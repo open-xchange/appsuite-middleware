@@ -59,11 +59,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.io.CompatibilityMode;
-import net.sourceforge.cardme.vcard.errors.VCardException;
-
+import net.sourceforge.cardme.vcard.exceptions.VCardException;
+import net.sourceforge.cardme.vcard.exceptions.VCardParseException;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.jackrabbit.webdav.DavConstants;
@@ -76,7 +75,6 @@ import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -96,21 +94,21 @@ import com.openexchange.test.ContactTestManager;
 
 /**
  * {@link CardDAVTest} - Common base class for CardDAV tests
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class CardDAVTest extends WebDAVTest {
-	
+
 	protected static final int TIMEOUT = 10000;
-	
+
 	private ContactTestManager testManager = null;
 	private int folderId;
 	private VCardEngine vCardEngine;
-	
+
 	public CardDAVTest(final String name) {
 		super(name);
 	}
-	
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -122,7 +120,7 @@ public abstract class CardDAVTest extends WebDAVTest {
         this.folderId = this.getAJAXClient().getValues().getPrivateContactFolder();
         this.vCardEngine = new VCardEngine(CompatibilityMode.MAC_ADDRESS_BOOK);
     }
-    
+
     @Override
     protected void tearDown() throws Exception {
     	if (null != this.getManager()) {
@@ -130,20 +128,20 @@ public abstract class CardDAVTest extends WebDAVTest {
     	}
         super.tearDown();
     }
-    
+
     @Override
     protected String getDefaultUserAgent() {
     	return UserAgents.MACOS_10_7_3;
     }
-    
+
     /**
-     * Remembers the supplied contact for deletion after the test is finished in the <code>tearDown()</code> method.  
+     * Remembers the supplied contact for deletion after the test is finished in the <code>tearDown()</code> method.
      * @param contact
      */
     protected void rememberForCleanUp(final Contact contact) {
     	this.getManager().getCreatedEntities().add(contact);
     }
-    
+
     /**
      * Gets the personal contacts folder id
      * @return
@@ -167,13 +165,13 @@ public abstract class CardDAVTest extends WebDAVTest {
     protected ContactTestManager getManager() {
     	return this.testManager;
     }
-    
+
     protected VCardEngine getVCardEngine() {
     	return this.vCardEngine;
     }
-    
+
     protected int delete(final String uid) throws OXException, HttpException, IOException {
-    	DeleteMethod delete = null;    	
+    	DeleteMethod delete = null;
         try {
             final String href = "/carddav/Contacts/" + uid + ".vcf";
             delete = new DeleteMethod(getBaseUri() + href);
@@ -182,17 +180,17 @@ public abstract class CardDAVTest extends WebDAVTest {
             release(delete);
         }
     }
-    
+
     protected void delete(Contact contact) {
     	getManager().deleteAction(contact);
     }
-    
+
     protected String getCTag() throws OXException, IOException, DavException {
 		PropFindMethod propFind = null;
 		try {
 			DavPropertyNameSet props = new DavPropertyNameSet();
 	        props.add(PropertyNames.GETCTAG);
-	        propFind = new PropFindMethod(getBaseUri() + "/carddav/Contacts/", 
+	        propFind = new PropFindMethod(getBaseUri() + "/carddav/Contacts/",
 	        		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
 	        MultiStatusResponse response = assertSingleResponse(
 	        		getWebDAVClient().doPropFind(propFind, StatusCodes.SC_MULTISTATUS));
@@ -201,7 +199,7 @@ public abstract class CardDAVTest extends WebDAVTest {
 			release(propFind);
 		}
     }
-    
+
 	protected int putVCard(String uid, String vCard) throws HttpException, IOException, OXException {
         PutMethod put = null;
         try {
@@ -214,11 +212,11 @@ public abstract class CardDAVTest extends WebDAVTest {
             release(put);
         }
 	}
-	
+
 	protected int putVCardUpdate(String uid, String vCard) throws HttpException, IOException, OXException {
 		return this.putVCardUpdate(uid, vCard, null);
 	}
-	
+
 	protected int putVCardUpdate(String uid, String vCard, String ifMatchEtag) throws HttpException, IOException, OXException {
         PutMethod put = null;
         try {
@@ -233,80 +231,80 @@ public abstract class CardDAVTest extends WebDAVTest {
             release(put);
         }
 	}
-	
+
 	protected String fetchSyncToken() throws OXException, IOException, DavException {
 		return super.fetchSyncToken("/carddav/Contacts");
 	}
-	
+
 	/**
-	 * Performs a REPORT method at /carddav/Contacts/ with a Depth of 1, requesting the 
-	 * ETag property of all resources that were changed since the supplied sync token. 
-	 * 
+	 * Performs a REPORT method at /carddav/Contacts/ with a Depth of 1, requesting the
+	 * ETag property of all resources that were changed since the supplied sync token.
+	 *
 	 * @param syncToken
 	 * @return
-	 * @throws IOException 
-	 * @throws ConfigurationException 
-	 * @throws DavException 
+	 * @throws IOException
+	 * @throws ConfigurationException
+	 * @throws DavException
 	 */
 	protected Map<String, String> syncCollection(final String syncToken) throws OXException, IOException, DavException {
 		return super.syncCollection(syncToken, "/carddav/Contacts");
 	}
-	
+
 	protected SyncCollectionResponse syncCollection(SyncToken syncToken) throws OXException, IOException, DavException {
 		return super.syncCollection(syncToken, "/carddav/Contacts");
 	}
-	
+
 	/**
-	 * Gets all changed vCards by performing a sync-collection REPORT with the 
-	 * supplied sync-token, followed by an addressbook-multiget REPORT for 
-	 * all of reported resources. 
-	 * 
+	 * Gets all changed vCards by performing a sync-collection REPORT with the
+	 * supplied sync-token, followed by an addressbook-multiget REPORT for
+	 * all of reported resources.
+	 *
 	 * @param syncToken
 	 * @return
 	 * @throws ConfigurationException
 	 * @throws IOException
 	 * @throws DavException
-	 * @throws VCardException 
+	 * @throws VCardException
 	 */
-	protected List<VCardResource> getVCardsSince(final String syncToken) throws OXException, IOException, DavException {
+	protected List<VCardResource> getVCardsSince(final String syncToken) throws Exception {
 		final Map<String, String> eTags = this.syncCollection(syncToken);
-		return this.addressbookMultiget(eTags.keySet());		
+		return this.addressbookMultiget(eTags.keySet());
 	}
-	
+
 	/**
 	 * Gets all available vCards by executing a REPORT method at /carddav/Contacts/
 	 * with a depth of 1, followed by an addressbook-multiget REPORT for all of the
-	 * available resources. 
-	 * 
+	 * available resources.
+	 *
 	 * @return
-	 * @throws DavException 
-	 * @throws IOException 
-	 * @throws ConfigurationException 
-	 * @throws VCardException 
+	 * @throws DavException
+	 * @throws IOException
+	 * @throws ConfigurationException
+	 * @throws VCardException
 	 */
-	protected List<VCardResource> getAllVCards() throws OXException, IOException, DavException {
+	protected List<VCardResource> getAllVCards() throws Exception {
 		final Map<String, String> eTags = this.getAllETags();
-		return this.addressbookMultiget(eTags.keySet());		
+		return this.addressbookMultiget(eTags.keySet());
 	}
-	
-	protected VCardResource getGlobalAddressbookVCard() throws OXException, IOException, DavException, JSONException {
+
+	protected VCardResource getGlobalAddressbookVCard() throws Exception {
 		GetResponse response = client.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, getGABFolderID()));
 		String gabFolderName = response.getFolder().getFolderName();
 		return getGroupVCard(gabFolderName);
 	}
-	
-	protected VCardResource getGroupVCard(String folderName) throws OXException, IOException, DavException, JSONException {
+
+	protected VCardResource getGroupVCard(String folderName) throws Exception {
 		List<VCardResource> groupVCards = this.getAllGroupVCards();
 		for (VCardResource resource : groupVCards) {
-			if (folderName.equals(resource.getVCard().getFormattedName().getFormattedName())) { 
+			if (folderName.equals(resource.getVCard().getFN().getFormattedName())) {
 				return resource;
 			}
 		}
 		fail("no vCard representing the folder '" + folderName + "' found");
 		return null;
 	}
-	
-	protected List<VCardResource> getAllGroupVCards() throws OXException, IOException, DavException {
+
+	protected List<VCardResource> getAllGroupVCards() throws Exception {
 		final Map<String, String> eTags = this.getAllETags();
 		final List<VCardResource> vCards = this.addressbookMultiget(eTags.keySet());
 		final List<VCardResource> groupVCards = new ArrayList<VCardResource>();
@@ -317,16 +315,16 @@ public abstract class CardDAVTest extends WebDAVTest {
 		}
 		return groupVCards;
 	}
-	
+
 	/**
-	 * Performs a REPORT method at /carddav/Contacts/ with a Depth of 1, requesting the 
-	 * ETag property of all resources. This models a "poor man's sync-collection" as 
-	 * executed by the addressbook client of Mac OS 10.6. 
-	 * 
+	 * Performs a REPORT method at /carddav/Contacts/ with a Depth of 1, requesting the
+	 * ETag property of all resources. This models a "poor man's sync-collection" as
+	 * executed by the addressbook client of Mac OS 10.6.
+	 *
 	 * @return
-	 * @throws DavException 
-	 * @throws IOException 
-	 * @throws ConfigurationException 
+	 * @throws DavException
+	 * @throws IOException
+	 * @throws ConfigurationException
 	 */
 	protected Map<String, String> getAllETags() throws OXException, IOException, DavException {
 		final Map<String, String> eTags = new HashMap<String, String>();
@@ -345,19 +343,20 @@ public abstract class CardDAVTest extends WebDAVTest {
 		}
     	return eTags;
 	}
-	
+
 	/**
-	 * Performs a REPORT method at /carddav/Contacts/, requesting the address 
-	 * data and ETags of all elements identified by the supplied hrefs. 
+	 * Performs a REPORT method at /carddav/Contacts/, requesting the address
+	 * data and ETags of all elements identified by the supplied hrefs.
 	 * @param hrefs
 	 * @return
 	 * @throws ConfigurationException
 	 * @throws IOException
 	 * @throws DavException
-	 * @throws VCardException 
+	 * @throws VCardParseException
+	 * @throws VCardException
 	 */
-	protected List<VCardResource> addressbookMultiget(final Collection<String> hrefs) throws OXException, IOException, DavException {
-		final List<VCardResource> addressData = new ArrayList<VCardResource>();		
+	protected List<VCardResource> addressbookMultiget(final Collection<String> hrefs) throws OXException, IOException, DavException, VCardParseException {
+		final List<VCardResource> addressData = new ArrayList<VCardResource>();
     	final DavPropertyNameSet props = new DavPropertyNameSet();
     	props.add(PropertyNames.GETETAG);
     	props.add(PropertyNames.ADDRESS_DATA);
@@ -376,21 +375,21 @@ public abstract class CardDAVTest extends WebDAVTest {
 		}
 		return addressData;
 	}
-	
-	protected VCardResource getVCard(final String uid) throws OXException, IOException, DavException {
-		final String href = "/carddav/Contacts/" + uid + ".vcf"; 
+
+	protected VCardResource getVCard(final String uid) throws Exception {
+		final String href = "/carddav/Contacts/" + uid + ".vcf";
 		final List<VCardResource> vCards = this.addressbookMultiget(Arrays.asList(href));
 		assertNotNull("no vCards found", vCards);
     	assertEquals("zero or more than one vCards found", 1, vCards.size());
     	final VCardResource vCard = vCards.get(0);
     	assertNotNull("no vCard data found", vCard);
-    	return vCard;		
+    	return vCard;
 	}
-	
+
 	private static JSONObject getSearchFilter(String uid, int[] folderIDs) throws JSONException {
 		String filter = null;
 		if (null == folderIDs || 0 == folderIDs.length) {
-			filter = "{'filter' : [ '=' , {'field' : 'uid'} , '" + uid + "']}";		
+			filter = "{'filter' : [ '=' , {'field' : 'uid'} , '" + uid + "']}";
 		} else if (1 == folderIDs.length) {
 			filter = "{'filter' : [ 'and', " +
 					"['=' , {'field' : 'uid'} , '" + uid + "'], " +
@@ -411,12 +410,12 @@ public abstract class CardDAVTest extends WebDAVTest {
 		}
 		return new JSONObject(filter);
 	}
-	
+
 	protected Contact searchContact(String uid, int[] folderIDs, int[] columnIDs) throws JSONException {
 		Contact[] contacts = getManager().searchAction(getSearchFilter(uid, folderIDs), null == columnIDs ? Contact.ALL_COLUMNS : columnIDs, -1, null);
 		return null != contacts && 0 < contacts.length ? contacts[0] : null;
 	}
-	
+
 //	protected Contact getContact(String uid, int folderID) {
 //		Contact[] contacts = this.getManager().allAction(folderId, new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.UID });
 //		for (Contact contact : contacts) {
@@ -430,16 +429,16 @@ public abstract class CardDAVTest extends WebDAVTest {
 	protected Contact getContact(String uid) throws InterruptedException, JSONException {
 		return getContact(uid, null);
 	}
-	
+
 	protected List<Contact> getContacts(int folderID) throws InterruptedException, JSONException {
 		Contact[] contacts = getManager().allAction(folderID);
 		return Arrays.asList(contacts);
 	}
-	
+
 	protected Contact getContact(String uid, int folderID) throws InterruptedException, JSONException {
 		return getContact(uid, new int[] { folderID });
 	}
-	
+
 	protected Contact getContact(String uid, int[] folderIDs) throws InterruptedException, JSONException {
 		return this.searchContact(uid, folderIDs, null);
 	}
@@ -447,11 +446,11 @@ public abstract class CardDAVTest extends WebDAVTest {
 	protected Contact waitForContact(String uid) throws InterruptedException, JSONException {
 		return waitForContact(uid, null);
 	}
-	
+
 	protected Contact waitForContact(String uid, int folderID) throws InterruptedException, JSONException {
 		return waitForContact(uid, new int[] { folderID });
 	}
-	
+
 	protected Contact waitForContact(String uid, int[] folderIDs) throws InterruptedException, JSONException {
 		long timeoutTime = new Date().getTime() + TIMEOUT;
 		do {
@@ -463,17 +462,17 @@ public abstract class CardDAVTest extends WebDAVTest {
 		} while (new Date().getTime() < timeoutTime);
 		return null;
 	}
-    
+
     protected Contact[] findContacts(final String pattern) {
     	return this.getManager().searchAction(pattern, this.getDefaultFolderID());
     }
-    
+
     /**
-     * Searches for a contact with the supplied pattern in the default contact folder on the server, 
+     * Searches for a contact with the supplied pattern in the default contact folder on the server,
      * asserting that exactly one contact is found during the search.
-     * 
+     *
      * @param pattern
-     * @return 
+     * @return
      */
     protected Contact findContact(final String pattern) {
     	final Contact[] contacts = this.findContacts(pattern);
@@ -481,7 +480,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     	assertEquals("zero or more than one contact found", 1, contacts.length);
     	return contacts[0];
     }
-	
+
     /**
      * Creates the given contact in the default folder.
      * @param contact
@@ -516,18 +515,18 @@ public abstract class CardDAVTest extends WebDAVTest {
         folder.setLastModified(response.getTimestamp());
 		return folder;
     }
-    
+
     @Override
     protected FolderObject updateFolder(FolderObject folder) throws OXException, IOException, JSONException {
 		InsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_NEW, folder));
         folder.setLastModified(response.getTimestamp());
 		return folder;
     }
-    
+
     protected FolderObject getDefaultFolder() throws OXException, IOException, JSONException {
     	return getFolder(getDefaultFolderID());
     }
-    
+
     protected FolderObject getGABFolder() throws OXException, IOException, JSONException {
     	return getFolder(getGABFolderID());
     }
@@ -535,13 +534,13 @@ public abstract class CardDAVTest extends WebDAVTest {
     protected FolderObject createFolder(String folderName) throws OXException, IOException, JSONException {
     	return super.createFolder(this.getDefaultFolder(), folderName);
     }
-    
+
     protected static String formatAsUTC(final Date date) {
 		final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmm'00Z'");
 		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 		return dateFormat.format(date);
     }
-    
+
 	protected static DistributionListEntryObject asDistListMember(Contact contact) throws OXException {
 		DistributionListEntryObject member = new DistributionListEntryObject();
 		member.setFolderID(contact.getParentFolderID());
@@ -561,7 +560,7 @@ public abstract class CardDAVTest extends WebDAVTest {
 		}
         return member;
 	}
-    
+
     /*
      * Additional assertXXX methods
      */
@@ -577,7 +576,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     	assertNotNull("no vCard with UID '" + uid + "' found", match);
     	return match;
     }
-    
+
     public static VCardResource assertContainsFN(String formattedName, Collection<VCardResource> vCards) {
     	VCardResource match = null;
     	for (VCardResource vCard : vCards) {
@@ -589,7 +588,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     	assertNotNull("no vCard with FN '" + formattedName + "' found", match);
     	return match;
     }
-    
+
     public static String assertContainsMemberUID(String uid, VCardResource groupVCard) {
     	List<String> members = groupVCard.getMemberUIDs();
     	assertNotNull("no members found in group vcard", members);
@@ -603,7 +602,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     	assertNotNull("no group member with UID '" + uid + "' found", match);
     	return match;
     }
-    
+
     public static void assertNotContainsMemberUID(String uid, VCardResource groupVCard) {
     	List<String> members = groupVCard.getMemberUIDs();
     	String match = null;
@@ -615,7 +614,7 @@ public abstract class CardDAVTest extends WebDAVTest {
 		}
     	assertNull("group member with UID '" + uid + "' found", match);
     }
-    
+
     public static void assertNotContainsFN(String formattedName, Collection<VCardResource> vCards) {
     	if (null != vCards && 0 < vCards.size()) {
 	    	for (VCardResource vCard : vCards) {
@@ -623,7 +622,7 @@ public abstract class CardDAVTest extends WebDAVTest {
 			}
     	}
     }
-    
+
     public static void assertNotContains(final String uid, final Collection<VCardResource> vCards) {
     	if (null != vCards && 0 < vCards.size()) {
 	    	for (final VCardResource vCard : vCards) {
@@ -631,5 +630,5 @@ public abstract class CardDAVTest extends WebDAVTest {
 	    	}
     	}
     }
-    
+
 }

@@ -35,17 +35,17 @@ class ForkTestParser extends AbstractParser {
     /** Serial version UID */
     private static final long serialVersionUID = -5492269783593452319L;
 
-    @Override
     public Set<MediaType> getSupportedTypes(ParseContext context) {
         return Collections.singleton(MediaType.TEXT_PLAIN);
     }
 
-    @Override
     public void parse(
             InputStream stream, ContentHandler handler,
             Metadata metadata, ParseContext context)
             throws IOException, SAXException, TikaException {
         stream.read();
+
+        metadata.set(Metadata.CONTENT_TYPE, "text/plain");
 
         XHTMLContentHandler xhtml = new XHTMLContentHandler(handler, metadata);
         xhtml.startDocument();

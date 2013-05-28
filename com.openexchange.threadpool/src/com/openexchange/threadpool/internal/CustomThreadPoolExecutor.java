@@ -53,7 +53,6 @@ import java.text.MessageFormat;
 import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
@@ -87,6 +86,7 @@ import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -1200,7 +1200,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             }
         }
 
-        void addTask(final long number, final Thread thread, final Map<String, Object> logProperties) {
+        void addTask(final long number, final Thread thread, final Props logProperties) {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
@@ -1251,11 +1251,11 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                             }
                             if (taskInfo.stamp < max) {
                                 final Thread thread = taskInfo.t;
-                                final Map<String, Object> logProperties = taskInfo.logProperties;
+                                final Props logProperties = taskInfo.logProperties;
                                 logBuilder.setLength(0);
                                 if (null != logProperties) {
                                     final Map<String, String> sorted = new TreeMap<String, String>();
-                                    for (final Map.Entry<String, Object> entry : logProperties.entrySet()) {
+                                    for (final Map.Entry<String, Object> entry : logProperties.asMap().entrySet()) {
                                         final String propertyName = entry.getKey();
                                         final Object value = entry.getValue();
                                         if (null != value) {
@@ -1327,13 +1327,13 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     private static final class TaskInfo {
         final Thread t;
         final long stamp;
-        final Map<String, Object> logProperties;
+        final Props logProperties;
 
         TaskInfo(final Thread t) {
-            this(t, Collections.<String, Object> emptyMap());
+            this(t, null);
         }
 
-        TaskInfo(final Thread t, final Map<String, Object> logProperties) {
+        TaskInfo(final Thread t, final Props logProperties) {
             super();
             this.t = t;
             stamp = System.currentTimeMillis();
@@ -1619,7 +1619,11 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             task.beforeExecute(thread);
             final Trackable trackable = customFutureTask.getTrackable();
             if (null != trackable) {
-                activeTaskWatcher.addTask(customFutureTask.getNumber(), thread, trackable.optLogProperties());
+                final Props props = trackable.optLogProperties();
+                activeTaskWatcher.addTask(customFutureTask.getNumber(), thread, props);
+                if (null != props) {
+                    LogProperties.getLogProperties(thread).putAll(props);
+                }
             }
         } else if (r instanceof ScheduledFutureTask<?>) {
             ((ThreadRenamer) thread).renamePrefix("OXTimer");

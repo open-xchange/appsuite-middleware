@@ -138,6 +138,9 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     @Override
     public Subscription loadSubscription(final Context ctx, final int subscriptionId, final String secret) throws OXException {
         final Subscription subscription = STORAGE.get().getSubscription(ctx, subscriptionId);
+        if (null == subscription) {
+            return null;
+        }
         subscription.setSecret(secret);
         modifyOutgoing(subscription);
         return subscription;

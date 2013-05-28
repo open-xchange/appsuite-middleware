@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.xml.transform.OutputKeys;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
@@ -35,10 +34,9 @@ import junit.framework.TestCase;
 
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
-import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Geographic;
-import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.BodyContentHandler;
 import org.apache.tika.sax.TeeContentHandler;
@@ -79,7 +77,7 @@ public class HtmlParserTest extends TestCase {
         }
 
         assertEquals(
-                "Title : Test Indexation Html", metadata.get(DublinCore.TITLE));
+                "Title : Test Indexation Html", metadata.get(TikaCoreProperties.TITLE));
         assertEquals("Tika Developers", metadata.get("Author"));
         assertEquals("5", metadata.get("refresh"));
         
@@ -122,8 +120,8 @@ public class HtmlParserTest extends TestCase {
         String content = new Tika().parseToString(
                 HtmlParserTest.class.getResourceAsStream(path), metadata);
 
-        assertEquals("application/xhtml+xml", metadata.get(HttpHeaders.CONTENT_TYPE));
-        assertEquals("XHTML test document", metadata.get(DublinCore.TITLE));
+        assertEquals("application/xhtml+xml", metadata.get(Metadata.CONTENT_TYPE));
+        assertEquals("XHTML test document", metadata.get(TikaCoreProperties.TITLE));
 
         assertEquals("Tika Developers", metadata.get("Author"));
         assertEquals("5", metadata.get("refresh"));
@@ -245,9 +243,25 @@ public class HtmlParserTest extends TestCase {
             + "</head><body></body></html>";
         Metadata metadata = new Metadata();
         new HtmlParser().parse (
-                new ByteArrayInputStream(test.getBytes("UTF-8")),
+                new ByteArrayInputStream(test.getBytes("ISO-8859-1")),
                 new BodyContentHandler(),  metadata, new ParseContext());
-        assertEquals("ISO-8859-1", metadata.get(HttpHeaders.CONTENT_ENCODING));
+        assertEquals("ISO-8859-1", metadata.get(Metadata.CONTENT_ENCODING));
+    }
+
+    /**
+     * Test case for TIKA-892
+     * @see <a href="https://issues.apache.org/jira/browse/TIKA-892">TIKA-892</a>
+     */
+    public void testHtml5Charset() throws Exception {
+        String test =
+                "<html><head><meta charset=\"ISO-8859-15\" />"
+                + "<title>the name is \u00e1ndre</title>"
+                + "</head><body></body></html>";
+        Metadata metadata = new Metadata();
+        new HtmlParser().parse(
+                new ByteArrayInputStream(test.getBytes("ISO-8859-1")),
+                new BodyContentHandler(), metadata, new ParseContext());
+        assertEquals("ISO-8859-15", metadata.get(Metadata.CONTENT_ENCODING));
     }
 
     /**
@@ -261,7 +275,7 @@ public class HtmlParserTest extends TestCase {
         new HtmlParser().parse (
                 new ByteArrayInputStream(test.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
-        assertEquals("\u017d", metadata.get(DublinCore.TITLE));
+        assertEquals("\u017d", metadata.get(TikaCoreProperties.TITLE));
     }
 
     /**
@@ -277,14 +291,14 @@ public class HtmlParserTest extends TestCase {
         new HtmlParser().parse (
                 new ByteArrayInputStream(test.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
-        assertEquals("UTF-8", metadata.get(HttpHeaders.CONTENT_ENCODING));
+        assertEquals("UTF-8", metadata.get(Metadata.CONTENT_ENCODING));
 
         metadata = new Metadata();
-        metadata.set(HttpHeaders.CONTENT_TYPE, "text/html; charset=ISO-8859-1");
+        metadata.set(Metadata.CONTENT_TYPE, "text/html; charset=ISO-8859-1");
         new HtmlParser().parse (
-                new ByteArrayInputStream(test.getBytes("UTF-8")),
+                new ByteArrayInputStream(test.getBytes("ISO-8859-1")),
                 new BodyContentHandler(),  metadata, new ParseContext());
-        assertEquals("ISO-8859-1", metadata.get(HttpHeaders.CONTENT_ENCODING));
+        assertEquals("ISO-8859-1", metadata.get(Metadata.CONTENT_ENCODING));
     }
 
     /**
@@ -313,12 +327,12 @@ public class HtmlParserTest extends TestCase {
     public void testIgnoreCharsetDetectorLanguage() throws Exception {
         String test = "<html><title>Simple Content</title><body></body></html>";
         Metadata metadata = new Metadata();
-        metadata.add(HttpHeaders.CONTENT_LANGUAGE, "en");
+        metadata.add(Metadata.CONTENT_LANGUAGE, "en");
         new HtmlParser().parse (
                 new ByteArrayInputStream(test.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
 
-        assertEquals("en", metadata.get(HttpHeaders.CONTENT_LANGUAGE));
+        assertEquals("en", metadata.get(Metadata.CONTENT_LANGUAGE));
     }
 
     /**
@@ -328,26 +342,26 @@ public class HtmlParserTest extends TestCase {
     public void testHttpEquivCharsetFunkyAttributes() throws Exception {
         String test1 =
             "<html><head><meta http-equiv=\"content-type\""
-            + " content=\"text/html; charset=ISO-8859-1; charset=iso-8859-1\" />"
+            + " content=\"text/html; charset=ISO-8859-15; charset=iso-8859-15\" />"
             + "<title>the name is \u00e1ndre</title>"
             + "</head><body></body></html>";
         Metadata metadata = new Metadata();
         new HtmlParser().parse (
-                new ByteArrayInputStream(test1.getBytes("UTF-8")),
+                new ByteArrayInputStream(test1.getBytes("ISO-8859-1")),
                 new BodyContentHandler(),  metadata, new ParseContext());
-        assertEquals("ISO-8859-1", metadata.get(HttpHeaders.CONTENT_ENCODING));
+        assertEquals("ISO-8859-15", metadata.get(Metadata.CONTENT_ENCODING));
 
         // Some HTML pages have errors like ';;' versus '; ' as separator
         String test2 =
             "<html><head><meta http-equiv=\"content-type\""
-            + " content=\"text/html;;charset=ISO-8859-1\" />"
+            + " content=\"text/html;;charset=ISO-8859-15\" />"
             + "<title>the name is \u00e1ndre</title>"
             + "</head><body></body></html>";
         metadata = new Metadata();
         new HtmlParser().parse (
-                new ByteArrayInputStream(test2.getBytes("UTF-8")),
+                new ByteArrayInputStream(test2.getBytes("ISO-8859-1")),
                 new BodyContentHandler(),  metadata, new ParseContext());
-        assertEquals("ISO-8859-1", metadata.get(HttpHeaders.CONTENT_ENCODING));
+        assertEquals("ISO-8859-15", metadata.get(Metadata.CONTENT_ENCODING));
     }
 
     /**
@@ -363,14 +377,14 @@ public class HtmlParserTest extends TestCase {
         new HtmlParser().parse (
                 new ByteArrayInputStream(test.getBytes("UTF-8")),
                 new BodyContentHandler(),  metadata, new ParseContext());
-        assertEquals("UTF-8", metadata.get(HttpHeaders.CONTENT_ENCODING));
+        assertEquals("UTF-8", metadata.get(Metadata.CONTENT_ENCODING));
 
         metadata = new Metadata();
-        metadata.set(HttpHeaders.CONTENT_TYPE, "charset=ISO-8859-1;text/html");
+        metadata.set(Metadata.CONTENT_TYPE, "charset=ISO-8859-1;text/html");
         new HtmlParser().parse (
-                new ByteArrayInputStream(test.getBytes("UTF-8")),
+                new ByteArrayInputStream(test.getBytes("ISO-8859-1")),
                 new BodyContentHandler(),  metadata, new ParseContext());
-        assertEquals("ISO-8859-1", metadata.get(HttpHeaders.CONTENT_ENCODING));
+        assertEquals("ISO-8859-1", metadata.get(Metadata.CONTENT_ENCODING));
     }
 
 
@@ -385,7 +399,7 @@ public class HtmlParserTest extends TestCase {
                 HtmlParserTest.class.getResourceAsStream(path),
                 new BodyContentHandler(),  metadata, new ParseContext());
 
-        assertEquals("windows-1251", metadata.get(HttpHeaders.CONTENT_ENCODING));
+        assertEquals("windows-1251", metadata.get(Metadata.CONTENT_ENCODING));
     }
 
     /**
@@ -571,9 +585,9 @@ public class HtmlParserTest extends TestCase {
                 makeHtmlTransformer(sw), metadata, new ParseContext());
 
         String result = sw.toString();
-        
+
         // <meta> tag for Content-Type should exist, but nothing for Language
-        assertTrue(Pattern.matches("(?s).*<meta name=\"Content-Type\" content=\"text/html; charset=utf-8\"/>.*$", result));
+        assertTrue(Pattern.matches("(?s).*<meta name=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>.*$", result));
         assertFalse(Pattern.matches("(?s).*<meta name=\"Language\".*$", result));
     }
 
@@ -678,7 +692,7 @@ public class HtmlParserTest extends TestCase {
      * @throws Exception
      */
     private ContentHandler makeHtmlTransformer(Writer writer) throws Exception {
-        SAXTransformerFactory factory = (SAXTransformerFactory)TransformerFactory.newInstance();
+        SAXTransformerFactory factory = (SAXTransformerFactory)SAXTransformerFactory.newInstance();
         TransformerHandler handler = factory.newTransformerHandler();
         handler.getTransformer().setOutputProperty(OutputKeys.METHOD, "html");
         handler.getTransformer().setOutputProperty(OutputKeys.INDENT, "no");
@@ -724,4 +738,74 @@ public class HtmlParserTest extends TestCase {
         assertNotNull(content);
     }
 
+    /**
+     * Test case for TIKA-869
+     * IdentityHtmlMapper needs to lower-case tag names.
+     * 
+     * @see <a href="https://issues.apache.org/jira/browse/TIKA-869">TIKA-869</a>
+     */
+    public void testIdentityMapper() throws Exception {
+        final String html = "<html><head><title>Title</title></head>" +
+                "<body></body></html>";
+        Metadata metadata = new Metadata();
+        ParseContext parseContext = new ParseContext();
+        parseContext.set(HtmlMapper.class, IdentityHtmlMapper.INSTANCE);
+
+        StringWriter sw = new StringWriter();
+
+        new HtmlParser().parse (
+                new ByteArrayInputStream(html.getBytes("UTF-8")),
+                makeHtmlTransformer(sw),  metadata, parseContext);
+        
+        String result = sw.toString();
+        // Make sure we don't get <body><BODY/></body>
+        assertTrue(Pattern.matches("(?s).*<body/>.*$", result));
+    }
+    
+    /**
+     * Test case for TIKA-889
+     * XHTMLContentHandler wont emit newline when html element matches ENDLINE set.
+     * 
+     * @see <a href="https://issues.apache.org/jira/browse/TIKA-889">TIKA-889</a>
+     */
+    public void testNewlineAndIndent() throws Exception {
+        final String html = "<html><head><title>Title</title></head>" +
+                "<body><ul><li>one</li></ul></body></html>";
+
+        BodyContentHandler handler = new BodyContentHandler();
+        new HtmlParser().parse(
+                new ByteArrayInputStream(html.getBytes("UTF-8")),
+                handler,  new Metadata(), new ParseContext());
+        
+        // Make sure we get <tab>, "one", newline, newline
+        String result = handler.toString();
+        
+        assertTrue(Pattern.matches("\tone\n\n", result));
+    }
+
+    /**
+     * Test case for TIKA-983:  HTML parser should add Open Graph meta tag data to Metadata returned by parser
+     * 
+     * @see <a href="https://issues.apache.org/jira/browse/TIKA-983">TIKA-983</a>
+     */
+    public void testOpenGraphMetadata() throws Exception {
+        String test1 =
+            "<html><head><meta property=\"og:description\""
+            + " content=\"some description\" />"
+            + "<title>hello</title>"
+            + "</head><body></body></html>";
+        Metadata metadata = new Metadata();
+        new HtmlParser().parse (
+                new ByteArrayInputStream(test1.getBytes("ISO-8859-1")),
+                new BodyContentHandler(),  metadata, new ParseContext());
+        assertEquals("some description", metadata.get("og:description"));
+
+    }
+
+    // TIKA-1011
+    public void testUserDefinedCharset() throws Exception {
+        String content = new Tika().parseToString(
+                HtmlParserTest.class.getResourceAsStream("/test-documents/testUserDefinedCharset.mhtml"), new Metadata());
+        assertNotNull(content);
+    }
 }

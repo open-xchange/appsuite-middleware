@@ -54,21 +54,59 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link DistributedFileManagement} - Provides access to distributed files in the cluster.
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public interface DistributedFileManagement {
 
+    /**
+     * Registers the file associated with given identifier for distributed access among Open-Xchange nodes.
+     *
+     * @param id The identifier
+     * @throws OXException If register attempt fails
+     */
     public void register(String id) throws OXException;
 
+    /**
+     * Unregisters the file associated with given identifier from distributed access among Open-Xchange nodes.
+     *
+     * @param id The identifier
+     * @throws OXException If unregister attempt fails
+     */
     public void unregister(String id) throws OXException;
 
+    /**
+     * Gets the binary content of the (distributed) file associated with given identifier.
+     *
+     * @param id The identifier
+     * @return The file's binary content as an input stream
+     * @throws OXException If providing binary content fails
+     */
     public InputStream get(String id) throws OXException;
 
+    /**
+     * Checks if there is such a distributed file associated with given identifier.
+     *
+     * @param id The identifier
+     * @return <code>true</code> if there is such a distributed file; otherwise <code>false</code>
+     * @throws OXException If existence check fails
+     */
     public boolean exists(String id) throws OXException;
 
+    /**
+     * Touches/resets the time stamp of the file associated with given identifier.
+     *
+     * @param id The identifier
+     * @throws OXException If resetting time stamp fails
+     */
     public void touch(String id) throws OXException;
-    
+
+    /**
+     * Removes the file associated with given identifier from distributed access among Open-Xchange nodes.
+     *
+     * @param id The identifier
+     * @throws OXException If removal fails
+     */
     public void remove(String id) throws OXException;
 
 }

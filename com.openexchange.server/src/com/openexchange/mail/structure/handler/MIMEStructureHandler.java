@@ -64,7 +64,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -88,6 +87,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -299,7 +299,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                         /*
                          * Assume an iTIP response or request
                          */
-                        contentType.setParameter("method", method.toUpperCase(Locale.US));
+                        contentType.setParameter("method", toUpperCase(method));
                         part.setContentType(contentType);
                     }
                 } catch (final RuntimeException e) {
@@ -460,9 +460,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                     generateHeadersObject(headersMap.entrySet().iterator(), currentMailObject);
                 } else {
                     // Set content type in existing headers
-                    headers.put(CONTENT_TYPE, generateParameterizedHeader(
-                        contentType,
-                        contentType.getBaseType().toLowerCase(Locale.ENGLISH)));
+                    headers.put(CONTENT_TYPE, generateParameterizedHeader( contentType, toLowerCase(contentType.getBaseType())));
                 }
             }
             return true;
@@ -649,29 +647,37 @@ public final class MIMEStructureHandler implements StructureHandler {
             } else {
                 final ContentType contentType = part.getContentType();
                 if (contentType.startsWith(PRIMARY_TEXT)) {
-                    // Set UTF-8 text
-                    if (contentType.startsWith(TEXT_HTML)) {
-                        final String html = readContent(part, contentType);
-                        final Matcher m = PAT_META_CT.matcher(html);
-                        final MatcherReplacer mr = new MatcherReplacer(m, html);
-                        final StringBuilder replaceBuffer = new StringBuilder(html.length());
-                        if (m.find()) {
-                            replaceBuffer.append("<meta content=\"").append(contentType.getBaseType().toLowerCase(Locale.ENGLISH));
-                            replaceBuffer.append("; charset=UTF-8\" http-equiv=\"Content-Type\" />");
-                            final String replacement = replaceBuffer.toString();
-                            replaceBuffer.setLength(0);
-                            mr.appendLiteralReplacement(replaceBuffer, replacement);
-                        }
-                        mr.appendTail(replaceBuffer);
-                        bodyObject.put(DATA, replaceBuffer.toString());
+                    // Check for special "text/comma-separated-values" Content-Type
+                    if (contentType.startsWith("text/comma-separated-values")) {
+                        fillBase64JSONString(part.getInputStream(), bodyObject, true);
+                        // Set Transfer-Encoding to base64
+                        headerObject.put(CONTENT_TRANSFER_ENCODING, "base64");
+                        contentType.setPrimaryType("application").setSubType("vnd.ms-excel");
+                        headerObject.put(CONTENT_TYPE, generateParameterizedHeader(contentType, toLowerCase(contentType.getBaseType())));
                     } else {
-                        bodyObject.put(DATA, readContent(part, contentType));
+                        // Set UTF-8 text
+                        if (contentType.startsWith(TEXT_HTML)) {
+                            final String html = readContent(part, contentType);
+                            final Matcher m = PAT_META_CT.matcher(html);
+                            final MatcherReplacer mr = new MatcherReplacer(m, html);
+                            final StringBuilder replaceBuffer = new StringBuilder(html.length());
+                            if (m.find()) {
+                                replaceBuffer.append("<meta content=\"").append(toLowerCase(contentType.getBaseType()));
+                                replaceBuffer.append("; charset=UTF-8\" http-equiv=\"Content-Type\" />");
+                                final String replacement = replaceBuffer.toString();
+                                replaceBuffer.setLength(0);
+                                mr.appendLiteralReplacement(replaceBuffer, replacement);
+                            }
+                            mr.appendTail(replaceBuffer);
+                            bodyObject.put(DATA, replaceBuffer.toString());
+                        } else {
+                            bodyObject.put(DATA, readContent(part, contentType));
+                        }
+                        // Set header according to UTF-8 content without transfer-encoding
+                        headerObject.remove(CONTENT_TRANSFER_ENCODING);
+                        contentType.setCharsetParameter("UTF-8");
+                        headerObject.put(CONTENT_TYPE, generateParameterizedHeader(contentType, toLowerCase(contentType.getBaseType())));
                     }
-                    // Set header according to UTF-8 content without transfer-encoding
-                    headerObject.remove(CONTENT_TRANSFER_ENCODING);
-                    contentType.setCharsetParameter("UTF-8");
-                    headerObject.put(CONTENT_TYPE, generateParameterizedHeader(contentType, contentType.getBaseType().toLowerCase(
-                        Locale.ENGLISH)));
                 } else {
                     fillBase64JSONString(part.getInputStream(), bodyObject, true);
                     // Set Transfer-Encoding to base64
@@ -695,13 +701,21 @@ public final class MIMEStructureHandler implements StructureHandler {
                 bodyObject.put(DATA, JSONObject.NULL);
             } else {
                 if (contentType.startsWith(PRIMARY_TEXT)) {
-                    // Set UTF-8 text
-                    bodyObject.put(DATA, readContent(isp, contentType));
-                    // Set header according to utf-8 content without transfer-encoding
-                    headerObject.remove(CONTENT_TRANSFER_ENCODING);
-                    contentType.setCharsetParameter("UTF-8");
-                    headerObject.put(CONTENT_TYPE, generateParameterizedHeader(contentType, contentType.getBaseType().toLowerCase(
-                        Locale.ENGLISH)));
+                    // Check for special "text/comma-separated-values" Content-Type
+                    if (contentType.startsWith("text/comma-separated-values")) {
+                        fillBase64JSONString(isp.getInputStream(), bodyObject, true);
+                        // Set Transfer-Encoding to base64
+                        headerObject.put(CONTENT_TRANSFER_ENCODING, "base64");
+                        contentType.setPrimaryType("application").setSubType("vnd.ms-excel");
+                        headerObject.put(CONTENT_TYPE, generateParameterizedHeader(contentType, toLowerCase(contentType.getBaseType())));
+                    } else { // Regular text part
+                        // Set UTF-8 text
+                        bodyObject.put(DATA, readContent(isp, contentType));
+                        // Set header according to utf-8 content without transfer-encoding
+                        headerObject.remove(CONTENT_TRANSFER_ENCODING);
+                        contentType.setCharsetParameter("UTF-8");
+                        headerObject.put(CONTENT_TYPE, generateParameterizedHeader(contentType, toLowerCase(contentType.getBaseType())));
+                    }
                 } else {
                     fillBase64JSONString(isp.getInputStream(), bodyObject, true);
                     // Set Transfer-Encoding to base64
@@ -780,7 +794,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             final JSONObject hdrObject = new JSONObject();
             while (iter.hasNext()) {
                 final Entry<String, String> entry = iter.next();
-                final String name = entry.getKey().toLowerCase(Locale.ENGLISH);
+                final String name = toLowerCase(entry.getKey());
                 final HeaderName headerName = HeaderName.valueOf(name);
                 if (ADDRESS_HEADERS.contains(headerName)) {
                     final InternetAddress[] internetAddresses = getAddressHeader(entry.getValue());
@@ -848,10 +862,10 @@ public final class MIMEStructureHandler implements StructureHandler {
     private JSONObject generateParameterizedHeader(final String value, final HeaderName headerName) throws OXException, JSONException {
         if (HN_CONTENT_TYPE.equals(headerName)) {
             final ContentType ct = new ContentType(value);
-            return generateParameterizedHeader(ct, ct.getBaseType().toLowerCase(Locale.ENGLISH));
+            return generateParameterizedHeader(ct, toLowerCase(ct.getBaseType()));
         }
         final ContentDisposition cd = new ContentDisposition(value);
-        return generateParameterizedHeader(cd, cd.getDisposition().toLowerCase(Locale.ENGLISH));
+        return generateParameterizedHeader(cd, toLowerCase(cd.getDisposition()));
     }
 
     private JSONObject generateParameterizedHeader(final ParameterizedHeader parameterizedHeader, final String type) throws JSONException {
@@ -861,11 +875,9 @@ public final class MIMEStructureHandler implements StructureHandler {
         for (final Iterator<String> pi = parameterizedHeader.getParameterNames(); pi.hasNext();) {
             final String paramName = pi.next();
             if ("read-date".equalsIgnoreCase(paramName)) {
-                paramListJsonObject.put(
-                    paramName.toLowerCase(Locale.ENGLISH),
-                    generateDateObject(parameterizedHeader.getParameter(paramName)));
+                paramListJsonObject.put( toLowerCase(paramName), generateDateObject(parameterizedHeader.getParameter(paramName)));
             } else {
-                paramListJsonObject.put(paramName.toLowerCase(Locale.ENGLISH), parameterizedHeader.getParameter(paramName));
+                paramListJsonObject.put(toLowerCase(paramName), parameterizedHeader.getParameter(paramName));
             }
         }
         if (paramListJsonObject.length() > 0) {
@@ -1039,6 +1051,34 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     private static boolean isVCalendar(final String baseContentType) {
         return "text/calendar".equalsIgnoreCase(baseContentType) || "text/x-vcalendar".equalsIgnoreCase(baseContentType);
+    }
+
+    /** ASCII-wise to upper-case */
+    private static String toUpperCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+        }
+        return builder.toString();
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

@@ -131,12 +131,12 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         return null == session ? null : new ServerSessionAdapter(session, context, user, userConfiguration);
     }
 
-    private Session session;
-    private Context ctx;
+    private final Session session;
+    private final Context ctx;
     private volatile User user;
     private volatile UserConfiguration userConfiguration;
     private volatile UserSettingMail userSettingMail;
-    private ServerSession serverSession;
+    private final ServerSession serverSession;
 
     /**
      * Initializes a new {@link ServerSessionAdapter}.
@@ -151,9 +151,13 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         }
         if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
+            this.session = null;
+            this.ctx = null;
         } else {
+            this.serverSession = null;
             this.session = session;
-            ctx = ContextStorage.getStorageContext(session.getContextId());
+            final int contextId = session.getContextId();
+            ctx = contextId > 0 ? ContextStorage.getStorageContext(contextId) : null;
         }
     }
 
@@ -171,7 +175,10 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         }
         if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
+            this.session = null;
+            this.ctx = null;
         } else {
+            this.serverSession = null;
             this.session = session;
             this.ctx = ctx;
         }
@@ -192,7 +199,10 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         }
         if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
+            this.session = null;
+            this.ctx = null;
         } else {
+            this.serverSession = null;
             this.session = session;
             this.ctx = ctx;
             this.user = user;
@@ -214,7 +224,10 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         }
         if (ServerSession.class.isInstance(session)) {
             this.serverSession = (ServerSession) session;
+            this.session = null;
+            this.ctx = null;
         } else {
+            this.serverSession = null;
             this.session = session;
             this.ctx = ctx;
             this.user = user;
@@ -339,12 +352,16 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         if (serverSession != null) {
             return serverSession.getUser();
         }
+        final int userId = session.getUserId();
+        if (userId <= 0) {
+            return null;
+        }
         User tmp = user;
         if (null == tmp) {
             synchronized (this) {
                 tmp = user;
                 if (null == tmp) {
-                    user = tmp = UserStorage.getStorageUser(getUserId(), ctx);
+                    user = tmp = UserStorage.getStorageUser(userId, ctx);
                 }
             }
         }
@@ -356,13 +373,17 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         if (serverSession != null) {
             return serverSession.getUserConfiguration();
         }
+        final int userId = session.getUserId();
+        if (userId <= 0) {
+            return null;
+        }
         UserConfiguration tmp = userConfiguration;
         if (null == tmp) {
             synchronized (this) {
                 tmp = userConfiguration;
                 if (null == tmp) {
                     try {
-                        userConfiguration = tmp = UserConfigurationStorage.getInstance().getUserConfiguration(getUserId(), ctx);
+                        userConfiguration = tmp = userId > 0 ? UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx) : null;
                     } catch (final OXException e) {
                         LOG.error(e.getMessage(), e);
                     }
@@ -377,12 +398,16 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         if (serverSession != null) {
             return serverSession.getUserSettingMail();
         }
+        final int userId = session.getUserId();
+        if (userId <= 0) {
+            return null;
+        }
         UserSettingMail tmp = userSettingMail;
         if (null == tmp) {
             synchronized (this) {
                 tmp = userSettingMail;
                 if (null == tmp) {
-                    userSettingMail = tmp = UserSettingMailStorage.getInstance().getUserSettingMail(getUserId(), ctx);
+                    userSettingMail = tmp = UserSettingMailStorage.getInstance().getUserSettingMail(userId, ctx);
                 }
             }
         }

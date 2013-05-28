@@ -53,10 +53,15 @@ import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.apache.commons.logging.Log;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
+import com.openexchange.group.GroupEventConstants;
 import com.openexchange.group.GroupExceptionCodes;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.group.GroupStorage.StorageType;
@@ -67,6 +72,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -139,6 +145,7 @@ public final class Delete {
         check();
         delete();
         propagate();
+        sentEvent();
     }
 
     private void allowed() throws OXException {
@@ -220,5 +227,16 @@ public final class Delete {
     private void propagate() throws OXException {
         final UserStorage storage = UserStorage.getInstance();
         storage.invalidateUser(ctx, getOrig().getMember());
+    }
+
+    private void sentEvent() {
+        final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
+        if (null != eventAdmin) {
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>(4);
+            dict.put(GroupEventConstants.PROPERTY_CONTEXT_ID, Integer.valueOf(ctx.getContextId()));
+            dict.put(GroupEventConstants.PROPERTY_USER_ID, Integer.valueOf(user.getId()));
+            dict.put(GroupEventConstants.PROPERTY_GROUP_ID, Integer.valueOf(groupId));
+            eventAdmin.postEvent(new Event(GroupEventConstants.TOPIC_DELETE, dict));
+        }
     }
 }

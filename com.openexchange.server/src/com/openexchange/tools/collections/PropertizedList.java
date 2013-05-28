@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-
 /**
  * {@link PropertizedList} - A {@link List list} enhanced by properties.
  *
@@ -248,7 +247,5 @@ public class PropertizedList<E> implements List<E> {
     public List<E> subList(final int fromIndex, final int toIndex) {
         return delegate.subList(fromIndex, toIndex);
     }
-
-
 
 }

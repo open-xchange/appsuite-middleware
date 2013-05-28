@@ -64,7 +64,7 @@ import com.fasterxml.jackson.core.util.MinimalPrettyPrinter;
 
 /**
  * {@link AbstractJSONValue} - The abstract {@link JSONValue} providing some general-purpose methods.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 abstract class AbstractJSONValue implements JSONValue {
@@ -105,19 +105,27 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Reads the content from given reader.
-     * 
+     *
      * @param reader The reader
+     * @param maxRead The max. number of characters to read
      * @return The reader's content
      * @throws IOException If an I/O error occurs
      */
-    protected static String readFrom(final Reader reader) throws IOException {
+    protected static String readFrom(final Reader reader, final long maxRead) throws IOException {
         if (null == reader) {
             return null;
         }
         final int buflen = BUF_SIZE;
         final char[] cbuf = new char[buflen];
         final org.json.helpers.StringAllocator sa = new org.json.helpers.StringAllocator(SB_SIZE);
+        long count = 0;
         for (int read = reader.read(cbuf, 0, buflen); read > 0; read = reader.read(cbuf, 0, buflen)) {
+            if (maxRead > 0) {
+                count += read;
+                if (count >= maxRead) {
+                    break;
+                }
+            }
             sa.append(cbuf, 0, read);
         }
         if (0 == sa.length()) {
@@ -128,7 +136,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Acquires next token from given {@link JsonParser} ignoring possible <code>"Unexpected character"</code> exception.
-     * 
+     *
      * @param jParser The JSON parser
      * @return The next token with possible <code>"Unexpected character"</code> exception(s) ignored
      * @throws IOException If an I/O error occurs
@@ -150,7 +158,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Creates a new JSON parser.
-     * 
+     *
      * @param reader The reader to read from
      * @return The new parser reading from given stream
      * @throws IOException If a JSON error occurs
@@ -168,7 +176,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Creates a new JSON generator.
-     * 
+     *
      * @param writer The writer to write to
      * @return The created generator
      * @throws IOException If an I/O error occurs
@@ -185,7 +193,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Writes end character and flushes generator.
-     * 
+     *
      * @param jGenerator The generator to write to and to flush
      * @param isJsonObject Whether generating a JSON object or a JSON array
      */
@@ -210,7 +218,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Generates String directly from given character array.
-     * 
+     *
      * @param off The offset
      * @param len The length
      * @param chars The character array
@@ -248,7 +256,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Closes given <code>java.io.Closeable</code> instance (if non-<code>null</code>).
-     * 
+     *
      * @param closeable The <code>java.io.Closeable</code> instance
      */
     protected static void close(final java.io.Closeable closeable) {
@@ -263,7 +271,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Writes to given generator.
-     * 
+     *
      * @param asciiOnly Whether to write only ASCII characters
      * @param jGenerator The generator
      * @throws IOException If an I/O error occurs
@@ -273,7 +281,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Writes specified object to given generator.
-     * 
+     *
      * @param v The object
      * @param asciiOnly Whether to allow only ASCII characters
      * @param jGenerator The generator
@@ -319,7 +327,7 @@ abstract class AbstractJSONValue implements JSONValue {
 
     /**
      * Indicates whether to escape non-ASCII characters.
-     * 
+     *
      * @param str The string to check
      * @return <code>true</code> to escape them; otherwise <code>false</code>
      */

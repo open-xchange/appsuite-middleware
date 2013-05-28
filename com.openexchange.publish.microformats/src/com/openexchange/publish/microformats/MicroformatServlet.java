@@ -174,7 +174,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             final OXMFPublicationService publisher = publishers.get(module);
             if (publisher == null) {
                 final PrintWriter writer = resp.getWriter();
-                writer.println("Don't know how to handle module " + module);
+                writer.println("The publication has either been revoked in the meantime or module \"" + module + "\" is unknown.");
                 writer.flush();
                 return;
             }

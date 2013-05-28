@@ -55,7 +55,7 @@ import java.util.regex.Pattern;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 
@@ -173,7 +173,7 @@ public final class IMAPNotifierRegistry implements IMAPNotifierRegistryService {
 
     @Override
     public void handleRemovedSession(final Session session) {
-        final SessiondService service = IMAPServiceRegistry.getService(SessiondService.class);
+        final SessiondService service = Services.getService(SessiondService.class);
         if (null == service || service.getAnyActiveSessionForUser(session.getUserId(), session.getContextId()) == null) {
             removeTaskFor(session);
         }

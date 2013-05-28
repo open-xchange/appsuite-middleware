@@ -49,12 +49,17 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview.cache.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.PreviewCacheImpl;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheCreateTableService;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheCreateTableTask;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheDeleteListener;
 import com.openexchange.database.CreateTableService;
+import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
@@ -85,6 +90,11 @@ public final class PreviewCacheActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         final PreviewCacheImpl cacheImpl = new PreviewCacheImpl();
         registerService(PreviewCache.class, cacheImpl);
+        {
+            final Dictionary<String, Object> d = new Hashtable<String, Object>(1);
+            d.put(EventConstants.EVENT_TOPIC, new String[] { FileStorageEventConstants.UPDATE_TOPIC, FileStorageEventConstants.DELETE_TOPIC });
+            registerService(EventHandler.class, cacheImpl, d);
+        }
         AbstractPreviewResultConverter.setPreviewCache(cacheImpl);
         /*
          * Register update task, create table job and delete listener

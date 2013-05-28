@@ -64,15 +64,11 @@ import com.openexchange.session.Session;
 public class FileStorageEventHelper {
 
     public static Event buildUpdateEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId) {
-        final Event event =
-            new Event(FileStorageEventConstants.UPDATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId));
-        return event;
+        return new Event(FileStorageEventConstants.UPDATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId));
     }
 
     public static Event buildCreateEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId) {
-        final Event event =
-            new Event(FileStorageEventConstants.CREATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId));
-        return event;
+        return new Event(FileStorageEventConstants.CREATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId));
     }
 
     public static Event buildDeleteEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId, final Set<String> versions) {
@@ -87,7 +83,7 @@ public class FileStorageEventHelper {
     }
 
     private static Dictionary<String, Object> buildProperties(final Session session, final String service, final String accountId, final String folderId, final String objectId) {
-        final Dictionary<String, Object> ht = new Hashtable<String, Object>();
+        final Dictionary<String, Object> ht = new Hashtable<String, Object>(6);
         if (null != session) {
             ht.put(FileStorageEventConstants.SESSION, session);
         }
@@ -99,6 +95,7 @@ public class FileStorageEventHelper {
         }
         if (null != objectId) {
             ht.put(FileStorageEventConstants.OBJECT_ID, objectId);
+            ht.put(FileStorageEventConstants.E_TAG, FileStorageUtility.getETagFor(objectId, FileStorageFileAccess.CURRENT_VERSION));
         }
         if (null != folderId) {
             ht.put(FileStorageEventConstants.FOLDER_ID, folderId);
@@ -107,15 +104,15 @@ public class FileStorageEventHelper {
     }
 
     public static boolean isCreateEvent(final Event event) {
-        return event.getTopic().equals(FileStorageEventConstants.CREATE_TOPIC);
+        return FileStorageEventConstants.CREATE_TOPIC.equals(event.getTopic());
     }
 
     public static boolean isUpdateEvent(final Event event) {
-        return event.getTopic().equals(FileStorageEventConstants.UPDATE_TOPIC);
+        return FileStorageEventConstants.UPDATE_TOPIC.equals(event.getTopic());
     }
 
     public static boolean isDeleteEvent(final Event event) {
-        return event.getTopic().equals(FileStorageEventConstants.DELETE_TOPIC);
+        return FileStorageEventConstants.DELETE_TOPIC.equals(event.getTopic());
     }
 
     public static boolean isInfostoreEvent(final Event event) {

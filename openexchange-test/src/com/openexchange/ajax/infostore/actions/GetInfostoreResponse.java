@@ -51,6 +51,7 @@ package com.openexchange.ajax.infostore.actions;
 
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.InfostoreParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -59,7 +60,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class GetInfostoreResponse extends AbstractInfostoreResponse {
+public class GetInfostoreResponse extends AbstractAJAXResponse {
 
     protected GetInfostoreResponse(Response response) {
         super(response);

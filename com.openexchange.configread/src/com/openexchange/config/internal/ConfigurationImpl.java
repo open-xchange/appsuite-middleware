@@ -62,6 +62,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -71,9 +72,11 @@ import org.apache.commons.logging.Log;
 import org.ho.yaml.Yaml;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
+import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.WildcardFilter;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 
@@ -200,7 +203,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                 } catch (final FileNotFoundException e) {
                     // IGNORE
                     return;
-                } catch (RuntimeException x) {
+                } catch (final RuntimeException x) {
                     log.error(file, x);
                     throw x;
                 }
@@ -292,7 +295,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     @Override
-    public Filter getFilterFromProperty(String name) {
+    public Filter getFilterFromProperty(final String name) {
         final String value = properties.get(name);
         if (null == value) {
             return null;
@@ -384,6 +387,22 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
         }
         return retval;
+    }
+
+    @Override
+    public Map<String, String> getProperties(final PropertyFilter filter) throws OXException {
+        if (null == filter) {
+            return new HashMap<String, String>(properties);
+        }
+        final Map<String, String> ret = new LinkedHashMap<String, String>(32);
+        for (final Entry<String, String> entry : this.properties.entrySet()) {
+            final String key = entry.getKey();
+            final String value = entry.getValue();
+            if (filter.accept(key, value)) {
+                ret.put(key, value);
+            }
+        }
+        return ret;
     }
 
     @Override

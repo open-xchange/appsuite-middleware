@@ -53,7 +53,7 @@ import static com.openexchange.imap.IMAPCommandsCollection.canCreateSubfolder;
 import javax.mail.MessagingException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.session.Session;
@@ -126,7 +126,7 @@ public final class RootSubfolderCache {
         private CacheKey getKeyInternal() {
             CacheKey tmp = key;
             if (null == tmp) {
-                key = tmp = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(MailCacheCode.ROOT_SUBFOLDER.getCode(), DUMMY);
+                key = tmp = Services.getService(CacheService.class).newCacheKey(MailCacheCode.ROOT_SUBFOLDER.getCode(), DUMMY);
             }
             return tmp;
         }

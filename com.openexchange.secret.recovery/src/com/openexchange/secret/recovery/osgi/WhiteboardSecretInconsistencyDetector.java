@@ -50,9 +50,13 @@
 package com.openexchange.secret.recovery.osgi;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
@@ -66,19 +70,64 @@ import com.openexchange.secret.recovery.impl.DefaultSecretInconsistencyDetector;
 public class WhiteboardSecretInconsistencyDetector extends DefaultSecretInconsistencyDetector {
 
     private final ServiceTracker<SecretConsistencyCheck, SecretConsistencyCheck> tracker;
-
     private final WhiteboardSecretService secretService;
+    private final AtomicReference<List<SecretConsistencyCheck>> checks;
 
     public WhiteboardSecretInconsistencyDetector(final BundleContext context) {
-        tracker = new ServiceTracker<SecretConsistencyCheck, SecretConsistencyCheck>(context, SecretConsistencyCheck.class, null);
+        super();
+        final AtomicReference<List<SecretConsistencyCheck>> checks = new AtomicReference<List<SecretConsistencyCheck>>(
+            Collections.<SecretConsistencyCheck> emptyList());
+        this.checks = checks;
+        final ServiceTrackerCustomizer<SecretConsistencyCheck, SecretConsistencyCheck> customizer = new ServiceTrackerCustomizer<SecretConsistencyCheck, SecretConsistencyCheck>() {
+
+            @Override
+            public void removedService(final ServiceReference<SecretConsistencyCheck> reference, final SecretConsistencyCheck service) {
+                List<SecretConsistencyCheck> expected;
+                List<SecretConsistencyCheck> list;
+                do {
+                    expected = checks.get();
+                    list = new ArrayList<SecretConsistencyCheck>(expected);
+                    list.remove(service);
+                } while (!checks.compareAndSet(expected, list));
+
+                context.ungetService(reference);
+            }
+
+            @Override
+            public void modifiedService(final ServiceReference<SecretConsistencyCheck> reference, final SecretConsistencyCheck service) {
+                // Ignore
+            }
+
+            @Override
+            public SecretConsistencyCheck addingService(final ServiceReference<SecretConsistencyCheck> reference) {
+                final SecretConsistencyCheck service = context.getService(reference);
+
+                List<SecretConsistencyCheck> expected;
+                List<SecretConsistencyCheck> list;
+                do {
+                    expected = checks.get();
+                    list = new ArrayList<SecretConsistencyCheck>(expected);
+                    list.add(service);
+                } while (!checks.compareAndSet(expected, list));
+
+                return service;
+            }
+        };
+        tracker = new ServiceTracker<SecretConsistencyCheck, SecretConsistencyCheck>(context, SecretConsistencyCheck.class, customizer);
         secretService = new WhiteboardSecretService(context);
     }
 
+    /**
+     * Opens this detector.
+     */
     public void open() {
         tracker.open();
         secretService.open();
     }
 
+    /**
+     * Closes this detector
+     */
     public void close() {
         tracker.close();
         secretService.close();
@@ -86,14 +135,7 @@ public class WhiteboardSecretInconsistencyDetector extends DefaultSecretInconsis
 
     @Override
     public List<SecretConsistencyCheck> getChecks() {
-        final Object[] services = tracker.getServices();
-        final List<SecretConsistencyCheck> checks = new ArrayList<SecretConsistencyCheck>(services.length);
-
-        for (final Object object : services) {
-            checks.add((SecretConsistencyCheck) object);
-        }
-
-        return checks;
+        return new ArrayList<SecretConsistencyCheck>(checks.get());
     }
 
     @Override

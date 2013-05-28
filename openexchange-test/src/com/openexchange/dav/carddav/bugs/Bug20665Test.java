@@ -52,7 +52,6 @@ package com.openexchange.dav.carddav.bugs;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.carddav.CardDAVTest;
 import com.openexchange.dav.carddav.VCardResource;
@@ -60,29 +59,29 @@ import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link Bug20665Test}
- * 
+ *
  * Adding picture to contact aborts with exception
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug20665Test extends CardDAVTest {
 
 	public Bug20665Test(String name) {
 		super(name);
-	}	
-	
+	}
+
 	public void testAddPhoto() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
 		 */
-		final String syncToken = super.fetchSyncToken();		
+		final String syncToken = super.fetchSyncToken();
 		/*
 		 * create contact
 		 */
     	final String uid = randomUID();
     	final String firstName = "test";
-    	final String lastName = uid;    	
-    	final String vCard = 
+    	final String lastName = uid;
+    	final String vCard =
     			"BEGIN:VCARD" + "\r\n" +
 				"VERSION:3.0" + "\r\n" +
 				"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
@@ -330,9 +329,9 @@ public class Bug20665Test extends CardDAVTest {
          * verify contact on server
          */
         Contact contact = super.getContact(uid);
-        super.rememberForCleanUp(contact);        
+        super.rememberForCleanUp(contact);
         assertEquals("uid wrong", uid, contact.getUid());
-        assertTrue("no contact image found", contact.containsImage1());        
+        assertTrue("no contact image found", contact.containsImage1());
         /*
          * verify contact on client
          */
@@ -341,7 +340,7 @@ public class Bug20665Test extends CardDAVTest {
         final List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
         final VCardResource card = assertContains(uid, addressData);
         assertNotNull("no PHOTO found in vCard", card.getVCard().getPhotos());
-        assertTrue("no PHOTO found in vCard", card.getVCard().getPhotos().hasNext());
-        assertNotNull("no PHOTO data found in vCard", card.getVCard().getPhotos().next().getPhoto());
+        assertTrue("no PHOTO found in vCard", 0 < card.getVCard().getPhotos().size());
+        assertNotNull("no PHOTO data found in vCard", card.getVCard().getPhotos().get(0).getPhoto());
 	}
 }

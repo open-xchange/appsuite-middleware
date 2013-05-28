@@ -20,9 +20,8 @@ import java.io.InputStream;
 
 import junit.framework.TestCase;
 
-import org.apache.tika.metadata.DublinCore;
-import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.epub.EpubParser;
 import org.apache.tika.sax.BodyContentHandler;
@@ -39,13 +38,13 @@ public class iBooksParserTest extends TestCase {
             new EpubParser().parse(input, handler, metadata, new ParseContext());
 
             assertEquals("application/x-ibooks+zip",
-                    metadata.get(HttpHeaders.CONTENT_TYPE));
+                    metadata.get(Metadata.CONTENT_TYPE));
             assertEquals("en-GB",
-                    metadata.get(DublinCore.LANGUAGE));
+                    metadata.get(TikaCoreProperties.LANGUAGE));
             assertEquals("iBooks Author v1.0",
-                    metadata.get(DublinCore.CONTRIBUTOR));
+                    metadata.get(TikaCoreProperties.CONTRIBUTOR));
             assertEquals("Apache",
-                    metadata.get(DublinCore.CREATOR));
+                    metadata.get(TikaCoreProperties.CREATOR));
 
             /* TODO For some reason, the xhtml files in iBooks-style ePub are not parsed properly, and the content comes back empty.git che
             String content = handler.toString();

@@ -75,7 +75,8 @@ public final class HtmlParser {
 
     private static final String FEATURE_PRESERVE_TEXT = "open-xchange.org/preserveText";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HtmlParser.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(HtmlParser.class);
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final int INT_IS_EMPTY_TAG = 1;
 
@@ -232,25 +233,27 @@ public final class HtmlParser {
                 }
             }
         } catch (final XmlPullParserException e) {
-            LOG.error(composeErrorMessage(e, html), e);
+            LOG.error(composeErrorMessage(e, DEBUG, html), e);
             handler.handleError(e.getMessage());
         } catch (final IOException e) {
-            LOG.error(composeErrorMessage(e, html), e);
+            LOG.error(composeErrorMessage(e, DEBUG, html), e);
             handler.handleError(e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(composeErrorMessage(e, html), e);
+            LOG.error(composeErrorMessage(e, DEBUG, html), e);
             handler.handleError(e.getMessage());
         }
     }
 
     private static final String ERR01 = "Parsing of HTML content failed: ";
 
-    private static String composeErrorMessage(final Exception e, final String html) {
+    private static String composeErrorMessage(final Exception e, final boolean appendHtml, final String html) {
         final StringBuilder sb = new StringBuilder(html.length() + 256);
         sb.append(ERR01);
         sb.append(e.getMessage());
-        sb.append(". Affected HTML content:\n");
-        dumpHtml(html, sb);
+        if (appendHtml) {
+            sb.append(". Affected HTML content:\n");
+            dumpHtml(html, sb);
+        }
         return sb.toString();
     }
 

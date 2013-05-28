@@ -54,6 +54,7 @@ import org.scribe.builder.api.YahooApi;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
+import com.openexchange.session.Session;
 
 /**
  * {@link OAuthServiceMetaDataYahooImpl}
@@ -62,20 +63,24 @@ import com.openexchange.oauth.AbstractOAuthServiceMetaData;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OAuthServiceMetaDataYahooImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
+    
+    private static final String API_KEY = "com.openexchange.oauth.yahoo.apiKey";
 
+    private static final String API_SECRET = "com.openexchange.oauth.yahoo.apiSecret";
+    
     private final DeferringURLService deferrer;
 
-    public OAuthServiceMetaDataYahooImpl(String apiKey, String apiSecret, DeferringURLService deferrer) {
+    public OAuthServiceMetaDataYahooImpl(DeferringURLService deferrer) {
         super();
         setId("com.openexchange.oauth.yahoo");
-        setApiKey(apiKey);
-        setApiSecret(apiSecret);
+        setAPIKeyName(API_KEY);
+        setAPISecretName(API_SECRET);
         setDisplayName("Yahoo");
         this.deferrer = deferrer;
     }
 
     @Override
-    public String modifyCallbackURL(String callbackUrl) {
+    public String modifyCallbackURL(String callbackUrl, Session session) {
         if (deferrer == null) {
             return callbackUrl;
         }

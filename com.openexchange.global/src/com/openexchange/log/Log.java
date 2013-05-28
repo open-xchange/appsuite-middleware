@@ -84,7 +84,7 @@ public final class Log implements org.apache.commons.logging.Log {
 
     /**
      * Sets the log service.
-     * 
+     *
      * @param logService The log service
      */
     public static void set(final LogService logService) {

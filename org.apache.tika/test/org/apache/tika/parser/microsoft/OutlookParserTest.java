@@ -22,18 +22,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.transform.OutputKeys;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
 
 import junit.framework.TestCase;
 
-import org.apache.tika.metadata.DublinCore;
-import org.apache.tika.metadata.HttpHeaders;
-import org.apache.tika.metadata.MSOffice;
-import org.apache.tika.metadata.Message;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
@@ -60,21 +56,24 @@ public class OutlookParserTest extends TestCase {
 
         assertEquals(
                 "application/vnd.ms-outlook",
-                metadata.get(HttpHeaders.CONTENT_TYPE));
+                metadata.get(Metadata.CONTENT_TYPE));
         assertEquals(
                 "Microsoft Outlook Express 6",
-                metadata.get(DublinCore.TITLE));
+                metadata.get(TikaCoreProperties.TITLE));
         assertEquals(
                 "Nouvel utilisateur de Outlook Express",
-                metadata.get(Message.MESSAGE_RECIPIENT_ADDRESS));
+                metadata.get(Metadata.MESSAGE_RECIPIENT_ADDRESS));
         assertEquals(
                 "L'\u00C9quipe Microsoft Outlook Express",
-                metadata.get(MSOffice.AUTHOR));
+                metadata.get(TikaCoreProperties.CREATOR));
+        assertEquals(
+                "L'\u00C9quipe Microsoft Outlook Express",
+                metadata.get(Metadata.AUTHOR));
         
         // Stored as Thu, 5 Apr 2007 09:26:06 -0700
         assertEquals(
                 "2007-04-05T16:26:06Z",
-                metadata.get(DublinCore.DATE));
+                metadata.get(TikaCoreProperties.CREATED));
 
         String content = handler.toString();
         assertTrue(content.contains(""));
@@ -104,7 +103,7 @@ public class OutlookParserTest extends TestCase {
 
         assertEquals(
                 "application/vnd.ms-outlook",
-                metadata.get(HttpHeaders.CONTENT_TYPE));
+                metadata.get(Metadata.CONTENT_TYPE));
 
         String content = handler.toString();
         Pattern pattern = Pattern.compile("From");
@@ -133,10 +132,10 @@ public class OutlookParserTest extends TestCase {
 
         assertEquals(
                 "application/vnd.ms-outlook",
-                metadata.get(HttpHeaders.CONTENT_TYPE));
+                metadata.get(Metadata.CONTENT_TYPE));
         assertEquals(
                 "Welcome to Microsoft Office Outlook 2003",
-                metadata.get(DublinCore.TITLE));
+                metadata.get(TikaCoreProperties.TITLE));
 
         String content = handler.toString();
         assertTrue(content.contains("Outlook 2003"));
@@ -151,7 +150,7 @@ public class OutlookParserTest extends TestCase {
         // Check the HTML version
         StringWriter sw = new StringWriter();
         SAXTransformerFactory factory = (SAXTransformerFactory)
-                 TransformerFactory.newInstance();
+                 SAXTransformerFactory.newInstance();
         TransformerHandler handler = factory.newTransformerHandler();
         handler.getTransformer().setOutputProperty(OutputKeys.METHOD, "xml");
         handler.getTransformer().setOutputProperty(OutputKeys.INDENT, "yes");
@@ -185,7 +184,7 @@ public class OutlookParserTest extends TestCase {
         // Check the HTML version
         StringWriter sw = new StringWriter();
         SAXTransformerFactory factory = (SAXTransformerFactory)
-                 TransformerFactory.newInstance();
+                 SAXTransformerFactory.newInstance();
         TransformerHandler handler = factory.newTransformerHandler();
         handler.getTransformer().setOutputProperty(OutputKeys.METHOD, "xml");
         handler.getTransformer().setOutputProperty(OutputKeys.INDENT, "yes");
@@ -212,7 +211,7 @@ public class OutlookParserTest extends TestCase {
         // Check the HTML version
         StringWriter sw = new StringWriter();
         SAXTransformerFactory factory = (SAXTransformerFactory)
-                 TransformerFactory.newInstance();
+                 SAXTransformerFactory.newInstance();
         TransformerHandler handler = factory.newTransformerHandler();
         handler.getTransformer().setOutputProperty(OutputKeys.METHOD, "xml");
         handler.getTransformer().setOutputProperty(OutputKeys.INDENT, "yes");

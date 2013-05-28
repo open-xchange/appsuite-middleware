@@ -82,6 +82,7 @@ public class MessageHandler extends AbstractStrategyHandler<Message> {
 
     @Override
     public void handleToIsNull(Message stanza) {
+        stanza.trace("Can not send to null recipients. Discarding");
         try {
             throw new UnsupportedOperationException("Not implemented yet.");
         } catch (Exception e) {
@@ -92,6 +93,7 @@ public class MessageHandler extends AbstractStrategyHandler<Message> {
 
     @Override
     public void handleAccountNotExists(Message stanza) {
+        stanza.trace("Discarding. Account doesn't exist");
         try {
             throw new UnsupportedOperationException("Not implemented yet.");
         } catch (Exception e) {
@@ -105,7 +107,9 @@ public class MessageHandler extends AbstractStrategyHandler<Message> {
         try {
             ResourceDirectory resourceDirectory = getResourceDirectory();
             ID to = stanza.getTo();
+            stanza.trace("Handle inbound");
             IDMap<Resource> resources = resourceDirectory.get(to);
+            stanza.trace("Resource directory said to deliver to: " + resources);
             if (resources.isEmpty()) {
                 /*
                  * Else if the JID is of the form <user@domain/resource> and no available resource matches the full JID, the recipient's
@@ -138,6 +142,7 @@ public class MessageHandler extends AbstractStrategyHandler<Message> {
     private void handleInboundStanzaWithGeneralRecipient0(Message stanza, ID recipient) {
         try {
             IDMap<Resource> receivers = DestinationSelector.select(recipient);
+            stanza.trace("Trying with general recipient. DestinationSelector chose: " + receivers);
             if (receivers.isEmpty()) {
                 /*
                  * For message stanzas, the server MAY choose to store the stanza on behalf of the user and deliver it when the user next
@@ -180,6 +185,7 @@ public class MessageHandler extends AbstractStrategyHandler<Message> {
 
     @Override
     public void handleOutboundStanza(Message stanza) {
+        stanza.trace("Discarding outbound message");
         try {
             throw new UnsupportedOperationException("Not implemented yet.");
         } catch (Exception e) {
@@ -194,11 +200,13 @@ public class MessageHandler extends AbstractStrategyHandler<Message> {
     }
     
     private void storeMessage(ID recipient, Message stanza) throws OXException {
+        stanza.trace("Couldn't deliver message. Storing.");
         StanzaStorage stanzaStorage = Services.getService(StanzaStorage.class);
         stanzaStorage.pushStanza(recipient, new TimedStanza(System.currentTimeMillis(), stanza));
     }
 
     private void sendServiceUnavailable(Message stanza) {
+        stanza.trace("Service unavailable. Discarding message");
         throw new UnsupportedOperationException("Not implemented yet.");
     }
 

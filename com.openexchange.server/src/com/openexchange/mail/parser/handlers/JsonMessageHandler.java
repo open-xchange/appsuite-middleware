@@ -337,6 +337,17 @@ public final class JsonMessageHandler implements MailMessageHandler {
         return timeZone;
     }
 
+    /**
+     * Sets the time zone.
+     *
+     * @param timeZone The time zone
+     * @return This handler with time zone applied
+     */
+    public JsonMessageHandler setTimeZone(TimeZone timeZone) {
+        this.timeZone = timeZone;
+        return this;
+    }
+
     private void addToken(final JSONObject jsonObject, final String attachmentId) {
         if (token && null != tokenFolder && null != tokenMailId) {
             /*
@@ -1012,7 +1023,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 return true;
             }
             final JsonMessageHandler msgHandler =
-                new JsonMessageHandler(accountId, null, null, displayMode, embedded, session, usm, ctx, token, ttlMillis);
+                new JsonMessageHandler(accountId, null, null, displayMode, embedded, session, usm, ctx, token, ttlMillis).setTimeZone(timeZone);
             msgHandler.includePlainText = includePlainText;
             msgHandler.attachHTMLAlternativePart = attachHTMLAlternativePart;
             msgHandler.tokenFolder = tokenFolder;

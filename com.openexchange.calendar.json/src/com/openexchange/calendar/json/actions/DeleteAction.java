@@ -142,7 +142,7 @@ public final class DeleteAction extends AppointmentAction {
                 }
             }
         }
-        return new AJAXRequestResult(new JSONArray(), timestamp, "json");
+        return new AJAXRequestResult(new JSONArray(0), timestamp, "json");
     }
 
 }

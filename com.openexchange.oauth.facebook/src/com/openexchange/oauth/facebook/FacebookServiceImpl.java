@@ -94,8 +94,8 @@ public class FacebookServiceImpl implements FacebookService {
     public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) throws OXException {
 
         List<Contact> contacts = new ArrayList<Contact>();
-        final OAuthService service = new ServiceBuilder().provider(FacebookApi.class).apiKey(facebookMetaData.getAPIKey()).apiSecret(
-            facebookMetaData.getAPISecret()).build();
+        final OAuthService service = new ServiceBuilder().provider(FacebookApi.class).apiKey(facebookMetaData.getAPIKey(session)).apiSecret(
+            facebookMetaData.getAPISecret(session)).build();
 
         OAuthAccount account = null;
 

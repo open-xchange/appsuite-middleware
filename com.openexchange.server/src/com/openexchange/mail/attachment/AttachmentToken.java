@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.attachment;
 
+import java.io.Closeable;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.exception.OXException;
@@ -65,40 +66,25 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AttachmentToken implements AttachmentTokenConstants {
+public final class AttachmentToken implements AttachmentTokenConstants, Closeable {
 
     private final String id;
-
     private final long ttlMillis;
-
     private final AtomicLong timeoutStamp;
 
     private int contextId;
-
     private int userId;
-
     private int accountId;
-
     private String mailId;
-
     private String attachmentId;
-
     private String fullName;
-
     private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess;
-
     private String sessionId;
-
     private String clientIp;
-
     private String client;
-
     private String userAgent;
-
     private String jsessionId;
-
     private boolean oneTime;
-
     private boolean checkIp;
 
     /**
@@ -110,7 +96,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
             throw new IllegalArgumentException("ttlMillis must be positive.");
         }
         this.id =
-            new com.openexchange.java.StringAllocator(64).append(UUIDs.getUnformattedString(UUID.randomUUID())).append('.').append(
+            new com.openexchange.java.StringAllocator(75).append(UUIDs.getUnformattedString(UUID.randomUUID())).append('.').append(
                 UUIDs.getUnformattedString(UUID.randomUUID())).toString();
         this.ttlMillis = ttlMillis;
         timeoutStamp = new AtomicLong(System.currentTimeMillis() + ttlMillis);
@@ -239,7 +225,8 @@ public final class AttachmentToken implements AttachmentTokenConstants {
      * @see {@link #close()}
      */
     public MailPart getAttachment() throws OXException {
-        mailAccess = MailAccess.getInstance(userId, contextId, accountId);
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccess.getInstance(userId, contextId, accountId);
+        this.mailAccess = mailAccess;
         mailAccess.connect();
         return mailAccess.getMessageStorage().getAttachment(
             MailFolderUtility.prepareMailFolderParam(fullName).getFullname(),
@@ -250,10 +237,12 @@ public final class AttachmentToken implements AttachmentTokenConstants {
     /**
      * Closes associated mail access (if opened)
      */
+    @Override
     public void close() {
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = this.mailAccess;
         if (null != mailAccess) {
             mailAccess.close(true);
-            mailAccess = null;
+            this.mailAccess = null;
         }
     }
 

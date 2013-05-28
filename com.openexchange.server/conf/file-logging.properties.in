@@ -33,3 +33,9 @@ com.openexchange.soap.cxf.logger.level=WARNING
 
 # Reduce log level for htmlunit.jar
 com.gargoylesoftware.htmlunit.level=WARNING
+
+# Set org.jaudiotagger to WARNING
+org.jaudiotagger.level=WARNING
+
+# Set global documentconverter logging level to WARNING
+com.openexchange.documentconverter.impl.Manager.level=WARNING

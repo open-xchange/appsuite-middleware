@@ -68,7 +68,7 @@ public interface FileStreamHandler {
      * @return The (possibly modified) stream
      * @throws OXException If handling stream fails
      */
-    InputStream handleDocumentStream(InputStream documentStream, FileID fileID, String version) throws OXException;
+    InputStream handleDocumentStream(InputStream documentStream, FileID fileID, String version, int context) throws OXException;
 
     /**
      * Gets this handler's ranking.

@@ -126,8 +126,8 @@ public final class AJPv13ExceptiopnMessages {
     // A messaging error occurred: %1$s
     public static final String MESSAGING_ERROR_MSG = "A messaging error occurred: %1$s";
 
-    // Missing property AJP_JVM_ROUTE in file "ajp.properties"
-    public static final String MISSING_JVM_ROUTE_MSG = "Missing property AJP_JVM_ROUTE in file \"ajp.properties\"";
+    // Missing property "com.openexchange.server.backendRoute" in file "server.properties"
+    public static final String MISSING_JVM_ROUTE_MSG = "Missing property \"com.openexchange.server.backendRoute\" in file \"server.properties\"";
 
     // Cookie JSESSIONID contains non-matching JVM route: %1$s not equal to %2$s
     public static final String WRONG_JVM_ROUTE_MSG = "Cookie JSESSIONID contains non-matching JVM route: %1$s not equal to %2$s";

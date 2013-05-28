@@ -159,7 +159,6 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.webdav.infostore.integration.LockExpiryTest.class);
 
         tests.addTestSuite(com.openexchange.l10n.SuperCollatorTest.class);
-        tests.addTest(com.openexchange.groupware.importexport.ImportExportStandaloneSuite.suite());
         tests.addTest(com.openexchange.pubsub.TemplateTestSuite.suite());
 
         // Slow Tests

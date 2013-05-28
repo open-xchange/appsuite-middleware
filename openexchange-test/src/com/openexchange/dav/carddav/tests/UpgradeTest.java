@@ -52,7 +52,6 @@ package com.openexchange.dav.carddav.tests;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.ThrowableHolder;
@@ -63,8 +62,8 @@ import com.openexchange.dav.reports.SyncCollectionResponse;
 import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link UpgradeTest} - Tests upgrades of the server with changed handling 
- * 
+ * {@link UpgradeTest} - Tests upgrades of the server with changed handling
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class UpgradeTest extends CardDAVTest {
@@ -81,7 +80,7 @@ public class UpgradeTest extends CardDAVTest {
     	final String contactsGroupUid = "f" + super.getClient().getValues().getContextId() + "_" + super.getDefaultFolderID();
     	final String gabGroupUid = "f" + super.getClient().getValues().getContextId() + "_" + super.getGABFolderID();
 		/*
-		 * get a ctag 
+		 * get a ctag
 		 */
 		String cTag = super.getCTag();
 		/*
@@ -170,14 +169,14 @@ public class UpgradeTest extends CardDAVTest {
 		 */
 		Map<String, String> eTags = super.getAllETags();
 		/*
-		 * verify corresponding vCards 
+		 * verify corresponding vCards
 		 */
         List<VCardResource> vCards = super.addressbookMultiget(eTags.keySet());
         assertNotContains(contactsGroupUid, vCards);
         assertNotContains(gabGroupUid, vCards);
-        assertContains(contactUid, vCards);		
+        assertContains(contactUid, vCards);
 	}
-	
+
 	public void testUpgradeWithGAB_10_7() throws Throwable {
 		super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_7_2);
 		/*
@@ -274,19 +273,19 @@ public class UpgradeTest extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTagsOK.size());
         /*
          * verify contact on client
-         */        
+         */
         List<VCardResource> addressData = super.addressbookMultiget(eTagsOK.keySet());
         VCardResource card = assertContains(contactUid, addressData);
-        assertEquals("N wrong", firstName, card.getVCard().getName().getGivenName());
-        assertEquals("N wrong", lastName, card.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", firstName + " " + lastName, card.getVCard().getFormattedName().getFormattedName());
+        assertEquals("N wrong", firstName, card.getGivenName());
+        assertEquals("N wrong", lastName, card.getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, card.getFN());
         /*
          * verify group deletions from sync-collection
-         */     
+         */
         List<String> hrefsNotFound = syncCollection.getHrefsStatusNotFound();
         assertTrue("no resource deletions reported on sync collection", 0 < hrefsNotFound.size());
         assertFalse("contacts group not reported as deleted", hrefsNotFound.contains(gabGroupHRef));
         assertFalse("contacts group not reported as deleted", hrefsNotFound.contains(contactsGroupHRef));
 	}
-	
+
 }

@@ -88,7 +88,9 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.html.HtmlService;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.API;
@@ -103,7 +105,7 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.OAuthToken;
-import com.openexchange.oauth.services.ServiceRegistry;
+import com.openexchange.oauth.services.Services;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
 import com.openexchange.secret.SecretEncryptionStrategy;
@@ -161,7 +163,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
 
     @Override
     public List<OAuthAccount> getAccounts(final Session session, final int user, final int contextId) throws OXException {
-        final SecretEncryptionService<PWUpdate> encryptionService = ServiceRegistry.getInstance().getService(SecretEncryptionFactoryService.class).createService(this);
+        final SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
         final Context context = getContext(contextId);
         final Connection con = getConnection(true, context);
         PreparedStatement stmt = null;
@@ -176,17 +178,24 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             }
             final List<OAuthAccount> accounts = new ArrayList<OAuthAccount>(8);
             do {
-                final DefaultOAuthAccount account = new DefaultOAuthAccount();
-                account.setId(rs.getInt(1));
-                account.setDisplayName(rs.getString(2));
                 try {
-                    account.setToken(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessToken", contextId, account.getId())));
-                    account.setSecret(encryptionService.decrypt(session, rs.getString(4), new PWUpdate("accessSecret", contextId, account.getId())));
+                    final DefaultOAuthAccount account = new DefaultOAuthAccount();
+                    account.setMetaData(registry.getService(rs.getString(5), user, contextId));
+                    account.setId(rs.getInt(1));
+                    account.setDisplayName(rs.getString(2));
+                    try {
+                        account.setToken(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessToken", contextId, account.getId())));
+                        account.setSecret(encryptionService.decrypt(session, rs.getString(4), new PWUpdate("accessSecret", contextId, account.getId())));
+                    } catch (final OXException e) {
+                        // IGNORE
+                    }
+                    accounts.add(account);
                 } catch (final OXException e) {
-                    // IGNORE
+                    if (!OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.equals(e)) {
+                        throw e;
+                    }
+                    // Obviously associated service is not available. Ignore...
                 }
-                account.setMetaData(registry.getService(rs.getString(5), user, contextId));
-                accounts.add(account);
             } while (rs.next());
             return accounts;
         } catch (final SQLException e) {
@@ -199,7 +208,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
 
     @Override
     public List<OAuthAccount> getAccounts(final String serviceMetaData, final Session session, final int user, final int contextId) throws OXException {
-        final SecretEncryptionService<PWUpdate> encryptionService = ServiceRegistry.getInstance().getService(SecretEncryptionFactoryService.class).createService(this);
+        final SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
         final Context context = getContext(contextId);
         final Connection con = getConnection(true, context);
         PreparedStatement stmt = null;
@@ -237,21 +246,21 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
 
     @Override
-    public OAuthInteraction initOAuth(final String serviceMetaData, String callbackUrl) throws OXException {
+    public OAuthInteraction initOAuth(final String serviceMetaData, String callbackUrl, Session session) throws OXException {
         try {
             final OAuthServiceMetaData metaData = registry.getService(serviceMetaData, -1, -1);
             /*
              * Get appropriate Scribe service implementation
              */
-            final OAuthInteraction interaction = metaData.initOAuth(callbackUrl);
+            final OAuthInteraction interaction = metaData.initOAuth(callbackUrl, session);
             if (interaction != null) {
                 return interaction;
             }
-            final String modifiedUrl = metaData.modifyCallbackURL(callbackUrl);
+            final String modifiedUrl = metaData.modifyCallbackURL(callbackUrl, session);
             if (modifiedUrl != null) {
                 callbackUrl = modifiedUrl;
             }
-            final org.scribe.oauth.OAuthService service = getScribeService(metaData, callbackUrl);
+            final org.scribe.oauth.OAuthService service = getScribeService(metaData, callbackUrl, session);
             final Token scribeToken;
             if (metaData.needsRequestToken()) {
                 scribeToken = service.getRequestToken();
@@ -485,7 +494,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              */
             return;
         }
-        final EventAdmin eventAdmin = ServiceRegistry.getInstance().getService(EventAdmin.class);
+        final EventAdmin eventAdmin = Services.getService(EventAdmin.class);
         if (null == eventAdmin) {
             /*
              * Missing event admin service
@@ -506,14 +515,14 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
 
     private static Session getUserSession(final int userId, final int contextId) {
      // Firstly let's see if the currently active session matches the one we need here and prefer that one.
-        final SessionHolder sessionHolder = ServiceRegistry.getInstance().getService(SessionHolder.class);
+        final SessionHolder sessionHolder = Services.getService(SessionHolder.class);
         if (sessionHolder != null) {
             final Session session = sessionHolder.getSessionObject();
             if (session != null && session.getUserId() == userId && session.getContextId() == contextId) {
                 return session;
             }
         }
-        final SessiondService service = ServiceRegistry.getInstance().getService(SessiondService.class);
+        final SessiondService service = Services.getService(SessiondService.class);
         if (null == service) {
             return null;
         }
@@ -565,7 +574,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
 
     @Override
     public OAuthAccount getAccount(final int accountId, final Session session, final int user, final int contextId) throws OXException {
-        final SecretEncryptionService<PWUpdate> encryptionService = ServiceRegistry.getInstance().getService(SecretEncryptionFactoryService.class).createService(this);
+        final SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
         final Context context = getContext(contextId);
         final Connection con = getConnection(true, context);
         PreparedStatement stmt = null;
@@ -696,11 +705,13 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 if (null == requestToken) {
                     throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
                 }
+                
+                Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
                 /*
                  * With the request token and the verifier (which is a number) we need now to get the access token
                  */
                 final Verifier verifier = new Verifier(pin);
-                final org.scribe.oauth.OAuthService service = getScribeService(account.getMetaData(), null);
+                final org.scribe.oauth.OAuthService service = getScribeService(account.getMetaData(), null, session);
                 final Token accessToken = service.getAccessToken(new Token(requestToken.getToken(), requestToken.getSecret()), verifier);
                 /*
                  * Apply to account
@@ -724,7 +735,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
 
     // Helper Methods
 
-    private static org.scribe.oauth.OAuthService getScribeService(final OAuthServiceMetaData metaData, final String callbackUrl) throws OXException {
+    private static org.scribe.oauth.OAuthService getScribeService(final OAuthServiceMetaData metaData, final String callbackUrl, Session session) throws OXException {
         final Class<? extends Api> apiClass;
         if (metaData instanceof com.openexchange.oauth.ScribeAware) {
             apiClass = ((com.openexchange.oauth.ScribeAware) metaData).getScribeService();
@@ -757,7 +768,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             }
         }
         final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(apiClass);
-        serviceBuilder.apiKey(metaData.getAPIKey()).apiSecret(metaData.getAPISecret());
+        serviceBuilder.apiKey(metaData.getAPIKey(session)).apiSecret(metaData.getAPISecret(session));
         if (null != callbackUrl) {
             serviceBuilder.callback(callbackUrl);
         }
@@ -847,7 +858,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         if (isEmpty(toEncrypt)) {
             return toEncrypt;
         }
-        final SecretEncryptionService<PWUpdate> service = ServiceRegistry.getInstance().getService(SecretEncryptionFactoryService.class).createService(this);
+        final SecretEncryptionService<PWUpdate> service = Services.getService(SecretEncryptionFactoryService.class).createService(this);
         return service.encrypt(session, toEncrypt);
     }
 
@@ -887,7 +898,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
 
     @Override
     public void cleanUpEncryptedItems(String secret, ServerSession session) throws OXException {
-        final CryptoService cryptoService = ServiceRegistry.getInstance().getService(CryptoService.class);
+        final CryptoService cryptoService = Services.getService(CryptoService.class);
         final int contextId = session.getContextId();
         final Context context = getContext(contextId);
         final Connection con = getConnection(false, context);
@@ -975,7 +986,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
 
     @Override
     public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
-        final CryptoService cryptoService = ServiceRegistry.getInstance().getService(CryptoService.class);
+        final CryptoService cryptoService = Services.getService(CryptoService.class);
         final int contextId = session.getContextId();
         final Context context = getContext(contextId);
         final Connection con = getConnection(false, context);
@@ -1050,20 +1061,33 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             String str = "can't extract token and secret from this:";
             int pos = lcMsg.indexOf(str);
             if (pos > 0) {
-                return OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, message.substring(pos + str.length()));
+                final String msg = toText(message.substring(pos + str.length()));
+                return OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, msg);
             }
             str = "can't extract a token from an empty string";
             pos = lcMsg.indexOf(str);
             if (pos > 0) {
-                return OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, message.substring(pos));
+                final String msg = toText(message.substring(pos));
+                return OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, msg);
             }
             str = "can't extract a token from this:";
             pos = lcMsg.indexOf(str);
             if (pos > 0) {
-                return OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, message.substring(pos + str.length()));
+                final String msg = toText(message.substring(pos + str.length()));
+                return OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, msg);
             }
         }
         return OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+    }
+
+    private static String toText(final String msg) {
+        final HtmlService htmlService = Services.getService(HtmlService.class);
+        if (null != htmlService) {
+            if (com.openexchange.java.HTMLDetector.containsHTMLTags(Charsets.toAsciiBytes(msg), 0, msg.length())) {
+                return htmlService.html2text(msg, false);
+            }
+        }
+        return msg;
     }
 
     /** ASCII-wise to lower-case */

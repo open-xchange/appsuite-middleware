@@ -181,4 +181,7 @@ public class UserExceptionMessage implements LocalizableStrings {
      */
     public final static String INVALID_TIMEZONE_MSG = "%s is not a valid timezone.";
 
+    // This is an internal exception to detect coding problems. A user will never see this exception.
+    // %1$d is replaced with the number of users that attributes should be locked in the database for updating them.
+    public static final String LOCKING_NOT_ALLOWED_MSG = "Locking attributes of multiple users is not allowed. You tried to lock %1$d user's attributes.";
 }

@@ -186,12 +186,12 @@ public abstract class OXContextStorageInterface {
      * Changes specified context's quota.
      *
      * @param ctx The context
-     * @param module The module
+     * @param modules The modules
      * @param quota The quota to set
      * @param auth The credentials
      * @throws StorageException
      */
-    public abstract void changeQuota(Context ctx, String module, long quota, Credentials auth) throws StorageException;
+    public abstract void changeQuota(Context ctx, List<String> modules, long quota, Credentials auth) throws StorageException;
 
     /**
      * Changes specified context's capabilities.

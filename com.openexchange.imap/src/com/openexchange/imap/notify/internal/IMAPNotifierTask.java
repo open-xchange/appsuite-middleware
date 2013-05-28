@@ -60,7 +60,7 @@ import javax.mail.UIDFolder.FetchProfileItem;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.config.IMAPProperties;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -167,7 +167,7 @@ public final class IMAPNotifierTask {
             /*
              * Purge from timer service
              */
-            final TimerService timerService = IMAPServiceRegistry.getService(TimerService.class);
+            final TimerService timerService = Services.getService(TimerService.class);
             if (null != timerService) {
                 timerService.purge();
             }
@@ -180,7 +180,7 @@ public final class IMAPNotifierTask {
      * @return <code>true</code> if this task has been successfully started; otherwise <code>false</code>
      */
     public boolean startUp() {
-        final TimerService timerService = IMAPServiceRegistry.getService(TimerService.class);
+        final TimerService timerService = Services.getService(TimerService.class);
         if (null == timerService) {
             return false;
         }

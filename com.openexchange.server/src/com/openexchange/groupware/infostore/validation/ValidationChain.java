@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -77,16 +78,20 @@ public class ValidationChain {
     public void validate(final DocumentMetadata metadata) throws OXException {
         final StringBuilder message = new StringBuilder();
         boolean failed = false;
-        for(final InfostoreValidator validator : validators) {
+        OXException exception = null;
+        for (final InfostoreValidator validator : validators) {
             final DocumentMetadataValidation validation = validator.validate(metadata);
-            if(!validation.isValid()) {
+            if (!validation.isValid()) {
                 failed = true;
-                final Map<String, List<Metadata>> errors = new HashMap<String, List<Metadata>>();
+                if (null == exception) {
+                    exception = validation.getException();
+                }
 
-                for(final Metadata field : validation.getInvalidFields()) {
+                final Map<String, List<Metadata>> errors = new HashMap<String, List<Metadata>>();
+                for (final Metadata field : validation.getInvalidFields()) {
                     final String error = validation.getError(field);
                     List<Metadata> errorList = errors.get(error);
-                    if(null == errorList) {
+                    if (null == errorList) {
                         errorList = new ArrayList<Metadata>();
                         errors.put(error, errorList);
                     }
@@ -94,11 +99,11 @@ public class ValidationChain {
                 }
 
                 message.append(validator.getName()).append(": ").append('(');
-                for(final Map.Entry<String, List<Metadata>> entry : errors.entrySet()) {
-                    for(final Metadata field : entry.getValue()) {
+                for (final Map.Entry<String, List<Metadata>> entry : errors.entrySet()) {
+                    for (final Metadata field : entry.getValue()) {
                         message.append(field.getName()).append(", ");
                     }
-                    message.setLength(message.length()-2);
+                    message.setLength(message.length() - 2);
                     message.append(") ").append(entry.getKey());
                     message.append('\n');
                 }
@@ -114,10 +119,15 @@ public class ValidationChain {
                     message.append(") ").append(error);
                     message.append("\n");
                 }
-                */
+                 */
             }
         }
-        if(failed) {
+        if (failed) {
+            if (null != exception) {
+                exception.setLogMessage(InfostoreExceptionCodes.VALIDATION_FAILED.getMessage(), message.toString());
+                exception.setLogLevel(LogLevel.ERROR);
+                throw exception;
+            }
             throw InfostoreExceptionCodes.VALIDATION_FAILED.create(message.toString());
         }
     }

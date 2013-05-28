@@ -53,13 +53,8 @@ import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.nio.charset.Charset;
 import org.apache.commons.logging.Log;
-import org.glassfish.grizzly.Buffer;
 import org.glassfish.grizzly.ThreadCache;
 import org.glassfish.grizzly.http.Cookie;
-import org.glassfish.grizzly.http.Method;
-import org.glassfish.grizzly.http.server.Request;
-import org.glassfish.grizzly.http.server.Response;
-import org.glassfish.grizzly.http.server.Session;
 import org.glassfish.grizzly.http.server.util.Globals;
 import org.glassfish.grizzly.utils.Charsets;
 import com.openexchange.http.grizzly.GrizzlyConfig;
@@ -69,22 +64,24 @@ import com.openexchange.tools.servlet.http.Cookies;
 
 /**
  * {@link OXRequest}
- * 
- * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
+ *
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class OXRequest extends Request {
 
     private static Log LOG = com.openexchange.log.Log.loggerFor(OXRequest.class);
 
+    private static final GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
+
+    private static final ThreadCache.CachedTypeIndex<Request> CACHE_IDX = ThreadCache.obtainIndex(Request.class, 16);
+
+    // ---------------------------- Members ---------------------------- //
+
     private String XForwardProto = null;
 
     private int XForwardPort = 0;
 
-    private static GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
-
     private final boolean isConsiderXForwards = grizzlyConfig.isConsiderXForwards();
-
-    private static final ThreadCache.CachedTypeIndex<Request> CACHE_IDX = ThreadCache.obtainIndex(Request.class, 16);
 
     public static Request create() {
         final Request request = ThreadCache.takeFromCache(CACHE_IDX);
@@ -109,7 +106,7 @@ public class OXRequest extends Request {
 
     /**
      * Gets the XForwardProto e.g. http/s
-     * 
+     *
      * @return The XForwardProto
      */
     public String getXForwardProto() {
@@ -118,7 +115,7 @@ public class OXRequest extends Request {
 
     /**
      * Sets the xForwardProto e.g. http/s
-     * 
+     *
      * @param XForwardProto The XForwardProto to set
      */
     public void setxForwardProto(String XForwardProto) {
@@ -127,7 +124,7 @@ public class OXRequest extends Request {
 
     /**
      * Gets the XForwardPort
-     * 
+     *
      * @return The XForwardPort
      */
     public int getXForwardPort() {
@@ -136,7 +133,7 @@ public class OXRequest extends Request {
 
     /**
      * Sets the XForwardPort
-     * 
+     *
      * @param XForwardPort The XForwardPort to set
      */
     public void setXForwardPort(int XForwardPort) {
@@ -209,10 +206,18 @@ public class OXRequest extends Request {
 
     /**
      * Register a new Session in the list of sessions, add it as Cookie to the Response and add the string value to the LogProperties.
-     * 
+     *
      * @param sessionId The new SessionId that has to be registered
      */
     private void registerNewSession(String sessionId) {
+        // Check possible limitation first
+        final int max = grizzlyConfig.getMaxNumberOfHttpSessions();
+        if (max > 0 && sessions.size() >= max) {
+            final String message = "Max. number of HTTP session (" + max + ") exceeded.";
+            LOG.warn(message);
+            throw new IllegalStateException(message);
+        }
+        // Proceed creating that session
         session = new Session(sessionId);
         session.setTimestamp(System.currentTimeMillis());
         session.setSessionTimeout(grizzlyConfig.getCookieMaxInactivityInterval() * 1000);
@@ -226,7 +231,7 @@ public class OXRequest extends Request {
 
     /**
      * Remove invalid JSession cookie used in the Request. Cookies are invalid when:
-     * 
+     *
      * @param invalidSessionId The invalid sessionId requested by the browser/cookie
      */
     private void removeInvalidSessionCookie(String invalidSessionId) {
@@ -249,7 +254,7 @@ public class OXRequest extends Request {
 
     /**
      * Generate a invalidation Cookie that can be added to the response to prompt the browser to remove that cookie.
-     * 
+     *
      * @param invalidCookie The invalid Cookie from the incoming request
      * @return an invalidation Cookie that can be added to the response to prompt the browser to remove that cookie.
      */
@@ -263,7 +268,7 @@ public class OXRequest extends Request {
     /**
      * Generate a invalidation Cookie with domain that can be added to the response to prompt the browser to remove that cookie. The domain
      * is needed for IE to change/remove cookies.
-     * 
+     *
      * @param invalidCookie The invalid Cookie from the incoming request
      * @param domain The domain to set in the invalidation cookie
      * @return an invalidation Cookie that can be added to the response to prompt the browser to remove that cookie.
@@ -277,7 +282,7 @@ public class OXRequest extends Request {
     /**
      * Create a new JSessioID String that consists of a (random)-(the urlencoded domain of this server with dots and dashes
      * encoded).(backendRoute).
-     * 
+     *
      * @return A new JSessionId value as String
      */
     private String createSessionID() {
@@ -296,7 +301,7 @@ public class OXRequest extends Request {
 
     /**
      * Creates a new JSessionIdCookie based on a sessionID and the server configuration.
-     * 
+     *
      * @param sessionID The sessionId to use for cookie generation
      * @return The new JSessionId Cookie
      */
@@ -331,7 +336,7 @@ public class OXRequest extends Request {
 
     /**
      * Override isSecure by first checking the X-Forward-Proto Header. Fallback is the original implementation of the header wasn't present.
-     * 
+     *
      * @return True if the X-Forward-Proto header indicates a secure connection or a real https connection was used.
      */
     @Override
@@ -346,14 +351,14 @@ public class OXRequest extends Request {
      * Lookup a Charset based on a String value.
      * If the lookup fails try to fall back to the default encoding from GrizzlyConfig. If that fails, too use UTF-8.
      * The resulting Charset is used to e.g decode parameters sent via request bodies.
-     * 
+     *
      * @param enc The String representing the encoding
      * @return The Charset loked up, or the default encoding specified in GrizzlyConfig, or UTF-8
      */
     @Override
     protected Charset lookupCharset(final String enc) {
         Charset charset;
-        
+
         if (enc != null) {
             try {
                 charset = Charsets.lookupCharset(enc);

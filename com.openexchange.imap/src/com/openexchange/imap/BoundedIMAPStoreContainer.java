@@ -59,7 +59,7 @@ import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.log.Log;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -139,10 +139,10 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
             super(server, port, login, pw);
             semaphore = new Semaphore(maxCount, true);
             stores = new NonBlockingHashMap<Thread, CountedIMAPStore>(maxCount);
-            final ConfigurationService configurationService = IMAPServiceRegistry.getService(ConfigurationService.class);
+            final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
             timeoutMillis = null == configurationService ? 20000 : configurationService.getIntProperty("com.openexchange.imap.imapConnectionTimeout", 20000);
             if (DEBUG) {
-                final TimerService service = IMAPServiceRegistry.getService(TimerService.class);
+                final TimerService service = Services.getService(TimerService.class);
                 if (null != service) {
                     final Runnable task = new Runnable() {
 
@@ -290,7 +290,7 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
             this.maxCount = maxCount;
             stores = new HashMap<Thread, CountedIMAPStore>(maxCount);
             count = 0;
-            final ConfigurationService configurationService = IMAPServiceRegistry.getService(ConfigurationService.class);
+            final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
             timeoutMillis = null == configurationService ? 20000 : configurationService.getIntProperty("com.openexchange.imap.imapConnectionTimeout", 20000);
         }
 

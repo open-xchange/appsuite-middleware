@@ -389,7 +389,7 @@ public class AJAXRequestDataTools {
             pathInfo = pathInfo.substring(0, lastIndex);
         }
         String module = pathInfo.substring(prefix.length());
-        final int mlen = module.length()-1;
+        final int mlen = module.length() - 1;
         if ('/' == module.charAt(mlen)) {
             module = module.substring(0, mlen);
         }

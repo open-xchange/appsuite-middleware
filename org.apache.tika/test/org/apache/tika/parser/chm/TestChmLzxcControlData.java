@@ -32,7 +32,6 @@ import org.apache.tika.parser.chm.core.ChmConstants;
 public class TestChmLzxcControlData extends TestCase {
     private ChmLzxcControlData chmLzxcControlData = null;
 
-    @Override
     public void setUp() throws Exception {
         byte[] data = TestParameters.chmData;
         /* Creates and parses itsf header */
@@ -127,7 +126,6 @@ public class TestChmLzxcControlData extends TestCase {
                 chmLzxcControlData.getSignature().length);
     }
 
-    @Override
     public void tearDown() throws Exception {
     }
 

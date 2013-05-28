@@ -110,11 +110,14 @@
     <target name="run-tests">
         <delete dir="${testXmlDir}"/>
         <mkdir dir="${testXmlDir}"/>
+        <path id="runClasspath">
+            <path refid="classpath"/>
+            <pathelement location="${testJar}"/>
+        </path>
+        <property name="printablePath" refid="runClasspath"/>
+        <echo message="Classpath for running tests: ${printablePath}"/>
         <junit errorProperty="test.failed" failureProperty="test.failed" showoutput="yes" printsummary="yes">
-            <classpath>
-                <path refid="classpath"/>
-                <pathelement location="${testJar}"/>
-            </classpath>
+            <classpath refid="runClasspath"/>
 
             <test name="${testClass}" todir="${testXmlDir}"/>
 

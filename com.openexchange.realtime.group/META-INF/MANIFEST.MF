@@ -18,6 +18,7 @@ Import-Package: com.openexchange.conversion.simple,
  com.openexchange.server,
  com.openexchange.tools.servlet,
  com.openexchange.tools.session,
+ javax.annotation.concurrent,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework

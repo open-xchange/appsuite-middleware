@@ -56,6 +56,7 @@ import java.util.Iterator;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.DecoderException;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
 /**
  * {@link ParameterizedHeader} - Super class for headers which can hold a parameter list such as <code>Content-Type</code>.
@@ -151,7 +152,8 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * @return The parameter's value or <code>null</code> if not existing
      */
     public String getParameter(final String key) {
-        return parameterList.getParameter(key);
+        final String value = parameterList.getParameter(key);
+        return null == value ? null : MimeMessageUtility.decodeMultiEncodedHeader(value);
     }
 
     /**
@@ -161,7 +163,8 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * @return The parameter's value or <code>null</code> if not existing
      */
     public String removeParameter(final String key) {
-        return parameterList.removeParameter(key);
+        final String value = parameterList.removeParameter(key);
+        return null == value ? null : MimeMessageUtility.decodeMultiEncodedHeader(value);
     }
 
     /**

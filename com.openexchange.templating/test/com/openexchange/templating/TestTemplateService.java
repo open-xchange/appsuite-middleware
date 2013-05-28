@@ -57,6 +57,7 @@ import junit.framework.TestCase;
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.SimSession;
 import com.openexchange.sim.SimBuilder;
@@ -110,8 +111,8 @@ public class TestTemplateService extends TestCase {
         final UserConfiguration noInfostore = new UserConfiguration(0,0,new int[0],null);
         noInfostore.setInfostore(false);
 
-        SimSession simSession = new SimSession();
-        session = new ServerSessionAdapter(simSession, null, null, userConfig);
+        SimSession simSession = new SimSession(1, 1);
+        session = new ServerSessionAdapter(simSession, null, new SimUser(1), userConfig);
         sessionWithoutInfostore = new ServerSessionAdapter(simSession, null, null, noInfostore);
     }
 

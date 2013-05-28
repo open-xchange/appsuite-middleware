@@ -138,13 +138,6 @@ public class WrappingFilter implements Filter {
                  protocol = httpServletRequest.getScheme();
             }
 
-            if(!isValidProtocol(protocol)) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Could not detect a valid protocol header value in " + protocol + ", falling back to default");
-                }
-                 protocol = httpServletRequest.getScheme();
-            }
-            
             if (remoteIP.isEmpty()) {
                 if (LOG.isDebugEnabled()) {
                     forHeaderValue = forHeaderValue == null ? "" : forHeaderValue;

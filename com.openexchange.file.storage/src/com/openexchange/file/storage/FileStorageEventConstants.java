@@ -77,4 +77,6 @@ public class FileStorageEventConstants {
 
     public static final String VERSIONS = "versions";
 
+    public static final String E_TAG = "eTag";
+
 }

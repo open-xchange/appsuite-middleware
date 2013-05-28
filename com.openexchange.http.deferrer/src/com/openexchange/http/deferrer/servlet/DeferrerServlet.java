@@ -242,18 +242,4 @@ public class DeferrerServlet extends HttpServlet {
         }
         return isWhitespace;
     }
-
-    /**
-     * Gets the ASCII string from specified bytes.
-     *
-     * @param bytes The bytes
-     * @return The ASCII string
-     */
-    public static String toAsciiString(final byte[] bytes) {
-        final StringBuilder sb = new StringBuilder(bytes.length);
-        for (int i = 0; i < bytes.length; i++) {
-            sb.append((char) (bytes[i] & 0x00FF));
-        }
-        return sb.toString();
-    }
 }

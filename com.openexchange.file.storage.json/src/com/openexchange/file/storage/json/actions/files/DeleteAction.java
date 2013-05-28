@@ -72,7 +72,6 @@ public class DeleteAction extends AbstractWriteAction {
         request.requireBody().require(Param.TIMESTAMP);
 
         final IDBasedFileAccess fileAccess = request.getFileAccess();
-
         final List<String> conflicting = fileAccess.removeDocument(request.getIds(), request.getTimestamp());
 
         return result(conflicting, request);

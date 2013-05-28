@@ -54,26 +54,21 @@ import java.util.Date;
 import com.openexchange.realtime.packet.Presence;
 
 /**
- * {@link DefaultResource} Abstract {@link Resource} implementation.
+ * {@link DefaultResource} {@link Resource} implementation that doesn't carry any routing information, yet. Routing information is
+ * automatically added by a transport specific Resource implmentation e.g. when adding a DefaultResource to a HazelcastResourceDirectory.
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class DefaultResource implements Resource {
+public class DefaultResource extends AbstractResource implements Resource {
 
     private static final long serialVersionUID = -1140736920132224444L;
-
-    protected Presence presence;
-
-    protected Serializable routingInfo;
-
-    protected Date timestamp;
 
     /**
      * Initializes a new {@link DefaultResource} without associated {@link Presence}
      */
     public DefaultResource() {
-        this(null);
+        super();
     }
 
     /**
@@ -83,7 +78,7 @@ public class DefaultResource implements Resource {
      * @param timestamp The timestamp
      */
     public DefaultResource(Presence presence) {
-        this(presence, new Date());
+        super(presence);
 
     }
 
@@ -94,75 +89,20 @@ public class DefaultResource implements Resource {
      * @param timestamp The timestamp
      */
     public DefaultResource(Presence presence, Date timestamp) {
-        this.presence = presence;
-        this.timestamp = timestamp;
+        super(presence, timestamp);
     }
 
-    @Override
-    public Presence getPresence() {
-        return this.presence;
-    }
-
-    @Override
-    public void setPresence(Presence presence) {
-        this.presence = presence;
-    }
+    /*
+     * DefaultResources don't carry routing infos
+     */
 
     @Override
     public Serializable getRoutingInfo() {
-        return this.routingInfo;
+        return null;
     }
 
     @Override
     public void setRoutingInfo(Serializable routingInfo) {
-        this.routingInfo = routingInfo;
-    }
-
-    @Override
-    public Date getTimestamp() {
-        return this.timestamp;
-    }
-
-    @Override
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((presence == null) ? 0 : presence.hashCode());
-        result = prime * result + ((routingInfo == null) ? 0 : routingInfo.hashCode());
-        result = prime * result + ((timestamp == null) ? 0 : timestamp.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (!(obj instanceof DefaultResource))
-            return false;
-        DefaultResource other = (DefaultResource) obj;
-        if (presence == null) {
-            if (other.presence != null)
-                return false;
-        } else if (!presence.equals(other.presence))
-            return false;
-        if (routingInfo == null) {
-            if (other.routingInfo != null)
-                return false;
-        } else if (!routingInfo.equals(other.routingInfo))
-            return false;
-        if (timestamp == null) {
-            if (other.timestamp != null)
-                return false;
-        } else if (!timestamp.equals(other.timestamp))
-            return false;
-        return true;
     }
 
 }

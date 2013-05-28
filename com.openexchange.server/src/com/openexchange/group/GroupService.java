@@ -56,12 +56,14 @@ import com.openexchange.groupware.ldap.User;
 
 /**
  * This service defines the API to the groups component.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public interface GroupService {
 
     /**
      * Creates a group.
+     *
      * @param ctx Context.
      * @param user User for permission checks.
      * @param group group to create.
@@ -71,26 +73,34 @@ public interface GroupService {
 
     /**
      * Updates a group.
+     *
      * @param ctx Context.
      * @param user User for permission checks.
      * @param group group to update.
      * @param lastRead timestamp when the group to update has last been read.
      * @throws OXException if some problem occurs.
      */
-    void update(Context ctx, User user, Group group, Date lastRead) throws
-        OXException;
+    void update(Context ctx, User user, Group group, Date lastRead) throws OXException;
 
     /**
      * Deletes a group.
+     *
      * @param ctx Context.
      * @param user User for permission checks.
      * @param groupId unique identifier of the group to delete.
      * @param lastModified timestamp when the group to delete has last been read.
      * @throws OXException if some problem occurs.
      */
-    void delete(Context ctx, User user, int groupId, Date lastModified) throws
-        OXException;
+    void delete(Context ctx, User user, int groupId, Date lastModified) throws OXException;
 
+    /**
+     * Returns the denoted group.
+     *
+     * @param ctx The context
+     * @param groupId The group identifier
+     * @return The group
+     * @throws OXException If group cannot be returned
+     */
     Group getGroup(Context ctx, int groupId) throws OXException;
 
 }

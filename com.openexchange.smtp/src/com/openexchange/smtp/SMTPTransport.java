@@ -103,6 +103,8 @@ import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailPath;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -115,6 +117,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MimeMessageDataSource;
+import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.config.ITransportProperties;
@@ -697,6 +700,30 @@ public final class SMTPTransport extends MailTransport {
              */
             if (null != mimeMessage) {
                 mimeMessage.removeHeader("x-original-headers");
+                /*
+                 * Check for reply
+                 */
+                {
+                    final MailPath msgref;
+                    if (ComposeType.REPLY.equals(sendType) && ((msgref = composedMail.getMsgref()) != null)) {
+                        MailAccess<?, ?> access = null;
+                        try {
+                            access = MailAccess.getInstance(session, msgref.getAccountId());
+                            access.connect();
+                            MimeMessageFiller.setReplyHeaders(access.getMessageStorage().getMessage(msgref.getFolder(), msgref.getMailID(), false), mimeMessage);
+                        } finally {
+                            if (null != access) {
+                                access.close(true);
+                            }
+                        }
+                    }
+                }
+                /*
+                 * Set common headers
+                 */
+                final SMTPMessageFiller smtpFiller = new SMTPMessageFiller(smtpConfig.getSMTPProperties(), session, ctx, usm);
+                smtpFiller.setAccountId(accountId);
+                smtpFiller.setCommonHeaders(mimeMessage);
                 /*
                  * Check recipients
                  */

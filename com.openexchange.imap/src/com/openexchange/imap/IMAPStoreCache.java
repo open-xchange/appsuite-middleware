@@ -58,7 +58,7 @@ import org.apache.commons.logging.Log;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
@@ -99,7 +99,7 @@ public final class IMAPStoreCache {
         if (null != tmp) {
             return;
         }
-        final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+        final ConfigurationService service = Services.getService(ConfigurationService.class);
         final boolean checkConnected = null == service ? false : service.getBoolProperty("com.openexchange.imap.checkConnected", false);
         tmp = instance = new IMAPStoreCache(checkConnected);
         tmp.init();
@@ -196,13 +196,13 @@ public final class IMAPStoreCache {
         map = new NonBlockingHashMap<Key, IMAPStoreContainer>();
         keys = new NonBlockingHashMap<IMAPStoreCache.User, Queue<Key>>();
 
-        final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+        final ConfigurationService service = Services.getService(ConfigurationService.class);
         final BoundedIMAPStoreContainer.ImplType it = null == service ? BoundedIMAPStoreContainer.ImplType.SEMAPHORE : BoundedIMAPStoreContainer.ImplType.valueOf(service.getProperty("com.openexchange.imap.cacheImplType", "SEMAPHORE"));
         implType = null == it ? BoundedIMAPStoreContainer.ImplType.SEMAPHORE : it;
     }
 
     private void init() {
-        final TimerService timer = IMAPServiceRegistry.getService(TimerService.class);
+        final TimerService timer = Services.getService(TimerService.class);
         final Runnable task = new CloseElapsedRunnable();
         final int shrinkerMillis = SHRINKER_MILLIS;
         timerTask = timer.scheduleWithFixedDelay(task, shrinkerMillis, shrinkerMillis);

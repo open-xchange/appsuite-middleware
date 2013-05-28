@@ -50,8 +50,11 @@
 package com.openexchange.oauth.twitter;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
+import com.openexchange.session.Session;
 
 /**
  * {@link OAuthServiceMetaDataTwitterImpl}
@@ -72,6 +75,8 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaDat
 
     public OAuthServiceMetaDataTwitterImpl() {
         super();
+        setAPIKeyName("com.openexchange.twitter.consumerKey");
+        setAPISecretName("com.openexchange.twitter.consumerSecret");
     }
 
     @Override
@@ -82,24 +87,6 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaDat
     @Override
     public String getId() {
         return "com.openexchange.oauth.twitter";
-    }
-
-    @Override
-    public String getAPIKey() {
-        final ConfigurationService configurationService = TwitterOAuthServiceRegistry.getServiceLookup().getService(ConfigurationService.class);
-        if (null == configurationService) {
-            return KEY_API;
-        }
-        return configurationService.getProperty("com.openexchange.twitter.consumerKey", KEY_API);
-    }
-
-    @Override
-    public String getAPISecret() {
-        final ConfigurationService configurationService = TwitterOAuthServiceRegistry.getServiceLookup().getService(ConfigurationService.class);
-        if (null == configurationService) {
-            return KEY_SECRET;
-        }
-        return configurationService.getProperty("com.openexchange.twitter.consumerSecret", KEY_SECRET);
     }
 
     @Override

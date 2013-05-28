@@ -50,6 +50,8 @@
 package com.openexchange.realtime.atmosphere.impl;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,6 +62,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -80,8 +85,8 @@ public class AtmosphereResourceReaper {
     /* Fair Reentrant Lock to synchronize removal of Moribunds */
     private final ReentrantLock moribundRemoveLock;
 
-    /* Define how long a moribund may linger before being reaped */
-    private static final int MORIBUND_MAX_LINGER = 5000;
+    /* Define how long a moribund may linger 2 ping intervals before being reaped */
+    private static final int MORIBUND_MAX_LINGER = 120000;
 
     private volatile ScheduledTimerTask scheduledReaper;
 
@@ -96,12 +101,15 @@ public class AtmosphereResourceReaper {
              * Start at the end of the navigable Set to get the oldest moribund first. Then proceed to the younger ones. Stop at the first
              * moribund that still has some time left to linger.
              */
+            @SuppressWarnings("unchecked")
             @Override
             public void run() {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Next Reaper run.");
                 }
+                final List<Moribund> deathRow = new LinkedList<Moribund>(); 
                 moribundRemoveLock.lock();
+                long now = System.currentTimeMillis();
                 try {
                     NavigableSet<Moribund> sortedMoribunds = new TreeSet<Moribund>(moribundRegistry.values());
                     final Iterator<Moribund> descendingMoribundIterator = sortedMoribunds.descendingIterator();
@@ -111,16 +119,9 @@ public class AtmosphereResourceReaper {
                     boolean ripeMoribundsLeft = true;
                     while (ripeMoribundsLeft && descendingMoribundIterator.hasNext()) {
                         final Moribund moribund = descendingMoribundIterator.next();
-                        if (moribund.getLinger() > MORIBUND_MAX_LINGER) {
-                            try {
-                                moribund.die();
-                                moribundRegistry.remove(moribund.getConcreteID());
-                                if (LOG.isDebugEnabled()) {
-                                    LOG.debug("Reaped Moribund: " + moribund);
-                                }
-                            } catch (final OXException oxe) {
-                                LOG.error("Couldn't reap Moribund: " + moribund, oxe);
-                            }
+                        if (moribund.getLinger(now) > MORIBUND_MAX_LINGER) {
+                            moribundRegistry.remove(moribund.getConcreteID());
+                            deathRow.add(moribund);
                         } else {
                             ripeMoribundsLeft = false;
                         }
@@ -129,6 +130,40 @@ public class AtmosphereResourceReaper {
                     LOG.error("Error during AtmosphereResourceReaper run.", e);
                 } finally {
                     moribundRemoveLock.unlock();
+                }
+                if (!deathRow.isEmpty()) {
+                    LOG.debug("Have " + deathRow.size() + " Moribunds on death row.");
+                    AtmosphereServiceRegistry.getInstance().getService(ThreadPoolService.class).invoke(new Task[]{new Task<Void>() {
+
+                        @Override
+                        public void setThreadName(ThreadRenamer threadRenamer) {
+                            threadRenamer.rename("Moribund Cleanup");
+                        }
+
+                        @Override
+                        public void beforeExecute(Thread t) {
+                            
+                        }
+
+                        @Override
+                        public void afterExecute(Throwable t) {
+                            
+                        }
+
+                        @Override
+                        public Void call() throws Exception {
+                            for (Moribund moribund : deathRow) {
+                                try {
+                                    moribund.die();
+                                    LOG.debug("Reaped moribund: " + moribund.getConcreteID());
+                                } catch (Exception e) {
+                                    LOG.error("Couldn't reap moribund: " + moribund.getConcreteID()+": " + e.getMessage(), e);
+                                }
+                            }
+                            return null;
+                        }
+                        
+                    }});
                 }
             }
         }, 1000, 10000, TimeUnit.MILLISECONDS);
@@ -146,11 +181,6 @@ public class AtmosphereResourceReaper {
         if (oldMoribund != null) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Found a previous Moribund, this shouldn't happen!: " + oldMoribund);
-            }
-            try {
-                oldMoribund.die();
-            } catch (final OXException oxe) {
-                LOG.error("Couldn't reap previous Moribund: " + oldMoribund, oxe);
             }
         }
     }

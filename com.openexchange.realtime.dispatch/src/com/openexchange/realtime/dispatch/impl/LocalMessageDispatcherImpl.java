@@ -57,10 +57,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.RealtimeExceptionCodes;
 import com.openexchange.realtime.dispatch.DispatchExceptionCode;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.StanzaSequenceGate;
@@ -77,17 +77,19 @@ public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
 
     private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
 
-    private StanzaSequenceGate gate = new StanzaSequenceGate() {
+    private StanzaSequenceGate gate = new StanzaSequenceGate("LocalMessageDispatcher") {
 
         @Override
         public void handleInternal(Stanza stanza, ID recipient) throws OXException {
             String protocol = recipient.getProtocol();
             Channel channel = channels.get(protocol);
             if (channel == null) {
+                stanza.trace("Didn't find channel for protocol: " + protocol);
                 throw DispatchExceptionCode.UNKNOWN_CHANNEL.create(protocol);
             } else {
                 if (channel.isConnected(recipient)) {
                     try {
+                        stanza.trace("Send to " + recipient.toString());
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Sending Stanza: " + stanza + " to " + recipient.toString());
                         }
@@ -99,6 +101,7 @@ public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
                             throw e;
                         }
                     } catch (RuntimeException e) {
+                        stanza.trace(e.getMessage(), e);
                         throw DispatchExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
                     }
                 } else {

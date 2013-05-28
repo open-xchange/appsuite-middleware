@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
@@ -129,18 +130,24 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     @Override
-    public void changeQuota(final Context ctx, final String module, final long quotaValue, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
-        if (isEmpty(module)) {
+    public void changeQuota(final Context ctx, final String sModule, final long quotaValue, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        if (isEmpty(sModule)) {
             throw new InvalidDataException("No valid module specified.");
         }
+        final Set<String> modules;
         {
             final Resource[] resources = Resource.values();
-            boolean found = false;
-            for (int i = 0; !found && i < resources.length; i++) {
-                found = resources[i].getIdentifier().equalsIgnoreCase(module);
-            }
-            if (!found) {
-                throw new InvalidDataException("Unknown module: \"" + module + "\" (known modules: " + Arrays.toString(Resource.allIdentifiers()) + ")");
+            final String[] mods = sModule.split(" *, *");
+            modules = new LinkedHashSet<String>(mods.length);
+            for (final String mod : mods) {
+                boolean found = false;
+                for (int i = 0; !found && i < resources.length; i++) {
+                    found = resources[i].getIdentifier().equalsIgnoreCase(mod);
+                }
+                if (!found) {
+                    throw new InvalidDataException("Unknown module: \"" + mod + "\" (known modules: " + Arrays.toString(Resource.allIdentifiers()) + ")");
+                }
+                modules.add(mod);
             }
         }
 
@@ -165,17 +172,17 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             quota = quotaValue;
         }
 
-        log.debug(ctx+" - "+module + " - " + quota);
+        log.debug(ctx+" - "+modules + " - " + quota);
 
         try {
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
             }
 
-            callPluginMethod("changeQuota", ctx, module, Long.valueOf(quota), auth);
+            callPluginMethod("changeQuota", ctx, new ArrayList<String>(modules), Long.valueOf(quota), auth);
 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            oxcox.changeQuota(ctx, module, quota, auth);
+            oxcox.changeQuota(ctx, new ArrayList<String>(modules), quota, auth);
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;

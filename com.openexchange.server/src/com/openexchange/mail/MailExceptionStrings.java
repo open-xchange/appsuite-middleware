@@ -422,6 +422,9 @@ public final class MailExceptionStrings implements LocalizableStrings {
      */
     public final static String FOLDER_NOT_FOUND_MSG = "Mail folder could not be found: %1$s.";
 
+    // Mail folder could not be found.
+    public final static String FOLDER_NOT_FOUND_SIMPLE_MSG = "Mail folder could not be found.";
+
     /**
      * Referenced mail %1$s could not be found in folder %2$s. Therefore reply/forward operation cannot be performed.
      */

@@ -52,13 +52,10 @@ package com.openexchange.apps.manifests.json.osgi;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
-import org.osgi.util.tracker.ServiceTracker;
-
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.apps.manifests.ServerConfigMatcherService;
@@ -70,6 +67,7 @@ import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
+import com.openexchange.osgi.NearRegistryServiceTracker;
 
 /**
  * {@link ManifestJSONActivator}
@@ -90,35 +88,21 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 
 	    UIVersion.UIVERSION = context.getBundle().getVersion().toString();
 
-		final ServiceTracker<ServerConfigMatcherService, ServerConfigMatcherService> matcherTracker = track(ServerConfigMatcherService.class);
-		final ServiceTracker<ComputedServerConfigValueService, ComputedServerConfigValueService> computedValueTracker = track(ComputedServerConfigValueService.class);
+	    final NearRegistryServiceTracker<ServerConfigMatcherService> matcherTracker = new NearRegistryServiceTracker<ServerConfigMatcherService>(context, ServerConfigMatcherService.class);
+	    rememberTracker(matcherTracker);
+	    final NearRegistryServiceTracker<ComputedServerConfigValueService> computedValueTracker = new NearRegistryServiceTracker<ComputedServerConfigValueService>(context, ComputedServerConfigValueService.class);
+	    rememberTracker(computedValueTracker);;
 
 		registerModule(new ManifestActionFactory(this, readManifests(), new ServerConfigServicesLookup() {
 
 			@Override
 			public List<ServerConfigMatcherService> getMatchers() {
-				List<ServerConfigMatcherService> services = new ArrayList<ServerConfigMatcherService>();
-				Object[] tracked = matcherTracker.getServices();
-				if (tracked == null) {
-					return services;
-				}
-				for(Object service: tracked) {
-					services.add((ServerConfigMatcherService) service);
-				}
-				return services;
+				return Collections.unmodifiableList(matcherTracker.getServiceList());
 			}
 
 			@Override
 			public List<ComputedServerConfigValueService> getComputed() {
-				List<ComputedServerConfigValueService> services = new ArrayList<ComputedServerConfigValueService>();
-				Object[] tracked = computedValueTracker.getServices();
-				if (tracked == null) {
-					return services;
-				}
-				for(Object service: tracked) {
-					services.add((ComputedServerConfigValueService) service);
-				}
-				return services;
+				return Collections.unmodifiableList(computedValueTracker.getServiceList());
 			}
 		}), "apps/manifests");
 

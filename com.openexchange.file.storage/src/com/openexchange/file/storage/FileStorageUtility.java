@@ -51,6 +51,7 @@ package com.openexchange.file.storage;
 
 import java.net.MalformedURLException;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 
 
 /**
@@ -68,8 +69,36 @@ public final class FileStorageUtility {
     }
 
     /**
+     * Generates the ETag for given file meta data.
+     *
+     * @param fileMetadata The file meta data
+     * @return The Etag
+     */
+    public static String getETagFor(final File fileMetadata) {
+        return getETagFor(fileMetadata.getId(), fileMetadata.getVersion());
+    }
+
+    /**
+     * Generates the ETag for given file meta data.
+     *
+     * @param id The file identifier
+     * @param version The optional version
+     * @return The Etag
+     */
+    public static String getETagFor(final String id, final String version) {
+        final StringAllocator sb = new StringAllocator("http://www.open-xchange.com/infostore");
+        if (null != id) {
+            sb.append('/').append(id);
+        }
+        if (null != version) {
+            sb.append('/').append(version);
+        }
+        return sb.toString();
+    }
+
+    /**
      * Checks given file's URL string for syntactical correctness.
-     * 
+     *
      * @param file The file whose URL to cehck
      * @throws OXException If URL string is invalid
      */
@@ -79,7 +108,7 @@ public final class FileStorageUtility {
 
     /**
      * Checks given URL string for syntactical correctness.
-     * 
+     *
      * @param sUrl The URL string
      * @throws OXException If URL string is invalid
      */

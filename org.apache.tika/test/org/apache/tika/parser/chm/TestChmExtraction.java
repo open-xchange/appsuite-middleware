@@ -32,9 +32,8 @@ import org.apache.tika.metadata.Metadata;
 
 public class TestChmExtraction extends TestCase {
 
-    private final List<String> files = new ArrayList<String>();
+    private List<String> files = new ArrayList<String>();
 
-    @Override
     public void setUp() {
         files.add("/test-documents/testChm.chm");
         files.add("/test-documents/testChm3.chm");
@@ -45,7 +44,6 @@ public class TestChmExtraction extends TestCase {
                 .newFixedThreadPool(TestParameters.NTHREADS);
         for (int i = 0; i < TestParameters.NTHREADS; i++) {
             executor.execute(new Runnable() {
-                @Override
                 public void run() {
                     Lock mutex = new ReentrantLock();
                     for (String fileName : files) {

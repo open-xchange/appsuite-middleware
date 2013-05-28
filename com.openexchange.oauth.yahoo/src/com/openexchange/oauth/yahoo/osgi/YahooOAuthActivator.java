@@ -70,10 +70,6 @@ public class YahooOAuthActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(YahooOAuthActivator.class);
 
-    private static final String API_KEY = "com.openexchange.oauth.yahoo.apiKey";
-
-    private static final String API_SECRET = "com.openexchange.oauth.yahoo.apiSecret";
-
     private volatile OAuthService oauthService;
     private volatile OAuthServiceMetaDataYahooImpl oAuthMetaData;
 
@@ -108,14 +104,10 @@ public class YahooOAuthActivator extends HousekeepingActivator {
         oauthService = getService(OAuthService.class);
 
         oAuthMetaData =
-            new OAuthServiceMetaDataYahooImpl(
-                config.getProperty(API_KEY),
-                config.getProperty(API_SECRET),
-                getService(DeferringURLService.class));
+            new OAuthServiceMetaDataYahooImpl(getService(DeferringURLService.class));
 
         registerService(OAuthServiceMetaData.class, oAuthMetaData);
         LOG.info("OAuthServiceMetaData for Yahoo was started");
-        LOG.info("API-Key for Yahoo : " + config.getProperty(API_KEY) + ", API-Secret for Yahoo : " + config.getProperty(API_SECRET));
 
         final YahooService yahooService = new YahooServiceImpl(this);
 

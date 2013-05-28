@@ -60,6 +60,7 @@ import java.util.Set;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
@@ -74,7 +75,7 @@ public class InfostoreTestManager {
 
     private boolean failOnError;
 
-    private AbstractInfostoreResponse lastResponse;
+    private AbstractAJAXResponse lastResponse;
 
     public InfostoreTestManager() {
         createdEntities = new HashSet<DocumentMetadata>();
@@ -105,7 +106,7 @@ public class InfostoreTestManager {
         return failOnError;
     }
 
-    public AbstractInfostoreResponse getLastResponse() {
+    public AbstractAJAXResponse getLastResponse() {
         return lastResponse;
     }
 

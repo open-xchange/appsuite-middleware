@@ -49,7 +49,9 @@
 
 package com.openexchange.realtime.packet;
 
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -59,9 +61,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import org.apache.commons.logging.Log;
 import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.util.ElementPath;
@@ -76,6 +83,8 @@ public abstract class Stanza implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private static final Log LOG = LogFactory.getLog(Stanza.class);
+
     // recipient and sender
     private ID to, from, sequencePrincipal;
 
@@ -86,11 +95,12 @@ public abstract class Stanza implements Serializable {
     
     private long sequenceNumber = -1;
     
-    
+    private String tracer; 
+    private List<String> logEntries = new LinkedList<String>();
 
     // Payloads carried by this Stanza as n-ary trees
     Map<ElementPath, List<PayloadTree>> payloads;
-
+    
     /**
      * Initializes a new {@link Stanza}.
      */
@@ -345,6 +355,45 @@ public abstract class Stanza implements Serializable {
     public void setSelector(String selector) {
         this.selector = selector;
     }
+    
+    public void setTracer(String tracer) {
+        this.tracer = tracer;
+    }
+    
+    public String getTracer() {
+        return tracer;
+    }
+    
+    public boolean traceEnabled() {
+        return tracer != null;
+    }
+    
+    public void trace(Object trace) {
+        if (traceEnabled()) {
+            LOG.info(tracer+": "+trace);
+            logEntries.add(trace.toString());
+        }
+    }
+
+    public void trace(Object trace, Throwable t) {
+        if (traceEnabled()) {
+            LOG.info(tracer+": "+trace, t);
+            StringWriter w = new StringWriter();
+            t.printStackTrace(new PrintWriter(w));
+            logEntries.add(trace.toString());
+            logEntries.add(w.toString());
+        }
+    }
+    
+    public void addLogMessages(List<String> logEntries) {
+        this.logEntries.addAll(logEntries);
+    }
+
+
+    
+    public List<String> getLogEntries() {
+        return logEntries;
+    }
 
     public void transformPayloads(String format) throws OXException {
         List<PayloadTree> copy = new ArrayList<PayloadTree>(getPayloads().size());
@@ -427,7 +476,4 @@ public abstract class Stanza implements Serializable {
 
         return "From: " + from + "\nTo: " + to + "\nPayloads:\n" + payloads;
     }
-
-    
-
 }

@@ -54,7 +54,11 @@ import static com.openexchange.java.Charsets.toAsciiString;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -108,7 +112,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     /**
      * Sets the preview cache reference.
-     * 
+     *
      * @param ref The reference
      */
     public static void setPreviewCache(final PreviewCache ref) {
@@ -157,24 +161,57 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
      * @param optParameters Optional parameters to consider
      * @return The appropriate cache key
      */
-    protected String generatePreviewCacheKey(final String eTag, final AJAXRequestData requestData, final String... optParameters) {
-        final StringAllocator sb = new StringAllocator(eTag);
-        sb.append('-').append(requestData.getModule());
+    protected String generatePreviewCacheKey(final String eTag, final AJAXRequestData requestData) {
+        final StringAllocator sb = new StringAllocator(512);
+        sb.append(requestData.getModule());
         sb.append('-').append(requestData.getAction());
         sb.append('-').append(requestData.getSession().getContextId());
-        if (optParameters != null) {
-            for (final String name : optParameters) {
+        List<String> parameters = new ArrayList<String>(requestData.getParameters().keySet());
+        Collections.sort(parameters);
+
+        for (final String name : parameters) {
+            if (!name.equalsIgnoreCase("session") && !name.equalsIgnoreCase("action")) {
+                sb.append('-').append(name);
                 final String parameter = requestData.getParameter(name);
                 if (!isEmpty(parameter)) {
-                    sb.append('-').append(parameter);
+                    sb.append('=').append(parameter);
                 }
             }
+        }
+        try {
+            final byte[] md5Bytes = sb.toString().getBytes("UTF-8");
+            sb.setNewLength(0);
+            return sb.append(eTag).append('-').append(asHex(MessageDigest.getInstance("MD5").digest(md5Bytes))).toString();
+        } catch (UnsupportedEncodingException e) {
+            // Shouldn't happen
+            LOG.error(e.getMessage(),e);
+        } catch (NoSuchAlgorithmException e) {
+            // Shouldn't happen
+            LOG.error(e.getMessage(),e);
         }
         return sb.toString();
     }
 
+    private static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+
+    /**
+     * Turns array of bytes into string representing each byte as unsigned hex number.
+     *
+     * @param hash Array of bytes to convert to hex-string
+     * @return Generated hex string
+     */
+    public static String asHex(final byte[] hash) {
+        final int length = hash.length;
+        final char[] buf = new char[length * 2];
+        for (int i = 0, x = 0; i < length; i++) {
+            buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
+            buf[x++] = HEX_CHARS[hash[i] & 0xf];
+        }
+        return new String(buf);
+    }
+
     @Override
-    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {        
+    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         IFileHolder fileHolder = null;
         try {
             // Check cache first
@@ -182,8 +219,8 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             final String eTag = requestData.getETag();
             final boolean isValidEtag = !isEmpty(eTag);
             if (null != previewCache && isValidEtag) {
-                final String cacheKey = generatePreviewCacheKey(eTag, requestData, "pages");
-                final CachedPreview cachedPreview = previewCache.get(cacheKey, session.getUserId(), session.getContextId());
+                final String cacheKey = generatePreviewCacheKey(eTag, requestData);
+                final CachedPreview cachedPreview = previewCache.get(cacheKey, 0, session.getContextId());
                 if (null != cachedPreview) {
                     /*
                      * Get content according to output format
@@ -266,7 +303,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                     if (null != content) {
                         final int size = content.size();
                         if (size > 0) {
-                            final String cacheKey = generatePreviewCacheKey(eTag, requestData, "pages");
+                            final String cacheKey = generatePreviewCacheKey(eTag, requestData);
                             final byte[] bytes;
                             if (1 == content.size()) {
                                 bytes = toAsciiBytes(toAsciiString(Base64.encodeBase64(content.get(0).getBytes(UTF8))));
@@ -288,7 +325,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                                 @Override
                                 public Void call() throws OXException {
                                     final CachedPreview preview = new CachedPreview(bytes, fileName, fileType, bytes.length);
-                                    previewCache.save(cacheKey, preview, session.getUserId(), session.getContextId());
+                                    previewCache.save(cacheKey, preview, 0, session.getContextId());
                                     return null;
                                 }
                             };

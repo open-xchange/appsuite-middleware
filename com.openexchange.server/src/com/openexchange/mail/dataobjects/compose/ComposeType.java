@@ -80,6 +80,10 @@ public enum ComposeType {
      * New SMS (special handling for contained text; e.g. no html-to-text conversion)
      */
     NEW_SMS(5),
+    /**
+     * Draft with <code>deleteDraftOnTransport</code> enabled.
+     */
+    DRAFT_DELETE_ON_TRANSPORT(6),
 
     ;
 

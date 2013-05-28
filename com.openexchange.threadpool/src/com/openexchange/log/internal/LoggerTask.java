@@ -51,6 +51,7 @@ package com.openexchange.log.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -60,6 +61,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Loggable;
+import com.openexchange.log.Loggable.Level;
+import com.openexchange.log.internal.callback.DebugCallback;
+import com.openexchange.log.internal.callback.ErrorCallback;
+import com.openexchange.log.internal.callback.FatalCallback;
+import com.openexchange.log.internal.callback.InfoCallback;
+import com.openexchange.log.internal.callback.LogCallback;
+import com.openexchange.log.internal.callback.TraceCallback;
+import com.openexchange.log.internal.callback.WarnCallback;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadRenamer;
 
@@ -118,12 +127,7 @@ final class LoggerTask extends AbstractTask<Object> {
     private final String lineSeparator;
     private final int maxMessageLength;
 
-    private final LogCallback fatalCb;
-    private final LogCallback traceCb;
-    private final LogCallback debugCb;
-    private final LogCallback infoCb;
-    private final LogCallback warnCb;
-    private final LogCallback errorCb;
+    private final Map<Level, LogCallback> callbacks;
 
     /**
      * Initializes a new {@link LoggerTask}.
@@ -138,72 +142,14 @@ final class LoggerTask extends AbstractTask<Object> {
         this.queue = queue;
         this.maxMessageLength = maxMessageLength;
 
-        fatalCb = new LogCallback() {
-
-            @Override
-            public void log(final Object message, final Throwable t, final Log log) {
-                if (null == t) {
-                    log.fatal(message);
-                } else {
-                    log.fatal(message, t);
-                }
-            }
-        };
-        errorCb = new LogCallback() {
-
-            @Override
-            public void log(final Object message, final Throwable t, final Log log) {
-                if (null == t) {
-                    log.error(message);
-                } else {
-                    log.error(message, t);
-                }
-            }
-        };
-        warnCb = new LogCallback() {
-
-            @Override
-            public void log(final Object message, final Throwable t, final Log log) {
-                if (null == t) {
-                    log.warn(message);
-                } else {
-                    log.warn(message, t);
-                }
-            }
-        };
-        infoCb = new LogCallback() {
-
-            @Override
-            public void log(final Object message, final Throwable t, final Log log) {
-                if (null == t) {
-                    log.info(message);
-                } else {
-                    log.info(message, t);
-                }
-            }
-        };
-        debugCb = new LogCallback() {
-
-            @Override
-            public void log(final Object message, final Throwable t, final Log log) {
-                if (null == t) {
-                    log.debug(message);
-                } else {
-                    log.debug(message, t);
-                }
-            }
-        };
-        traceCb = new LogCallback() {
-
-            @Override
-            public void log(final Object message, final Throwable t, final Log log) {
-                if (null == t) {
-                    log.trace(message);
-                } else {
-                    log.trace(message, t);
-                }
-            }
-        };
+        final Map<Loggable.Level, LogCallback> callbacks = new EnumMap<Loggable.Level, LogCallback>(Loggable.Level.class);
+        callbacks.put(Loggable.Level.DEBUG, new DebugCallback());
+        callbacks.put(Loggable.Level.ERROR, new ErrorCallback());
+        callbacks.put(Loggable.Level.FATAL, new FatalCallback());
+        callbacks.put(Loggable.Level.INFO, new InfoCallback());
+        callbacks.put(Loggable.Level.TRACE, new TraceCallback());
+        callbacks.put(Loggable.Level.WARNING, new WarnCallback());
+        this.callbacks = callbacks;
     }
 
     /**
@@ -248,7 +194,10 @@ final class LoggerTask extends AbstractTask<Object> {
                 queue.drainTo(loggables);
                 final boolean quit = loggables.remove(POISON);
                 for (final Loggable loggable : loggables) {
-                    logIt(loggable);
+                    final LogCallback callback = callbacks.get(loggable.getLevel());
+                    if (null != callback && callback.isLoggable(loggable.getLog())) {
+                        invokeCallback(loggable, callback);
+                    }
                 }
                 if (quit) {
                     return null;
@@ -266,51 +215,6 @@ final class LoggerTask extends AbstractTask<Object> {
         return null;
     }
 
-    private void logIt(final Loggable loggable) {
-        LogCallback callback = null;
-        {
-            switch (loggable.getLevel()) {
-            case FATAL:
-                if (loggable.getLog().isFatalEnabled()) {
-                    callback = fatalCb;
-                }
-                break;
-            case ERROR:
-                if (loggable.getLog().isErrorEnabled()) {
-                    callback = errorCb;
-                }
-                break;
-            case WARNING:
-                if (loggable.getLog().isWarnEnabled()) {
-                    callback = warnCb;
-                }
-                break;
-            case INFO:
-                if (loggable.getLog().isInfoEnabled()) {
-                    callback = infoCb;
-                }
-                break;
-            case DEBUG:
-                if (loggable.getLog().isDebugEnabled()) {
-                    callback = debugCb;
-                }
-                break;
-            case TRACE:
-                if (loggable.getLog().isTraceEnabled()) {
-                    callback = traceCb;
-                }
-                break;
-            default:
-                // No-op
-            }
-        }
-
-        // Invoke method if a callback has been initialized
-        if (null != callback) {
-            invokeCallback(loggable, callback);
-        }
-    }
-
     private static final Pattern CRLF = Pattern.compile("\r?\n");
 
     private void invokeCallback(final Loggable loggable, final LogCallback callback) {
@@ -321,7 +225,7 @@ final class LoggerTask extends AbstractTask<Object> {
             if (null == message) {
                 msg = "null";
             } else {
-                msg = message.toString();
+                msg = toString(message, loggable);
                 if (msg.startsWith(PREFIX)) {
                     callback.log(msg, loggable.getThrowable(), loggable.getLog());
                     return;
@@ -337,30 +241,7 @@ final class LoggerTask extends AbstractTask<Object> {
         }
         // Stack trace available: <stack-trace> + <LF> + <message>
         final StringBuilder sb = new StringBuilder(1024);
-        for (final StackTraceElement ste : trace) {
-            final String className = ste.getClassName();
-            if (null != className && !className.startsWith("com.openexchange.log") && !className.startsWith("com.openexchange.exception.Log") && className.indexOf("LoggingLogic", 16) < 0) {
-                sb.append(PREFIX).append(className).append('.').append(ste.getMethodName());
-                if (ste.isNativeMethod()) {
-                    sb.append("(Native Method)");
-                } else {
-                    final String fileName = ste.getFileName();
-                    if (null == fileName) {
-                        sb.append("(Unknown Source)");
-                    } else {
-                        final int lineNumber = ste.getLineNumber();
-                        sb.append('(').append(fileName);
-                        if (lineNumber >= 0) {
-                            sb.append(':').append(lineNumber);
-                        }
-                        sb.append(')');
-                    }
-                }
-                // sb.append(" (").append(loggable.getLog().getClass().getSimpleName()).append(')');
-                sb.append(lineSeparator).append(' ');
-                break;
-            }
-        }
+        appendLogLocation(trace, sb);
         sb.append(msg);
         // Finally, invoke callback with appropriate message chunks
         final int maxMessageLength = this.maxMessageLength;
@@ -397,9 +278,55 @@ final class LoggerTask extends AbstractTask<Object> {
         }
     }
 
-    private static interface LogCallback {
-
-        void log(Object message, Throwable t, Log log);
+    private void appendLogLocation(final StackTraceElement[] trace, final StringBuilder sb) {
+        boolean found = false;
+        for (int i = 0; !found && i < trace.length; i++) {
+            final StackTraceElement ste = trace[i];
+            final String className = ste.getClassName();
+            if (null != className && !className.startsWith("com.openexchange.log") && !className.startsWith("com.openexchange.exception.Log") && className.indexOf("LoggingLogic", 16) < 0) {
+                sb.append(PREFIX).append(className).append('.').append(ste.getMethodName());
+                if (ste.isNativeMethod()) {
+                    sb.append("(Native Method)");
+                } else {
+                    final String fileName = ste.getFileName();
+                    if (null == fileName) {
+                        sb.append("(Unknown Source)");
+                    } else {
+                        final int lineNumber = ste.getLineNumber();
+                        sb.append('(').append(fileName);
+                        if (lineNumber >= 0) {
+                            sb.append(':').append(lineNumber);
+                        }
+                        sb.append(')');
+                    }
+                }
+                // sb.append(" (").append(loggable.getLog().getClass().getSimpleName()).append(')');
+                sb.append(lineSeparator).append(' ');
+                found = true;
+            }
+        }
     }
 
+    /**
+     * Gets the message's string representation
+     *
+     * @param message The loggable's message
+     * @param loggable The associated loggable
+     * @return The message's string representation
+     * @throws IllegalArgumentException If {@link Object#toString()} fails
+     */
+    private String toString(final Object message, final Loggable loggable) {
+        try {
+            return message.toString();
+        } catch (final Exception e) {
+            // Bad message object
+            final StringBuilder sb = new StringBuilder(256);
+            sb.append("Bad message object.").append(lineSeparator);
+            final StackTraceElement[] trace = loggable.getCallerTrace();
+            if (null != trace) {
+                appendLogLocation(trace, sb);
+            }
+            throw new IllegalArgumentException(sb.toString(), e);
+        }
+    }
 }

@@ -175,6 +175,7 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         data.setFileMIMEType("text/plain");
         data.setFolderId(infostorePublicationFolder.getObjectID());
         File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        data.setFileName(upload.getName());
 
         infoMgr.newAction(data, upload);
 

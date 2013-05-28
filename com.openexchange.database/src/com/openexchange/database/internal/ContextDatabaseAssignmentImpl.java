@@ -58,7 +58,6 @@ import java.sql.SQLException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -66,6 +65,7 @@ import com.openexchange.database.Assignment;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 
 /**
  * Reads assignments from the database, maybe stores them in a cache for faster access.
@@ -83,9 +83,9 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
 
     private static final String CACHE_NAME = "OXDBPoolCache";
 
-    private CacheService cacheService;
+    private volatile CacheService cacheService;
 
-    private Cache cache;
+    private volatile Cache cache;
 
     /**
      * Lock for the cache.
@@ -102,18 +102,20 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
 
     @Override
     public AssignmentImpl getAssignment(final int contextId) throws OXException {
+        CacheService myCacheService = this.cacheService;
+        Cache myCache = this.cache;
         AssignmentImpl retval;
-        if (null == cache) {
+        if (null == myCache || null == myCacheService) {
             retval = loadAssignment(contextId);
         } else {
-            final CacheKey key = cacheService.newCacheKey(contextId, Server.getServerId());
+            final CacheKey key = myCacheService.newCacheKey(contextId, Server.getServerId());
             cacheLock.lock();
             try {
-                retval = (AssignmentImpl) cache.get(key);
+                retval = (AssignmentImpl) myCache.get(key);
                 if (null == retval) {
                     retval = loadAssignment(contextId);
                     try {
-                        cache.putSafe(key, retval);
+                        myCache.putSafe(key, retval);
                     } catch (final OXException e) {
                         LOG.error("Cannot put database assignment into cache.", e);
                     }
@@ -174,12 +176,14 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
 
     @Override
     public void writeAssignment(Connection con, Assignment assign) throws OXException {
-        if (null != cache) {
-            final CacheKey key = cacheService.newCacheKey(assign.getContextId(), assign.getServerId());
+        CacheService myCacheService = this.cacheService;
+        Cache myCache = this.cache;
+        if (null != myCache && null != myCacheService) {
+            final CacheKey key = myCacheService.newCacheKey(assign.getContextId(), assign.getServerId());
             cacheLock.lock();
             try {
                 try {
-                    cache.putSafe(key, new AssignmentImpl(assign));
+                    myCache.putSafe(key, new AssignmentImpl(assign));
                 } catch (OXException e) {
                     LOG.error("Cannot put database assignment into cache.", e);
                 }
@@ -192,9 +196,10 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
 
     @Override
     public void removeAssignments(final int contextId) {
-        if (null != cache) {
+        Cache myCache = this.cache;
+        if (null != myCache) {
             try {
-                cache.remove(cache.newCacheKey(contextId, Server.getServerId()));
+                myCache.remove(myCache.newCacheKey(contextId, Server.getServerId()));
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
@@ -212,13 +217,14 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
 
     void removeCacheService() {
         this.cacheService = null;
-        if (null != cache) {
+        Cache myCache = this.cache;
+        if (null != myCache) {
             try {
-                cache.clear();
+                myCache.clear();
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
-            cache = null;
+            this.cache = null;
         }
     }
 }

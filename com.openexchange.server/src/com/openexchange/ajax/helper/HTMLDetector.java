@@ -52,7 +52,7 @@ package com.openexchange.ajax.helper;
 
 /**
  * {@link HTMLDetector} - Detects HTML tags in a byte sequence.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HTMLDetector {
@@ -65,8 +65,18 @@ public final class HTMLDetector {
     }
 
     /**
+     * Checks if given String contains common HTML tags.
+     *
+     * @param sequence The String to check
+     * @return <code>true</code> if given String contains common HTML tags; otherwise <code>false</code>
+     */
+    public static boolean containsHTMLTags(final String sequence) {
+        return com.openexchange.java.HTMLDetector.containsHTMLTags(sequence);
+    }
+
+    /**
      * Checks if given byte sequence contains common HTML tags.
-     * 
+     *
      * @param sequence The byte sequence to check
      * @return <code>true</code> if given byte sequence contains common HTML tags; otherwise <code>false</code>
      */
@@ -76,7 +86,7 @@ public final class HTMLDetector {
 
     /**
      * Checks if given byte sequence contains specified HTML tag.
-     * 
+     *
      * @param sequence The byte sequence to check
      * @param tag The HTML tag; e.g. <code>"body"</code>
      * @return <code>true</code> if given byte sequence contains specified HTML tag; otherwise <code>false</code>

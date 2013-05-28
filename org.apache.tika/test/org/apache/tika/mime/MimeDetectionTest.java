@@ -23,9 +23,7 @@ import java.io.InputStream;
 import junit.framework.TestCase;
 
 import org.apache.tika.config.TikaConfig;
-import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
-import org.apache.tika.metadata.TikaMetadataKeys;
 
 public class MimeDetectionTest extends TestCase {
 
@@ -48,6 +46,7 @@ public class MimeDetectionTest extends TestCase {
         testFile("text/html", "test.html");
         testFile("application/xml", "test-iso-8859-1.xml");
         testFile("application/xml", "test-utf8.xml");
+        testFile("application/xml", "test-utf8-bom.xml");
         testFile("application/xml", "test-utf16le.xml");
         testFile("application/xml", "test-utf16be.xml");
         testFile("application/xml", "test-long-comment.xml");
@@ -68,13 +67,13 @@ public class MimeDetectionTest extends TestCase {
 
     public void testByteOrderMark() throws Exception {
         assertEquals(MediaType.TEXT_PLAIN, mimeTypes.detect(
-                new ByteArrayInputStream("\ufffetest".getBytes("UTF-16LE")),
+                new ByteArrayInputStream("\ufefftest".getBytes("UTF-16LE")),
                 new Metadata()));
         assertEquals(MediaType.TEXT_PLAIN, mimeTypes.detect(
-                new ByteArrayInputStream("\ufffetest".getBytes("UTF-16BE")),
+                new ByteArrayInputStream("\ufefftest".getBytes("UTF-16BE")),
                 new Metadata()));
         assertEquals(MediaType.TEXT_PLAIN, mimeTypes.detect(
-                new ByteArrayInputStream("\ufffetest".getBytes("UTF-8")),
+                new ByteArrayInputStream("\ufefftest".getBytes("UTF-8")),
                 new Metadata()));
     }
 
@@ -133,7 +132,7 @@ public class MimeDetectionTest extends TestCase {
             assertEquals(urlOrFileName + " is not properly detected: detected.", expected, mime);
 
             //Add resource name and test again
-            metadata.set(TikaMetadataKeys.RESOURCE_NAME_KEY, urlOrFileName);
+            metadata.set(Metadata.RESOURCE_NAME_KEY, urlOrFileName);
             mime = this.mimeTypes.detect(in, metadata).toString();
             assertEquals(urlOrFileName + " is not properly detected after adding resource name.", expected, mime);
         } finally {
@@ -151,12 +150,12 @@ public class MimeDetectionTest extends TestCase {
                 new ByteArrayInputStream(new byte[0]), new Metadata()));
 
         Metadata namehint = new Metadata();
-        namehint.set(TikaMetadataKeys.RESOURCE_NAME_KEY, "test.txt");
+        namehint.set(Metadata.RESOURCE_NAME_KEY, "test.txt");
         assertEquals(MediaType.TEXT_PLAIN, mimeTypes.detect(
                 new ByteArrayInputStream(new byte[0]), namehint));
 
         Metadata typehint = new Metadata();
-        typehint.set(HttpHeaders.CONTENT_TYPE, "text/plain");
+        typehint.set(Metadata.CONTENT_TYPE, "text/plain");
         assertEquals(MediaType.TEXT_PLAIN, mimeTypes.detect(
                 new ByteArrayInputStream(new byte[0]), typehint));
 

@@ -49,12 +49,14 @@
 
 package com.openexchange.groupware.notify.hostname.internal;
 
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
 import com.openexchange.systemname.SystemNameService;
+import com.openexchange.version.Version;
 
 /**
  * Adds the host data to every session.
@@ -63,11 +65,13 @@ import com.openexchange.systemname.SystemNameService;
  */
 public final class HostDataLoginHandler implements BlockingLoginHandlerService {
 
-    private HostnameService hostnameService;
-    private SystemNameService systemNameService;
+    private final AtomicReference<HostnameService> hostnameService;
+    private final AtomicReference<SystemNameService> systemNameService;
 
     public HostDataLoginHandler() {
         super();
+        hostnameService = new AtomicReference<HostnameService>();
+        systemNameService = new AtomicReference<SystemNameService>();
     }
 
     @Override
@@ -84,6 +88,7 @@ public final class HostDataLoginHandler implements BlockingLoginHandlerService {
 
     private String determineHost(LoginRequest request, int contextId, int userId) {
         String host = request.getServerName();
+        final HostnameService hostnameService = this.hostnameService.get();
         if (null != hostnameService) {
             String tmp = hostnameService.getHostname(userId, contextId);
             if (null != tmp) {
@@ -96,12 +101,14 @@ public final class HostDataLoginHandler implements BlockingLoginHandlerService {
     private String determineHttpSessionId(String httpSessionId) {
         final String retval;
         if (null == httpSessionId) {
-            retval = "0123456789." + systemNameService.getSystemName();
+            final SystemNameService systemNameService = this.systemNameService.get();
+            retval = "0123456789." + (null == systemNameService ? Version.NAME : systemNameService.getSystemName());
         } else {
             if (httpSessionId.indexOf('.') > 0) {
                 retval = httpSessionId;
             } else {
-                retval = httpSessionId + '.' + systemNameService.getSystemName();
+                final SystemNameService systemNameService = this.systemNameService.get();
+                retval = httpSessionId + '.' + (null == systemNameService ? Version.NAME : systemNameService.getSystemName());
             }
         }
         return retval;
@@ -113,10 +120,10 @@ public final class HostDataLoginHandler implements BlockingLoginHandlerService {
     }
 
     public void setHostnameService(HostnameService hostnameService) {
-        this.hostnameService = hostnameService;
+        this.hostnameService.set(hostnameService);
     }
 
     public void setSystemNameService(SystemNameService systemNameService) {
-        this.systemNameService = systemNameService;
+        this.systemNameService.set(systemNameService);
     }
 }

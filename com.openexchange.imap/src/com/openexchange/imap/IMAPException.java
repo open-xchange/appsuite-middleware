@@ -51,19 +51,32 @@ package com.openexchange.imap;
 
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import javax.mail.Folder;
+import javax.mail.MessagingException;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.imap.cache.FolderCache;
 import com.openexchange.imap.cache.ListLsubCache;
+import com.openexchange.imap.cache.RightsCache;
+import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.services.Services;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
+import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.push.PushEventConstants;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
@@ -1110,6 +1123,109 @@ public final class IMAPException extends OXException {
     public static String getFormattedMessage(final Code code, final Object... msgArgs) {
         final IMAPCode imapCode = code.getImapCode();
         return String.format(imapCode.getMessage(), msgArgs);
+    }
+
+    /**
+     * Handles given instance of {@link MessagingException} derived from IMAP communication and creates an appropriate instance of
+     * {@link OXException}
+     *
+     * @param e The messaging exception
+     * @param mailConfig The corresponding mail configuration used to add information like mail server etc.
+     * @param session The session providing user information
+     * @param accountId The account identifier or <code>-1</code> if unknown
+     * @param optProps The optional properties
+     * @return An appropriate instance of {@link OXException}
+     */
+    public static OXException handleMessagingException(final MessagingException e, final MailConfig mailConfig, final Session session, final int accountId, final Map<String, Object> optProps) {
+        return handleMessagingException(e, mailConfig, session, null, accountId, optProps);
+    }
+
+    /**
+     * Handles given instance of {@link MessagingException} derived from IMAP communication and creates an appropriate instance of
+     * {@link OXException}
+     *
+     * @param e The messaging exception
+     * @param mailConfig The corresponding mail configuration used to add information like mail server etc.
+     * @param session The session providing user information
+     * @param folder The optional folder
+     * @param accountId The account identifier or <code>-1</code> if unknown
+     * @param optProps The optional properties
+     * @return An appropriate instance of {@link OXException}
+     */
+    public static OXException handleMessagingException(final MessagingException e, final MailConfig mailConfig, final Session session, final Folder folder, final int accountId, final Map<String, Object> optProps) {
+        if (null == session) {
+            // Delegate to MIME handling
+            return MimeMailException.handleMessagingException(e, mailConfig, session, folder);
+        }
+        final String message = toLowerCase(e.getMessage());
+        if (null != message) {
+            // Check for absent folder
+            if (message.indexOf("not found") >= 0 || (message.indexOf("mailbox") >= 0 && (message.indexOf("doesn't exist") >= 0 || message.indexOf("does not exist") >= 0))) {
+                // Folder not found
+                String fullName = getProperty("fullName", optProps);
+                if (null == fullName) {
+                    fullName = null == folder ? null : folder.getFullName();
+                }
+                if (null == fullName) {
+                    FolderCache.removeCachedFolders(session, accountId);
+                    ListLsubCache.clearCache(accountId, session);
+                    return MailExceptionCode.FOLDER_NOT_FOUND_SIMPLE.create(e, new Object[0]);
+                }
+                FolderCache.removeCachedFolder(fullName, session, accountId);
+                ListLsubCache.removeCachedEntry(fullName, accountId, session);
+                RightsCache.removeCachedRights(fullName, session, accountId);
+                UserFlagsCache.removeUserFlags(fullName, session, accountId);
+                final EventAdmin eventAdmin = Services.getService(EventAdmin.class);
+                if (null != eventAdmin) {
+                    final Map<String, Object> ep = new LinkedHashMap<String, Object>(6);
+                    ep.put(PushEventConstants.PROPERTY_CONTENT_RELATED, Boolean.FALSE);
+                    ep.put(PushEventConstants.PROPERTY_FOLDER, MailFolderUtility.prepareFullname(accountId, fullName));
+                    ep.put(PushEventConstants.PROPERTY_CONTEXT, Integer.valueOf(session.getContextId()));
+                    ep.put(PushEventConstants.PROPERTY_USER, Integer.valueOf(session.getUserId()));
+                    ep.put(PushEventConstants.PROPERTY_SESSION, session);
+                    eventAdmin.postEvent(new Event(PushEventConstants.TOPIC, ep));
+                }
+                return MailExceptionCode.FOLDER_NOT_FOUND.create(e, fullName);
+            }
+        }
+        // Delegate to MIME handling
+        return MimeMailException.handleMessagingException(e, mailConfig, session, folder);
+    }
+
+    private static <V> V getProperty(final String name, final Map<String, Object> props) {
+        if (isEmpty(name) || null == props) {
+            return null;
+        }
+        try {
+            return (V) props.get(name);
+        } catch (final ClassCastException e) {
+            return null;
+        }
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
     private IMAPException() {

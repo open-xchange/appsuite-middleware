@@ -62,7 +62,9 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.session.Session;
 
 /**
  * {@link LogProperties} - Provides thread-local log properties.
@@ -312,8 +314,10 @@ public final class LogProperties {
      */
     public static void configuredProperties(final Collection<LogPropertyName> propertyNames) {
         PROPERTY_NAMES.clear();
+        ENABLED.set(false);
         if (null != propertyNames && !propertyNames.isEmpty()) {
             PROPERTY_NAMES.addAll(new TreeSet<LogPropertyName>(propertyNames));
+            ENABLED.set(true);
         }
     }
 
@@ -326,13 +330,15 @@ public final class LogProperties {
         return PROPERTY_NAMES;
     }
 
+    private static final AtomicBoolean ENABLED = new AtomicBoolean(false);
+
     /**
      * Checks if thread-local log properties are enabled.
      *
      * @return <code>true</code> if thread-local log properties are enabled; otherwise <code>false</code>
      */
     public static boolean isEnabled() {
-        return !PROPERTY_NAMES.isEmpty();
+        return ENABLED.get();
     }
 
     /**
@@ -347,11 +353,7 @@ public final class LogProperties {
      * @see #isEnabled()
      */
     public static Props optLogProperties() {
-        Props props = THREAD_LOCAL.get(Thread.currentThread());
-        if (props == null) {
-        	return null;
-        }
-        return props;
+        return optLogProperties(Thread.currentThread());
     }
 
     /**
@@ -365,7 +367,7 @@ public final class LogProperties {
         if (null == thread) {
             return null;
         }
-        Props props = THREAD_LOCAL.get(thread);
+        final Props props = THREAD_LOCAL.get(thread);
         if (props == null) {
             return null;
         }
@@ -376,7 +378,16 @@ public final class LogProperties {
      * Removes the log properties for calling thread.
      */
     public static void removeLogProperties() {
-        THREAD_LOCAL.remove(Thread.currentThread());
+        removeLogProperties(Thread.currentThread());
+    }
+
+    /**
+     * Removes the log properties for specified thread.
+     *
+     * @param thread The thread
+     */
+    public static void removeLogProperties(final Thread thread) {
+        THREAD_LOCAL.remove(thread);
     }
 
     /**
@@ -386,7 +397,20 @@ public final class LogProperties {
      * @see #isEnabled()
      */
     public static Props getLogProperties() {
-        final Thread thread = Thread.currentThread();
+        return getLogProperties(Thread.currentThread());
+    }
+
+    /**
+     * Gets the log properties for given thread.
+     *
+     * @param thread The thread
+     * @return The log properties
+     * @see #isEnabled()
+     */
+    public static Props getLogProperties(final Thread thread) {
+        if (null == thread) {
+            return null;
+        }
         Props props = THREAD_LOCAL.get(thread);
         if (null == props) {
             final Props newprops = new Props();
@@ -422,6 +446,38 @@ public final class LogProperties {
             return;
         }
         THREAD_LOCAL.put(other, new Props(props));
+    }
+
+    /**
+     * Puts session properties.
+     *
+     * @param session The session
+     */
+    public static void putSessionProperties(final Session session) {
+        if (null == session) {
+            return;
+        }
+        final Props props = LogProperties.getLogProperties();
+        props.put(LogProperties.Name.SESSION_SESSION_ID, session.getSessionID());
+        props.put(LogProperties.Name.SESSION_USER_ID, ForceLog.valueOf(Integer.valueOf(session.getUserId())));
+        props.put(LogProperties.Name.SESSION_CONTEXT_ID, ForceLog.valueOf(Integer.valueOf(session.getContextId())));
+        final String client  = session.getClient();
+        props.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : ForceLog.valueOf(client));
+        props.put(LogProperties.Name.SESSION_SESSION, session);
+    }
+
+    /**
+     * Removes session properties.
+     */
+    public static void removeSessionProperties() {
+        final Props props = LogProperties.optLogProperties();
+        if (null != props) {
+            props.remove(LogProperties.Name.SESSION_SESSION_ID);
+            props.remove(LogProperties.Name.SESSION_USER_ID);
+            props.remove(LogProperties.Name.SESSION_CONTEXT_ID);
+            props.remove(LogProperties.Name.SESSION_CLIENT_ID);
+            props.remove(LogProperties.Name.SESSION_SESSION);
+        }
     }
 
     /**
@@ -511,13 +567,14 @@ public final class LogProperties {
      */
     public static String getAndPrettyPrint(final Collection<LogProperties.Name> nonMatching) {
         String logString = "";
-        final Props logProperties = getLogProperties();
+        final Props logProperties = optLogProperties();
         // If we have additional log properties from the ThreadLocal add it to the logBuilder
         if (logProperties != null) {
             final StringAllocator logBuilder = new StringAllocator(1024);
             final Map<LogProperties.Name, Object> propertyMap = logProperties.getMap();
             // Sort the properties for readability
             final Map<String, String> sorted = new TreeMap<String, String>();
+            final String sep = System.getProperty("line.separator");
             for (final Entry<LogProperties.Name, Object> propertyEntry : propertyMap.entrySet()) {
                 final LogProperties.Name propertyName = propertyEntry.getKey();
                 if (null == nonMatching || !nonMatching.contains(propertyName)) {
@@ -529,9 +586,9 @@ public final class LogProperties {
             }
             // And add them to the logBuilder
             for (final Map.Entry<String, String> propertyEntry : sorted.entrySet()) {
-                logBuilder.append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue()).append('\n');
+                logBuilder.append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue()).append(sep);
             }
-            logString=logBuilder.toString();
+            logString = logBuilder.toString();
         }
         return logString;
     }

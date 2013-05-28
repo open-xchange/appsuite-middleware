@@ -979,8 +979,14 @@ public class JSONArray extends AbstractJSONValue {
         JsonParser jParser = null;
         try {
             jParser = createParser(reader);
-            if (jParser.nextToken() != JsonToken.START_ARRAY) {
-                throw new JSONException("A JSONArray text must begin with '['");
+            // Check start
+            {
+                final JsonToken token = jParser.nextToken();
+                if (token != JsonToken.START_ARRAY) {
+                    final String content = readFrom(reader, 0x2000);
+                    final String sep = System.getProperty("line.separator");
+                    throw new JSONException("A JSONArray text must begin with '[', but got \"" + (null == token ? "null" : token.toString()) + "\" parse event." + sep + "Rest:" + sep + content);
+                }
             }
             return parse(jParser, optArray);
         } catch (final IOException e) {

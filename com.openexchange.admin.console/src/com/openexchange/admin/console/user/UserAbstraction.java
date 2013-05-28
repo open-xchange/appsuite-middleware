@@ -1858,11 +1858,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected void setQuotaModule(final AdminParser parser) {
-        this.quotaModule = setLongOpt(parser,OPT_QUOTA_MODULE,"The identifier of the module to which to apply the quota value; currently supported values: [task, calendar, contact, infostore]", true, false,false);
+        this.quotaModule = setLongOpt(parser,OPT_QUOTA_MODULE,"The (comma-separated) list of identifiers for those modules to which to apply the quota value; currently supported values: [task, calendar, contact, infostore]", true, false,false);
     }
 
     protected void setQuotaValue(final AdminParser parser) {
-        this.quotaValue = setLongOpt(parser,OPT_QUOTA_VALUE,"The quota value; zero is unlimited", true, false,false);
+        this.quotaValue = setLongOpt(parser,OPT_QUOTA_VALUE,"The numeric quota value specifying the max. number of items allowed for context; zero is unlimited", true, false,false);
     }
 
     protected final void setAliasesOption(final AdminParser admp){

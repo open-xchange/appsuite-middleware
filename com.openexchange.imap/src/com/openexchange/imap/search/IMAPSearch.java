@@ -68,7 +68,7 @@ import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.command.MessageFetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.config.MailProperties;
@@ -176,7 +176,7 @@ public final class IMAPSearch {
             synchronized (IMAPSearch.class) {
                 i = umlautFilterThreshold;
                 if (null == i) {
-                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
                     i = Integer.valueOf(null == service ? 50 : service.getIntProperty("com.openexchange.imap.umlautFilterThreshold", 50));
                     umlautFilterThreshold = i;
                 }

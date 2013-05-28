@@ -60,6 +60,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 
@@ -80,6 +81,17 @@ public final class Collections {
      */
     private Collections() {
         super();
+    }
+    
+    public static <K, V> V opt(ConcurrentHashMap<K, V> map, K key, V defaultValue) {
+        V v = map.get(key);
+        if (v == null) {
+            v = defaultValue;
+            V meantime = map.putIfAbsent(key, v);
+            v = (meantime == null) ? v : meantime;
+        }
+        
+        return v;
     }
 
     /**

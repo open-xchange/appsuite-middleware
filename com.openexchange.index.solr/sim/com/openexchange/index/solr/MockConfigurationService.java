@@ -50,12 +50,15 @@
 package com.openexchange.index.solr;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
+import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.PropertyListener;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -68,6 +71,11 @@ public class MockConfigurationService implements ConfigurationService {
     @Override
     public String getProperty(final String name) {
         return "IAmAString";
+    }
+
+    @Override
+    public Map<String, String> getProperties(final PropertyFilter filter) throws OXException {
+        return Collections.emptyMap();
     }
 
     @Override
@@ -95,13 +103,13 @@ public class MockConfigurationService implements ConfigurationService {
     }
 
     @Override
-    public File getDirectory(String directoryName) {
+    public File getDirectory(final String directoryName) {
         // Nothing to do
         return null;
     }
 
     @Override
-    public File getFileByName(String fileName) {
+    public File getFileByName(final String fileName) {
         // Nothing to do
         return null;
     }
@@ -163,7 +171,7 @@ public class MockConfigurationService implements ConfigurationService {
      * @see com.openexchange.config.ConfigurationService#getFilterFromProperty(java.lang.String)
      */
     @Override
-    public Filter getFilterFromProperty(String name) {
+    public Filter getFilterFromProperty(final String name) {
         // Nothing to do
         return null;
     }

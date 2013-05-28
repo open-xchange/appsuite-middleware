@@ -933,7 +933,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     /*
                      * ... and write bytes
                      */
-                    final byte[] bytes = e.getData().getBytes("UTF-8");
+                    final byte[] bytes = e.getData().getBytes(Charsets.UTF_8);
                     final ByteChunk byteChunk = new ByteChunk(packetSize);
                     byteChunk.append(bytes, 0, bytes.length);
                     outputBuffer.doWrite(byteChunk);
@@ -2233,6 +2233,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         request.recycle();
         response.recycle();
         certificates.recycle();
+        LogProperties.removeLogProperties();
     }
 
     // ------------------------------------- InputStreamInputBuffer Inner Class

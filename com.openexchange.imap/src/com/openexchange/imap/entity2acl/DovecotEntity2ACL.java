@@ -55,7 +55,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -171,13 +171,13 @@ public class DovecotEntity2ACL extends Entity2ACL {
     }
 
     private static final String getACLNameInternal(final int userId, final Context ctx, final int accountId, final InetSocketAddress imapAddr) throws OXException {
-        final MailAccountStorageService storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
+        final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
         if (null == storageService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( MailAccountStorageService.class.getName());
         }
         final String userLoginInfo;
         {
-            final UserService userService = IMAPServiceRegistry.getService(UserService.class, true);
+            final UserService userService = Services.getService(UserService.class);
             if (null == userService) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( UserService.class.getName());
             }

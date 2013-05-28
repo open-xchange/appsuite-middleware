@@ -463,7 +463,7 @@ public final class Response {
 
     /**
      * Gets this response object's warnings
-     * 
+     *
      * @return The warnings as an unmodifiable list
      */
     public List<OXException> getWarnings() {

@@ -119,7 +119,7 @@ public final class ConfirmAction extends AppointmentAction {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( AJAXServlet.PARAMETER_TYPE, jData.get(AJAXServlet.PARAMETER_TYPE));
         }
 
-        return new AJAXRequestResult(new JSONObject(), timestamp, "json");
+        return new AJAXRequestResult(new JSONObject(0), timestamp, "json");
     }
 
 }

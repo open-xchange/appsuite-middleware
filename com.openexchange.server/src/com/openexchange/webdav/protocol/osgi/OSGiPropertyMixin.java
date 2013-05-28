@@ -52,8 +52,8 @@ package com.openexchange.webdav.protocol.osgi;
 import java.util.ArrayList;
 import java.util.List;
 import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
@@ -66,19 +66,17 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixinFactory;
  */
 public class OSGiPropertyMixin implements PropertyMixin {
 
-    private ServiceTracker mixinTracker = null;
-
-    private final ServiceTracker factoryTracker;
-
+    private final NearRegistryServiceTracker<PropertyMixin> mixinTracker;
+    private final NearRegistryServiceTracker<PropertyMixinFactory> factoryTracker;
     private final SessionHolder sessionHolder;
 
     public OSGiPropertyMixin(BundleContext context, SessionHolder sessionHolder) {
         this.sessionHolder = sessionHolder;
 
-        this.mixinTracker = new ServiceTracker(context, PropertyMixin.class.getName(), null);
+        this.mixinTracker = new NearRegistryServiceTracker<PropertyMixin>(context, PropertyMixin.class);
         mixinTracker.open();
 
-        this.factoryTracker = new ServiceTracker(context, PropertyMixinFactory.class.getName(), null);
+        this.factoryTracker = new NearRegistryServiceTracker<PropertyMixinFactory>(context, PropertyMixinFactory.class);
         factoryTracker.open();
     }
 
@@ -89,19 +87,18 @@ public class OSGiPropertyMixin implements PropertyMixin {
 
     @Override
     public List<WebdavProperty> getAllProperties() throws OXException {
-        Object[] mixins = mixinTracker.getServices();
         List<WebdavProperty> allProperties = new ArrayList<WebdavProperty>();
-        if (mixins != null) {
-            for (Object object : mixins) {
-                PropertyMixin mixin = (PropertyMixin) object;
+
+        List<PropertyMixin> mixins = mixinTracker.getServiceList();
+        if (mixins != null && !mixins.isEmpty()) {
+            for (PropertyMixin mixin : mixins) {
                 allProperties.addAll(mixin.getAllProperties());
             }
         }
 
-        Object[] factories = factoryTracker.getServices();
-        if (factories != null) {
-            for (Object object : factories) {
-                PropertyMixinFactory factory = (PropertyMixinFactory) object;
+        List<PropertyMixinFactory> factories = factoryTracker.getServiceList();
+        if (factories != null && !factories.isEmpty()) {
+            for (PropertyMixinFactory factory : factories) {
                 PropertyMixin mixin = factory.create(sessionHolder);
                 allProperties.addAll(mixin.getAllProperties());
             }
@@ -112,10 +109,9 @@ public class OSGiPropertyMixin implements PropertyMixin {
 
     @Override
     public WebdavProperty getProperty(String namespace, String name) throws OXException {
-        Object[] mixins = mixinTracker.getServices();
-        if (mixins != null) {
-            for (Object object : mixins) {
-                PropertyMixin mixin = (PropertyMixin) object;
+        List<PropertyMixin> mixins = mixinTracker.getServiceList();
+        if (mixins != null && !mixins.isEmpty()) {
+            for (PropertyMixin mixin : mixins) {
                 WebdavProperty property = mixin.getProperty(namespace, name);
                 if (property != null) {
                     return property;
@@ -123,10 +119,9 @@ public class OSGiPropertyMixin implements PropertyMixin {
             }
         }
 
-        Object[] factories = factoryTracker.getServices();
-        if (factories != null) {
-            for (Object object : factories) {
-                PropertyMixinFactory factory = (PropertyMixinFactory) object;
+        List<PropertyMixinFactory> factories = factoryTracker.getServiceList();
+        if (factories != null && !factories.isEmpty()) {
+            for (PropertyMixinFactory factory : factories) {
                 PropertyMixin mixin = factory.create(sessionHolder);
                 WebdavProperty property = mixin.getProperty(namespace, name);
                 if (property != null) {

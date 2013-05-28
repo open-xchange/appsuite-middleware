@@ -20,10 +20,8 @@ import java.io.InputStream;
 
 import junit.framework.TestCase;
 
-import org.apache.tika.metadata.DublinCore;
-import org.apache.tika.metadata.HttpHeaders;
-import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.ContentHandler;
 
@@ -57,6 +55,29 @@ public class DWGParserTest extends TestCase {
                 "/test-documents/testDWG2010.dwg");
         testParser(input);
     }
+    
+    public void testDWG2010CustomPropertiesParser() throws Exception {
+        // Check that standard parsing works
+        InputStream input = DWGParserTest.class.getResourceAsStream(
+                "/test-documents/testDWG2010_custom_props.dwg");
+        testParser(input);
+        
+        // Check that custom properties with alternate padding work
+        input = DWGParserTest.class.getResourceAsStream(
+                "/test-documents/testDWG2010_custom_props.dwg");
+        try {
+            Metadata metadata = new Metadata();
+            ContentHandler handler = new BodyContentHandler();
+            new DWGParser().parse(input, handler, metadata, null);
+            
+            assertEquals("valueforcustomprop1",
+                    metadata.get("customprop1"));
+            assertEquals("valueforcustomprop2",
+                    metadata.get("customprop2"));
+        } finally {
+            input.close();
+        }
+    }
 
     public void testDWGMechParser() throws Exception {
         String[] types = new String[] {
@@ -76,20 +97,28 @@ public class DWGParserTest extends TestCase {
             ContentHandler handler = new BodyContentHandler();
             new DWGParser().parse(input, handler, metadata);
 
-            assertEquals("image/vnd.dwg", metadata.get(HttpHeaders.CONTENT_TYPE));
+            assertEquals("image/vnd.dwg", metadata.get(Metadata.CONTENT_TYPE));
 
             assertEquals("The quick brown fox jumps over the lazy dog", 
-                    metadata.get(DublinCore.TITLE));
+                    metadata.get(TikaCoreProperties.TITLE));
             assertEquals("Gym class featuring a brown fox and lazy dog",
-                    metadata.get(DublinCore.SUBJECT));
+                    metadata.get(TikaCoreProperties.DESCRIPTION));
+            assertEquals("Gym class featuring a brown fox and lazy dog",
+                    metadata.get(Metadata.SUBJECT));
             assertEquals("Nevin Nollop",
-                    metadata.get(MSOffice.AUTHOR));
+                    metadata.get(TikaCoreProperties.CREATOR));
             assertEquals("Pangram, fox, dog",
-                    metadata.get(MSOffice.KEYWORDS));
+                    metadata.get(TikaCoreProperties.KEYWORDS));
             assertEquals("Lorem ipsum",
-                    metadata.get(MSOffice.COMMENTS).substring(0,11));
+                    metadata.get(TikaCoreProperties.COMMENTS).substring(0,11));
             assertEquals("http://www.alfresco.com",
-                    metadata.get(DublinCore.RELATION));
+                    metadata.get(TikaCoreProperties.RELATION));
+            
+            // Check some of the old style metadata too
+            assertEquals("The quick brown fox jumps over the lazy dog", 
+                  metadata.get(Metadata.TITLE));
+            assertEquals("Gym class featuring a brown fox and lazy dog",
+                  metadata.get(Metadata.SUBJECT));
 
             String content = handler.toString();
             assertTrue(content.contains("The quick brown fox jumps over the lazy dog"));
@@ -106,14 +135,15 @@ public class DWGParserTest extends TestCase {
             ContentHandler handler = new BodyContentHandler();
             new DWGParser().parse(input, handler, metadata);
 
-            assertEquals("image/vnd.dwg", metadata.get(HttpHeaders.CONTENT_TYPE));
+            assertEquals("image/vnd.dwg", metadata.get(Metadata.CONTENT_TYPE));
             
-            assertNull(metadata.get(DublinCore.TITLE));
-            assertNull(metadata.get(DublinCore.SUBJECT));
-            assertNull(metadata.get(MSOffice.AUTHOR));
-            assertNull(metadata.get(MSOffice.KEYWORDS));
-            assertNull(metadata.get(MSOffice.COMMENTS));
-            assertNull(metadata.get(DublinCore.RELATION));
+            assertNull(metadata.get(TikaCoreProperties.TITLE));
+            assertNull(metadata.get(TikaCoreProperties.DESCRIPTION));
+            assertNull(metadata.get(Metadata.SUBJECT));
+            assertNull(metadata.get(TikaCoreProperties.CREATOR));
+            assertNull(metadata.get(TikaCoreProperties.KEYWORDS));
+            assertNull(metadata.get(TikaCoreProperties.COMMENTS));
+            assertNull(metadata.get(TikaCoreProperties.RELATION));
 
             String content = handler.toString();
             assertTrue(content.contains(""));
@@ -128,22 +158,26 @@ public class DWGParserTest extends TestCase {
             ContentHandler handler = new BodyContentHandler();
             new DWGParser().parse(input, handler, metadata);
 
-            assertEquals("image/vnd.dwg", metadata.get(HttpHeaders.CONTENT_TYPE));
+            assertEquals("image/vnd.dwg", metadata.get(Metadata.CONTENT_TYPE));
 
             assertEquals("Test Title", 
-                    metadata.get(DublinCore.TITLE));
+                    metadata.get(TikaCoreProperties.TITLE));
             assertEquals("Test Subject",
-                    metadata.get(DublinCore.SUBJECT));
+                    metadata.get(TikaCoreProperties.DESCRIPTION));
+            assertEquals("Test Subject",
+                    metadata.get(Metadata.SUBJECT));
             assertEquals("My Author",
-                    metadata.get(MSOffice.AUTHOR));
+                    metadata.get(TikaCoreProperties.CREATOR));
             assertEquals("My keyword1, MyKeyword2",
-                    metadata.get(MSOffice.KEYWORDS));
+                    metadata.get(TikaCoreProperties.KEYWORDS));
             assertEquals("This is a comment",
-                    metadata.get(MSOffice.COMMENTS));
+                    metadata.get(TikaCoreProperties.COMMENTS));
             assertEquals("bejanpol",
-                    metadata.get(MSOffice.LAST_AUTHOR));
+                    metadata.get(TikaCoreProperties.MODIFIER));
+            assertEquals("bejanpol",
+                    metadata.get(Metadata.LAST_AUTHOR));
             assertEquals("http://mycompany/drawings",
-                    metadata.get(DublinCore.RELATION));
+                    metadata.get(TikaCoreProperties.RELATION));
             assertEquals("MyCustomPropertyValue",
                   metadata.get("MyCustomProperty"));
 

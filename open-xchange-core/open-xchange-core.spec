@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -216,10 +216,33 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
 fi
 
 # SoftwareChange_Request-1458
-# -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/mail.properties
 if ! ox_exists_property com.openexchange.mail.maxMailSize $pfile; then
     ox_set_property com.openexchange.mail.maxMailSize -1 $pfile
+fi
+
+# SoftwareChange_Request-1455
+pfile=/opt/open-xchange/etc/sessiond.properties
+if ! ox_exists_property com.openexchange.sessiond.asyncPutToSessionStorage $pfile; then
+    ox_set_property com.openexchange.sessiond.asyncPutToSessionStorage false $pfile
+fi
+
+# SoftwareChange_Request-1448
+ox_set_property com.openexchange.push.udp.pushEnabled false /opt/open-xchange/etc/push-udp.properties
+ox_set_property com.openexchange.push.udp.registerDistributionEnabled false /opt/open-xchange/etc/push-udp.properties
+ox_set_property com.openexchange.push.udp.eventDistributionEnabled false /opt/open-xchange/etc/push-udp.properties
+ox_set_property com.openexchange.push.udp.multicastEnabled false /opt/open-xchange/etc/push-udp.properties
+
+# SoftwareChange_Request-1445
+pfile=/opt/open-xchange/etc/hazelcast.properties
+if ! ox_exists_property com.openexchange.hazelcast.maxOperationTimeout $pfile; then
+    ox_set_property com.openexchange.hazelcast.maxOperationTimeout 300000 $pfile
+fi
+
+# SoftwareChange_Request-1426
+pfile=/opt/open-xchange/etc/server.properties
+if ! ox_exists_property com.openexchange.log.maxMessageLength $pfile; then
+    ox_set_property com.openexchange.log.maxMessageLength -1 $pfile
 fi
 
 # SoftwareChange_Request-1358
@@ -367,6 +390,7 @@ fi
 # SoftwareChange_Request-1237
 # SoftwareChange_Request-1243
 # SoftwareChange_Request-1245
+# SoftwareChange_Request-1392
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/ox-scriptconf.sh
 jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
@@ -379,9 +403,14 @@ if [ $permval -lt 256 ]; then
 fi
 # -----------------------------------------------------------------------
 for opt in "-XX:+DisableExplicitGC" "-server" "-Djava.awt.headless=true" \
-        "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=75" \
-        "-XX:+UseCMSInitiatingOccupancyOnly"; do
+    "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=" \
+    "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB"; do
     if ! echo $nopts | grep -- $opt > /dev/null; then
+        if [ "$opt" = "-XX:CMSInitiatingOccupancyFraction=" ]; then
+            opt="-XX:CMSInitiatingOccupancyFraction=75"
+        elif [ "$opt" = "-XX:NewRatio=" ]; then
+            opt="-XX:NewRatio=3"
+        fi
         nopts="$nopts $opt"
     fi
 done
@@ -424,8 +453,9 @@ EOF
 fi
 
 # SoftwareChange_Request-1214
+# SoftwareChange_Request-1429
 pfile=/opt/open-xchange/etc/file-logging.properties
-for opt in org.apache.cxf.level com.openexchange.soap.cxf.logger.level; do
+for opt in org.apache.cxf.level com.openexchange.soap.cxf.logger.level org.jaudiotagger.level; do
     if ! ox_exists_property $opt $pfile; then
        ox_set_property $opt WARNING $pfile
     fi
@@ -626,10 +656,22 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Thu May 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.2.1 release
 * Wed May 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-05-22
 * Wed May 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.2.1 release
+* Wed May 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-05-10
+* Mon May 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-05-09
+* Mon May 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-05-09
+* Mon May 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-05-09
+* Mon May 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-05-09
 * Mon May 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-05-09
 * Tue May 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -640,10 +682,14 @@ Build for patch 2013-04-23
 Build for patch 2013-04-17
 * Sun Apr 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-25
+* Mon Apr 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.2.1 release
 * Thu Apr 18 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-30
 * Wed Apr 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-09
+* Mon Apr 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.2.1
 * Fri Apr 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-12
 * Wed Apr 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -654,6 +700,12 @@ Third candidate for 7.2.0 release
 Build for patch 2013-04-04
 * Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.2.0 release
+* Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-04
+* Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-04
+* Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-04
 * Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-04
 * Tue Mar 26 2013 Marcus Klein <marcus.klein@open-xchange.com>

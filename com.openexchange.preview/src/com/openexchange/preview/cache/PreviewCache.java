@@ -61,7 +61,7 @@ public interface PreviewCache {
 
     /**
      * Stores given preview document's binary content.
-     * 
+     *
      * @param id The identifier (cache key) for the cached document
      * @param preview The cached preview
      * @param userId The user identifier
@@ -73,7 +73,7 @@ public interface PreviewCache {
 
     /**
      * Stores given preview document's binary content.
-     * 
+     *
      * @param id The identifier (cache key) for the cached document
      * @param in The binary stream
      * @param optName The optional file name
@@ -87,7 +87,7 @@ public interface PreviewCache {
 
     /**
      * Stores given preview document's binary content.
-     * 
+     *
      * @param id The identifier (cache key) for the cached document
      * @param bytes The binary content
      * @param optName The optional file name
@@ -101,7 +101,7 @@ public interface PreviewCache {
 
     /**
      * Gets the caching quota for denoted context.
-     * 
+     *
      * @param contextId The context identifier
      * @return The context quota or <code>-1</code> if unlimited
      */
@@ -109,7 +109,7 @@ public interface PreviewCache {
 
     /**
      * Ensures enough space is available for desired size if context-sensitive caching quota is specified.
-     * 
+     *
      * @param desiredSize The desired size
      * @param total The context-sensitive caching quota
      * @param totalPerDocument The context-sensitive caching quota per document
@@ -122,7 +122,7 @@ public interface PreviewCache {
 
     /**
      * Gets the preview document.
-     * 
+     *
      * @param id The document identifier
      * @param userId The user identifier or <code>-1</code> for context-global document
      * @param contextId The context identifier
@@ -132,8 +132,27 @@ public interface PreviewCache {
     CachedPreview get(String id, int userId, int contextId) throws OXException;
 
     /**
+     * Removes the preview documents associated with specified user.
+     *
+     * @param userId The user identifier or <code>-1</code> for context-global document
+     * @param contextId The context identifier
+     * @throws OXException If deleting document data fails
+     */
+    void remove(int userId, int contextId) throws OXException;
+
+    /**
+     * Removes the preview documents associated with specified user.
+     *
+     * @param id The document identifier prefix
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If deleting document data fails
+     */
+    void removeAlikes(String id, int userId, int contextId) throws OXException;
+
+    /**
      * Tests for existence of denoted preview document.
-     * 
+     *
      * @param id The identifier (cache key) for the cached document
      * @param userId The user identifier or <code>-1</code> for context-global document
      * @param contextId The context identifier

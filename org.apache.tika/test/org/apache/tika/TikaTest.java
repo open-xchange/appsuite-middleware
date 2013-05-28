@@ -18,10 +18,20 @@ package org.apache.tika;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.net.URISyntaxException;
 import java.net.URL;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.sax.SAXTransformerFactory;
+import javax.xml.transform.sax.TransformerHandler;
+import javax.xml.transform.stream.StreamResult;
 
 import junit.framework.TestCase;
+
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.AutoDetectParser;
+import org.apache.tika.parser.ParseContext;
+import org.apache.tika.parser.Parser;
 
 /**
  * Parent class of Tika tests
@@ -31,7 +41,7 @@ public abstract class TikaTest extends TestCase {
     * This method will give you back the filename incl. the absolute path name
     * to the resource. If the resource does not exist it will give you back the
     * resource name incl. the path.
-    *
+    * 
     * @param name
     *            The named resource to search for.
     * @return an absolute path incl. the name which is in the same directory as
@@ -60,8 +70,44 @@ public abstract class TikaTest extends TestCase {
        }
        return stream;
    }
-
+    
     public void assertContains(String needle, String haystack) {
        assertTrue(needle + " not found in:\n" + haystack, haystack.contains(needle));
     }
+
+    protected static class XMLResult {
+        public final String xml;
+        public final Metadata metadata;
+
+        public XMLResult(String xml, Metadata metadata) {
+            this.xml = xml;
+            this.metadata = metadata;
+        }
+    }
+
+    protected XMLResult getXML(String filePath) throws Exception {
+        InputStream input = null;
+        Metadata metadata = new Metadata();
+        Parser parser = new AutoDetectParser();
+        
+        StringWriter sw = new StringWriter();
+        SAXTransformerFactory factory = (SAXTransformerFactory)
+                 SAXTransformerFactory.newInstance();
+        TransformerHandler handler = factory.newTransformerHandler();
+        handler.getTransformer().setOutputProperty(OutputKeys.METHOD, "xml");
+        handler.getTransformer().setOutputProperty(OutputKeys.INDENT, "no");
+        handler.setResult(new StreamResult(sw));
+
+        ParseContext context = new ParseContext();
+        context.set(Parser.class, parser);
+
+        input = getResourceAsStream("/test-documents/" + filePath);
+        try {
+            parser.parse(input, handler, metadata, context);
+            return new XMLResult(sw.toString(), metadata);
+        } finally {
+            input.close();
+        }
+    }
+
 }

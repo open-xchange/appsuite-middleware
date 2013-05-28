@@ -65,10 +65,13 @@ import java.util.regex.Pattern;
 import net.htmlparser.jericho.Renderer;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
+import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
@@ -90,10 +93,9 @@ import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.UnsynchronizedByteArrayInputStream;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
@@ -124,6 +126,7 @@ public final class HtmlServiceImpl implements HtmlService {
     private final Map<Character, String> htmlCharMap;
     private final Map<String, Character> htmlEntityMap;
     private final Tika tika;
+    private final String lineSeparator;
 
     /**
      * Initializes a new {@link HtmlServiceImpl}.
@@ -134,6 +137,7 @@ public final class HtmlServiceImpl implements HtmlService {
      */
     public HtmlServiceImpl(final Map<Character, String> htmlCharMap, final Map<String, Character> htmlEntityMap) {
         super();
+        lineSeparator = System.getProperty("line.separator");
         this.htmlCharMap = htmlCharMap;
         this.htmlEntityMap = htmlEntityMap;
         tika = new Tika();
@@ -474,6 +478,7 @@ public final class HtmlServiceImpl implements HtmlService {
             html = replaceHexEntities(html);
             html = processDownlevelRevealedConditionalComments(html);
             html = dropDoubleAccents(html);
+            html = dropSlashedTags(html);
             // CSS- and tag-wise sanitizing
             {
                 // Determine the definition to use
@@ -487,7 +492,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 }
                 // Handle HTML content
                 final FilterJerichoHandler handler = null == definition ? new FilterJerichoHandler(html.length()) : new FilterJerichoHandler(html.length(), definition);
-                JerichoParser.parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
+                JerichoParser.getInstance().parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
                 if (dropExternalImages && null != modified) {
                     modified[0] |= handler.isImageURLFound();
                 }
@@ -509,6 +514,27 @@ public final class HtmlServiceImpl implements HtmlService {
             LOG.warn("HTML content will be returned un-sanitized. Reason: "+e.getMessage(), e);
             return htmlContent;
         }
+    }
+
+    private static final Pattern PATTERN_FIX_START_TAG = Pattern.compile("(<[a-zA-Z_0-9-]+)/+([a-zA-Z_0-9-][^>]+)");
+
+    private static String dropSlashedTags(final String html) {
+        if (null == html) {
+            return html;
+        }
+        final Matcher m = PATTERN_FIX_START_TAG.matcher(html);
+        if (!m.find()) {
+            /*
+             * No slashed tags found
+             */
+            return html;
+        }
+        final StringBuffer sb = new StringBuffer(html.length());
+        do {
+            m.appendReplacement(sb, "$1 $2");
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
     }
 
     private static final Pattern PATTERN_TAG = Pattern.compile("<\\w+?[^>]*>");
@@ -560,7 +586,7 @@ public final class HtmlServiceImpl implements HtmlService {
             prepared = prepareHrTag(prepared);
             prepared = insertBlockquoteMarker(prepared);
             prepared = insertSpaceMarker(prepared);
-            String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
+            String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setConvertNonBreakingSpaces(true).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
             // Drop heading whitespaces
             text = PATTERN_HEADING_WS.matcher(text).replaceAll("$1");
             // ... but keep enforced ones
@@ -572,7 +598,7 @@ public final class HtmlServiceImpl implements HtmlService {
             // Retry with Tika framework
             try {
                 return extractFrom(new java.io.ByteArrayInputStream(htmlContent.getBytes(Charsets.ISO_8859_1)));
-            } catch (final OXException e) {
+            } catch (final Exception e) {
                 LOG.error("Error during processing HTML content.", e);
                 return "";
             }
@@ -634,7 +660,7 @@ public final class HtmlServiceImpl implements HtmlService {
         return PATTERN_SPACE_MARKER.matcher(text).replaceAll(" ");
     }
 
-    private static final Pattern PATTERN_HTML_MANDATORY_SPACE = Pattern.compile("(?:&nbsp;|&#160;)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_HTML_MANDATORY_SPACE = Pattern.compile("&#160;");
 
     private static String insertSpaceMarker(final String html) {
         return PATTERN_HTML_MANDATORY_SPACE.matcher(html).replaceAll(SPACE_MARKER);
@@ -1063,6 +1089,7 @@ public final class HtmlServiceImpl implements HtmlService {
                     pos = m.start(2);
                     epos = m.end(2);
                 }
+                href = trimHref(href);
                 if (!href.startsWith("cid") && !href.startsWith("http")) {
                     if (href.charAt(0) != '/') {
                         href = '/' + href;
@@ -1075,6 +1102,16 @@ public final class HtmlServiceImpl implements HtmlService {
         mr.appendTail(sb);
         html = sb.toString();
         return html;
+    }
+
+    private static String trimHref(final String href) {
+        if (isEmpty(href)) {
+            return href;
+        }
+        if (href.startsWith("\"")) {
+            return href.endsWith("\"") ? href.substring(1, href.length() - 1) : href.substring(1);
+        }
+        return href;
     }
 
     @Override
@@ -1121,6 +1158,11 @@ public final class HtmlServiceImpl implements HtmlService {
         while (mStyleFile.find()) {
             final String cssFile = mStyleFile.group(2);
             final HttpClient client = new HttpClient();
+            client.getParams().setSoTimeout(3000);
+            client.getParams().setIntParameter("http.connection.timeout", 3000);
+            client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
+            client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
+            client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
             final GetMethod get = new GetMethod(cssFile);
             try {
                 final int statusCode = client.executeMethod(get);
@@ -1144,6 +1186,58 @@ public final class HtmlServiceImpl implements HtmlService {
             }
         }
         return css.toString();
+    }
+
+    private static final Pattern HTML_START = Pattern.compile("<html.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern HEAD_START = Pattern.compile("<head.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern BODY_START = Pattern.compile("<body.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    @Override
+    public String documentizeContent(String htmlContent, String charset) {
+        if (null == htmlContent) {
+            return htmlContent;
+        }
+        final String lineSeparator = this.lineSeparator;
+        final StringAllocator sb = new StringAllocator(htmlContent.length() + 512);
+        if (isEmpty(htmlContent)) {
+            sb.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">").append(lineSeparator);
+            sb.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">").append(lineSeparator);
+            sb.append("<head>").append(lineSeparator);
+            sb.append("    <meta content=\"text/html; charset=").append(charset).append("\" http-equiv=\"Content-Type\"/>").append(lineSeparator);
+            sb.append("</head>").append(lineSeparator);
+            sb.append("<body>").append(lineSeparator);
+            sb.append(htmlContent);
+            sb.append("</body>").append(lineSeparator);
+            sb.append("</html>");
+            return sb.toString();
+        }
+        // Check for <html> tag
+        boolean closeHtml = false;
+        if (!HTML_START.matcher(htmlContent).find()) {
+            sb.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">").append(lineSeparator);
+            sb.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">").append(lineSeparator);
+            closeHtml = true;
+        }
+        // Check for <head> tag
+        if (!HEAD_START.matcher(htmlContent).find()) {
+            sb.append("<head>").append(lineSeparator);
+            sb.append("    <meta content=\"text/html; charset=").append(charset).append("\" http-equiv=\"Content-Type\"/>").append(lineSeparator);
+            sb.append("</head>").append(lineSeparator);
+        }
+        // Check for <body> tag
+        boolean closeBody = false;
+        if (!BODY_START.matcher(htmlContent).find()) {
+            sb.append("<body>").append(lineSeparator);
+            closeBody = true;
+        }
+        sb.append(htmlContent);
+        if (closeBody) {
+            sb.append("</body>").append(lineSeparator);
+        }
+        if (closeHtml) {
+            sb.append("</html>").append(lineSeparator);
+        }
+        return sb.toString();
     }
 
     @Override

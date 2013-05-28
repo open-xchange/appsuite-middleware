@@ -51,60 +51,70 @@ package com.openexchange.dav.carddav;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.io.CompatibilityMode;
 import net.sourceforge.cardme.io.VCardWriter;
 import net.sourceforge.cardme.vcard.VCard;
-import net.sourceforge.cardme.vcard.VCardVersion;
+import net.sourceforge.cardme.vcard.arch.VCardVersion;
+import net.sourceforge.cardme.vcard.exceptions.VCardBuildException;
+import net.sourceforge.cardme.vcard.exceptions.VCardParseException;
 import net.sourceforge.cardme.vcard.features.ExtendedFeature;
-import net.sourceforge.cardme.vcard.features.FormattedNameFeature;
-import net.sourceforge.cardme.vcard.features.UIDFeature;
+import net.sourceforge.cardme.vcard.features.UidFeature;
+import net.sourceforge.cardme.vcard.types.ExtendedType;
+import net.sourceforge.cardme.vcard.types.FNType;
+import net.sourceforge.cardme.vcard.types.NType;
 
 /**
  * {@link VCardResource}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class VCardResource {
-	
+
 	private static final VCardEngine PARSER = new VCardEngine(CompatibilityMode.MAC_ADDRESS_BOOK);
 	private static final VCardWriter WRITER = new VCardWriter(VCardVersion.V3_0, CompatibilityMode.MAC_ADDRESS_BOOK);
-	
+
 	private final String eTag;
 	private final String href;
 	private final VCard vCard;
-	
-	public VCardResource(final String vCardString, final String href, final String eTag) throws IOException {
-		this.vCard = PARSER.parse(vCardString);	
+
+	public VCardResource(final String vCardString, final String href, final String eTag) throws IOException, VCardParseException {
+		this.vCard = PARSER.parse(vCardString);
 		this.href = href;
 		this.eTag = eTag;
 	}
-	
+
 	public String getUID() {
-		final UIDFeature uidFeature = this.vCard.getUID();
-		return null != uidFeature ? uidFeature.getUID() : null;
-	}	
-
-	public String getFN() {
-		FormattedNameFeature formattedName = this.vCard.getFormattedName();
-		return null != formattedName ? formattedName.getFormattedName() : null;
-	}	
-
-	public List<ExtendedFeature> getExtendedFeatures(final String extensionName) {
-		final List<ExtendedFeature> xFeatures = new ArrayList<ExtendedFeature>();
-		final Iterator<ExtendedFeature> iter = this.vCard.getExtendedTypes();
-		while (iter.hasNext()) {
-			final ExtendedFeature extension = iter.next();
-			if (extensionName.equals(extension.getExtensionName())) {
-				xFeatures.add(extension);
-			}
-		}
-		return xFeatures;				
+		final UidFeature uidFeature = this.vCard.getUid();
+		return null != uidFeature ? uidFeature.getUid() : null;
 	}
-	
+
+    public String getFN() {
+        FNType formattedName = this.vCard.getFN();
+        return null != formattedName ? formattedName.getFormattedName() : null;
+    }
+
+    public String getGivenName() {
+        NType n = this.vCard.getN();
+        return null != n ? n.getGivenName() : null;
+    }
+
+    public String getFamilyName() {
+        NType n = this.vCard.getN();
+        return null != n ? n.getFamilyName() : null;
+    }
+
+	public List<ExtendedType> getExtendedTypes(String extendedName) {
+		List<ExtendedType> xTypes = new ArrayList<ExtendedType>();
+		for (ExtendedType xType : this.vCard.getExtendedTypes()) {
+            if (extendedName.equals(xType.getExtendedName())) {
+                xTypes.add(xType);
+            }
+		}
+		return xTypes;
+	}
+
 	/**
 	 * @return the eTag
 	 */
@@ -127,40 +137,45 @@ public class VCardResource {
 	}
 
 	public boolean isGroup() {
-		final List<ExtendedFeature> xFeatures = this.getExtendedFeatures("X-ADDRESSBOOKSERVER-KIND");
-		return null != xFeatures && 0 < xFeatures.size() && "group".equals(xFeatures.get(0).getExtensionData());
+		final List<ExtendedType> xFeatures = this.getExtendedTypes("X-ADDRESSBOOKSERVER-KIND");
+		return null != xFeatures && 0 < xFeatures.size() && "group".equals(xFeatures.get(0).getExtendedValue());
 	}
-	
+
 	public List<String> getMemberUIDs() {
-		List<ExtendedFeature> members = this.getExtendedFeatures("X-ADDRESSBOOKSERVER-MEMBER");
+		List<ExtendedType> members = this.getExtendedTypes("X-ADDRESSBOOKSERVER-MEMBER");
 		if (null == members) {
 			return null;
 		}
 		List<String> uids = new ArrayList<String>();
-		for (ExtendedFeature memberFeature : members) {
-			uids.add(memberFeature.getExtensionData().substring(9));
-			
+		for (ExtendedType memberType : members) {
+			uids.add(memberType.getExtendedValue().substring(9));
+
 		}
 		return uids;
 	}
-	
+
 	public ExtendedFeature getMemberXFeature(String uid) {
-		List<ExtendedFeature> members = this.getExtendedFeatures("X-ADDRESSBOOKSERVER-MEMBER");
+		List<ExtendedType> members = this.getExtendedTypes("X-ADDRESSBOOKSERVER-MEMBER");
 		if (null == members) {
 			return null;
 		}
-		for (ExtendedFeature memberFeature : members) {
-			if (uid.equals(memberFeature.getExtensionData().substring(9))) {
-				return memberFeature;
+		for (ExtendedType memberType : members) {
+			if (uid.equals(memberType.getExtendedValue().substring(9))) {
+				return memberType;
 			}
 		}
 		return null;
 	}
-	
+
 	@Override
     public String toString() {
 		WRITER.setVCard(this.vCard);
-		return WRITER.buildVCardString();		
+		try {
+            return WRITER.buildVCardString();
+        } catch (VCardBuildException e) {
+            e.printStackTrace();
+            return null;
+        }
 	}
 
 }

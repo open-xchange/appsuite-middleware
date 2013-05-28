@@ -208,37 +208,42 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
              */
             final Bundle systemBundle = bundleContext.getBundle(0);
             if (null != systemBundle && systemBundle.getState() == Bundle.ACTIVE) {
-                LOG.info("Stopping system bundle...");
-                // Note that stopping process is done in a separate thread
-                systemBundle.stop();
                 if (waitForExit) {
-                    final Lock SHUTDOWN_LOCK = new ReentrantLock();
-                    final Condition SHUTDOWN_COMPLETED = SHUTDOWN_LOCK.newCondition();
-                    
+                    final Lock shutdownLock = new ReentrantLock();
+                    final Condition shutdownCompleted = shutdownLock.newCondition();
+                    // Add bundle listener
                     systemBundle.getBundleContext().addBundleListener(new BundleListener() {
-                        
+
                         @Override
                         public void bundleChanged(BundleEvent event) {
                             if (systemBundle.getState() == Bundle.RESOLVED) {
                                 try {
-                                    SHUTDOWN_LOCK.lock();
-                                    SHUTDOWN_COMPLETED.signalAll();
+                                    shutdownLock.lock();
+                                    shutdownCompleted.signalAll();
 
                                 } finally {
-                                    SHUTDOWN_LOCK.unlock();
+                                    shutdownLock.unlock();
                                 }
                             }
                         }
                     });
-                    SHUTDOWN_LOCK.lock();
+                    LOG.info("Stopping system bundle...");
+                    // Note that stopping process is done in a separate thread
+                    systemBundle.stop();
+                    // Wait on condition
+                    shutdownLock.lock();
                     try {
-                        SHUTDOWN_COMPLETED.await(10, TimeUnit.SECONDS);
+                        shutdownCompleted.await(10, TimeUnit.SECONDS);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         LOG.error(e.getMessage(), e);
                     } finally {
-                        SHUTDOWN_LOCK.unlock();
-                    } 
+                        shutdownLock.unlock();
+                    }
+                } else {
+                    LOG.info("Stopping system bundle...");
+                    // Note that stopping process is done in a separate thread
+                    systemBundle.stop();
                 }
             }
         } catch (final BundleException e) {

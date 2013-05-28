@@ -73,6 +73,7 @@ import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
 public class AtmosphereRTActivator extends HousekeepingActivator {
@@ -81,7 +82,7 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ConfigurationService.class, SessiondService.class, AtmosphereService.class, MessageDispatcher.class, SimpleConverter.class,
-            ResourceDirectory.class, StanzaQueueService.class, PayloadTreeConverter.class, CapabilityService.class, TimerService.class };
+            ResourceDirectory.class, StanzaQueueService.class, PayloadTreeConverter.class, CapabilityService.class, TimerService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -92,6 +93,7 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
 
         AtmosphereService atmosphereService = getService(AtmosphereService.class);
         RTAtmosphereHandler handler = new RTAtmosphereHandler();
+        handler.init();
         atmosphereService.addAtmosphereHandler("rt", handler);
         registerService(Channel.class, new RTAtmosphereChannel(handler));
 

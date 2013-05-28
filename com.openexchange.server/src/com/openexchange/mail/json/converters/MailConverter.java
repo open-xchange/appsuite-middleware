@@ -55,6 +55,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import org.json.JSONArray;
@@ -90,6 +91,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -207,6 +209,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
          */
         final int[] columns = requestData.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
         final String[] headers = requestData.getParameterValues(Mail.PARAMETER_HEADERS);
+        String tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
+        final TimeZone timeZone = isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
+        tmp = null;
         /*
          * Pre-Select field writers
          */
@@ -228,7 +233,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             for (final List<MailMessage> mails : structure.getMails()) {
                 if (mails != null && !mails.isEmpty()) {
                     final JSONObject jo = new JSONObject(32);
-                    writeThreadSortedMail(mails, jo, writers, headerWriters, containsMultipleFolders, writeThreadAsObjects, userId, contextId);
+                    writeThreadSortedMail(mails, jo, writers, headerWriters, containsMultipleFolders, writeThreadAsObjects, userId, contextId, timeZone);
                     jsonWriter.value(jo);
                 }
             }
@@ -282,15 +287,15 @@ public final class MailConverter implements ResultConverter, MailActionConstants
     private static final MailFieldWriter[] WRITER_IDS = MessageWriter.getMailFieldWriter(new MailListField[] {
         MailListField.ID, MailListField.FOLDER_ID });
 
-    private void writeThreadSortedMail(final List<MailMessage> mails, final JSONObject jMail, final MailFieldWriter[] writers, final MailFieldWriter[] headerWriters, final boolean containsMultipleFolders, final boolean writeThreadAsObjects, final int userId, final int contextId) throws OXException, JSONException {
+    private void writeThreadSortedMail(final List<MailMessage> mails, final JSONObject jMail, final MailFieldWriter[] writers, final MailFieldWriter[] headerWriters, final boolean containsMultipleFolders, final boolean writeThreadAsObjects, final int userId, final int contextId, final TimeZone optTimeZone) throws OXException, JSONException {
         final MailMessage rootMessage = mails.get(0);
         int accountID = rootMessage.getAccountId();
         for (int j = 0; j < writers.length; j++) {
-            writers[j].writeField(jMail, rootMessage, 0, true, accountID, userId, contextId);
+            writers[j].writeField(jMail, rootMessage, 0, true, accountID, userId, contextId, optTimeZone);
         }
         if (null != headerWriters) {
             for (int j = 0; j < headerWriters.length; j++) {
-                headerWriters[j].writeField(jMail, rootMessage, 0, true, accountID, userId, contextId);
+                headerWriters[j].writeField(jMail, rootMessage, 0, true, accountID, userId, contextId, optTimeZone);
             }
         }
         int unreadCount = 0;
@@ -301,11 +306,11 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 final JSONObject jChild = new JSONObject();
                 accountID = child.getAccountId();
                 for (int j = 0; j < writers.length; j++) {
-                    writers[j].writeField(jChild, child, 0, true, accountID, userId, contextId);
+                    writers[j].writeField(jChild, child, 0, true, accountID, userId, contextId, optTimeZone);
                 }
                 if (null != headerWriters) {
                     for (int j = 0; j < headerWriters.length; j++) {
-                        headerWriters[j].writeField(jChild, child, 0, true, accountID, userId, contextId);
+                        headerWriters[j].writeField(jChild, child, 0, true, accountID, userId, contextId, optTimeZone);
                     }
                 }
                 /*-
@@ -359,6 +364,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
          */
         final int[] columns = requestData.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
         final String[] headers = requestData.getParameterValues(Mail.PARAMETER_HEADERS);
+        String tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
+        final TimeZone timeZone = isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
+        tmp = null;
         /*
          * Pre-Select field writers
          */
@@ -380,11 +388,11 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                     final JSONArray ja = new JSONArray();
                     final int accountID = mail.getAccountId();
                     for (int j = 0; j < writers.length; j++) {
-                        writers[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
+                        writers[j].writeField(ja, mail, 0, false, accountID, userId, contextId, timeZone);
                     }
                     if (null != headerWriters) {
                         for (int j = 0; j < headerWriters.length; j++) {
-                            headerWriters[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
+                            headerWriters[j].writeField(ja, mail, 0, false, accountID, userId, contextId, timeZone);
                         }
                     }
                     jsonWriter.value(ja);
@@ -399,6 +407,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
     private void convertMultiple4All(final Collection<MailMessage> mails, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException, JSONException {
         final int[] columns = requestData.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
         final String sort = requestData.getParameter(AJAXServlet.PARAMETER_SORT);
+        String tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
+        final TimeZone timeZone = isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
+        tmp = null;
         /*
          * Get mail interface
          */
@@ -424,7 +435,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                     if (mail != null) {
                         final int accountId = mail.getAccountId();
                         for (final MailFieldWriter writer : writers) {
-                            writer.writeField(ja, mail, mail.getThreadLevel(), false, accountId, userId, contextId);
+                            writer.writeField(ja, mail, mail.getThreadLevel(), false, accountId, userId, contextId, timeZone);
                         }
 
                     }
@@ -439,7 +450,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                     if (mail != null) {
                         final int accountId = mail.getAccountId();
                         for (final MailFieldWriter writer : writers) {
-                            writer.writeField(ja, mail, 0, false, accountId, userId, contextId);
+                            writer.writeField(ja, mail, 0, false, accountId, userId, contextId, timeZone);
                         }
                     }
                     jsonWriter.value(ja);
@@ -483,6 +494,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final String view = null == tmp ? null : tmp.toLowerCase(Locale.ENGLISH);
         tmp = requestData.getParameter(Mail.PARAMETER_UNSEEN);
         final boolean unseen = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
+        tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
+        final TimeZone timeZone = isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
         tmp = requestData.getParameter("token");
         final boolean token = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
         tmp = requestData.getParameter("ttlMillis");
@@ -553,7 +566,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 warnings,
                 token,
                 ttlMillis,
-                mimeFilter);
+                mimeFilter,
+                timeZone);
         } catch (final OXException e) {
             if (MailExceptionCode.MESSAGING_ERROR.equals(e)) {
                 final Throwable cause = e.getCause();

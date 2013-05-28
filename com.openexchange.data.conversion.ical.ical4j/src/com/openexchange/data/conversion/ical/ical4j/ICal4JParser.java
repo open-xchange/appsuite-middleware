@@ -502,7 +502,18 @@ public class ICal4JParser implements ICalParser {
      * strips those newline+whitespace elements so we can use simple regexps.
      */
     private String removeAnnoyingWhitespaces(final String input) {
-		return input.replaceAll("\n\\s+", "");
+        /*
+         * [http://www.ietf.org/rfc/rfc2445.txt]
+         *
+         * Long content lines SHOULD be split into a multiple line
+         * representations using a line "folding" technique. That is, a long
+         * line can be split between any two characters by inserting a CRLF
+         * immediately followed by a single linear white space character (i.e.,
+         * SPACE, US-ASCII decimal 32 or HTAB, US-ASCII decimal 9). Any sequence
+         * of CRLF followed immediately by a single linear white space character
+         * is ignored (i.e., removed) when processing the content type.
+         */
+        return input.replaceAll("(?:\\r\\n?|\\n)[ \t]", "");
 	}
 
 	private String workaroundFor16895(final String input) {

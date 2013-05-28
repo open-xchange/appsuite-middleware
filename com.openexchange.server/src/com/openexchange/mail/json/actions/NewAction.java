@@ -65,6 +65,7 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -147,13 +148,13 @@ public final class NewAction extends AbstractMailAction {
         final UploadEvent uploadEvent = request.getUploadEvent();
         String msgIdentifier = null;
         {
-            final JSONObject jsonMailObj;
+            final JSONObject jMail;
             {
                 final String json0 = uploadEvent.getFormField(AJAXServlet.UPLOAD_FORMFIELD_MAIL);
                 if (json0 == null || json0.trim().length() == 0) {
                     throw MailExceptionCode.PROCESSING_ERROR.create(MailExceptionCode.MISSING_PARAM.create(AJAXServlet.UPLOAD_FORMFIELD_MAIL), new Object[0]);
                 }
-                jsonMailObj = new JSONObject(json0);
+                jMail = new JSONObject(json0);
             }
             /*-
              * Parse
@@ -162,7 +163,7 @@ public final class NewAction extends AbstractMailAction {
              */
             final InternetAddress from;
             try {
-                String value = jsonMailObj.getString(MailJSONField.FROM.getKey());
+                String value = jMail.getString(MailJSONField.FROM.getKey());
                 final int endPos;
                 if (value.length() > 0 && '[' == value.charAt(0) && (endPos = value.indexOf(']', 1)) < value.length()) {
                     value = new com.openexchange.java.StringAllocator(32).append("\"[").append(value.substring(1, endPos)).append("]\"").append(value.substring(endPos+1)).toString();
@@ -184,12 +185,11 @@ public final class NewAction extends AbstractMailAction {
                 accountId = MailAccount.DEFAULT_ID;
             }
             final MailServletInterface mailInterface = getMailInterface(req);
-            if (jsonMailObj.hasAndNotNull(MailJSONField.FLAGS.getKey()) && (jsonMailObj.getInt(MailJSONField.FLAGS.getKey()) & MailMessage.FLAG_DRAFT) > 0) {
+            if (jMail.hasAndNotNull(MailJSONField.FLAGS.getKey()) && (jMail.getInt(MailJSONField.FLAGS.getKey()) & MailMessage.FLAG_DRAFT) > 0) {
                 /*
                  * ... and save draft
                  */
-                final ComposedMailMessage composedMail =
-                    MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, accountId, warnings);
+                final ComposedMailMessage composedMail = MessageParser.parse4Draft(jMail, uploadEvent, session, accountId, warnings);
                 msgIdentifier = mailInterface.saveDraft(composedMail, false, accountId);
                 if (msgIdentifier == null) {
                     throw MailExceptionCode.DRAFT_FAILED_UNKNOWN.create();
@@ -199,10 +199,12 @@ public final class NewAction extends AbstractMailAction {
                 /*
                  * ... and send message
                  */
-                final ComposedMailMessage[] composedMails =
-                    MessageParser.parse4Transport(jsonMailObj, uploadEvent, session, accountId, request.isSecure() ? "https://" : "http://", request.getHostname(), warnings);
-                final ComposeType sendType =
-                    jsonMailObj.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jsonMailObj.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
+                final String protocol = request.isSecure() ? "https://" : "http://";
+                final ComposedMailMessage[] composedMails = MessageParser.parse4Transport(jMail, uploadEvent, session, accountId, protocol, request.getHostname(), warnings);
+                ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
+                if (ComposeType.DRAFT.equals(sendType) && AJAXRequestDataTools.parseBoolParameter("deleteDraftOnTransport", request)) {
+                    sendType = ComposeType.DRAFT_DELETE_ON_TRANSPORT;
+                }
                 for (final ComposedMailMessage cm : composedMails) {
                     if (null != cm) {
                         cm.setSendType(sendType);
@@ -210,7 +212,10 @@ public final class NewAction extends AbstractMailAction {
                 }
                 msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId);
                 for (int i = 1; i < composedMails.length; i++) {
-                    mailInterface.sendMessage(composedMails[i], sendType, accountId);
+                    final ComposedMailMessage cm = composedMails[i];
+                    if (null != cm) {
+                        mailInterface.sendMessage(cm, sendType, accountId);
+                    }
                 }
                 warnings.addAll(mailInterface.getWarnings());
                 /*
@@ -225,14 +230,14 @@ public final class NewAction extends AbstractMailAction {
                         userId).booleanValue()) {
                         triggerContactCollector(session, composedMails[0]);
                     }
-                } catch (final OXException e) {
+                } catch (final Exception e) {
                     LOG.warn("Contact collector could not be triggered.", e);
                 }
             }
         }
         if (msgIdentifier == null) {
             if (warnings.isEmpty()) {
-                throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();                            
+                throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();
             }
             final AJAXRequestResult result = new AJAXRequestResult(JSONObject.NULL, "json");
             result.addWarnings(warnings);

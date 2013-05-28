@@ -68,6 +68,7 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -171,8 +172,11 @@ public final class GetAction extends AbstractMailAction {
             final boolean showMessageSource = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
             tmp = req.getParameter(Mail.PARAMETER_SHOW_HEADER);
             final boolean showMessageHeaders = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
-            tmp = req.getParameter(Mail.PARAMETER_SAVE);
-            final boolean saveToDisk = (tmp != null && tmp.length() > 0 && Integer.parseInt(tmp) > 0);
+            final boolean saveToDisk;
+            {
+                final String saveParam = req.getParameter(Mail.PARAMETER_SAVE);
+                saveToDisk = AJAXRequestDataTools.parseBoolParameter(saveParam) || "download".equals(toLowerCase(req.getParameter(AJAXServlet.PARAMETER_DELIVERY)));
+            }
             tmp = req.getParameter(Mail.PARAMETER_UNSEEN);
             final boolean unseen = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
             tmp = req.getParameter("ignorable");
@@ -231,7 +235,7 @@ public final class GetAction extends AbstractMailAction {
                 /*
                  * Get message
                  */
-                final MailMessage mail = mailInterface.getMessage(folderPath, uid);
+                final MailMessage mail = mailInterface.getMessage(folderPath, uid, !unseen);
                 if (mail == null) {
                     throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
                 }
@@ -242,8 +246,6 @@ public final class GetAction extends AbstractMailAction {
                     final AJAXRequestData requestData = req.getRequest();
                     final OutputStream directOutputStream = requestData.optOutputStream();
                     if (null != directOutputStream) {
-                        final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
-                        final boolean doUnseen = (unseen && wasUnseen);
                         if (saveToDisk) {
                             requestData.setResponseHeader("Content-Type", "application/octet-stream");
                             final StringAllocator sb = new StringAllocator(64).append("attachment");
@@ -267,11 +269,7 @@ public final class GetAction extends AbstractMailAction {
                             directOutputStream.write(CHUNK2); // ..."}
                             directOutputStream.flush();
                         }
-                        final AJAXRequestResult requestResult = new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
-                        if (doUnseen) {
-                            mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
-                        }
-                        return requestResult;
+                        return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
                     }
                 }
                 /*-
@@ -291,9 +289,15 @@ public final class GetAction extends AbstractMailAction {
                 }
                 // Filter
                 if (null != mimeFilter) {
-                    final InputStream is = fileHolder.getStream();
+                    InputStream is = fileHolder.getStream();
                     try {
+                        // Store to MIME message
                         MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), is);
+                        // Clean-up
+                        Streams.close(is);
+                        is = null;
+                        fileHolder.close();
+                        // Filter MIME message
                         mimeMessage = mimeFilter.filter(mimeMessage);
                         fileHolder = new ThresholdFileHolder();
                         mimeMessage.writeTo(fileHolder.asOutputStream());
@@ -335,8 +339,36 @@ public final class GetAction extends AbstractMailAction {
                     /*
                      * Create appropriate file holder
                      */
-                    req.getRequest().setFormat("file");
+                    final AJAXRequestData requestData = req.getRequest();
+                    requestData.setResponseHeader("Content-Type", "application/octet-stream");
+                    final OutputStream directOutputStream = requestData.optOutputStream();
+                    if (null != directOutputStream) {
+                        // Direct output
+                        final StringAllocator sb = new StringAllocator(64).append("attachment");
+                        {
+                            final String subject = mail.getSubject();
+                            final String fileName = isEmpty(subject) ? "mail.eml" : saneForFileName(subject) + ".eml";
+                            DownloadUtility.appendFilenameParameter(fileName, requestData.getUserAgent(), sb);
+                        }
+                        requestData.setResponseHeader("Content-Disposition",  sb.toString());
+                        requestData.removeCachingHeader();
+                        final InputStream is = fileHolder.getStream();
+                        try {
+                            final int len = 2048;
+                            final byte[] buf = new byte[len];
+                            for (int read; (read = is.read(buf, 0, len)) > 0;) {
+                                directOutputStream.write(buf, 0, read);
+                            }
+                        } finally {
+                            Streams.close(is);
+                        }
+                        directOutputStream.flush();
+                        return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
+                    }
+                    // As file holder
+                    requestData.setFormat("file");
                     fileHolder.setContentType("application/octet-stream");
+                    fileHolder.setDelivery("download");
                     // Set file name
                     final String subject = mail.getSubject();
                     fileHolder.setName(new com.openexchange.java.StringAllocator(isEmpty(subject) ? "mail" : saneForFileName(subject)).append(".eml").toString());
@@ -363,17 +395,12 @@ public final class GetAction extends AbstractMailAction {
                 /*
                  * Get message
                  */
-                final MailMessage mail = mailInterface.getMessage(folderPath, uid);
+                final MailMessage mail = mailInterface.getMessage(folderPath, uid, !unseen);
                 if (mail == null) {
                     throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
                 }
                 final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
                 final boolean doUnseen = (unseen && wasUnseen);
-                if (doUnseen) {
-                    mail.setFlag(MailMessage.FLAG_SEEN, false);
-                    final int unreadMsgs = mail.getUnreadMessages();
-                    mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
-                }
                 final ContentType rct = new ContentType("text/plain");
                 final ContentType ct = mail.getContentType();
                 if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
@@ -407,24 +434,10 @@ public final class GetAction extends AbstractMailAction {
                     }
                 }
             } else {
-//                tmp = req.getParameter(Mail.PARAMETER_EDIT_DRAFT);
-//                final boolean editDraft = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
-//                tmp = req.getParameter(Mail.PARAMETER_VIEW);
-//                final String view = null == tmp ? null : tmp.toLowerCase(Locale.ENGLISH);
-//                tmp = null;
-//                final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
-//                /*
-//                 * Deny saving for this request-specific settings
-//                 */
-//                usmNoSave.setNoSave(true);
-//                /*
-//                 * Overwrite settings with request's parameters
-//                 */
-//                detectDisplayMode(editDraft, view, usmNoSave);
                 /*
                  * Get message
                  */
-                final MailMessage mail = mailInterface.getMessage(folderPath, uid);
+                final MailMessage mail = mailInterface.getMessage(folderPath, uid, !unseen);
                 if (mail == null) {
                     throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
                 }
@@ -507,6 +520,20 @@ public final class GetAction extends AbstractMailAction {
             }
         }
         return sb.toString();
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

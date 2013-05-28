@@ -95,7 +95,7 @@ public class DeleteAction extends ContactAction {
             getContactService().deleteContact(session, Integer.toString(deleteRequestData[1]), Integer.toString(deleteRequestData[0]), lastRead);
         } else {
             Map<String, List<String>> objectIDsPerFolder = request.getObjectIDsPerFolder();
-            if (null != objectIDsPerFolder && 0 < objectIDsPerFolder.size()) {
+            if (null != objectIDsPerFolder && !objectIDsPerFolder.isEmpty()) {
                 ContactService contactService = getContactService();
                 for (Entry<String, List<String>> entry : objectIDsPerFolder.entrySet()) {
                     String[] objectIDs = entry.getValue().toArray(new String[entry.getValue().size()]);
@@ -103,7 +103,7 @@ public class DeleteAction extends ContactAction {
                 }
             }
         }
-        return new AJAXRequestResult(new JSONObject(), lastRead, "json");
+        return new AJAXRequestResult(new JSONObject(0), lastRead, "json");
     }
 
 }

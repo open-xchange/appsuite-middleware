@@ -69,6 +69,7 @@ import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -116,6 +117,19 @@ public final class JerichoParser {
 
     } // End of ParsingDeniedException
 
+    private static final JerichoParser INSTANCE = new JerichoParser();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static JerichoParser getInstance() {
+        return INSTANCE;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------- //
+
     /**
      * Initializes a new {@link JerichoParser}.
      */
@@ -123,10 +137,10 @@ public final class JerichoParser {
         super();
     }
 
-    private static final Pattern BODY_START = Pattern.compile("<body.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private final Pattern BODY_START = Pattern.compile("<body.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
-    private static volatile Integer maxLength;
-    private static int maxLength() {
+    private volatile Integer maxLength;
+    private int maxLength() {
         Integer i = maxLength;
         if (null == maxLength) {
             synchronized (JerichoParser.class) {
@@ -135,7 +149,9 @@ public final class JerichoParser {
                     // Default is 512KB
                     final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
                     final int defaultMaxLength = 1048576 >> 1;
-                    i = Integer.valueOf(null == service ? defaultMaxLength : service.getIntProperty("com.openexchange.html.maxLength", defaultMaxLength));
+                    i = Integer.valueOf(null == service ? defaultMaxLength : service.getIntProperty(
+                        "com.openexchange.html.maxLength",
+                        defaultMaxLength));
                     maxLength = i;
                 }
             }
@@ -150,7 +166,7 @@ public final class JerichoParser {
      * @return The checked HTML content possibly with surrounded with a <code>&lt;body&gt;</code> tag
      * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
-    private static StreamedSource checkBody(final String html) {
+    private StreamedSource checkBody(final String html) {
         if (null == html) {
             return null;
         }
@@ -171,7 +187,7 @@ public final class JerichoParser {
     }
 
     private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
-    private static final Pattern FIX_START_TAG = Pattern.compile("^([^<]*)(<[a-zA-Z_0-9-]+)/([a-zA-Z][^>]+>)");
+    private static final Pattern FIX_START_TAG = Pattern.compile("(<[^>]+)(>?)");
 
     /**
      * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
@@ -180,7 +196,7 @@ public final class JerichoParser {
      * @param handler The HTML handler
      * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
-    public static void parse(final String html, final JerichoHandler handler) {
+    public void parse(final String html, final JerichoHandler handler) {
         final long st = DEBUG ? System.currentTimeMillis() : 0L;
         StreamedSource streamedSource = null;
         try {
@@ -290,16 +306,11 @@ public final class JerichoParser {
              */
             if (contains('<', segment)) {
                 final Matcher m = FIX_START_TAG.matcher(segment);
-                if (m.find()) {
-                    final StringBuffer sb = new StringBuffer(segment.length());
-                    do {
-                        m.appendReplacement(sb, "$1$2 $3");
-                    } while (m.find());
-                    m.appendTail(sb);
+                if (m.find() && isEmpty(m.group(2))) {
                     /*
                      * Re-parse start tag
                      */
-                    final StreamedSource nestedSource = new StreamedSource(sb.toString());
+                    final StreamedSource nestedSource = new StreamedSource(new StringAllocator(m.group(1)).append('>').toString());
                     for (final Segment nestedSegment : nestedSource) {
                         handleSegment(handler, nestedSegment);
                     }
@@ -312,7 +323,7 @@ public final class JerichoParser {
         }
     }
 
-    private static String fixStyleAttribute(final String startTag) {
+    private String fixStyleAttribute(final String startTag) {
         if (startTag.indexOf("style=") <= 0) {
             return startTag;
         }
@@ -353,6 +364,19 @@ public final class JerichoParser {
             }
         }
         return false;
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

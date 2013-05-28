@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.json.services;
 
 import java.util.concurrent.atomic.AtomicReference;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -72,6 +73,11 @@ public class Services {
      */
     public static void setServiceLookup(final ServiceLookup serviceLookup) {
         LOOKUP_REF.set(serviceLookup);
+    }
+
+    public static EventAdmin getEventAdmin() {
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(EventAdmin.class);
     }
 
     public static IDBasedFileAccessFactory getFileAccessFactory() {

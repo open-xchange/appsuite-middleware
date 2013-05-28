@@ -108,8 +108,10 @@ public abstract class AbstractITipAction implements AJAXActionService{
         final ITipParser itipParser = services.getService(ITipParser.class);
         final ITipAnalyzerService analyzer = services.getService(ITipAnalyzerService.class);
 
-        final String optTimezone = request.getParameter("timezone");
-		final TimeZone tz = TimeZone.getTimeZone(optTimezone != null ? optTimezone : session.getUser().getTimeZone());
+        final TimeZone tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
+        final String timezoneParameter = request.getParameter("timezone");
+        TimeZone outputTimeZone = timezoneParameter == null ? tz : TimeZone.getTimeZone(timezoneParameter);
+        
         final Map<String, String> mailHeader = new HashMap<String, String>();
         final InputStream stream = getInputStreamAndFillMailHeader(request, session, mailHeader);
         int owner = 0;
@@ -121,10 +123,10 @@ public abstract class AbstractITipAction implements AJAXActionService{
         final List<ITipAnalysis> analysis = analyzer.analyze(messages, request.getParameter("descriptionFormat"), session, mailHeader);
         Object result;
         try {
-			result = process(analysis, request, session, tz);
-		} catch (final JSONException e) {
-			throw AjaxExceptionCodes.JSON_ERROR.create(e);
-		}
+            result = process(analysis, request, session, outputTimeZone);
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e);
+        }
 
         return new AJAXRequestResult(result, new Date());
     }

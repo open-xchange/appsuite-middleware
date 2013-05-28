@@ -57,6 +57,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
@@ -64,7 +65,7 @@ import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.Component.EvictionPolicy;
 import com.openexchange.realtime.ComponentHandle;
-import com.openexchange.realtime.RealtimeExceptionCodes;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Stanza;
@@ -94,6 +95,8 @@ public class SyntheticChannel implements Channel, Runnable {
     
     private Random loadBalancer = new Random();
     
+    private AtomicBoolean shuttingDown = new AtomicBoolean(false);
+    
     public SyntheticChannel(ServiceLookup services) {
         for (int i = 0; i < NUMBER_OF_RUNLOOPS; i++) {
             SyntheticChannelRunLoop rl = new SyntheticChannelRunLoop("message-handler-" + i);
@@ -119,11 +122,17 @@ public class SyntheticChannel implements Channel, Runnable {
 
     @Override
     public boolean isConnected(ID id) throws OXException {
+        if (shuttingDown.get()) {
+            return false;
+        }
         return handles.containsKey(id);
     }
 
     @Override
     public boolean conjure(ID id) throws OXException {
+        if (shuttingDown.get()) {
+            return false;
+        }
         ComponentHandle componentHandle = handles.get(id);
         if (componentHandle != null) {
             return true;
@@ -160,6 +169,9 @@ public class SyntheticChannel implements Channel, Runnable {
     }
 
     protected void setUpEviction(EvictionPolicy evictionPolicy, ComponentHandle handle, ID id) {
+        if (shuttingDown.get()) {
+            return;
+        }
         if (Component.Timeout.class.isInstance(evictionPolicy)) {
             Component.Timeout timeout = (Component.Timeout) evictionPolicy;
             timeouts.add(new TimeoutEviction(TimeUnit.MILLISECONDS.convert(timeout.getTimeout(), timeout.getUnit()), id));
@@ -168,17 +180,33 @@ public class SyntheticChannel implements Channel, Runnable {
 
     @Override
     public void send(final Stanza stanza, ID recipient) throws OXException {
+        if (shuttingDown.get()) {
+            stanza.trace("This server is shutting down. Discarding.");
+            return;
+        }
+        stanza.trace("SyntheticChannel delivering to " + recipient);
         final ComponentHandle handle = handles.get(recipient);
         if (handle == null) {
+            stanza.trace("Unknown recipient: "+ stanza.getTo());
             throw RealtimeExceptionCodes.INVALID_ID.create(stanza.getTo());
         }
+        stanza.trace("Delivering to handle " + handle);
+        stanza.trace("Updating last access");
         lastAccess.put(stanza.getTo(), System.currentTimeMillis());
 
         SyntheticChannelRunLoop runLoop = runLoopsPerID.get(recipient);
         if (runLoop == null) {
             throw RealtimeExceptionCodes.INVALID_ID.create(stanza.getTo());
         }
-        runLoop.offer(new MessageDispatch(handle, stanza));
+        if (handle.shouldBeDoneInGlobalThread(stanza)) {
+            new MessageDispatch(handle, stanza).tick();
+        } else {
+            final boolean taken = runLoop.offer(new MessageDispatch(handle, stanza));
+            if (!taken) {
+                LOG.error("Queue refused offered Stanza");
+                RealtimeExceptionCodes.UNEXPECTED_ERROR.create("Queue refused offered Stanza");
+            }
+        }
     }
     
     public void addComponent(Component component) {
@@ -200,6 +228,9 @@ public class SyntheticChannel implements Channel, Runnable {
         }
         
         public void tick() throws OXException {
+            if (shuttingDown.get()) {
+                return;
+            }
             long last = lastAccess.get(id);
             long now = System.currentTimeMillis();
             
@@ -210,9 +241,18 @@ public class SyntheticChannel implements Channel, Runnable {
         
     
     }
+    
+    public void shutdown() {
+        for(ID id: handles.keySet()) {
+            id.trigger("dispose", SyntheticChannel.this);
+        }
+    }
 
     @Override
     public void run() {
+        if (shuttingDown.get()) {
+            return;
+        }
         for(TimeoutEviction e: new ArrayList<TimeoutEviction>(timeouts)) {
             try {
                 e.tick();

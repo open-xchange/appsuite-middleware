@@ -354,6 +354,10 @@ public enum MailExceptionCode implements OXExceptionCode {
      */
     FOLDER_NOT_FOUND(MailExceptionStrings.FOLDER_NOT_FOUND_MSG, CATEGORY_USER_INPUT, 66),
     /**
+     * Mail folder could not be found.
+     */
+    FOLDER_NOT_FOUND_SIMPLE(MailExceptionStrings.FOLDER_NOT_FOUND_SIMPLE_MSG, CATEGORY_USER_INPUT, 66),
+    /**
      * Referenced mail %1$s could not be found in folder %2$s. Therefore reply/forward operation cannot be performed.
      */
     REFERENCED_MAIL_NOT_FOUND(MailExceptionStrings.REFERENCED_MAIL_NOT_FOUND_MSG, CATEGORY_USER_INPUT, 67),

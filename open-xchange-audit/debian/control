@@ -1,0 +1,14 @@
+Source: open-xchange-audit
+Section: web
+Priority: optional
+Maintainer: Benjamin Otterbach <benjamin.otterbach@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-audit
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
+Description: Backend extension to track user actions
+ This package installs a bundle that allows tracking of user actions. The tracked information is written to a configurable log file.

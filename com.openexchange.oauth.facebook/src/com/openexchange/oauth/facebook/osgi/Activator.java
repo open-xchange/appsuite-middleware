@@ -83,7 +83,8 @@ public final class Activator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + OAuthService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DeferringURLService.class.getName() + "))");
-        track(filter, new FacebookRegisterer(context));
+        FacebookRegisterer fbRegisterer = new FacebookRegisterer(context);
+        track(filter, fbRegisterer);
         openTrackers();
         registerService(CapabilityChecker.class, new CapabilityChecker() {
 

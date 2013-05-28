@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Audit Bundle
 Bundle-SymbolicName: com.openexchange.audit
-Bundle-Version: 6.21.0
+Bundle-Version: 7.2.1
 Bundle-Activator: com.openexchange.audit.osgi.AuditActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -11,6 +11,7 @@ Import-Package: com.openexchange.ajax.login,
  com.openexchange.config,
  com.openexchange.event,
  com.openexchange.exception,
+ com.openexchange.file.storage,
  com.openexchange.groupware,
  com.openexchange.groupware.contact,
  com.openexchange.groupware.container,

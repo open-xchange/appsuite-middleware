@@ -51,9 +51,11 @@ package com.openexchange.indexedSearch.json.converter;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -66,12 +68,13 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SearchResult2JSONConverter}. Converts a search result to JSON.
- * 
+ *
  *     "mail":{
  *       "numFound":314,
  *       "duration":15,
@@ -87,7 +90,7 @@ import com.openexchange.tools.session.ServerSession;
  *         ...
  *       ]
  *     }
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SearchResult2JSONConverter implements ResultConverter {
@@ -119,17 +122,20 @@ public class SearchResult2JSONConverter implements ResultConverter {
             result.setResultObject(JSONObject.NULL, "json");
             return;
         }
+        String tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
+        final TimeZone timeZone = isEmpty(tmp) ? null : TimeZoneUtils.getTimeZone(tmp.trim());
+        tmp = null;
 
         OXJSONWriter resultWriter = new OXJSONWriter();
         try {
             resultWriter.object();
             if (resultObject instanceof SearchResult<?>) {
                 SearchResult<?> genericResult = (SearchResult<?>) resultObject;
-                writeResult(session, genericResult, resultWriter);
+                writeResult(session, genericResult, resultWriter, timeZone);
             } else {
                 Collection<SearchResult<?>> results = (Collection<SearchResult<?>>) resultObject;
                 for (SearchResult<?> genericResult : results) {
-                    writeResult(session, genericResult, resultWriter);
+                    writeResult(session, genericResult, resultWriter, timeZone);
                 }
             }
         } catch (JSONException e) {
@@ -145,13 +151,13 @@ public class SearchResult2JSONConverter implements ResultConverter {
         result.setResultObject(resultWriter.getObject(), "json");
     }
 
-    private void writeResult(ServerSession session, SearchResult<?> genericResult, OXJSONWriter resultWriter) throws JSONException, OXException {
+    private void writeResult(ServerSession session, SearchResult<?> genericResult, OXJSONWriter resultWriter, TimeZone optTimeZone) throws JSONException, OXException {
         if (genericResult.getModule() == Types.EMAIL) {
-            writeMails(session, genericResult, resultWriter);
+            writeMails(session, genericResult, resultWriter, optTimeZone);
         }
     }
-    
-    private void writeMails(ServerSession session, SearchResult<?> genericResult, OXJSONWriter resultWriter) throws JSONException, OXException {
+
+    private void writeMails(ServerSession session, SearchResult<?> genericResult, OXJSONWriter resultWriter, TimeZone optTimeZone) throws JSONException, OXException {
         SearchResult<MailMessage> searchResult = (SearchResult<MailMessage>) genericResult;
         List<IndexDocument<MailMessage>> mailDocuments = searchResult.getDocuments();
         if (mailDocuments != null) {
@@ -163,7 +169,7 @@ public class SearchResult2JSONConverter implements ResultConverter {
                 fields = MailListField.getFields(requestedFields);
             }
 
-            JSONArray mails = convertMails(session, mailDocuments, fields);
+            JSONArray mails = convertMails(session, mailDocuments, fields, optTimeZone);
             JSONObject mailJSON = new JSONObject();
             mailJSON.put("duration", searchResult.getDuration());
             mailJSON.put("numFound", searchResult.getNumFound());
@@ -174,7 +180,7 @@ public class SearchResult2JSONConverter implements ResultConverter {
         }
     }
 
-    private JSONArray convertMails(ServerSession session, List<IndexDocument<MailMessage>> mails, MailListField[] fields) throws JSONException, OXException {
+    private JSONArray convertMails(ServerSession session, List<IndexDocument<MailMessage>> mails, MailListField[] fields, TimeZone optTimeZone) throws JSONException, OXException {
         if (mails.isEmpty()) {
             return new JSONArray();
         }
@@ -194,7 +200,7 @@ public class SearchResult2JSONConverter implements ResultConverter {
                     JSONObject mailJSON = new JSONObject();
                     int accountID = mail.getAccountId();
                     for (int j = 0; j < writers.length; j++) {
-                        writers[j].writeField(mailJSON, mail, 0, true, accountID, userId, contextId);
+                        writers[j].writeField(mailJSON, mail, 0, true, accountID, userId, contextId, optTimeZone);
                     }
                     documentJSON.put("data", mailJSON);
                     jsonWriter.value(documentJSON);
@@ -205,6 +211,19 @@ public class SearchResult2JSONConverter implements ResultConverter {
         }
 
         return (JSONArray) jsonWriter.getObject();
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

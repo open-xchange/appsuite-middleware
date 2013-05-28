@@ -50,6 +50,7 @@
 package com.openexchange.contacts.json.actions;
 
 import java.util.Date;
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -62,6 +63,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 
@@ -92,18 +94,40 @@ public class UpdateAction extends ContactAction {
     protected AJAXRequestResult perform(final ContactRequest request) throws OXException {
         boolean containsImage = request.containsImage();
         JSONObject json = request.getContactJSON(containsImage);
-        Contact contact = null;
+
+        String imageBase64 = null;
+        {
+            Object imageObject = json.opt("image1");
+            if (imageObject instanceof String) {
+                json.remove("image1");
+                imageBase64 = (String) imageObject;
+            }
+        }
+
+        Contact contact;
 		try {
 			contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields(ContactAction.VIRTUAL_FIELDS));
 		} catch (JSONException e) {
 			throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
 		}
+
         if (containsImage) {
         	RequestTools.setImageData(request, contact);
+        } else if (null != imageBase64) {
+            try {
+                final byte[] image1 = Base64.decodeBase64(imageBase64);
+                if (null != image1 && image1.length > 0) {
+                    final String mimeType = json.optString("image1_content_type", "image/jpeg");
+                    RequestTools.setImageData(contact, image1, mimeType);
+                }
+            } catch (final RuntimeException e) {
+                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
         }
+
         getContactService().updateContact(request.getSession(), request.getFolderID(), request.getObjectID(), contact,
         		new Date(request.getTimestamp()));
-        return new AJAXRequestResult(new JSONObject(), contact.getLastModified(), "json");
+        return new AJAXRequestResult(new JSONObject(0), contact.getLastModified(), "json");
     }
 
 }

@@ -61,7 +61,7 @@ import com.openexchange.mail.structure.handler.MIMEStructureHandler;
 
 /**
  * {@link Bug23037_StructureTest} - Test for output of structured JSON mail object.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Bug23037_StructureTest extends AbstractMailTest {
@@ -75,7 +75,7 @@ public class Bug23037_StructureTest extends AbstractMailTest {
 
     /**
      * Initializes a new {@link Bug23037_StructureTest}.
-     * 
+     *
      * @param name The test name
      */
     public Bug23037_StructureTest(final String name) {
@@ -90,40 +90,40 @@ public class Bug23037_StructureTest extends AbstractMailTest {
     public void testMIMEStructure() {
         try {
             getSession();
-            final InputStream is = new ByteArrayInputStream(("From: Janusz Kurzawski <jkurzawski@polarisfamily.com>\n" + 
-                "To: Martin Poglin <mpoglin@polarisfamily.com>\n" + 
-                "Subject: Przeczytano: Mailuserlsit\n" + 
-                "Date: Tue, 22 Feb 2011 13:02:24 +0100\n" + 
-                "Message-ID: <4340252EF61240F6B275681F552B965E@polarisfamily.com>\n" + 
-                "MIME-Version: 1.0\n" + 
-                "Content-Type: application/ms-tnef;\n" + 
-                "    name=\"winmail.dat\"\n" + 
-                "Content-Transfer-Encoding: base64\n" + 
-                "Content-Disposition: attachment;\n" + 
-                "    filename=\"winmail.dat\"\n" + 
-                "X-Mailer: Microsoft Office Outlook 12.0\n" + 
-                "\n" + 
-                "eJ8+IhcQAQaQCAAEAAAAAAABAAEAAQeQBgAIAAAA5AQAAAAAAADoAAEIgAcAIAAAAElQTS5NaWNy\n" + 
-                "b3NvZnQgTWFpbC5SZWFkIFJlY2VpcHQAAwsBCoABACEAAAA0RjM4MzM0MTFDQUFCNzRGODJBQzRG\n" + 
-                "NDZEMzkzOUQ1RABEBwEDkAYA9AMAAB8AAAALACkAAAAAAEAAMgCw+/0oiNLLAR4ASQABAAAAEQAA\n" + 
-                "AFJlOiBNYWlsdXNlcmxzaXQAAAAAAgFMAAEAAABFAAAAAAAAAIErH6S+oxAZnW4A3QEPVAIAAAEA\n" + 
-                "TWFydGluIFBvZ2xpbgBTTVRQAG1wb2dsaW5AcG9sYXJpc2ZhbWlseS5jb20AAAAAQABOAIAdvrSG\n" + 
-                "0ssBQABVAADG62yH0ssBHgBwAAEAAAANAAAATWFpbHVzZXJsc2l0AAAAAAIBcQABAAAAGwAAAAHL\n" + 
-                "0ods60YFkxDbUkAqsXme8f2sjvsAAC8ETgAeAHIAAQAAAAEAAAAAAAAAHgBzAAEAAAABAAAAAAAA\n" + 
-                "AB4AdAABAAAAEQAAAEphbnVzeiBLdXJ6YXdza2kAAAAACwAIDAAAAAALAAEOAQAAAAMAFA4AAAAA\n" + 
-                "HgAoDgEAAABDAAAAMDAwMDAwMDIBamt1cnphd3NraUBwb2xhcmlzZmFtaWx5LmNvbQFtYWlsc2Vy\n" + 
-                "dmVyLnBvbGFyaXNmYW1pbHkuY29tAAAeACkOAQAAAEMAAAAwMDAwMDAwMgFqa3VyemF3c2tpQHBv\n" + 
-                "bGFyaXNmYW1pbHkuY29tAW1haWxzZXJ2ZXIucG9sYXJpc2ZhbWlseS5jb20AAB4AARABAAAAHwAA\n" + 
-                "AFdpYWRvbW+c5iB6b3N0YbNhIHByemVjenl0YW5hOgAAHgBGEAEAAAAdAAAAamt1cnphd3NraUBw\n" + 
-                "b2xhcmlzZmFtaWx5LmNvbQAAAAADAN4/n04AAAMAHYBWq/MpTVXQEal8AKDJEfUKAAAAAACgAAAB\n" + 
-                "AAAAAwAogFOr8ylNVdARqXwAoMkR9QoAAAAAQ6AAAAEAAAAeAE2AhgMCAAAAAADAAAAAAAAARgEA\n" + 
-                "AAAaAAAAYwBvAG4AdABlAG4AdAAtAHQAeQBwAGUAAAAAAAEAAABfAAAAbXVsdGlwYXJ0L21peGVk\n" + 
-                "OyBib3VuZGFyeT0iVktVVVhGSVRIT01RSk5ZWFFTRFBBR0RVRUtEQ1pGTlZQSFFOTVpIVU5VIjsg\n" + 
-                "Y2hhcnNldD0iV2luZG93cy0xMjUyIgAACwBTgAggBgAAAAAAwAAAAAAAAEYAAAAAgoUAAAEAAAAL\n" + 
-                "AB8OAQAAAAIB+A8BAAAAEAAAAE3Mno+Ux81Jgva+YKrLqQ8CAfoPAQAAABAAAABNzJ6PlMfNSYL2\n" + 
-                "vmCqy6kPAwD+DwUAAAADAA00/T+lBgMADzT9P6UGAgEUNAEAAAAQAAAATklUQfm/uAEAqgA32W4A\n" + 
-                "AAIBfwABAAAAMQAAADAwMDAwMDAwMUExMzg5NDAzMUU1RUY0Q0E4RUY0RkZDNzcwQjNCMUY0NDE1\n" + 
-                "MzgwMAAAAACL+w==\n" + 
+            final InputStream is = new ByteArrayInputStream(("From: Janusz Kurzawski <jkurzawski@polarisfamily.com>\n" +
+                "To: Martin Poglin <mpoglin@polarisfamily.com>\n" +
+                "Subject: Przeczytano: Mailuserlsit\n" +
+                "Date: Tue, 22 Feb 2011 13:02:24 +0100\n" +
+                "Message-ID: <4340252EF61240F6B275681F552B965E@polarisfamily.com>\n" +
+                "MIME-Version: 1.0\n" +
+                "Content-Type: application/ms-tnef;\n" +
+                "    name=\"winmail.dat\"\n" +
+                "Content-Transfer-Encoding: base64\n" +
+                "Content-Disposition: attachment;\n" +
+                "    filename=\"winmail.dat\"\n" +
+                "X-Mailer: Microsoft Office Outlook 12.0\n" +
+                "\n" +
+                "eJ8+IhcQAQaQCAAEAAAAAAABAAEAAQeQBgAIAAAA5AQAAAAAAADoAAEIgAcAIAAAAElQTS5NaWNy\n" +
+                "b3NvZnQgTWFpbC5SZWFkIFJlY2VpcHQAAwsBCoABACEAAAA0RjM4MzM0MTFDQUFCNzRGODJBQzRG\n" +
+                "NDZEMzkzOUQ1RABEBwEDkAYA9AMAAB8AAAALACkAAAAAAEAAMgCw+/0oiNLLAR4ASQABAAAAEQAA\n" +
+                "AFJlOiBNYWlsdXNlcmxzaXQAAAAAAgFMAAEAAABFAAAAAAAAAIErH6S+oxAZnW4A3QEPVAIAAAEA\n" +
+                "TWFydGluIFBvZ2xpbgBTTVRQAG1wb2dsaW5AcG9sYXJpc2ZhbWlseS5jb20AAAAAQABOAIAdvrSG\n" +
+                "0ssBQABVAADG62yH0ssBHgBwAAEAAAANAAAATWFpbHVzZXJsc2l0AAAAAAIBcQABAAAAGwAAAAHL\n" +
+                "0ods60YFkxDbUkAqsXme8f2sjvsAAC8ETgAeAHIAAQAAAAEAAAAAAAAAHgBzAAEAAAABAAAAAAAA\n" +
+                "AB4AdAABAAAAEQAAAEphbnVzeiBLdXJ6YXdza2kAAAAACwAIDAAAAAALAAEOAQAAAAMAFA4AAAAA\n" +
+                "HgAoDgEAAABDAAAAMDAwMDAwMDIBamt1cnphd3NraUBwb2xhcmlzZmFtaWx5LmNvbQFtYWlsc2Vy\n" +
+                "dmVyLnBvbGFyaXNmYW1pbHkuY29tAAAeACkOAQAAAEMAAAAwMDAwMDAwMgFqa3VyemF3c2tpQHBv\n" +
+                "bGFyaXNmYW1pbHkuY29tAW1haWxzZXJ2ZXIucG9sYXJpc2ZhbWlseS5jb20AAB4AARABAAAAHwAA\n" +
+                "AFdpYWRvbW+c5iB6b3N0YbNhIHByemVjenl0YW5hOgAAHgBGEAEAAAAdAAAAamt1cnphd3NraUBw\n" +
+                "b2xhcmlzZmFtaWx5LmNvbQAAAAADAN4/n04AAAMAHYBWq/MpTVXQEal8AKDJEfUKAAAAAACgAAAB\n" +
+                "AAAAAwAogFOr8ylNVdARqXwAoMkR9QoAAAAAQ6AAAAEAAAAeAE2AhgMCAAAAAADAAAAAAAAARgEA\n" +
+                "AAAaAAAAYwBvAG4AdABlAG4AdAAtAHQAeQBwAGUAAAAAAAEAAABfAAAAbXVsdGlwYXJ0L21peGVk\n" +
+                "OyBib3VuZGFyeT0iVktVVVhGSVRIT01RSk5ZWFFTRFBBR0RVRUtEQ1pGTlZQSFFOTVpIVU5VIjsg\n" +
+                "Y2hhcnNldD0iV2luZG93cy0xMjUyIgAACwBTgAggBgAAAAAAwAAAAAAAAEYAAAAAgoUAAAEAAAAL\n" +
+                "AB8OAQAAAAIB+A8BAAAAEAAAAE3Mno+Ux81Jgva+YKrLqQ8CAfoPAQAAABAAAABNzJ6PlMfNSYL2\n" +
+                "vmCqy6kPAwD+DwUAAAADAA00/T+lBgMADzT9P6UGAgEUNAEAAAAQAAAATklUQfm/uAEAqgA32W4A\n" +
+                "AAIBfwABAAAAMQAAADAwMDAwMDAwMUExMzg5NDAzMUU1RUY0Q0E4RUY0RkZDNzcwQjNCMUY0NDE1\n" +
+                "MzgwMAAAAACL+w==\n" +
                 "").getBytes());
             MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), is);
             final MailMessage mail = MimeMessageConverter.convertMessage(mimeMessage);
@@ -134,7 +134,7 @@ public class Bug23037_StructureTest extends AbstractMailTest {
             final JSONObject jsonMailObject = handler.getJSONMailObject();
             assertNotNull("Structured JSON mail object is null.", jsonMailObject);
 
-            System.out.println(jsonMailObject.toString(2));
+            // System.out.println(jsonMailObject.toString(2));
 
         } catch (final Exception e) {
             e.printStackTrace();

@@ -51,10 +51,15 @@ package com.openexchange.ajax.requesthandler.converters.preview;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
@@ -88,6 +93,9 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class PreviewImageResultConverter extends AbstractPreviewResultConverter {
 
+    private static final String PARAMETER_ACTION = AJAXServlet.PARAMETER_ACTION;
+    private static final String PARAMETER_SESSION = AJAXServlet.PARAMETER_SESSION;
+
     /**
      * Initializes a new {@link PreviewImageResultConverter}.
      */
@@ -119,8 +127,8 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             final String eTag = result.getHeader("ETag");
             final boolean isValidEtag = !isEmpty(eTag);
             if (null != previewCache && isValidEtag) {
-                final String cacheKey = generatePreviewCacheKey(eTag, requestData, new String[0]);
-                final CachedPreview cachedPreview = previewCache.get(cacheKey, session.getUserId(), session.getContextId());
+                final String cacheKey = generatePreviewCacheKey(eTag, requestData);
+                final CachedPreview cachedPreview = previewCache.get(cacheKey, 0, session.getContextId());
                 if (null != cachedPreview) {
                     requestData.setFormat("file");
                     // Create appropriate IFileHolder
@@ -175,13 +183,13 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                 thumbnail = Streams.newByteArrayInputStream(bytes);
                 size = bytes.length;
                 // Specify task
-                final String cacheKey = generatePreviewCacheKey(eTag, requestData, new String[0]);
+                final String cacheKey = generatePreviewCacheKey(eTag, requestData);
                 final AbstractTask<Void> task = new AbstractTask<Void>() {
 
                     @Override
                     public Void call() throws OXException {
                         final CachedPreview preview = new CachedPreview(bytes, fileName, "image/jpeg", bytes.length);
-                        previewCache.save(cacheKey, preview, session.getUserId(), session.getContextId());
+                        previewCache.save(cacheKey, preview, 0, session.getContextId());
                         return null;
                     }
                 };

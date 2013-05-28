@@ -83,7 +83,7 @@ public class GrizzlyConfig implements Initialization {
     private String httpHost = "0.0.0.0";
 
     /** The default port for the http network listener. */
-    private int httpPort = 8080;
+    private int httpPort = 8009;
 
     /** Enable grizzly monitoring via JMX? */
     private boolean isJMXEnabled = false;
@@ -122,8 +122,8 @@ public class GrizzlyConfig implements Initialization {
 
     /** Default encoding for incoming Http Requests, this value must be equal to the web server's default encoding */
     private String defaultEncoding = "UTF-8";
-    
-    /** Do we want to consider X-Forward-* Headers */ 
+
+    /** Do we want to consider X-Forward-* Headers */
     private boolean isConsiderXForwards = false;
 
     /** A comma separated list of known proxies */
@@ -133,7 +133,7 @@ public class GrizzlyConfig implements Initialization {
      * proxy or load balancer
      */
     private String forHeader = "X-Forwarded-For";
-    
+
     /** The name of the protocolHeader used to decide if we are dealing with a in-/secure Request */
     private String protocolHeader = "X-Forwarded-Proto";
 
@@ -150,7 +150,10 @@ public class GrizzlyConfig implements Initialization {
     private String echoHeader = "X-Echo-Header";
 
     /** The maximum allowed size for PUT and POST bodies */
-    private  int maxBodySize = 104857600; 
+    private int maxBodySize = 104857600;
+
+    /** The max. number of HTTP sessions */
+    private int maxNumberOfHttpSessions = 250000;
 
     // sessiond properties
 
@@ -203,6 +206,8 @@ public class GrizzlyConfig implements Initialization {
         this.httpsProtoPort = configService.getIntProperty("com.openexchange.server.httpsProtoPort", 443);
         final int configuredMaxBodySize = configService.getIntProperty("com.openexchange.servlet.maxBodySize", 104857600);
         this.maxBodySize = configuredMaxBodySize <= 0 ? Integer.MAX_VALUE : configuredMaxBodySize;
+        final int configuredMaxNumberOfHttpSessions = configService.getIntProperty("com.openexchange.servlet.maxActiveSessions", 250000);
+        this.maxNumberOfHttpSessions = configuredMaxNumberOfHttpSessions <= 0 ? 0 : configuredMaxNumberOfHttpSessions;
 
         this.httpHost = configService.getProperty("com.openexchange.connector.networkListenerHost", "127.0.0.1");
         // keep backwards compatibility with ajp config
@@ -368,15 +373,15 @@ public class GrizzlyConfig implements Initialization {
     public List<String> getKnownProxies() {
         return knownProxies;
     }
-    
+
     /**
-     * Gets the name of forward for header 
+     * Gets the name of forward for header
      * @return the forwardHeader
      */
     public String getForHeader() {
         return forHeader;
     }
-    
+
     /**
      * Gets the protocolHeader
      *
@@ -446,16 +451,25 @@ public class GrizzlyConfig implements Initialization {
     }
 
     /**
-     * Get the name of the echo header whose value is echoed for each request providing that header when using KippDta's mod_id. 
+     * Get the name of the echo header whose value is echoed for each request providing that header when using KippDta's mod_id.
      * @return The name of the echo header whose value is echoed for each request providing that header.
      */
     public String getEchoHeader() {
         return this.echoHeader;
     }
-    
+
     /** Get the maximum allowed size for PUT and POST bodies */
     public int getMaxBodySize() {
         return maxBodySize;
+    }
+
+    /**
+     * Gets the maximum number of active sessions
+     *
+     * @return The maximum number of active sessions
+     */
+    public int getMaxNumberOfHttpSessions() {
+        return maxNumberOfHttpSessions;
     }
 
 }

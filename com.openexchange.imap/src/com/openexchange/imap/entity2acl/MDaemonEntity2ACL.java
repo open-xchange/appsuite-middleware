@@ -53,7 +53,7 @@ import java.net.InetSocketAddress;
 import java.util.Arrays;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -105,10 +105,10 @@ public final class MDaemonEntity2ACL extends Entity2ACL {
         if (OCLPermission.ALL_GROUPS_AND_USERS == userId) {
             return AUTH_ID_ANYONE;
         }
-        final MailAccountStorageService storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
+        final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
         final String userLoginInfo;
         {
-            final UserService userService = IMAPServiceRegistry.getService(UserService.class, true);
+            final UserService userService = Services.getService(UserService.class);
             if (null == userService) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( UserService.class.getName());
             }

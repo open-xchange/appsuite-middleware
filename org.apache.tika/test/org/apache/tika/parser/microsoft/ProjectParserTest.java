@@ -18,10 +18,11 @@ package org.apache.tika.parser.microsoft;
 
 import java.io.InputStream;
 
-import org.apache.tika.metadata.DublinCore;
-import org.apache.tika.metadata.HttpHeaders;
-import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.Office;
+import org.apache.tika.metadata.OfficeOpenXMLCore;
+import org.apache.tika.metadata.OfficeOpenXMLExtended;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.ContentHandler;
@@ -62,21 +63,24 @@ public class ProjectParserTest extends TestCase {
 
        assertEquals(
                "application/vnd.ms-project",
-               metadata.get(HttpHeaders.CONTENT_TYPE));
+               metadata.get(Metadata.CONTENT_TYPE));
        
-       assertEquals("The quick brown fox jumps over the lazy dog", metadata.get(DublinCore.TITLE));
-       assertEquals("Gym class featuring a brown fox and lazy dog", metadata.get(DublinCore.SUBJECT));
-       assertEquals("Nevin Nollop", metadata.get(MSOffice.AUTHOR));
-       assertEquals("", metadata.get(MSOffice.LAST_AUTHOR));
-       assertEquals("Pangram, fox, dog", metadata.get(MSOffice.KEYWORDS));
-       assertEquals("Comment Vulpes vulpes comment", metadata.get(MSOffice.COMMENTS));
+       assertEquals("The quick brown fox jumps over the lazy dog", metadata.get(TikaCoreProperties.TITLE));
+       assertEquals("Gym class featuring a brown fox and lazy dog", metadata.get(OfficeOpenXMLCore.SUBJECT));
+       assertEquals("Gym class featuring a brown fox and lazy dog", metadata.get(Metadata.SUBJECT));
+       assertEquals("Nevin Nollop", metadata.get(TikaCoreProperties.CREATOR));
+       assertEquals("", metadata.get(TikaCoreProperties.MODIFIER));
+       assertEquals("Pangram, fox, dog", metadata.get(TikaCoreProperties.KEYWORDS));
+       assertEquals("Comment Vulpes vulpes comment", metadata.get(TikaCoreProperties.COMMENTS));
        
-       assertEquals("Category1", metadata.get(MSOffice.CATEGORY));
-       assertEquals("Mr Burns", metadata.get(MSOffice.MANAGER));
-       assertEquals("CompanyA", metadata.get(MSOffice.COMPANY));
+       assertEquals("Category1", metadata.get(OfficeOpenXMLCore.CATEGORY));
+       assertEquals("Mr Burns", metadata.get(OfficeOpenXMLExtended.MANAGER));
+       assertEquals("CompanyA", metadata.get(OfficeOpenXMLExtended.COMPANY));
        
-       assertEquals("2011-11-24T10:58:00Z", metadata.get(MSOffice.CREATION_DATE));
-       assertEquals("2011-11-24T11:31:00Z", metadata.get(MSOffice.LAST_SAVED));
+       assertEquals("2011-11-24T10:58:00Z", metadata.get(TikaCoreProperties.CREATED));
+       assertEquals("2011-11-24T10:58:00Z", metadata.get(Metadata.CREATION_DATE));
+       assertEquals("2011-11-24T11:31:00Z", metadata.get(TikaCoreProperties.MODIFIED));
+       assertEquals("2011-11-24T11:31:00Z", metadata.get(Metadata.DATE));
        
        // Custom Project metadata is present with prefix
        assertEquals("0%", metadata.get("custom:% Complete"));

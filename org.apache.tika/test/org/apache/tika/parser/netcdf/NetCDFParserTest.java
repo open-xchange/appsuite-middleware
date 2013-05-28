@@ -19,10 +19,9 @@ package org.apache.tika.parser.netcdf;
 //JDK imports
 import java.io.InputStream;
 
-import org.apache.tika.metadata.ClimateForcast;
-import org.apache.tika.metadata.DublinCore;
 //TIKA imports
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
@@ -54,14 +53,14 @@ public class NetCDFParserTest extends TestCase {
             stream.close();
         }
 
-        assertEquals(metadata.get(DublinCore.TITLE),
+        assertEquals(metadata.get(TikaCoreProperties.TITLE),
                 "model output prepared for IPCC AR4");
-        assertEquals(metadata.get(ClimateForcast.CONTACT), "ccsm@ucar.edu");
-        assertEquals(metadata.get(ClimateForcast.PROJECT_ID),
+        assertEquals(metadata.get(Metadata.CONTACT), "ccsm@ucar.edu");
+        assertEquals(metadata.get(Metadata.PROJECT_ID),
                 "IPCC Fourth Assessment");
-        assertEquals(metadata.get(ClimateForcast.CONVENTIONS), "CF-1.0");
-        assertEquals(metadata.get(ClimateForcast.REALIZATION), "1");
-        assertEquals(metadata.get(ClimateForcast.EXPERIMENT_ID),
+        assertEquals(metadata.get(Metadata.CONVENTIONS), "CF-1.0");
+        assertEquals(metadata.get(Metadata.REALIZATION), "1");
+        assertEquals(metadata.get(Metadata.EXPERIMENT_ID),
                 "720 ppm stabilization experiment (SRESA1B)");
 
     }

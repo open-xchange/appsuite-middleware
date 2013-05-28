@@ -74,6 +74,8 @@ import com.openexchange.user.UserService;
  */
 public class RealtimeActivator extends HousekeepingActivator {
 
+    private SyntheticChannel synth;
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[]{ ContextService.class, UserService.class, TimerService.class, SimpleConverter.class, ThreadPoolService.class };
@@ -83,7 +85,7 @@ public class RealtimeActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         RealtimeServiceRegistry.SERVICES.set(this);
         
-        final SyntheticChannel synth = new SyntheticChannel(this);
+        synth = new SyntheticChannel(this);
         
         TimerService timerService = getService(TimerService.class);
         timerService.scheduleAtFixedRate(synth, 0, 1, TimeUnit.MINUTES);
@@ -110,6 +112,11 @@ public class RealtimeActivator extends HousekeepingActivator {
         registerService(PayloadTreeConverter.class, converter);
         
         openTrackers();
+    }
+    
+    @Override
+    protected void stopBundle() throws Exception {
+        synth.shutdown();
     }
 
 }

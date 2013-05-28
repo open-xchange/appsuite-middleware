@@ -204,7 +204,9 @@ public class TestTask extends Task {
         Calendar cal = new GregorianCalendar(TimeZones.UTC);
         cal.setTime(getStartDate());
         int currentMonth = cal.get(Calendar.MONTH);
-        setStartDate(setWeekOfMonth(setWeekDay(getStartDate(), dayOfWeek), week));
+        Date setWeekOfMonth = setWeekOfMonth(getStartDate(), week);
+        Date setWeekDay = setWeekDay(setWeekOfMonth, dayOfWeek);
+        setStartDate(setWeekDay);
         cal.setTime(getStartDate());
         int otherMonth = cal.get(Calendar.MONTH);
         if (otherMonth != currentMonth) {

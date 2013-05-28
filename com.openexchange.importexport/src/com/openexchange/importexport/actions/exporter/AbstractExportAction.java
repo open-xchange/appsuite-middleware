@@ -55,6 +55,7 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -78,7 +79,7 @@ public abstract class AbstractExportAction implements AJAXActionService {
     public abstract Exporter getExporter();
 
     private static final String PARAMETER_CONTENT_TYPE = "content_type";
-    private static final String DELIVERY = "delivery";
+    private static final String DELIVERY = AJAXServlet.PARAMETER_DELIVERY;
     private static final String SAVE_AS_TYPE = "application/octet-stream";
     private static final String DOWNLOAD = "download";
 
@@ -102,7 +103,7 @@ public abstract class AbstractExportAction implements AJAXActionService {
                 String contentType = request.getParameter(PARAMETER_CONTENT_TYPE);
                 String delivery = request.getParameter(DELIVERY);
                 if (SAVE_AS_TYPE.equals(contentType) || DOWNLOAD.equalsIgnoreCase(delivery)) {
-                    optionalParams.put("__saveToDisk", Boolean.TRUE);                    
+                    optionalParams.put("__saveToDisk", Boolean.TRUE);
                 }
             }
         }

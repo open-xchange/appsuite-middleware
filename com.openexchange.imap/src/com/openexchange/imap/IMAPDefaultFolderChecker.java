@@ -70,7 +70,7 @@ import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RootSubfolderCache;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionCache;
@@ -285,7 +285,7 @@ public class IMAPDefaultFolderChecker {
                          */
                         final boolean mboxEnabled = MBoxEnabledCache.isMBoxEnabled(imapConfig, inboxFolder, prefix);
                         final int type = mboxEnabled ? Folder.HOLDS_MESSAGES : FOLDER_TYPE;
-                        sequentiallyCheckFolders(prefix, sep, type, IMAPServiceRegistry.getService(MailAccountStorageService.class, true), mailSessionCache);
+                        sequentiallyCheckFolders(prefix, sep, type, Services.getService(MailAccountStorageService.class), mailSessionCache);
                         /*
                          * Remember default folders
                          */
@@ -459,7 +459,7 @@ public class IMAPDefaultFolderChecker {
             if (Log.appendTraceToMessage()) {
                 final String lineSeparator = System.getProperty("line.separator");
                 sb.append(lineSeparator).append(lineSeparator);
-                appendStackTrace(e.getStackTrace(), sb, new ClassNameMatcher(IMAPDefaultFolderChecker.class.getSimpleName()), lineSeparator);                        
+                appendStackTrace(e.getStackTrace(), sb, new ClassNameMatcher(IMAPDefaultFolderChecker.class.getSimpleName()), lineSeparator);
                 LOG.warn(sb.toString());
             } else {
                 LOG.warn(sb.toString(), e);
@@ -488,7 +488,7 @@ public class IMAPDefaultFolderChecker {
                 if (Log.appendTraceToMessage()) {
                     final String lineSeparator = System.getProperty("line.separator");
                     sb.append(lineSeparator).append(lineSeparator);
-                    appendStackTrace(e.getStackTrace(), sb, new ClassNameMatcher(IMAPDefaultFolderChecker.class.getSimpleName()), lineSeparator);                        
+                    appendStackTrace(e.getStackTrace(), sb, new ClassNameMatcher(IMAPDefaultFolderChecker.class.getSimpleName()), lineSeparator);
                     LOG.warn(sb.toString());
                 } else {
                     LOG.warn(sb.toString(), e);
@@ -503,7 +503,7 @@ public class IMAPDefaultFolderChecker {
                 if (Log.appendTraceToMessage()) {
                     final String lineSeparator = System.getProperty("line.separator");
                     sb.append(lineSeparator).append(lineSeparator);
-                    appendStackTrace(e.getStackTrace(), sb, new ClassNameMatcher(IMAPDefaultFolderChecker.class.getSimpleName()), lineSeparator);                        
+                    appendStackTrace(e.getStackTrace(), sb, new ClassNameMatcher(IMAPDefaultFolderChecker.class.getSimpleName()), lineSeparator);
                     LOG.warn(sb.toString());
                 } else {
                     LOG.warn(sb.toString(), e);

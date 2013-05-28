@@ -6,7 +6,6 @@ Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
- lib/json.jar,
  lib/jchronic-0.2.3.jar,
  lib/junit-4.6.jar,
  lib/cglib-nodep-2.2.jar,
@@ -15,3 +14,6 @@ Bundle-ClassPath: .,
  lib/mockito-all-1.9.5.jar,
  lib/objenesis-1.2.jar,
  lib/powermock-mockito-1.5-full.jar
+Import-Package: javax.servlet,
+ javax.servlet.http,
+ org.json

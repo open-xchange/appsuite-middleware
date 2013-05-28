@@ -23,11 +23,9 @@ import junit.framework.TestCase;
 
 import org.apache.tika.detect.DefaultDetector;
 import org.apache.tika.detect.Detector;
-import org.apache.tika.metadata.DublinCore;
-import org.apache.tika.metadata.HttpHeaders;
-import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
-import org.apache.tika.metadata.TikaMetadataKeys;
+import org.apache.tika.metadata.OfficeOpenXMLExtended;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
@@ -48,15 +46,18 @@ public class ExcelParserTest extends TestCase {
 
             assertEquals(
                     "application/vnd.ms-excel",
-                    metadata.get(HttpHeaders.CONTENT_TYPE));
-            assertEquals("Simple Excel document", metadata.get(DublinCore.TITLE));
-            assertEquals("Keith Bennett", metadata.get(MSOffice.AUTHOR));
+                    metadata.get(Metadata.CONTENT_TYPE));
+            assertEquals("Simple Excel document", metadata.get(TikaCoreProperties.TITLE));
+            assertEquals("Keith Bennett", metadata.get(TikaCoreProperties.CREATOR));
+            assertEquals("Keith Bennett", metadata.get(Metadata.AUTHOR));
             
             // Mon Oct 01 17:13:56 BST 2007
-            assertEquals("2007-10-01T16:13:56Z", metadata.get(MSOffice.CREATION_DATE));
+            assertEquals("2007-10-01T16:13:56Z", metadata.get(TikaCoreProperties.CREATED));
+            assertEquals("2007-10-01T16:13:56Z", metadata.get(Metadata.CREATION_DATE));
             
             // Mon Oct 01 17:31:43 BST 2007
-            assertEquals("2007-10-01T16:31:43Z", metadata.get(MSOffice.LAST_SAVED));
+            assertEquals("2007-10-01T16:31:43Z", metadata.get(TikaCoreProperties.MODIFIED));
+            assertEquals("2007-10-01T16:31:43Z", metadata.get(Metadata.DATE));
             
             String content = handler.toString();
             assertTrue(content.contains("Sample Excel Worksheet"));
@@ -83,7 +84,7 @@ public class ExcelParserTest extends TestCase {
 
             assertEquals(
                     "application/vnd.ms-excel",
-                    metadata.get(HttpHeaders.CONTENT_TYPE));
+                    metadata.get(Metadata.CONTENT_TYPE));
 
             String content = handler.toString();
 
@@ -158,7 +159,7 @@ public class ExcelParserTest extends TestCase {
         
             assertEquals(
                     "application/vnd.ms-excel",
-                    metadata.get(HttpHeaders.CONTENT_TYPE));
+                    metadata.get(Metadata.CONTENT_TYPE));
         
             String content = handler.toString();
             
@@ -195,7 +196,7 @@ public class ExcelParserTest extends TestCase {
 
             assertEquals(
                     "application/vnd.ms-excel",
-                    metadata.get(HttpHeaders.CONTENT_TYPE));
+                    metadata.get(Metadata.CONTENT_TYPE));
             String content = handler.toString();
             assertTrue(content.contains("Number Formats"));
         } finally {
@@ -232,7 +233,7 @@ public class ExcelParserTest extends TestCase {
        InputStream input = ExcelParserTest.class.getResourceAsStream(
              "/test-documents/testEXCEL.xlsb");
        Metadata m = new Metadata();
-       m.add(TikaMetadataKeys.RESOURCE_NAME_KEY, "excel.xlsb");
+       m.add(Metadata.RESOURCE_NAME_KEY, "excel.xlsb");
        
        // Should be detected correctly
        MediaType type = null;
@@ -264,6 +265,50 @@ public class ExcelParserTest extends TestCase {
           input.close();
        }
     }
+
+    /**
+     * We don't currently support the old Excel 95 .xls file format, 
+     *  but we shouldn't break on these files either (TIKA-976)  
+     */
+    public void testExcel95() throws Exception {
+       Detector detector = new DefaultDetector();
+       AutoDetectParser parser = new AutoDetectParser();
+       
+       InputStream input = ExcelParserTest.class.getResourceAsStream(
+             "/test-documents/testEXCEL_95.xls");
+       Metadata m = new Metadata();
+       m.add(Metadata.RESOURCE_NAME_KEY, "excel_95.xls");
+       
+       // Should be detected correctly
+       MediaType type = null;
+       try {
+          type = detector.detect(input, m);
+          assertEquals("application/vnd.ms-excel", type.toString());
+       } finally {
+          input.close();
+       }
+       
+       // OfficeParser will claim to handle it
+       assertEquals(true, (new OfficeParser()).getSupportedTypes(new ParseContext()).contains(type));
+       
+       // OOXMLParser won't handle it
+       assertEquals(false, (new OOXMLParser()).getSupportedTypes(new ParseContext()).contains(type));
+       
+       // AutoDetectParser doesn't break on it
+       input = ExcelParserTest.class.getResourceAsStream("/test-documents/testEXCEL_95.xls");
+
+       try {
+          ContentHandler handler = new BodyContentHandler(-1);
+          ParseContext context = new ParseContext();
+          context.set(Locale.class, Locale.US);
+          parser.parse(input, handler, m, context);
+
+          String content = handler.toString();
+          assertEquals("", content);
+       } finally {
+          input.close();
+       }
+    }
     
     /**
      * Ensures that custom OLE2 (HPSF) properties are extracted
@@ -282,12 +327,12 @@ public class ExcelParserTest extends TestCase {
           input.close();
        }
        
-       assertEquals("application/vnd.ms-excel", metadata.get(HttpHeaders.CONTENT_TYPE));
-       assertEquals("",                     metadata.get(MSOffice.AUTHOR));
-       assertEquals("",                     metadata.get(MSOffice.LAST_AUTHOR));
-       assertEquals("2011-08-22T13:45:54Z", metadata.get(MSOffice.LAST_SAVED));
-       assertEquals("2006-09-12T15:06:44Z", metadata.get(MSOffice.CREATION_DATE));
-       assertEquals("Microsoft Excel",      metadata.get(MSOffice.APPLICATION_NAME));
+       assertEquals("application/vnd.ms-excel", metadata.get(Metadata.CONTENT_TYPE));
+       assertEquals("",                     metadata.get(TikaCoreProperties.CREATOR));
+       assertEquals("",                     metadata.get(TikaCoreProperties.MODIFIER));
+       assertEquals("2011-08-22T13:45:54Z", metadata.get(TikaCoreProperties.MODIFIED));
+       assertEquals("2006-09-12T15:06:44Z", metadata.get(TikaCoreProperties.CREATED));
+       assertEquals("Microsoft Excel",      metadata.get(OfficeOpenXMLExtended.APPLICATION));
        assertEquals("true",                 metadata.get("custom:myCustomBoolean"));
        assertEquals("3",                    metadata.get("custom:myCustomNumber"));
        assertEquals("MyStringValue",        metadata.get("custom:MyCustomString"));

@@ -20,11 +20,12 @@ import java.io.ByteArrayInputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
+
 import junit.framework.TestCase;
 
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.metadata.Metadata;
-import org.apache.tika.metadata.TikaMetadataKeys;
 
 /**
  * These tests try to ensure that the MimeTypesReader
@@ -149,7 +150,7 @@ public class MimeTypesReaderTest extends TestCase {
           // Check that we can correct detect with the file one:
           // By name
           Metadata m = new Metadata();
-          m.add(TikaMetadataKeys.RESOURCE_NAME_KEY, "test.hello.world");
+          m.add(Metadata.RESOURCE_NAME_KEY, "test.hello.world");
           assertEquals(hwf.toString(), this.mimeTypes.detect(null, m).toString());
           
           // By contents

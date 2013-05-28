@@ -68,6 +68,6 @@ public class MultipleHandlerTools {
      */
     public static OXException wrapThrowable(Throwable t) {
         ExceptionUtils.handleThrowable(t);
-        return THROWABLE.create(t, t.getMessage());
+        return t instanceof OXException ? (OXException) t : THROWABLE.create(t, t.getMessage());
     }
 }

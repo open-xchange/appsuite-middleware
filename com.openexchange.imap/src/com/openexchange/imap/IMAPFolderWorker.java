@@ -70,7 +70,7 @@ import com.openexchange.imap.cache.ListLsubRuntimeException;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.api.enhanced.MailMessageStorageLong;
@@ -122,7 +122,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             synchronized (IMAPFolderWorker.class) {
                 tmp = failFastTimeout;
                 if (null == tmp) {
-                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
                     tmp = Integer.valueOf(null == service ? 10000 : service.getIntProperty("com.openexchange.imap.failFastTimeout", 10000));
                     failFastTimeout = tmp;
                 }
@@ -133,7 +133,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
     /**
      * Checks for possible fail-fast error.
-     * 
+     *
      * @param imapStore The IMAP store to check
      * @param fullName The mailbox full name
      * @throws MessagingException If such a fail-fast error exists and has not elapsed, yet

@@ -71,6 +71,9 @@ public final class PreviewExceptionMessages implements LocalizableStrings {
     // Thumbnail image not available.
     public static final String THUMBNAIL_NOT_AVAILABLE = "Thumbnail image not available.";
 
+    // No preview service for MIME type %1$s
+    public static final String NO_PREVIEW_SERVICE = "No preview service for MIME type %1$s";
+
     /**
      * Prevent instantiation.
      */

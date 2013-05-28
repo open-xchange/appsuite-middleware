@@ -30,7 +30,6 @@ import org.apache.tika.parser.chm.accessor.DirectoryListingEntry;
 public class TestDirectoryListingEntry extends TestCase {
     private DirectoryListingEntry dle = null;
 
-    @Override
     public void setUp() throws Exception {
         dle = new DirectoryListingEntry(TestParameters.nameLength,
                 TestParameters.entryName, TestParameters.entryType,

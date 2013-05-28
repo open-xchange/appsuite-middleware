@@ -26,6 +26,8 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.apache.tika.Tika;
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.detect.DefaultDetector;
 import org.apache.tika.detect.Detector;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.fork.ForkParser;
@@ -42,9 +44,9 @@ import org.xml.sax.SAXException;
  *  wired in to the regular Parsers and their test data
  */
 public class ForkParserIntegrationTest extends TestCase {
-//    private TikaConfig tika = TikaConfig.getDefaultConfig();
-    private final Tika tika = new Tika(); // TODO Use TikaConfig instead, when it works
-    
+
+    private Tika tika = new Tika(); // TODO Use TikaConfig instead, when it works
+
     /**
      * Simple text parsing
      */
@@ -74,7 +76,7 @@ public class ForkParserIntegrationTest extends TestCase {
      */
     static class AnError extends Error {
         private static final long serialVersionUID = -6197267350768803348L;
-        private final String message;
+        private String message;
         AnError(String message) {
             super(message);
             this.message = message;
@@ -82,18 +84,12 @@ public class ForkParserIntegrationTest extends TestCase {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
 
             AnError anError = (AnError) o;
 
-            if (!message.equals(anError.message)) {
-                return false;
-            }
+            if (!message.equals(anError.message)) return false;
 
             return true;
         }
@@ -134,16 +130,12 @@ public class ForkParserIntegrationTest extends TestCase {
         public Error err = new AnError("Simulated fail");
         public RuntimeException re = null;
         
-        @Override
         public Set<MediaType> getSupportedTypes(ParseContext context) {
             return new HashSet<MediaType>(Arrays.asList(MediaType.TEXT_PLAIN));
         }
 
-        @Override
         public void parse(InputStream stream, ContentHandler handler, Metadata metadata, ParseContext context) throws IOException, SAXException, TikaException {
-            if (re != null) {
-                throw re;
-            }
+            if (re != null) throw re;
             throw err;
         }
     }
@@ -194,8 +186,7 @@ public class ForkParserIntegrationTest extends TestCase {
        
        ParseContext context = new ParseContext();
        context.set(Detector.class, new Detector() {
-          @Override
-        public MediaType detect(InputStream input, Metadata metadata) {
+          public MediaType detect(InputStream input, Metadata metadata) {
              return MediaType.OCTET_STREAM;
           }
        });
@@ -214,6 +205,33 @@ public class ForkParserIntegrationTest extends TestCase {
        } finally {
           parser.close();
        }
+    }
+
+    /**
+     * TIKA-832
+     */
+    public void testAttachingADebuggerOnTheForkedParserShouldWork()
+            throws Exception {
+        ParseContext context = new ParseContext();
+        context.set(Parser.class, tika.getParser());
+
+        ForkParser parser = new ForkParser(
+                ForkParserIntegrationTest.class.getClassLoader(),
+                tika.getParser());
+        parser.setJavaCommand(
+                "java -Xmx32m -Xdebug -Xrunjdwp:"
+                + "transport=dt_socket,address=54321,server=y,suspend=n");
+        try {
+            ContentHandler body = new BodyContentHandler();
+            InputStream stream = ForkParserIntegrationTest.class.getResourceAsStream(
+                    "/test-documents/testTXT.txt");
+            parser.parse(stream, body, new Metadata(), context);
+            String content = body.toString();
+            assertTrue(content.contains("Test d'indexation"));
+            assertTrue(content.contains("http://www.apache.org"));
+        } finally {
+            parser.close();
+        }
     }
 
     /**

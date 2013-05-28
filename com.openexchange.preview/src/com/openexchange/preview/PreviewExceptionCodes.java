@@ -84,7 +84,11 @@ public enum PreviewExceptionCodes implements OXExceptionCode {
     /**
      * Thumbnail image not available.
      */
-    THUMBNAIL_NOT_AVAILABLE(PreviewExceptionMessages.THUMBNAIL_NOT_AVAILABLE, CATEGORY_USER_INPUT, 5)
+    THUMBNAIL_NOT_AVAILABLE(PreviewExceptionMessages.THUMBNAIL_NOT_AVAILABLE, CATEGORY_USER_INPUT, 5),
+    /**
+     * No preview service for MIME type %1$s
+     */
+    NO_PREVIEW_SERVICE(PreviewExceptionMessages.NO_PREVIEW_SERVICE, CATEGORY_USER_INPUT, 6),
 
     ;
 

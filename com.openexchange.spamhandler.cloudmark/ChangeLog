@@ -1,3 +1,7 @@
+* 2013-05-16 - wolfgang.rosenauer@open-xchange.com
+
+  - Fixed Bug #26627 : Bring back Ham reporting via mail feature
+
 * 2011-07-20 - benjamin.otterbach@open-xchange.com
 
   - Fixed Bug #19775 : "No Spam" button does not work

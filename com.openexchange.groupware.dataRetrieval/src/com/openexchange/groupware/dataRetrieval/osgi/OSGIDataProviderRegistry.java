@@ -49,12 +49,12 @@
 
 package com.openexchange.groupware.dataRetrieval.osgi;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.groupware.dataRetrieval.DataProvider;
 import com.openexchange.groupware.dataRetrieval.registry.DataProviderRegistry;
+import com.openexchange.osgi.NearRegistryServiceTracker;
 
 
 /**
@@ -64,10 +64,10 @@ import com.openexchange.groupware.dataRetrieval.registry.DataProviderRegistry;
  */
 public class OSGIDataProviderRegistry extends DataProviderRegistry {
 
-    private ServiceTracker tracker = null;
+    private final NearRegistryServiceTracker<DataProvider> tracker;
 
     public OSGIDataProviderRegistry(BundleContext context) {
-        tracker = new ServiceTracker(context, DataProvider.class.getName(), null);
+        tracker = new NearRegistryServiceTracker<DataProvider>(context, DataProvider.class);
     }
 
     public void open() {
@@ -80,12 +80,7 @@ public class OSGIDataProviderRegistry extends DataProviderRegistry {
 
     @Override
     public List<DataProvider> getProviders() {
-        Object[] services = tracker.getServices();
-        List<DataProvider> providers = new ArrayList<DataProvider>(services.length);
-        for (Object object : services) {
-            providers.add((DataProvider) object);
-        }
-        return providers;
+        return Collections.unmodifiableList(tracker.getServiceList());
     }
 
 }
