@@ -424,8 +424,8 @@ public final class SessionHandler {
         if (null == sessionData) {
             throw SessionExceptionCodes.NOT_INITIALIZED.create();
         }
-        checkMaxSessPerUser(userId, contextId);
-        checkMaxSessPerClient(client, userId, contextId);
+        checkMaxSessPerUser(userId, contextId, false);
+        checkMaxSessPerClient(client, userId, contextId, false);
         checkAuthId(login, authId);
         final SessionIdGenerator sessionIdGenerator = SessionHandler.sessionIdGenerator;
         final String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
@@ -542,7 +542,7 @@ public final class SessionHandler {
         }
     }
 
-    private static void checkMaxSessPerUser(final int userId, final int contextId) throws OXException {
+    private static void checkMaxSessPerUser(final int userId, final int contextId, boolean considerSessionStorage) throws OXException {
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
@@ -550,32 +550,34 @@ public final class SessionHandler {
         }
         final int maxSessPerUser = config.getMaxSessionsPerUser();
         if (maxSessPerUser > 0) {
-            final int count = sessionData.getNumOfUserSessions(userId, contextId);
+            int count = sessionData.getNumOfUserSessions(userId, contextId);
             if (count >= maxSessPerUser) {
                 throw SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.create(I(userId), I(contextId));
             }
-        }
-        final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
-        if (storageService != null) {
-            try {
-                final Task<Integer> c = new AbstractTask<Integer>() {
+            if (considerSessionStorage) {
+                final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+                if (storageService != null) {
+                    try {
+                        final Task<Integer> c = new AbstractTask<Integer>() {
 
-                    @Override
-                    public Integer call() throws Exception {
-                        return Integer.valueOf(storageService.getUserSessionCount(userId, contextId));
+                            @Override
+                            public Integer call() throws Exception {
+                                return Integer.valueOf(storageService.getUserSessionCount(userId, contextId));
+                            }
+                        };
+                        count = getFrom(c, Integer.valueOf(0)).intValue();
+                        if (count >= maxSessPerUser) {
+                            throw SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.create(I(userId), I(contextId));
+                        }
+                    } catch (final OXException e) {
+                        LOG.error(e.getMessage(), e);
                     }
-                };
-                final int count = getFrom(c, Integer.valueOf(0)).intValue();
-                if (maxSessPerUser > 0 && count >= maxSessPerUser) {
-                    throw SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.create(I(userId), I(contextId));
                 }
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
             }
         }
     }
 
-    private static void checkMaxSessPerClient(final String client, final int userId, final int contextId) throws OXException {
+    private static void checkMaxSessPerClient(final String client, final int userId, final int contextId, boolean considerSessionStorage) throws OXException {
         if (null == client) {
             // Nothing to check against
             return;
@@ -590,27 +592,29 @@ public final class SessionHandler {
                     throw SessionExceptionCodes.MAX_SESSION_PER_CLIENT_EXCEPTION.create(client, I(userId), I(contextId));
                 }
             }
-        }
-        final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
-        if (storageService != null) {
-            if (maxSessPerClient > 0) {
-                try {
-                    final Task<Session[]> c = new AbstractTask<Session[]>() {
+            if (considerSessionStorage) {
+                final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+                if (storageService != null) {
+                    if (maxSessPerClient > 0) {
+                        try {
+                            final Task<Session[]> c = new AbstractTask<Session[]>() {
 
-                        @Override
-                        public Session[] call() throws Exception {
-                            return storageService.getUserSessions(userId, contextId);
-                        }
-                    };
-                    final Session[] userSessions = getFrom(c, new Session[0]);
-                    int cnt = 0;
-                    for (final Session session : userSessions) {
-                        if (client.equals(session.getClient()) && ++cnt > maxSessPerClient) {
-                            throw SessionExceptionCodes.MAX_SESSION_PER_CLIENT_EXCEPTION.create(client, I(userId), I(contextId));
+                                @Override
+                                public Session[] call() throws Exception {
+                                    return storageService.getUserSessions(userId, contextId);
+                                }
+                            };
+                            final Session[] storedSessions = getFrom(c, new Session[0]);
+                            cnt = 0;
+                            for (final Session session : storedSessions) {
+                                if (client.equals(session.getClient()) && ++cnt > maxSessPerClient) {
+                                    throw SessionExceptionCodes.MAX_SESSION_PER_CLIENT_EXCEPTION.create(client, I(userId), I(contextId));
+                                }
+                            }
+                        } catch (final OXException e) {
+                            LOG.error(e.getMessage(), e);
                         }
                     }
-                } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
                 }
             }
         }

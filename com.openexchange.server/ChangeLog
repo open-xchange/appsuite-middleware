@@ -1,3 +1,7 @@
+* 2013-05-28 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 26807: Don't consider storage when checking for maximum allowed sessions   
+
 * 2013-05-22 - marc.arens@open-xchange.com
 
  - Fix for bug 26580: Remove superfluous warning

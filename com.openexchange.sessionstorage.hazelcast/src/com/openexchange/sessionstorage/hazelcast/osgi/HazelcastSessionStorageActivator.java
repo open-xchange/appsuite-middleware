@@ -72,7 +72,6 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
-import com.openexchange.sessionstorage.hazelcast.HazelcastStoredSession;
 import com.openexchange.sessionstorage.hazelcast.Services;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -85,11 +84,6 @@ import com.openexchange.threadpool.ThreadPoolService;
 public class HazelcastSessionStorageActivator extends HousekeepingActivator {
 
     private static Log LOG = LogFactory.getLog(HazelcastSessionStorageActivator.class);
-
-    /**
-     * Name for the userSessions multi-map - no further configuration via config file needed
-     */
-    private static final String USER_SESSIONS_NAME = "userSessions-0";
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -119,10 +113,8 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
                     /*
                      * create & register session storage service
                      */
-                    String sessionsName = discoverSessionsMapName(hazelcastInstance.getConfig());
-                    final HazelcastSessionStorageService sessionStorageService = new HazelcastSessionStorageService(
-                        sessionsName, USER_SESSIONS_NAME);
-                    hazelcastInstance.<String, HazelcastStoredSession> getMap(sessionsName).addLocalEntryListener(sessionStorageService);
+                    String sessionsMapName = discoverSessionsMapName(hazelcastInstance.getConfig());
+                    final HazelcastSessionStorageService sessionStorageService = new HazelcastSessionStorageService(sessionsMapName);
                     sessionStorageRegistration = context.registerService(SessionStorageService.class, sessionStorageService, null);
                     /*
                      * create & register event handler
