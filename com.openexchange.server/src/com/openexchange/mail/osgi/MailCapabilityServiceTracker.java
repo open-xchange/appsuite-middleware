@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,67 +47,75 @@
  *
  */
 
-package com.openexchange.indexedSearch.json.capabilities;
+package com.openexchange.mail.osgi;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
-import com.openexchange.index.IndexAccess;
-import com.openexchange.index.IndexExceptionCodes;
-import com.openexchange.index.IndexFacadeService;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
- * {@link MailIndexChecker}
+ * {@link MailCapabilityServiceTracker} - A <code>ServiceTrackerCustomizer</code> for <code>CapabilityService</code>.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailIndexChecker implements CapabilityChecker {
+public final class MailCapabilityServiceTracker implements ServiceTrackerCustomizer<CapabilityService, CapabilityService> {
 
-    public static final String CAPABILITY = "indexedSearch-mail";
+    private static final String MSISDN = "msisdn";
 
-    private final ServiceLookup serviceLookup;
+    private final BundleContext context;
+    private volatile ServiceRegistration<CapabilityChecker> registration;
 
-    public MailIndexChecker(ServiceLookup serviceLookup) {
+    /**
+     * Initializes a new {@link MailCapabilityServiceTracker}.
+     */
+    public MailCapabilityServiceTracker(final BundleContext context) {
         super();
-        this.serviceLookup = serviceLookup;
+        this.context = context;
     }
 
     @Override
-    public boolean isEnabled(String capability, Session ses) throws OXException {
-        if (capability.equals(CAPABILITY)) {
-            final ServerSession session = ServerSessionAdapter.valueOf(ses);
-            if (session.isAnonymous()) {
-                return false;
-            }
+    public CapabilityService addingService(ServiceReference<CapabilityService> reference) {
+        final CapabilityService service = context.getService(reference);
+        final CapabilityChecker checker = new CapabilityChecker() {
 
-            IndexFacadeService indexFacade = serviceLookup.getOptionalService(IndexFacadeService.class);
-            if (indexFacade == null) {
-                return false;
-            }
-
-            try {
-                IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, session);
-                try {
-                    return indexAccess.isIndexed("0", "INBOX");
-                } finally {
-                    indexFacade.releaseIndexAccess(indexAccess);
+            @Override
+            public boolean isEnabled(String capability, Session ses) throws OXException {
+                if (MSISDN.equals(capability)) {
+                    if (ServerSessionAdapter.valueOf(ses).isAnonymous()) {
+                        return false;
+                    }
+                    return MailProperties.getInstance().isSupportMsisdnAddresses();
                 }
-            } catch (OXException e) {
-                if (IndexExceptionCodes.INDEXING_NOT_ENABLED.equals(e) || IndexExceptionCodes.INDEX_LOCKED.equals(e)) {
-                    return false;
-                }
-
-                throw e;
+                return true;
             }
+        };
+        registration = context.registerService(CapabilityChecker.class, checker, null);
+        service.declareCapability(MSISDN);
+        return service;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<CapabilityService> reference, CapabilityService service) {
+        // Ignore
+    }
+
+    @Override
+    public void removedService(ServiceReference<CapabilityService> reference, CapabilityService service) {
+        final ServiceRegistration<CapabilityChecker> registration = this.registration;
+        if (null != registration) {
+            registration.unregister();
+            this.registration = null;
         }
 
-        return true;
+        context.ungetService(reference);
     }
 
 }

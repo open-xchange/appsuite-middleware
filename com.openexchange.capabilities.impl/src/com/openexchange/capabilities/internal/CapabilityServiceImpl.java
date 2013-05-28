@@ -73,7 +73,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link CapabilityServiceImpl}
@@ -147,11 +149,12 @@ public class CapabilityServiceImpl implements CapabilityService {
     }
 
     @Override
-    public Set<Capability> getCapabilities(ServerSession session) throws OXException {
+    public Set<Capability> getCapabilities(final Session session) throws OXException {
+        final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         Set<Capability> capabilities = new HashSet<Capability>(64);
-        if (!session.isAnonymous()) {
-            for (String type : session.getUserConfiguration().getExtendedPermissions()) {
-                if (check(type, session)) {
+        if (!serverSession.isAnonymous()) {
+            for (String type : serverSession.getUserConfiguration().getExtendedPermissions()) {
+                if (check(type, serverSession)) {
                     capabilities.add(getCapability(type));
                 }
             }
@@ -162,14 +165,14 @@ public class CapabilityServiceImpl implements CapabilityService {
         }
         // Now the declared ones
         for (String cap : declaredCapabilities.keySet()) {
-            if (check(cap, session)) {
+            if (check(cap, serverSession)) {
                 capabilities.add(getCapability(cap));
             }
         }
         // ------------- Combined capabilities/permissions ------------ //
-        if (!session.isAnonymous()) {
+        if (!serverSession.isAnonymous()) {
             // Portal
-            final UserConfiguration userConfiguration = session.getUserConfiguration();
+            final UserConfiguration userConfiguration = serverSession.getUserConfiguration();
             if (userConfiguration.hasPortal()) {
                 capabilities.add(getCapability("portal"));
                 capabilities.remove(getCapability("deniedPortal"));
@@ -208,7 +211,7 @@ public class CapabilityServiceImpl implements CapabilityService {
                 capabilities.remove(getCapability("pim"));
             }
             // Spam
-            if (session.getUserSettingMail().isSpamEnabled()) {
+            if (serverSession.getUserSettingMail().isSpamEnabled()) {
                 capabilities.add(getCapability("spam"));
             } else {
                 capabilities.remove(getCapability("spam"));
@@ -216,7 +219,7 @@ public class CapabilityServiceImpl implements CapabilityService {
         }
         // ---------------- Now the ones from database ------------------ //
         {
-            final int contextId = session.getContextId();
+            final int contextId = serverSession.getContextId();
             if (contextId > 0) {
                 final Set<String> set = new HashSet<String>();
                 final Set<String> removees = new HashSet<String>();
@@ -236,7 +239,7 @@ public class CapabilityServiceImpl implements CapabilityService {
                     }
                 }
                 // User-sensitive
-                final int userId = session.getUserId();
+                final int userId = serverSession.getUserId();
                 if (userId > 0) {
                     for (final String sCap : getUserCaps(userId, contextId)) {
                         final char firstChar = sCap.charAt(0);

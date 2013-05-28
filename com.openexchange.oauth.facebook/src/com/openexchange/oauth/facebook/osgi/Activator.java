@@ -60,7 +60,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -89,8 +91,9 @@ public final class Activator extends HousekeepingActivator {
         registerService(CapabilityChecker.class, new CapabilityChecker() {
 
             @Override
-            public boolean isEnabled(String capability, ServerSession session) throws OXException {
+            public boolean isEnabled(String capability, Session ses) throws OXException {
                 if ("facebook".equals(capability)) {
+                    final ServerSession session = ServerSessionAdapter.valueOf(ses);
                     if (session.isAnonymous()) {
                         return false;
                     }
@@ -99,7 +102,7 @@ public final class Activator extends HousekeepingActivator {
                     return view.opt("com.openexchange.oauth.facebook", boolean.class, Boolean.TRUE).booleanValue();
                 }
                 return true;
-                
+
             }
         });
         getService(CapabilityService.class).declareCapability("facebook");

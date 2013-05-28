@@ -60,7 +60,9 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.rss.RssJsonConverter;
 import com.openexchange.rss.RssServices;
 import com.openexchange.rss.actions.RssActionFactory;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class RssActivator extends AJAXModuleActivator {
 
@@ -77,8 +79,9 @@ public class RssActivator extends AJAXModuleActivator {
         registerService(CapabilityChecker.class, new CapabilityChecker() {
 
             @Override
-            public boolean isEnabled(String capability, ServerSession session) throws OXException {
+            public boolean isEnabled(String capability, Session ses) throws OXException {
                 if ("rss".equals(capability)) {
+                    final ServerSession session = ServerSessionAdapter.valueOf(ses);
                     if (session.isAnonymous()) {
                         return false;
                     }
