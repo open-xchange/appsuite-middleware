@@ -64,6 +64,8 @@ import com.openexchange.http.requestwatcher.osgi.services.RequestRegistryEntry;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -143,25 +145,33 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                         }
                         trace.setStackTrace(stackTrace);
                     }
-                    Props logProperties = LogProperties.optLogProperties(entry.getThread());
                     logBuilder.append("Request").append(lineSeparator);
 
                     // If we have additional log properties from the ThreadLocal add it to the logBuilder
-                    if (logProperties != null) {
-                        Map<String, Object> propertyMap = logProperties.asMap();
-                        // Sort the properties for readability
-                        Map<String, String> sorted = new TreeMap<String, String>();
-                        for (Entry<String, Object> propertyEntry : propertyMap.entrySet()) {
-                            String propertyName = propertyEntry.getKey();
-                            Object value = propertyEntry.getValue();
-                            if (null != value) {
-                                sorted.put(propertyName, value.toString());
+                    {
+                        final Props logProperties = LogProperties.optLogProperties(entry.getThread());
+                        if (logProperties != null) {
+                            Map<String, Object> propertyMap = logProperties.asMap();
+                            // Sort the properties for readability
+                            Map<String, String> sorted = new TreeMap<String, String>();
+                            for (Entry<String, Object> propertyEntry : propertyMap.entrySet()) {
+                                String propertyName = propertyEntry.getKey();
+                                Object value = propertyEntry.getValue();
+                                if (null != value) {
+                                    if (LogProperties.Name.SESSION_SESSION_ID.getName().equals(propertyName) && !isValidSession(value.toString())) {
+                                        // Non-existent or elapsed session
+                                        entry.getThread().interrupt();
+                                        requestRegistry.remove(entry);
+                                        return;
+                                    }
+                                    sorted.put(propertyName, value.toString());
+                                }
                             }
-                        }
-                        logBuilder.append("with properties:").append(lineSeparator);
-                        // And add them to the logBuilder
-                        for (Map.Entry<String, String> propertyEntry : sorted.entrySet()) {
-                            logBuilder.append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue()).append(lineSeparator);
+                            logBuilder.append("with properties:").append(lineSeparator);
+                            // And add them to the logBuilder
+                            for (Map.Entry<String, String> propertyEntry : sorted.entrySet()) {
+                                logBuilder.append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue()).append(lineSeparator);
+                            }
                         }
                     }
 
@@ -174,6 +184,11 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                     // }
 
                     LOG.info(logBuilder.append("with age: ").append(entry.getAge()).append("ms exceeds max. age of: ").append(requestMaxAge).append("ms.").toString(), trace);
+                }
+
+                private boolean isValidSession(final String sessionId) {
+                    final SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+                    return sessiondService instanceof SessiondServiceExtended ? ((SessiondServiceExtended) sessiondService).isActive(sessionId) : true;
                 }
 
                 private boolean dontLog(final StackTraceElement[] stackTrace) {

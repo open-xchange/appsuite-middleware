@@ -1,6 +1,7 @@
 * 2013-05-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 26838: Ignore file uploads during request watcher tracking
+ - Fix for bug 26832: Dropped misleading log output & check for locally active session during request watcher run
 
 * 2013-05-28 - tobias.friedrich@open-xchange.com
 

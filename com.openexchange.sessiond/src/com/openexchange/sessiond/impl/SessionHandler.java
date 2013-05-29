@@ -858,9 +858,10 @@ public final class SessionHandler {
      * Gets the session associated with given session ID
      *
      * @param sessionId The session ID
+     * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise <code>false</code>
      * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
      */
-    protected static SessionControl getSession(final String sessionId) {
+    protected static SessionControl getSession(final String sessionId, final boolean considerSessionStorage) {
         if (DEBUG) {
             LOG.debug(new StringBuilder("getSession <").append(sessionId).append('>').toString());
         }
@@ -870,7 +871,7 @@ public final class SessionHandler {
             return null;
         }
         final SessionControl sessionControl = sessionData.getSession(sessionId);
-        if (null == sessionControl) {
+        if (considerSessionStorage && null == sessionControl) {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
@@ -893,6 +894,21 @@ public final class SessionHandler {
         }
         */
         return sessionControl;
+    }
+
+    /**
+     * Checks if denoted session is <code>locally</code> available and located in short-term container.
+     *
+     * @param sessionId The session identifier
+     * @return <code>true</code> if <code>locally</code> active; otherwise <code>false</code>
+     */
+    protected static boolean isActive(final String sessionId) {
+        final SessionData sessionData = sessionDataRef.get();
+        if (null == sessionData) {
+            LOG.warn("\tSessionData instance is null.");
+            return false;
+        }
+        return null != sessionData.optShortTermSession(sessionId);
     }
 
     /**
