@@ -71,7 +71,7 @@ import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.MetadataException;
-import com.drew.metadata.exif.ExifDirectory;
+import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.jpeg.JpegDirectory;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
@@ -414,7 +414,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
             ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             managedFile = mfm.createManagedFile(inputStream);
             try {
-                metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(managedFile.getInputStream()));
+                metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(managedFile.getInputStream()), false);
             } catch (ImageProcessingException e) {
                 LOG.warn("error getting metadata", e);
             }
@@ -449,9 +449,9 @@ public class ImageTransformationsImpl implements ImageTransformations {
         int width = 0;
         int height = 0;
         try {
-            Directory directory = metadata.getDirectory(ExifDirectory.class);
+            Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
             if (null != directory) {
-                orientation = directory.getInt(ExifDirectory.TAG_ORIENTATION);
+                orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
             }
             Directory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
             if (null != jpegDirectory && jpegDirectory instanceof JpegDirectory) {
