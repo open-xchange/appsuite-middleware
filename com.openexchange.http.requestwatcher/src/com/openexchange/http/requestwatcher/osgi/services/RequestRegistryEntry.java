@@ -49,7 +49,6 @@
 
 package com.openexchange.http.requestwatcher.osgi.services;
 
-import java.io.IOException;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -62,25 +61,32 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
 
+    private final long number;
     private final Thread thread;
-
     private final HttpServletRequest request;
-
     private final HttpServletResponse response;
-
     private final long birthTime;
+    private final int hash;
 
     /**
      * Initializes a new {@link RequestRegistryEntry}.
      *
+     * @param number The entry's unique number
      * @param request the incoming request to register
      * @param thread the thread associated with the request
      */
-    public RequestRegistryEntry(final HttpServletRequest request, final HttpServletResponse response, final Thread thread) {
+    public RequestRegistryEntry(final long number, final HttpServletRequest request, final HttpServletResponse response, final Thread thread) {
+        super();
+        this.number = number;
         this.thread = thread;
         this.request = request;
         this.response = response;
         this.birthTime = System.currentTimeMillis();
+
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (int) (number ^ (number >>> 32));
+        hash = result;
     }
 
     /**
@@ -108,8 +114,7 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
      */
     public String getRequestParameters() {
         final com.openexchange.java.StringAllocator sa = new com.openexchange.java.StringAllocator();
-        @SuppressWarnings("unchecked")
-        final Map<String, String[]> parameterMap = request.getParameterMap();
+        @SuppressWarnings("unchecked") final Map<String, String[]> parameterMap = request.getParameterMap();
         final String[] parameterNames = parameterMap.keySet().toArray(new String[0]);
         for (int i = 0; i < parameterNames.length; i++) {
             final String[] parameterValues = parameterMap.get(parameterNames[i]);
@@ -155,13 +160,7 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (int) (birthTime ^ (birthTime >>> 32));
-        result = prime * result + ((request == null) ? 0 : request.hashCode());
-        result = prime * result + ((response == null) ? 0 : response.hashCode());
-        result = prime * result + ((thread == null) ? 0 : thread.hashCode());
-        return result;
+        return hash;
     }
 
     @Override
@@ -169,46 +168,14 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof RequestRegistryEntry)) {
-            return false;
-        }
-        final RequestRegistryEntry other = (RequestRegistryEntry) obj;
-        if (birthTime != other.birthTime) {
-            return false;
-        }
-        if (request == null) {
-            if (other.request != null) {
-                return false;
-            }
-        } else if (!request.equals(other.request)) {
-            return false;
-        }
-        if (response == null) {
-            if (other.response != null) {
-                return false;
-            }
-        } else if (!response.equals(other.response)) {
-            return false;
-        }
-        if (thread == null) {
-            if (other.thread != null) {
-                return false;
-            }
-        } else if (!thread.equals(other.thread)) {
-            return false;
-        }
-        return true;
+        return (number == ((RequestRegistryEntry) obj).number);
     }
 
     @Override
     public int compareTo(final RequestRegistryEntry otherEntry) {
-        if (this.birthTime < otherEntry.birthTime) {// this one is older
-            return 1;
-        } else if (birthTime > otherEntry.birthTime) {// this one is younger
-            return -1;
-        } else {
-            return 0;
-        }
+        final long thisBirthTime = this.birthTime;
+        final long otherBirthTime = otherEntry.birthTime;
+        return thisBirthTime < otherBirthTime ? 1 : birthTime > otherBirthTime ? -1 : 0;
     }
 
 }

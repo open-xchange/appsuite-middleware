@@ -55,6 +55,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -78,6 +79,9 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
 
     /** The logger. */
     protected static final Log LOG = com.openexchange.log.Log.loggerFor(RequestWatcherServiceImpl.class);
+
+    /** The request number */
+    private static final AtomicLong NUMBER = new AtomicLong();
 
     /** Navigable set, entries ordered by age(youngest first), weakly consistent iterator */
     private final ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry;
@@ -213,7 +217,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
 
     @Override
     public RequestRegistryEntry registerRequest(final HttpServletRequest request, final HttpServletResponse response, final Thread thread) {
-        final RequestRegistryEntry registryEntry = new RequestRegistryEntry(request, response, thread);
+        final RequestRegistryEntry registryEntry = new RequestRegistryEntry(NUMBER.incrementAndGet(), request, response, thread);
         requestRegistry.add(registryEntry);
         return registryEntry;
     }

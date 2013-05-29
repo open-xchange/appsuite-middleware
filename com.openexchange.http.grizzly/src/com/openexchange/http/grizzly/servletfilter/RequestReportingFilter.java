@@ -77,6 +77,8 @@ public class RequestReportingFilter implements Filter {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(RequestReportingFilter.class);
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     // properties of long running eas requests
     private static final String EAS_URI = "/Microsoft-Server-ActiveSync";
 
@@ -86,8 +88,13 @@ public class RequestReportingFilter implements Filter {
 
     private final boolean isFilterEnabled;
 
+    /**
+     * Initializes a new {@link RequestReportingFilter}.
+     *
+     * @throws OXException If initialization fails
+     */
     public RequestReportingFilter() throws OXException {
-        ConfigurationService configService = Services.getService(ConfigurationService.class);
+        final ConfigurationService configService = Services.getService(ConfigurationService.class);
         if (configService == null) {
             throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getSimpleName());
         }
@@ -95,35 +102,39 @@ public class RequestReportingFilter implements Filter {
     }
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(final FilterConfig filterConfig) throws ServletException {
         // nothing to do here
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
         if (isFilterEnabled) {
-            HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-            HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-            boolean longRunning = EAS_URI.equals(httpServletRequest.getRequestURI()) && EAS_PING.equals(request.getParameter(EAS_CMD));
+            final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+            final HttpServletResponse httpServletResponse = (HttpServletResponse) response;
+            final boolean longRunning = EAS_URI.equals(httpServletRequest.getRequestURI()) && EAS_PING.equals(request.getParameter(EAS_CMD));
             if (longRunning) { // don't track long running requests
                 chain.doFilter(request, response);
             } else {
                 final RequestWatcherService requestWatcherService = Services.getService(RequestWatcherService.class);
                 // Request watcher is enabled but service is missing, bundle not started etc ..
                 if (requestWatcherService == null) {
-                    writeToErrorLog("The required RequestWatcherService isn't available. Not able to watch this request.");
+                    LOG.warn("RequestWatcherService is not available. Unable to watch this request.");
                     chain.doFilter(httpServletRequest, httpServletResponse);
                 } else {
-                    RequestRegistryEntry requestRegistryEntry = requestWatcherService.registerRequest(httpServletRequest, httpServletResponse, Thread.currentThread());
+                    final RequestRegistryEntry requestRegistryEntry = requestWatcherService.registerRequest(httpServletRequest, httpServletResponse, Thread.currentThread());
+                    try {
+                        // proceed processing
+                        chain.doFilter(request, response);
 
-                    // proceed processing
-                    chain.doFilter(request, response);
-
-                    // debug duration
-                    writeToDebugLog(new StringAllocator("Request took ").append(requestRegistryEntry.getAge()).append("ms ").append(" for URL: ").append(httpServletRequest.getRequestURL()).toString());
-
-                    // remove request from registry after processing finished
-                    requestWatcherService.unregisterRequest(requestRegistryEntry);
+                        // debug duration
+                        if (DEBUG) {
+                            LOG.debug(new StringAllocator("Request took ").append(requestRegistryEntry.getAge()).append("ms ").append(" for URL: ").append(
+                                httpServletRequest.getRequestURL()).toString());
+                        }
+                    } finally {
+                        // remove request from registry after processing finished
+                        requestWatcherService.unregisterRequest(requestRegistryEntry);
+                    }
                 }
             }
         } else { // filter isn't enabled
@@ -134,39 +145,6 @@ public class RequestReportingFilter implements Filter {
     @Override
     public void destroy() {
         // nothing to do here
-    }
-
-    /**
-     * Write a String to the error log.
-     *
-     * @param logValue the String that should be logged
-     */
-    private static void writeToErrorLog(String logValue) {
-        if (LOG.isErrorEnabled()) {
-            LOG.error(logValue);
-        }
-    }
-
-    /**
-     * Write a String to the info log.
-     *
-     * @param logValue the String that should be logged
-     */
-    private static void writeToInfoLog(String logValue) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info(logValue);
-        }
-    }
-
-    /**
-     * Write a String to the debug log.
-     *
-     * @param logValue the String that should be logged
-     */
-    private static void writeToDebugLog(String logValue) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(logValue);
-        }
     }
 
 }
