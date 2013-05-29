@@ -121,7 +121,7 @@ import org.glassfish.grizzly.monitoring.jmx.JmxMonitoringAware;
 import org.glassfish.grizzly.monitoring.jmx.JmxObject;
 import org.glassfish.grizzly.utils.DelayedExecutor;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
+import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.java.Charsets;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -210,7 +210,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
         // Ping stuff
         pingMap = new ConcurrentHashMap<FilterChainContext, WatchInfo>(512);
         {
-            final ConfigurationService service = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
+            final ConfigurationService service = Services.getService(ConfigurationService.class);
             pingDelay = null == service ? 90000 : service.getIntProperty("com.openexchange.http.grizzly.pingDelay", 90000);
 
             maxPingCount = null == service ? 9 : service.getIntProperty("com.openexchange.http.grizzly.maxPingCount", 9);
@@ -314,7 +314,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                         final WatchInfo watchInfo = pingMap.remove(ctx);
                         if (null != watchInfo) {
                             watchInfo.timerTask.cancel(false);
-                            GrizzlyServiceRegistry.getInstance().getService(TimerService.class).purge();
+                            Services.getService(TimerService.class).purge();
                         }
                     }
                 }
@@ -359,7 +359,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
     private void initiatePing(final Response handlerResponse, final FilterChainContext ctx) {
         final Ping ping = this.ping;
         if (ping != Ping.NONE) {
-            final TimerService timerService = GrizzlyServiceRegistry.getInstance().getService(TimerService.class);
+            final TimerService timerService = Services.getService(TimerService.class);
             if (null != timerService) {
                 final ConcurrentMap<FilterChainContext, WatchInfo> cm = pingMap;
                 final Logger logger = LOGGER;

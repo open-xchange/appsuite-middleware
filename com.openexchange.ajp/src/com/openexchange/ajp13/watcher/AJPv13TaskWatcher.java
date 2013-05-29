@@ -389,11 +389,11 @@ public class AJPv13TaskWatcher {
                 if (null != className) {
                     if (className.startsWith("org.apache.commons.fileupload.MultipartStream$ItemInputStream")) {
                         // A long-running file upload. Ignore
-                        return false;
+                        return true;
                     }
                 }
             }
-            return true;
+            return false;
         }
 
         private static final int MAX_STACK_TRACE_ELEMENTS = 1000;

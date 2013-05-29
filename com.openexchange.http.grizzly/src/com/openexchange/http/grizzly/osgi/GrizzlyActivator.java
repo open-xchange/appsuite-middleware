@@ -95,23 +95,6 @@ public class GrizzlyActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Service " + clazz.getName() + " is available again.");
-        }
-        Object service = getService(clazz);
-        GrizzlyServiceRegistry.getInstance().addService(clazz, service);
-    }
-
-    @Override
-    protected void handleUnavailability(Class<?> clazz) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Service " + clazz.getName() + " is no longer available.");
-        }
-        GrizzlyServiceRegistry.getInstance().removeService(clazz);
-    }
-
-    @Override
     protected void startBundle() throws OXException {
         try {
             if (LOG.isInfoEnabled()) {
@@ -132,14 +115,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 }
             });
 
-            GrizzlyServiceRegistry grizzlyServiceRegistry = GrizzlyServiceRegistry.getInstance();
-
-            /*
-             * initialize the registry, handleUn/Availability keeps track of services. Otherwise use
-             * trackService(ConfigurationService.class) and openTrackers() to let the superclass handle the services.
-             */
-            initializeServiceRegistry(grizzlyServiceRegistry);
-
+            Services.setServiceLookup(this);
 
             GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
             grizzlyConfig.start();
@@ -249,36 +225,16 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        /*
-         * Clear the registry from the services we are tracking. Otherwise use super.stopBundle(); if we let the superclass handle the
-         * services.
-         */
-        GrizzlyServiceRegistry.getInstance().clearRegistry();
+        Services.setServiceLookup(null);
 
         if (LOG.isInfoEnabled()) {
             LOG.info("Unregistering services.");
         }
-        unregisterServices();
+        cleanUp();
         if (LOG.isInfoEnabled()) {
             LOG.info("Stopping Grizzly.");
         }
         grizzly.stop();
-    }
-
-    /**
-     * Initialize the package wide service registry with the services we declared as needed.
-     *
-     * @param serviceRegistry the registry to fill
-     */
-    private void initializeServiceRegistry(final GrizzlyServiceRegistry serviceRegistry) {
-        serviceRegistry.clearRegistry();
-        Class<?>[] serviceClasses = getNeededServices();
-        for (Class<?> serviceClass : serviceClasses) {
-            Object service = getService(serviceClass);
-            if (service != null) {
-                serviceRegistry.addService(serviceClass, service);
-            }
-        }
     }
 
     /**

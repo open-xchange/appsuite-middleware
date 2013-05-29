@@ -113,8 +113,8 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                     final StringBuilder sb = new StringBuilder(256);
                     boolean stillOldRequestsLeft = true;
                     while (stillOldRequestsLeft && descendingEntryIterator.hasNext()) {
-                        sb.setLength(0);
                         if (debugEnabled) {
+                            sb.setLength(0);
                             for (final RequestRegistryEntry entry : requestRegistry) {
                                 sb.append(lineSeparator).append("RegisteredThreads:").append(lineSeparator).append("    age: ").append(entry.getAge()).append(" ms").append(
                                     ", thread: ").append(entry.getThreadInfo());
@@ -197,11 +197,11 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                         if (null != className) {
                             if (className.startsWith("org.apache.commons.fileupload.MultipartStream$ItemInputStream")) {
                                 // A long-running file upload. Ignore
-                                return false;
+                                return true;
                             }
                         }
                     }
-                    return true;
+                    return false;
                 }
             },
                 1000,
