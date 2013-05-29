@@ -98,6 +98,7 @@ import com.openexchange.log.Props;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionSecretChecker;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
@@ -562,6 +563,19 @@ public abstract class SessionServlet extends AJAXServlet {
      * @throws SessionException if the session can not be found.
      */
     public static ServerSession getSession(final CookieHashSource source, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws OXException {
+        return getSession(source, req, sessionId, sessiondService, null);
+    }
+
+    /**
+     * Finds appropriate local session.
+     *
+     * @param source defines how the cookie should be found
+     * @param sessionId identifier of the session.
+     * @param sessiondService The SessionD service
+     * @return the session.
+     * @throws SessionException if the session can not be found.
+     */
+    public static ServerSession getSession(final CookieHashSource source, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService, final SessionSecretChecker optChecker) throws OXException {
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
             if (INFO) {
@@ -573,7 +587,11 @@ public abstract class SessionServlet extends AJAXServlet {
         /*
          * Get session secret
          */
-        checkSecret(source, req, session);
+        if (null == optChecker) {
+            checkSecret(source, req, session);
+        } else {
+            optChecker.checkSecret(session, req, source.name());
+        }
         try {
             final Context context = ContextStorage.getInstance().getContext(session.getContextId());
             final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
@@ -624,7 +642,9 @@ public abstract class SessionServlet extends AJAXServlet {
             if (INFO && null != secret) {
                 LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
             }
-            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
+            final OXException oxe = SessionExceptionCodes.WRONG_SESSION_SECRET.create();
+            oxe.setProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name(), null == secret ? "null" : secret);
+            throw oxe;
         }
     }
 

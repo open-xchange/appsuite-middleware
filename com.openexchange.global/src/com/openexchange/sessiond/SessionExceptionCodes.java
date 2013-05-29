@@ -92,7 +92,9 @@ public enum SessionExceptionCodes implements OXExceptionCode {
      * Got a collision while adding a new session to the session container. Colliding session has login %1$s and new session has login %2$s.
      */
     SESSIONID_COLLISION(SESSIONID_COLLISION_MSG, Category.CATEGORY_ERROR, 10),
-    /** Received wrong session %1$s having random %2$s when looking for random %3$s and session %4$s. */
+    /**
+     * Received wrong session %1$s having random %2$s when looking for random %3$s and session %4$s.
+     */
     WRONG_BY_RANDOM(WRONG_BY_RANDOM_MSG, Category.CATEGORY_ERROR, 11),
     /**
      * The session parameter is missing.

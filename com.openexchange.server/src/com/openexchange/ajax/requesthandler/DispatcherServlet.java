@@ -81,6 +81,8 @@ import com.openexchange.log.PropertiesAppendingLogWrapper;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionSecretChecker;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
@@ -219,7 +221,21 @@ public class DispatcherServlet extends SessionServlet {
             final String sSession = req.getParameter("session");
             if (sSession != null && sSession.length() > 0) {
                 final String sessionId = getSessionId(req);
-                session = getSession(req, sessionId, sessiondService);
+                try {
+                    session = getSession(req, sessionId, sessiondService);
+                } catch (final OXException e) {
+                    if (!SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
+                        throw e;
+                    }
+                    // Got a wrong or missing secret
+                    final String wrongSecret = e.getProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name());
+                    if (!"null".equals(wrongSecret)) {
+                        // No information available or a differing secret
+                        throw e;
+                    }
+                    // Missing secret cookie
+                    session = getSession(hashSource, req, sessionId, sessiondService, new NoSecretCallbackChecker(DISPATCHER.get(), e, getAjaxRequestDataTools()));
+                }
                 verifySession(req, sessiondService, sessionId, session);
                 rememberSession(req, session);
                 sessionParamFound = true;
@@ -476,6 +492,45 @@ public class DispatcherServlet extends SessionServlet {
             builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
         }
         return builder.toString();
+    }
+
+    /**
+     * Helper class.
+     */
+    private static final class NoSecretCallbackChecker implements SessionSecretChecker {
+
+        private static final String PARAM_TOKEN = Session.PARAM_TOKEN;
+
+        private final Dispatcher dispatcher;
+        private final OXException e;
+        private final AJAXRequestDataTools requestDataTools;
+
+        /**
+         * Initializes a new {@link SessionSecretCheckerImplementation}.
+         */
+        protected NoSecretCallbackChecker(final Dispatcher dispatcher, final OXException e, final AJAXRequestDataTools requestDataTools) {
+            super();
+            this.requestDataTools = requestDataTools;
+            this.dispatcher = dispatcher;
+            this.e = e;
+        }
+
+        @Override
+        public void checkSecret(final Session session, final HttpServletRequest req, final String cookieHashSource) throws OXException {
+            final String module = requestDataTools.getModule(PREFIX.get(), req);
+            final String action = requestDataTools.getAction(req);
+            final boolean noSecretCallback = dispatcher.noSecretCallback(module, action);
+            if (!noSecretCallback) {
+                throw e;
+            }
+            final String paramToken = PARAM_TOKEN;
+            final String token = (String) session.getParameter(paramToken);
+            session.setParameter(paramToken, null);
+            if (null == token || !token.equals(req.getParameter(paramToken))) {
+                throw e;
+            }
+            // Token does match for this noSecretCallback-capable request
+        }
     }
 
 }

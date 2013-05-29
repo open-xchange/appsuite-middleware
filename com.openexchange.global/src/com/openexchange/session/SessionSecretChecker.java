@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,42 +47,26 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler;
+package com.openexchange.session;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import javax.servlet.http.HttpServletRequest;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link DispatcherNotes} - The action annotation provides the default format for an {@link AJAXActionService}.
+ * {@link SessionSecretChecker} - Callback interface to check a session's secret.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface DispatcherNotes {
+public interface SessionSecretChecker {
 
     /**
-     * Gets the default format.
+     * Checks if secret matches/aligns to given session.
      *
-     * @return The default format
+     * @param session The session looked-up for the incoming request
+     * @param req The incoming HTTP request
+     * @param source The configured cookie hash source
+     * @throws OXException If the secret differs
      */
-    String defaultFormat() default "apiResponse";
+    void checkSecret(Session session, HttpServletRequest req, String cookieHashSource) throws OXException;
 
-    /**
-     * Indicates whether this action allows falling back to the public session cookie for session retrieval. This is useful
-     * if you don't want varying URLs between sessions. The trade-off is less stability for your requests in problematic infrastructures.
-     * @return Whether to allow access using the fallback session or not
-     */
-    boolean allowPublicSession() default false;
-
-    /**
-     * Indicates that this action may be called without a session
-     * @return whether to allow access to this action without a session
-     */
-	boolean noSession() default false;
-
-	/**
-     * Indicates whether this action is allowed to miss the associated secret cookie, because it is meant as a callback.
-     * @return Whether to allow access without secret
-     */
-	boolean noSecretCallback() default false;
 }

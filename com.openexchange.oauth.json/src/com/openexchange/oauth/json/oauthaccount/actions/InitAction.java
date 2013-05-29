@@ -73,6 +73,7 @@ import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.Tools;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -134,6 +135,10 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
          */
         final String uuid = UUID.randomUUID().toString();
         /*
+         * OAuth token for session
+         */
+        final String oauthSessionToken = UUID.randomUUID().toString();
+        /*
          * Compose call-back URL
          */
         final String callbackUrl;
@@ -147,6 +152,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
             callbackUrlBuilder.append('&').append(name).append('=').append(urlEncode(displayName));
             callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(urlEncode(serviceId));
             callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
+            callbackUrlBuilder.append('&').append(Session.PARAM_TOKEN).append('=').append(oauthSessionToken);
             final String cb = request.getParameter("cb");
             if (!isEmpty(cb)) {
             	callbackUrlBuilder.append("&callback=").append(cb);
@@ -174,6 +180,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         oauthState.put(OAuthConstants.ARGUMENT_SECRET, requestToken.getSecret());
         oauthState.put(OAuthConstants.ARGUMENT_CALLBACK, callbackUrl);
         session.setParameter(uuid, oauthState);
+        session.setParameter(Session.PARAM_TOKEN, oauthSessionToken);
         /*
          * Write as JSON
          */
@@ -196,6 +203,10 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
          */
         final String uuid = UUID.randomUUID().toString();
         /*
+         * OAuth token for session
+         */
+        final String oauthSessionToken = UUID.randomUUID().toString();
+        /*
          * Compose call-back URL
          */
         final StringBuilder callbackUrlBuilder = new StringBuilder(256);
@@ -214,6 +225,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         }
         callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(urlEncode(serviceId));
         callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
+        callbackUrlBuilder.append('&').append(Session.PARAM_TOKEN).append('=').append(oauthSessionToken);
         if (request.getParameter("cb") != null) {
         	callbackUrlBuilder.append("&").append("callback=").append(request.getParameter("cb"));
         }
@@ -228,7 +240,9 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         final Map<String, Object> oauthState = new HashMap<String, Object>();
         oauthState.put(OAuthConstants.ARGUMENT_SECRET, requestToken.getSecret());
         oauthState.put(OAuthConstants.ARGUMENT_CALLBACK, callbackUrlBuilder.toString());
-        session.setParameter(uuid, oauthState);        /*
+        session.setParameter(uuid, oauthState);
+        session.setParameter(Session.PARAM_TOKEN, oauthSessionToken);
+        /*
          * Write as JSON
          */
         final JSONObject jsonInteraction = AccountWriter.write(interaction, uuid);

@@ -145,4 +145,16 @@ public interface Dispatcher {
      * @see AJAXRequestDataTools#getAction(javax.servlet.http.HttpServletRequest)
      */
     boolean mayOmitSession(String module, String action) throws OXException;
+
+    /**
+     * Indicates that given action can be used without a secret.
+     *
+     * @param module The module identifier
+     * @param action The action identifier
+     * @return <code>true</code> if given action can be used without a secret; otherwise <code>false</code>
+     * @throws OXException If check fails for any reason
+     * @see AJAXRequestDataTools#getModule(String, javax.servlet.http.HttpServletRequest)
+     * @see AJAXRequestDataTools#getAction(javax.servlet.http.HttpServletRequest)
+     */
+    boolean noSecretCallback(String module, String action) throws OXException;
 }

@@ -8,6 +8,7 @@
  - Fix for bug 26838: Ignore file uploads during request watcher tracking
  - Fix for bug 26832: Dropped misleading log output & check for locally active session during request watcher run
  - Fix for bug 26828: Create a repetitive file holder for image data when checking if image transformation is needed
+ - Fix for bug 26852: Fixed OAuth provider callback
 
 * 2013-05-28 - tobias.friedrich@open-xchange.com
 
