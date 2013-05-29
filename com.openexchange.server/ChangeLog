@@ -1,6 +1,7 @@
 * 2013-05-29 - martin.herfurth@open-xchange.com
 
  - Fix for bug 26842: Default Participant for public folders.
+ - Fix for bug 26497: Remove Update Action for already accepted reply mails.
 
 * 2013-05-29 - thorben.betten@open-xchange.com
 
