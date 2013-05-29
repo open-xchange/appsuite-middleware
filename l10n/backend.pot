@@ -6343,9 +6343,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:97
 msgid ""
-"Import failed. Some data entered exceed the database field limit. Please "
-"shorten the following entries: %1$s character limit: %2$s sent %3$s Please "
-"add a comment for the variables"
+"Some data entered exceeded the field limit. Please shorten the value for "
+"\"%1$s\" (current: %2$s, limit: %3$s) and try again."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:99
@@ -9189,6 +9188,17 @@ msgstr ""
 #. Invoked method is not supported.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:536
 msgid "Invoked method is not supported."
+msgstr ""
+
+#. Maximum message size is exceeded. Max. is %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:539
+msgid "Maximum message size is exceeded. Max. is %1$s."
+msgstr ""
+
+#. Re-sending message denied because message is not located in %1$s folder.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:542
+msgid ""
+"Re-sending message denied because message is not located in %1$s folder."
 msgstr ""
 
 #. *
