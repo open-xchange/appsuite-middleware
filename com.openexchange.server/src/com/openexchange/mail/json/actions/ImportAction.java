@@ -55,12 +55,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -80,6 +80,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.java.Streams;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -91,7 +93,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.AbstractTrackableTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.tools.session.ServerSession;
@@ -203,10 +205,7 @@ public final class ImportAction extends AbstractMailAction {
                  * Ensure release from BlockingQueue.take();
                  */
                 try {
-                    future.get(10, TimeUnit.SECONDS);
-                } catch (final TimeoutException e) {
-                    // Wait time elapsed; enforce cancelation
-                    future.cancel(true);
+                    future.get();
                 } catch (final ExecutionException e) {
                     final Throwable t = e.getCause();
                     if (t instanceof RuntimeException) {
@@ -296,21 +295,15 @@ public final class ImportAction extends AbstractMailAction {
      */
     protected static final MimeMessage POISON = new MimeMessage(MimeDefaultSession.getDefaultSession());
 
-    private static final class AppenderTask extends AbstractTask<Object> {
+    private static final class AppenderTask extends AbstractTrackableTask<Object> {
 
         private final AtomicBoolean keepgoing;
-
         private final MailServletInterface mailInterface;
-
         private final String folder;
-
         private final boolean force;
-
         private final int flags;
-
         private final BlockingQueue<MimeMessage> queue;
-
-        private OXException exception;
+        private final Map<String, Object> logProperties;
 
         protected AppenderTask(final MailServletInterface mailInterface, final String folder, final boolean force, final int flags, final BlockingQueue<MimeMessage> queue) {
             super();
@@ -320,6 +313,8 @@ public final class ImportAction extends AbstractMailAction {
             this.force = force;
             this.flags = flags;
             this.queue = queue;
+            final Props props = LogProperties.optLogProperties();
+            logProperties = null == props ? null : props.asMap();
         }
 
         protected void stop() throws OXException {
@@ -336,6 +331,11 @@ public final class ImportAction extends AbstractMailAction {
                 Thread.currentThread().interrupt();
                 throw MailExceptionCode.INTERRUPT_ERROR.create(e);
             }
+        }
+
+        @Override
+        public Map<String, Object> optLogProperties() {
+            return logProperties;
         }
 
         @Override
@@ -372,14 +372,11 @@ public final class ImportAction extends AbstractMailAction {
                     }
                 }
             } catch (final OXException e) {
-                exception = e;
                 throw e;
             } catch (final MessagingException e) {
-                exception = MimeMailException.handleMessagingException(e);
-                throw exception;
+                throw MimeMailException.handleMessagingException(e);
             } catch (final InterruptedException e) {
-                exception = MailExceptionCode.INTERRUPT_ERROR.create(e);
-                throw exception;
+                throw MailExceptionCode.INTERRUPT_ERROR.create(e);
             } finally {
                 mailInterface.close(true);
             }
