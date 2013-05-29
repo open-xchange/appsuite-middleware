@@ -173,9 +173,9 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
 
     @Override
     public int compareTo(final RequestRegistryEntry otherEntry) {
-        final long thisBirthTime = this.birthTime;
-        final long otherBirthTime = otherEntry.birthTime;
-        return thisBirthTime < otherBirthTime ? 1 : birthTime > otherBirthTime ? -1 : 0;
+        final long thisNumber = this.number;
+        final long otherNumber = otherEntry.number;
+        return thisNumber < otherNumber ? 1 : thisNumber > otherNumber ? -1 : 0;
     }
 
 }
