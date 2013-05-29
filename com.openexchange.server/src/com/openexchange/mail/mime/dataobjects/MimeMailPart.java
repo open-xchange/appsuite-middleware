@@ -832,7 +832,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                     /*
                      * If size is unknown or exceeds 1MB, use the stream-based implementation
                      */
-                    final Object content = part.getContent();
+                    Object content = part.getContent();
                     if (content instanceof Multipart) {
                         multipart = new JavaMailMultipartWrapper((Multipart) content);
                     } else {
@@ -855,7 +855,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                         } else {
                             part = new MimeBodyPart(Streams.asInputStream(out));
                         }
-                        multipart = new JavaMailMultipartWrapper((Multipart) part.getContent());
+                        multipart = new JavaMailMultipartWrapper(MimeMessageConverter.multipartFor(part.getContent(), getContentType()));
                     }
                 }
             } catch (final MessagingException e) {
