@@ -473,5 +473,5 @@ Bundle-ClassPath: .,
  lib/java-image-scaling-0.8.5.jar,
  lib/jaudiotagger-2.0.3.jar,
  lib/xmpcore.jar,
- lib/metadata-extractor-2.6.1.jar
+ lib/metadata-extractor-2.4.0-beta-1.jar
 
