@@ -707,6 +707,12 @@ public abstract class SessionServlet extends AJAXServlet {
         session.setParameter("JSESSIONID", req.getSession().getId());
     }
 
+    /**
+     * Convenience method to remember the public session for a request in the servlet attributes.
+     *
+     * @param req The servlet request.
+     * @param session The public session to remember.
+     */
     public static void rememberPublicSession(final HttpServletRequest req, final ServerSession session) {
     	req.setAttribute(PUBLIC_SESSION_KEY, session);
         session.setParameter("JSESSIONID", req.getSession().getId());
