@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,72 @@
  *
  */
 
-package com.openexchange.sessiond;
+package com.openexchange.http.grizzly.osgi;
 
-import com.openexchange.session.Session;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link SessiondServiceExtended} - The extended {@link SessiondService SessionD service}.
+ * {@link Services} - The static service lookup.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SessiondServiceExtended extends SessiondService {
+public final class Services {
 
     /**
-     * Checks for any active session for specified context.
-     *
-     * @param contextId The context identifier
-     * @return <code>true</code> if at least one active session is found; otherwise <code>false</code>
+     * Initializes a new {@link Services}.
      */
-    boolean hasForContext(final int contextId);
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
     /**
-     * Checks if denoted session is <code>locally</code> available and located in short-term container.
+     * Sets the service lookup.
      *
-     * @param sessionId The session identifier
-     * @return <code>true</code> if <code>locally</code> active; otherwise <code>false</code>
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    boolean isActive(String sessionId);
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
 
     /**
-     * Get the session object related to the given session identifier.
+     * Gets the service lookup.
      *
-     * @param sessionId The Session identifier
-     * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise
-     *            <code>false</code>
-     * @return Returns the session or <code>null</code> if no session exists for the given identifier or if the session is expired
+     * @return The service lookup or <code>null</code>
      */
-    Session getSession(String sessionId, boolean considerSessionStorage);
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.caching.hazelcast\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
+    }
 
 }

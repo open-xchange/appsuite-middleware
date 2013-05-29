@@ -74,8 +74,11 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailAccessCacheEventListener.class));
 
-    private ServiceRegistration serviceRegistration;
+    private volatile ServiceRegistration<EventHandler> serviceRegistration;
 
+    /**
+     * Initializes a new {@link MailAccessCacheEventListener}.
+     */
     public MailAccessCacheEventListener() {
         super();
     }
@@ -96,11 +99,6 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
                 try {
                     mac.clearUserEntries(session);
                     // AttachmentTokenRegistry.getInstance().dropFor(session);
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info(new com.openexchange.java.StringAllocator(128).append("Detected a removed session: ").append(session.getSessionID()).append(
-                            ". Removed all possibly cached mail access instances for user ").append(session.getUserId()).append(
-                            " in context ").append(session.getContextId()).toString());
-                    }
                 } catch (final OXException e) {
                     LOG.error("Unable to clear cached mail access for session: " + session.getSessionID(), e);
                 }
@@ -117,11 +115,6 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
             try {
                 mac.clearUserEntries(session);
                 // AttachmentTokenRegistry.getInstance().dropFor(session);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(new com.openexchange.java.StringAllocator(128).append("Detected a removed session: ").append(session.getSessionID()).append(
-                        ". Removed all possibly cached mail access instances for user ").append(session.getUserId()).append(" in context ").append(
-                        session.getContextId()).toString());
-                }
             } catch (final OXException e) {
                 LOG.error("Unable to clear cached mail access for session: " + session.getSessionID(), e);
             }
@@ -134,14 +127,15 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] {
             SessiondEventConstants.TOPIC_REMOVE_DATA, SessiondEventConstants.TOPIC_REMOVE_CONTAINER,
             SessiondEventConstants.TOPIC_REMOVE_SESSION });
-        serviceRegistration = context.registerService(EventHandler.class.getName(), this, serviceProperties);
+        serviceRegistration = context.registerService(EventHandler.class, this, serviceProperties);
     }
 
     @Override
     public void unregisterService() {
+        final ServiceRegistration<EventHandler> serviceRegistration = this.serviceRegistration;
         if (null != serviceRegistration) {
             serviceRegistration.unregister();
-            serviceRegistration = null;
+            this.serviceRegistration = null;
         }
     }
 }

@@ -62,9 +62,10 @@ import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
-import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
+import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.http.requestwatcher.osgi.services.RequestRegistryEntry;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
+import com.openexchange.java.StringAllocator;
 
 /**
  * {@link RequestReportingFilter} - Add incoming requests to the RequestWatcherService so we can track and interrupt long running requests.
@@ -83,18 +84,14 @@ public class RequestReportingFilter implements Filter {
 
     private static final String EAS_PING = "Ping";
 
-    RequestWatcherService requestWatcherService = null;
-
     private final boolean isFilterEnabled;
 
     public RequestReportingFilter() throws OXException {
-        GrizzlyServiceRegistry serviceRegistry = GrizzlyServiceRegistry.getInstance();
-        ConfigurationService configService = serviceRegistry.getService(ConfigurationService.class);
+        ConfigurationService configService = Services.getService(ConfigurationService.class);
         if (configService == null) {
             throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getSimpleName());
         }
         this.isFilterEnabled = configService.getBoolProperty("com.openexchange.server.requestwatcher.isEnabled", true);
-        this.requestWatcherService = serviceRegistry.getService(RequestWatcherService.class);
     }
 
     @Override
@@ -111,22 +108,19 @@ public class RequestReportingFilter implements Filter {
             if (longRunning) { // don't track long running requests
                 chain.doFilter(request, response);
             } else {
-                // requestwatcher is enabled but service is missing, bundle not started etc ..
+                final RequestWatcherService requestWatcherService = Services.getService(RequestWatcherService.class);
+                // Request watcher is enabled but service is missing, bundle not started etc ..
                 if (requestWatcherService == null) {
                     writeToErrorLog("The required RequestWatcherService isn't available. Not able to watch this request.");
                     chain.doFilter(httpServletRequest, httpServletResponse);
                 } else {
-                    RequestRegistryEntry requestRegistryEntry = requestWatcherService.registerRequest(
-                        httpServletRequest,
-                        httpServletResponse,
-                        Thread.currentThread());
+                    RequestRegistryEntry requestRegistryEntry = requestWatcherService.registerRequest(httpServletRequest, httpServletResponse, Thread.currentThread());
 
                     // proceed processing
                     chain.doFilter(request, response);
 
                     // debug duration
-                    writeToDebugLog(new StringBuilder("Request took ").append(requestRegistryEntry.getAge()).append(" ms").append(
-                        " for url: ").append(httpServletRequest.getRequestURL()).toString());
+                    writeToDebugLog(new StringAllocator("Request took ").append(requestRegistryEntry.getAge()).append("ms ").append(" for URL: ").append(httpServletRequest.getRequestURL()).toString());
 
                     // remove request from registry after processing finished
                     requestWatcherService.unregisterRequest(requestRegistryEntry);

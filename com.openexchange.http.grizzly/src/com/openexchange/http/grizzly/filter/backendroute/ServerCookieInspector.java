@@ -63,7 +63,7 @@ import org.glassfish.grizzly.http.util.Header;
 import org.glassfish.grizzly.http.util.MimeHeaders;
 import org.glassfish.grizzly.memory.ByteBufferWrapper;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
+import com.openexchange.http.grizzly.osgi.Services;
 
 
 /**
@@ -143,7 +143,7 @@ public class ServerCookieInspector extends AbstractCookieInspector {
      * @return true if either the request is over a secure connection or the server enforces https.
      */
     private boolean isSecure() {
-        final ConfigurationService configService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final ConfigurationService configService = Services.getService(ConfigurationService.class);
         final boolean forceHttps = configService.getBoolProperty("com.openexchange.forceHTTPS", true);
         if (forceHttps && !com.openexchange.tools.servlet.http.Cookies.isLocalLan(httpResponsePacket.getRequest().getRemoteHost())) {
             // Speak HTTPS with all non-local LAN endpoints

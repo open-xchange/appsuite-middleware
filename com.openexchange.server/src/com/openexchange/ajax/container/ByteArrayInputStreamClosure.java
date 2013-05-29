@@ -47,41 +47,32 @@
  *
  */
 
-package com.openexchange.sessiond;
+package com.openexchange.ajax.container;
 
-import com.openexchange.session.Session;
+import java.io.InputStream;
+import com.openexchange.ajax.container.IFileHolder.InputStreamClosure;
+import com.openexchange.java.Streams;
 
 /**
- * {@link SessiondServiceExtended} - The extended {@link SessiondService SessionD service}.
+ * {@link ByteArrayInputStreamClosure} - The byte array {@link InputStreamClosure}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SessiondServiceExtended extends SessiondService {
+public class ByteArrayInputStreamClosure implements InputStreamClosure {
+
+    private final byte[] bytes;
 
     /**
-     * Checks for any active session for specified context.
-     *
-     * @param contextId The context identifier
-     * @return <code>true</code> if at least one active session is found; otherwise <code>false</code>
+     * Initializes a new {@link ByteArrayInputStreamClosure}.
      */
-    boolean hasForContext(final int contextId);
+    public ByteArrayInputStreamClosure(final byte[] bytes) {
+        super();
+        this.bytes = bytes;
+    }
 
-    /**
-     * Checks if denoted session is <code>locally</code> available and located in short-term container.
-     *
-     * @param sessionId The session identifier
-     * @return <code>true</code> if <code>locally</code> active; otherwise <code>false</code>
-     */
-    boolean isActive(String sessionId);
-
-    /**
-     * Get the session object related to the given session identifier.
-     *
-     * @param sessionId The Session identifier
-     * @param considerSessionStorage <code>true</code> to consider session storage for possible distributed session; otherwise
-     *            <code>false</code>
-     * @return Returns the session or <code>null</code> if no session exists for the given identifier or if the session is expired
-     */
-    Session getSession(String sessionId, boolean considerSessionStorage);
+    @Override
+    public InputStream newStream() {
+        return Streams.newByteArrayInputStream(bytes);
+    }
 
 }

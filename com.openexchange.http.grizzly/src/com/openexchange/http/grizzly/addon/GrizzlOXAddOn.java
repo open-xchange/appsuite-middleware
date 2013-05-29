@@ -60,7 +60,7 @@ import org.glassfish.grizzly.http.server.OXHttpServerFilter;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.grizzly.filter.FilterChainUtils;
 import com.openexchange.http.grizzly.filter.backendroute.AppendBackendRouteFilter;
-import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
+import com.openexchange.http.grizzly.osgi.Services;
 
 /**
  * {@link GrizzlOXAddOn}
@@ -75,7 +75,7 @@ public class GrizzlOXAddOn implements AddOn {
 
     public GrizzlOXAddOn() {
         //1. BackendRouteFilter
-        ConfigurationService configurationService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
+        ConfigurationService configurationService = Services.getService(ConfigurationService.class);
         final String backendRoute = configurationService.getProperty("com.openexchange.http.grizzly.backendRoute", "");
         AppendBackendRouteFilter appendBackendRouteFilter = new AppendBackendRouteFilter(backendRoute);
         filters.add(appendBackendRouteFilter);

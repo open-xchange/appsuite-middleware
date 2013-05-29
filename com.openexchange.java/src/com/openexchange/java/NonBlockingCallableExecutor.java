@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,29 +47,75 @@
  *
  */
 
-package com.openexchange.http.requestwatcher.osgi;
+package com.openexchange.java;
 
-import com.openexchange.osgi.ServiceRegistry;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * {@link RequestWatcherServiceRegistry} Singleton that extends the existing {@link ServiceRegistry} to gain functionality and acts as central
- * accesspoint for classes of the grizzly bundle.
+ * {@link NonBlockingCallableExecutor} - According to pattern introduced in <a
+ * href="http://mailinator.blogspot.de/2007/05/readerwriter-in-java-in-nonblocking.html"
+ * >http://mailinator.blogspot.de/2007/05/readerwriter-in-java-in-nonblocking.html</a>.
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class RequestWatcherServiceRegistry extends ServiceRegistry{
-    private static final RequestWatcherServiceRegistry INSTANCE = new RequestWatcherServiceRegistry();
+public class NonBlockingCallableExecutor<V> {
+
+    private final AtomicInteger writeCounter;
+    private final Lock lock;
 
     /**
-     * Encapsulated constructor.
+     * Initializes a new {@link NonBlockingCallableExecutor}.
      */
-    private RequestWatcherServiceRegistry() {}
-
-    /**
-     * Get the GrizzlyService Registry singleton.
-     * @return the GrizzlyService Registry singleton
-     */
-    public static RequestWatcherServiceRegistry getInstance() {
-        return INSTANCE;
+    public NonBlockingCallableExecutor() {
+        super();
+        writeCounter = new AtomicInteger();
+        lock = new ReentrantLock();
     }
+
+    /**
+     * Concurrent/non-exclusive computation of given task.
+     *
+     * @param task The task
+     * @return The concurrently computed result
+     * @throws Exception If unable to compute a result
+     */
+    public V readCall(Callable<V> task) throws Exception {
+        int save = 0;
+        V value = null;
+
+        do {
+            while (((save = writeCounter.get()) & 1) > 0) {
+                ;
+            }
+            value = task.call();
+        } while (save != writeCounter.get());
+
+        return value;
+    }
+
+    /**
+     * Exclusive computation of given task.
+     *
+     * @param task The task
+     * @return The exclusively computed result.
+     * @throws Exception If unable to compute a result
+     */
+    public V writeCall(Callable<V> task) throws Exception {
+        V value;
+
+        lock.lock();
+        try {
+            writeCounter.incrementAndGet();
+            value = task.call();
+        } finally {
+            writeCounter.incrementAndGet();
+            lock.unlock();
+        }
+
+        return value;
+    }
+
 }

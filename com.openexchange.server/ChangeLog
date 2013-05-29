@@ -1,3 +1,9 @@
+* 2013-05-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26838: Ignore file uploads during request watcher tracking
+ - Fix for bug 26832: Dropped misleading log output & check for locally active session during request watcher run
+ - Fix for bug 26828: Create a repetitive file holder for image data when checking if image transformation is needed
+
 * 2013-05-28 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 26807: Don't consider storage when checking for maximum allowed sessions
