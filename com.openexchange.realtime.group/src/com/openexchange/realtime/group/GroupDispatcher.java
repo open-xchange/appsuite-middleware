@@ -160,16 +160,6 @@ public class GroupDispatcher implements ComponentHandle {
         if (!handleGroupCommand(stanza)) {
             processStanza(stanza);
         }
-        if (stanza.traceEnabled()) {
-            // Send analysis back
-            stanza.trace("------------- SENDING RECEIPT ----------------");
-            Stanza stanza2 = stanza.newInstance();
-            stanza2.setFrom(id);
-            stanza2.setTo(stanza.getFrom());
-            stanza2.setTracer(stanza.getTracer());
-            stanza2.addLogMessages(stanza.getLogEntries());
-            send(stanza2);
-        }
     }
 
     /**

@@ -71,6 +71,7 @@ import com.openexchange.realtime.atmosphere.protocol.RTProtocol;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.ResourceDirectory;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.dispatch.StanzaSender;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.handle.StanzaQueueService;
@@ -179,12 +180,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         stanza.transformPayloadsToInternal();
         stanza.initializeDefaults();
 
-        StanzaQueueService stanzaQueueService = AtmosphereServiceRegistry.getInstance().getService(StanzaQueueService.class);
+        MessageDispatcher dispatcher = AtmosphereServiceRegistry.getInstance().getService(MessageDispatcher.class);
 
-        if (!stanzaQueueService.enqueueStanza(stanza)) {
-            // TODO: exception?
-            LOG.error("Couldn't enqueue Stanza: " + stanza);
-        }
+        dispatcher.send(stanza);
     }
 
     /**

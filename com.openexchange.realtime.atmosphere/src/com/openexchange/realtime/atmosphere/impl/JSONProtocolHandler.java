@@ -77,6 +77,11 @@ public class JSONProtocolHandler {
         this.gate = gate;
     }
     
+    
+    public StanzaSequenceGate getGate() {
+        return gate;
+    }
+    
     /**
      * Handles a list of messages, and calls the appropriate protocol messages
      * @param constructedId The ID for the client

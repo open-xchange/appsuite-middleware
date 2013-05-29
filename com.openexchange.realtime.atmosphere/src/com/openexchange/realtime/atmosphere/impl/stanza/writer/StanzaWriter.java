@@ -99,8 +99,12 @@ public class StanzaWriter {
     }
 
     private void writeBasics(Stanza stanza, JSONObject object) throws JSONException {
-        object.put("from", stanza.getFrom().toString());
-        object.put("to", stanza.getTo().toString());
+        if (stanza.getFrom() != null) {
+            object.put("from", stanza.getFrom().toString());
+        }
+        if (stanza.getTo() != null) {
+            object.put("to", stanza.getTo().toString());
+        }
         object.put("selector", stanza.getSelector());
         
         String id = stanza.getId();

@@ -47,45 +47,17 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.http;
+package com.openexchange.realtime.util;
 
-import java.util.Arrays;
-import java.util.Collection;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.impl.JSONProtocolHandler;
-import com.openexchange.realtime.atmosphere.impl.StateManager;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
 
 
 /**
- * {@link RealtimeActions}
+ * {@link CustomGateAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class RealtimeActions implements AJAXActionServiceFactory {
-    
-    private AJAXActionService SEND = null;
-    private AJAXActionService QUERY = null;
-
-    public RealtimeActions(ServiceLookup services, StateManager stateManager, JSONProtocolHandler protocolHandler) {
-        SEND = new SendAction(services, stateManager, protocolHandler);
-        QUERY = new QueryAction(services, protocolHandler.getGate());
-    }
-    
-    @Override
-    public Collection<?> getSupportedServices() {
-        return Arrays.asList("send", "query");
-    }
-
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        if ("query".equals(action)) {
-            return QUERY;
-        }
-        return SEND;
-
-    }
-
+public interface CustomGateAction {
+    public void handle(Stanza stanza, ID recipient);
 }

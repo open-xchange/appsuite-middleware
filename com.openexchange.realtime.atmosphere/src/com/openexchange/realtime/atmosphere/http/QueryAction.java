@@ -49,7 +49,12 @@
 
 package com.openexchange.realtime.atmosphere.http;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -60,7 +65,13 @@ import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.CustomGateAction;
+import com.openexchange.realtime.util.StanzaSequenceGate;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -72,18 +83,20 @@ import com.openexchange.tools.session.ServerSession;
 public class QueryAction extends RTAction {
 
     private ServiceLookup services;
-
+    private StanzaSequenceGate gate;
+    
     /**
      * Initializes a new {@link QueryAction}.
      * @param services
      */
-    public QueryAction(ServiceLookup services) {
+    public QueryAction(ServiceLookup services, StanzaSequenceGate gate) {
         super();
         this.services = services;
+        this.gate = gate;
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, ServerSession session) throws OXException {
         ID id = constructID(request, session);
         
         StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(id, session, (JSONObject) request.getData());
@@ -94,12 +107,50 @@ public class QueryAction extends RTAction {
         }
         
         stanza.setOnBehalfOf(id);
+        stanza.setFrom(id);
         
         stanza.transformPayloadsToInternal();
         stanza.initializeDefaults();
         
-        Stanza answer = services.getService(MessageDispatcher.class).sendSynchronously(stanza, request.isSet("timeout") ? request.getIntParameter("timeout") : 30, TimeUnit.SECONDS);
-        return new AJAXRequestResult(new StanzaWriter().write(answer), "json");
+        final Map<String, Object> values = new HashMap<String, Object>();
+        
+        final Lock sendLock = new ReentrantLock();
+        try {
+            sendLock.lock();
+            final Condition handled = sendLock.newCondition();
+            gate.handle(stanza, stanza.getTo(), new CustomGateAction() {
+
+                @Override
+                public void handle(final Stanza stanza, ID recipient) {
+                    
+                    try {
+                        values.put("answer", services.getService(MessageDispatcher.class).sendSynchronously(stanza, request.isSet("timeout") ? request.getIntParameter("timeout") : 30, TimeUnit.SECONDS));
+                    } catch (OXException e) {
+                        values.put("exception", e);
+                    }
+                    values.put("done", Boolean.TRUE);
+                    try {
+                        sendLock.lock();
+                        handled.signal();
+                    } finally {
+                        sendLock.unlock();
+                    }
+                }
+                
+            });
+            
+            if (!values.containsKey("done")) {
+                handled.await(request.isSet("timeout") ? request.getIntParameter("timeout") : 30, TimeUnit.SECONDS);
+            }
+        } catch (InterruptedException e) {
+        } finally {
+            sendLock.unlock();
+        }
+        OXException exception = (OXException) values.get("exception");
+        if (exception != null) {
+            throw exception;
+        }
+        return new AJAXRequestResult(new StanzaWriter().write((Stanza)values.get("answer")), "json");
     }
 
 }
