@@ -314,7 +314,13 @@ public class AJPv13TaskWatcher {
              */
             {
                 final Throwable t = new Throwable();
-                t.setStackTrace(task.getStackTrace());
+                {
+                    final StackTraceElement[] stackTrace = task.getStackTrace();
+                    if (dontLog(stackTrace)) {
+                        return;
+                    }
+                    t.setStackTrace(stackTrace);
+                }
                 final Map<String, Object> taskProperties;
                 {
                     final Props taskProps = LogProperties.optLogProperties(task.getThread());
@@ -362,6 +368,19 @@ public class AJPv13TaskWatcher {
             if (max > 0 && task.getProcessingStartTime() < max) {
                 task.cancel();
             }
+        }
+
+        private boolean dontLog(final StackTraceElement[] stackTrace) {
+            for (final StackTraceElement ste : stackTrace) {
+                final String className = ste.getClassName();
+                if (null != className) {
+                    if (className.startsWith("org.apache.commons.fileupload.MultipartStream$ItemInputStream")) {
+                        // A long-running file upload. Ignore
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
 
         private static final int MAX_STACK_TRACE_ELEMENTS = 1000;
