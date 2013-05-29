@@ -61,6 +61,8 @@ fi
 %doc com.openexchange.spamhandler.cloudmark/ChangeLog
 
 %changelog
+* Tue May 28 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Second build for patch 2013-05-28
 * Thu May 23 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 Third candidate for 7.2.1 release
 * Wed May 22 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
