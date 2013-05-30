@@ -251,16 +251,16 @@ public final class HtmlParser {
         sb.append(ERR01);
         sb.append(e.getMessage());
         if (appendHtml) {
-            sb.append(". Affected HTML content:").append(System.getProperty("line.separator"));
-            dumpHtml(html, sb);
+            final String sep = System.getProperty("line.separator");
+            sb.append(". Affected HTML content:").append(sep);
+            dumpHtml(html, sep, sb);
         }
         return sb.toString();
     }
 
-    private static void dumpHtml(final String html, final StringBuilder sb) {
+    private static void dumpHtml(final String html, final String sep, final StringBuilder sb) {
         final String[] lines = Strings.splitByCRLF(html);
         final DecimalFormat df = new DecimalFormat("0000");
-        final String sep = System.getProperty("line.separator");
         int count = 1;
         for (final String line : lines) {
             sb.append(df.format(count++)).append(' ').append(line).append(sep);
