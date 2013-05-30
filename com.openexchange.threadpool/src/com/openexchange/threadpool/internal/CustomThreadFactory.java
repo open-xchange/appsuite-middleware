@@ -99,18 +99,6 @@ public final class CustomThreadFactory implements java.util.concurrent.ThreadFac
                 threadNum = threadNumber.incrementAndGet();
             }
         }
-        /*-
-         * Previous approach which could possibly result in an infinite cycle
-         * when two threads enter the loop simultaneously
-         *
-        while (threadNum <= 0) {
-            if (threadNumber.compareAndSet(threadNum, 1)) {
-                threadNum = 1;
-            } else {
-                threadNum = threadNumber.incrementAndGet();
-            }
-        }
-         */
         /*
          * Create thread
          */
