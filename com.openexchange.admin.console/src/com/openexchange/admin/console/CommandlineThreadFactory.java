@@ -47,70 +47,41 @@
  *
  */
 
-package com.openexchange.secret.recovery.mail.osgi;
+package com.openexchange.admin.console;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
-import com.openexchange.secret.recovery.EncryptedItemDetectorService;
-import com.openexchange.secret.recovery.SecretMigrator;
-import com.openexchange.tools.session.ServerSession;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * {@link MailSecretRecoveryActivator}
+ * {@link CommandlineThreadFactory} - A thread factory for command-line.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailSecretRecoveryActivator extends HousekeepingActivator {
+public final class CommandlineThreadFactory implements java.util.concurrent.ThreadFactory {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailAccountStorageService.class };
+    private final AtomicInteger threadNumber;
+
+    /**
+     * Initializes a new {@link CommandlineThreadFactory}.
+     *
+     * @param namePrefix The name prefix
+     */
+    public CommandlineThreadFactory() {
+        super();
+        threadNumber = new AtomicInteger();
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        // Ignore
+    public Thread newThread(final Runnable r) {
+        final Thread t = new Thread(r, getThreadName(threadNumber.incrementAndGet(), new StringBuilder("Commandline-Worker-")));
+        t.setUncaughtExceptionHandler(new CommandlineUncaughtExceptionhandler());
+        return t;
     }
 
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        // Ignore
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        final MailAccountStorageService mailAccountStorage = getService(MailAccountStorageService.class);
-        registerService(EncryptedItemDetectorService.class, new EncryptedItemDetectorService() {
-
-            @Override
-            public boolean hasEncryptedItems(final ServerSession session) throws OXException {
-                return mailAccountStorage.hasAccounts(session);
-            }
-
-        });
-        registerService(SecretMigrator.class, new SecretMigrator() {
-
-            @Override
-            public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
-                mailAccountStorage.migratePasswords(session.getUserId(), session.getContextId(), oldSecret, newSecret);
-            }
-
-        });
-        registerService(EncryptedItemCleanUpService.class, new EncryptedItemCleanUpService() {
-
-            @Override
-            public void cleanUpEncryptedItems(final String secret, final ServerSession session) throws OXException {
-                mailAccountStorage.cleanUp(secret, session);
-            }
-
-        });
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        cleanUp();
+    private static String getThreadName(final int threadNumber, final StringBuilder sb) {
+        for (int i = threadNumber; i < 100; i *= 10) {
+            sb.append('0');
+        }
+        return sb.append(threadNumber).toString();
     }
 
 }

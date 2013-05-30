@@ -47,70 +47,56 @@
  *
  */
 
-package com.openexchange.secret.recovery.mail.osgi;
+package com.openexchange.admin.console;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
-import com.openexchange.secret.recovery.EncryptedItemDetectorService;
-import com.openexchange.secret.recovery.SecretMigrator;
-import com.openexchange.tools.session.ServerSession;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * {@link MailSecretRecoveryActivator}
+ * {@link SubmitCountExecutorCompletionService} - Extends {@code ExecutorCompletionService} by counting submitted tasks; retrievable via
+ * {@link #getSubmitCount()}.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailSecretRecoveryActivator extends HousekeepingActivator {
+public class SubmitCountExecutorCompletionService<V> extends ExecutorCompletionService<V> {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailAccountStorageService.class };
+    /** Counter for submitted tasks */
+    private final AtomicInteger count;
+
+    /**
+     * Initializes a new {@link SubmitCountExecutorCompletionService}.
+     *
+     * @param executor The executor
+     */
+    public SubmitCountExecutorCompletionService(final Executor executor) {
+        super(executor);
+        count = new AtomicInteger(0);
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        // Ignore
+    public Future<V> submit(final Callable<V> task) {
+        final Future<V> submit = super.submit(task);
+        count.incrementAndGet();
+        return submit;
     }
 
     @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        // Ignore
+    public Future<V> submit(final Runnable task, final V result) {
+        final Future<V> submit = super.submit(task, result);
+        count.incrementAndGet();
+        return submit;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        final MailAccountStorageService mailAccountStorage = getService(MailAccountStorageService.class);
-        registerService(EncryptedItemDetectorService.class, new EncryptedItemDetectorService() {
-
-            @Override
-            public boolean hasEncryptedItems(final ServerSession session) throws OXException {
-                return mailAccountStorage.hasAccounts(session);
-            }
-
-        });
-        registerService(SecretMigrator.class, new SecretMigrator() {
-
-            @Override
-            public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
-                mailAccountStorage.migratePasswords(session.getUserId(), session.getContextId(), oldSecret, newSecret);
-            }
-
-        });
-        registerService(EncryptedItemCleanUpService.class, new EncryptedItemCleanUpService() {
-
-            @Override
-            public void cleanUpEncryptedItems(final String secret, final ServerSession session) throws OXException {
-                mailAccountStorage.cleanUp(secret, session);
-            }
-
-        });
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        cleanUp();
+    /**
+     * Gets the count of submitted tasks.
+     *
+     * @return The task count.
+     */
+    public int getSubmitCount() {
+        return count.get();
     }
 
 }

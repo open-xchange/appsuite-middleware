@@ -548,7 +548,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     LOG.warn("Lost connection to client while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
                 }
             } catch (final com.sun.mail.util.MessageRemovedIOException e) {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Message not found.");
+                sendErrorSafe(HttpServletResponse.SC_NOT_FOUND, "Message not found.", resp);
             } catch (final IOException e) {
                 if ("connection reset by peer".equals(toLowerCase(e.getMessage()))) {
                     /*-
@@ -565,10 +565,20 @@ public class FileResponseRenderer implements ResponseRenderer {
                 }
             }
         } catch (final Exception e) {
-            LOG.error("Exception while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+            final String message = "Exception while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName);
+            LOG.error(message, e);
+            sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
         } finally {
             close(file, documentData);
             close(closeables);
+        }
+    }
+
+    private void sendErrorSafe(int sc, String msg, final HttpServletResponse resp) {
+        try {
+            resp.sendError(sc, msg);
+        } catch (final Exception e) {
+            // Ignore
         }
     }
 

@@ -1,3 +1,7 @@
+* 2013-05-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26607: Gather statistic information in a concurrent fashion
+
 * 2013-05-29 - martin.herfurth@open-xchange.com
 
  - Fix for bug 26842: Default Participant for public folders.

@@ -47,70 +47,76 @@
  *
  */
 
-package com.openexchange.secret.recovery.mail.osgi;
+package com.openexchange.admin.console;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
-import com.openexchange.secret.recovery.EncryptedItemDetectorService;
-import com.openexchange.secret.recovery.SecretMigrator;
-import com.openexchange.tools.session.ServerSession;
+import java.io.OutputStream;
+import java.io.PrintStream;
 
 /**
- * {@link MailSecretRecoveryActivator}
+ * {@link StringPrintStream} - Gathers everything written to print stream as a string.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailSecretRecoveryActivator extends HousekeepingActivator {
+public class StringPrintStream extends PrintStream {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailAccountStorageService.class };
+    /**
+     * Creates a new {@link StringPrintStream} instance
+     *
+     * @param capacity The capacity
+     * @return The new {@link StringPrintStream} instance
+     */
+    public static StringPrintStream newInstance(final int capacity) {
+        return new StringPrintStream(new StringOutputStream(capacity));
+    }
+
+    // -------------------------------------------------------------------------------------------- //
+
+    final StringOutputStream sos;
+
+    private StringPrintStream(final StringOutputStream sos) {
+        super(sos);
+        this.sos = sos;
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        // Ignore
+    public String toString() {
+        return sos.builder.toString();
     }
 
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        // Ignore
-    }
+    private static class StringOutputStream extends OutputStream {
 
-    @Override
-    protected void startBundle() throws Exception {
-        final MailAccountStorageService mailAccountStorage = getService(MailAccountStorageService.class);
-        registerService(EncryptedItemDetectorService.class, new EncryptedItemDetectorService() {
+        final StringBuilder builder;
 
-            @Override
-            public boolean hasEncryptedItems(final ServerSession session) throws OXException {
-                return mailAccountStorage.hasAccounts(session);
-            }
+        StringOutputStream(final int capacity) {
+            builder = new StringBuilder(capacity);
+        }
 
-        });
-        registerService(SecretMigrator.class, new SecretMigrator() {
+        @Override()
+        public void close() {
+            // Nope
+        }
 
-            @Override
-            public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
-                mailAccountStorage.migratePasswords(session.getUserId(), session.getContextId(), oldSecret, newSecret);
-            }
+        @Override()
+        public void flush() {
+            // Nope
+        }
 
-        });
-        registerService(EncryptedItemCleanUpService.class, new EncryptedItemCleanUpService() {
+        @Override()
+        public void write(final byte[] b) {
+            builder.append(new String(b));
+        }
 
-            @Override
-            public void cleanUpEncryptedItems(final String secret, final ServerSession session) throws OXException {
-                mailAccountStorage.cleanUp(secret, session);
-            }
+        @Override()
+        public void write(final byte[] b, final int off, final int len) {
+            final byte[] bytes = new byte[len];
+            System.arraycopy(b, off, bytes, 0, len);
+            builder.append(new String(bytes));
+        }
 
-        });
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        cleanUp();
+        @Override
+        public void write(final int b) {
+            builder.append(b);
+        }
     }
 
 }
