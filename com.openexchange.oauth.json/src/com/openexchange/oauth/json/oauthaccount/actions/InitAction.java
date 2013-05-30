@@ -62,6 +62,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -143,10 +144,8 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
          */
         final String callbackUrl;
         {
-            final StringBuilder callbackUrlBuilder = new StringBuilder();
-            callbackUrlBuilder.append(request.isSecure() ? "https://" : "http://");
-            callbackUrlBuilder.append(request.getHostname());
-            callbackUrlBuilder.append(PREFIX.get().getPrefix()).append("oauth/accounts");
+            final StringBuilder callbackUrlBuilder = request.constructURL(new StringAllocator(PREFIX.get().getPrefix()).append("oauth/accounts").toString(), true);
+            // Append query string
             callbackUrlBuilder.append("?action=create");
             callbackUrlBuilder.append("&respondWithHTML=true&session=").append(session.getSessionID());
             callbackUrlBuilder.append('&').append(name).append('=').append(urlEncode(displayName));
@@ -209,10 +208,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         /*
          * Compose call-back URL
          */
-        final StringBuilder callbackUrlBuilder = new StringBuilder(256);
-        callbackUrlBuilder.append(request.isSecure() ? "https://" : "http://");
-        callbackUrlBuilder.append(request.getHostname());
-        callbackUrlBuilder.append(PREFIX.get().getPrefix()).append("oauth/accounts");
+        final StringBuilder callbackUrlBuilder = request.constructURL(new StringAllocator(PREFIX.get().getPrefix()).append("oauth/accounts").toString(), true);
         callbackUrlBuilder.append("?action=reauthorize");
         callbackUrlBuilder.append("&id=").append(account.getId());
         callbackUrlBuilder.append("&respondWithHTML=true&session=").append(session.getSessionID());
@@ -226,8 +222,9 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(urlEncode(serviceId));
         callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
         callbackUrlBuilder.append('&').append(Session.PARAM_TOKEN).append('=').append(oauthSessionToken);
-        if (request.getParameter("cb") != null) {
-        	callbackUrlBuilder.append("&").append("callback=").append(request.getParameter("cb"));
+        final String cb = request.getParameter("cb");
+        if (!isEmpty(cb)) {
+        	callbackUrlBuilder.append("&callback=").append(cb);
         }
         /*
          * Invoke
