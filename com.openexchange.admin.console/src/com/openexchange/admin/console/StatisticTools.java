@@ -72,19 +72,24 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
+import javax.management.openmbean.CompositeDataSupport;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 public class StatisticTools extends AbstractJMXTools {
 
-    
     public class ThreadOutputElem {
 
         private final long threadId;
+
         private final String threadName;
+
         private final long allocatedBytes;
+
         private final long cpuTime;
+
         private final long userTime;
+
         private StackTraceElement[] stackTrace;
 
         public ThreadOutputElem(long threadId, String threadName, long allocatedBytes, long cpuTime, long userTime) {
@@ -108,7 +113,6 @@ public class StatisticTools extends AbstractJMXTools {
             return threadId;
         }
 
-        
         public String getThreadName() {
             return threadName;
         }
@@ -125,7 +129,6 @@ public class StatisticTools extends AbstractJMXTools {
             return userTime;
         }
 
-        
         public StackTraceElement[] getStackTrace() {
             return stackTrace;
         }
@@ -171,15 +174,19 @@ public class StatisticTools extends AbstractJMXTools {
     private static final char OPT_DOOPERATIONS_STATS_SHORT = 'd';
 
     private static final String OPT_DOOPERATIONS_STATS_LONG = "dooperation";
-    
+
     private static final char OPT_MEMORY_THREADS_STATS_SHORT = 'm';
-    
+
     private static final String OPT_MEMORY_THREADS_STATS_LONG = "memory";
-    
+
+    private static final char OPT_GC_STATS_SHORT = 'z';
+
+    private static final String OPT_GC_STATS_LONG = "gcstats";
+
     private static final char OPT_MEMORY_THREADS_FULL_STATS_SHORT = 'M';
-    
+
     private static final String OPT_MEMORY_THREADS_FULL_STATS_LONG = "Memory";
-    
+
     private CLIOption xchangestats = null;
 
     private CLIOption threadpoolstats = null;
@@ -197,11 +204,11 @@ public class StatisticTools extends AbstractJMXTools {
     private CLIOption showoperation = null;
 
     private CLIOption dooperation = null;
-    
+
     private CLIOption memorythreadstats = null;
-    
+
     private CLIOption memorythreadstatsfull = null;
-    
+
     private CLIOption sessionStats = null;
 
     private CLIOption usmSessionStats = null;
@@ -211,6 +218,11 @@ public class StatisticTools extends AbstractJMXTools {
     private CLIOption clusterStats = null;
 
     private CLIOption grizzlyStats = null;
+
+    /**
+     * Option for garbage collection statistics
+     */
+    private CLIOption gcStats = null;
 
     public static void main(final String args[]) {
         final StatisticTools st = new StatisticTools();
@@ -293,6 +305,13 @@ public class StatisticTools extends AbstractJMXTools {
                 count++;
             }
         }
+        if (null != parser.getOptionValue(this.gcStats)) {
+            if (0 == count) {
+                final MBeanServerConnection initConnection = initConnection(admin, env);
+                showGcData(initConnection);
+                count++;
+            }
+        }
         if (null != parser.getOptionValue(this.allstats)) {
             if (0 == count) {
                 final MBeanServerConnection initConnection = initConnection(admin, env);
@@ -305,6 +324,7 @@ public class StatisticTools extends AbstractJMXTools {
                 showSysThreadingData(initConnection);
                 System.out.print(getStats(initConnection, "org.json", "name", "JSONMBean"));
                 showGrizzlyData(initConnection);
+                showGcData(initConnection);
                 try {
                     System.out.print(getStats(
                         initConnection,
@@ -347,7 +367,7 @@ public class StatisticTools extends AbstractJMXTools {
             showThreadMemory(env, admin, true);
             count++;
         }
-        
+
         if (0 == count) {
             System.err.println(new StringBuilder("No option selected (").append(OPT_STATS_LONG).append(", ").append(OPT_RUNTIME_STATS_LONG).append(
                 ", ").append(OPT_OS_STATS_LONG).append(", ").append(OPT_THREADING_STATS_LONG).append(", ").append(OPT_ALL_STATS_LONG).append(
@@ -360,12 +380,15 @@ public class StatisticTools extends AbstractJMXTools {
 
     private void showThreadMemory(final HashMap<String, String[]> env, boolean admin, boolean stacktrace) throws InterruptedException, IOException, MalformedObjectNameException, InstanceNotFoundException, MBeanException, ReflectionException {
         final MBeanServerConnection initConnection = initConnection(admin, env);
-        ThreadMXBean threadBean = ManagementFactory.newPlatformMXBeanProxy(initConnection, ManagementFactory.THREAD_MXBEAN_NAME, ThreadMXBean.class);
+        ThreadMXBean threadBean = ManagementFactory.newPlatformMXBeanProxy(
+            initConnection,
+            ManagementFactory.THREAD_MXBEAN_NAME,
+            ThreadMXBean.class);
         final long[] allThreadIds = threadBean.getAllThreadIds();
         ObjectName srvThrdName = new ObjectName(ManagementFactory.THREAD_MXBEAN_NAME);
         long[] allocatedBytes = null;
         long[] cpuTime = null;
-        long[] userTime = null; 
+        long[] userTime = null;
         final ThreadInfo[] threadInfo;
         if (stacktrace) {
             threadInfo = threadBean.getThreadInfo(allThreadIds, Integer.MAX_VALUE);
@@ -373,26 +396,34 @@ public class StatisticTools extends AbstractJMXTools {
             threadInfo = threadBean.getThreadInfo(allThreadIds);
         }
         try {
-            allocatedBytes = (long[]) initConnection.invoke(srvThrdName, "getThreadAllocatedBytes", new Object[]{allThreadIds}, new String[] {"[J"});
+            allocatedBytes = (long[]) initConnection.invoke(
+                srvThrdName,
+                "getThreadAllocatedBytes",
+                new Object[] { allThreadIds },
+                new String[] { "[J" });
         } catch (javax.management.ReflectionException e) {
             System.err.println("AllocatedBytes is not supported on this JVM");
             // Simple set to an array of 0
-            allocatedBytes = new long[threadInfo.length]; 
+            allocatedBytes = new long[threadInfo.length];
             Arrays.fill(allocatedBytes, 0);
         }
         // First try the new method everytime, if not available use the old iteration approach
         try {
-            cpuTime = (long[]) initConnection.invoke(srvThrdName, "getThreadCpuTime", new Object[]{allThreadIds}, new String[] {"[J"});
+            cpuTime = (long[]) initConnection.invoke(srvThrdName, "getThreadCpuTime", new Object[] { allThreadIds }, new String[] { "[J" });
         } catch (javax.management.ReflectionException e) {
-            cpuTime = new long[threadInfo.length]; 
+            cpuTime = new long[threadInfo.length];
             for (int i = 0; i < allThreadIds.length; i++) {
                 cpuTime[i] = threadBean.getThreadCpuTime(allThreadIds[i]);
             }
         }
         try {
-            userTime = (long[]) initConnection.invoke(srvThrdName, "getThreadUserTime", new Object[]{allThreadIds}, new String[] {"[J"});
+            userTime = (long[]) initConnection.invoke(
+                srvThrdName,
+                "getThreadUserTime",
+                new Object[] { allThreadIds },
+                new String[] { "[J" });
         } catch (javax.management.ReflectionException e) {
-            userTime = new long[threadInfo.length]; 
+            userTime = new long[threadInfo.length];
             for (int i = 0; i < allThreadIds.length; i++) {
                 userTime[i] = threadBean.getThreadUserTime(allThreadIds[i]);
             }
@@ -405,15 +436,26 @@ public class StatisticTools extends AbstractJMXTools {
         if (stacktrace) {
             System.out.println("ThreadID, Name, AllocatedBytes, CpuTime, UserTime, StackTrace");
             for (int i = 0; i < allThreadIds.length; i++) {
-                arrayList.add(new ThreadOutputElem(allThreadIds[i], threadInfo[i].getThreadName(), allocatedBytes[i], cpuTime[i], userTime[i], threadInfo[i].getStackTrace()));
+                arrayList.add(new ThreadOutputElem(
+                    allThreadIds[i],
+                    threadInfo[i].getThreadName(),
+                    allocatedBytes[i],
+                    cpuTime[i],
+                    userTime[i],
+                    threadInfo[i].getStackTrace()));
             }
         } else {
             System.out.println("ThreadID, Name, AllocatedBytes, CpuTime, UserTime");
             for (int i = 0; i < allThreadIds.length; i++) {
-                arrayList.add(new ThreadOutputElem(allThreadIds[i], threadInfo[i].getThreadName(), allocatedBytes[i], cpuTime[i], userTime[i]));
+                arrayList.add(new ThreadOutputElem(
+                    allThreadIds[i],
+                    threadInfo[i].getThreadName(),
+                    allocatedBytes[i],
+                    cpuTime[i],
+                    userTime[i]));
             }
         }
-        
+
         Collections.sort(arrayList, new Comparator<ThreadOutputElem>() {
 
             @Override
@@ -520,8 +562,27 @@ public class StatisticTools extends AbstractJMXTools {
         this.jsonStats = setShortLongOpt(parser, 'j', "jsonstats", "shows the JSON statistics", false, NeededQuadState.notneeded);
         this.clusterStats = setShortLongOpt(parser, 'c', "clusterstats", "shows the cluster statistics", false, NeededQuadState.notneeded);
         this.grizzlyStats = setShortLongOpt(parser, 'g', "grizzlystats", "shows the grizzly statistics", false, NeededQuadState.notneeded);
-        this.memorythreadstats = setShortLongOpt(parser, OPT_MEMORY_THREADS_STATS_SHORT, OPT_MEMORY_THREADS_STATS_LONG, "shows memory usage of threads", false, NeededQuadState.notneeded);
-        this.memorythreadstatsfull = setShortLongOpt(parser, OPT_MEMORY_THREADS_FULL_STATS_SHORT, OPT_MEMORY_THREADS_FULL_STATS_LONG, "shows memory usage of threads including stack traces", false, NeededQuadState.notneeded);
+        this.gcStats = setShortLongOpt(
+            parser,
+            OPT_GC_STATS_SHORT,
+            OPT_GC_STATS_LONG,
+            "shows the gc statistics",
+            false,
+            NeededQuadState.notneeded);
+        this.memorythreadstats = setShortLongOpt(
+            parser,
+            OPT_MEMORY_THREADS_STATS_SHORT,
+            OPT_MEMORY_THREADS_STATS_LONG,
+            "shows memory usage of threads",
+            false,
+            NeededQuadState.notneeded);
+        this.memorythreadstatsfull = setShortLongOpt(
+            parser,
+            OPT_MEMORY_THREADS_FULL_STATS_SHORT,
+            OPT_MEMORY_THREADS_FULL_STATS_LONG,
+            "shows memory usage of threads including stack traces",
+            false,
+            NeededQuadState.notneeded);
     }
 
     private void showMemoryPoolData(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
@@ -615,26 +676,71 @@ public class StatisticTools extends AbstractJMXTools {
 
     /**
      * Print Grizzly related management info to stdout if Grizzly's MBeans can be found.
-     *
+     * 
      * @param mbeanServerConnection The MBeanServerConnection to be used for querying MBeans.
      * @throws IOException
      * @throws MalformedObjectNameException
      * @throws NullPointerException
      */
     private void showGrizzlyData(MBeanServerConnection mbeanServerConnection) throws MalformedObjectNameException, NullPointerException, IOException {
-        // Iterate over the MBeans we are interested in, query by objectName
         for (GrizzlyMBean grizzlyMBean : GrizzlyMBean.values()) {
             ObjectName objectName = new ObjectName(grizzlyMBean.getObjectName());
-            Set<ObjectInstance> mBeans = mbeanServerConnection.queryMBeans(objectName, null);
-            // Iterate over the found MBeans and print the desired attributes for this MBean. If no MBeans are found (jmx disabled, ajp
-            // backend in use) nothig will be printed to stdout
-            for (ObjectInstance mBean : mBeans) {
-                for (String attribute : grizzlyMBean.getAttributes()) {
-                    try {
-                        System.out.println(objectName + "," + attribute + " = " + mbeanServerConnection.getAttribute(objectName, attribute));
-                    } catch (Exception e) {
-                        System.out.println(objectName + "," + attribute + " = [" + e.getMessage() + "]");
+            mbeanServerConnection.queryMBeans(objectName, null);
+
+            for (String attribute : grizzlyMBean.getAttributes()) {
+                try {
+                    System.out.println(objectName + "," + attribute + " = " + mbeanServerConnection.getAttribute(objectName, attribute));
+                } catch (Exception e) {
+                    System.out.println(objectName + "," + attribute + " = [" + e.getMessage() + "]");
+                }
+            }
+        }
+    }
+
+    /**
+     * Method to prepare and display the garbage collection information.
+     * 
+     * @param mbeanServerConnection - The MBeanServerConnection to be used for querying MBeans.
+     * @throws MalformedObjectNameException - thrown while creating {@link ObjectName}
+     * @throws IOException - thrown while using the {@link MBeanServerConnection}
+     * @throws ReflectionException- thrown while using the {@link MBeanServerConnection}
+     * @throws IntrospectionException - thrown while getting {@link MBeanInfo}
+     * @throws InstanceNotFoundException - thrown while getting {@link MBeanAttributeInfo} or {@link MBeanInfo}
+     * @throws MBeanException - thrown while trying to get the attribute from {@link MBeanServerConnection}
+     * @throws AttributeNotFoundException - thrown while trying to get the attribute from {@link MBeanServerConnection}
+     */
+    private void showGcData(MBeanServerConnection mbeanServerConnection) throws MalformedObjectNameException, IOException, InstanceNotFoundException, IntrospectionException, AttributeNotFoundException, MBeanException, ReflectionException {
+        ObjectName domainType = new ObjectName(ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE + ",*");
+        Set<ObjectInstance> mbeans = mbeanServerConnection.queryMBeans(domainType, null);
+
+        for (ObjectInstance mbean : mbeans) {
+            ObjectName objectName = mbean.getObjectName();
+            MBeanInfo beanInfo = mbeanServerConnection.getMBeanInfo(objectName);
+
+            for (MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
+                Object attribute = mbeanServerConnection.getAttribute(objectName, attributeInfo.getName());
+
+                if (attribute != null) {
+                    final StringBuilder stringBuilder = new StringBuilder(objectName.getCanonicalName()).append(",").append(
+                        attributeInfo.getName()).append(" = ");
+
+                    if (attribute instanceof CompositeDataSupport) {
+                        final CompositeDataSupport compositeDataSupport = (CompositeDataSupport) attribute;
+                        stringBuilder.append("[startTime=").append(compositeDataSupport.get("startTime")).append(", endTime=").append(
+                            compositeDataSupport.get("endTime")).append(", GcThreadCount=").append(
+                            compositeDataSupport.get("GcThreadCount")).append(", duration=").append(compositeDataSupport.get("duration")).append(
+                            "]");
+                        compositeDataSupport.get("memoryUsageBeforeGc");
+                    } else if (attribute instanceof String[]) {
+                        final String[] stringArray = (String[]) attribute;
+                        stringBuilder.append(Arrays.toString(stringArray));
+                    } else if (attribute instanceof long[]) {
+                        final long[] longArray = (long[]) attribute;
+                        stringBuilder.append(Arrays.toString(longArray));
+                    } else {
+                        stringBuilder.append(attribute.toString());
                     }
+                    System.out.println(stringBuilder.toString());
                 }
             }
         }
@@ -673,7 +779,7 @@ public class StatisticTools extends AbstractJMXTools {
 
     /**
      * {@link GrizzlyMBean} Enum of MBeans we are interested in. Each containing the ObjectName and the attributes to query.
-     *
+     * 
      * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
      */
     private enum GrizzlyMBean {
@@ -697,7 +803,7 @@ public class StatisticTools extends AbstractJMXTools {
 
         /**
          * Initializes a new {@link GrizzlyMBean}.
-         *
+         * 
          * @param objectName The object name needed to query for this MBean
          * @param attributes The attributes of the MBean we are interested in.
          */
@@ -708,7 +814,7 @@ public class StatisticTools extends AbstractJMXTools {
 
         /**
          * Gets the object name of the MBean we are interested in.
-         *
+         * 
          * @return The object name
          */
         public String getObjectName() {
@@ -717,7 +823,7 @@ public class StatisticTools extends AbstractJMXTools {
 
         /**
          * Gets the attributes of the MBean we are interested in.
-         *
+         * 
          * @return The attributes
          */
         public String[] getAttributes() {
