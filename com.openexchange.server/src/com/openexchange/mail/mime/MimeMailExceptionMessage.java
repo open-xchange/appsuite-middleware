@@ -256,14 +256,14 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
     public final static String MESSAGING_ERROR_MSG = "Messaging error: %1$s";
 
     /**
-     * The quota on mail server exceeded.
+     * The quota on mail server exceeded. Error message: %1$s
      */
-    public final static String QUOTA_EXCEEDED_MSG = "The quota on mail server exceeded.";
+    public final static String QUOTA_EXCEEDED_MSG = "The quota on mail server exceeded. Error message: %1$s";
 
     /**
-     * The quota on mail server "%1$s" exceeded with login %2$s (user=%3$s, context=%4$s).
+     * The quota on mail server "%1$s" exceeded with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
      */
-    public final static String QUOTA_EXCEEDED_EXT_MSG = "The quota on mail server \"%1$s\" exceeded with login %2$s (user=%3$s, context=%4$s).";
+    public final static String QUOTA_EXCEEDED_EXT_MSG = "The quota on mail server \"%1$s\" exceeded with login %2$s (user=%3$s, context=%4$s). Error message: %5$s";
 
     /**
      * A command to mail server failed. Server response: %1$s

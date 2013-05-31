@@ -230,13 +230,13 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      */
     MESSAGING_ERROR(MimeMailExceptionMessage.MESSAGING_ERROR_MSG, CATEGORY_ERROR, 1023),
     /**
-     * The quota on mail server exceeded.
+     * The quota on mail server exceeded. Error message: %1$s
      */
-    QUOTA_EXCEEDED(MimeMailExceptionMessage.QUOTA_EXCEEDED_MSG, CATEGORY_CAPACITY, 1024),
+    QUOTA_EXCEEDED(MimeMailExceptionMessage.QUOTA_EXCEEDED_MSG, CATEGORY_CAPACITY, 1024, LogLevel.ERROR),
     /**
-     * The quota on mail server "%1$s" exceeded with login %2$s (user=%3$s, context=%4$s).
+     * The quota on mail server "%1$s" exceeded with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
      */
-    QUOTA_EXCEEDED_EXT(MimeMailExceptionMessage.QUOTA_EXCEEDED_EXT_MSG, QUOTA_EXCEEDED.category, QUOTA_EXCEEDED.detailNumber),
+    QUOTA_EXCEEDED_EXT(MimeMailExceptionMessage.QUOTA_EXCEEDED_EXT_MSG, QUOTA_EXCEEDED.category, QUOTA_EXCEEDED.detailNumber, LogLevel.ERROR),
     /**
      * A command to mail server failed. Server response: %1$s
      */
