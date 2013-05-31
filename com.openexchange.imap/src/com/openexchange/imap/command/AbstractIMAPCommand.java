@@ -148,7 +148,7 @@ public abstract class AbstractIMAPCommand<T> {
                             LOG.debug("Runtime error during Protocol.notifyResponseHandlers() invocation.", e);
                         }
                     } catch (final MessagingException e) {
-                        final ProtocolException pe = new ProtocolException(response);
+                        final ProtocolException pe = new ProtocolException(e.getMessage());
                         pe.initCause(e);
                         throw pe;
                     }
