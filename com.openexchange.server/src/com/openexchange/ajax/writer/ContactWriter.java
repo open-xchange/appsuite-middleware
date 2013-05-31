@@ -225,13 +225,13 @@ public class ContactWriter extends CommonWriter {
         writeParameter(ContactFields.USERFIELD18, contact.getUserField18(), json);
         writeParameter(ContactFields.USERFIELD19, contact.getUserField19(), json);
         writeParameter(ContactFields.USERFIELD20, contact.getUserField20(), json);
-        writeParameter(ContactFields.USER_ID, contact.getInternalUserId(), json);
+        writeParameter(ContactFields.USER_ID, contact.getInternalUserId(), json, contact.containsInternalUserId());
         writeParameter(
             ContactFields.MARK_AS_DISTRIBUTIONLIST,
             contact.getMarkAsDistribtuionlist(),
             json,
             contact.containsMarkAsDistributionlist());
-        writeParameter(ContactFields.USE_COUNT, contact.getUseCount(), json);
+        writeParameter(ContactFields.USE_COUNT, contact.getUseCount(), json, contact.containsInternalUserId());
         writeParameter(ContactFields.FILE_AS, contact.getFileAs(), json, contact.containsFileAs());
         writeParameter(ContactFields.YOMI_FIRST_NAME, contact.getYomiFirstName(), json);
         writeParameter(ContactFields.YOMI_LAST_NAME, contact.getYomiLastName(), json);
