@@ -9453,19 +9453,19 @@ msgid "The IP address of host \"%1$s\" could not be determined"
 msgstr ""
 
 #. *
-#. * The quota on mail server exceeded.
+#. * The quota on mail server exceeded. Error message: %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:261
-msgid "The quota on mail server exceeded."
+msgid "The quota on mail server exceeded. Error message: %1$s"
 msgstr ""
 
 #. *
-#. * The quota on mail server "%1$s" exceeded with login %2$s (user=%3$s, context=%4$s).
+#. * The quota on mail server "%1$s" exceeded with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:266
 msgid ""
 "The quota on mail server \"%1$s\" exceeded with login %2$s (user=%3$s, "
-"context=%4$s)."
+"context=%4$s). Error message: %5$s"
 msgstr ""
 
 #. *
