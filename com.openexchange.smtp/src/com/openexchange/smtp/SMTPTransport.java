@@ -83,7 +83,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
-import org.apache.commons.io.output.NullOutputStream;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
 import com.openexchange.config.cascade.ConfigProperty;
@@ -98,7 +97,6 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
-import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
@@ -309,7 +307,7 @@ public final class SMTPTransport extends MailTransport {
         }
         throw MailExceptionCode.UNEXPECTED_ERROR.create(cause, cause.getMessage());
     }
-    
+
     private long getMaxMailSize() throws OXException {
         ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
 
@@ -325,7 +323,7 @@ public final class SMTPTransport extends MailTransport {
                 }
             }
         }
-        
+
         return -1;
     }
 
@@ -336,8 +334,8 @@ public final class SMTPTransport extends MailTransport {
                     final Properties smtpProps = SMTPSessionProperties.getDefaultSessionProperties();
                     smtpProps.put("mail.smtp.class", JavaSMTPTransport.class.getName());
                     smtpProps.put("com.openexchange.mail.maxMailSize", Long.toString(getMaxMailSize()));
-                    
-                    
+
+
                     final SMTPConfig smtpConfig = getTransportConfig0();
                     /*
                      * Set properties
@@ -449,7 +447,7 @@ public final class SMTPTransport extends MailTransport {
                     smtpSession.addProvider(new Provider(
                         Provider.Type.TRANSPORT,
                         "smtp",
-                        "com.sun.mail.smtp.JavaSMTPTransport",
+                        JavaSMTPTransport.class.getName(),
                         "Open-Xchange, Inc.",
                         "7.2.2"));
                 }
