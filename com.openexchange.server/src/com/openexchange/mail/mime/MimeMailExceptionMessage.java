@@ -51,6 +51,7 @@ package com.openexchange.mail.mime;
 
 import static com.openexchange.i18n.TextPattern.LINE_SEPARATOR;
 import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 
 /**
@@ -350,5 +351,9 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
      * message: %5$s
      */
     public final static String PROCESSING_ERROR_WE_EXT_MSG = "Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed. Error message: %5$s";
+
+    public static final String IN_USE_ERROR_MSG = "That mailbox is already in use by another process. Please try again." + Strings.getLineSeparator() + "Error message: %1$s";
+
+    public static final String IN_USE_ERROR_EXT_MSG = "That mailbox is already in use by another process on %1$s mail server for login %2$s (user=%3$s, context=%4$s). Please try again." + Strings.getLineSeparator() + "Error message: %5$s";;
 
 }
