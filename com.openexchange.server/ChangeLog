@@ -1,3 +1,7 @@
+* 2013-05-31 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 26800: Removed needless slash in Object link.
+
 * 2013-05-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 26853: Dropped Bundle-Activator from capabilities interface bundle
