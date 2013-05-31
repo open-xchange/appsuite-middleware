@@ -396,10 +396,22 @@ public class MimeMailException extends OXException {
                 }
                 return MimeMailExceptionCode.QUOTA_EXCEEDED.create(e, appendInfo(nextException.getMessage(), folder));
             } else if (nextException instanceof com.sun.mail.iap.CommandFailedException) {
-                Category category = MimeMailExceptionCode.PROCESSING_ERROR.getCategory();
+                // Check for in-use error
                 if (toLowerCase(e.getMessage()).indexOf("[inuse]") >= 0) {
-                    category = CATEGORY_USER_INPUT;
+                    // Too many sessions in use
+                    if (null != mailConfig && null != session) {
+                        return MimeMailExceptionCode.IN_USE_ERROR_EXT.create(
+                            e,
+                            mailConfig.getServer(),
+                            mailConfig.getLogin(),
+                            Integer.valueOf(session.getUserId()),
+                            Integer.valueOf(session.getContextId()),
+                            appendInfo(skipTag(nextException.getMessage()), folder));
+                    }
+                    return MimeMailExceptionCode.IN_USE_ERROR.create(e, appendInfo(skipTag(nextException.getMessage()), folder));
+
                 }
+                // Regular processing error cause by CommandFailedException
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.PROCESSING_ERROR_WE_EXT.create(
                         e,
@@ -407,9 +419,9 @@ public class MimeMailException extends OXException {
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()),
-                        appendInfo(skipTag(nextException.getMessage()), folder)).setCategory(category);
+                        appendInfo(skipTag(nextException.getMessage()), folder));
                 }
-                return MimeMailExceptionCode.PROCESSING_ERROR_WE.create(e, appendInfo(skipTag(nextException.getMessage()), folder)).setCategory(category);
+                return MimeMailExceptionCode.PROCESSING_ERROR_WE.create(e, appendInfo(skipTag(nextException.getMessage()), folder));
             } else if (nextException instanceof com.sun.mail.iap.BadCommandException) {
                 Category category = MimeMailExceptionCode.PROCESSING_ERROR.getCategory();
                 if (toLowerCase(e.getMessage()).indexOf("[inuse]") >= 0) {

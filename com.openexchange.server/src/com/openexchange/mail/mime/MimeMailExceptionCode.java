@@ -306,7 +306,18 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      * Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed. Error
      * message: %5$s
      */
-    PROCESSING_ERROR_WE_EXT(MimeMailExceptionMessage.PROCESSING_ERROR_WE_EXT_MSG, CATEGORY_ERROR, PROCESSING_ERROR_WE.detailNumber, LogLevel.ERROR), ;
+    PROCESSING_ERROR_WE_EXT(MimeMailExceptionMessage.PROCESSING_ERROR_WE_EXT_MSG, CATEGORY_ERROR, PROCESSING_ERROR_WE.detailNumber, LogLevel.ERROR),
+    /**
+     * That mailbox is already in use by another process. Please try again.<br>
+     * Error message: %1$s
+     */
+    IN_USE_ERROR(MimeMailExceptionMessage.IN_USE_ERROR_MSG, CATEGORY_USER_INPUT, PROCESSING_ERROR.detailNumber, LogLevel.ERROR),
+    /**
+     * That mailbox is already in use by another process on %1$s mail server for login %2$s (user=%3$s, context=%4$s). Please try again.<br>
+     * Error message: %5$s
+     */
+    IN_USE_ERROR_EXT(MimeMailExceptionMessage.IN_USE_ERROR_EXT_MSG, CATEGORY_USER_INPUT, PROCESSING_ERROR.detailNumber, LogLevel.ERROR),
+    ;
 
     private final String message;
     private final int detailNumber;
