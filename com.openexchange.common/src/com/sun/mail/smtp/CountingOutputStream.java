@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.smtp;
+package com.sun.mail.smtp;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;

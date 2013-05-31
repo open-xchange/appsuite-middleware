@@ -133,6 +133,7 @@ import com.openexchange.smtp.config.SMTPSessionProperties;
 import com.openexchange.smtp.filler.SMTPMessageFiller;
 import com.openexchange.smtp.services.Services;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.sun.mail.smtp.JavaSMTPTransport;
 import com.sun.mail.smtp.SMTPMessage;
 
 /**
