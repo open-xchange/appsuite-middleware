@@ -301,12 +301,12 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
     /**
      * Error processing mail server response. The administrator has been informed. Error message: %1$s
      */
-    PROCESSING_ERROR_WE(MimeMailExceptionMessage.PROCESSING_ERROR_WE_MSG, CATEGORY_ERROR, PROCESSING_ERROR.detailNumber),
+    PROCESSING_ERROR_WE(MimeMailExceptionMessage.PROCESSING_ERROR_WE_MSG, CATEGORY_ERROR, PROCESSING_ERROR.detailNumber, LogLevel.ERROR),
     /**
      * Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed. Error
      * message: %5$s
      */
-    PROCESSING_ERROR_WE_EXT(MimeMailExceptionMessage.PROCESSING_ERROR_WE_EXT_MSG, CATEGORY_ERROR, PROCESSING_ERROR_WE.detailNumber), ;
+    PROCESSING_ERROR_WE_EXT(MimeMailExceptionMessage.PROCESSING_ERROR_WE_EXT_MSG, CATEGORY_ERROR, PROCESSING_ERROR_WE.detailNumber, LogLevel.ERROR), ;
 
     private final String message;
     private final int detailNumber;
