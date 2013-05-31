@@ -553,11 +553,13 @@ public class MimeMailException extends OXException {
         if (null == e) {
             return false;
         }
-        final String msg = toLowerCase(e.getMessage());
-        return (msg.indexOf("quota") >= 0 || msg.indexOf("limit") >= 0);
+        return isOverQuotaException(toLowerCase(e.getMessage()));
     }
 
-    private static boolean isOverQuotaException(final String msg) {
+    /**
+     * Checks for possible over-quota error.
+     */
+    public static boolean isOverQuotaException(final String msg) {
         if (null == msg) {
             return false;
         }
@@ -571,10 +573,13 @@ public class MimeMailException extends OXException {
         if (null == e) {
             return false;
         }
-        return (toLowerCase(e.getMessage()).indexOf("[inuse]") >= 0);
+        return isInUseException(toLowerCase(e.getMessage()));
     }
 
-    private static boolean isInUseException(final String msg) {
+    /**
+     * Checks for possible in-use error.
+     */
+    public static boolean isInUseException(final String msg) {
         if (null == msg) {
             return false;
         }
