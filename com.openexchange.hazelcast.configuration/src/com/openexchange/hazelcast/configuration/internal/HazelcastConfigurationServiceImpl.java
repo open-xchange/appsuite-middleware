@@ -122,9 +122,10 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         /*
          * Continue Hazelcast configuration
          */
+        final String lf = Strings.getLineSeparator();
         if ("ox".equalsIgnoreCase(groupName)) {
-            LOG.warn("\n\tThe configuration value for \"com.openexchange.cluster.name\" has not been changed from it's default " +
-                    "value \"ox\". Please do so to make this warning disappear.\n");
+            LOG.warn(lf + "    The configuration value for \"com.openexchange.cluster.name\" has not been changed from it's default " +
+                    "value \"ox\". Please do so to make this warning disappear." + lf);
         }
         config.getGroupConfig().setName(groupName).setPassword("YXV0b2JhaG4=");
         /*
@@ -304,17 +305,16 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
 
     private static File[] listPropertyFiles() throws OXException {
         File directory = Services.getService(ConfigurationService.class).getDirectory(DIRECTORY_NAME);
-        if (null != directory) {
-            return directory.listFiles(new FilenameFilter() {
-
-                @Override
-                public boolean accept(File dir, String name) {
-                    return null != name && name.toLowerCase().endsWith(".properties");
-                }
-            });
-        } else {
+        if (null == directory) {
             return new File[0];
         }
+        return directory.listFiles(new FilenameFilter() {
+
+            @Override
+            public boolean accept(File dir, String name) {
+                return null != name && name.toLowerCase().endsWith(".properties");
+            }
+        });
     }
 
     private static Properties loadProperties(File file) throws OXException {
