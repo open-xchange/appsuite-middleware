@@ -10,6 +10,7 @@
  - Fix for bug 26848: Quit request with 404 Not Found if there is no file item associated with file meta-data
  - Fix for bug 26895: Signal an over-quota error during folder create attempt as a severe error to ensure user is aware of that
  - Fix for bug 26898: Treat special "[NONEXISTENT]" error prefix as empty response
+ - Fix for bug 26897: Set proper error message
 
 * 2013-05-30 - thorben.betten@open-xchange.com
 
