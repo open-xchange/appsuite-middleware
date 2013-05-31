@@ -255,11 +255,12 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 
 	@Override
     public String getFileMIMEType() {
-        if(contentType == null) {
+        final String contentType = this.contentType;
+        if (contentType == null) {
             return DEFAULT_TYPE;
         }
         return contentType;
-	}
+    }
 
 	@Override
     public void setFileMIMEType(final String contentType) {
