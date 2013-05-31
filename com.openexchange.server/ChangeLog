@@ -1,6 +1,7 @@
 * 2013-05-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 26853: Dropped Bundle-Activator from capabilities interface bundle
+ - Fix for bug 26884: Prefer html2text converted HTML content if plain text one is empty
 
 * 2013-05-30 - thorben.betten@open-xchange.com
 
