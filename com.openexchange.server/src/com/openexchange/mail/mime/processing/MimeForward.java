@@ -76,7 +76,9 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
@@ -572,7 +574,15 @@ public final class MimeForward {
                 final String charset = MessageUtility.checkCharset(part, partContentType);
                 retvalContentType.setContentType(partContentType);
                 retvalContentType.setCharsetParameter(charset);
-                return MimeProcessingUtility.handleInlineTextPart(part, retvalContentType, usm.isDisplayHtmlInlineContent());
+                String text = MimeProcessingUtility.handleInlineTextPart(part, retvalContentType, usm.isDisplayHtmlInlineContent());
+                if (isEmpty(text)) {
+                    final String htmlContent = getHtmlContent(multipartPart, count);
+                    if (null != htmlContent) {
+                        final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                        text = null == htmlService ? "" : htmlService.html2text(htmlContent, true);
+                    }
+                }
+                return text;
             } else if (partContentType.startsWith(MULTIPART)) {
                 final String text = getFirstSeenText(part, retvalContentType, usm);
                 if (text != null) {
@@ -583,6 +593,19 @@ public final class MimeForward {
         /*
          * No text content found
          */
+        return null;
+    }
+
+    private static String getHtmlContent(final MailPart multipartPart, final int count) throws OXException, IOException {
+        boolean found = false;
+        for (int i = 0; !found && i < count; i++) {
+            final MailPart part = multipartPart.getEnclosedMailPart(i);
+            final ContentType partContentType = part.getContentType();
+            if (partContentType.startsWith(TEXT_HTM) && MimeProcessingUtility.isInline(part, partContentType) && !MimeProcessingUtility.isSpecial(partContentType.getBaseType())) {
+                final String charset = MessageUtility.checkCharset(part, partContentType);
+                return MimeProcessingUtility.readContent(part, charset);
+            }
+        }
         return null;
     }
 
@@ -803,6 +826,19 @@ public final class MimeForward {
             // Ignore
             return null;
         }
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

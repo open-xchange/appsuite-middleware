@@ -80,6 +80,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -619,6 +620,28 @@ public final class JsonMessageHandler implements MailMessageHandler {
             if (isAlternative) {
                 if (DisplayMode.DISPLAY.equals(displayMode)) {
                     /*
+                     * Check if previously appended text part was empty
+                     */
+                    if (textWasEmpty) {
+                        if (usm.isDisplayHtmlInlineContent()) {
+                            final JSONObject jsonObject = asDisplayHtml(id, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
+                            if (includePlainText) {
+                                try {
+                                    /*
+                                     * Try to convert the given HTML to regular text
+                                     */
+                                    final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                                    final String plainText = htmlService.html2text(htmlContent, true);
+                                    jsonObject.put("plain_text", plainText);
+                                } catch (final JSONException e) {
+                                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                                }
+                            }
+                        } else {
+                            asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, DisplayMode.DISPLAY.equals(displayMode));
+                        }
+                    }
+                    /*
                      * Add HTML alternative part as attachment
                      */
                     if (attachHTMLAlternativePart) {
@@ -828,7 +851,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     }
                 }
             } else {
-                final String content = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
+                final String content = isEmpty(plainTextContentArg) ? "" : HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
                 final JSONObject textObject = asPlainText(id, contentType.getBaseType(), content);
                 if (includePlainText) {
                     textObject.put("plain_text", plainTextContentArg);
@@ -1363,4 +1386,18 @@ public final class JsonMessageHandler implements MailMessageHandler {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
 }
