@@ -570,6 +570,36 @@ public final class MimeMessageConverter {
     }
 
     /**
+     * Gets the multipart from passed content object.
+     *
+     * @param content The content object
+     * @param contentType The content type
+     * @return The appropriate multipart
+     * @throws OXException If content cannot be presented as a multipart
+     */
+    public static Multipart multipartFor(final Object content, final ContentType contentType) throws OXException {
+        if (null == content) {
+            return null;
+        }
+        if (content instanceof Multipart) {
+            return (Multipart) content;
+        }
+        if (content instanceof InputStream) {
+            try {
+                new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
+            } catch (MessagingException e) {
+                throw MimeMailException.handleMessagingException(e);
+            } catch (IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            }
+        }
+        throw MailExceptionCode.MESSAGING_ERROR.create("Content is not of type javax.mail.Multipart, but " + content.getClass().getName());
+    }
+
+    /**
      * Performs {@link MimeMessage#saveChanges() saveChanges()} on specified message with sanitizing for a possibly corrupt/wrong
      * Content-Type header.
      *
@@ -1863,7 +1893,17 @@ public final class MimeMessageConverter {
                             mail.setHasAttachment(false);
                         } else {
                             try {
-                                mail.setHasAttachment(hasAttachments((Multipart) content, ct.getSubType()));
+                                mail.setHasAttachment(hasAttachments(multipartFor(content, ct), ct.getSubType()));
+                            } catch (final OXException e) {
+                                if (!MailExceptionCode.MESSAGING_ERROR.equals(e)) {
+                                    throw e;
+                                }
+                                // A messaging error occurred
+                                LOG.warn(new com.openexchange.java.StringAllocator(256).append(
+                                    "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
+                                    e.getMessage()).append(
+                                    ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
+                                mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                             } catch (final ClassCastException e) {
                                 // Cast to javax.mail.Multipart failed
                                 LOG.warn(new com.openexchange.java.StringAllocator(256).append(

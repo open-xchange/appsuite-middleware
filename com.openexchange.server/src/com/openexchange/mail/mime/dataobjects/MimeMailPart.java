@@ -855,7 +855,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                         } else {
                             part = new MimeBodyPart(Streams.asInputStream(out));
                         }
-                        multipart = new JavaMailMultipartWrapper((Multipart) part.getContent());
+                        multipart = new JavaMailMultipartWrapper(MimeMessageConverter.multipartFor(part.getContent(), getContentType()));
                     }
                 }
             } catch (final MessagingException e) {
@@ -869,6 +869,12 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            } catch (final ClassCastException e) {
+                // Cast to javax.mail.Multipart failed
+                LOG.warn(new com.openexchange.java.StringAllocator(256).append(
+                    "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
+                    e.getMessage()).toString());
+                throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
             }
         }
         return multipart;
