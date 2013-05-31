@@ -3,7 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Capabilities Model for the Backend
 Bundle-SymbolicName: com.openexchange.capabilities
 Bundle-Version: 7.4.0
-Bundle-Activator: com.openexchange.capabilities.osgi.CapabilitiesActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
