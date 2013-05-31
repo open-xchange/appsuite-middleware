@@ -7,6 +7,7 @@
  - Fix for bug 26853: Dropped Bundle-Activator from capabilities interface bundle
  - Fix for bug 26884: Prefer html2text converted HTML content if plain text one is empty
  - Fix for bug 26892: Use a more meaningful error message in case an in-use error occurs
+ - Fix for bug 26848: Quit request with 404 Not Found if there is no file item associated with file meta-data
 
 * 2013-05-30 - thorben.betten@open-xchange.com
 
