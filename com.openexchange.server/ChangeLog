@@ -1,3 +1,7 @@
+* 2013-05-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26853: Dropped Bundle-Activator from capabilities interface bundle
+
 * 2013-05-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 26607: Gather statistic information in a concurrent fashion
