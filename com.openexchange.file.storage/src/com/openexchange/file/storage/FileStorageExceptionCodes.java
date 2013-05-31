@@ -153,7 +153,7 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
     /**
      * No attachment found with section identifier %1$s in file %2$s in folder %3$s.
      */
-    ATTACHMENT_NOT_FOUND(FileStorageExceptionMessages.ATTACHMENT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 25),
+    ATTACHMENT_NOT_FOUND(FileStorageExceptionMessages.ATTACHMENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 25),
     /**
      * File %1$s not found in folder %2$s.
      */
