@@ -64,6 +64,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
+import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.infostore.internal.VirtualFolderInfostoreFacade;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -79,10 +80,10 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link InfostoreAdapterFileAccess}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFileAccess {
+public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFileAccess, FileStorageSequenceNumberProvider {
 
     private static final InfostoreFacade VIRTUAL_INFOSTORE = new VirtualFolderInfostoreFacade();
     private static final Set<Long> VIRTUAL_FOLDERS;
@@ -105,7 +106,7 @@ public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFi
 
     /**
      * Initializes a new {@link InfostoreAdapterFileAccess}.
-     * 
+     *
      * @param session
      * @param infostore2
      */
@@ -303,6 +304,33 @@ public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFi
                 user,
                 userConfig);
         return new InfostoreDeltaWrapper(delta);
+    }
+
+    @Override
+    public Map<String, Long> getSequenceNumbers(List<String> folderIds) throws OXException {
+        /*
+         * filter virtual folders
+         */
+        Map<String, Long> sequenceNumbers = new HashMap<String, Long>(folderIds.size());
+        List<Long> foldersToQuery = new ArrayList<Long>(folderIds.size());
+        for (String folderId : folderIds) {
+            Long id = Long.valueOf(folderId);
+            if (VIRTUAL_FOLDERS.contains(id)) {
+                sequenceNumbers.put(folderId, Long.valueOf(0L));
+            } else {
+                foldersToQuery.add(id);
+            }
+        }
+        /*
+         * query infostore for non-virtual ones
+         */
+        if (0 < foldersToQuery.size()) {
+            Map<Long, Long> infostoreNumbers = infostore.getSequenceNumbers(foldersToQuery, true, ctx, user, userConfig);
+            for (Map.Entry<Long, Long> entry : infostoreNumbers.entrySet()) {
+                sequenceNumbers.put(String.valueOf(entry.getKey().longValue()), entry.getValue());
+            }
+        }
+        return sequenceNumbers;
     }
 
     @Override

@@ -51,6 +51,8 @@
 package com.openexchange.groupware.infostore;
 
 import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -64,7 +66,7 @@ import com.openexchange.tx.TransactionAware;
 
 /**
  * {@link InfostoreFacade} - Access to infostore documents.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Some JavaDoc
  */
@@ -84,7 +86,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Checks if denoted document exists.
-     * 
+     *
      * @param id The identifier
      * @param version The version
      * @param ctx The context
@@ -98,7 +100,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Gets the denoted document's meta data information.
-     * 
+     *
      * @param id The identifier
      * @param version The version
      * @param ctx The context
@@ -114,7 +116,7 @@ public interface InfostoreFacade extends TransactionAware {
      * Saves given document meta data.
      * <p>
      * <b>Note</b>: No <tt>modifiedColumns</tt> means all columns.
-     * 
+     *
      * @param document The meta data of the document
      * @param sequenceNumber The sequence number; e.g. client most recent time stamp
      * @param session The session
@@ -124,7 +126,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Saves given document meta data
-     * 
+     *
      * @param document The meta data of the document
      * @param sequenceNumber The sequence number; e.g. client most recent time stamp
      * @param modifiedColumns The columns to modify
@@ -135,7 +137,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Gets the document's binary content.
-     * 
+     *
      * @param id The identifier
      * @param version The version
      * @param ctx The context
@@ -149,7 +151,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Saves given document meta data and binary content (if not <code>null</code>).
-     * 
+     *
      * @param document The document meta data
      * @param data The optional binary content or <code>null</code>
      * @param sequenceNumber The sequence number; e.g. client most recent time stamp
@@ -160,7 +162,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Saves given document meta data and binary content (if not <code>null</code>).
-     * 
+     *
      * @param document The document meta data
      * @param data The optional binary content or <code>null</code>
      * @param sequenceNumber The sequence number; e.g. client most recent time stamp
@@ -172,7 +174,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Saves given document meta data and binary content (if not <code>null</code>).
-     * 
+     *
      * @param document The document meta data
      * @param data The optional binary content or <code>null</code>
      * @param sequenceNumber The sequence number; e.g. client most recent time stamp
@@ -185,7 +187,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Removes all documents contained in specified folder.
-     * 
+     *
      * @param folderId The identifier of the folder to clear
      * @param date The client's time stamp
      * @param session The session
@@ -195,7 +197,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Removes denoted documents.
-     * 
+     *
      * @param ids The identifiers of the documents to remove
      * @param date The client's time stamp
      * @param session The session
@@ -206,7 +208,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Removes denoted versions.
-     * 
+     *
      * @param id The document identifier
      * @param versionIds The identifiers of the versions to remove
      * @param session The session
@@ -217,7 +219,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Gets the folder's documents.
-     * 
+     *
      * @param folderId The folder identifier
      * @param ctx The context
      * @param user The user
@@ -229,7 +231,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Gets the folder's documents.
-     * 
+     *
      * @param folderId The folder identifier
      * @param columns The columns to set in returned documents
      * @param ctx The context
@@ -242,7 +244,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Gets the sorted folder's documents.
-     * 
+     *
      * @param folderId The folder identifier
      * @param columns The columns to set in returned documents
      * @param sort The sort-by field
@@ -257,7 +259,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Gets the document's versions.
-     * 
+     *
      * @param id The document identifier
      * @param ctx The context
      * @param user The user
@@ -269,7 +271,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Gets the document's versions.
-     * 
+     *
      * @param id The document identifier
      * @param columns The columns to set in returned documents
      * @param ctx The context
@@ -282,7 +284,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Gets the document's versions.
-     * 
+     *
      * @param id The document identifier
      * @param columns The columns to set in returned documents
      * @param sort The sort-by field
@@ -297,7 +299,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Gets the specified documents.
-     * 
+     *
      * @param ids The identifiers
      * @param columns The columns to set in returned documents
      * @param ctx The context
@@ -310,7 +312,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Gets the folder's updated & deleted documents.
-     * 
+     *
      * @param folderId The folder identifier
      * @param updateSince The time stamp to consider
      * @param columns The columns to set in returned documents
@@ -325,7 +327,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Gets the folder's updated & deleted documents.
-     * 
+     *
      * @param folderId The folder identifier
      * @param updateSince The time stamp to consider
      * @param columns The columns to set in returned documents
@@ -341,8 +343,22 @@ public interface InfostoreFacade extends TransactionAware {
     public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, Metadata sort, int order, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
     /**
+     * Gets the sequence numbers for the contents of the supplied folders to quickly determine which folders contain changes. An updated
+     * sequence number in a folder indicates a change, for example a new, modified or deleted file.
+     *
+     * @param folderIds A list of folder IDs to get the sequence numbers for
+     * @param versionsOnly <code>true</code> to only take documents with at least one version into account, <code>false</code>, otherwise
+     * @param ctx The context
+     * @param user The user
+     * @param userConfig The user configuration
+     * @return A map holding the resulting sequence numbers to each requested folder ID
+     * @throws OXException
+     */
+    Map<Long, Long> getSequenceNumbers(List<Long> folderIds, boolean versionsOnly, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+
+    /**
      * Gets the number of documents in given folder.
-     * 
+     *
      * @param folderId The folder identifier
      * @param ctx The context
      * @param user The user
@@ -354,7 +370,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Signals if denoted folder contains documents not owned by specified user.
-     * 
+     *
      * @param folderId The folder identifier
      * @param ctx The context
      * @param user The user
@@ -366,7 +382,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Checks if denoted folder is empty.
-     * 
+     *
      * @param folderId The folder identifier
      * @param ctx The context
      * @return <code>true</code> if empty; otherwise <code>false</code>
@@ -376,7 +392,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Performs necessary clean-up operations if specified user has been deleted.
-     * 
+     *
      * @param userId The user identifier
      * @param context The context
      * @param session The session
@@ -386,7 +402,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Unlocks specified document.
-     * 
+     *
      * @param id The document identifier
      * @param session The session
      * @throws OXException If operation fails
@@ -395,7 +411,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Locks specified document.
-     * 
+     *
      * @param id The document identifier
      * @param session The session
      * @throws OXException If operation fails
@@ -404,7 +420,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Touches specified document.
-     * 
+     *
      * @param id The document identifier
      * @param session The session
      * @throws OXException If operation fails
@@ -413,7 +429,7 @@ public interface InfostoreFacade extends TransactionAware {
 
     /**
      * Sets this facade's session holder.
-     * 
+     *
      * @param sessionHolder The session holder
      */
     public void setSessionHolder(SessionHolder sessionHolder);

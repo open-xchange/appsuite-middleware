@@ -1548,6 +1548,45 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return delta;
     }
 
+    @Override
+    public Map<Long, Long> getSequenceNumbers(List<Long> folderIds, boolean versionsOnly, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+        if (0 == folderIds.size()) {
+            return Collections.emptyMap();
+        }
+        final Map<Long, Long> sequenceNumbers = new HashMap<Long, Long>(folderIds.size());
+        try {
+            performQuery(ctx,
+                QUERIES.getFolderSequenceNumbersQuery(folderIds, versionsOnly, true, ctx.getContextId()), new ResultProcessor<Void>() {
+
+                @Override
+                public Void process(ResultSet rs) throws SQLException {
+                    while (rs.next()) {
+                        sequenceNumbers.put(Long.valueOf(rs.getLong(1)), Long.valueOf(rs.getLong(2)));
+                    }
+                    return null;
+                }
+            });
+            performQuery(ctx,
+                QUERIES.getFolderSequenceNumbersQuery(folderIds, versionsOnly, false, ctx.getContextId()), new ResultProcessor<Void>() {
+
+                @Override
+                public Void process(ResultSet rs) throws SQLException {
+                    while (rs.next()) {
+                        Long folderID = Long.valueOf(rs.getLong(1));
+                        long sequenceNumber = rs.getLong(2);
+                        if (false == sequenceNumbers.containsKey(folderID) || sequenceNumbers.get(folderID).longValue() < sequenceNumber) {
+                            sequenceNumbers.put(folderID, Long.valueOf(sequenceNumber));
+                        }
+                    }
+                    return null;
+                }
+            });
+        } catch (SQLException e) {
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        }
+        return sequenceNumbers;
+    }
+
     private Map<Integer, List<Lock>> loadLocksInFolderAndExpireOldLocks(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         final Map<Integer, List<Lock>> locks = new HashMap<Integer, List<Lock>>();
         final InfostoreIterator documents = InfostoreIterator.documents(

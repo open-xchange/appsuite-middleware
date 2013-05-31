@@ -52,6 +52,9 @@ package com.openexchange.file.storage.infostore.internal;
 
 
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -91,6 +94,15 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns, final Metadata sort, final int order, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         final SearchIterator<DocumentMetadata> emptyIter = SearchIteratorAdapter.emptyIterator();
         return new DeltaImpl<DocumentMetadata>(emptyIter,emptyIter,emptyIter,System.currentTimeMillis());
+    }
+
+    @Override
+    public Map<Long, Long> getSequenceNumbers(List<Long> folderIds, boolean versionsOnly, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+        Map<Long, Long> sequenceNumbers = new HashMap<Long, Long>(folderIds.size());
+        for (Long folderID : folderIds) {
+            sequenceNumbers.put(folderID, Long.valueOf(0));
+        }
+        return sequenceNumbers;
     }
 
     @Override

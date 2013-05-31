@@ -59,6 +59,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
+import com.openexchange.java.StringAllocator;
 
 public class InfostoreQueryCatalog {
 
@@ -552,6 +553,27 @@ public class InfostoreQueryCatalog {
             " AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id WHERE ").append(
             where);
         return builder.toString();
+    }
+
+    public String getFolderSequenceNumbersQuery(List<Long> folderIds, boolean versionsOnly, boolean deleted, int contextId) {
+        StringAllocator allocator = new StringAllocator(STR_SELECT).append(Metadata.FOLDER_ID_LITERAL.getName()).append(",MAX(")
+            .append(Metadata.LAST_MODIFIED_LITERAL.getName())
+            .append(") FROM ").append(deleted ? Table.DEL_INFOSTORE.getTablename() : Table.INFOSTORE.getTablename())
+            .append(" WHERE ").append(STR_CID).append('=').append(contextId);
+        if (versionsOnly) {
+            allocator.append(" AND ").append(Metadata.VERSION_LITERAL.getName()).append(">0");
+        }
+        if (1 == folderIds.size()) {
+            allocator.append(" AND ").append(Metadata.FOLDER_ID_LITERAL.getName()).append('=').append(folderIds.get(0));
+        } else if (1 < folderIds.size()) {
+            allocator.append(" AND ").append(Metadata.FOLDER_ID_LITERAL.getName()).append(" IN (").append(folderIds.get(0));
+            for (int i = 1; i < folderIds.size(); i++) {
+                allocator.append(',').append(folderIds.get(i));
+            }
+            allocator.append(')');
+        }
+        allocator.append(" GROUP BY ").append(Metadata.FOLDER_ID_LITERAL.getName()).append(';');
+        return allocator.toString();
     }
 
     private String order(final int order) {
