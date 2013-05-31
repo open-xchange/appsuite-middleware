@@ -1894,6 +1894,16 @@ public final class MimeMessageConverter {
                         } else {
                             try {
                                 mail.setHasAttachment(hasAttachments(multipartFor(content, ct), ct.getSubType()));
+                            } catch (final OXException e) {
+                                if (!MailExceptionCode.MESSAGING_ERROR.equals(e)) {
+                                    throw e;
+                                }
+                                // A messaging error occurred
+                                LOG.warn(new com.openexchange.java.StringAllocator(256).append(
+                                    "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
+                                    e.getMessage()).append(
+                                    ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
+                                mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                             } catch (final ClassCastException e) {
                                 // Cast to javax.mail.Multipart failed
                                 LOG.warn(new com.openexchange.java.StringAllocator(256).append(
