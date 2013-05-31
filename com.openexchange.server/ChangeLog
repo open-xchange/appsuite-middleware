@@ -8,6 +8,7 @@
  - Fix for bug 26884: Prefer html2text converted HTML content if plain text one is empty
  - Fix for bug 26892: Use a more meaningful error message in case an in-use error occurs
  - Fix for bug 26848: Quit request with 404 Not Found if there is no file item associated with file meta-data
+ - Fix for bug 26895: Signal an over-quota error during folder create attempt as a severe error to ensure user is aware of that
 
 * 2013-05-30 - thorben.betten@open-xchange.com
 
