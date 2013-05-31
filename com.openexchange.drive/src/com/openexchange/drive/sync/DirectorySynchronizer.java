@@ -50,6 +50,7 @@
 package com.openexchange.drive.sync;
 
 import com.openexchange.drive.DirectoryVersion;
+import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.actions.AcknowledgeDirectoryAction;
 import com.openexchange.drive.actions.RemoveDirectoryAction;
 import com.openexchange.drive.actions.SyncDirectoryAction;
@@ -140,12 +141,16 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion>{
             /*
              * delete-edit conflict, let client synchronize the directory
              */
-            result.addActionForClient(new SyncDirectoryAction(serverVersion));
+            DriveAction<DirectoryVersion> action = new SyncDirectoryAction(serverVersion);
+            action.getParameters().put("conflict", Boolean.TRUE);
+            result.addActionForClient(action);
         } else if ((Change.NEW == clientChange || Change.MODIFIED == clientChange) && Change.DELETED == serverChange) {
             /*
              * edit-delete conflict, create on server, let client synchronize the directory
              */
-            result.addActionForClient(new SyncDirectoryAction(clientVersion));
+            DriveAction<DirectoryVersion> action = new SyncDirectoryAction(clientVersion);
+            action.getParameters().put("conflict", Boolean.TRUE);
+            result.addActionForClient(action);
         } else {
             throw new UnsupportedOperationException("Not implemented: Server: " + serverChange + ", Client: " + clientChange);
         }

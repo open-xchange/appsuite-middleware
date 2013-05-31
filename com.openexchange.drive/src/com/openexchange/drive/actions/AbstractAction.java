@@ -51,6 +51,8 @@ package com.openexchange.drive.actions;
 
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.drive.Action;
+import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
 
 /**

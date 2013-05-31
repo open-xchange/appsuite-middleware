@@ -49,6 +49,8 @@
 
 package com.openexchange.drive.actions;
 
+import com.openexchange.drive.Action;
+import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.FileVersion;
 
 /**

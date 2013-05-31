@@ -35,5 +35,4 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.tx,
  org.apache.commons.logging,
  org.osgi.framework
-Export-Package: com.openexchange.drive,
- com.openexchange.drive.actions
+Export-Package: com.openexchange.drive

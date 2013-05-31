@@ -51,8 +51,8 @@ package com.openexchange.drive.sync;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
-import com.openexchange.drive.actions.DriveAction;
 import com.openexchange.java.StringAllocator;
 
 

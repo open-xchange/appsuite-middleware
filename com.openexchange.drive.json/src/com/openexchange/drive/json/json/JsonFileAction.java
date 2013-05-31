@@ -56,9 +56,10 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.drive.Action;
+import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.FileVersion;
-import com.openexchange.drive.actions.Action;
-import com.openexchange.drive.actions.DriveAction;
+import com.openexchange.java.Enums;
 
 
 /**
@@ -110,7 +111,7 @@ public class JsonFileAction extends JsonDriveAction<FileVersion> {
         Map<String, Object> parameters = new HashMap<String, Object>();
         for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
             if ("action".equals(entry.getKey())) {
-                action = parse(Action.class, (String)entry.getValue());
+                action = Enums.parse(Action.class, (String)entry.getValue());
             } else if ("version".equals(entry.getKey())) {
                 version = JsonFileVersion.deserialize((JSONObject)entry.getValue());
             } else if ("newVersion".equals(entry.getKey())) {

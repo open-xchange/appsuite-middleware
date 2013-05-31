@@ -47,46 +47,48 @@
  *
  */
 
-package com.openexchange.drive.actions;
+package com.openexchange.drive;
+
+import java.util.Map;
 
 /**
- * {@link Action}
- *
- * Defines executable actions.
+ * {@link DriveAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public enum Action {
+public interface DriveAction<T extends DriveVersion> extends Comparable<DriveAction<T>> {
+
+    static final String PARAMETER_PATH = "path";
+    static final String PARAMETER_TOTAL_LENGTH = "totalLength";
+    static final String PARAMETER_OFFSET = "offset";
 
     /**
-     * Edits a file's metadata.
+     * Gets the action.
+     *
+     * @return The action
      */
-    EDIT,
+    Action getAction();
 
     /**
-     * Stores a file.
+     * Gets the version.
+     *
+     * @return The version, or <code>null</code> if not applicable
      */
-    DOWNLOAD,
+    T getVersion();
 
     /**
-     * Uploads a file to the server.
+     * Gets the new version.
+     *
+     * @return The new version, or <code>null</code> if not applicable
      */
-    UPLOAD,
+    T getNewVersion();
 
     /**
-     * Removes a file.
+     * Gets a map of additional parameters.
+     *
+     * @return The parameters map
      */
-    REMOVE,
-
-    /**
-     * Acknowledges a file creation, deletion or modification.
-     */
-    ACKNOWLEDGE,
-
-    /**
-     * Synchronizes the files in a directory.
-     */
-    SYNC
+    Map<String, Object> getParameters();
 
 }
 

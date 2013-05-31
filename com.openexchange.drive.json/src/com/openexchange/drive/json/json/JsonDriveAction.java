@@ -50,9 +50,9 @@
 package com.openexchange.drive.json.json;
 
 import java.util.Map;
+import com.openexchange.drive.Action;
+import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
-import com.openexchange.drive.actions.AbstractAction;
-import com.openexchange.drive.actions.Action;
 
 
 /**
@@ -60,14 +60,34 @@ import com.openexchange.drive.actions.Action;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class JsonDriveAction<T extends DriveVersion> extends AbstractAction<T> {
+public abstract class JsonDriveAction<T extends DriveVersion> implements DriveAction<T> {
 
     protected final Action action;
+    protected final T version;
+    protected final T newVersion;
+    protected final Map<String, Object> parameters;
 
     public JsonDriveAction(Action action, T version, T newVersion, Map<String, Object> parameters) {
-        super(version, newVersion);
+        super();
         this.action = action;
-        super.parameters.putAll(parameters);
+        this.version = version;
+        this.newVersion = newVersion;
+        this.parameters = parameters;
+    }
+
+    @Override
+    public T getVersion() {
+        return version;
+    }
+
+    @Override
+    public T getNewVersion() {
+        return newVersion;
+    }
+
+    @Override
+    public Map<String, Object> getParameters() {
+        return parameters;
     }
 
     @Override
@@ -75,36 +95,19 @@ public abstract class JsonDriveAction<T extends DriveVersion> extends AbstractAc
         return action;
     }
 
-    /**
-     * Parses the supplied value into an enumeration constant, ignoring case.
-     *
-     * @param enumeration The enumeration class from which to return a constant
-     * @param name The name of the constant to return
-     * @return The enum constant
-     * @throws IllegalArgumentException If there's no suitable enum constant for the supplied name
-     */
-    protected static <T extends Enum<T>> T parse(Class<T> enumeration, String name) {
-        T value = parse(enumeration, name, null);
-        if (null != value) {
-            return value;
+    @Override
+    public int compareTo(DriveAction<T> other) {
+        Action thisAction = this.getAction();
+        Action otherAction = null != other ? other.getAction() : null;
+        if (null == otherAction) {
+            return null == thisAction ? 0 : -1;
         }
-        throw new IllegalArgumentException("No enum value '" + name + "' in Enum " + enumeration.getClass().getName());
+        return thisAction.compareTo(otherAction);
     }
 
-    /**
-     * Parses the supplied value into an enumeration constant, ignoring case.
-     *
-     * @param enumeration The enumeration class from which to return a constant
-     * @param name The name of the constant to return
-     * @param defaultValue The enumeration constant to return if parsing fails
-     * @return The enum constant
-     */
-    protected static <T extends Enum<T>> T parse(Class<T> enumeration, String name, T defaultValue) {
-        for (T value : enumeration.getEnumConstants()) {
-            if (value.name().equalsIgnoreCase(name)) {
-                return value;
-            }
-        }
-        return defaultValue;
+    @Override
+    public String toString() {
+        return getAction() + " [version=" + version + ", newVersion=" + newVersion + ", parameters=" + parameters + "]";
     }
+
 }

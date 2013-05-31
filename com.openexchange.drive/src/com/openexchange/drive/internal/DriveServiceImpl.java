@@ -56,10 +56,10 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.drive.DirectoryVersion;
+import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
-import com.openexchange.drive.actions.DriveAction;
 import com.openexchange.drive.actions.EditFileAction;
 import com.openexchange.drive.actions.RemoveFileAction;
 import com.openexchange.drive.checksum.ChecksumProvider;
@@ -190,7 +190,8 @@ public class DriveServiceImpl implements DriveService {
         FileVersion originalVersion, FileVersion newVersion, String contentType, long offset, long totalLength) throws OXException {
         DriveSession driveSession = createSession(session, rootFolderID);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Handling upload: " + newVersion);
+            LOG.debug("Handling upload: original version: " + originalVersion + ", new version: " + newVersion +
+                ", offset: " + offset + ", total length: " + totalLength);
         }
         SyncResult<FileVersion> syncResult = new SyncResult<FileVersion>();
         File createdFile = new UploadHelper(driveSession).perform(path, originalVersion, newVersion, uploadStream, contentType, offset, totalLength);

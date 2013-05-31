@@ -51,8 +51,8 @@ package com.openexchange.drive.sync.optimize;
 
 import java.util.Collections;
 import java.util.List;
+import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.FileVersion;
-import com.openexchange.drive.actions.DriveAction;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.sync.SyncResult;

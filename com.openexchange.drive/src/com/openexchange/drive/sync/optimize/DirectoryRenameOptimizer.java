@@ -53,10 +53,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryVersion;
+import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.actions.AcknowledgeDirectoryAction;
-import com.openexchange.drive.actions.Action;
-import com.openexchange.drive.actions.DriveAction;
 import com.openexchange.drive.actions.EditDirectoryAction;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
@@ -89,7 +89,8 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
              * Client: {"action":"acknowledge","newVersion":null,"version":{"path":"/wf","checksum":"55bd0578618be81d9b4140212e0fae50"}}
              * Server: {"action":"remove","newVersion":null,"version":{"path":"/wf","checksum":"55bd0578618be81d9b4140212e0fae50"}}
              */
-            if (Action.SYNC == clientAction.getAction() && false == DriveConstants.ROOT_PATH.equals(clientAction.getVersion().getPath())) {
+            if (Action.SYNC == clientAction.getAction() && false == DriveConstants.ROOT_PATH.equals(clientAction.getVersion().getPath()) &&
+                false == wasConflict(clientAction)) {
                 DriveAction<DirectoryVersion> matchingServerAction = findMatchingRenameAction(
                     Action.REMOVE, clientAction.getVersion(), optimizedActionsForServer);
                 if (null != matchingServerAction) {

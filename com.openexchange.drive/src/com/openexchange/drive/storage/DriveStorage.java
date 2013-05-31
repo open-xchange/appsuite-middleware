@@ -55,6 +55,7 @@ import static com.openexchange.drive.storage.DriveConstants.TEMP_PATH;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -78,9 +79,9 @@ import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.groupware.results.Delta;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -354,38 +355,33 @@ public class DriveStorage {
         return folder.getId();
     }
 
-    public boolean supportsFolderSequenceNumbers() {
-        return true;//TODO
+    /**
+     * Gets a value whether folder sequence numbers are supported by the underlying storage or not.
+     *
+     * @return <code>true</code> if sequence numbers are supported, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    public boolean supportsFolderSequenceNumbers() throws OXException {
+        return FileStorageSequenceNumberProvider.class.isInstance(getFileAccess());
     }
 
-    public boolean hasChangedSince(String path, long lastSequenceNumber) throws OXException {
-        // TODO: adding 1 to "since" timestamp - the infostore seems to use a >= comparison in queries
-        // TODO: the 'deleted' iterator will only contain the object id field
-        Delta<File> delta = getFileAccess().getDelta(getFolderID(path), 1 + lastSequenceNumber,
-            Arrays.asList(new Field[] { Field.ID }), false);
-        return null != delta && (isNotEmpty(delta.getNew()) || isNotEmpty(delta.getDeleted()) || isNotEmpty(delta.getModified()));
-    }
-
-    public long getSequenceNumber(String path, long lastSequenceNumber) throws OXException {
-        // TODO: adding 1 to sequence number - the infostore seems to use a >= comparison in queries
-        // TODO: the 'deleted' iterator will only contain the object id field
-        Delta<File> delta = getFileAccess().getDelta(getFolderID(path), 1 + lastSequenceNumber,
-            Arrays.asList(new Field[] { Field.ID }), false);
-        if (null != delta && (isNotEmpty(delta.getNew()) || isNotEmpty(delta.getDeleted()) || isNotEmpty(delta.getModified()))) {
-            return delta.sequenceNumber();
-        } else {
-            return lastSequenceNumber;
+    /**
+     * Gets the sequence numbers for the contents of the supplied folders to quickly determine which folders contain changes. An updated
+     * sequence number in a folder indicates a change, for example a new, modified or deleted file.
+     *
+     * @param folderIds A list of folder IDs to get the sequence numbers for
+     * @return A map holding the resulting sequence numbers to each requested folder ID
+     * @throws OXException
+     */
+    public Map<String, Long> getSequenceNumbers(List<String> folderIDs) throws OXException {
+        if (null == folderIDs || 0 == folderIDs.size()) {
+            return Collections.emptyMap();
         }
-    }
-
-    private static boolean isNotEmpty(SearchIterator<?> searchIterator) throws OXException {
-        try {
-            return null != searchIterator && searchIterator.hasNext();
-        } finally {
-            if (null != searchIterator) {
-                searchIterator.close();
-            }
+        FileStorageFileAccess fileStorageFileAccess = getFileAccess();
+        if (false == FileStorageSequenceNumberProvider.class.isInstance(fileStorageFileAccess)) {
+            throw new UnsupportedOperationException("FileStorageSequenceNumberProvider is needed");
         }
+        return ((FileStorageSequenceNumberProvider)fileStorageFileAccess).getSequenceNumbers(folderIDs);
     }
 
     public InputStream getDocument(File file) throws OXException {

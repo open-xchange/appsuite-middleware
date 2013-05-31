@@ -49,7 +49,9 @@
 
 package com.openexchange.drive.actions;
 
+import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryVersion;
+import com.openexchange.drive.DriveAction;
 
 /**
  * {@link RemoveDirectoryAction}

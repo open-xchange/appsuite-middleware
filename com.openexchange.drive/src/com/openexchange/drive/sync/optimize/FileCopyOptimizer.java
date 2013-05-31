@@ -52,11 +52,11 @@ package com.openexchange.drive.sync.optimize;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import com.openexchange.drive.Action;
+import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
-import com.openexchange.drive.actions.Action;
 import com.openexchange.drive.actions.DownloadFileAction;
-import com.openexchange.drive.actions.DriveAction;
 import com.openexchange.drive.checksum.FileChecksum;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.comparison.VersionMapper;
@@ -131,7 +131,7 @@ public class FileCopyOptimizer extends FileActionOptimizer {
                     String path = session.getStorage().getPath(fileChecksum.getFolderID());
                     storageFile = session.getStorage().getFile(path, fileChecksum.getFileID(), fileChecksum.getVersion());
                 } catch (OXException e) {
-                    LOG.debug("Error accessing file referenced by checksum store", e);
+                    LOG.debug("Error accessing file referenced by checksum store: " + e.getMessage());
                 }
                 if (null == storageFile || storageFile.getSequenceNumber() != fileChecksum.getSequenceNumber()) {
                     LOG.debug("Invalidating stored file checksum: " + fileChecksum);

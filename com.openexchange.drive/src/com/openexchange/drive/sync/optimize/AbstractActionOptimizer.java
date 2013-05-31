@@ -52,9 +52,9 @@ package com.openexchange.drive.sync.optimize;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
+import com.openexchange.drive.Action;
+import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
-import com.openexchange.drive.actions.Action;
-import com.openexchange.drive.actions.DriveAction;
 import com.openexchange.drive.comparison.VersionMapper;
 
 /**

@@ -50,6 +50,7 @@
 package com.openexchange.drive.sync.optimize;
 
 import com.openexchange.drive.DirectoryVersion;
+import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.comparison.VersionMapper;
 
 
@@ -81,6 +82,10 @@ public abstract class DirectoryActionOptimizer extends AbstractActionOptimizer<D
         } else {
             return null == v1.getPath() ? null == v2.getPath() : v1.getPath().equals(v2.getPath());
         }
+    }
+
+    protected static boolean wasConflict(DriveAction<DirectoryVersion> action) {
+        return null != action && null != action.getParameters() && Boolean.TRUE.equals(action.getParameters().get("conflict"));
     }
 
     protected static class SimpleDirectoryVersion implements DirectoryVersion {
