@@ -1,3 +1,7 @@
+* 2013-06-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26752: Use SecretEncryptionService mechanism during mail account password migration
+
 * 2013-05-31 - martin.herfurth@open-xchange.com
 
  - Fix for bug 26800: Removed needless slash in Object link.
