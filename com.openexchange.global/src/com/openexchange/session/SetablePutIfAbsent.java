@@ -47,53 +47,16 @@
  *
  */
 
-package com.openexchange.secret.recovery.json.action;
+package com.openexchange.session;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.secret.recovery.SecretInconsistencyDetector;
-import com.openexchange.secret.recovery.json.SecretRecoveryAJAXRequest;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link CheckAction}
+ * {@link SetablePutIfAbsent} - Extends {@link Session} by certain setter methods.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CheckAction extends AbstractSecretRecoveryAction {
+public interface SetablePutIfAbsent extends PutIfAbsent, SetableSession {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CheckAction.class));
-
-    /**
-     * Initializes a new {@link CheckAction}.
-     *
-     * @param services
-     */
-    public CheckAction(final ServiceLookup services) {
-        super(services);
-    }
-
-    @Override
-    protected AJAXRequestResult perform(final SecretRecoveryAJAXRequest req) throws OXException, JSONException {
-        final SecretInconsistencyDetector secretInconsistencyDetector = getService(SecretInconsistencyDetector.class);
-        if (null == secretInconsistencyDetector) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SecretInconsistencyDetector.class.getName());
-        }
-
-        final String diagnosis = secretInconsistencyDetector.isSecretWorking(req.getSession());
-        final JSONObject object = new JSONObject(2);
-        if (diagnosis == null) {
-            object.put("secretWorks", true);
-        } else {
-            LOG.info("Secrets in session " + req.getSession().getSessionID() + " seem to need migration: " + diagnosis);
-            object.put("secretWorks", false);
-            object.put("diagnosis", diagnosis);
-        }
-        return new AJAXRequestResult(object, "json");
-    }
+    // Combines SetableSession and PutIfAbsent
 
 }

@@ -113,8 +113,12 @@ import com.openexchange.mailaccount.json.fields.MailAccountGetSwitch;
 import com.openexchange.mailaccount.json.fields.SetSwitch;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
+import com.openexchange.secret.SecretEncryptionStrategy;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.session.SetableSession;
+import com.openexchange.session.SetableSessionFactory;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.net.URIDefaults;
@@ -128,6 +132,8 @@ import com.openexchange.tools.sql.DBUtils;
 public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RdbMailAccountStorage.class));
+
+    private static final SecretEncryptionStrategy<GenericProperty> STRATEGY = MailPasswordUtil.STRATEGY;
 
     /**
      * The constant in the Java programming language, sometimes referred to as a type code, that identifies the generic SQL type VARCHAR.
@@ -176,9 +182,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     private static final String SELECT_EXISTS_FOR_USER2 = "SELECT 1 FROM user_transport_account WHERE cid = ? AND user = ? AND id > 0 LIMIT 1";
 
-    private static final String SELECT_PASSWORD1 = "SELECT id, password FROM user_mail_account WHERE cid = ? AND user = ?";
+    private static final String SELECT_PASSWORD1 = "SELECT id, password, login, url FROM user_mail_account WHERE cid = ? AND user = ?";
 
-    private static final String SELECT_PASSWORD2 = "SELECT id, password FROM user_transport_account WHERE cid = ? AND user = ?";
+    private static final String SELECT_PASSWORD2 = "SELECT id, password, login, url FROM user_transport_account WHERE cid = ? AND user = ?";
 
     private static final String UPDATE_PASSWORD1 = "UPDATE user_mail_account SET password = ?  WHERE cid = ? AND id = ? AND user = ?";
 
@@ -2139,17 +2145,41 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             selectStmt.setInt(1, cid);
             selectStmt.setInt(2, user);
             rs = selectStmt.executeQuery();
+            // Gather needed services
+            final SecretEncryptionService<GenericProperty> encryptionService = ServerServiceRegistry.getInstance().getService(SecretEncryptionFactoryService.class).createService(STRATEGY);
+            if (null == encryptionService) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SecretEncryptionService.class.getName());
+            }
+            final Session session;
+            {
+                final SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+                if (null == sessiondService) {
+                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
+                }
+                session = sessiondService.getAnyActiveSessionForUser(user, cid);
+            }
+            final CustomMailAccount parser = new CustomMailAccount();
+            // Iterate mail accounts
             while (rs.next()) {
                 final String password = rs.getString(2);
                 if (!isEmpty(password)) {
                     final int id = rs.getInt(1);
                     if (id != MailAccount.DEFAULT_ID) {
+                        final String login = rs.getString(3);
+                        parser.parseMailServerURL(rs.getString(4));
+                        final String mailServer = parser.getMailServer();
                         try {
                             // If we can decrypt the password with the newSecret, we don't need to do anything about this account
-                            MailPasswordUtil.decrypt(password, newSecret);
-                        } catch (final GeneralSecurityException x) {
+                            encryptionService.decrypt(session, password, new GenericProperty(id, session, login, mailServer));
+                        } catch (final OXException x) {
+                            // Decrypt with old -- encrypt with new
                             // We couldn't decrypt the password, so, let's try the oldSecret and do the migration
-                            final String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
+                            final SetableSession setableSession = SetableSessionFactory.getFactory().setableSessionFor(session);
+                            setableSession.setPassword(oldSecret);
+                            final String decrypted = encryptionService.decrypt(setableSession, password, new GenericProperty(id, setableSession, login, mailServer));
+                            // Encrypt with new secret
+                            final String transcribed = encryptionService.encrypt(session, decrypted);
+                            // Add to batch update
                             if (null == updateStmt) {
                                 updateStmt = con.prepareStatement(UPDATE_PASSWORD1);
                                 updateStmt.setInt(2, cid);
@@ -2178,22 +2208,37 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             selectStmt.setInt(1, cid);
             selectStmt.setInt(2, user);
             rs = selectStmt.executeQuery();
+            // Iterate transport accounts
             while (rs.next()) {
                 final String password = rs.getString(2);
                 if (!isEmpty(password)) {
                     final int id = rs.getInt(1);
-                    if (id == MailAccount.DEFAULT_ID) {
-                        continue;
+                    if (id != MailAccount.DEFAULT_ID) {
+                        final String login = rs.getString(3);
+                        parser.parseTransportServerURL(rs.getString(4));
+                        final String transportServer = parser.getTransportServer();
+                        try {
+                            // If we can decrypt the password with the newSecret, we don't need to do anything about this account
+                            encryptionService.decrypt(session, password, new GenericProperty(id, session, login, transportServer));
+                        } catch (final OXException x) {
+                            // Decrypt with old -- encrypt with new
+                            // We couldn't decrypt the password, so, let's try the oldSecret and do the migration
+                            final SetableSession setableSession = SetableSessionFactory.getFactory().setableSessionFor(session);
+                            setableSession.setPassword(oldSecret);
+                            final String decrypted = encryptionService.decrypt(setableSession, password, new GenericProperty(id, setableSession, login, transportServer));
+                            // Encrypt with new secret
+                            final String transcribed = encryptionService.encrypt(session, decrypted);
+                            // Add to batch update
+                            if (null == updateStmt) {
+                                updateStmt = con.prepareStatement(UPDATE_PASSWORD1);
+                                updateStmt.setInt(2, cid);
+                                updateStmt.setInt(4, user);
+                            }
+                            updateStmt.setString(1, transcribed);
+                            updateStmt.setInt(3, id);
+                            updateStmt.addBatch();
+                        }
                     }
-                    final String transcribed = MailPasswordUtil.encrypt(MailPasswordUtil.decrypt(password, oldSecret), newSecret);
-                    if (null == updateStmt) {
-                        updateStmt = con.prepareStatement(UPDATE_PASSWORD2);
-                        updateStmt.setInt(2, cid);
-                        updateStmt.setInt(4, user);
-                    }
-                    updateStmt.setString(1, transcribed);
-                    updateStmt.setInt(3, id);
-                    updateStmt.addBatch();
                 }
             }
             if (null != updateStmt) {
@@ -2205,8 +2250,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             rollback = false;
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final GeneralSecurityException e) {
-            throw MailAccountExceptionCodes.PASSWORD_ENCRYPTION_FAILED.create(e, "", "", Integer.valueOf(user), Integer.valueOf(cid));
         } catch (final RuntimeException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -2348,7 +2391,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         if (null == toCrypt) {
             return null;
         }
-        final SecretEncryptionService<GenericProperty> encryptionService = getService(SecretEncryptionFactoryService.class).createService(MailPasswordUtil.STRATEGY);
+        final SecretEncryptionService<GenericProperty> encryptionService = getService(SecretEncryptionFactoryService.class).createService(STRATEGY);
         return encryptionService.encrypt(session, toCrypt);
     }
 

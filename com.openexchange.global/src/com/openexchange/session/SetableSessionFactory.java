@@ -47,53 +47,52 @@
  *
  */
 
-package com.openexchange.secret.recovery.json.action;
+package com.openexchange.session;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.secret.recovery.SecretInconsistencyDetector;
-import com.openexchange.secret.recovery.json.SecretRecoveryAJAXRequest;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.delegate.DelegatePutIfAbsent;
+import com.openexchange.session.delegate.DelegateSession;
 
 /**
- * {@link CheckAction}
+ * {@link SetableSessionFactory} - A factory for {@code SetableSession} via {@link #setableSessionFor(Session)}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CheckAction extends AbstractSecretRecoveryAction {
+public final class SetableSessionFactory {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CheckAction.class));
+    private static final SetableSessionFactory FACTORY = new SetableSessionFactory();
 
     /**
-     * Initializes a new {@link CheckAction}.
+     * Gets the factory instance.
      *
-     * @param services
+     * @return The factory instance
      */
-    public CheckAction(final ServiceLookup services) {
-        super(services);
+    public static SetableSessionFactory getFactory() {
+        return FACTORY;
     }
 
-    @Override
-    protected AJAXRequestResult perform(final SecretRecoveryAJAXRequest req) throws OXException, JSONException {
-        final SecretInconsistencyDetector secretInconsistencyDetector = getService(SecretInconsistencyDetector.class);
-        if (null == secretInconsistencyDetector) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SecretInconsistencyDetector.class.getName());
-        }
+    // ---------------------------------------------------------------------------------- //
 
-        final String diagnosis = secretInconsistencyDetector.isSecretWorking(req.getSession());
-        final JSONObject object = new JSONObject(2);
-        if (diagnosis == null) {
-            object.put("secretWorks", true);
-        } else {
-            LOG.info("Secrets in session " + req.getSession().getSessionID() + " seem to need migration: " + diagnosis);
-            object.put("secretWorks", false);
-            object.put("diagnosis", diagnosis);
+    /**
+     * Initializes a new {@link SetableSessionFactory}.
+     */
+    private SetableSessionFactory() {
+        super();
+    }
+
+    /**
+     * Creates a new setable session for specified session.
+     *
+     * @param session The session
+     * @return A setable session
+     */
+    public SetableSession setableSessionFor(final Session session) {
+        if (null == session) {
+            return null;
         }
-        return new AJAXRequestResult(object, "json");
+        if (session instanceof PutIfAbsent) {
+            return new DelegatePutIfAbsent((PutIfAbsent) session);
+        }
+        return new DelegateSession(session);
     }
 
 }
