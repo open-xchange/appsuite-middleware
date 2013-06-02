@@ -55,7 +55,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
-import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.ajp13.Services;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -82,9 +82,9 @@ public final class HttpSessionManagement {
         synchronized (HttpSessionManagement.class) {
             if (null == sessions) {
                 sessions = new NonBlockingHashMap<String, HttpSessionWrapper>();
-                final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                final ConfigurationService service = Services.getService(ConfigurationService.class);
                 maxActiveSessions = null == service ? -1 : service.getIntProperty("com.openexchange.servlet.maxActiveSessions", 250000);
-                final TimerService timer = AJPv13ServiceRegistry.getInstance().getService(TimerService.class);
+                final TimerService timer = Services.getService(TimerService.class);
                 if (null != timer) {
                     sessionRemover = timer.scheduleWithFixedDelay(new SessionRemover(sessions), 300000, 300000); // Every 5 minutes
                 }
@@ -102,7 +102,7 @@ public final class HttpSessionManagement {
                 sessions = null;
                 maxActiveSessions = -1;
                 sessionRemover.cancel(false);
-                final TimerService timer = AJPv13ServiceRegistry.getInstance().getService(TimerService.class);
+                final TimerService timer = Services.getService(TimerService.class);
                 if (null != timer) {
                     timer.purge();
                 }

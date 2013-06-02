@@ -148,7 +148,7 @@ public final class AJPv13Config implements Initialization {
     }
 
     private void init() throws OXException {
-        ConfigurationService configService = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        ConfigurationService configService = Services.getService(ConfigurationService.class);
         if (configService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getSimpleName());
         }
@@ -315,7 +315,7 @@ public final class AJPv13Config implements Initialization {
      * @return The property value
      */
     public static String getServerProperty(final ServerConfig.Property property) {
-        final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final ConfigurationService service = Services.getService(ConfigurationService.class);
         return service == null ? property.getDefaultValue() : service.getProperty(property.getPropertyName(), property.getDefaultValue());
     }
 
@@ -326,7 +326,7 @@ public final class AJPv13Config implements Initialization {
      * @return The property value
      */
     public static String getSystemProperty(final SystemConfig.Property property) {
-        final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final ConfigurationService service = Services.getService(ConfigurationService.class);
         return service == null ? null : service.getProperty(property.getPropertyName());
     }
 

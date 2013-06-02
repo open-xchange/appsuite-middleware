@@ -62,7 +62,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
-import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.ajp13.Services;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
@@ -99,7 +99,7 @@ public class AJPv13TaskWatcher {
         /*
          * Start keep-alive task
          */
-        final TimerService timer = AJPv13ServiceRegistry.getInstance().getService(TimerService.class);
+        final TimerService timer = Services.getService(TimerService.class);
         if (null != timer) {
             scheduledTimerTask =
                 timer.scheduleWithFixedDelay(
@@ -146,7 +146,7 @@ public class AJPv13TaskWatcher {
         if (null != scheduledTimerTask) {
             scheduledTimerTask.cancel(false);
             scheduledTimerTask = null;
-            final TimerService timer = AJPv13ServiceRegistry.getInstance().getService(TimerService.class);
+            final TimerService timer = Services.getService(TimerService.class);
             if (null != timer) {
                 timer.purge();
             }

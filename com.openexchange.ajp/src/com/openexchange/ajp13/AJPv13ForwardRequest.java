@@ -160,7 +160,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
         attributeMapping.put(0x0d, ATTR_STORED_METHOD);
         attributeMapping.put(REQUEST_TERMINATOR, "are_done");
 
-        final ConfigurationService configurationService = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
         if (configurationService == null) {
             forceHttps = false;
         } else {
