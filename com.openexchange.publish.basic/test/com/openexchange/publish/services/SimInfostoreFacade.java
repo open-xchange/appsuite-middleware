@@ -52,6 +52,7 @@ package com.openexchange.publish.services;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -310,6 +311,12 @@ public class SimInfostoreFacade implements InfostoreFacade {
 
     public void simulateDocument(int cid, int folder, int id, String string, byte[] bytes) {
         files.put(id, bytes);
+    }
+
+    @Override
+    public Map<Long, Long> getSequenceNumbers(List<Long> folderIds, boolean versionsOnly, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+        // Nothing to do
+        return null;
     }
 
 }
