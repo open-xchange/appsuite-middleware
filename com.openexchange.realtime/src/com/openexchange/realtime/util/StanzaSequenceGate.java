@@ -81,14 +81,13 @@ public abstract class StanzaSequenceGate {
     protected ConcurrentHashMap<ID, AtomicLong> sequenceNumbers = new ConcurrentHashMap<ID, AtomicLong>();
 
     protected ConcurrentHashMap<ID, List<StanzaWithCustomAction>> inboxes = new ConcurrentHashMap<ID, List<StanzaWithCustomAction>>();
-    
 
     private String name;
 
     public StanzaSequenceGate(String name) {
         this.name = name;
     }
-    
+
     public boolean handle(Stanza stanza, ID recipient) throws OXException {
         return handle(stanza, recipient, null);
     }
@@ -132,7 +131,6 @@ public abstract class StanzaSequenceGate {
                     threshold = meantime;
                 }
             }
-            stanza.trace("Stanza Gate (" + name + ") : " + stanza.getSequencePrincipal() + ":" + stanza.getSequenceNumber() + ":" + threshold);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Stanza Gate (" + name + ") : " + stanza.getSequencePrincipal() + ":" + stanza.getSequenceNumber() + ":" + threshold);
             }
@@ -207,23 +205,34 @@ public abstract class StanzaSequenceGate {
         }
 
     }
-    
+
     public void freeRessourcesFor(ID sequencePrincipal) {
         sequenceNumbers.remove(sequencePrincipal);
         inboxes.remove(sequencePrincipal);
     }
 
+    /**
+     * Procedure to handle incoming Stanzas. Has to be implemented by the Components that want to make use of a StanzaSequenceGate and have
+     * to adapt the logic of the Stanza handling after the gateway enforced the Sequence of the received Stanzas.
+     * 
+     * @param stanza The incoming Stanza
+     * @param recipient The recipient of the incoming Stanza
+     * @throws OXException If the Stanza couldn't be handled
+     */
     public abstract void handleInternal(Stanza stanza, ID recipient) throws OXException;
-    
+
     private final class StanzaWithCustomAction {
+
         public Stanza stanza;
+
         public CustomGateAction action;
+
         public StanzaWithCustomAction(Stanza stanza, CustomGateAction action) {
             super();
             this.stanza = stanza;
             this.action = action;
         }
-        
+
     }
 
 }
