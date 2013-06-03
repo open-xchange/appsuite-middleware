@@ -163,10 +163,9 @@ public final class QuotedInternetAddress extends InternetAddress {
      * RFC822 Address parser. XXX - This is complex enough that it ought to be a real parser, not this ad-hoc mess, and because of that,
      * this is not perfect. XXX - Deal with encoded Headers too.
      */
-    private static InternetAddress[] parse(final String str, final boolean strict, final boolean parseHdr) throws AddressException {
+    private static InternetAddress[] parse(final String s, final boolean strict, final boolean parseHdr) throws AddressException {
         int start, end, index, nesting;
         int start_personal = -1, end_personal = -1;
-        final String s = MimeMessageUtility.decodeMultiEncodedHeader(str);
         final int length = s.length();
         final boolean ignoreErrors = parseHdr && !strict;
         boolean in_group = false; // we're processing a group term
