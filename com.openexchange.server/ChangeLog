@@ -1,3 +1,7 @@
+* 2013-06-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26614: Fixed parsing of mail-safe encoded personal
+
 * 2013-06-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 26752: Use SecretEncryptionService mechanism during mail account password migration
