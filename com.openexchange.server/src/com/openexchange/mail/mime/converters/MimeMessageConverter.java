@@ -547,7 +547,7 @@ public final class MimeMessageConverter {
         }
         if (content instanceof InputStream) {
             try {
-                new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
+                return new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
             } catch (MessagingException e) {
                 throw MimeMailException.handleMessagingException(e);
             } catch (IOException e) {
