@@ -17,12 +17,14 @@ if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 	}
 }
 
+# collectionTime: the overall time (in ms) currently used from the garbage collector
+
 if ( $ARGV[0] and $ARGV[0] eq "config")
 {
-	print "graph_title JVM GC frequency\n";
+	print "graph_title JVM GC CollectionTime\n";
 	print "graph_args --base 1024 -l 0\n";
 	print "graph_category Open Xchange\n";
-	print "graph_vlabel CollectionCount\n";
+	print "graph_vlabel CollectionTime\n";
 	print "a.label ConcurrentMarkSweep\n";
 	print "a.draw LINE1\n";
 	print "b.label ParNew\n";
@@ -35,14 +37,14 @@ open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";
 
 while (<SHOWRUNTIME>)
 {
-	if ( $_ =~ /ConcurrentMarkSweep,type=GarbageCollector,CollectionCount /) {
+	if ( $_ =~ /ConcurrentMarkSweep,type=GarbageCollector,CollectionTime /) {
 		s/.*\=//; 
 		s/].*//;
 		$val=$_+0;
 		print "a.value $val\n";
 		next;
 	}
-	if ( $_ =~ /ParNew,type=GarbageCollector,CollectionCount /) {
+	if ( $_ =~ /ParNew,type=GarbageCollector,CollectionTime /) {
 		s/.*\=//; 
 		s/].*//;
 		$val=$_+0;
