@@ -84,6 +84,7 @@ public class ContactAJAXSuite extends TestSuite {
         tests.addTestSuite(DistListMemberUpdateTest.class);
         tests.addTestSuite(DistListPermissionsTest.class);
         tests.addTestSuite(BirthdayAndAnniversaryTest.class);
+        tests.addTestSuite(UpdateNotAllowedFieldsTest.class);
 
         tests.addTest(ContactBugTestSuite.suite());
         return tests;

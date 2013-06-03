@@ -50,11 +50,9 @@
 package com.openexchange.ajax.parser;
 
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
@@ -1178,6 +1176,17 @@ public class ContactParser extends CommonParser {
             public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setUid(parseString(jsonobject, CommonFields.UID));
             }
+        },
+        new JSONAttributeMapper() {
+            @Override
+            public boolean jsonObjectContains(final JSONObject jsonobject) {
+                return jsonobject.has(ContactFields.USER_ID);
+            }
+            @Override
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) throws JSONException, OXException {
+                contactobject.setInternalUserId(parseInt(jsonobject, ContactFields.USER_ID));
+            }
         }
+
     };
 }
