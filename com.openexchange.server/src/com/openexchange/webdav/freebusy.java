@@ -81,6 +81,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
+import com.openexchange.tools.servlet.RateLimitedException;
 import com.openexchange.user.UserService;
 
 /**
@@ -103,9 +104,14 @@ public class freebusy extends HttpServlet {
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        // create new HttpSession if it's missing
-        req.getSession(true);
-        super.service(new CountingHttpServletRequest(req), resp);
+        try {
+            // create new HttpSession if it's missing
+            req.getSession(true);
+            super.service(new CountingHttpServletRequest(req), resp);
+        } catch (final RateLimitedException e) {
+            resp.setContentType("text/plain; charset=UTF-8");
+            resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
+        }
     }
 
     @Override
