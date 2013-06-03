@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -50,6 +50,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon Jun 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First sprint increment for 7.2.2 release
 * Wed May 29 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.2.2 release
 * Tue May 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
