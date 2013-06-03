@@ -94,5 +94,14 @@ public class DriveConstants {
      */
     public static final String EMPTY_MD5 = "d41d8cd98f00b204e9800998ecf8427e";
 
+    /**
+     * The number of maximum retries in case of recoverable exceptions during execution of server actions
+     */
+    public static final int MAX_RETRIES = 5;
+
+    /**
+     * The base number of milliseconds to wait until retrying
+     */
+    public static final int RETRY_BASEDELAY = 1000;
 
 }
