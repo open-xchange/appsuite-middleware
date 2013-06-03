@@ -122,6 +122,7 @@ public class OSGiServletContext extends WebappContext {
      * @param logger      Logger util.
      */
     public OSGiServletContext(HttpContext httpContext) {
+        super("HttpService");
         this.httpContext = httpContext;
     }
 
