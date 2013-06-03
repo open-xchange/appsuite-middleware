@@ -51,9 +51,12 @@ package com.openexchange.realtime.atmosphere;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandlerTest;
+import com.openexchange.realtime.atmosphere.impl.EnqueuedStanzaTest;
+import com.openexchange.realtime.atmosphere.impl.ProtocolHandlerTest;
+import com.openexchange.realtime.atmosphere.impl.RTClientStateTest;
 import com.openexchange.realtime.atmosphere.impl.stanza.PresenceBuilderTest;
 import com.openexchange.realtime.atmosphere.presence.converter.JSONToPresenceStateTest;
+import com.openexchange.realtime.atmosphere.protocol.RTProtocolTest;
 
 /**
  * {@link UnitTests}
@@ -62,9 +65,12 @@ import com.openexchange.realtime.atmosphere.presence.converter.JSONToPresenceSta
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    RTAtmosphereHandlerTest.class,
     PresenceBuilderTest.class,
-    JSONToPresenceStateTest.class
+    JSONToPresenceStateTest.class,
+    EnqueuedStanzaTest.class,
+    RTClientStateTest.class,
+    RTProtocolTest.class,
+    ProtocolHandlerTest.class
 })
 public class UnitTests {
 

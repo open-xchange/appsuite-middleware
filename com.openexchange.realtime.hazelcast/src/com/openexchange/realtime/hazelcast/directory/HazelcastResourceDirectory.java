@@ -356,7 +356,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
         if (conjure(id)) {
             HazelcastResource res = new HazelcastResource();
             HazelcastResource meantime = setIfAbsent(id, res);
-            id.on("dispose", CLEAN_UP);
+            id.on(ID.Events.DISPOSE, CLEAN_UP);
             if (meantime == null) {
                 return res;
             }

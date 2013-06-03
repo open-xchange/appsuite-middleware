@@ -47,39 +47,31 @@
  *
  */
 
-package com.openexchange.realtime.group.commands;
+package com.openexchange.realtime.atmosphere.impl;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
-import com.openexchange.realtime.group.GroupCommand;
-import com.openexchange.realtime.group.GroupDispatcher;
-import com.openexchange.realtime.packet.Stanza;
+import org.junit.Test;
+import com.openexchange.realtime.packet.Message;
+import static org.junit.Assert.*;
 
 
 /**
- * {@link LeaveCommand}
+ * {@link EnqueuedStanzaTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class LeaveCommand implements GroupCommand {
-
-    @Override
-    public void perform(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
-        if (isSynchronous(stanza) && groupDispatcher.isMember(stanza.getOnBehalfOf())) {
-            Stanza signOffMessage = groupDispatcher.getSignOffMessage(stanza.getOnBehalfOf());
-            signOffMessage.setFrom(groupDispatcher.getId());
-            signOffMessage.setTo(stanza.getFrom());
-
-            groupDispatcher.leave(stanza.getOnBehalfOf());
-           
-            GroupDispatcher.SERVICE_REF.get().getService(MessageDispatcher.class).send(signOffMessage);
-        } else {
-            groupDispatcher.leave(stanza.getFrom());
+public class EnqueuedStanzaTest {
+    @Test
+    public void incCounterShouldReturnTrueTheFirstOneHundredTimesAndFalseAfterThat() {
+        Message message = new Message();
+        message.setSequenceNumber(23);
+        
+        EnqueuedStanza enqueuedStanza = new EnqueuedStanza(message);
+        for(int i = 0; i < 101; i++) {
+            if (i < 100) {
+                assertTrue(enqueuedStanza.incCounter());
+            } else {
+                assertFalse(enqueuedStanza.incCounter());
+            }
         }
     }
-    
-    private boolean isSynchronous(Stanza stanza) {
-        return stanza.getFrom().getProtocol().equals("call");
-    }
-
 }

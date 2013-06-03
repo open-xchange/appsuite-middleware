@@ -101,7 +101,7 @@ public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
                             throw e;
                         }
                     } catch (RuntimeException e) {
-                        stanza.trace(e.getMessage(), e);
+                        stanza.trace(e.toString(), e);
                         throw DispatchExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
                     }
                 } else {

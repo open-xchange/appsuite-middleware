@@ -208,7 +208,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
                 peerMap = new ConcurrentHashMap<String, AtomicLong>();
                 ConcurrentHashMap<String, AtomicLong> otherPeerMap = peerMapPerID.putIfAbsent(stanza.getSequencePrincipal(), peerMap);
                 if (otherPeerMap == null) {
-                    stanza.getSequencePrincipal().on("dispose", new IDEventHandler() {
+                    stanza.getSequencePrincipal().on(ID.Events.DISPOSE, new IDEventHandler() {
 
                         @Override
                         public void handle(String event, ID id, Object source, Map<String, Object> properties) {
