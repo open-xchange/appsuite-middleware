@@ -153,7 +153,7 @@ public class SyntheticChannel implements Channel, Runnable {
         
         setUpEviction(component.getEvictionPolicy(), handle, id);
         
-        id.on("dispose", new IDEventHandler() {
+        id.on(ID.Events.DISPOSE, new IDEventHandler() {
             
             @Override
             public void handle(String event, ID id, Object source, Map<String, Object> properties) {
@@ -235,7 +235,7 @@ public class SyntheticChannel implements Channel, Runnable {
             long now = System.currentTimeMillis();
             
             if (now - last >= millis) {                
-                id.trigger("dispose", SyntheticChannel.this);
+                id.trigger(ID.Events.DISPOSE, SyntheticChannel.this);
             }
         }
         
@@ -244,7 +244,7 @@ public class SyntheticChannel implements Channel, Runnable {
     
     public void shutdown() {
         for(ID id: handles.keySet()) {
-            id.trigger("dispose", SyntheticChannel.this);
+            id.trigger(ID.Events.DISPOSE, SyntheticChannel.this);
         }
     }
 

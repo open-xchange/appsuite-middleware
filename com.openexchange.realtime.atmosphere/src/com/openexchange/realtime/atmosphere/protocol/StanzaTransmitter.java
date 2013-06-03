@@ -47,39 +47,29 @@
  *
  */
 
-package com.openexchange.realtime.group.commands;
+package com.openexchange.realtime.atmosphere.protocol;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
-import com.openexchange.realtime.group.GroupCommand;
-import com.openexchange.realtime.group.GroupDispatcher;
+import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 
 
 /**
- * {@link LeaveCommand}
+ * A {@link StanzaTransmitter} tries to transmit stanzas to a connected client.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class LeaveCommand implements GroupCommand {
-
-    @Override
-    public void perform(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
-        if (isSynchronous(stanza) && groupDispatcher.isMember(stanza.getOnBehalfOf())) {
-            Stanza signOffMessage = groupDispatcher.getSignOffMessage(stanza.getOnBehalfOf());
-            signOffMessage.setFrom(groupDispatcher.getId());
-            signOffMessage.setTo(stanza.getFrom());
-
-            groupDispatcher.leave(stanza.getOnBehalfOf());
-           
-            GroupDispatcher.SERVICE_REF.get().getService(MessageDispatcher.class).send(signOffMessage);
-        } else {
-            groupDispatcher.leave(stanza.getFrom());
-        }
-    }
+public interface StanzaTransmitter {
     
-    private boolean isSynchronous(Stanza stanza) {
-        return stanza.getFrom().getProtocol().equals("call");
-    }
-
+    /**
+     * Attempts to send a stanza to a connected client and resumes the transmitter
+     * @throws OXException 
+     */
+    public boolean send(List<Stanza> stanzas) throws OXException;
+    
+    /**
+     * Suspends the transmitter
+     */
+    public void suspend();
 }

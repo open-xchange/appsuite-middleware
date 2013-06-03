@@ -47,39 +47,69 @@
  *
  */
 
-package com.openexchange.realtime.group.commands;
+package com.openexchange.realtime.atmosphere.protocol;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
-import com.openexchange.realtime.group.GroupCommand;
-import com.openexchange.realtime.group.GroupDispatcher;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
-
+import com.openexchange.realtime.util.StanzaSequenceGate;
 
 /**
- * {@link LeaveCommand}
+ * {@link RTProtocol}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class LeaveCommand implements GroupCommand {
+public interface RTProtocol {
 
-    @Override
-    public void perform(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
-        if (isSynchronous(stanza) && groupDispatcher.isMember(stanza.getOnBehalfOf())) {
-            Stanza signOffMessage = groupDispatcher.getSignOffMessage(stanza.getOnBehalfOf());
-            signOffMessage.setFrom(groupDispatcher.getId());
-            signOffMessage.setTo(stanza.getFrom());
+    /**
+     * Called when a GET request is received from the client. 
+     * @param state - the client state
+     * @param transmitter - the client transmitter 
+     * @throws OXException 
+     */
+    public abstract void getReceived(RTClientState state, StanzaTransmitter transmitter) throws OXException;
 
-            groupDispatcher.leave(stanza.getOnBehalfOf());
-           
-            GroupDispatcher.SERVICE_REF.get().getService(MessageDispatcher.class).send(signOffMessage);
-        } else {
-            groupDispatcher.leave(stanza.getFrom());
-        }
-    }
-    
-    private boolean isSynchronous(Stanza stanza) {
-        return stanza.getFrom().getProtocol().equals("call");
-    }
+    /**
+     * Called when a Ping is received from the client. If the ping asks for a commit, a Pong message is generated, enqueued and the buffer is emptied, otherwise only the states
+     * timestamp is touched.
+     * @throws OXException 
+     */
+    public abstract void ping(ID from, boolean commit, RTClientState state, StanzaTransmitter transmitter) throws OXException;
+
+    /**
+     * A 'received' message was received from the client
+     */
+    public abstract void acknowledgementReceived(long seq, RTClientState state);
+
+    /**
+     * Enqueus a stanza and empties the buffer
+     * @throws OXException 
+     */
+    public abstract void send(Stanza stanza, RTClientState state, StanzaTransmitter transmitter) throws OXException;
+
+    /**
+     * A message was received from the client
+     * @param newState 
+     * @throws OXException 
+     */
+    public abstract void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean newState, StanzaTransmitter transmitter) throws OXException;
+
+    /**
+     * A message was received from the client. Instead of sending acknlowledgements, they will be collected in the passed acknowledgements list.
+     */
+    public abstract void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean b, StanzaTransmitter transmitter, List<Long> acknowledgements) throws OXException;
+
+    /**
+     * Empties the buffer, if there are messages to be sent
+     * @throws OXException 
+     */
+    public abstract void emptyBuffer(RTClientState state, StanzaTransmitter transmitter) throws OXException;
+
+    public abstract void handleOXException(OXException e);
+
+    public abstract void handleException(Exception e);
+
 
 }

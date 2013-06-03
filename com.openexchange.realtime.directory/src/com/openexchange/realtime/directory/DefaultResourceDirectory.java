@@ -126,7 +126,7 @@ public abstract class DefaultResourceDirectory implements ResourceDirectory {
     }
 
     protected void notifyAdded(ID id, Resource addedResource) {
-        id.trigger("add", this);
+        id.trigger(Events.ADD, this);
         for (ChangeListener listener : listeners) {
             listener.added(id, addedResource);
         }
@@ -137,7 +137,7 @@ public abstract class DefaultResourceDirectory implements ResourceDirectory {
         event.put("updated", updatedResource);
         event.put("previous", previousResource);
         
-        id.trigger("update", this, event);
+        id.trigger(Events.UPDATE, this, event);
 
         for (ChangeListener listener : listeners) {
             listener.updated(id, updatedResource, previousResource);
@@ -148,7 +148,7 @@ public abstract class DefaultResourceDirectory implements ResourceDirectory {
         for (ChangeListener listener : listeners) {
             for (Entry<ID, Resource> entry : removedResources.entrySet()) {
                 if (triggerDispose) {
-                    entry.getKey().trigger("dispose", this);
+                    entry.getKey().trigger(ID.Events.DISPOSE, this);
                 }
                 listener.removed(entry.getKey(), entry.getValue());
             }
