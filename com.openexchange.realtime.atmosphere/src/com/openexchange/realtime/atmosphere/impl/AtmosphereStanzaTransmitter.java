@@ -79,6 +79,13 @@ public class AtmosphereStanzaTransmitter implements StanzaTransmitter {
     private StateManager stateManager;
     private ID id;
     
+    /**
+     * Initializes a new {@link AtmosphereStanzaTransmitter}.
+     * 
+     * @param resource {@link AtmosphereResource} used for actually transmitting Stanzas to a client
+     * @param id {@link ID} of the connected client
+     * @param stateManager statemanager that keeps track of the client <-> resource mapping
+     */
     public AtmosphereStanzaTransmitter(AtmosphereResource resource, ID id, StateManager stateManager) {
         super();
         this.resource = resource;
@@ -93,11 +100,12 @@ public class AtmosphereStanzaTransmitter implements StanzaTransmitter {
         }
         try {
             lock.lock();
-            trace(stanzas, "Trying to send as part of a batch of " +stanzas.size() + " stanzas");
+            trace(stanzas, "Trying to send as part of a batch of " + stanzas.size() + " stanzas");
             if (!canSend || resource.isCancelled() || resource.isResumed() || stanzas.isEmpty()) {
                 trace(stanzas, "Stale AtmosphereStanzaTransmitter, enqueue again");
                 return false;
             }
+            boolean didSend = false;
             JSONArray array = new JSONArray();
             StanzaWriter stanzaWriter = new StanzaWriter();
             for (Stanza stanza : stanzas) {
@@ -108,16 +116,27 @@ public class AtmosphereStanzaTransmitter implements StanzaTransmitter {
             trace(stanzas, "Writing to stream");
             resource.getResponse().write(array.toString());
             switch (resource.transport()) {
-            case LONG_POLLING: 
+            case LONG_POLLING:
                 if (resource.isSuspended()) {
                     trace(stanzas, "Delivering to client");
-                    resource.resume(); 
+                    resource.resume();
                 }
                 canSend = false;
+                didSend = true;
                 stateManager.forgetTransmitter(id, this);
+                break;
+            case WEBSOCKET:
+            default:
+                didSend = false;
+                LOG.warn("Unable to send via: "+resource.transport());
+                break;
             }
-            trace(stanzas, "Done sending");
-            return true;
+            if (didSend) {
+                trace(stanzas, "Done sending");
+            } else {
+                trace(stanzas, "Couldn't send");
+            }
+            return didSend;
         } catch (Throwable t) {
             return false;
         } finally {
@@ -126,9 +145,11 @@ public class AtmosphereStanzaTransmitter implements StanzaTransmitter {
     }
 
     private void trace(List<Stanza> stanzas, String string) {
-        LOG.debug(string);
-        for (Stanza stanza : stanzas) {
-            stanza.trace(string);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(string);
+            for (Stanza stanza : stanzas) {
+                stanza.trace(string);
+            }
         }
     }
 
