@@ -65,7 +65,7 @@ public class DelegateFileHolder implements IFileHolder {
     private final IFileHolder fileHolder;
     private InputStream stream;
     private InputStreamClosure streamProvider;
-    private long length;
+    private Long length;
     private int repetitive = -1;
 
     /**
@@ -74,7 +74,7 @@ public class DelegateFileHolder implements IFileHolder {
     public DelegateFileHolder(final IFileHolder fileHolder) {
         super();
         this.fileHolder = fileHolder;
-        length = -1L;
+        length = null;
     }
 
     @Override
@@ -117,7 +117,7 @@ public class DelegateFileHolder implements IFileHolder {
      */
     public DelegateFileHolder setStream(final InputStream stream, final long length) {
         this.stream = stream;
-        this.length = length;
+        this.length = Long.valueOf(length);
         repetitive = 0;
         return this;
     }
@@ -131,16 +131,27 @@ public class DelegateFileHolder implements IFileHolder {
      */
     public DelegateFileHolder setStream(final IFileHolder.InputStreamClosure streamProvider, final long length) {
         this.streamProvider = streamProvider;
-        this.length = length;
+        this.length = Long.valueOf(length);
         repetitive = 1;
+        return this;
+    }
+
+    /**
+     * Sets the length
+     *
+     * @param length The length to set
+     * @return This file holder with length applied
+     */
+    public DelegateFileHolder setLength(final long length) {
+        this.length = Long.valueOf(length);
         return this;
     }
 
     @Override
     public long getLength() {
-        final long length = this.length;
-        if (length >= 0) {
-            return length;
+        final Long length = this.length;
+        if (length != null) {
+            return length.longValue();
         }
         return fileHolder.getLength();
     }
