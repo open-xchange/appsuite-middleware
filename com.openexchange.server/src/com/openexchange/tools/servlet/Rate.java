@@ -66,6 +66,7 @@ public class Rate {
     private final int numberCalls;
     private final long timeInMillis;
     private final Deque<Long> callHistory;
+    private boolean deprecated;
 
     /**
      * Initializes a new {@link Rate}.
@@ -76,20 +77,17 @@ public class Rate {
      */
     public Rate(final int numberCalls, final int timeLength, final TimeUnit timeUnit) {
         super();
+        deprecated = false;
         callHistory = new LinkedList<Long>();
         this.numberCalls = numberCalls;
         this.timeInMillis = timeUnit.toMillis(timeLength);
     }
 
     private void cleanOld(final long now) {
-        final Iterator<Long> i = callHistory.iterator();
         final long threshold = now - timeInMillis;
-        while (i.hasNext()) {
-            if (i.next().longValue() <= threshold) {
-                i.remove();
-            } else {
-                break;
-            }
+        Long first;
+        while ((first = callHistory.peekFirst()) != null && first.longValue() <= threshold) {
+            callHistory.pollFirst();
         }
     }
 
@@ -111,7 +109,7 @@ public class Rate {
             count++;
             firstPeriodCall = call;
         }
-        return count < numberCalls ? firstPeriodCall + 1 : firstPeriodCall + timeInMillis + 1;
+        return count < numberCalls ? (firstPeriodCall + 1) : (firstPeriodCall + timeInMillis + 1);
     }
 
     /**
@@ -121,17 +119,47 @@ public class Rate {
      */
     public long lastAccessTime() {
         synchronized (callHistory) {
-            return callHistory.peekLast().longValue();
+            final Long last = callHistory.peekLast();
+            return null == last ? Long.MIN_VALUE : last.longValue();
         }
     }
 
     /**
-     * Checks if this rate is elapsed; meaning there is no slot occupied anymore because time is elapsed.
+     * Checks if this rate is deprecated
+     *
+     * @return <code>true</code> if deprecated; otherwise <code>false</code>
+     * @see #markDeprecatedIfElapsed(long)
+     */
+    public boolean isDeprecated() {
+        synchronized (callHistory) {
+            return deprecated;
+        }
+    }
+
+    /**
+     * Marks this rate as deprecated if elapsed in comparison to given threshold.
+     *
+     * @param threshold The threshold
+     * @return <code>true</code> if elapsed (and marked as deprecated); otherwise <code>false</code>
+     */
+    public boolean markDeprecatedIfElapsed(final long threshold) {
+        synchronized (callHistory) {
+            final Long last = callHistory.peekLast();
+            if (null != last && last.longValue() > threshold) {
+                return false;
+            }
+            deprecated = true;
+            return true;
+        }
+    }
+
+    /**
+     * Checks if this rate is empty; meaning there is no slot occupied anymore because time is elapsed.
      *
      * @param now The current time stamp
-     * @return <code>true</code> if elapsed; otherwise <code>false</code>
+     * @return <code>true</code> if empty; otherwise <code>false</code>
      */
-    public boolean elapsed(final long now) {
+    public boolean isEmpty(final long now) {
         synchronized (callHistory) {
             cleanOld(now);
             return callHistory.isEmpty();
@@ -142,13 +170,17 @@ public class Rate {
      * Consumes one slot from this rate.
      *
      * @param now The current time stamp
-     * @return <code>true</code> if rate limit is not exceeded, yet; otherwise <code>false</code> if exceeded
+     * @return <code>1</code> if successfully consumed, <code>0</code> if all available slots are occupied, or <code>-1</code> if marked as
+     *         deprecated
      */
-    public boolean consume(final long now) {
+    public int consume(final long now) {
         synchronized (callHistory) {
+            if (deprecated) {
+                return -1;
+            }
             final long callTime = callTime(now);
             callHistory.offerLast(Long.valueOf(callTime));
-            return ((callTime - now) <= 0);
+            return ((callTime - now) <= 0) ? 1 : 0;
         }
     }
 

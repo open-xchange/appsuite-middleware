@@ -53,8 +53,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -65,11 +68,14 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.Weighers;
+import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
+import com.javacodegeeks.concurrent.LRUPolicy;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.Parameterizable;
+import com.openexchange.java.ConcurrentList;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -83,11 +89,126 @@ import com.openexchange.tools.stream.CountingInputStream;
  */
 public final class CountingHttpServletRequest implements HttpServletRequest, Parameterizable {
 
+    private static interface KeyPartProvider {
+
+        String getValue(HttpServletRequest servletRequest);
+    }
+
+    private static final KeyPartProvider HTTP_SESSION_KEY_PART_PROVIDER = new KeyPartProvider() {
+
+        @Override
+        public String getValue(HttpServletRequest servletRequest) {
+            final Cookie[] cookies = servletRequest.getCookies();
+            if (null == cookies) {
+                return null;
+            }
+            for (final Cookie cookie : cookies) {
+                if ("jsessionid".equals(toLowerCase(cookie.getName()))) {
+                    return cookie.getValue();
+                }
+            }
+            return null;
+        }
+    };
+
+    private static final class CookieKeyPartProvider implements KeyPartProvider {
+
+        private final String cookieName;
+
+        CookieKeyPartProvider(String cookieName) {
+            super();
+            this.cookieName = toLowerCase(cookieName);
+        }
+
+        @Override
+        public String getValue(final HttpServletRequest servletRequest) {
+            final Cookie[] cookies = servletRequest.getCookies();
+            if (null == cookies) {
+                return null;
+            }
+            for (final Cookie cookie : cookies) {
+                if (cookieName.equals(toLowerCase(cookie.getName()))) {
+                    return cookie.getValue();
+                }
+            }
+            return null;
+        }
+
+    }
+
+    private static final class HeaderKeyPartProvider implements KeyPartProvider {
+
+        private final String headerName;
+
+        HeaderKeyPartProvider(String headerName) {
+            super();
+            this.headerName = headerName;
+        }
+
+        @Override
+        public String getValue(final HttpServletRequest servletRequest) {
+            return servletRequest.getHeader(headerName);
+        }
+
+    }
+
+    private static final class ParameterKeyPartProvider implements KeyPartProvider {
+
+        private final String paramName;
+
+        ParameterKeyPartProvider(String paramName) {
+            super();
+            this.paramName = paramName;
+        }
+
+        @Override
+        public String getValue(final HttpServletRequest servletRequest) {
+            return servletRequest.getParameter(paramName);
+        }
+
+    }
+
+    private static volatile List<KeyPartProvider> keyPartProviders;
+
+    private static List<KeyPartProvider> keyPartProviders() {
+        List<KeyPartProvider> tmp = keyPartProviders;
+        if (null == tmp) {
+            synchronized (CountingHttpServletRequest.class) {
+                tmp = keyPartProviders;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final String sProviders = service.getProperty("com.openexchange.servlet.maxRateKeyPartProviders");
+                    if (isEmpty(sProviders)) {
+                        tmp = new ConcurrentList<KeyPartProvider>();
+                    } else {
+                        final List<KeyPartProvider> list = new LinkedList<KeyPartProvider>();
+                        for (final String sProvider : Strings.splitByComma(sProviders)) {
+                            final String s = toLowerCase(sProvider);
+                            if ("http-session".equals(s)) {
+                                list.add(HTTP_SESSION_KEY_PART_PROVIDER);
+                            } else if (s.startsWith("cookie-")) {
+                                list.add(new HeaderKeyPartProvider(s.substring(7)));
+                            } else if (s.startsWith("header-")) {
+                                list.add(new HeaderKeyPartProvider(s.substring(7)));
+                            } else if (s.startsWith("parameter-")) {
+                                list.add(new ParameterKeyPartProvider(s.substring(10)));
+                            }
+                        }
+                        tmp = new ConcurrentList<KeyPartProvider>(list);
+                    }
+                    keyPartProviders = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
     private static final class Key {
 
         final int remotePort;
         final String remoteAddr;
         final String userAgent;
+        final List<String> parts;
         private final int hash;
 
         Key(final HttpServletRequest servletRequest) {
@@ -96,11 +217,26 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
             this.remoteAddr = servletRequest.getRemoteAddr();
             this.userAgent = servletRequest.getHeader("User-Agent");
 
+            final List<String> parts;
+            {
+                final List<KeyPartProvider> keyPartProviders = keyPartProviders();
+                if (null == keyPartProviders || keyPartProviders.isEmpty()) {
+                    parts = null;
+                } else {
+                    parts = new ArrayList<String>(keyPartProviders.size());
+                    for (final KeyPartProvider keyPartProvider : keyPartProviders) {
+                        parts.add(keyPartProvider.getValue(servletRequest));
+                    }
+                }
+            }
+            this.parts = parts;
+
             final int prime = 31;
             int result = 1;
             result = prime * result + ((remoteAddr == null) ? 0 : remoteAddr.hashCode());
             result = prime * result + remotePort;
             result = prime * result + ((userAgent == null) ? 0 : userAgent.hashCode());
+            result = prime * result + ((parts == null) ? 0 : parts.hashCode());
             this.hash = result;
         }
 
@@ -135,6 +271,13 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
             } else if (!userAgent.equals(other.userAgent)) {
                 return false;
             }
+            if (parts == null) {
+                if (other.parts != null) {
+                    return false;
+                }
+            } else if (!parts.equals(other.parts)) {
+                return false;
+            }
             return true;
         }
 
@@ -142,6 +285,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
 
     private static volatile ScheduledTimerTask timerTask;
     private static volatile ConcurrentMap<Key, Rate> bucketMap;
+
     private static ConcurrentMap<Key, Rate> bucketMap() {
         ConcurrentMap<Key, Rate> tmp = bucketMap;
         if (null == tmp) {
@@ -150,7 +294,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                     final int maxCapacity = null == service ? 250000 : service.getIntProperty("com.openexchange.servlet.maxActiveSessions", 250000);
-                    final ConcurrentMap<Key, Rate> tmp2 = new ConcurrentLinkedHashMap.Builder<Key, Rate>().maximumWeightedCapacity(maxCapacity).weigher(Weighers.entrySingleton()).build();
+                    final ConcurrentLinkedHashMap<Key, Rate> tmp2 = new ConcurrentLinkedHashMap<CountingHttpServletRequest.Key, Rate>(256, 0.75F, 16, maxCapacity, new LRUPolicy());
                     tmp = tmp2;
                     bucketMap = tmp;
 
@@ -161,12 +305,14 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
                         public void run() {
                             try {
                                 final long mark = System.currentTimeMillis() - 600000; // Older than 10 minutes
+                                // Iterator obeys LRU policy therefore stop after first non-elapsed entry
                                 final Iterator<Entry<Key, Rate>> iterator = tmp2.entrySet().iterator();
                                 while (iterator.hasNext()) {
                                     final Entry<Key, Rate> entry = iterator.next();
-                                    if (entry.getValue().lastAccessTime() < mark) {
-                                        iterator.remove();
+                                    if (!entry.getValue().markDeprecatedIfElapsed(mark)) {
+                                        break;
                                     }
+                                    iterator.remove();
                                 }
                             } catch (final Exception e) {
                                 // Ignore
@@ -181,6 +327,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
     }
 
     private static volatile Integer maxRatePerMinute;
+
     private static int maxRatePerMinute() {
         Integer tmp = maxRatePerMinute;
         if (null == tmp) {
@@ -214,16 +361,25 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
         }
         final ConcurrentMap<Key, Rate> bucketMap = bucketMap();
         final Key key = new Key(servletRequest);
-        Rate rate = bucketMap.get(key);
-        if (null == rate) {
-            final Rate newLeakyBucket = new Rate(maxRatePerMinute, 60, TimeUnit.SECONDS);
-            rate = bucketMap.putIfAbsent(key, newLeakyBucket);
+        while (true) {
+            Rate rate = bucketMap.get(key);
             if (null == rate) {
-                rate = newLeakyBucket;
+                final Rate newRate = new Rate(maxRatePerMinute, 60, TimeUnit.SECONDS);
+                rate = bucketMap.putIfAbsent(key, newRate);
+                if (null == rate) {
+                    rate = newRate;
+                }
             }
+            // Acquire or fails to do so
+            final int res = rate.consume(System.currentTimeMillis());
+            if (res < 0) {
+                // Deprecated
+                bucketMap.remove(key, rate);
+            } else {
+                return (res > 0);
+            }
+            // Otherwise retry
         }
-        // Acquire or fails to do so
-        return rate.consume(System.currentTimeMillis());
     }
 
     // ---------------------------------------------------------------------------------- //
@@ -547,6 +703,33 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
     @Override
     public boolean isRequestedSessionIdFromUrl() {
         return servletRequest.isRequestedSessionIdFromUrl();
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    /** ASCII-wise to lower-case */
+    static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }
