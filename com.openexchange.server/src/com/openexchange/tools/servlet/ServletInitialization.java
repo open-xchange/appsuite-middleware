@@ -74,7 +74,7 @@ public final class ServletInitialization implements Initialization {
 
     @Override
     public void stop() throws OXException {
-        CountingHttpServletRequest.stop();
+        RateLimiter.stop();
     }
 
 }
