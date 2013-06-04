@@ -73,6 +73,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.servlet.Rate.Result;
 
 /**
  * {@link RateLimiter}
@@ -202,6 +203,8 @@ public final class RateLimiter {
         return tmp;
     }
 
+    // ----------------------------------------------------------------------------------- //
+
     private static final class Key {
 
         final int remotePort;
@@ -279,8 +282,9 @@ public final class RateLimiter {
             }
             return true;
         }
+    } // End of class Key
 
-    }
+    // ----------------------------------------------------------------------------------- //
 
     private static volatile ScheduledTimerTask timerTask;
     private static volatile ConcurrentMap<Key, Rate> bucketMap;
@@ -298,15 +302,15 @@ public final class RateLimiter {
                     bucketMap = tmp;
 
                     final TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
+                    final int delay = 300000; // Delay of 5 minutes
                     final Runnable r = new Runnable() {
 
                         @Override
                         public void run() {
                             try {
-                                final long mark = System.currentTimeMillis() - 600000; // Older than 10 minutes
+                                final long mark = System.currentTimeMillis() - (delay << 1); // Older than doubled delay -- 10 minutes
                                 // Iterator obeys LRU policy therefore stop after first non-elapsed entry
-                                final Iterator<Entry<Key, Rate>> iterator = tmp2.entrySet().iterator();
-                                while (iterator.hasNext()) {
+                                for (final Iterator<Entry<Key, Rate>> iterator = tmp2.entrySet().iterator(); iterator.hasNext();) {
                                     final Entry<Key, Rate> entry = iterator.next();
                                     if (!entry.getValue().markDeprecatedIfElapsed(mark)) {
                                         break;
@@ -318,7 +322,7 @@ public final class RateLimiter {
                             }
                         }
                     };
-                    timerTask = timerService.scheduleWithFixedDelay(r, 300000, 300000);
+                    timerTask = timerService.scheduleWithFixedDelay(r, delay, delay);
                 }
             }
         }
@@ -342,6 +346,8 @@ public final class RateLimiter {
         return tmp.intValue();
     }
 
+    // ----------------------------------------------------------------------------------- //
+
     /**
      * Stops scheduled time task.
      */
@@ -352,6 +358,8 @@ public final class RateLimiter {
             timerTask = null;
         }
     }
+
+    // ----------------------------------------------------------------------------------- //
 
     private static final Set<String> LOCALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("localhost", "127.0.0.1", "::1")));
     private static final String PARAMETER_SESSION = AJAXServlet.PARAMETER_SESSION;
@@ -385,12 +393,12 @@ public final class RateLimiter {
                 }
             }
             // Acquire or fails to do so
-            final int res = rate.consume(System.currentTimeMillis());
-            if (res < 0) {
+            final Rate.Result res = rate.consume(System.currentTimeMillis());
+            if (Result.DEPRECATED == res) {
                 // Deprecated
                 bucketMap.remove(key, rate);
             } else {
-                return (res > 0);
+                return (Result.SUCCESS == res);
             }
             // Otherwise retry
         }

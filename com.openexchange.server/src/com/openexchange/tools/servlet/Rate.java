@@ -63,6 +63,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class Rate {
 
+    /**
+     * The rate result.
+     */
+    public static enum Result {
+        SUCCESS, FAILED, DEPRECATED;
+    }
+
     private final int numberCalls;
     private final long timeInMillis;
     private final Deque<Long> callHistory;
@@ -170,17 +177,16 @@ public class Rate {
      * Consumes one slot from this rate.
      *
      * @param now The current time stamp
-     * @return <code>1</code> if successfully consumed, <code>0</code> if all available slots are occupied, or <code>-1</code> if marked as
-     *         deprecated
+     * @return The rate result
      */
-    public int consume(final long now) {
+    public Result consume(final long now) {
         synchronized (callHistory) {
             if (deprecated) {
-                return -1;
+                return Result.DEPRECATED;
             }
             final long callTime = callTime(now);
             callHistory.offerLast(Long.valueOf(callTime));
-            return ((callTime - now) <= 0) ? 1 : 0;
+            return ((callTime - now) <= 0) ? Result.SUCCESS : Result.FAILED;
         }
     }
 
