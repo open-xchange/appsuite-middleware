@@ -186,7 +186,7 @@ public final class RateLimiter {
                             if ("http-session".equals(s)) {
                                 list.add(HTTP_SESSION_KEY_PART_PROVIDER);
                             } else if (s.startsWith("cookie-")) {
-                                list.add(new HeaderKeyPartProvider(s.substring(7)));
+                                list.add(new CookieKeyPartProvider(s.substring(7)));
                             } else if (s.startsWith("header-")) {
                                 list.add(new HeaderKeyPartProvider(s.substring(7)));
                             } else if (s.startsWith("parameter-")) {
