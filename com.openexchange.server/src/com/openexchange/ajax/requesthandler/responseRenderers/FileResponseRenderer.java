@@ -715,7 +715,8 @@ public class FileResponseRenderer implements ResponseRenderer {
             final boolean transformationNeeded = isTransformationNeeded(request, arr, delivery);
             file = arr[0];
             if (!transformationNeeded) {
-                return file;
+                // Go without length
+                return new DelegateFileHolder(file).setLength(-1L);
             }
         }
 
