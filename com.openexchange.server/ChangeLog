@@ -1,3 +1,7 @@
+* 2013-06-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26911: Turned into an abstract class
+
 * 2013-05-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 26815: Don't interrupt appender task if not finished
