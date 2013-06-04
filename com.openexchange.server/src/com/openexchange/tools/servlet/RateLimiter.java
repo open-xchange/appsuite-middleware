@@ -50,24 +50,29 @@
 package com.openexchange.tools.servlet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.javacodegeeks.concurrent.LRUPolicy;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
-
 
 /**
  * {@link RateLimiter}
@@ -91,7 +96,7 @@ public final class RateLimiter {
     private static final KeyPartProvider HTTP_SESSION_KEY_PART_PROVIDER = new KeyPartProvider() {
 
         @Override
-        public String getValue(HttpServletRequest servletRequest) {
+        public String getValue(final HttpServletRequest servletRequest) {
             final Cookie[] cookies = servletRequest.getCookies();
             if (null == cookies) {
                 return null;
@@ -109,7 +114,7 @@ public final class RateLimiter {
 
         private final String cookieName;
 
-        CookieKeyPartProvider(String cookieName) {
+        CookieKeyPartProvider(final String cookieName) {
             super();
             this.cookieName = toLowerCase(cookieName);
         }
@@ -134,7 +139,7 @@ public final class RateLimiter {
 
         private final String headerName;
 
-        HeaderKeyPartProvider(String headerName) {
+        HeaderKeyPartProvider(final String headerName) {
             super();
             this.headerName = headerName;
         }
@@ -150,7 +155,7 @@ public final class RateLimiter {
 
         private final String paramName;
 
-        ParameterKeyPartProvider(String paramName) {
+        ParameterKeyPartProvider(final String paramName) {
             super();
             this.paramName = paramName;
         }
@@ -329,7 +334,7 @@ public final class RateLimiter {
                 tmp = maxRatePerMinute;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = Integer.valueOf(null == service ? "300" : service.getProperty("com.openexchange.servlet.maxRatePerMinute", "300"));
+                    tmp = Integer.valueOf(null == service ? "120" : service.getProperty("com.openexchange.servlet.maxRatePerMinute", "120"));
                     maxRatePerMinute = tmp;
                 }
             }
@@ -348,6 +353,9 @@ public final class RateLimiter {
         }
     }
 
+    private static final Set<String> LOCALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("localhost", "127.0.0.1", "::1")));
+    private static final String PARAMETER_SESSION = AJAXServlet.PARAMETER_SESSION;
+
     /**
      * Checks given request if possibly rate limited.
      *
@@ -355,9 +363,15 @@ public final class RateLimiter {
      * @return <code>true</code> if not rate limited; otherwise <code>false</code> if rate limited
      */
     public static boolean checkRequest(final HttpServletRequest servletRequest) {
-        final int maxRatePerMinute = maxRatePerMinute();
+        int maxRatePerMinute = maxRatePerMinute();
         if (maxRatePerMinute <= 0) {
             return true;
+        }
+        if (LOCALS.contains(servletRequest.getServerName())) {
+            return true;
+        }
+        if (lenientCheckForClient(servletRequest)) {
+            maxRatePerMinute <<= 2;
         }
         final ConcurrentMap<Key, Rate> bucketMap = bucketMap();
         final Key key = new Key(servletRequest);
@@ -380,6 +394,21 @@ public final class RateLimiter {
             }
             // Otherwise retry
         }
+    }
+
+    private static boolean lenientCheckForClient(final HttpServletRequest servletRequest) {
+        final SessiondService service = SessiondService.SERVICE_REFERENCE.get();
+        if (null != service) {
+            final String sessionId = servletRequest.getParameter(PARAMETER_SESSION);
+            final Session session = null == sessionId ? null : service.getSession(sessionId);
+            if (null != session) {
+                final String client = toLowerCase(session.getClient());
+                if (client != null && (client.startsWith("usm-json") || client.startsWith("usm-eas"))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /** Check for an empty string */
