@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
 import org.json.JSONObject;
 import com.openexchange.ajax.contact.action.AdvancedSearchRequest;
 import com.openexchange.ajax.framework.CommonSearchResponse;
@@ -343,9 +344,106 @@ public class AdvancedSearchTest extends AbstractManagedContactTest{
 		assertEquals("Should only appear once", 1, occurences);
 	}
 
+	public void testQuestionmarkWildcardInTheBeginning () throws Exception {
+		ContactField field = ContactField.GIVEN_NAME;
+		ContactField folderField = ContactField.FOLDER_ID;
+
+		JSONObject filter = new JSONObject(
+				"{'filter' : [ 'and', " +
+					"['=' , {'field' : '"+field.getAjaxName()+"'} , '?ob'], " +
+					"['=' , {'field' : '"+folderField.getAjaxName()+"'}, "+folderID+"]" +
+				"]})");
+
+		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{Contact.GIVEN_NAME}, -1, null);
+		CommonSearchResponse response = getClient().execute(request);
+		assertFalse("Should work", response.hasError());
+
+		Object[][] resultTable = response.getArray();
+		assertNotNull("Should find a result", resultTable);
+		assertEquals("Should find one result", 1, resultTable.length);
+
+		int columnPos = response.getColumnPos(field.getNumber());
+		String actual = (String) resultTable[0][columnPos];
+
+		assertEquals("Bob", actual);
+	}
+
+	public void testQuestionmarkWildcardInTheEnd () throws Exception {
+		ContactField field = ContactField.GIVEN_NAME;
+		ContactField folderField = ContactField.FOLDER_ID;
+
+		JSONObject filter = new JSONObject(
+				"{'filter' : [ 'and', " +
+					"['=' , {'field' : '"+field.getAjaxName()+"'} , 'Bo?'], " +
+					"['=' , {'field' : '"+folderField.getAjaxName()+"'}, "+folderID+"]" +
+				"]})");
+
+		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{Contact.GIVEN_NAME}, -1, null);
+		CommonSearchResponse response = getClient().execute(request);
+		assertFalse("Should work", response.hasError());
+
+		Object[][] resultTable = response.getArray();
+		assertNotNull("Should find a result", resultTable);
+		assertEquals("Should find one result", 1, resultTable.length);
+
+		int columnPos = response.getColumnPos(field.getNumber());
+		String actual = (String) resultTable[0][columnPos];
+
+		assertEquals("Bob", actual);
+	}
+	
+
+	public void testAsteriskWildcardInTheBeginning () throws Exception {
+		ContactField field = ContactField.GIVEN_NAME;
+		ContactField folderField = ContactField.FOLDER_ID;
+		
+		JSONObject filter = new JSONObject(
+				"{'filter' : [ 'and', " +
+					"['=' , {'field' : '"+field.getAjaxName()+"'} , '*b'], " +
+					"['=' , {'field' : '"+folderField.getAjaxName()+"'}, "+folderID+"]" +
+				"]})");
+
+		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{Contact.GIVEN_NAME}, -1, null);
+		CommonSearchResponse response = getClient().execute(request);
+		assertFalse("Should work", response.hasError());
+
+		Object[][] resultTable = response.getArray();
+		assertNotNull("Should find a result", resultTable);
+		assertEquals("Should find one result", 1, resultTable.length);
+
+		int columnPos = response.getColumnPos(field.getNumber());
+		String actual = (String) resultTable[0][columnPos];
+
+		assertEquals("Bob", actual);
+	}
+
+	public void testAsteriskWildcardInTheEnd () throws Exception {
+		ContactField field = ContactField.GIVEN_NAME;
+		ContactField folderField = ContactField.FOLDER_ID;
+		
+		JSONObject filter = new JSONObject(
+				"{'filter' : [ 'and', " +
+					"['=' , {'field' : '"+field.getAjaxName()+"'} , 'B*'], " +
+					"['=' , {'field' : '"+folderField.getAjaxName()+"'}, "+folderID+"]" +
+				"]})");
+
+		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[]{Contact.GIVEN_NAME}, -1, null);
+		CommonSearchResponse response = getClient().execute(request);
+		assertFalse("Should work", response.hasError());
+
+		Object[][] resultTable = response.getArray();
+		assertNotNull("Should find a result", resultTable);
+		assertEquals("Should find one result", 1, resultTable.length);
+
+		int columnPos = response.getColumnPos(field.getNumber());
+		String actual = (String) resultTable[0][columnPos];
+
+		assertEquals("Bob", actual);
+	}
+	
+	
 	/* TODO:
 	 * wrong collation
-	 * sql inject
 	*/
 
 
