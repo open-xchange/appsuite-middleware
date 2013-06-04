@@ -468,7 +468,7 @@ public class DispatcherServlet extends SessionServlet {
         boolean first = true;
         ResponseRenderer candidate = null;
         for (final ResponseRenderer renderer : RESPONSE_RENDERERS) {
-            if (renderer.handles(requestData, result) && (first || highest <= renderer.getRanking())) {
+            if ((first || highest <= renderer.getRanking()) && renderer.handles(requestData, result)) {
                 first = false;
                 highest = renderer.getRanking();
                 candidate = renderer;
