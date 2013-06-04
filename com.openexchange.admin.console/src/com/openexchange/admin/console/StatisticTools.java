@@ -718,6 +718,9 @@ public class StatisticTools extends AbstractJMXTools {
         ObjectName domainType = new ObjectName(ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE + ",*");
         Set<ObjectInstance> mbeans = mbeanServerConnection.queryMBeans(domainType, null);
 
+        final StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE + ", hoursUptime=" + uptimeHours + "\n");
+
         for (ObjectInstance mbean : mbeans) {
             ObjectName objectName = mbean.getObjectName();
             MBeanInfo beanInfo = mbeanServerConnection.getMBeanInfo(objectName);
@@ -726,7 +729,7 @@ public class StatisticTools extends AbstractJMXTools {
                 Object attribute = mbeanServerConnection.getAttribute(objectName, attributeInfo.getName());
 
                 if (attribute != null) {
-                    final StringBuilder stringBuilder = new StringBuilder(objectName.getCanonicalName()).append(",").append(
+                    stringBuilder.append(objectName.getCanonicalName()).append(",").append(
                         attributeInfo.getName()).append(" = ");
 
                     if (attribute instanceof CompositeDataSupport) {
@@ -734,36 +737,34 @@ public class StatisticTools extends AbstractJMXTools {
                         stringBuilder.append("[startTime=").append(compositeDataSupport.get("startTime")).append(", endTime=").append(
                             compositeDataSupport.get("endTime")).append(", GcThreadCount=").append(
                                 compositeDataSupport.get("GcThreadCount")).append(", duration=").append(compositeDataSupport.get("duration")).append(
-                                    "]");
-                        compositeDataSupport.get("memoryUsageBeforeGc");
+                                    "]\n");
                     } else if (attribute instanceof String[]) {
                         final String[] stringArray = (String[]) attribute;
-                        stringBuilder.append(Arrays.toString(stringArray));
+                        stringBuilder.append(Arrays.toString(stringArray) + "\n");
                     } else if (attribute instanceof long[]) {
                         final long[] longArray = (long[]) attribute;
-                        stringBuilder.append(Arrays.toString(longArray));
+                        stringBuilder.append(Arrays.toString(longArray) + "\n");
                     } else {
                         if (attributeInfo.getName().equalsIgnoreCase("collectioncount") ||
                             attributeInfo.getName().equalsIgnoreCase("collectiontime")) {
                             if (attribute instanceof Long) {
                                 Long attributeValue = (Long)attribute;
                                 if (uptimeHours > 0) {
-                                    stringBuilder.append(attributeValue / uptimeHours);
+                                    stringBuilder.append((attributeValue / uptimeHours) + "\n");
                                 }
                                 else {
-                                    stringBuilder.append(0);
+                                    stringBuilder.append(0 + "\n");
                                 }
                             }
-                            // stringBuilder.append(attribute.
                         }
                         else {
-                            stringBuilder.append(attribute.toString());
+                            stringBuilder.append(attribute.toString() + "\n");
                         }
                     }
-                    System.out.println(stringBuilder.toString());
                 }
             }
         }
+        System.out.println(stringBuilder.toString());
     }
 
     private static String extractTextInBrackets(String value, int startIdx) {
