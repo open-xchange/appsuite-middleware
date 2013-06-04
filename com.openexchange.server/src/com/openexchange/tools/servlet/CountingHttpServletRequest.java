@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -73,7 +74,6 @@ import com.javacodegeeks.concurrent.LRUPolicy;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.Parameterizable;
-import com.openexchange.java.ConcurrentList;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -170,7 +170,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
 
     private static volatile List<KeyPartProvider> keyPartProviders;
 
-    private static List<KeyPartProvider> keyPartProviders() {
+    static List<KeyPartProvider> keyPartProviders() {
         List<KeyPartProvider> tmp = keyPartProviders;
         if (null == tmp) {
             synchronized (CountingHttpServletRequest.class) {
@@ -179,7 +179,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                     final String sProviders = service.getProperty("com.openexchange.servlet.maxRateKeyPartProviders");
                     if (isEmpty(sProviders)) {
-                        tmp = new ConcurrentList<KeyPartProvider>();
+                        tmp = Collections.emptyList();
                     } else {
                         final List<KeyPartProvider> list = new LinkedList<KeyPartProvider>();
                         for (final String sProvider : Strings.splitByComma(sProviders)) {
@@ -194,7 +194,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
                                 list.add(new ParameterKeyPartProvider(s.substring(10)));
                             }
                         }
-                        tmp = new ConcurrentList<KeyPartProvider>(list);
+                        tmp = Collections.unmodifiableList(new ArrayList<KeyPartProvider>(list));
                     }
                     keyPartProviders = tmp;
                 }
