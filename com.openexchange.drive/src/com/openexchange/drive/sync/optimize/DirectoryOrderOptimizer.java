@@ -91,7 +91,8 @@ public class DirectoryOrderOptimizer extends DirectoryActionOptimizer {
                 String oldPath = actions.get(i).getVersion().getPath();
                 String newPath = actions.get(i).getNewVersion().getPath();
                 for (int j = i + 1; j < actions.size(); j++) {
-                    if (Action.EDIT.equals(actions.get(j).getAction()) && actions.get(j).getVersion().getPath().startsWith(oldPath)) {
+                    if (Action.EDIT.equals(actions.get(j).getAction()) &&
+                        actions.get(j).getVersion().getPath().startsWith(oldPath +'/')) {
                         String newOldPath = newPath + actions.get(j).getVersion().getPath().substring(oldPath.length());
                         DirectoryVersion modifiedOldVersion = new SimpleDirectoryVersion(newOldPath, actions.get(j).getVersion().getChecksum());
                         actions.set(j, new EditDirectoryAction(modifiedOldVersion, actions.get(j).getNewVersion()));
