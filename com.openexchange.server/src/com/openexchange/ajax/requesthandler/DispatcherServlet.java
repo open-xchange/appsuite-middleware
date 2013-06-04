@@ -367,7 +367,7 @@ public class DispatcherServlet extends SessionServlet {
             }
             if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
                 final Object[] logArgs = e.getLogArgs();
-                final Object statusMsg = logArgs[1];
+                final Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
                 httpResponse.sendError(((Integer) logArgs[0]).intValue(), null == statusMsg ? null : statusMsg.toString());
                 return;
             }
