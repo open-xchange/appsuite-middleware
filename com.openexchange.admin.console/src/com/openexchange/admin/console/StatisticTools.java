@@ -51,6 +51,7 @@ package com.openexchange.admin.console;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
@@ -371,7 +372,7 @@ public class StatisticTools extends AbstractJMXTools {
         if (0 == count) {
             System.err.println(new StringBuilder("No option selected (").append(OPT_STATS_LONG).append(", ").append(OPT_RUNTIME_STATS_LONG).append(
                 ", ").append(OPT_OS_STATS_LONG).append(", ").append(OPT_THREADING_STATS_LONG).append(", ").append(OPT_ALL_STATS_LONG).append(
-                ", sessionstats)"));
+                    ", sessionstats)"));
             parser.printUsage();
         } else if (count > 1) {
             System.err.println("More than one of the stat options given. Using the first one only");
@@ -710,6 +711,10 @@ public class StatisticTools extends AbstractJMXTools {
      * @throws AttributeNotFoundException - thrown while trying to get the attribute from {@link MBeanServerConnection}
      */
     private void showGcData(MBeanServerConnection mbeanServerConnection) throws MalformedObjectNameException, IOException, InstanceNotFoundException, IntrospectionException, AttributeNotFoundException, MBeanException, ReflectionException {
+        RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
+        long uptime = runtimeMxBean.getUptime();
+        int uptimeHours = (int) (uptime  / (1000*60*60));
+
         ObjectName domainType = new ObjectName(ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE + ",*");
         Set<ObjectInstance> mbeans = mbeanServerConnection.queryMBeans(domainType, null);
 
@@ -728,8 +733,8 @@ public class StatisticTools extends AbstractJMXTools {
                         final CompositeDataSupport compositeDataSupport = (CompositeDataSupport) attribute;
                         stringBuilder.append("[startTime=").append(compositeDataSupport.get("startTime")).append(", endTime=").append(
                             compositeDataSupport.get("endTime")).append(", GcThreadCount=").append(
-                            compositeDataSupport.get("GcThreadCount")).append(", duration=").append(compositeDataSupport.get("duration")).append(
-                            "]");
+                                compositeDataSupport.get("GcThreadCount")).append(", duration=").append(compositeDataSupport.get("duration")).append(
+                                    "]");
                         compositeDataSupport.get("memoryUsageBeforeGc");
                     } else if (attribute instanceof String[]) {
                         final String[] stringArray = (String[]) attribute;
@@ -738,7 +743,22 @@ public class StatisticTools extends AbstractJMXTools {
                         final long[] longArray = (long[]) attribute;
                         stringBuilder.append(Arrays.toString(longArray));
                     } else {
-                        stringBuilder.append(attribute.toString());
+                        if (attributeInfo.getName().equalsIgnoreCase("collectioncount") ||
+                            attributeInfo.getName().equalsIgnoreCase("collectiontime")) {
+                            if (attribute instanceof Long) {
+                                Long attributeValue = (Long)attribute;
+                                if (uptimeHours > 0) {
+                                    stringBuilder.append(attributeValue / uptimeHours);
+                                }
+                                else {
+                                    stringBuilder.append(0);
+                                }
+                            }
+                            // stringBuilder.append(attribute.
+                        }
+                        else {
+                            stringBuilder.append(attribute.toString());
+                        }
                     }
                     System.out.println(stringBuilder.toString());
                 }
@@ -785,17 +805,17 @@ public class StatisticTools extends AbstractJMXTools {
     private enum GrizzlyMBean {
         HTTPCODECFILTER("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=HttpCodecFilter,name=HttpCodecFilter", new String[] {
             "total-bytes-written", "total-bytes-received", "http-codec-error-count" }),
-        HTTPSERVERFILTER("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=HttpServerFilter,name=HttpServerFilter", new String[] {
-            "current-suspended-request-count", "requests-cancelled-count", "requests-completed-count", "requests-received-count",
+            HTTPSERVERFILTER("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=HttpServerFilter,name=HttpServerFilter", new String[] {
+                "current-suspended-request-count", "requests-cancelled-count", "requests-completed-count", "requests-received-count",
             "requests-timed-out-count" }),
-        KEEPALIVE("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=KeepAlive,name=Keep-Alive", new String[] {
-            "hits-count", "idle-timeout-seconds", "live-connections-count", "max-requests-count", "refuses-count", "timeouts-count" }),
-        NETWORKLISTENER("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer],type=NetworkListener,name=NetworkListener[http-listener]", new String[] {
-            "host", "port", "secure", "started", "paused", "chunking-enabled", "max-http-header-size", "max-pending-bytes" }),
-        TCPNIOTRANSPORT("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=TCPNIOTransport,name=Transport", new String[] {
-            "bound-addresses", "bytes-read", "bytes-written", "client-connect-timeout-millis", "client-socket-so-timeout", "last-error",
-            "open-connections-count", "total-connections-count", "read-buffer-size", "selector-threads-count", "thread-pool-type",
-            "server-socket-so-timeout", "socket-keep-alive", "socket-linger", "state", "write-buffer-size" });
+            KEEPALIVE("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=KeepAlive,name=Keep-Alive", new String[] {
+                "hits-count", "idle-timeout-seconds", "live-connections-count", "max-requests-count", "refuses-count", "timeouts-count" }),
+                NETWORKLISTENER("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer],type=NetworkListener,name=NetworkListener[http-listener]", new String[] {
+                    "host", "port", "secure", "started", "paused", "chunking-enabled", "max-http-header-size", "max-pending-bytes" }),
+                    TCPNIOTRANSPORT("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=TCPNIOTransport,name=Transport", new String[] {
+                        "bound-addresses", "bytes-read", "bytes-written", "client-connect-timeout-millis", "client-socket-so-timeout", "last-error",
+                        "open-connections-count", "total-connections-count", "read-buffer-size", "selector-threads-count", "thread-pool-type",
+                        "server-socket-so-timeout", "socket-keep-alive", "socket-linger", "state", "write-buffer-size" });
 
         private final String objectName;
 
