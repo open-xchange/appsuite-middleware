@@ -19,10 +19,10 @@ if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 
 if ( $ARGV[0] and $ARGV[0] eq "config")
 {
-	print "graph_title Last JVM GC duration\n";
+	print "graph_title JVM GC duration\n";
 	print "graph_args --base 1024 -l 0\n";
 	print "graph_category Open Xchange\n";
-	print "graph_vlabel Last GC Duration\n";
+	print "graph_vlabel GC Duration\n";
 	print "a.label ConcurrentMarkSweep\n";
 	print "a.draw LINE1\n";
 	print "b.label ParNew\n";

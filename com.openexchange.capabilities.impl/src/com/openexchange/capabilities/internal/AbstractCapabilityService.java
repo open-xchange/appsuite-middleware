@@ -79,14 +79,14 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link CapabilityServiceImpl}
+ * {@link AbstractCapabilityService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CapabilityServiceImpl implements CapabilityService {
+public abstract class AbstractCapabilityService implements CapabilityService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CapabilityServiceImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractCapabilityService.class);
 
     private static final Object PRESENT = new Object();
 
@@ -100,9 +100,9 @@ public class CapabilityServiceImpl implements CapabilityService {
     private volatile Boolean autologin;
 
     /**
-     * Initializes a new {@link CapabilityServiceImpl}.
+     * Initializes a new {@link AbstractCapabilityService}.
      */
-    public CapabilityServiceImpl(final ServiceLookup services) {
+    public AbstractCapabilityService(final ServiceLookup services) {
         super();
         this.services = services;
         capabilities = new ConcurrentHashMap<String, Capability>();
@@ -333,9 +333,7 @@ public class CapabilityServiceImpl implements CapabilityService {
      *
      * @return The checkers
      */
-    protected Map<String, List<CapabilityChecker>> getCheckers() {
-        return Collections.emptyMap();
-    }
+    protected abstract Map<String, List<CapabilityChecker>> getCheckers();
 
     private Set<String> getContextCaps(final int contextId) throws OXException {
         if (contextId <= 0) {
