@@ -147,7 +147,7 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
         boolean retval = false;
         try {
             rs = metaData.getProcedures(null, null, procedure);
-//            retval = (rs.next() && rs.getString("TABLE_NAME").equalsIgnoreCase(table));
+            retval = (rs.next() && rs.getString("PROCEDURE_NAME").equalsIgnoreCase(procedure));
         } finally {
             closeSQLStuff(rs);
         }

@@ -219,157 +219,119 @@ public class CreateSequencesTables extends AbstractCreateTableImpl {
        + "PRIMARY KEY (cid)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     
-    private static final String createGetUniqueIdProcedure = "DELIMITER //"
-       + "CREATE PROCEDURE get_unique_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA"
-       + "BEGIN"
+    private static final String createGetUniqueIdProcedure = "CREATE PROCEDURE get_unique_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA "
+       + "BEGIN "
          + "UPDATE sequence_id SET id=id+1 WHERE cid=context;"
          + "SELECT id FROM sequence_id WHERE cid=context;"
-       + "END //"
-       + "DELIMITER ;";
+       + "END ;";
     
-    private static final String createGetResourceIdProcedure = "DELIMITER //"
-       + "CREATE PROCEDURE get_resource_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA"
-       + "BEGIN"
+    private static final String createGetResourceIdProcedure = "CREATE PROCEDURE get_resource_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA "
+       + "BEGIN "
          + "UPDATE sequence_resource SET id=id+1 WHERE cid=context;"
          + "SELECT id FROM sequence_resource WHERE cid=context;"
-       + "END //"
-       + "DELIMITER ;";
+       + "END ;";
     
-    private static final String createGetResourceGroupIdProcedure = "DELIMITER //"
-       + "CREATE PROCEDURE get_resource_group_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA"
-       + "BEGIN"
+    private static final String createGetResourceGroupIdProcedure = "CREATE PROCEDURE get_resource_group_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA "
+       + "BEGIN "
          + "UPDATE sequence_resource_group SET id=id+1 WHERE cid=context;"
          + "SELECT id FROM sequence_resource_group WHERE cid=context;"
-       + "END //"
-       + "DELIMITER ;";
+       + "END ;";
     
-    private static final String createGetPrincipalIdProcedure = "DELIMITER //"
-       + "CREATE PROCEDURE get_principal_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA"
-       + "BEGIN"
+    private static final String createGetPrincipalIdProcedure = "CREATE PROCEDURE get_principal_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA "
+       + "BEGIN "
          + "UPDATE sequence_principal SET id=id+1 WHERE cid=context;"
          + "SELECT id FROM sequence_principal WHERE cid=context;"
-       + "END //"
-       + "DELIMITER ;";
+       + "END ;";
     
-    private static final String createGetFolderIdProcedure = "DELIMITER //"
-       + "CREATE PROCEDURE get_folder_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA"
-       + "BEGIN"
+    private static final String createGetFolderIdProcedure = "CREATE PROCEDURE get_folder_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA "
+       + "BEGIN "
          + "UPDATE sequence_folder SET id=id+1 WHERE cid=context;"
          + "SELECT id FROM sequence_folder WHERE cid=context;"
-       + "END //"
-       + "DELIMITER ;";
+       + "END ;";
     
-    private static final String createGetCalendarIdProcedure = "DELIMITER //"
-       + "CREATE PROCEDURE get_calendar_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA"
-       + "BEGIN"
+    private static final String createGetCalendarIdProcedure = "CREATE PROCEDURE get_calendar_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA "
+       + "BEGIN "
          + "UPDATE sequence_calendar SET id=id+1 WHERE cid=context;"
          + "SELECT id FROM sequence_calendar WHERE cid=context;"
-       + "END //"
-       + "DELIMITER ;";
+       + "END ;";
     
-    private static final String createGetContactIdProcedure = "DELIMITER //"
-       + "CREATE PROCEDURE get_contact_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA"
-       + "BEGIN"
+    private static final String createGetContactIdProcedure = "CREATE PROCEDURE get_contact_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA "
+       + "BEGIN "
          + "UPDATE sequence_contact SET id=id+1 WHERE cid=context;"
          + "SELECT id FROM sequence_contact WHERE cid=context;"
-       + "END //"
-       + "DELIMITER ;";
+       + "END ;";
     
-    private static final String createGetTaskIdProcedure = "DELIMITER //"
-       + "CREATE PROCEDURE get_task_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA"
-       + "BEGIN"
+    private static final String createGetTaskIdProcedure = "CREATE PROCEDURE get_task_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA "
+       + "BEGIN "
          + "UPDATE sequence_task SET id=id+1 WHERE cid=context;"
          + "SELECT id FROM sequence_task WHERE cid=context;"
-       + "END //"
-       + "DELIMITER ;";
+       + "END ;";
     
-    private static final String createGetProjectIdProcedure = "DELIMITER //"
-       + "CREATE PROCEDURE get_project_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA"
-       + "BEGIN"
+    private static final String createGetProjectIdProcedure = "CREATE PROCEDURE get_project_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA "
+       + "BEGIN "
          + "UPDATE sequence_project SET id=id+1 WHERE cid=context;"
          + "SELECT id FROM sequence_project WHERE cid=context;"
-       + "END //"
-       + "DELIMITER ;";
+       + "END ;";
     
-    private static final String createGetInfostoreIdProcedure = "DELIMITER //"
-       + "CREATE PROCEDURE get_infostore_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA"
-       + "BEGIN"
+    private static final String createGetInfostoreIdProcedure = "CREATE PROCEDURE get_infostore_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA "
+       + "BEGIN "
          + "UPDATE sequence_infostore SET id=id+1 WHERE cid=context;"
          + "SELECT id FROM sequence_infostore WHERE cid=context;"
-       + "END//"
-       + "DELIMITER ;";
+       + "END ;";
     
-    private static final String createGetForumIdProcedure = "DELIMITER //"
-       + "CREATE PROCEDURE get_forum_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA"
-       + "BEGIN"
+    private static final String createGetForumIdProcedure = "CREATE PROCEDURE get_forum_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA "
+       + "BEGIN "
          + "UPDATE sequence_forum SET id=id+1 WHERE cid=context;"
          + "SELECT id FROM sequence_forum WHERE cid=context;"
-       + "END //"
-       + "DELIMITER ;";
+       + "END ;";
     
-    private static final String createGetPinboardIdProcedure = "DELIMITER //"
-       + "CREATE PROCEDURE get_pinboard_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA"
-       + "BEGIN"
+    private static final String createGetPinboardIdProcedure = "CREATE PROCEDURE get_pinboard_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA "
+       + "BEGIN "
          + "UPDATE sequence_pinboard SET id=id+1 WHERE cid=context;"
          + "SELECT id FROM sequence_pinboard WHERE cid=context;"
-       + "END //"
-       + "DELIMITER ;";
+       + "END ;";
     
-    private static final String createGetGuiSettingIdProcedure = "DELIMITER //"
-       + "CREATE PROCEDURE get_gui_setting_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA"
-       + "BEGIN"
+    private static final String createGetGuiSettingIdProcedure = "CREATE PROCEDURE get_gui_setting_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA "
+       + "BEGIN "
          + "UPDATE sequence_gui_setting SET id=id+1 WHERE cid=context;"
          + "SELECT id FROM sequence_gui_setting WHERE cid=context;"
-       + "END //"
-       + "DELIMITER ;";
+       + "END ;";
     
-    private static final String createGetIcalIdProcedure = "DELIMITER //"
-       + "CREATE PROCEDURE get_ical_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA"
-       + "BEGIN"
+    private static final String createGetIcalIdProcedure = "CREATE PROCEDURE get_ical_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA "
+       + "BEGIN "
          + "UPDATE sequence_ical SET id=id+1 WHERE cid=context;"
          + "SELECT id FROM sequence_ical WHERE cid=context;"
-       + "END //"
-       + "DELIMITER ;";
+       + "END ;";
     
-    private static final String createGetAttachmentIdProcedure = "DELIMITER //"
-       + "CREATE PROCEDURE get_attachment_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA"
-       + "BEGIN"
+    private static final String createGetAttachmentIdProcedure = "CREATE PROCEDURE get_attachment_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA "
+       + "BEGIN "
          + "UPDATE sequence_attachment SET id=id+1 WHERE cid=context;"
          + "SELECT id FROM sequence_attachment WHERE cid=context;"
-       + "END //"
-       + "DELIMITER ;";
+       + "END ;";
     
-    private static final String createGetWebdavIdProcedure = "DELIMITER //"
-       + "CREATE PROCEDURE get_webdav_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA"
-       + "BEGIN"
+    private static final String createGetWebdavIdProcedure = "CREATE PROCEDURE get_webdav_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA "
+       + "BEGIN "
          + "UPDATE sequence_webdav SET id=id+1 WHERE cid=context;"
          + "SELECT id FROM sequence_webdav WHERE cid=context;"
-       + "END //"
-       + "DELIMITER ;";
+       + "END ;";
     
-    private static final String createGetUidNumberIdProcedure = "DELIMITER //"
-       + "CREATE PROCEDURE get_uid_number_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA"
-       + "BEGIN"
+    private static final String createGetUidNumberIdProcedure = "CREATE PROCEDURE get_uid_number_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA "
+       + "BEGIN "
          + "UPDATE sequence_uid_number SET id=id+1 WHERE cid=context;"
          + "SELECT id FROM sequence_uid_number WHERE cid=context;"
-       + "END //"
-       + "DELIMITER ;";
+       + "END ;";
     
-    private static final String createGetGidNumberIdProcedure = "DELIMITER //"
-       + "CREATE PROCEDURE get_gid_number_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA"
-       + "BEGIN"
+    private static final String createGetGidNumberIdProcedure = "CREATE PROCEDURE get_gid_number_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA "
+       + "BEGIN "
          + "UPDATE sequence_gid_number SET id=id+1 WHERE cid=context;"
          + "SELECT id FROM sequence_gid_number WHERE cid=context;"
-       + "END //"
-       + "DELIMITER ;";
+       + "END ;";
     
-    private static final String createGetMailServiceIdProcedure = "DELIMITER //"
-       + "CREATE PROCEDURE get_mail_service_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA"
-       + "BEGIN"
+    private static final String createGetMailServiceIdProcedure = "CREATE PROCEDURE get_mail_service_id(IN context INT4 UNSIGNED) NOT DETERMINISTIC MODIFIES SQL DATA "
+       + "BEGIN "
          + "UPDATE get_mail_service_id SET id=id+1 WHERE cid=context;"
          + "SELECT id FROM get_mail_service_id WHERE cid=context;"
-       + "END //"
-       + "DELIMITER ;";
+       + "END ;";
 
     /**
      * Initializes a new {@link CreateSequencesTables}.
