@@ -70,6 +70,8 @@ public class DelegateFileHolder implements IFileHolder {
 
     /**
      * Initializes a new {@link DelegateFileHolder}.
+     *
+     * @param fileHolder The delegate file holder
      */
     public DelegateFileHolder(final IFileHolder fileHolder) {
         super();
