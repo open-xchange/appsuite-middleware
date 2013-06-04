@@ -284,9 +284,16 @@ public class DriveServiceImpl implements DriveService {
             break;
         case REMOVE:
             if (false == DriveConstants.EMPTY_MD5.equals(action.getVersion().getChecksum())) {
+                /*
+                 * move all files to temp folder
+                 */
+
                 // move all files to temp path
                 // TODO: optimize
                 List<ServerFileVersion> serverFileVersions = getServerFiles(session, action.getVersion().getPath());
+
+//                session.getChecksumStore().removeFileChecksumsInFolder(newFolderID)
+
                 for (ServerFileVersion serverFileVersion : serverFileVersions) {
                     execute(session, action.getVersion().getPath(), new RemoveFileAction(serverFileVersion, action.getVersion().getPath()));
                 }

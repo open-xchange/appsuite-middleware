@@ -49,7 +49,11 @@
 
 package com.openexchange.drive;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * {@link DriveAction}
@@ -61,6 +65,11 @@ public interface DriveAction<T extends DriveVersion> extends Comparable<DriveAct
     static final String PARAMETER_PATH = "path";
     static final String PARAMETER_TOTAL_LENGTH = "totalLength";
     static final String PARAMETER_OFFSET = "offset";
+    static final String PARAMETER_CONTENT_TYPE = "contentType";
+
+    static final Set<String> PARAMETER_NAMES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(new String[]
+        { PARAMETER_PATH, PARAMETER_TOTAL_LENGTH, PARAMETER_OFFSET, PARAMETER_CONTENT_TYPE }
+    )));
 
     /**
      * Gets the action.
@@ -84,7 +93,7 @@ public interface DriveAction<T extends DriveVersion> extends Comparable<DriveAct
     T getNewVersion();
 
     /**
-     * Gets a map of additional parameters.
+     * Gets a map of additional parameters; possible parameters are defined in {@link DriveAction#PARAMETER_NAMES}.
      *
      * @return The parameters map
      */

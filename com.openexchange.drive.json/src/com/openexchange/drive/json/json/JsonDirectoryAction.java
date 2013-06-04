@@ -88,7 +88,9 @@ public class JsonDirectoryAction extends JsonDriveAction<DirectoryVersion> {
         jsonObject.putOpt("version", JsonDirectoryVersion.serialize(action.getVersion()));
         jsonObject.putOpt("newVersion", JsonDirectoryVersion.serialize(action.getNewVersion()));
         for (Map.Entry<String, Object> entry : action.getParameters().entrySet()) {
-            jsonObject.put(entry.getKey(), entry.getValue());
+            if (DriveAction.PARAMETER_NAMES.contains(entry.getKey())) {
+                jsonObject.put(entry.getKey(), entry.getValue());
+            }
         }
         return jsonObject;
     }

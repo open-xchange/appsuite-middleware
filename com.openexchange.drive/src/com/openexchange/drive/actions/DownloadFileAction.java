@@ -63,7 +63,7 @@ public class DownloadFileAction extends AbstractAction<FileVersion> {
         super(file, newFile);
         parameters.put(PARAMETER_TOTAL_LENGTH, Long.valueOf(totalLength));
         parameters.put(PARAMETER_PATH, path);
-        parameters.put("contentType", contentType);
+        parameters.put(PARAMETER_CONTENT_TYPE, contentType);
     }
 
     @Override

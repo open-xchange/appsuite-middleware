@@ -88,7 +88,9 @@ public class JsonFileAction extends JsonDriveAction<FileVersion> {
         jsonObject.putOpt("version", JsonFileVersion.serialize(action.getVersion()));
         jsonObject.putOpt("newVersion", JsonFileVersion.serialize(action.getNewVersion()));
         for (Map.Entry<String, Object> entry : action.getParameters().entrySet()) {
-            jsonObject.put(entry.getKey(), entry.getValue());
+            if (DriveAction.PARAMETER_NAMES.contains(entry.getKey())) {
+                jsonObject.put(entry.getKey(), entry.getValue());
+            }
         }
         return jsonObject;
     }
