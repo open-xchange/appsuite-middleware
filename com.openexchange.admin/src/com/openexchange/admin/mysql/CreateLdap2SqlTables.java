@@ -204,7 +204,9 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
      */
     @Override
     public String[] tablesToCreate() {
-        return new String[] { groupsTableName, delGroupsTableName, userTableName, delUserTableName, groupsMemberTableName, login2UserTableName, userAttributeTableName, resourceTableName, delResourceTableName };
+        return new String[] { groupsTableName, delGroupsTableName, userTableName, delUserTableName,
+            groupsMemberTableName, login2UserTableName, userAttributeTableName, resourceTableName,
+            delResourceTableName };
     }
 
     /* (non-Javadoc)
@@ -212,7 +214,9 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
      */
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { createGroupsTable, createDelGroupsTable, createUserTable, createDelUserTable, createGroupsMemberTable, createLogin2UserTable, createUserAttributeTable, createResourceTable, createDelResourceTable };
+        return new String[] { createGroupsTable, createDelGroupsTable, createUserTable, createDelUserTable,
+            createGroupsMemberTable, createLogin2UserTable, createUserAttributeTable, createResourceTable,
+            createDelResourceTable };
     }
 
 }

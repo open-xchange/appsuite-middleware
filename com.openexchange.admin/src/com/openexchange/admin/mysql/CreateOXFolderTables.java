@@ -217,7 +217,9 @@ public class CreateOXFolderTables extends AbstractCreateTableImpl {
      */
     @Override
     public String[] tablesToCreate() {
-        return new String[] { oxfolderTreeTableName, oxfolderPermissionsTableName, oxfolderSpecialfoldersTableName, oxfolderUserfoldersTableName, oxfolderUserfoldersStandardfoldersTableName, delOxfolderTreeTableName, delOxfolderPermissionsTableName, oxfolderLockTableName, oxfolderPropertyTableName };
+        return new String[] { oxfolderTreeTableName, oxfolderPermissionsTableName, oxfolderSpecialfoldersTableName,
+            oxfolderUserfoldersTableName, oxfolderUserfoldersStandardfoldersTableName, delOxfolderTreeTableName,
+            delOxfolderPermissionsTableName, oxfolderLockTableName, oxfolderPropertyTableName };
     }
 
     /* (non-Javadoc)
@@ -225,7 +227,9 @@ public class CreateOXFolderTables extends AbstractCreateTableImpl {
      */
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { createOxfolderTreeTable, createOxfolderPermissionsTable, createOxfolderSpecialfoldersTable, createOxfolderUserfoldersTable, createOxfolderUserfoldersStandardfoldersTable, createDelOxfolderTreeTable, createDelOxfolderPermissionsTable, createOxfolderLockTable, createOxfolderPropertyTable };
+        return new String[] { createOxfolderTreeTable, createOxfolderPermissionsTable, createOxfolderSpecialfoldersTable,
+            createOxfolderUserfoldersTable, createOxfolderUserfoldersStandardfoldersTable, createDelOxfolderTreeTable,
+            createDelOxfolderPermissionsTable, createOxfolderLockTable, createOxfolderPropertyTable };
     }
 
 }

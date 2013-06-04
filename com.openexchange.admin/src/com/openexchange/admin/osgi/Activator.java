@@ -59,6 +59,18 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.OXGenericException;
+import com.openexchange.admin.mysql.CreateAttachmentTables;
+import com.openexchange.admin.mysql.CreateCalendarTables;
+import com.openexchange.admin.mysql.CreateContactsTables;
+import com.openexchange.admin.mysql.CreateIcalVcardTables;
+import com.openexchange.admin.mysql.CreateInfostoreTables;
+import com.openexchange.admin.mysql.CreateLdap2SqlTables;
+import com.openexchange.admin.mysql.CreateMiscTables;
+import com.openexchange.admin.mysql.CreateOXFolderTables;
+import com.openexchange.admin.mysql.CreateSequencesTables;
+import com.openexchange.admin.mysql.CreateSettingsTables;
+import com.openexchange.admin.mysql.CreateTaskTables;
+import com.openexchange.admin.mysql.CreateVirtualFolderTables;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
@@ -145,6 +157,20 @@ public class Activator extends HousekeepingActivator {
         } catch (final InvalidSyntaxException e) {
             e.printStackTrace();
         }
+        
+        //Register CreateTableServices
+        registerService(CreateTableService.class, new CreateSequencesTables());
+        registerService(CreateTableService.class, new CreateLdap2SqlTables());
+        registerService(CreateTableService.class, new CreateOXFolderTables());
+        registerService(CreateTableService.class, new CreateVirtualFolderTables());
+        registerService(CreateTableService.class, new CreateSettingsTables());
+        registerService(CreateTableService.class, new CreateCalendarTables());
+        registerService(CreateTableService.class, new CreateContactsTables());
+        registerService(CreateTableService.class, new CreateTaskTables());
+        registerService(CreateTableService.class, new CreateInfostoreTables());
+        registerService(CreateTableService.class, new CreateAttachmentTables());
+        registerService(CreateTableService.class, new CreateMiscTables());
+        registerService(CreateTableService.class, new CreateIcalVcardTables());
     }
 
     /**

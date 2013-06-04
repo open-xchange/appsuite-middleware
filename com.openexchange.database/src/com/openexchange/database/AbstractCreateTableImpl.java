@@ -83,10 +83,20 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
             stmt = con.createStatement();
             for (final String create : getCreateStatements()) {
                 final String tableName = extractTableName(create);
-                if (null != tableName && tableExists(con, tableName)) {
-                    LOG.info("A table with name \"" + tableName + "\" already exists. Aborting table creation.");
-                } else {
-                    stmt.execute(create);
+                if (null != tableName) {
+                    if (tableExists(con, tableName)) {
+                        LOG.info("A table with name \"" + tableName + "\" already exists. Aborting table creation.");
+                    } else {
+                        stmt.execute(create);
+                    }
+                }
+                final String procedureName = extractProcedureName(create);
+                if (null != procedureName) {
+                    if (procedureExists(con, procedureName)) {
+                        LOG.info("A procedure with name \"" + procedureName + "\" already exists. Aborting procedure creation.");
+                    } else {
+                        stmt.execute(create);
+                    }
                 }
             }
         } catch (final SQLException e) {
@@ -98,9 +108,18 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
     }
 
     private static final Pattern PATTERN_CREATE_TABLE = Pattern.compile("CREATE +TABLE +`?(\\w+)`? +\\(");
+    private static final Pattern PATTERN_CREATE_PROCEDURE = Pattern.compile("CREATE +PROCEDURE +`?(\\w+)`?");
 
     private static String extractTableName(final String create) {
         final Matcher m = PATTERN_CREATE_TABLE.matcher(create);
+        if (m.find()) {
+            return m.group(1);
+        }
+        return null;
+    }
+    
+    private static String extractProcedureName(final String create) {
+        final Matcher m = PATTERN_CREATE_PROCEDURE.matcher(create);
         if (m.find()) {
             return m.group(1);
         }
@@ -116,6 +135,19 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
         try {
             rs = metaData.getTables(null, null, table, new String[] { TABLE });
             retval = (rs.next() && rs.getString("TABLE_NAME").equalsIgnoreCase(table));
+        } finally {
+            closeSQLStuff(rs);
+        }
+        return retval;
+    }
+    
+    private static final boolean procedureExists(final Connection con, final String procedure) throws SQLException {
+        final DatabaseMetaData metaData = con.getMetaData();
+        ResultSet rs = null;
+        boolean retval = false;
+        try {
+            rs = metaData.getProcedures(null, null, procedure);
+//            retval = (rs.next() && rs.getString("TABLE_NAME").equalsIgnoreCase(table));
         } finally {
             closeSQLStuff(rs);
         }

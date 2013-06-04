@@ -205,7 +205,9 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
      */
     @Override
     public String[] tablesToCreate() {
-        return new String[] { infostoreTableName, infostoreDocumentsTableName, delInfostoreTableName, delInfostoreDocumentTableName, infostorePropertyTableName, infostoreLockTableName, lockNullTableName, lockNullLockTableName };
+        return new String[] { infostoreTableName, infostoreDocumentsTableName, delInfostoreTableName,
+            delInfostoreDocumentTableName, infostorePropertyTableName, infostoreLockTableName, lockNullTableName,
+            lockNullLockTableName };
     }
 
     /* (non-Javadoc)
@@ -213,7 +215,9 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
      */
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { createInfostoreTable, createInfostoreDocumentTable, createDelInfostoreTable, createDelInfostoreDocumentTable, createInfostorePropertyTable, createInfostoreLockTable, createLockNullTable, createLockNullLockTable };
+        return new String[] { createInfostoreTable, createInfostoreDocumentTable, createDelInfostoreTable,
+            createDelInfostoreDocumentTable, createInfostorePropertyTable, createInfostoreLockTable, createLockNullTable,
+            createLockNullLockTable };
     }
 
 }

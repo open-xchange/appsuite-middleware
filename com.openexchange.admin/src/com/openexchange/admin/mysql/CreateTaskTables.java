@@ -247,7 +247,9 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
      */
     @Override
     public String[] tablesToCreate() {
-        return new String[] { taskTableName, taskFolderTableName, taskParticipantTableName, taskEParticipantTableName, taskRemovedParticipantTableName, delTaskTableName, delTaskFolderTableName, delTaskParticipantTableName, delTaskEParticipantTableName };
+        return new String[] { taskTableName, taskFolderTableName, taskParticipantTableName, taskEParticipantTableName,
+            taskRemovedParticipantTableName, delTaskTableName, delTaskFolderTableName, delTaskParticipantTableName,
+            delTaskEParticipantTableName };
     }
 
     /* (non-Javadoc)
@@ -255,7 +257,9 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
      */
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { createTaskTable, createTaskFolderTable, createTaskParticipantTable, createTaskEParticipantTable, createTaskRemovedParticipantTable, createDelTaskTable, createDelTaskFolderTable, createDelTaskParticipantTable, createDelTaskEParticipantTable };
+        return new String[] { createTaskTable, createTaskFolderTable, createTaskParticipantTable, createTaskEParticipantTable,
+            createTaskRemovedParticipantTable, createDelTaskTable, createDelTaskFolderTable, createDelTaskParticipantTable,
+            createDelTaskEParticipantTable };
     }
 
 }

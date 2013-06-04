@@ -161,7 +161,8 @@ public class CreateSettingsTables extends AbstractCreateTableImpl {
      */
     @Override
     public String[] tablesToCreate() {
-        return new String[] { userConfigurationTableName, userSettingMailTableName, userSettingMailSignatureTableName, userSettingSpellcheckTableName, userSettingAdminTableName, userSettingTableName, userSettingServerTableName };
+        return new String[] { userConfigurationTableName, userSettingMailTableName, userSettingMailSignatureTableName,
+            userSettingSpellcheckTableName, userSettingAdminTableName, userSettingTableName, userSettingServerTableName };
     }
 
     /* (non-Javadoc)
@@ -169,7 +170,8 @@ public class CreateSettingsTables extends AbstractCreateTableImpl {
      */
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { createUserConfigurationTable, createUserSettingMailTable, createUserSettingMailSignatureTable, createUserSettingSpellcheckTable, createUserSettingAdminTable, createUserSettingTable, createUserSettingServerTable };
+        return new String[] { createUserConfigurationTable, createUserSettingMailTable, createUserSettingMailSignatureTable,
+            createUserSettingSpellcheckTable, createUserSettingAdminTable, createUserSettingTable, createUserSettingServerTable };
     }
 
 }
