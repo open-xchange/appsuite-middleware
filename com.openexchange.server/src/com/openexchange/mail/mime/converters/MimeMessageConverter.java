@@ -2140,7 +2140,7 @@ public final class MimeMessageConverter {
      */
     public static MailPart convertPart(final byte[] asciiBytes) throws OXException {
         try {
-            return convertPart(new MimeBodyPart(new UnsynchronizedByteArrayInputStream(asciiBytes)));
+            return convertPart(new MimeBodyPart(new UnsynchronizedByteArrayInputStream(asciiBytes)), false);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
