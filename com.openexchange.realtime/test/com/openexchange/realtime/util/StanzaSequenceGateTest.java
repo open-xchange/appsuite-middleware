@@ -17,6 +17,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.StanzaSequenceGate.StanzaWithCustomAction;
 
 public class StanzaSequenceGateTest extends StanzaSequenceGate {
 
@@ -45,7 +46,7 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
 
         handle(stanza1, stanza1.getTo());
         AtomicLong threshold = sequenceNumbers.get(stanza0.getSequencePrincipal());
-        List<Stanza> inbox = inboxes.get(stanza0.getSequencePrincipal());
+        List<StanzaWithCustomAction> inbox = inboxes.get(stanza0.getSequencePrincipal());
         assertEquals("Wrong threshold", 0L, threshold.get());
         assertEquals("Should not have handled stanza", -1L, lastInternallyHandledSeqNum);
         assertNotNull("Inbox has not been created", inbox);
@@ -70,7 +71,7 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
 
         handle(stanza0, stanza0.getTo());
         AtomicLong threshold = sequenceNumbers.get(stanza0.getSequencePrincipal());
-        List<Stanza> inbox = inboxes.get(stanza0.getSequencePrincipal());
+        List<StanzaWithCustomAction> inbox = inboxes.get(stanza0.getSequencePrincipal());
         assertEquals("Wrong threshold", 1L, threshold.get());
         assertNull("Inbox has been created unnecessarily", inbox);
 
@@ -96,7 +97,7 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
         handle(stanza0, stanza0.getTo());
         handle(stanza3, stanza3.getTo());
         AtomicLong threshold = sequenceNumbers.get(stanza0.getSequencePrincipal());
-        List<Stanza> inbox = inboxes.get(stanza0.getSequencePrincipal());
+        List<StanzaWithCustomAction> inbox = inboxes.get(stanza0.getSequencePrincipal());
         assertEquals("Wrong threshold", 1L, threshold.get());
         assertNotNull("Inbox has not been created", inbox);
         assertEquals("Wrong inbox size", 1, inbox.size());
@@ -149,7 +150,7 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
         handle(stanza4, stanza4.getTo());
         handle(stanza5, stanza5.getTo());
         AtomicLong threshold = sequenceNumbers.get(stanza0.getSequencePrincipal());
-        List<Stanza> inbox = inboxes.get(stanza0.getSequencePrincipal());
+        List<StanzaWithCustomAction> inbox = inboxes.get(stanza0.getSequencePrincipal());
         assertEquals("Wrong threshold", 1L, threshold.get());
         assertNotNull("Inbox has not been created", inbox);
         assertEquals("Wrong inbox size", 3, inbox.size());
@@ -176,7 +177,7 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
         }
 
         AtomicLong threshold = sequenceNumbers.get(stanza.getSequencePrincipal());
-        List<Stanza> inbox = inboxes.get(stanza.getSequencePrincipal());
+        List<StanzaWithCustomAction> inbox = inboxes.get(stanza.getSequencePrincipal());
         assertEquals("Wrong threshold", 0L, threshold.get());
         assertNotNull("Inbox has not been created", inbox);
         assertEquals("Wrong inbox size", BUFFER_SIZE, inbox.size());
@@ -225,7 +226,7 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
         while (it.hasNext()) {
             Stanza stanza = it.next();
             AtomicLong threshold = sequenceNumbers.get(stanza.getSequencePrincipal());
-            List<Stanza> inbox = inboxes.get(stanza.getSequencePrincipal());
+            List<StanzaWithCustomAction> inbox = inboxes.get(stanza.getSequencePrincipal());
             assertEquals("Wrong threshold", stanza.getSequenceNumber(), threshold.get());
             assertEquals("Wrong inbox size", messages - stanza.getSequenceNumber() - lost.size(), inbox.size());
             handle(stanza, stanza.getTo());
@@ -233,7 +234,7 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
         }
 
         AtomicLong threshold = sequenceNumbers.get(stanzas.get(0).getSequencePrincipal());
-        List<Stanza> inbox = inboxes.get(stanzas.get(0).getSequencePrincipal());
+        List<StanzaWithCustomAction> inbox = inboxes.get(stanzas.get(0).getSequencePrincipal());
         assertEquals("Wrong threshold", messages, threshold.get());
         assertNull("Inbox has not been removed", inbox);
     }

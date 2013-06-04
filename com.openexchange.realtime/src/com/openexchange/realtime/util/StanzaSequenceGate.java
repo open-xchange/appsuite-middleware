@@ -221,7 +221,7 @@ public abstract class StanzaSequenceGate {
      */
     public abstract void handleInternal(Stanza stanza, ID recipient) throws OXException;
 
-    private final class StanzaWithCustomAction {
+    protected final class StanzaWithCustomAction {
 
         public Stanza stanza;
 
