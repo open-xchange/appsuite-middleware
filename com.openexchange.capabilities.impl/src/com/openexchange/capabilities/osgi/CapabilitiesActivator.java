@@ -61,7 +61,7 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.groupware.CapabilityCreateTableService;
 import com.openexchange.capabilities.groupware.CapabilityCreateTableTask;
 import com.openexchange.capabilities.groupware.CapabilityDeleteListener;
-import com.openexchange.capabilities.internal.CapabilityServiceImpl;
+import com.openexchange.capabilities.internal.AbstractCapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
@@ -74,6 +74,21 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.TimerService;
 
 public class CapabilitiesActivator extends HousekeepingActivator {
+
+    private static final class CapabilityServiceImpl extends AbstractCapabilityService {
+
+        private final CapabilityCheckerRegistry capCheckers;
+
+        CapabilityServiceImpl(ServiceLookup services, CapabilityCheckerRegistry capCheckers) {
+            super(services);
+            this.capCheckers = capCheckers;
+        }
+
+        @Override
+        protected Map<String, List<CapabilityChecker>> getCheckers() {
+            return capCheckers.getCheckers();
+        }
+    }
 
     /** The service look-up */
     public static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
@@ -92,13 +107,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
         /*
          * Create & register CapabilityService
          */
-        final CapabilityServiceImpl capService = new CapabilityServiceImpl(this) {
-
-            @Override
-            public Map<String, List<CapabilityChecker>> getCheckers() {
-                return capCheckers.getCheckers();
-            }
-        };
+        final CapabilityServiceImpl capService = new CapabilityServiceImpl(this, capCheckers);
         registerService(CapabilityService.class, capService);
 
         track(Capability.class, new SimpleRegistryListener<Capability>() {
