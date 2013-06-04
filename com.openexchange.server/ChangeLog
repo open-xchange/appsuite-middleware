@@ -2,6 +2,7 @@
 
  - Fix for bug 26881: Append bytes to the end of temporary file if in-memory threshold is exceeded; rather than to the beginning
  - Fix for bug 26929: Dropped unnecessary class import
+ - Fix for bug 26926: Don't set "Content-Length" HTTP response header for a mail part only roughly estimated by mail system. Prefer chunked transfer encoding instead.
 
 * 2013-06-03 - thorben.betten@open-xchange.com
 
