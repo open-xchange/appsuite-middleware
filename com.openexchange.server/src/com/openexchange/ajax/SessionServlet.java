@@ -831,7 +831,7 @@ public abstract class SessionServlet extends AJAXServlet {
     protected static ServerSession getSessionObject(final ServletRequest req, final boolean mayUseFallbackSession) {
         final Object attribute = req.getAttribute(SESSION_KEY);
         if (attribute != null) {
-            return (ServerSession) req.getAttribute(SESSION_KEY);
+            return (ServerSession) attribute;
         }
         if (mayUseFallbackSession) {
             return (ServerSession) req.getAttribute(PUBLIC_SESSION_KEY);
