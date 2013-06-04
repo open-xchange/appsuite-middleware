@@ -63,7 +63,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 /**
  * {@link ThresholdFileHolder} - A {@link IFileHolder} that backs data in a <code>byte</code> array as long as specified threshold is not
  * exceeded, but streams data to a temporary file otherwise.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThresholdFileHolder implements IFileHolder {
@@ -107,7 +107,7 @@ public final class ThresholdFileHolder implements IFileHolder {
 
     /**
      * Initializes a new {@link ThresholdFileHolder} with default initial capacity.
-     * 
+     *
      * @param threshold The threshold
      */
     public ThresholdFileHolder(final int threshold) {
@@ -116,7 +116,7 @@ public final class ThresholdFileHolder implements IFileHolder {
 
     /**
      * Initializes a new {@link ThresholdFileHolder}.
-     * 
+     *
      * @param threshold The threshold
      * @param initalCapacity The initial capacity
      */
@@ -130,7 +130,7 @@ public final class ThresholdFileHolder implements IFileHolder {
 
     /**
      * Gets the {@link OutputStream} view on this file holder.
-     * 
+     *
      * @return An {@link OutputStream} that writes data into this file holder
      */
     public OutputStream asOutputStream() {
@@ -139,7 +139,7 @@ public final class ThresholdFileHolder implements IFileHolder {
 
     /**
      * Writes the specified content to this file holder.
-     * 
+     *
      * @param bytes The content to be written.
      * @param off the start offset in the data.
      * @param len the number of bytes to write.
@@ -162,7 +162,7 @@ public final class ThresholdFileHolder implements IFileHolder {
 
     /**
      * Writes the specified content to this file holder.
-     * 
+     *
      * @param bytes The content to be written.
      * @return This file holder with content written
      * @throws OXException If write attempt fails
@@ -195,7 +195,7 @@ public final class ThresholdFileHolder implements IFileHolder {
      * Writes the specified content to this file holder.
      * <p>
      * Orderly closes specified {@link InputStream} instance.
-     * 
+     *
      * @param in The content to be written.
      * @return This file holder with content written
      * @throws OXException If write attempt fails
@@ -236,7 +236,7 @@ public final class ThresholdFileHolder implements IFileHolder {
                 out.flush();
             } else {
                 // Threshold already exceeded. Stream to file.
-                out = new FileOutputStream(tempFile);
+                out = new FileOutputStream(tempFile, true);
                 final int buflen = 0xFFFF; // 64KB
                 final byte[] buffer = new byte[buflen];
                 for (int len; (len = in.read(buffer, 0, buflen)) > 0;) {
@@ -257,10 +257,10 @@ public final class ThresholdFileHolder implements IFileHolder {
         }
         return this;
     }
-    
+
     /**
      * Gets the number of valid bytes written to this file holder.
-     * 
+     *
      * @return The number of bytes
      */
     public long getCount() {
@@ -294,7 +294,7 @@ public final class ThresholdFileHolder implements IFileHolder {
 
     /**
      * Gets this file holder content as a byte array.
-     * 
+     *
      * @return The byte array
      * @throws OXException If byte array cannot be returned for any reason
      */
@@ -379,7 +379,7 @@ public final class ThresholdFileHolder implements IFileHolder {
 
     /**
      * Sets the disposition.
-     * 
+     *
      * @param disposition The disposition
      */
     public void setDisposition(final String disposition) {
@@ -388,7 +388,7 @@ public final class ThresholdFileHolder implements IFileHolder {
 
     /**
      * Sets the content type; e.g. "application/octet-stream"
-     * 
+     *
      * @param contentType The content type
      */
     public void setContentType(final String contentType) {
@@ -397,7 +397,7 @@ public final class ThresholdFileHolder implements IFileHolder {
 
     /**
      * Sets the (file) name.
-     * 
+     *
      * @param name The name
      */
     public void setName(final String name) {
@@ -406,7 +406,7 @@ public final class ThresholdFileHolder implements IFileHolder {
 
     /**
      * Sets the delivery
-     * 
+     *
      * @param delivery The delivery to set
      */
     public void setDelivery(final String delivery) {
