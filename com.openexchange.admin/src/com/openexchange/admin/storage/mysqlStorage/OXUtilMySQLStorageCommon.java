@@ -217,9 +217,6 @@ public class OXUtilMySQLStorageCommon {
 
     private void pumpData2DatabaseNew(final Connection con, final List<CreateTableService> createTables) throws StorageException {
         final Set<String> existingTables = new HashSet<String>();
-        for (final String table : FROM_SCRIPTS) {
-            existingTables.add(table);
-        }
         final List<CreateTableService> toCreate = new ArrayList<CreateTableService>(createTables.size());
         toCreate.addAll(createTables);
         CreateTableService next;
@@ -315,19 +312,4 @@ public class OXUtilMySQLStorageCommon {
         }
     }
 
-    private static final String[] FROM_SCRIPTS = {
-        "sequence_id", "sequence_principal", "sequence_resource", "sequence_resource_group", "sequence_folder", "sequence_calendar",
-        "sequence_contact", "sequence_task", "sequence_project", "sequence_infostore", "sequence_forum", "sequence_pinboard",
-        "sequence_attachment", "sequence_gui_setting", "sequence_reminder", "sequence_ical", "sequence_webdav", "sequence_uid_number",
-        "sequence_gid_number", "sequence_mail_service", "groups", "del_groups", "user", "del_user", "groups_member", "login2user",
-        "user_attribute", "resource", "del_resource", "oxfolder_tree", "oxfolder_permissions",
-        "oxfolder_specialfolders", "oxfolder_userfolders", "oxfolder_userfolders_standardfolders", "del_oxfolder_tree",
-        "del_oxfolder_permissions", "oxfolder_lock", "oxfolder_property", "user_configuration", "user_setting_mail",
-        "user_setting_mail_signature", "user_setting_spellcheck", "user_setting_admin", "user_setting", "user_setting_server", "prg_dates",
-        "prg_date_rights", "del_date_rights", "del_dates", "del_dates_members", "prg_dates_members", "prg_dlist", "del_dlist",
-        "prg_contacts_linkage", "prg_contacts_image", "del_contacts_image", "del_contacts", "prg_contacts", "task", "task_folder",
-        "task_participant", "task_eparticipant", "task_removedparticipant", "del_task", "del_task_folder", "del_task_participant",
-        "del_task_eparticipant", "infostore", "infostore_document", "del_infostore", "del_infostore_document", "infostore_property",
-        "infostore_lock", "lock_null", "lock_null_lock", "prg_attachment", "del_attachment", "prg_links", "reminder", "filestore_usage",
-        "ical_principal", "ical_ids", "vcard_principal", "vcard_ids", "version" };
 }
