@@ -203,6 +203,23 @@ public final class RateLimiter {
         return tmp;
     }
 
+    private static volatile Boolean considerRemotePort;
+
+    static boolean considerRemotePort() {
+        Boolean tmp = considerRemotePort;
+        if (null == tmp) {
+            synchronized (CountingHttpServletRequest.class) {
+                tmp = considerRemotePort;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(null == service ? "false" : service.getProperty("com.openexchange.servlet.maxRateConsiderRemotePort", "false"));
+                    considerRemotePort = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
     // ----------------------------------------------------------------------------------- //
 
     private static final class Key {
@@ -215,9 +232,9 @@ public final class RateLimiter {
 
         Key(final HttpServletRequest servletRequest) {
             super();
-            this.remotePort = servletRequest.getRemotePort();
-            this.remoteAddr = servletRequest.getRemoteAddr();
-            this.userAgent = servletRequest.getHeader("User-Agent");
+            remotePort = considerRemotePort() ? servletRequest.getRemotePort() : 0;
+            remoteAddr = servletRequest.getRemoteAddr();
+            userAgent = servletRequest.getHeader("User-Agent");
 
             final List<String> parts;
             {
@@ -282,6 +299,28 @@ public final class RateLimiter {
             }
             return true;
         }
+
+        @Override
+        public String toString() {
+            StringAllocator builder = new StringAllocator(256);
+            builder.append("Key [");
+            if (remotePort > 0) {
+                builder.append("remotePort=").append(remotePort).append(", ");
+            }
+            if (remoteAddr != null) {
+                builder.append("remoteAddr=").append(remoteAddr).append(", ");
+            }
+            if (userAgent != null) {
+                builder.append("userAgent=").append(userAgent).append(", ");
+            }
+            if (parts != null) {
+                builder.append("parts=").append(parts).append(", ");
+            }
+            builder.append("hash=").append(hash).append("]");
+            return builder.toString();
+        }
+
+
     } // End of class Key
 
     // ----------------------------------------------------------------------------------- //
@@ -346,6 +385,23 @@ public final class RateLimiter {
         return tmp.intValue();
     }
 
+    private static volatile Boolean omitLocals;
+
+    private static boolean omitLocals() {
+        Boolean tmp = omitLocals;
+        if (null == tmp) {
+            synchronized (CountingHttpServletRequest.class) {
+                tmp = omitLocals;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(null == service ? "false" : service.getProperty("com.openexchange.servlet.maxRateOmitLocals", "false"));
+                    omitLocals = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
     // ----------------------------------------------------------------------------------- //
 
     /**
@@ -375,7 +431,7 @@ public final class RateLimiter {
         if (maxRatePerMinute <= 0) {
             return true;
         }
-        if (LOCALS.contains(servletRequest.getServerName())) {
+        if (omitLocals() && LOCALS.contains(servletRequest.getServerName())) {
             return true;
         }
         if (lenientCheckForClient(servletRequest)) {
@@ -420,7 +476,7 @@ public final class RateLimiter {
     }
 
     /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
+    static boolean isEmpty(final String string) {
         if (null == string) {
             return true;
         }
