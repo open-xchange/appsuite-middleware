@@ -60,7 +60,7 @@ public class AppStoreTables extends AbstractCreateTableImpl {
 
     @Override
     public String[] requiredTables() {
-        return NO_TABLES;
+        return new String[] { "user" };
     }
 
     @Override
