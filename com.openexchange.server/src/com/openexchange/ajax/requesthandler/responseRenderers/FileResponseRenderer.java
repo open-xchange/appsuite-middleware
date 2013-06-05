@@ -761,21 +761,26 @@ public class FileResponseRenderer implements ResponseRenderer {
         /*
          * transform
          */
-        final InputStream transformed = transformations.getInputStream(file.getContentType());
-        if (null == transformed) {
-            LOG.warn("Got no resulting input stream from transformation, trying to recover original input");
-            if (markSupported) {
-                try {
-                    stream.reset();
-                    return file;
-                } catch (final Exception e) {
-                    LOG.warn("Error resetting input stream", e);
+        try {
+            final InputStream transformed = transformations.getInputStream(file.getContentType());
+            if (null == transformed) {
+                LOG.warn("Got no resulting input stream from transformation, trying to recover original input");
+                if (markSupported) {
+                    try {
+                        stream.reset();
+                        return file;
+                    } catch (final Exception e) {
+                        LOG.warn("Error resetting input stream", e);
+                    }
                 }
+                LOG.error("Unable to transform image from " + file);
+                return file.repetitive() ? file : null;
             }
+            return new FileHolder(transformed, -1, file.getContentType(), file.getName());
+        } catch (final RuntimeException e) {
             LOG.error("Unable to transform image from " + file);
             return file.repetitive() ? file : null;
         }
-        return new FileHolder(transformed, -1, file.getContentType(), file.getName());
     }
 
     /**
