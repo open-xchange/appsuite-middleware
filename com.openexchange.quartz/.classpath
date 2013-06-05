@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-1.6.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/slf4j-nop-1.6.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/quartz-2.1.5.jar" sourcepath="source/quartz-2.1.5-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/quartz-backward-compat-2.1.5.jar" sourcepath="source/quartz-backward-compat-2.1.5-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/quartz-commonj-2.1.5.jar" sourcepath="source/quartz-commonj-2.1.5-src.jar"/>
