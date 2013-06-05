@@ -64,7 +64,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.javacodegeeks.concurrent.LRUPolicy;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
@@ -375,8 +374,25 @@ public final class RateLimiter {
                 tmp = maxRatePerMinute;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = Integer.valueOf(null == service ? "120" : service.getProperty("com.openexchange.servlet.maxRatePerMinute", "120"));
+                    tmp = Integer.valueOf(null == service ? "3000" : service.getProperty("com.openexchange.servlet.maxRatePerMinute", "3000"));
                     maxRatePerMinute = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    private static volatile Integer maxRateTimeWindow;
+
+    private static int maxRateTimeWindow() {
+        Integer tmp = maxRateTimeWindow;
+        if (null == tmp) {
+            synchronized (CountingHttpServletRequest.class) {
+                tmp = maxRateTimeWindow;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Integer.valueOf(null == service ? "300000" : service.getProperty("com.openexchange.servlet.maxRateTimeWindow", "300000"));
+                    maxRateTimeWindow = tmp;
                 }
             }
         }
@@ -416,7 +432,6 @@ public final class RateLimiter {
     // ----------------------------------------------------------------------------------- //
 
     private static final Set<String> LOCALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("localhost", "127.0.0.1", "::1")));
-    private static final String PARAMETER_SESSION = AJAXServlet.PARAMETER_SESSION;
 
     /**
      * Checks given request if possibly rate limited.
@@ -426,6 +441,10 @@ public final class RateLimiter {
      */
     public static boolean checkRequest(final HttpServletRequest servletRequest) {
         int maxRatePerMinute = maxRatePerMinute();
+        if (maxRatePerMinute <= 0) {
+            return true;
+        }
+        final int maxRateTimeWindow = maxRateTimeWindow();
         if (maxRatePerMinute <= 0) {
             return true;
         }
@@ -441,7 +460,7 @@ public final class RateLimiter {
         while (true) {
             Rate rate = bucketMap.get(key);
             if (null == rate) {
-                final Rate newRate = new Rate(maxRatePerMinute, 60, TimeUnit.SECONDS);
+                final Rate newRate = new Rate(maxRatePerMinute, maxRateTimeWindow, TimeUnit.MILLISECONDS);
                 rate = bucketMap.putIfAbsent(key, newRate);
                 if (null == rate) {
                     rate = newRate;
