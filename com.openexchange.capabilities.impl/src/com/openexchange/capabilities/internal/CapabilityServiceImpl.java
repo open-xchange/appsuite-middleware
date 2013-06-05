@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
@@ -68,15 +69,21 @@ import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityExceptionCodes;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link CapabilityServiceImpl}
@@ -92,6 +99,9 @@ public class CapabilityServiceImpl implements CapabilityService {
 
     private static final String REGION_NAME_CONTEXT = "CapabilitiesContext";
     private static final String REGION_NAME_USER = "CapabilitiesUser";
+
+    private static final String PERMISSION_PROPERTY = "permissions".intern();
+    private static final Pattern P_SPLIT = Pattern.compile("\\s*[, ]\\s*");
 
     private final ConcurrentMap<String, Capability> capabilities;
     private final ConcurrentMap<String, Object> declaredCapabilities;
@@ -148,10 +158,10 @@ public class CapabilityServiceImpl implements CapabilityService {
         }
         return tmp.booleanValue();
     }
-
-    @Override
-    public Set<Capability> getCapabilities(final Session session) throws OXException {
-        final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+    
+    public Set<Capability> getCapabilities(final int userId, final int contextId) throws OXException {
+        ServerSession serverSession = ServerSessionAdapter.valueOf(userId, contextId);
+        
         Set<Capability> capabilities = new HashSet<Capability>(64);
         if (!serverSession.isAnonymous()) {
             for (String type : serverSession.getUserConfiguration().getExtendedPermissions()) {
@@ -173,7 +183,7 @@ public class CapabilityServiceImpl implements CapabilityService {
         // ------------- Combined capabilities/permissions ------------ //
         if (!serverSession.isAnonymous()) {
             // Portal
-            final UserConfiguration userConfiguration = serverSession.getUserConfiguration();
+            final UserPermissionBits userConfiguration = services.getService(UserPermissionService.class).getUserPermissionBits(serverSession.getUserId(), serverSession.getContext());
             if (userConfiguration.hasPortal()) {
                 capabilities.add(getCapability("portal"));
                 capabilities.remove(getCapability("deniedPortal"));
@@ -218,9 +228,46 @@ public class CapabilityServiceImpl implements CapabilityService {
                 capabilities.remove(getCapability("spam"));
             }
         }
+        
+        // permission properties
+        final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
+        if (configViews != null) {
+            final ConfigView view = configViews.getView(userId, contextId);
+            final String property = PERMISSION_PROPERTY;
+            for (final String scope : configViews.getSearchPath()) {
+                final String permissions = view.property(property, String.class).precedence(scope).get();
+                if (permissions != null) {
+                    for (final String permissionModifier : P_SPLIT.split(permissions)) {
+                        final char firstChar = permissionModifier.charAt(0);
+                        if ('-' == firstChar) {
+                            capabilities.remove(getCapability(permissionModifier.substring(1)));
+                        } else {
+                            if ('+' == firstChar) {
+                                capabilities.add(getCapability(permissionModifier.substring(1)));
+                            } else {
+                                capabilities.add(getCapability(permissionModifier));
+                            }
+                        }
+                    }
+                }
+            }
+            
+            Map<String, ComposedConfigProperty<String>> all = view.all();
+            for (Map.Entry<String, ComposedConfigProperty<String>> entry: all.entrySet()) {
+                if (entry.getKey().startsWith("com.openexchange.capability.")) {
+                    boolean value = Boolean.parseBoolean(entry.getValue().get());
+                    String name = entry.getKey().substring(28);
+                    if (value) {
+                        capabilities.add(getCapability(name));
+                    } else {
+                        capabilities.remove(getCapability(name));
+                    }
+                }
+            }
+        }
+        
         // ---------------- Now the ones from database ------------------ //
         {
-            final int contextId = serverSession.getContextId();
             if (contextId > 0) {
                 final Set<String> set = new HashSet<String>();
                 final Set<String> removees = new HashSet<String>();
@@ -240,7 +287,6 @@ public class CapabilityServiceImpl implements CapabilityService {
                     }
                 }
                 // User-sensitive
-                final int userId = serverSession.getUserId();
                 if (userId > 0) {
                     for (final String sCap : getUserCaps(userId, contextId)) {
                         final char firstChar = sCap.charAt(0);
@@ -272,6 +318,11 @@ public class CapabilityServiceImpl implements CapabilityService {
         }
 
         return capabilities;
+    }
+
+    @Override
+    public Set<Capability> getCapabilities(final Session session) throws OXException {
+        return getCapabilities(session.getUserId(), session.getContextId());
     }
 
     private boolean check(String cap, ServerSession session) throws OXException {

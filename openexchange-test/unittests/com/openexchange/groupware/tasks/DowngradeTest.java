@@ -52,6 +52,7 @@ package com.openexchange.groupware.tasks;
 import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.util.Iterator;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import com.mysql.jdbc.AssertionFailedException;
@@ -67,6 +68,8 @@ import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.folder.FolderToolkit;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserToolkit;
+import com.openexchange.groupware.userconfiguration.AllowAllUserConfiguration;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
@@ -199,7 +202,17 @@ public class DowngradeTest extends TestCase {
     /* ----------------- Test help methods ---------------------*/
 
     private void downgradeDelegate() throws OXException, OXException {
-        final UserConfiguration userConfig = new UserConfiguration(Integer.MAX_VALUE ^ UserConfiguration.DELEGATE_TASKS, user.getId(), user.getGroups(), ctx);
+        
+        final UserConfiguration userConfig = new AllowAllUserConfiguration(user.getId(), user.getGroups(), ctx) {
+            @Override
+            public boolean hasPermission(String name) {
+                if (name.equalsIgnoreCase(Permission.DELEGATE_TASKS.name())) {
+                    return false;
+                }
+                return true;
+            }
+        };
+        
         final Connection con = Database.get(ctx, true);
         try {
             final DowngradeEvent event = new DowngradeEvent(userConfig, con, ctx);
@@ -210,11 +223,15 @@ public class DowngradeTest extends TestCase {
     }
 
     private void downgradeNoTasks() throws OXException, OXException {
-        final UserConfiguration userConfig = new UserConfiguration(
-            Integer.MAX_VALUE ^ UserConfiguration.DELEGATE_TASKS ^ UserConfiguration.TASKS,
-            user.getId(),
-            user.getGroups(),
-            ctx);
+        final UserConfiguration userConfig = new AllowAllUserConfiguration(user.getId(), user.getGroups(), ctx) {
+            @Override
+            public boolean hasPermission(String name) {
+                if (name.equalsIgnoreCase(Permission.DELEGATE_TASKS.name()) || name.equalsIgnoreCase(Permission.TASKS.name())) {
+                    return false;
+                }
+                return true;
+            }
+        };
         final Connection con = Database.get(ctx, true);
         try {
             final DowngradeEvent event = new DowngradeEvent(userConfig, con, ctx);

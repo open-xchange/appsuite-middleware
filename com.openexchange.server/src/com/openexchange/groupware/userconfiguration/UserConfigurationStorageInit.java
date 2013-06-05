@@ -53,7 +53,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.userconfiguration.UserConfiguration.Permission;
 import com.openexchange.server.Initialization;
 
 /**

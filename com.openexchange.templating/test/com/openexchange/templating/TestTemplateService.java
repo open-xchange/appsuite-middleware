@@ -52,12 +52,14 @@ package com.openexchange.templating;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.SimUser;
+import com.openexchange.groupware.userconfiguration.MutableUserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.SimSession;
 import com.openexchange.sim.SimBuilder;
@@ -105,10 +107,10 @@ public class TestTemplateService extends TestCase {
         globalTemplateFolder.setFolderName("Templates");
         globalTemplateFolder.setObjectID(13);
 
-        final UserConfiguration userConfig = new UserConfiguration(0, 0, new int[0], null);
+        final MutableUserConfiguration userConfig = new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null);
         userConfig.setInfostore(true);
 
-        final UserConfiguration noInfostore = new UserConfiguration(0,0,new int[0],null);
+        final MutableUserConfiguration noInfostore = new MutableUserConfiguration(new HashSet<String>(),0,new int[0],null);
         noInfostore.setInfostore(false);
 
         SimSession simSession = new SimSession(1, 1);

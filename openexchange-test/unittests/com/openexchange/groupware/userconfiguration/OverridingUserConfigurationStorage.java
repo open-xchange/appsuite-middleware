@@ -85,30 +85,10 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
     }
 
     @Override
-    public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx, final boolean initExtendedPermissions) throws OXException {
-        final UserConfiguration config = getOverride(userId, groups, ctx, initExtendedPermissions);
-        return config == null ? delegate.getUserConfiguration(userId, groups, ctx, initExtendedPermissions) : config;
-    }
-
-    @Override
     public UserConfiguration[] getUserConfiguration(final Context ctx, final User[] users) throws OXException {
         final List<UserConfiguration> retval = new ArrayList<UserConfiguration>();
         for (final User user : users) {
             retval.add(getUserConfiguration(user.getId(), user.getGroups(), ctx));
-        }
-        return retval.toArray(new UserConfiguration[retval.size()]);
-    }
-
-    @Override
-    UserConfiguration[] getUserConfigurationWithoutExtended(Context ctx, int[] userIds, int[][] groups) throws OXException {
-        List<UserConfiguration> retval = new ArrayList<UserConfiguration>();
-        for (int i = 0; i < userIds.length ; i++) {
-            UserConfiguration config = getOverride(userIds[i], groups[i], ctx, false);
-            if (null == config) {
-                retval.add(delegate.getUserConfiguration(userIds[i], groups[i], ctx, false));
-            } else {
-                retval.add(config);
-            }
         }
         return retval.toArray(new UserConfiguration[retval.size()]);
     }
@@ -119,8 +99,8 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
     }
 
     @Override
-    public void removeUserConfiguration(final int userId, final Context ctx) throws OXException {
-        delegate.removeUserConfiguration(userId,ctx);
+    public void invalidateCache(final int userId, final Context ctx) throws OXException {
+        delegate.invalidateCache(userId,ctx);
     }
 
     public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws OXException {
@@ -137,10 +117,5 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
 
     public void takeBack() throws OXException {
         UserConfigurationStorage.setInstance(delegate);
-    }
-
-    @Override
-    public void saveUserConfiguration(final int permissionBits, final int userId, final Context ctx) throws OXException {
-        delegate.saveUserConfiguration(permissionBits, userId, ctx);
     }
 }

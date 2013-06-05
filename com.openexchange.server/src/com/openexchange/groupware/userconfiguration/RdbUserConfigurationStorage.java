@@ -59,9 +59,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
+import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -79,23 +83,13 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbUserConfigurationStorage.class);
 
-    private static final AtomicBoolean initExtendedPermissions = new AtomicBoolean(true);
-
+    private static CapabilityService capabilities;
     /**
      * Initializes a new {@link RdbUserConfigurationStorage}
      */
-    public RdbUserConfigurationStorage() {
+    public RdbUserConfigurationStorage(CapabilityService capabilities) {
         super();
-    }
-
-    /**
-     * Sets whether to initialize extended permissions. Default is <code>true</code>.
-     *
-     * @param initExtendedPermissions <code>true</code> to initialize extended permissions; else <code>false</code>
-     * @return This storage
-     */
-    public static void setInitExtendedPermissions(final boolean initExtendedPermissions) {
-        RdbUserConfigurationStorage.initExtendedPermissions.set(initExtendedPermissions);
+        this.capabilities = capabilities;
     }
 
     @Override
@@ -111,12 +105,12 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
          * Nothing to stop
          */
     }
-
+    
     @Override
-    public UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx, boolean initExtendedPermissions) throws OXException {
+    public UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx) throws OXException {
         try {
-            return loadUserConfiguration(userId, groups, ctx, initExtendedPermissions, null);
-        } catch (final SQLException e) {
+            return loadUserConfiguration(userId, groups, ctx);
+        } catch (SQLException e) {
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -129,6 +123,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
+    
 
     @Override
     public void clearStorage() {
@@ -138,116 +133,12 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
-    public void removeUserConfiguration(final int userId, final Context ctx) {
+    public void invalidateCache(final int userId, final Context ctx) {
         /*
          * Since this storage implementation directly fetches data from database this method has no effect
          */
     }
-
-    @Override
-    public void saveUserConfiguration(final int permissionBits, final int userId, final Context ctx) throws OXException {
-        saveUserConfiguration0(permissionBits, userId, ctx);
-    }
-
-    /*-
-     * ------------- Methods for saving -------------
-     */
-
-    /**
-     * Saves given user configuration to database. If <code>insert</code> is <code>true</code> an INSERT command is performed, otherwise an
-     * UPDATE command.
-     *
-     * @param userConfig - the user configuration to save
-     * @param insert - <code>true</code> for an INSERT; otherwise UPDATE
-     * @param writeCon - the writable connection; may be <code>null</code>
-     * @throws SQLException - if saving fails due to a SQL error
-     * @throws OXException - if a writable connection could not be obtained from database
-     */
-    public static void saveUserConfiguration(final UserConfiguration userConfig, final boolean insert, final Connection writeCon) throws SQLException, OXException {
-        saveUserConfiguration(userConfig.getPermissionBits(), userConfig.getUserId(), insert, userConfig.getContext(), writeCon);
-    }
-
-    private static final String SQL_SELECT = "SELECT user FROM user_configuration WHERE cid = ? AND user = ?";
-
-    /**
-     * Saves given user configuration to database by self-determining if an INSERT or UPDATE is going to be performed.
-     *
-     * @param permissionBits The permission bits.
-     * @param userId The user ID.
-     * @param ctx The context the user belongs to.
-     * @throws OXException - if saving fails
-     */
-    private static void saveUserConfiguration0(final int permissionBits, final int userId, final Context ctx) throws OXException {
-        boolean insert = false;
-        try {
-            Connection readCon = null;
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            try {
-                readCon = DBPool.pickup(ctx);
-                stmt = readCon.prepareStatement(SQL_SELECT);
-                stmt.setInt(1, ctx.getContextId());
-                stmt.setInt(2, userId);
-                rs = stmt.executeQuery();
-                insert = !rs.next();
-            } finally {
-                closeResources(rs, stmt, readCon, true, ctx);
-            }
-            saveUserConfiguration(permissionBits, userId, insert, ctx, null);
-        } catch (final SQLException e) {
-            throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private static final String INSERT_USER_CONFIGURATION = "INSERT INTO user_configuration (cid, user, permissions) VALUES (?, ?, ?)";
-
-    private static final String UPDATE_USER_CONFIGURATION = "UPDATE user_configuration SET permissions = ? WHERE cid = ? AND user = ?";
-
-    /**
-     * Saves given user configuration to database. If <code>insert</code> is <code>true</code> an INSERT command is performed, otherwise an
-     * UPDATE command.
-     *
-     * @param permissionBits The permission bits.
-     * @param userId The user ID.
-     * @param insert - <code>true</code> for an INSERT; otherwise UPDATE
-     * @param ctx - the context
-     * @param writeConArg - the writable connection; may be <code>null</code>
-     * @throws SQLException If saving fails due to a SQL error
-     * @throws OXException If a writable connection could not be obtained from database
-     */
-    public static void saveUserConfiguration(final int permissionBits, final int userId, final boolean insert, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
-        Connection writeCon = writeConArg;
-        boolean closeConnection = false;
-        PreparedStatement stmt = null;
-        try {
-            if (writeCon == null) {
-                writeCon = DBPool.pickupWriteable(ctx);
-                closeConnection = true;
-            }
-            if (insert) {
-                stmt = writeCon.prepareStatement(INSERT_USER_CONFIGURATION);
-                stmt.setInt(1, ctx.getContextId());
-                stmt.setInt(2, userId);
-                stmt.setInt(3, permissionBits);
-            } else {
-                stmt = writeCon.prepareStatement(UPDATE_USER_CONFIGURATION);
-                stmt.setInt(1, permissionBits);
-                stmt.setInt(2, ctx.getContextId());
-                stmt.setInt(3, userId);
-            }
-            stmt.executeUpdate();
-            if (!insert) {
-                try {
-                    UserConfigurationStorage.getInstance().removeUserConfiguration(userId, ctx);
-                } catch (final OXException e) {
-                    LOG.warn("User Configuration could not be removed from cache", e);
-                }
-            }
-        } finally {
-            closeResources(null, stmt, closeConnection ? writeCon : null, false, ctx);
-        }
-    }
-
+    
     /*-
      * ------------- Methods for loading -------------
      */
@@ -281,83 +172,20 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
         return loadUserConfiguration(userId, groups, ctx, true, null);
     }
 
-    /**
-     * Special method invoked by admin to load user configuration since no exception is thrown if no matching config could be found. In this
-     * case an instance of {@link UserConfiguration} is returned that does not hold any permissions.
-     *
-     * @param userId - the user ID
-     * @param groups - the group IDs the user belongs to; may be <code>null</code>
-     * @param cid - the context ID
-     * @param readConArg - the readable context; may be <code>null</code>
-     * @return the instance of <code>{@link UserConfiguration}</code>
-     * @throws SQLException - if user configuration could not be loaded from database
-     * @throws OXException - if a readable connection could not be obtained from connection pool
-     */
-    public static UserConfiguration adminLoadUserConfiguration(final int userId, final int[] groups, final int cid, final Connection readConArg) throws SQLException, OXException {
-        final Context ctx = new ContextImpl(cid);
-        Connection readCon = readConArg;
-        boolean closeReadCon = false;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            if (readCon == null) {
-                readCon = DBPool.pickup(ctx);
-                closeReadCon = true;
-            }
-            stmt = readCon.prepareStatement(LOAD_USER_CONFIGURATION);
-            stmt.setInt(1, ctx.getContextId());
-            stmt.setInt(2, userId);
-            rs = stmt.executeQuery();
-            final UserConfiguration uc = rs.next() ? new UserConfiguration(rs.getInt(1), userId, groups, ctx) : new UserConfiguration(0, userId, groups, ctx);
-            if (initExtendedPermissions.get()) {
-                uc.setExtendedPermissions(uc.calcExtendedPermissions());
-            }
-            return uc;
-        } finally {
-            closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
-        }
+    private static Set<String> getCapabilities(final int userId, final int cid) throws OXException {
+        return stringify(capabilities.getCapabilities(userId, cid));
     }
 
-    /**
-     * Counts all users with the permission as set in {@link UserConfiguration} object
-     *
-     * @param cid - the context id
-     * @param userconf {@link UserConfiguration} object containing set of permissions to count
-     * @param readConArg - the readable context; may be <code>null</code>
-     * @return number of users with permission as set in {@link UserConfiguration}
-     * @throws SQLException
-     * @throws OXException
-     */
-    public static int adminCountUsersByPermission(final int cid, final UserConfiguration userconf, final Connection readConArg) throws SQLException, OXException {
-        final Context ctx = new ContextImpl(cid);
-        Connection readCon = readConArg;
-        boolean closeReadCon = false;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            if (readCon == null) {
-                readCon = DBPool.pickup(ctx);
-                closeReadCon = true;
-            }
-            stmt = readCon.prepareStatement(COUNT_USERS_BY_PERMISSION);
-            stmt.setInt(1, ctx.getContextId());
-            stmt.setInt(2, userconf.getPermissionBits());
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return -1;
-        } finally {
-            closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
+    private static Set<String> stringify(Set<Capability> capabilities2) {
+        Set<String> set = new HashSet<String>(capabilities2.size());
+        for (Capability capability : capabilities2) {
+            set.add(capability.getId().toLowerCase());
         }
+        
+        return set;
     }
 
     private static final String LOAD_USER_CONFIGURATION = "SELECT permissions FROM user_configuration WHERE cid = ? AND user = ?";
-
-    private static final String LOAD_SOME_USER_CONFIGURATIONS = "SELECT user,permissions FROM user_configuration WHERE cid=? AND user IN (";
-
-    private static final String COUNT_USERS_BY_PERMISSION =
-        "SELECT COUNT(permissions) FROM user_configuration WHERE cid = ? AND permissions = ?";
 
     /**
      * Loads the user configuration from database specified through user ID and context
@@ -391,10 +219,8 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
             if (!rs.next()) {
                 throw UserConfigurationCodes.NOT_FOUND.create(Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
             }
-            final UserConfiguration userConfiguration = new UserConfiguration(rs.getInt(1), userId, groups, ctx);
-            if (calcPerms && initExtendedPermissions.get()) {
-                userConfiguration.setExtendedPermissions(userConfiguration.calcExtendedPermissions());
-            }
+            final UserConfiguration userConfiguration = new UserConfiguration(getCapabilities(userId, ctx.getContextId()), userId, groups, ctx);
+            
             return userConfiguration;
         } finally {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
@@ -453,16 +279,14 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
                 stmt.setInt(1, ctx.getContextId());
             }
             result = stmt.executeQuery();
-            final boolean initExtPerms = initExtendedPermissions.get();
+            
             while (result.next()) {
                 final int userId = result.getInt(1);
                 if (userMap.containsKey(userId)) {
                     final int index = userMap.get(userId);
                     final User user = users[index];
-                    final UserConfiguration userConfiguration = new UserConfiguration(result.getInt(2), user.getId(), user.getGroups(), ctx);
-                    if (initExtPerms) {
-                        userConfiguration.setExtendedPermissions(userConfiguration.calcExtendedPermissions());
-                    }
+                    final UserConfiguration userConfiguration = new UserConfiguration(getCapabilities(user.getId(), ctx.getContextId()), user.getId(), user.getGroups(), ctx);
+                    
                     retval[index] = userConfiguration;
                 }
             }
@@ -471,111 +295,4 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
         }
         return retval;
     }
-
-    @Override
-    UserConfiguration[] getUserConfigurationWithoutExtended(Context ctx, int[] userIds, int[][] groups) throws OXException {
-        if (0 == userIds.length) {
-            return new UserConfiguration[0];
-        }
-        Connection con = Database.get(ctx, false);
-        try {
-            return loadUserConfigurationWithoutExtended(ctx, con, userIds, groups);
-        } catch (SQLException e) {
-            throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            Database.back(ctx, false, con);
-        }
-    }
-
-    private static UserConfiguration[] loadUserConfigurationWithoutExtended(Context ctx, Connection con, int[] userIds, int[][] groupsArg) throws OXException, SQLException {
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            final int length = userIds.length;
-            final TIntIntMap userMap;
-            if (length <= LIMIT) {
-                stmt = con.prepareStatement(getIN("SELECT user,permissions FROM user_configuration WHERE cid=? AND user IN (", length));
-                int pos = 1;
-                stmt.setInt(pos++, ctx.getContextId());
-                userMap = new TIntIntHashMap(length, 1);
-                for (int i = 0; i < length; i++) {
-                    stmt.setInt(pos++, userIds[i]);
-                    userMap.put(userIds[i], i);
-                }
-            } else {
-                stmt = con.prepareStatement("SELECT user,permissions FROM user_configuration WHERE cid=?");
-                stmt.setInt(1, ctx.getContextId());
-                userMap = new TIntIntHashMap(length, 1);
-                for (int i = 0; i < length; i++) {
-                    userMap.put(userIds[i], i);
-                }
-            }
-            result = stmt.executeQuery();
-            final List<UserConfiguration> list = new ArrayList<UserConfiguration>(length);
-            while (result.next()) {
-                final int userId = result.getInt(1);
-                if (userMap.containsKey(userId)) {
-                    final int pos = userMap.get(userId);
-                    final int[] groups = groupsArg[pos] == null ? UserStorage.getInstance().getUser(userId, ctx).getGroups() : groupsArg[pos];
-                    list.add(new UserConfiguration(result.getInt(2), userId, groups, ctx));
-                }
-            }
-            return list.toArray(new UserConfiguration[0]);
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
-    }
-
-    /*-
-     * ------------- Methods for deleting -------------
-     */
-
-    /**
-     * Deletes the user configuration from database specified through ID and context. This is a convenience method that delegates invokation
-     * to <code>{@link #deleteUserConfiguration(int, Connection, Context)}</code>. whereby connection is set to <code>null</code>, thus a
-     * new writeable connection is going to be obtained from connection pool.
-     *
-     * @param userId - the user ID
-     * @param ctx - the context
-     * @throws SQLException - if user configuration cannot be removed from database
-     * @throws OXException If no writeable connection could be obtained
-     */
-    public static void deleteUserConfiguration(final int userId, final Context ctx) throws SQLException, OXException {
-        RdbUserConfigurationStorage.deleteUserConfiguration(userId, null, ctx);
-    }
-
-    private static final String DELETE_USER_CONFIGURATION = "DELETE FROM user_configuration WHERE cid = ? AND user = ?";
-
-    /**
-     * Deletes the user configuration from database specified through ID and context.
-     *
-     * @param userId - the user ID
-     * @param writeConArg - the writeable connection
-     * @param ctx - the context
-     * @throws SQLException - if user configuration cannot be removed from database
-     * @throws OXException - if no writeable connection could be obtained
-     */
-    public static void deleteUserConfiguration(final int userId, final Connection writeConArg, final Context ctx) throws SQLException, OXException {
-        Connection writeCon = writeConArg;
-        boolean closeWriteCon = false;
-        PreparedStatement stmt = null;
-        try {
-            if (writeCon == null) {
-                writeCon = DBPool.pickupWriteable(ctx);
-                closeWriteCon = true;
-            }
-            stmt = writeCon.prepareStatement(DELETE_USER_CONFIGURATION);
-            stmt.setInt(1, ctx.getContextId());
-            stmt.setInt(2, userId);
-            stmt.executeUpdate();
-            try {
-                UserConfigurationStorage.getInstance().removeUserConfiguration(userId, ctx);
-            } catch (final OXException e) {
-                LOG.warn("User Configuration could not be removed from cache", e);
-            }
-        } finally {
-            closeResources(null, stmt, closeWriteCon ? writeCon : null, false, ctx);
-        }
-    }
-
 }

@@ -59,7 +59,17 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface CapabilityService {
-
+    
+    /**
+     * Gets the capabilities associated with given user.
+     *
+     * @param userId
+     * @param contextId
+     * @return The capabilities
+     * @throws OXException If capabilities cannot be determined
+     */
+    Set<Capability> getCapabilities(int userId, int contextId) throws OXException;
+    
     /**
      * Gets the capabilities associated with given session.
      *
@@ -68,7 +78,7 @@ public interface CapabilityService {
      * @throws OXException If capabilities cannot be determined
      */
     Set<Capability> getCapabilities(Session session) throws OXException;
-
+    
     /**
      * Declares specified capability.
      *

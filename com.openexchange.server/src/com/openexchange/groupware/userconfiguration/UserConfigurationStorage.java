@@ -198,36 +198,9 @@ public abstract class UserConfigurationStorage {
      * @throws OXException If user's configuration could not be
      *             determined
      */
-    public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws OXException {
-        return getUserConfiguration(userId, groups, ctx, true);
-    }
-
-    /**
-     * Determines the instance of <code>UserConfiguration</code> that
-     * corresponds to given user ID. If <code>groups</code> argument is set,
-     * user's groups need not to be loaded from user storage
-     *
-     * @param userId - the user ID
-     * @param groups - user's groups
-     * @param ctx - the context
-     * @param initExtendedPermissions - Whether to initialize extended permissions
-     * @return the instance of <code>UserConfiguration</code>
-     * @throws OXException If user's configuration could not be determined
-     */
-    public abstract UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx, boolean initExtendedPermissions) throws OXException;
+    public abstract UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws OXException;
 
     public abstract UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws OXException;
-
-    /**
-     * Loads the {@link UserConfiguration} for a lot of users. The extended permissions will not be initialized. This is a special method
-     * to improve performance of the caching layer. Therefore package private.
-     * @param ctx the context
-     * @param userIds an array of user identifier for that the configuration should be loaded.
-     * @param groups the corresponding array of groups for the given user identifier.
-     * @return the corresponding array of {@link UserConfiguration}s.
-     * @throws OXException if loading the data from the database fails somehow.
-     */
-    abstract UserConfiguration[] getUserConfigurationWithoutExtended(Context ctx, int[] userIds, int[][] groups) throws OXException;
 
     /**
      * <p>
@@ -253,29 +226,7 @@ public abstract class UserConfigurationStorage {
      * @param ctx - the context
      * @throws OXException If removal fails
      */
-    public abstract void removeUserConfiguration(int userId, Context ctx) throws OXException;
+    public abstract void invalidateCache(int userId, Context ctx) throws OXException;
 
-    /**
-     * Saves specified user configuration.
-     *
-     * @param userConfiguration The user configuration to save.
-     * @throws OXException If saving user configuration fails.
-     */
-    public final void saveUserConfiguration(final UserConfiguration userConfiguration)
-            throws OXException {
-        saveUserConfiguration(userConfiguration.getPermissionBits(), userConfiguration.getUserId(), userConfiguration
-                .getContext());
-    }
-
-    /**
-     * Saves specified user configuration.
-     *
-     * @param permissionBits The permission bits.
-     * @param userId The user ID.
-     * @param ctx The context the user belongs to.
-     * @throws OXException If saving user configuration fails.
-     */
-    public abstract void saveUserConfiguration(int permissionBits, int userId, Context ctx)
-            throws OXException;
 
 }

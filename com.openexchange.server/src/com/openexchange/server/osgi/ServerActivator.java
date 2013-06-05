@@ -205,7 +205,9 @@ import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
+import com.openexchange.userconf.internal.UserPermissionServiceImpl;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.spring.SpringParser;
 
@@ -540,6 +542,12 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(
             UserConfigurationService.class,
             ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
+
+        ServerServiceRegistry.getInstance().addService(UserPermissionService.class, new UserPermissionServiceImpl());
+        registerService(
+            UserPermissionService.class,
+            ServerServiceRegistry.getInstance().getService(UserPermissionService.class, true));
+        
         registerService(ContextService.class, ServerServiceRegistry.getInstance().getService(ContextService.class, true));
         // Register mail stuff
         {

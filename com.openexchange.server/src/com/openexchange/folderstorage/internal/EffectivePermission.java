@@ -65,6 +65,7 @@ import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreFacades;
+import com.openexchange.groupware.userconfiguration.AllowAllUserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
@@ -257,7 +258,7 @@ public final class EffectivePermission implements Permission {
             try {
                 userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(getEntity(), context);
             } catch (final OXException e) {
-                userConfig = new UserConfiguration(0xFFFFFFFF, getEntity(), null, context);
+                userConfig = new AllowAllUserConfiguration(getEntity(), null, context);
             }
         }
         return userConfig;

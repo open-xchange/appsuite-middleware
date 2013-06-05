@@ -60,6 +60,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.SessionObject;
 
 /**
  * {@link ServerSessionAdapter}
@@ -114,6 +115,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         }
         return null == session ? null : new ServerSessionAdapter(session, context, user);
     }
+    
 
     /**
      * Gets the server session for specified session.
@@ -130,6 +132,10 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         }
         return null == session ? null : new ServerSessionAdapter(session, context, user, userConfiguration);
     }
+    
+    public static ServerSession valueOf(int userId, int contextId) throws OXException {
+        return new ServerSessionAdapter(userId, contextId);
+    }
 
     private final Session session;
     private final Context ctx;
@@ -138,6 +144,18 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
     private volatile UserSettingMail userSettingMail;
     private final ServerSession serverSession;
 
+    public ServerSessionAdapter(final int userId, final int contextId) throws OXException {
+        super();
+        
+        this.session = new SessionObject("synthetic") {
+            public int getUserId() { return userId; };
+            public int getContextId() {return contextId; };
+        };
+        this.serverSession = null;
+        
+        ctx = contextId > 0 ? ContextStorage.getStorageContext(contextId) : null;
+    }
+    
     /**
      * Initializes a new {@link ServerSessionAdapter}.
      *

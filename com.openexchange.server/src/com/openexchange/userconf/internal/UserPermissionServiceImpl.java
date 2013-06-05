@@ -47,38 +47,41 @@
  *
  */
 
-package com.openexchange.config.cascade.context.matching;
+package com.openexchange.userconf.internal;
 
-import java.util.Arrays;
-import java.util.Set;
-import junit.framework.TestCase;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.userconf.UserPermissionService;
 
 
 /**
- * {@link UserConfigurationAnalyzerTest}
+ * {@link UserPermissionServiceImpl}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class UserConfigurationAnalyzerTest extends TestCase {
-    public void testSample() {
-        UserPermissionBits config = new UserPermissionBits(0, 0, 0);
-        config.setActiveSync(true);
-        config.setEditPassword(true);
-        config.setInfostore(true);
-        config.setWebDAVXML(true);
+public class UserPermissionServiceImpl implements UserPermissionService {
 
-        UserConfigurationAnalyzer analyzer = new UserConfigurationAnalyzer();
-
-        Set<String> tags = analyzer.getTags(config);
-
-        for(String tag : Arrays.asList("ucActiveSync", "ucEditPassword", "ucInfostore", "ucWebDAVXML")) {
-            assertTrue(tags.toString()+ " did not contain "+tag, tags.remove(tag));
-        }
-
-        assertTrue(tags.toString()+" were not expected", tags.isEmpty());
-
-
+    @Override
+    public UserPermissionBits getUserPermissionBits(int userId, Context ctx) throws OXException {
+        return UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
     }
+
+    @Override
+    public UserPermissionBits[] getUserPermissionBits(Context ctx, User[] users) throws OXException {
+        return UserPermissionBitsStorage.getInstance().getUserPermissionBits(ctx, users);
+    }
+
+    @Override
+    public void clearStorage() throws OXException {
+        UserPermissionBitsStorage.getInstance().clearStorage();
+    }
+
+    @Override
+    public void removeUserPermissionBits(int userId, Context ctx) throws OXException {
+        UserPermissionBitsStorage.getInstance().removeUserPermissionBits(userId, ctx);
+    }
+
 }

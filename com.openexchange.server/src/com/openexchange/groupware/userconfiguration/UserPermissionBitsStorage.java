@@ -47,38 +47,31 @@
  *
  */
 
-package com.openexchange.config.cascade.context.matching;
+package com.openexchange.groupware.userconfiguration;
 
-import java.util.Arrays;
-import java.util.Set;
-import junit.framework.TestCase;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 
 /**
- * {@link UserConfigurationAnalyzerTest}
+ * {@link UserPermissionBitsStorage}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class UserConfigurationAnalyzerTest extends TestCase {
-    public void testSample() {
-        UserPermissionBits config = new UserPermissionBits(0, 0, 0);
-        config.setActiveSync(true);
-        config.setEditPassword(true);
-        config.setInfostore(true);
-        config.setWebDAVXML(true);
-
-        UserConfigurationAnalyzer analyzer = new UserConfigurationAnalyzer();
-
-        Set<String> tags = analyzer.getTags(config);
-
-        for(String tag : Arrays.asList("ucActiveSync", "ucEditPassword", "ucInfostore", "ucWebDAVXML")) {
-            assertTrue(tags.toString()+ " did not contain "+tag, tags.remove(tag));
-        }
-
-        assertTrue(tags.toString()+" were not expected", tags.isEmpty());
-
-
+public abstract class UserPermissionBitsStorage {
+    
+    public static UserPermissionBitsStorage getInstance() {
+        return null; // TODO
     }
+    
+    public abstract UserPermissionBits getUserPermissionBits( final int userId, final Context ctx) throws OXException;
+
+    public abstract UserPermissionBits[] getUserPermissionBits(final Context ctx, final User[] users) throws OXException;
+
+    public abstract void clearStorage();
+
+    public abstract void removeUserPermissionBits(final int userId, final Context ctx) throws OXException;
+
+    public abstract void saveUserPermissionBits(final int permissionBits, final int userId, final Context ctx) throws OXException;
+
 }

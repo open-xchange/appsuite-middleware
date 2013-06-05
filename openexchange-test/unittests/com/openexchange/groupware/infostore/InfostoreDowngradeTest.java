@@ -51,6 +51,7 @@ package com.openexchange.groupware.infostore;
 import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -120,7 +121,7 @@ public class InfostoreDowngradeTest extends TestCase {
     }
 
     private void runDelete() {
-        final UserConfiguration config = new UserConfiguration(0, userId,userConfig.getGroups() , ctx);
+        final UserConfiguration config = new UserConfiguration(new HashSet<String>(), userId,userConfig.getGroups() , ctx);
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(ctx);

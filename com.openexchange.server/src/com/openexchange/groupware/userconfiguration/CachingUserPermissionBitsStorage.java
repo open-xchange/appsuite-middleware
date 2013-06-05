@@ -47,38 +47,63 @@
  *
  */
 
-package com.openexchange.config.cascade.context.matching;
+package com.openexchange.groupware.userconfiguration;
 
-import java.util.Arrays;
-import java.util.Set;
-import junit.framework.TestCase;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 
 
 /**
- * {@link UserConfigurationAnalyzerTest}
+ * {@link CachingUserPermissionBitsStorage}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class UserConfigurationAnalyzerTest extends TestCase {
-    public void testSample() {
-        UserPermissionBits config = new UserPermissionBits(0, 0, 0);
-        config.setActiveSync(true);
-        config.setEditPassword(true);
-        config.setInfostore(true);
-        config.setWebDAVXML(true);
+public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage {
 
-        UserConfigurationAnalyzer analyzer = new UserConfigurationAnalyzer();
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage#getUserPermissionBits(int, com.openexchange.groupware.contexts.Context)
+     */
+    @Override
+    public UserPermissionBits getUserPermissionBits(int userId, Context ctx) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-        Set<String> tags = analyzer.getTags(config);
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage#getUserPermissionBits(com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User[])
+     */
+    @Override
+    public UserPermissionBits[] getUserPermissionBits(Context ctx, User[] users) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-        for(String tag : Arrays.asList("ucActiveSync", "ucEditPassword", "ucInfostore", "ucWebDAVXML")) {
-            assertTrue(tags.toString()+ " did not contain "+tag, tags.remove(tag));
-        }
-
-        assertTrue(tags.toString()+" were not expected", tags.isEmpty());
-
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage#clearStorage()
+     */
+    @Override
+    public void clearStorage() {
+        // TODO Auto-generated method stub
 
     }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage#removeUserPermissionBits(int, com.openexchange.groupware.contexts.Context)
+     */
+    @Override
+    public void removeUserPermissionBits(int userId, Context ctx) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage#saveUserPermissionBits(int, int, com.openexchange.groupware.contexts.Context)
+     */
+    @Override
+    public void saveUserPermissionBits(int permissionBits, int userId, Context ctx) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
 }
