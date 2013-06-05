@@ -465,6 +465,9 @@ public final class RateLimiter {
             if (lc.startsWith("open-xchange .net http client")) {
                 return true;
             }
+            if (lc.startsWith("open-xchange usm http client")) {
+                return true;
+            }
             if (lc.startsWith("jakarta commons-httpclient")) {
                 return true;
             }
