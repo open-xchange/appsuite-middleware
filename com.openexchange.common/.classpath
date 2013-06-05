@@ -39,7 +39,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/commons-collections-3.2.1.jar" sourcepath="source/commons-collections-3.2.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/trove-3.0.3.jar" sourcepath="source/trove-3.0.3-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/chardet-1.1.jar" sourcepath="source/chardet-1.1-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/tnef-1.8.0.jar" sourcepath="source/tnef-1.8.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tnef-1.8.0.jar" sourcepath="source/tnef-1_8_0-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-fileupload-1.2.1.jar" sourcepath="lib/commons-fileupload-1.2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-httpclient-3.1.jar" sourcepath="source/commons-httpclient-3.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jakarta-slide-webdavlib-2.1.jar"/>
