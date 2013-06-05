@@ -281,7 +281,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
      */
     @Override
     public String[] requiredTables() {
-        return new String[] { TABLE_PRG_DATES, TABLE_DEL_DATES };
+        return NO_TABLES;
     }
 
     /**
