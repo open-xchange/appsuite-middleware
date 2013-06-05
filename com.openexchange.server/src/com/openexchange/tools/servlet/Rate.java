@@ -185,7 +185,7 @@ public class Rate {
                 return Result.DEPRECATED;
             }
             final long callTime = callTime(now);
-            callHistory.offerLast(Long.valueOf(callTime));
+            callHistory.offerLast(Long.valueOf(now));
             return ((callTime - now) <= 0) ? Result.SUCCESS : Result.FAILED;
         }
     }
