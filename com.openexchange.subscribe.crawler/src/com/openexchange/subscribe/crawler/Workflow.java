@@ -53,7 +53,6 @@ import java.security.GeneralSecurityException;
 import java.util.List;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.ho.yaml.Yaml;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.BrowserVersionFeatures;
@@ -66,6 +65,7 @@ import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.ThreadedRefreshHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.crawler.internal.HasLoginPage;
@@ -208,23 +208,10 @@ public class Workflow {
 
             webClient.closeAllWindows();
             return (Object[]) result;
-        }
-        catch (NullPointerException e) {
-            LOG.error(e);
-            String stacktrace = "";
-            for (StackTraceElement element : e.getStackTrace()){
-                stacktrace += element + "\n";
-            }
-            LOG.error(stacktrace);
-            LOG.error("User with id="+subscription.getUserId()+ " and context="+ subscription.getContext()+" failed to subscribe source="+subscription.getSource().getDisplayName()+" with display_name="+subscription.getDisplayName());
-            throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
-        }
-        catch (ClassCastException e) {
-            LOG.error(e);
-            LOG.error("User with id="+subscription.getUserId()+ " and context="+ subscription.getContext()+" failed to subscribe source="+subscription.getSource().getDisplayName()+" with display_name="+subscription.getDisplayName());
-            throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
-        }
-        finally {
+        } catch (RuntimeException e) {
+            LOG.error("User with id="+subscription.getUserId()+ " and context="+ subscription.getContext()+" failed to subscribe source="+subscription.getSource().getDisplayName()+" with display_name="+subscription.getDisplayName(), e);
+            throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create(e);
+        } finally {
             /*MultiThreadedHttpConnectionManager manager = (MultiThreadedHttpConnectionManager) crawlerConnection.getHttpClient().getHttpConnectionManager();
             manager.shutdown(); */
         }
