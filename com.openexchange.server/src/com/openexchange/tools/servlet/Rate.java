@@ -105,11 +105,10 @@ public class Rate {
             return now;
         }
         final long lastStart = callHistory.peekLast().longValue() - timeInMillis;
-        long firstPeriodCall = lastStart, call;
+        long firstPeriodCall = lastStart;
         int count = 0;
-        final Iterator<Long> i = callHistory.descendingIterator();
-        while (i.hasNext()) {
-            call = i.next().longValue();
+        for (final Iterator<Long> i = callHistory.descendingIterator(); i.hasNext();) {
+            final long call = i.next().longValue();
             if (call < lastStart) {
                 break;
             }
@@ -188,6 +187,29 @@ public class Rate {
             callHistory.offerLast(Long.valueOf(callTime));
             return ((callTime - now) <= 0) ? Result.SUCCESS : Result.FAILED;
         }
+    }
+
+
+    // ----------------------------------------------------------------------------- //
+
+    public static void main(String[] args) {
+        Rate rate = new Rate(5, 5, TimeUnit.SECONDS);
+
+        long callTime = System.currentTimeMillis();
+
+        for (int i = 0; i < 6; i++) {
+            System.out.println(rate.consume(callTime));
+            callTime += 100;
+        }
+        System.out.println("-------------------------");
+
+        callTime += 6000;
+
+        for (int i = 0; i < 6; i++) {
+            System.out.println(rate.consume(callTime));
+            callTime += 100;
+        }
+        System.out.println("-------------------------");
     }
 
 }
