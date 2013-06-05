@@ -69,8 +69,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.servlet.Rate.Result;
@@ -230,11 +228,11 @@ public final class RateLimiter {
         final List<String> parts;
         private final int hash;
 
-        Key(final HttpServletRequest servletRequest) {
+        Key(final HttpServletRequest servletRequest, final String userAgent) {
             super();
             remotePort = considerRemotePort() ? servletRequest.getRemotePort() : 0;
             remoteAddr = servletRequest.getRemoteAddr();
-            userAgent = servletRequest.getHeader("User-Agent");
+            this.userAgent = userAgent;
 
             final List<String> parts;
             {
@@ -434,11 +432,12 @@ public final class RateLimiter {
         if (omitLocals() && LOCALS.contains(servletRequest.getServerName())) {
             return true;
         }
-        if (lenientCheckForClient(servletRequest)) {
+        final String userAgent = servletRequest.getHeader("User-Agent");
+        if (lenientCheckForUserAgent(userAgent)) {
             maxRatePerMinute <<= 2;
         }
         final ConcurrentMap<Key, Rate> bucketMap = bucketMap();
-        final Key key = new Key(servletRequest);
+        final Key key = new Key(servletRequest, userAgent);
         while (true) {
             Rate rate = bucketMap.get(key);
             if (null == rate) {
@@ -460,16 +459,14 @@ public final class RateLimiter {
         }
     }
 
-    private static boolean lenientCheckForClient(final HttpServletRequest servletRequest) {
-        final SessiondService service = SessiondService.SERVICE_REFERENCE.get();
-        if (null != service) {
-            final String sessionId = servletRequest.getParameter(PARAMETER_SESSION);
-            final Session session = null == sessionId ? null : service.getSession(sessionId);
-            if (null != session) {
-                final String client = toLowerCase(session.getClient());
-                if (client != null && (client.startsWith("usm-json") || client.startsWith("usm-eas"))) {
-                    return true;
-                }
+    private static boolean lenientCheckForUserAgent(final String userAgent) {
+        if (null != userAgent) {
+            final String lc = toLowerCase(userAgent);
+            if (lc.startsWith("open-xchange .net http client")) {
+                return true;
+            }
+            if (lc.startsWith("jakarta commons-httpclient")) {
+                return true;
             }
         }
         return false;
