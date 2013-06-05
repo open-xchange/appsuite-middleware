@@ -51,7 +51,6 @@ package com.openexchange.admin.console;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
@@ -711,15 +710,13 @@ public class StatisticTools extends AbstractJMXTools {
      * @throws AttributeNotFoundException - thrown while trying to get the attribute from {@link MBeanServerConnection}
      */
     private void showGcData(MBeanServerConnection mbeanServerConnection) throws MalformedObjectNameException, IOException, InstanceNotFoundException, IntrospectionException, AttributeNotFoundException, MBeanException, ReflectionException {
-        RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
-        long uptime = runtimeMxBean.getUptime();
-        int uptimeHours = (int) (uptime  / (1000*60*60));
+        final StringBuilder stringBuilder = new StringBuilder();
+
+        int uptimeHours = getUptimeHours(mbeanServerConnection);
+        stringBuilder.append(ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE + ",hoursUptime=" + uptimeHours + "\n");
 
         ObjectName domainType = new ObjectName(ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE + ",*");
         Set<ObjectInstance> mbeans = mbeanServerConnection.queryMBeans(domainType, null);
-
-        final StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE + ", hoursUptime=" + uptimeHours + "\n");
 
         for (ObjectInstance mbean : mbeans) {
             ObjectName objectName = mbean.getObjectName();
@@ -729,8 +726,7 @@ public class StatisticTools extends AbstractJMXTools {
                 Object attribute = mbeanServerConnection.getAttribute(objectName, attributeInfo.getName());
 
                 if (attribute != null) {
-                    stringBuilder.append(objectName.getCanonicalName()).append(",").append(
-                        attributeInfo.getName()).append(" = ");
+                    stringBuilder.append(objectName.getCanonicalName()).append(",").append(attributeInfo.getName()).append(" = ");
 
                     if (attribute instanceof CompositeDataSupport) {
                         final CompositeDataSupport compositeDataSupport = (CompositeDataSupport) attribute;
@@ -745,19 +741,17 @@ public class StatisticTools extends AbstractJMXTools {
                         final long[] longArray = (long[]) attribute;
                         stringBuilder.append(Arrays.toString(longArray) + "\n");
                     } else {
-                        if (attributeInfo.getName().equalsIgnoreCase("collectioncount") ||
-                            attributeInfo.getName().equalsIgnoreCase("collectiontime")) {
+                        if (attributeInfo.getName().equalsIgnoreCase("collectioncount") || attributeInfo.getName().equalsIgnoreCase(
+                            "collectiontime")) {
                             if (attribute instanceof Long) {
-                                Long attributeValue = (Long)attribute;
+                                Long attributeValue = (Long) attribute;
                                 if (uptimeHours > 0) {
                                     stringBuilder.append((attributeValue / uptimeHours) + "\n");
-                                }
-                                else {
+                                } else {
                                     stringBuilder.append(0 + "\n");
                                 }
                             }
-                        }
-                        else {
+                        } else {
                             stringBuilder.append(attribute.toString() + "\n");
                         }
                     }
@@ -765,6 +759,39 @@ public class StatisticTools extends AbstractJMXTools {
             }
         }
         System.out.println(stringBuilder.toString());
+    }
+
+    /**
+     * @param mbeanServerConnection
+     * @param uptimeHours
+     * @return
+     * @throws MalformedObjectNameException
+     * @throws IOException
+     * @throws InstanceNotFoundException
+     * @throws IntrospectionException
+     * @throws ReflectionException
+     * @throws MBeanException
+     * @throws AttributeNotFoundException
+     */
+    private int getUptimeHours(MBeanServerConnection mbeanServerConnection) throws MalformedObjectNameException, IOException, InstanceNotFoundException, IntrospectionException, ReflectionException, MBeanException, AttributeNotFoundException {
+        int uptimeHours = 0;
+
+        ObjectName domainTypeRuntime = new ObjectName(ManagementFactory.RUNTIME_MXBEAN_NAME + ",*");
+        Set<ObjectInstance> mbeansRuntime = mbeanServerConnection.queryMBeans(domainTypeRuntime, null);
+        for (ObjectInstance mbean : mbeansRuntime) {
+            ObjectName objectName = mbean.getObjectName();
+            MBeanInfo beanInfo = mbeanServerConnection.getMBeanInfo(objectName);
+            for (MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
+                if (attributeInfo.getName().equalsIgnoreCase("uptime")) {
+                    Object attribute = mbeanServerConnection.getAttribute(objectName, attributeInfo.getName());
+                    if (attribute instanceof Long) {
+                        Long value = (Long) attribute;
+                        uptimeHours = (int) (value / (1000 * 60 * 60));
+                    }
+                }
+            }
+        }
+        return uptimeHours;
     }
 
     private static String extractTextInBrackets(String value, int startIdx) {

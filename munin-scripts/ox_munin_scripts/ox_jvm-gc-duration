@@ -23,10 +23,30 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 	print "graph_args --base 1024 -l 0\n";
 	print "graph_category Open Xchange\n";
 	print "graph_vlabel GC Duration\n";
-	print "a.label ConcurrentMarkSweep\n";
+
+	print "a.label Copy\n";
 	print "a.draw LINE1\n";
-	print "b.label ParNew\n";
+
+	print "b.label MarkSweepCompact\n";
 	print "b.draw LINE1\n";
+
+	print "c.label PS MarkSweep\n";
+	print "c.draw LINE1\n";
+
+	print "d.label PS Scavenge\n";
+	print "d.draw LINE1\n";
+
+	print "e.label ConcurrentMarkSweep\n";
+	print "e.draw LINE1\n";
+
+	print "f.label ParNew\n";
+	print "f.draw LINE1\n";
+
+	print "g.label G1 Old Generation\n";
+	print "g.draw LINE1\n";
+
+	print "h.label G1 Young Generation\n";
+	print "h.draw LINE1\n";
 	exit 0
 }
 									
@@ -35,18 +55,60 @@ open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";
 
 while (<SHOWRUNTIME>)
 {
-	if ( $_ =~ /ConcurrentMarkSweep,type=GarbageCollector,LastGcInfo /) {
+	if ( $_ =~ /Copy,type=GarbageCollector,LastGcInfo /) {
 		s/.*\=//; 
 		s/].*//;
 		$val=$_+0;
 		print "a.value $val\n";
 		next;
 	}
-	if ( $_ =~ /ParNew,type=GarbageCollector,LastGcInfo /) {
+	if ( $_ =~ /MarkSweepCompact,type=GarbageCollector,LastGcInfo /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "b.value $val\n";
+		next;
+	}
+	if ( $_ =~ /PS MarkSweep,type=GarbageCollector,LastGcInfo /) {
 		s/.*\=//; 
 		s/].*//;
 		$val=$_+0;
 		print "c.value $val\n";
+		next;
+	}
+	if ( $_ =~ /PS Scavenge,type=GarbageCollector,LastGcInfo /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "d.value $val\n";
+		next;
+	}
+	if ( $_ =~ /ConcurrentMarkSweep,type=GarbageCollector,LastGcInfo /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "e.value $val\n";
+		next;
+	}
+	if ( $_ =~ /ParNew,type=GarbageCollector,LastGcInfo /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "f.value $val\n";
+		next;
+	}
+	if ( $_ =~ /G1 Old Generation,type=GarbageCollector,LastGcInfo /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "g.value $val\n";
+		next;
+	}
+	if ( $_ =~ /G1 Young Generation,type=GarbageCollector,LastGcInfo /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "h.value $val\n";
 		next;
 	}
 }
