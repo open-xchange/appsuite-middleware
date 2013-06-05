@@ -54,7 +54,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.apps.manifests.ComputedServerConfigValueService;
@@ -75,8 +74,13 @@ import com.openexchange.osgi.NearRegistryServiceTracker;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ManifestJSONActivator extends AJAXModuleActivator {
-    private static final Log LOG = LogFactory.getLog(ManifestJSONActivator.class);
 
+    /**
+     * Initializes a new {@link ManifestJSONActivator}.
+     */
+    public ManifestJSONActivator() {
+        super();
+    }
 
 	@Override
 	protected Class<?>[] getNeededServices() {
@@ -91,7 +95,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 	    final NearRegistryServiceTracker<ServerConfigMatcherService> matcherTracker = new NearRegistryServiceTracker<ServerConfigMatcherService>(context, ServerConfigMatcherService.class);
 	    rememberTracker(matcherTracker);
 	    final NearRegistryServiceTracker<ComputedServerConfigValueService> computedValueTracker = new NearRegistryServiceTracker<ComputedServerConfigValueService>(context, ComputedServerConfigValueService.class);
-	    rememberTracker(computedValueTracker);;
+	    rememberTracker(computedValueTracker);
 
 		registerModule(new ManifestActionFactory(this, readManifests(), new ServerConfigServicesLookup() {
 
@@ -146,7 +150,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
                 array.put(fileContent.get(i));
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            LogFactory.getLog(ManifestJSONActivator.class).error(e.getMessage(), e);
         } finally {
             Streams.close(r);
         }

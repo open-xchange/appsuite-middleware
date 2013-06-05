@@ -65,7 +65,7 @@ import com.openexchange.tools.pipesnfilters.internal.PipesAndFiltersFactory;
 public class PipesAndFiltersRegisterer implements ServiceTrackerCustomizer<ThreadPoolService,ThreadPoolService> {
 
     private final BundleContext context;
-    private ServiceRegistration<PipesAndFiltersService> registration;
+    private volatile ServiceRegistration<PipesAndFiltersService> registration;
 
     public PipesAndFiltersRegisterer(final BundleContext context) {
         super();
@@ -77,8 +77,10 @@ public class PipesAndFiltersRegisterer implements ServiceTrackerCustomizer<Threa
         final ThreadPoolService service = context.getService(reference);
         if (null == registration) {
             registration = context.registerService(PipesAndFiltersService.class, new PipesAndFiltersFactory(service), null);
+            return service;
         }
-        return service;
+        context.ungetService(reference);
+        return null;
     }
 
     @Override
@@ -88,9 +90,10 @@ public class PipesAndFiltersRegisterer implements ServiceTrackerCustomizer<Threa
 
     @Override
     public void removedService(final ServiceReference<ThreadPoolService> reference, final ThreadPoolService service) {
+        final ServiceRegistration<PipesAndFiltersService> registration = this.registration;
         if (null != registration) {
             registration.unregister();
-            registration = null;
+            this.registration = null;
         }
         context.ungetService(reference);
     }
