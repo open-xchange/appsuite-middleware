@@ -406,7 +406,7 @@ public final class MimeMessageUtility {
     /**
      * Compares (case insensitive) the given values of message header "Content-ID". The leading/trailing characters '<code>&lt;</code>' and
      * ' <code>&gt;</code>' are ignored during comparison
-     * 
+     *
      * @param contentId1 The first content ID
      * @param contentId2 The second content ID
      * @return <code>true</code> if both are equal; otherwise <code>false</code>
@@ -1097,6 +1097,10 @@ public final class MimeMessageUtility {
             } else {
                 ret.add(string);
             }
+        }
+        if (tmp.length() > 0) {
+            final String str = tmp.toString();
+            ret.add(str.endsWith(", ") ? str.substring(0, str.length() - 2) : str);
         }
         return ret;
     }
