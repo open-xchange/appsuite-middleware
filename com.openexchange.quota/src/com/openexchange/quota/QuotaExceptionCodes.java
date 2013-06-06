@@ -77,7 +77,7 @@ public enum QuotaExceptionCodes implements OXExceptionCode {
     ;
 
     /**
-     * The error code prefix for capability module.
+     * The error code prefix for quota module.
      */
     public static final String PREFIX = "QUOTA";
 
