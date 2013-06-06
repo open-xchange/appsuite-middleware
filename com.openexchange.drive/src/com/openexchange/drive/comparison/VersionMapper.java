@@ -182,13 +182,13 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
     @Override
     public String toString() {
         StringAllocator stringAllocator = new StringAllocator();
-        stringAllocator.append("                                 | Original Version                 | Client Version                     | Server Version                    \n");
-        stringAllocator.append("---------------------------------+----------------------------------+------------------------------------+-----------------------------------\n");
+        stringAllocator.append("                                         | Original Version                 | Client Version                     | Server Version                    \n");
+        stringAllocator.append("-----------------------------------------+----------------------------------+------------------------------------+-----------------------------------\n");
         for (Entry<String, ThreeWayComparison<T>> entry : this) {
-            String name = Strings.abbreviate(entry.getKey(), entry.getKey().length(), 32);
+            String name = Strings.abbreviate(entry.getKey(), entry.getKey().length() + 1, 40);
             ThreeWayComparison<T> comparison = entry.getValue();
             stringAllocator.append(name);
-            for (int i = 0; i < 32 - name.length(); i++) {
+            for (int i = 0; i < 40 - name.length(); i++) {
                 stringAllocator.append(' ');
             }
             stringAllocator.append(" | ");
