@@ -374,7 +374,7 @@ public final class RateLimiter {
                 tmp = maxRatePerMinute;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = Integer.valueOf(null == service ? "3000" : service.getProperty("com.openexchange.servlet.maxRatePerMinute", "3000"));
+                    tmp = Integer.valueOf(null == service ? "1500" : service.getProperty("com.openexchange.servlet.maxRate", "1500"));
                     maxRatePerMinute = tmp;
                 }
             }
