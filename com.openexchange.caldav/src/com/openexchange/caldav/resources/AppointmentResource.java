@@ -234,7 +234,26 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 if (null != originalException && false == containsChanges(originalException, exceptionToSave)) {
                     LOG.debug("No changes detected in " + exceptionToSave + ", skipping update.");
                 } else {
-                    getAppointmentInterface().updateAppointmentObject(exceptionToSave, parentFolderID, clientLastModified, checkPermissions);
+                    try {
+                        getAppointmentInterface().updateAppointmentObject(exceptionToSave, parentFolderID, clientLastModified, checkPermissions);
+                    } catch (OXException e) {
+                        if ("APP-0059".equals(e.getErrorCode())) {
+                            StringBuilder stringBuilder = new StringBuilder("---- DEBUG for Bug #26293 -----").append("\n");
+                            stringBuilder.append("appointmentToSave: " + appointmentToSave).append("\n");
+                            stringBuilder.append("exceptionToSave: " + exceptionToSave).append("\n");
+                            stringBuilder.append("originalException: " + exceptionToSave).append("\n");
+                            stringBuilder.append("parentFolderID: " + parentFolderID).append("\n\n");
+                            stringBuilder.append("iCal as sent by client: " + this.sentIcal).append("\n\n");
+                            if (null != deleteExceptionsToSave) {
+                                stringBuilder.append("deleteExceptionsToSave: ").append("\n");
+                                for (CalendarDataObject cdo : deleteExceptionsToSave) {
+                                    stringBuilder.append(cdo).append("\n");
+                                }
+                            }
+                            LOG.error(stringBuilder.toString());
+                        }
+                        throw e;
+                    }
                     clientLastModified = exceptionToSave.getLastModified();
                 }
 //                getAppointmentInterface().updateAppointmentObject(exceptionToSave, parentFolderID, clientLastModified, checkPermissions);
@@ -403,7 +422,10 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         }
     }
 
+    String sentIcal;
+
     private List<CalendarDataObject> parse(final String iCal) throws ConversionError {
+        sentIcal = iCal;
         if (LOG.isTraceEnabled()) {
             LOG.trace(iCal);
         }
