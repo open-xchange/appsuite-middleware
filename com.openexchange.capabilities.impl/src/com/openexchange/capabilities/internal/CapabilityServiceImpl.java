@@ -75,6 +75,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.StringAllocator;
@@ -87,7 +88,7 @@ import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link CapabilityServiceImpl}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -98,15 +99,19 @@ public class CapabilityServiceImpl implements CapabilityService {
     private static final Object PRESENT = new Object();
 
     private static final String REGION_NAME_CONTEXT = "CapabilitiesContext";
+
     private static final String REGION_NAME_USER = "CapabilitiesUser";
 
     private static final String PERMISSION_PROPERTY = "permissions".intern();
+
     private static final Pattern P_SPLIT = Pattern.compile("\\s*[, ]\\s*");
 
     private final ConcurrentMap<String, Capability> capabilities;
+
     private final ConcurrentMap<String, Object> declaredCapabilities;
 
     private final ServiceLookup services;
+
     private volatile Boolean autologin;
 
     /**
@@ -151,25 +156,21 @@ public class CapabilityServiceImpl implements CapabilityService {
             synchronized (this) {
                 tmp = autologin;
                 if (null == tmp) {
-                    tmp = Boolean.valueOf(services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.sessiond.autologin", false));
+                    tmp = Boolean.valueOf(services.getService(ConfigurationService.class).getBoolProperty(
+                        "com.openexchange.sessiond.autologin",
+                        false));
                     autologin = tmp;
                 }
             }
         }
         return tmp.booleanValue();
     }
-    
+
     public Set<Capability> getCapabilities(final int userId, final int contextId) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(userId, contextId);
-        
+
         Set<Capability> capabilities = new HashSet<Capability>(64);
-        if (!serverSession.isAnonymous()) {
-            for (String type : serverSession.getUserConfiguration().getExtendedPermissions()) {
-                if (check(type, serverSession)) {
-                    capabilities.add(getCapability(type));
-                }
-            }
-        }
+        
         // What about autologin?
         if (autologin()) {
             capabilities.add(new Capability("autologin", true));
@@ -183,7 +184,14 @@ public class CapabilityServiceImpl implements CapabilityService {
         // ------------- Combined capabilities/permissions ------------ //
         if (!serverSession.isAnonymous()) {
             // Portal
-            final UserPermissionBits userConfiguration = services.getService(UserPermissionService.class).getUserPermissionBits(serverSession.getUserId(), serverSession.getContext());
+            final UserPermissionBits userConfiguration = services.getService(UserPermissionService.class).getUserPermissionBits(
+                serverSession.getUserId(),
+                serverSession.getContext());
+            
+            for (Permission p: Permission.byBits(userConfiguration.getPermissionBits())) {
+                capabilities.add(getCapability(p.name().toLowerCase()));
+            }
+            
             if (userConfiguration.hasPortal()) {
                 capabilities.add(getCapability("portal"));
                 capabilities.remove(getCapability("deniedPortal"));
@@ -227,45 +235,45 @@ public class CapabilityServiceImpl implements CapabilityService {
             } else {
                 capabilities.remove(getCapability("spam"));
             }
-        }
-        
-        // permission properties
-        final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
-        if (configViews != null) {
-            final ConfigView view = configViews.getView(userId, contextId);
-            final String property = PERMISSION_PROPERTY;
-            for (final String scope : configViews.getSearchPath()) {
-                final String permissions = view.property(property, String.class).precedence(scope).get();
-                if (permissions != null) {
-                    for (final String permissionModifier : P_SPLIT.split(permissions)) {
-                        final char firstChar = permissionModifier.charAt(0);
-                        if ('-' == firstChar) {
-                            capabilities.remove(getCapability(permissionModifier.substring(1)));
-                        } else {
-                            if ('+' == firstChar) {
-                                capabilities.add(getCapability(permissionModifier.substring(1)));
+
+            // permission properties
+            final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
+            if (configViews != null) {
+                final ConfigView view = configViews.getView(userId, contextId);
+                final String property = PERMISSION_PROPERTY;
+                for (final String scope : configViews.getSearchPath()) {
+                    final String permissions = view.property(property, String.class).precedence(scope).get();
+                    if (permissions != null) {
+                        for (final String permissionModifier : P_SPLIT.split(permissions)) {
+                            final char firstChar = permissionModifier.charAt(0);
+                            if ('-' == firstChar) {
+                                capabilities.remove(getCapability(permissionModifier.substring(1)));
                             } else {
-                                capabilities.add(getCapability(permissionModifier));
+                                if ('+' == firstChar) {
+                                    capabilities.add(getCapability(permissionModifier.substring(1)));
+                                } else {
+                                    capabilities.add(getCapability(permissionModifier));
+                                }
                             }
                         }
                     }
                 }
-            }
-            
-            Map<String, ComposedConfigProperty<String>> all = view.all();
-            for (Map.Entry<String, ComposedConfigProperty<String>> entry: all.entrySet()) {
-                if (entry.getKey().startsWith("com.openexchange.capability.")) {
-                    boolean value = Boolean.parseBoolean(entry.getValue().get());
-                    String name = entry.getKey().substring(28);
-                    if (value) {
-                        capabilities.add(getCapability(name));
-                    } else {
-                        capabilities.remove(getCapability(name));
+
+                Map<String, ComposedConfigProperty<String>> all = view.all();
+                for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
+                    if (entry.getKey().startsWith("com.openexchange.capability.")) {
+                        boolean value = Boolean.parseBoolean(entry.getValue().get());
+                        String name = entry.getKey().substring(28);
+                        if (value) {
+                            capabilities.add(getCapability(name));
+                        } else {
+                            capabilities.remove(getCapability(name));
+                        }
                     }
                 }
             }
         }
-        
+
         // ---------------- Now the ones from database ------------------ //
         {
             if (contextId > 0) {
@@ -351,7 +359,7 @@ public class CapabilityServiceImpl implements CapabilityService {
 
     /**
      * Gets all currently known capabilities.
-     *
+     * 
      * @return All capabilities
      * @throws OXException If operation fails
      */
@@ -361,7 +369,7 @@ public class CapabilityServiceImpl implements CapabilityService {
 
     /**
      * Gets the singleton capability for given identifier
-     *
+     * 
      * @param id The identifier
      * @return The singleton capability
      */
@@ -381,7 +389,7 @@ public class CapabilityServiceImpl implements CapabilityService {
 
     /**
      * Gets the available capability checkers.
-     *
+     * 
      * @return The checkers
      */
     protected Map<String, List<CapabilityChecker>> getCheckers() {
@@ -398,8 +406,7 @@ public class CapabilityServiceImpl implements CapabilityService {
         }
         final Object object = cache.get(Integer.valueOf(contextId));
         if (object instanceof Set) {
-            @SuppressWarnings("unchecked")
-            final Set<String> caps = (Set<String>) object;
+            @SuppressWarnings("unchecked") final Set<String> caps = (Set<String>) object;
             return caps;
         }
         // Load from database
@@ -448,8 +455,7 @@ public class CapabilityServiceImpl implements CapabilityService {
         }
         final Object object = cache.getFromGroup(Integer.valueOf(userId), Integer.toString(contextId));
         if (object instanceof Set) {
-            @SuppressWarnings("unchecked")
-            final Set<String> caps = (Set<String>) object;
+            @SuppressWarnings("unchecked") final Set<String> caps = (Set<String>) object;
             return caps;
         }
         // Load from database

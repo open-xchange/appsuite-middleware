@@ -78,7 +78,7 @@ import com.openexchange.server.impl.DBPool;
 public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbUserPermissionBitsStorage.class);
 
-    public RdbUserPermissionBitsStorage(CapabilityService capabilities) {
+    public RdbUserPermissionBitsStorage() {
         super();
     }
 
@@ -91,44 +91,41 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
         }
     }
     
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage#getUserPermissionBits(com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User[])
-     */
+
     @Override
     public UserPermissionBits[] getUserPermissionBits(final Context ctx, final User[] users) throws OXException {
         try {
-            return loadUserPermissionBits(ctx, null, users);
+            int[] userIds = new int[users.length];
+            for(int i = 0; i < users.length; i++) {
+                userIds[i] = users[i].getId();
+            }
+            return loadUserPermissionBits(ctx, null, userIds);
+        } catch (final SQLException e) {
+            throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
+    
+    @Override
+    public UserPermissionBits[] getUserPermissionBits(Context ctx, int[] userIds) throws OXException {
+        try {
+            return loadUserPermissionBits(ctx, null, userIds);
         } catch (final SQLException e) {
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
     
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage#clearStorage()
-     */
     @Override
     public void clearStorage() {
-        /*
-         * Since this storage implementation directly fetches data from database this method has no effect
-         */
     }
 
     
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage#removeUserPermissionBits(int, com.openexchange.groupware.contexts.Context)
-     */
     @Override
     public void removeUserPermissionBits(final int userId, final Context ctx) {
-        /*
-         * Since this storage implementation directly fetches data from database this method has no effect
-         */
+
     }
 
     
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage#saveUserPermissionBits(int, int, com.openexchange.groupware.contexts.Context)
-     */
     @Override
     public void saveUserPermissionBits(final int permissionBits, final int userId, final Context ctx) throws OXException {
         saveUserPermissionBits0(permissionBits, userId, ctx);
@@ -371,8 +368,8 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
 
     private static final int LIMIT = 1000;
 
-    public static UserPermissionBits[] loadUserPermissionBits(final Context ctx, final Connection conArg, final User[] users) throws OXException, SQLException {
-        final int length = users.length;
+    public static UserPermissionBits[] loadUserPermissionBits(final Context ctx, final Connection conArg, final int[] userIds) throws OXException, SQLException {
+        final int length = userIds.length;
         if (0 == length) {
             return new UserPermissionBits[0];
         }
@@ -407,16 +404,16 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
                 int pos = 1;
                 userMap = new TIntIntHashMap(length, 1);
                 for (int index = 0; index < length; index++) {
-                    final User user = users[index];
-                    stmt.setInt(pos++, user.getId());
-                    userMap.put(user.getId(), index);
+                    final int userId = userIds[index];
+                    stmt.setInt(pos++,userId);
+                    userMap.put(userId, index);
                 }
                 stmt.setInt(pos++, ctx.getContextId());
             } else {
                 stmt = con.prepareStatement("SELECT u.user, u.permissions FROM user_configuration AS u WHERE u.cid = ?");
                 userMap = new TIntIntHashMap(length, 1);
                 for (int index = 0; index < length; index++) {
-                    userMap.put(users[index].getId(), index);
+                    userMap.put(userIds[index], index);
                 }
                 stmt.setInt(1, ctx.getContextId());
             }
@@ -426,8 +423,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
                 final int userId = result.getInt(1);
                 if (userMap.containsKey(userId)) {
                     final int index = userMap.get(userId);
-                    final User user = users[index];
-                    final UserPermissionBits UserPermissionBits = new UserPermissionBits(result.getInt(2), user.getId(), ctx.getContextId());
+                    final UserPermissionBits UserPermissionBits = new UserPermissionBits(result.getInt(2), userId, ctx.getContextId());
                     
                     retval[index] = UserPermissionBits;
                 }

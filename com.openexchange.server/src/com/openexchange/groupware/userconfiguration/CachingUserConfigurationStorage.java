@@ -101,7 +101,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     public CachingUserConfigurationStorage() throws OXException {
         super();
         cacheWriteLock = new ReentrantLock();
-        this.delegateStorage = new RdbUserConfigurationStorage(ServerServiceRegistry.getInstance().getService(CapabilityService.class));
+        this.delegateStorage = new RdbUserConfigurationStorage();
         cacheAvailabilityListener = new CacheAvailabilityListener() {
 
             @Override
@@ -123,7 +123,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             synchronized (this) {
                 fallback = this.fallback;
                 if (null == fallback) {
-                    fallback = new RdbUserConfigurationStorage(ServerServiceRegistry.getInstance().getService(CapabilityService.class));
+                    fallback = new RdbUserConfigurationStorage();
                     this.fallback = fallback;
                 }
             }
@@ -231,15 +231,16 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         loadUserConfiguration(cache, map, ctx, toLoad.toArray(), groupsToLoad.toArray(new int[groupsToLoad.size()][]));
         return convert(map, userIds);
     }
-
-    /**
-     * Convenience method for calling the single array style implementation.
-     */
-    private UserConfiguration getUserConfiguration(Cache cache, Context ctx, int userId, int[] groups) throws OXException {
-        return getUserConfiguration(cache, ctx, new int[] { userId }, new int[][] { groups })[0];
+    
+    @Override
+    public UserConfiguration[] getUserConfigurations(Context ctx, int[] userIds, int[][] groups) throws OXException {
+        final Cache cache = this.cache;
+        if (cache == null) {
+            return getFallback().getUserConfigurations(ctx, userIds, groups);
+        }
+        return getUserConfigurations(cache, ctx, userIds, groups);
     }
-
-
+    
     private static TIntObjectMap<UserConfiguration> getCachedUserConfiguration(Cache cache, Context ctx, int[] userIds, boolean extendedPermissions) {
         TIntObjectMap<UserConfiguration> map = new TIntObjectHashMap<UserConfiguration>(userIds.length, 1);
         for (int i = 0; i < userIds.length; i++) {
@@ -288,30 +289,12 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         return convert(map, userIds);
     }
 
-    /**
-     * This method uses the {@link UserConfiguration} cached without extended permissions and adds to them the extended permissions.
-     * Afterwards puts the fully initialized {@link UserConfiguration} into the normal cache.
-     */
-    private UserConfiguration[] getUserConfiguration(Cache cache, Context ctx, int[] userIds, int[][] groups) throws OXException {
-        TIntObjectMap<UserConfiguration> map = getCachedUserConfiguration(cache, ctx, userIds, true);
-        TIntList toLoad = new TIntArrayList(userIds.length - map.size());
-        List<int[]> groupsToLoad = new ArrayList<int[]>(userIds.length - map.size());
-        for (int i = 0; i < userIds.length; i++) {
-            if (!map.containsKey(userIds[i])) {
-                toLoad.add(userIds[i]);
-                groupsToLoad.add(groups[i]);
-            }
-        }
-        loadUserConfiguration(cache, map, ctx, toLoad.toArray(), groupsToLoad.toArray(new int[groupsToLoad.size()][]));
-        return convert(map, userIds);
-    }
-
     private void loadUserConfiguration(Cache cache, TIntObjectMap<UserConfiguration> map, Context ctx, int[] userIds, int[][] groups) throws OXException {
         if (null == userIds || 0 == userIds.length) {
             return;
         }
         final UserConfiguration[] loaded;
-        loaded = getUserConfigurations(cache, ctx, userIds, groups);
+        loaded = delegateStorage.getUserConfigurations(ctx, userIds, groups);
         if (null == loaded) {
             return;
         }

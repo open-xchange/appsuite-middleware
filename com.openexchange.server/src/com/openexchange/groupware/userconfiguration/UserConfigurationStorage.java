@@ -121,6 +121,8 @@ public abstract class UserConfigurationStorage {
         stopInternal();
         started = false;
     }
+    
+    
 
     /**
      * A convenience method that invokes
@@ -201,6 +203,9 @@ public abstract class UserConfigurationStorage {
     public abstract UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws OXException;
 
     public abstract UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws OXException;
+    
+    public abstract UserConfiguration[] getUserConfigurations(Context ctx, int[] userIds, int[][] groups) throws OXException;
+
 
     /**
      * <p>
@@ -227,6 +232,7 @@ public abstract class UserConfigurationStorage {
      * @throws OXException If removal fails
      */
     public abstract void invalidateCache(int userId, Context ctx) throws OXException;
+
 
 
 }

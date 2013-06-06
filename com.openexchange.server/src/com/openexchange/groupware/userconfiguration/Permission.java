@@ -218,5 +218,14 @@ public enum Permission implements Initialization {
     public static void addByBits(final int bits, final Set<String> set) {
         byBit.forEachEntry(new AdderProcedure(bits, set));
     }
+    
+    public Permission get(String name) {
+        for (Permission p: values()) {
+            if (p.name().equalsIgnoreCase(name)) {
+                return p;
+            }
+        }
+        return null;
+    }
 
 } // End of Permission class

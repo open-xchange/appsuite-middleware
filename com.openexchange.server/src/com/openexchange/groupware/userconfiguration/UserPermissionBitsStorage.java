@@ -60,18 +60,95 @@ import com.openexchange.groupware.ldap.User;
  */
 public abstract class UserPermissionBitsStorage {
     
-    public static UserPermissionBitsStorage getInstance() {
-        return null; // TODO
+    private static UserPermissionBitsStorage singleton;
+
+    /**
+     * Sets the singleton instance of {@link UserConfigurationStorage}
+     *
+     * @param singleton The singleton instance
+     * @throws OXException If singleton cannot be configured
+     */
+    static void setInstance(final UserPermissionBitsStorage singleton) throws OXException {
+        UserPermissionBitsStorage.singleton = singleton;
+        singleton.start();
+    }
+
+    /**
+     * Releases the singleton instance of {@link UserConfigurationStorage}
+     *
+     * @throws OXException If singleton cannot be configured
+     */
+    static void releaseInstance() throws OXException {
+        singleton.stop();
+        singleton = null;
+    }
+
+    /**
+     * Factory method for an instance of UserConfigurationStorage.
+     *
+     * @return an instance implementing the
+     *         <code>UserConfigurationStorage</code> interface
+     */
+    public static final UserPermissionBitsStorage getInstance() {
+        return singleton;
+    }
+
+    private boolean started;
+
+    private final void start() throws OXException {
+        if (started) {
+            return;
+        }
+        startInternal();
+        started = true;
+    }
+
+    private final void stop() throws OXException {
+        if (!started) {
+            return;
+        }
+        stopInternal();
+        started = false;
     }
     
+    /**
+     * Retrieve the permission bits for the given user
+     */
     public abstract UserPermissionBits getUserPermissionBits( final int userId, final Context ctx) throws OXException;
 
+    /**
+     * Retrieve the permission bits for the given users
+     */
     public abstract UserPermissionBits[] getUserPermissionBits(final Context ctx, final User[] users) throws OXException;
 
-    public abstract void clearStorage();
+    /**
+     * Retrieve the permission bits for the given users
+     */
+    public abstract UserPermissionBits[] getUserPermissionBits(Context ctx, int[] userIds) throws OXException;
+    
+    /**
+     * Forget any locally cached entries
+     */
+    public abstract void clearStorage() throws OXException;
 
+    /**
+     * Forget a locally cached entry
+     */
     public abstract void removeUserPermissionBits(final int userId, final Context ctx) throws OXException;
 
+    /**
+     * Store the permission bits in the database
+     */
     public abstract void saveUserPermissionBits(final int permissionBits, final int userId, final Context ctx) throws OXException;
+
+    
+    protected void startInternal() throws OXException {
+        
+    }
+
+    protected void stopInternal() throws OXException {
+        
+    }
+
 
 }

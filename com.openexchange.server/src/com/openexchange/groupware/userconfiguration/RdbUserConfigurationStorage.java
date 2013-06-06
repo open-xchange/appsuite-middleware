@@ -73,6 +73,7 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link RdbUserConfigurationStorage} - The database storage implementation of a user configuration storage.
@@ -83,13 +84,11 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbUserConfigurationStorage.class);
 
-    private static CapabilityService capabilities;
     /**
      * Initializes a new {@link RdbUserConfigurationStorage}
      */
-    public RdbUserConfigurationStorage(CapabilityService capabilities) {
+    public RdbUserConfigurationStorage() {
         super();
-        this.capabilities = capabilities;
     }
 
     @Override
@@ -173,12 +172,16 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     private static Set<String> getCapabilities(final int userId, final int cid) throws OXException {
+        CapabilityService capabilities = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
+        if (capabilities == null) {
+            return new HashSet<String>();
+        }
         return stringify(capabilities.getCapabilities(userId, cid));
     }
 
-    private static Set<String> stringify(Set<Capability> capabilities2) {
-        Set<String> set = new HashSet<String>(capabilities2.size());
-        for (Capability capability : capabilities2) {
+    private static Set<String> stringify(Set<Capability> capabilities) {
+        Set<String> set = new HashSet<String>(capabilities.size());
+        for (Capability capability : capabilities) {
             set.add(capability.getId().toLowerCase());
         }
         
@@ -294,5 +297,59 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
             closeResources(result, stmt, closeCon ? con : null, true, ctx);
         }
         return retval;
+    }
+    
+    @Override
+    public UserConfiguration[] getUserConfigurations(Context ctx, int[] userIds, int[][] groups) throws OXException {
+        if (0 == userIds.length) {
+            return new UserConfiguration[0];
+        }
+        Connection con = Database.get(ctx, false);
+        try {
+            return loadUserConfigurations(ctx, con, userIds, groups);
+        } catch (SQLException e) {
+            throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Database.back(ctx, false, con);
+        }
+    }
+
+    private static UserConfiguration[] loadUserConfigurations(Context ctx, Connection con, int[] userIds, int[][] groupsArg) throws OXException, SQLException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            final int length = userIds.length;
+            final TIntIntMap userMap;
+            if (length <= LIMIT) {
+                stmt = con.prepareStatement(getIN("SELECT user,permissions FROM user_configuration WHERE cid=? AND user IN (", length));
+                int pos = 1;
+                stmt.setInt(pos++, ctx.getContextId());
+                userMap = new TIntIntHashMap(length, 1);
+                for (int i = 0; i < length; i++) {
+                    stmt.setInt(pos++, userIds[i]);
+                    userMap.put(userIds[i], i);
+                }
+            } else {
+                stmt = con.prepareStatement("SELECT user,permissions FROM user_configuration WHERE cid=?");
+                stmt.setInt(1, ctx.getContextId());
+                userMap = new TIntIntHashMap(length, 1);
+                for (int i = 0; i < length; i++) {
+                    userMap.put(userIds[i], i);
+                }
+            }
+            result = stmt.executeQuery();
+            final List<UserConfiguration> list = new ArrayList<UserConfiguration>(length);
+            while (result.next()) {
+                final int userId = result.getInt(1);
+                if (userMap.containsKey(userId)) {
+                    final int pos = userMap.get(userId);
+                    final int[] groups = groupsArg[pos] == null ? UserStorage.getInstance().getUser(userId, ctx).getGroups() : groupsArg[pos];
+                    list.add(new UserConfiguration(getCapabilities(userId, ctx.getContextId()), userId, groups, ctx));
+                }
+            }
+            return list.toArray(new UserConfiguration[0]);
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
     }
 }

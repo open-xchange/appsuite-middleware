@@ -51,6 +51,7 @@ package com.openexchange.groupware.userconfiguration;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Set;
 import com.openexchange.groupware.container.FolderObject;
@@ -62,8 +63,10 @@ import com.openexchange.groupware.contexts.Context;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class UserPermissionBits {
+public class UserPermissionBits implements Serializable{
     
+    private static final long serialVersionUID = -4210686154175384469L;
+
     /**
      * The permission bit for mail access.
      */
@@ -928,8 +931,14 @@ public class UserPermissionBits {
 
 
     public static int getPermissionBits(Set<String> capabilities) {
-        // TODO Auto-generated method stub
-        return 0;
+        int bits = 0;
+        for (String string : capabilities) {
+            Permission permission = Permission.valueOf(string);
+            if (permission != null) {
+                bits = bits | permission.bit;
+            }
+        }
+        return bits;
     }
 
 

@@ -49,9 +49,21 @@
 
 package com.openexchange.groupware.userconfiguration;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import com.openexchange.cache.registry.CacheAvailabilityListener;
+import com.openexchange.cache.registry.CacheAvailabilityRegistry;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 
 /**
@@ -60,50 +72,229 @@ import com.openexchange.groupware.ldap.User;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage {
+    
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CachingUserConfigurationStorage.class));
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage#getUserPermissionBits(int, com.openexchange.groupware.contexts.Context)
+    private static final String CACHE_REGION_NAME = "UserPermissionBits";
+
+    private final CacheAvailabilityListener cacheAvailabilityListener;
+
+    private transient final UserPermissionBitsStorage delegateStorage;
+
+    private final Lock cacheWriteLock;
+
+    private volatile Cache cache;
+
+    private volatile UserPermissionBitsStorage fallback;
+    
+    /**
+     * Initializes a new {@link CachingUserPermissionBitsStorage}.
+     * @param capabilities 
+     *
+     * @throws OXException If an error occurs
      */
+    public CachingUserPermissionBitsStorage() throws OXException {
+        super();
+        cacheWriteLock = new ReentrantLock();
+        this.delegateStorage = new RdbUserPermissionBitsStorage();
+        cacheAvailabilityListener = new CacheAvailabilityListener() {
+
+            @Override
+            public void handleAbsence() throws OXException {
+                releaseCache();
+            }
+
+            @Override
+            public void handleAvailability() throws OXException {
+                initCache();
+            }
+        };
+        initCache();
+    }
+
+    private UserPermissionBitsStorage getFallback() {
+        UserPermissionBitsStorage fallback = this.fallback;
+        if (null == fallback) {
+            synchronized (this) {
+                fallback = this.fallback;
+                if (null == fallback) {
+                    fallback = new RdbUserPermissionBitsStorage();
+                    this.fallback = fallback;
+                }
+            }
+        }
+        return fallback;
+    }
+
+    @Override
+    protected void startInternal() throws OXException {
+        final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+        if (null != reg && !reg.registerListener(cacheAvailabilityListener)) {
+            LOG.error("Cache availability listener could not be registered", new Throwable());
+        }
+    }
+
+    @Override
+    protected void stopInternal() throws OXException {
+        final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+        if (null != reg) {
+            reg.unregisterListener(cacheAvailabilityListener);
+        }
+        releaseCache();
+    }
+
+    private final static CacheKey getKey(final int userId, final Context ctx, final Cache cache) {
+        return cache.newCacheKey(ctx.getContextId(), userId);
+    }
+
+    /**
+     * Initializes cache reference
+     *
+     * @throws OXException If an error occurs
+     */
+    void initCache() throws OXException {
+        if (cache != null) {
+            return;
+        }
+        try {
+            cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
+        } catch (final RuntimeException e) {
+            throw UserConfigurationCodes.CACHE_INITIALIZATION_FAILED.create(e, CACHE_REGION_NAME);
+        }
+    }
+
+    /**
+     * Releases cache reference
+     *
+     * @throws OXException If an error occurs
+     */
+    void releaseCache() throws OXException {
+        final Cache cache = this.cache;
+        if (cache == null) {
+            return;
+        }
+        try {
+            cache.clear();
+            final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+            if (null != cacheService) {
+                cacheService.freeCache(CACHE_REGION_NAME);
+            }
+        } catch (final RuntimeException e) {
+            throw UserConfigurationCodes.CACHE_INITIALIZATION_FAILED.create(e, CACHE_REGION_NAME);
+        } finally {
+            this.cache = null;
+        }
+    }
+    
+
     @Override
     public UserPermissionBits getUserPermissionBits(int userId, Context ctx) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        if (cache == null) { return getFallback().getUserPermissionBits(userId, ctx); }
+        return get(cache, ctx, new int[]{ userId })[0];
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage#getUserPermissionBits(com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User[])
-     */
     @Override
     public UserPermissionBits[] getUserPermissionBits(Context ctx, User[] users) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        if (cache == null) { return getFallback().getUserPermissionBits(ctx, users); }
+        int[] userIds = new int[users.length];
+        for(int i = 0; i < users.length; i++) {
+            userIds[i] = users[i].getId();
+        }
+        
+        return get(cache, ctx, userIds);
     }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage#clearStorage()
-     */
+    
     @Override
-    public void clearStorage() {
-        // TODO Auto-generated method stub
-
+    public UserPermissionBits[] getUserPermissionBits(Context ctx, int[] userIds) throws OXException {
+        if (cache == null) { return getFallback().getUserPermissionBits(ctx, userIds); }
+        return get(cache, ctx, userIds);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage#removeUserPermissionBits(int, com.openexchange.groupware.contexts.Context)
-     */
+    @Override
+    public void clearStorage() throws OXException {
+        final Cache cache = this.cache;
+        if (cache == null) {
+            return;
+        }
+        cacheWriteLock.lock();
+        try {
+            cache.clear();
+        } catch (final RuntimeException rte) {
+            /*
+             * Swallow
+             */
+            LOG.warn("A runtime error occurred.", rte);
+        } finally {
+            cacheWriteLock.unlock();
+        }
+    }
+
     @Override
     public void removeUserPermissionBits(int userId, Context ctx) throws OXException {
-        // TODO Auto-generated method stub
-
+        if (cache == null) { return; }
+        try {
+            cacheWriteLock.lock();
+            cache.remove(getKey(userId, ctx, cache));
+        } finally {
+            cacheWriteLock.unlock();
+        }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage#saveUserPermissionBits(int, int, com.openexchange.groupware.contexts.Context)
-     */
     @Override
     public void saveUserPermissionBits(int permissionBits, int userId, Context ctx) throws OXException {
-        // TODO Auto-generated method stub
-
+        delegateStorage.saveUserPermissionBits(permissionBits, userId, ctx);
+        removeUserPermissionBits(userId, ctx);
+    }
+    
+    private UserPermissionBits[] get(Cache cache, Context ctx, int[] userIds) throws OXException {
+        if (userIds.length == 0) {
+            return new UserPermissionBits[0];
+        }
+        
+        Map<Integer, UserPermissionBits> map = new HashMap<Integer, UserPermissionBits>();
+        List<Integer> toLoad = new ArrayList<Integer>(userIds.length);
+        
+        for (int id : userIds) {
+            CacheKey key = getKey(id, ctx, cache);
+            Object object = cache.get(key);
+            if (object == null) {
+                toLoad.add(id);
+            } else {
+                map.put(id, (UserPermissionBits) object);
+            }
+        }
+        
+        for(UserPermissionBits perms: load(cache, ctx, toLoad)) {
+            map.put(perms.getUserId(), perms);
+        }
+        
+        
+        UserPermissionBits[] retval = new UserPermissionBits[userIds.length];
+        
+        for(int i = 0; i < userIds.length; i++) {
+            retval[i] = map.get(userIds[i]);
+        }
+        
+        return retval;
+        
+    }
+    
+    private UserPermissionBits[] load(Cache cache, Context ctx, List<Integer> userIds) throws OXException {
+        int[] userIdsArr = new int[userIds.size()];
+        for(int i = 0; i < userIdsArr.length; i++) {
+            userIdsArr[i] = userIds.get(i);
+        }
+        UserPermissionBits[] perms = delegateStorage.getUserPermissionBits(ctx, userIdsArr);
+        try {
+            cacheWriteLock.lock();
+            for (UserPermissionBits userPermissionBits : perms) {
+                cache.put(getKey(userPermissionBits.getUserId(), ctx, cache), userPermissionBits, false);
+            }
+        } finally {
+            cacheWriteLock.unlock();
+        }
+        
+        return perms;
     }
 
 }
