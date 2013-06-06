@@ -66,6 +66,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -84,6 +85,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
@@ -1123,65 +1125,83 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             throw UploadException.UploadCode.UNKNOWN_ACTION_VALUE.create(action);
         }
         /*
-         * Create file upload base
+         * Get file upload
          */
         final ServletFileUpload upload = getFileUploadBase();
-        final List<FileItem> items;
-        try {
-            @SuppressWarnings("unchecked") final List<FileItem> tmp = upload.parseRequest(req);
-            items = tmp;
-        } catch (final FileUploadException e) {
-            final Throwable cause = e.getCause();
-            if (cause instanceof IOException) {
-                final String message = cause.getMessage();
-                if (null != message && message.startsWith("Max. byte count of ")) {
-                    // E.g. Max. byte count of 10240 exceeded.
-                    final int pos = message.indexOf(" exceeded", 19 + 1);
-                    final String limit = message.substring(19, pos);
-                    throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, limit);
-                }
-            }
-            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage()  : cause.getMessage()));
-        }
         /*
-         * Create the upload event
+         * Parse the upload request
          */
-        final UploadEvent uploadEvent = new UploadEvent();
-        uploadEvent.setAction(action);
-        /*
-         * Set affiliation to mail upload
-         */
-        uploadEvent.setAffiliationId(UploadEvent.MAIL_UPLOAD);
-        /*
-         * Fill upload event instance
-         */
-        final String charEnc;
+        final List<FileItem> items = new LinkedList<FileItem>();
         {
-            final String rce = req.getCharacterEncoding();
-            charEnc = null == rce ? ServerConfig.getProperty(Property.DefaultEncoding) : rce;
-        }
-        final String uploadDir = ServerConfig.getProperty(Property.UploadDirectory);
-        for (final FileItem fileItem : items) {
-            if (fileItem.isFormField()) {
-                try {
-                    uploadEvent.addFormField(fileItem.getFieldName(), fileItem.getString(charEnc));
-                } catch (final UnsupportedEncodingException e) {
-                    throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+            boolean cleanUp = true;
+            try {
+                upload.parseRequest(new ServletRequestContext(req), items);
+                cleanUp = false;
+            } catch (final FileUploadException e) {
+                final Throwable cause = e.getCause();
+                if (cause instanceof IOException) {
+                    final String message = cause.getMessage();
+                    if (null != message && message.startsWith("Max. byte count of ")) {
+                        // E.g. Max. byte count of 10240 exceeded.
+                        final int pos = message.indexOf(" exceeded", 19 + 1);
+                        final String limit = message.substring(19, pos);
+                        throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, limit);
+                    }
                 }
-            } else {
-                if (fileItem.getSize() > 0 || !isEmpty(fileItem.getName())) {
-                    try {
-                        uploadEvent.addUploadFile(processUploadedFile(fileItem, uploadDir));
-                    } catch (final Exception e) {
-                        throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+                throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
+            } finally {
+                if (cleanUp) {
+                    for (final FileItem fileItem : items) {
+                        try { fileItem.delete(); } catch (final Exception e) { /* Ignore */ }
                     }
                 }
             }
         }
-        if (uploadEvent.getAffiliationId() < 0) {
-            throw UploadException.UploadCode.MISSING_AFFILIATION_ID.create(action);
+        /*
+         * Create the upload event
+         */
+        try {
+            final UploadEvent uploadEvent = new UploadEvent();
+            uploadEvent.setAction(action);
+            /*
+             * Set affiliation to mail upload
+             */
+            uploadEvent.setAffiliationId(UploadEvent.MAIL_UPLOAD);
+            /*
+             * Fill upload event instance
+             */
+            final String charEnc;
+            {
+                final String rce = req.getCharacterEncoding();
+                charEnc = null == rce ? ServerConfig.getProperty(Property.DefaultEncoding) : rce;
+            }
+            final String uploadDir = ServerConfig.getProperty(Property.UploadDirectory);
+            for (final FileItem fileItem : items) {
+                if (fileItem.isFormField()) {
+                    try {
+                        uploadEvent.addFormField(fileItem.getFieldName(), fileItem.getString(charEnc));
+                    } catch (final UnsupportedEncodingException e) {
+                        throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+                    }
+                } else {
+                    if (fileItem.getSize() > 0 || !isEmpty(fileItem.getName())) {
+                        try {
+                            uploadEvent.addUploadFile(processUploadedFile(fileItem, uploadDir));
+                        } catch (final Exception e) {
+                            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+                        }
+                    }
+                }
+            }
+            if (uploadEvent.getAffiliationId() < 0) {
+                throw UploadException.UploadCode.MISSING_AFFILIATION_ID.create(action);
+            }
+            return uploadEvent;
+        } finally {
+            for (final FileItem fileItem : items) {
+                try { fileItem.delete(); } catch (final Exception e) { /* Ignore */ }
+            }
         }
-        return uploadEvent;
     }
 
     protected static boolean mayUpload(final String action) {
