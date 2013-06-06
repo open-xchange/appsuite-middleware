@@ -62,6 +62,7 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -99,8 +100,12 @@ public class UpdateAction extends ContactAction {
         {
             Object imageObject = json.opt("image1");
             if (imageObject instanceof String) {
-                json.remove("image1");
                 imageBase64 = (String) imageObject;
+                if (isEmpty(imageBase64)) {
+                    imageBase64 = null;
+                } else {
+                    json.remove("image1");
+                }
             }
         }
 
@@ -128,6 +133,19 @@ public class UpdateAction extends ContactAction {
         getContactService().updateContact(request.getSession(), request.getFolderID(), request.getObjectID(), contact,
         		new Date(request.getTimestamp()));
         return new AJAXRequestResult(new JSONObject(0), contact.getLastModified(), "json");
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }
