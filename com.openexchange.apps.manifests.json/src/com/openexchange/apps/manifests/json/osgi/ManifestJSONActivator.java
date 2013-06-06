@@ -54,7 +54,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.apps.manifests.ComputedServerConfigValueService;
@@ -65,7 +64,6 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.NearRegistryServiceTracker;
 
@@ -75,8 +73,13 @@ import com.openexchange.osgi.NearRegistryServiceTracker;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ManifestJSONActivator extends AJAXModuleActivator {
-    private static final Log LOG = LogFactory.getLog(ManifestJSONActivator.class);
 
+    /**
+     * Initializes a new {@link ManifestJSONActivator}.
+     */
+    public ManifestJSONActivator() {
+        super();
+    }
 
 	@Override
 	protected Class<?>[] getNeededServices() {
@@ -91,7 +94,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 	    final NearRegistryServiceTracker<ServerConfigMatcherService> matcherTracker = new NearRegistryServiceTracker<ServerConfigMatcherService>(context, ServerConfigMatcherService.class);
 	    rememberTracker(matcherTracker);
 	    final NearRegistryServiceTracker<ComputedServerConfigValueService> computedValueTracker = new NearRegistryServiceTracker<ComputedServerConfigValueService>(context, ComputedServerConfigValueService.class);
-	    rememberTracker(computedValueTracker);;
+	    rememberTracker(computedValueTracker);
 
 		registerModule(new ManifestActionFactory(this, readManifests(), new ServerConfigServicesLookup() {
 
@@ -110,43 +113,44 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 	}
 
     private JSONArray readManifests() {
-        ConfigurationService conf = getService(ConfigurationService.class);
-        String property = conf.getProperty("com.openexchange.apps.manifestPath");
-        if (null == property) {
-            property = conf.getProperty("com.openexchange.apps.path");
+        String property;
+        {
+            final ConfigurationService conf = getService(ConfigurationService.class);
+            property = conf.getProperty("com.openexchange.apps.manifestPath");
             if (null == property) {
-                return new JSONArray(0);
+                property = conf.getProperty("com.openexchange.apps.path");
+                if (null == property) {
+                    return new JSONArray(0);
+                }
+                property += "/manifests";
             }
-            property += "/manifests";
         }
 
-        JSONArray array = new JSONArray();
-        for(String path: property.split(":")) {
-            File file = new File(path);
+        final String[] paths = property.split(":");
+        final JSONArray array = new JSONArray(paths.length << 1);
+        for (final String path : paths) {
+            final File file = new File(path);
             if (file.exists()) {
-                for (File f : file.listFiles()) {
+                for (final File f : file.listFiles()) {
                     read(f, array);
                 }
             }
         }
+
         return array;
     }
 
     private void read(File f, JSONArray array) {
         BufferedReader r = null;
-        StringAllocator b = new StringAllocator();
         try {
             r = new BufferedReader(new FileReader(f));
-            int c = -1;
-            while ((c = r.read()) != -1) {
-                b.append((char) c);
-            }
-            JSONArray fileContent = new JSONArray(b.toString());
-            for (int i = 0, size = fileContent.length(); i < size; i++) {
+            final JSONArray fileContent = new JSONArray(r);
+            final int length = fileContent.length();
+            for (int i = 0, size = length; i < size; i++) {
                 array.put(fileContent.get(i));
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            LogFactory.getLog(ManifestJSONActivator.class).error(e.getMessage(), e);
         } finally {
             Streams.close(r);
         }

@@ -65,30 +65,26 @@ import com.openexchange.server.ServiceLookup;
  */
 public class ManifestActionFactory implements AJAXActionServiceFactory {
 
+    private final AJAXActionService all;
+    private final ConfigAction config;
 
-	private final AJAXActionService all;
-	private final ConfigAction config;
+    public ManifestActionFactory(ServiceLookup services, JSONArray manifests, ServerConfigServicesLookup registry) {
+        super();
+        all = new AllAction(services, manifests);
+        config = new ConfigAction(services, manifests, registry);
+    }
 
-	public ManifestActionFactory(ServiceLookup services,
-			JSONArray manifests, ServerConfigServicesLookup registry) {
-		super();
-		all = new AllAction(services, manifests);
-		config = new ConfigAction(services, manifests, registry);
-	}
+    @Override
+    public Collection<?> getSupportedServices() {
+        return Arrays.asList("all", "config");
+    }
 
-
-	@Override
-	public Collection<?> getSupportedServices() {
-		return Arrays.asList("all", "config");
-	}
-
-	@Override
-	public AJAXActionService createActionService(String action)
-			throws OXException {
-		if (action.equals("config")) {
-			return config;
-		}
-		return all;
-	}
+    @Override
+    public AJAXActionService createActionService(String action) throws OXException {
+        if (action.equals("config")) {
+            return config;
+        }
+        return all;
+    }
 
 }
