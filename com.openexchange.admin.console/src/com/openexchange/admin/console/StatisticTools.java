@@ -712,7 +712,7 @@ public class StatisticTools extends AbstractJMXTools {
     private void showGcData(MBeanServerConnection mbeanServerConnection) throws MalformedObjectNameException, IOException, InstanceNotFoundException, IntrospectionException, AttributeNotFoundException, MBeanException, ReflectionException {
         final StringBuilder stringBuilder = new StringBuilder();
 
-        int uptimeHours = getUptimeHours(mbeanServerConnection);
+        double uptimeHours = getUptimeHours(mbeanServerConnection);
         stringBuilder.append(ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE + ",hoursUptime=" + uptimeHours + "\n");
 
         ObjectName domainType = new ObjectName(ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE + ",*");
@@ -745,7 +745,7 @@ public class StatisticTools extends AbstractJMXTools {
                             "collectiontime")) {
                             if (attribute instanceof Long) {
                                 Long attributeValue = (Long) attribute;
-                                if (uptimeHours > 0) {
+                                if (uptimeHours > 1) {
                                     stringBuilder.append((attributeValue / uptimeHours) + "\n");
                                 } else {
                                     stringBuilder.append(0 + "\n");
@@ -773,8 +773,8 @@ public class StatisticTools extends AbstractJMXTools {
      * @throws MBeanException
      * @throws AttributeNotFoundException
      */
-    private int getUptimeHours(MBeanServerConnection mbeanServerConnection) throws MalformedObjectNameException, IOException, InstanceNotFoundException, IntrospectionException, ReflectionException, MBeanException, AttributeNotFoundException {
-        int uptimeHours = 0;
+    private double getUptimeHours(MBeanServerConnection mbeanServerConnection) throws MalformedObjectNameException, IOException, InstanceNotFoundException, IntrospectionException, ReflectionException, MBeanException, AttributeNotFoundException {
+        double uptimeHours = 0;
 
         ObjectName domainTypeRuntime = new ObjectName(ManagementFactory.RUNTIME_MXBEAN_NAME + ",*");
         Set<ObjectInstance> mbeansRuntime = mbeanServerConnection.queryMBeans(domainTypeRuntime, null);
@@ -786,7 +786,8 @@ public class StatisticTools extends AbstractJMXTools {
                     Object attribute = mbeanServerConnection.getAttribute(objectName, attributeInfo.getName());
                     if (attribute instanceof Long) {
                         Long value = (Long) attribute;
-                        uptimeHours = (int) (value / (1000 * 60 * 60));
+                        double valueAsDouble = value.doubleValue();
+                        uptimeHours = valueAsDouble / (1000 * 60 * 60);
                     }
                 }
             }
