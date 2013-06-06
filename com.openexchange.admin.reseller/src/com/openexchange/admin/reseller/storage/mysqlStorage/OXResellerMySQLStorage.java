@@ -83,8 +83,8 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 
 /**
  * @author choeger
@@ -983,7 +983,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     private int countUsersByModuleAccess(final Context ctx, final UserModuleAccess access) throws StorageException {
         try {
-            final UserConfiguration userconf = new UserConfiguration(0, 0, new int[1], new com.openexchange.groupware.contexts.impl.ContextImpl(ctx.getId()));
+            final UserPermissionBits userconf = new UserPermissionBits(0, 0, ctx.getId());
             userconf.setCalendar(access.getCalendar());
             userconf.setContact(access.getContacts());
             userconf.setForum(access.getForum());
@@ -1013,7 +1013,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             userconf.setUSM(access.isUSM());
             userconf.setOLOX20(access.isOLOX20());
 
-            final int ret = RdbUserConfigurationStorage.adminCountUsersByPermission(ctx.getId(), userconf, null);
+            final int ret = RdbUserPermissionBitsStorage.adminCountUsersByPermission(ctx.getId(), userconf, null);
             if( ret < 0 ) {
                 throw new StorageException("unable to count number of users by module access");
             }
