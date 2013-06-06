@@ -47,43 +47,43 @@
  *
  */
 
-package com.openexchange.groupware.update.internal;
+package com.openexchange.groupware.update.osgi;
 
-import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.database.CreateTableService;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.groupware.update.tasks.AddUUIDForUpdateTaskTable;
+import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUpdateTaskTable;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * Implements the {@link CreateTableService} for creating the updateTask table.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * {@link UpdateTaskTableUpdateTasksActivator}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public final class CreateUpdateTaskTable extends AbstractCreateTableImpl {
+public class UpdateTaskTableUpdateTasksActivator extends HousekeepingActivator {
 
-    private static final String[] CREATED_TABLES = { "updateTask" };
-
-    static final String[] CREATES = {
-        // Using full index is not possible to convert to a primary key because two different tasks may have same beginning letters that
-        // fit into the index and causing a collision.
-        "CREATE TABLE updateTask (cid INT4 UNSIGNED NOT NULL,taskName VARCHAR(1024) NOT NULL,successful BOOLEAN NOT NULL," +
-        "lastModified INT8 NOT NULL,uuid BINARY(16),INDEX full (cid,taskName(255))) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
-    };
-
-    public CreateUpdateTaskTable() {
-        super();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return null;
     }
 
     @Override
-    protected String[] getCreateStatements() {
-        return CREATES.clone();
+    protected void startBundle() throws Exception {
+        registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
+
+            @Override
+            public Collection<? extends UpdateTaskV2> getUpdateTasks() {
+                List<UpdateTaskV2> updateTasks = new ArrayList<UpdateTaskV2>();
+                updateTasks.add(new AddUUIDForUpdateTaskTable());
+                if (false) { // TODO: Config einlesen
+                    updateTasks.add(new MakeUUIDPrimaryForUpdateTaskTable());
+                }
+                return updateTasks;
+            }
+        });
     }
 
-    @Override
-    public String[] requiredTables() {
-        return NO_TABLES;
-    }
-
-    @Override
-    public String[] tablesToCreate() {
-        return CREATED_TABLES.clone();
-    }
 }

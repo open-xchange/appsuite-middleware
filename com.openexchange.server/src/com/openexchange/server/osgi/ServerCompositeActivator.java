@@ -52,6 +52,7 @@ package com.openexchange.server.osgi;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.osgi.PreviewCacheActivator;
 import com.openexchange.ajax.requesthandler.osgi.PrefixServiceActivator;
+import com.openexchange.groupware.update.osgi.UpdateTaskTableUpdateTasksActivator;
 import com.openexchange.groupware.update.tasks.quota.QuotaGWActivator;
 import com.openexchange.image.osgi.ImageActivator;
 import com.openexchange.json.cache.impl.osgi.JsonCacheActivator;
@@ -107,6 +108,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new PreviewCacheActivator(),
         new ReportActivator(),
         new QuotaGWActivator(),
+        new UpdateTaskTableUpdateTasksActivator(),
     };
 
     public ServerCompositeActivator() {
