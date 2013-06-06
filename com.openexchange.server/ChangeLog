@@ -1,6 +1,7 @@
 * 2013-06-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 26933: Fixed removal of contact images
+ - Fix for bug 26973: Delete uploaded file if an error occurs during request processing
 
 * 2013-06-04 - thorben.betten@open-xchange.com
 
