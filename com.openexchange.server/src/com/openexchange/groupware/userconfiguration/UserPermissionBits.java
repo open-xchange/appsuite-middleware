@@ -53,320 +53,203 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.UserExceptionCode;
-import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
-import com.openexchange.server.services.ServerServiceRegistry;
+
 
 /**
- * {@link UserConfiguration} - Represents a user configuration.
+ * {@link UserPermissionBits}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class UserConfiguration implements Serializable, Cloneable {
-
-    private static final long serialVersionUID = -8277899698366715803L;
-
-    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserConfiguration.class));
+public class UserPermissionBits implements Serializable{
+    
+    private static final long serialVersionUID = -4210686154175384469L;
 
     /**
      * The permission bit for mail access.
      */
-    public static final int WEBMAIL = UserPermissionBits.WEBMAIL;
+    public static final int WEBMAIL = 1;
 
     /**
      * The permission bit for calendar access.
      */
-    public static final int CALENDAR = UserPermissionBits.CALENDAR;
+    public static final int CALENDAR = 1 << 1;
 
     /**
      * The permission bit for contacts access.
      */
-    public static final int CONTACTS = UserPermissionBits.CONTACTS;
+    public static final int CONTACTS = 1 << 2;
 
     /**
      * The permission bit for tasks access.
      */
-    public static final int TASKS = UserPermissionBits.TASKS;
+    public static final int TASKS = 1 << 3;
 
     /**
      * The permission bit for infostore access.
      */
-    public static final int INFOSTORE = UserPermissionBits.INFOSTORE;
+    public static final int INFOSTORE = 1 << 4;
 
     /**
      * The permission bit for projects access.
      */
-    public static final int PROJECTS = UserPermissionBits.PROJECTS;
+    public static final int PROJECTS = 1 << 5;
 
     /**
      * The permission bit for forum access.
      */
-    public static final int FORUM = UserPermissionBits.FORUM;
+    public static final int FORUM = 1 << 6;
 
     /**
      * The permission bit for pinboard access.
      */
-    public static final int PINBOARD_WRITE_ACCESS = UserPermissionBits.PINBOARD_WRITE_ACCESS;
+    public static final int PINBOARD_WRITE_ACCESS = 1 << 7;
 
     /**
      * The permission bit for WebDAV/XML access.
      */
-    public static final int WEBDAV_XML = UserPermissionBits.WEBDAV_XML;
+    public static final int WEBDAV_XML = 1 << 8;
 
     /**
      * The permission bit for WebDAV access.
      */
-    public static final int WEBDAV = UserPermissionBits.WEBDAV;
+    public static final int WEBDAV = 1 << 9;
 
     /**
      * The permission bit for iCal access.
      */
-    public static final int ICAL = UserPermissionBits.ICAL;
+    public static final int ICAL = 1 << 10;
 
     /**
      * The permission bit for vCard access.
      */
-    public static final int VCARD = UserPermissionBits.VCARD;
+    public static final int VCARD = 1 << 11;
 
     /**
      * The permission bit for RSS bookmarks access.
      */
-    public static final int RSS_BOOKMARKS = UserPermissionBits.RSS_BOOKMARKS;
+    public static final int RSS_BOOKMARKS = 1 << 12;
 
     /**
      * The permission bit for RSS portal access.
      */
-    public static final int RSS_PORTAL = UserPermissionBits.RSS_PORTAL;
+    public static final int RSS_PORTAL = 1 << 13;
 
     /**
      * The permission bit for mobility access.
      */
-    public static final int MOBILITY = UserPermissionBits.MOBILITY;
+    public static final int MOBILITY = 1 << 14;
 
     /**
      * The permission bit whether write access to public folders is granted.
      */
-    public static final int EDIT_PUBLIC_FOLDERS = UserPermissionBits.EDIT_PUBLIC_FOLDERS;
+    public static final int EDIT_PUBLIC_FOLDERS = 1 << 15;
 
     /**
      * The permission bit whether shared folders are accessible.
      */
-    public static final int READ_CREATE_SHARED_FOLDERS = UserPermissionBits.READ_CREATE_SHARED_FOLDERS;
+    public static final int READ_CREATE_SHARED_FOLDERS = 1 << 16;
 
     /**
      * The permission bit if tasks may be delegated.
      */
-    public static final int DELEGATE_TASKS = UserPermissionBits.DELEGATE_TASKS;
+    public static final int DELEGATE_TASKS = 1 << 17;
 
     /**
      * The permission bit whether groups may be modified.
      */
-    public static final int EDIT_GROUP = UserPermissionBits.EDIT_GROUP;
+    public static final int EDIT_GROUP = 1 << 18;
 
     /**
      * The permission bit for whether resources may be modified.
      */
-    public static final int EDIT_RESOURCE = UserPermissionBits.EDIT_RESOURCE;
+    public static final int EDIT_RESOURCE = 1 << 19;
 
     /**
      * The permission bit for whether password may be changed.
      */
-    public static final int EDIT_PASSWORD = UserPermissionBits.EDIT_PASSWORD;
+    public static final int EDIT_PASSWORD = 1 << 20;
 
     /**
      * The permission bit whether email addresses shall be collected.
      */
-    public static final int COLLECT_EMAIL_ADDRESSES = UserPermissionBits.COLLECT_EMAIL_ADDRESSES;
+    public static final int COLLECT_EMAIL_ADDRESSES = 1 << 21;
 
     /**
      * The permission bit for multiple mail account access.
      */
-    public static final int MULTIPLE_MAIL_ACCOUNTS = UserPermissionBits.MULTIPLE_MAIL_ACCOUNTS;
+    public static final int MULTIPLE_MAIL_ACCOUNTS = 1 << 22;
 
     /**
      * The permission bit for subscription access.
      */
-    public static final int SUBSCRIPTION = UserPermissionBits.SUBSCRIPTION;
+    public static final int SUBSCRIPTION = 1 << 23;
 
     /**
      * The permission bit for publication access.
      */
-    public static final int PUBLICATION = UserPermissionBits.PUBLICATION;
+    public static final int PUBLICATION = 1 << 24;
 
     /**
      * The permission bit for active sync access.
      */
-    public static final int ACTIVE_SYNC = UserPermissionBits.ACTIVE_SYNC;
+    public static final int ACTIVE_SYNC = 1 << 25;
 
     /**
      * The permission bit for USM access.
      */
-    public static final int USM = UserPermissionBits.USM;
+    public static final int USM = 1 << 26;
 
     /**
      * The permission bit for OLOX v2.0 access.
      */
-    public static final int OLOX20 = UserPermissionBits.OLOX20;
+    public static final int OLOX20 = 1 << 27;
 
     /**
      * The permission bit for denied portal access.
      */
-    public static final int DENIED_PORTAL = UserPermissionBits.DENIED_PORTAL;
+    public static final int DENIED_PORTAL = 1 << 28;
 
     /**
      * The permission bit for caldav access. ATTENTION: This is actually handled by the config cascade!
      */
-    public static final int CALDAV = UserPermissionBits.CALDAV;
+    public static final int CALDAV = 1 << 29;
 
 
     /**
      * The permission bit for carddav access. ATTENTION: This is actually handled by the config cascade!
      */
-    public static final int CARDDAV = UserPermissionBits.CARDDAV;
+    public static final int CARDDAV = 1 << 30;
+    
+    private int userId;
+    private int contextId;
+    private int permissionBits;
 
-
-    /*-
-     * Field members
-     */
-
-    /**
-     * The user capabilities.
-     */
-    protected Set<String> capabilities;
-
-    /**
-     * The user identifier.
-     */
-    protected final int userId;
-
-    /**
-     * The identifiers of user's groups
-     */
-    protected int[] groups;
-
-    /**
-     * The context.
-     */
-    protected final Context ctx;
-
-    /**
-     * Initializes a new {@link UserConfiguration}.
-     *
-     * @param permissionBits The permissions' bit mask
-     * @param userId The user ID
-     * @param groups The user's group IDs
-     * @param ctx The context
-     */
-    public UserConfiguration(final Set<String> capabilities, final int userId, final int[] groups, final Context ctx) {
-        super();
-        this.capabilities = capabilities;
+    public UserPermissionBits(int permissions, int userId, int contextId) {
         this.userId = userId;
-        if (null == groups) {
-            this.groups = null;
-        } else {
-            this.groups = new int[groups.length];
-            System.arraycopy(groups, 0, this.groups, 0, groups.length);
-        }
-        this.ctx = ctx;
-    }
-
-    @Override
-    public boolean equals(final Object other) {
-        if (this == other) {
-            return true;
-        } else if ((other == null) || !(other instanceof UserConfiguration)) {
-            return false;
-        }
-        final UserConfiguration uc = (UserConfiguration) other;
-        if ((userId != uc.userId) || (!getExtendedPermissions().equals(uc.getExtendedPermissions()))) {
-            return false;
-        }
-        if (null != groups) {
-            if (null == uc.groups) {
-                return false;
-            }
-            Arrays.sort(groups);
-            Arrays.sort(uc.groups);
-            if (!Arrays.equals(groups, uc.groups)) {
-                return false;
-            }
-        }
-        if (null != uc.groups) {
-            return false;
-        }
-        if (null != ctx) {
-            if (null == uc.ctx) {
-                return false;
-            }
-            return (ctx.getContextId() == uc.ctx.getContextId());
-        }
-        return (null == uc.ctx);
+        this.contextId = contextId;
+        this.permissionBits = permissions;
     }
     
-    public MutableUserConfiguration getMutable() {
-        int[] groupCopy = new int[groups.length];
-        System.arraycopy(groups, 0, groupCopy, 0, groups.length);
-        return new MutableUserConfiguration(new HashSet<String>(capabilities), userId, groupCopy, ctx);
-    }
-
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + userId;
-        for(String p: capabilities) {
-        	hash = 31 * hash + p.hashCode();
-        }
-        if (null != groups) {
-            Arrays.sort(groups);
-            for (int i = 0; i < groups.length; i++) {
-                hash = 31 * hash + groups[i];
-            }
-        }
-        if (null != ctx) {
-            hash = 31 * hash + ctx.getContextId();
-        }
-        return hash;
-    }
-
-    @Override
-    public UserConfiguration clone() {
-        try {
-            final UserConfiguration clone = (UserConfiguration) super.clone();
-            if (groups != null) {
-                clone.groups = new int[groups.length];
-                System.arraycopy(groups, 0, clone.groups, 0, groups.length);
-            }
-            clone.capabilities = capabilities;
-            /*
-             * if (userSettingMail != null) { clone.userSettingMail = (UserSettingMail) userSettingMail.clone(); }
-             */
-            return clone;
-        } catch (final CloneNotSupportedException e) {
-            LOG.error(e.getMessage(), e);
-            throw new InternalError(e.getMessage());
-        }
-    }
-
     /**
      * Gets this user configuration's bit pattern.
      *
      * @return the bit pattern as an <code>int</code>.
      */
     public int getPermissionBits() {
-        return UserPermissionBits.getPermissionBits(capabilities);
+        return permissionBits;
     }
 
+    /**
+     * Sets this user configuration's bit pattern.
+     *
+     * @param permissionBits - the bit pattern.
+     */
+    public void setPermissionBits(final int permissionBits) {
+        this.permissionBits = permissionBits;
+    }
 
     /**
      * Detects if user configuration allows web mail access.
@@ -375,6 +258,15 @@ public class UserConfiguration implements Serializable, Cloneable {
      */
     public boolean hasWebMail() {
         return hasPermission(WEBMAIL);
+    }
+
+    /**
+     * Enables/Disables web mail access in user configuration.
+     *
+     * @param enableWebMail
+     */
+    public void setWebMail(final boolean enableWebMail) {
+        setPermission(enableWebMail, WEBMAIL);
     }
 
     /**
@@ -387,12 +279,30 @@ public class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
+     * Enables/Disables calendar access in user configuration.
+     *
+     * @param enableCalender
+     */
+    public void setCalendar(final boolean enableCalender) {
+        setPermission(enableCalender, CALENDAR);
+    }
+
+    /**
      * Detects if user configuration allows contact access.
      *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasContact() {
         return hasPermission(CONTACTS);
+    }
+
+    /**
+     * Enables/Disables contact access in user configuration.
+     *
+     * @param enableContact
+     */
+    public void setContact(final boolean enableContact) {
+        setPermission(enableContact, CONTACTS);
     }
 
     /**
@@ -405,12 +315,30 @@ public class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
+     * Enables/Disables task access in user configuration.
+     *
+     * @param enableTask
+     */
+    public void setTask(final boolean enableTask) {
+        setPermission(enableTask, TASKS);
+    }
+
+    /**
      * Detects if user configuration allows infostore access.
      *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasInfostore() {
         return hasPermission(INFOSTORE);
+    }
+
+    /**
+     * Enables/Disables infostore access in user configuration.
+     *
+     * @param enableInfostore
+     */
+    public void setInfostore(final boolean enableInfostore) {
+        setPermission(enableInfostore, INFOSTORE);
     }
 
     /**
@@ -423,12 +351,30 @@ public class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
+     * Enables/Disables project access in user configuration.
+     *
+     * @param enableProject
+     */
+    public void setProject(final boolean enableProject) {
+        setPermission(enableProject, PROJECTS);
+    }
+
+    /**
      * Detects if user configuration allows forum access.
      *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasForum() {
         return hasPermission(FORUM);
+    }
+
+    /**
+     * Enables/Disables forum access in user configuration.
+     *
+     * @param enableForum
+     */
+    public void setForum(final boolean enableForum) {
+        setPermission(enableForum, FORUM);
     }
 
     /**
@@ -441,12 +387,30 @@ public class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
+     * Enables/Disables pinboard write access in user configuration.
+     *
+     * @param enablePinboardWriteAccess
+     */
+    public void setPinboardWriteAccess(final boolean enablePinboardWriteAccess) {
+        setPermission(enablePinboardWriteAccess, PINBOARD_WRITE_ACCESS);
+    }
+
+    /**
      * Detects if user configuration allows WebDAV XML.
      *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasWebDAVXML() {
         return hasPermission(WEBDAV_XML);
+    }
+
+    /**
+     * Enables/Disables WebDAV XML access in user configuration.
+     *
+     * @param enableWebDAVXML
+     */
+    public void setWebDAVXML(final boolean enableWebDAVXML) {
+        setPermission(enableWebDAVXML, WEBDAV_XML);
     }
 
     /**
@@ -459,12 +423,30 @@ public class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
+     * Enables/Disables WebDAV access in user configuration.
+     *
+     * @param enableWebDAV
+     */
+    public void setWebDAV(final boolean enableWebDAV) {
+        setPermission(enableWebDAV, WEBDAV);
+    }
+
+    /**
      * Detects if user configuration allows ICalendar.
      *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasICal() {
         return hasPermission(ICAL);
+    }
+
+    /**
+     * Enables/Disables ICalendar access in user configuration.
+     *
+     * @param enableICal
+     */
+    public void setICal(final boolean enableICal) {
+        setPermission(enableICal, ICAL);
     }
 
     /**
@@ -477,12 +459,30 @@ public class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
+     * Enables/Disables VCard access in user configuration.
+     *
+     * @param enableVCard
+     */
+    public void setVCard(final boolean enableVCard) {
+        setPermission(enableVCard, VCARD);
+    }
+
+    /**
      * Detects if user configuration allows RSS bookmarks.
      *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasRSSBookmarks() {
         return hasPermission(RSS_BOOKMARKS);
+    }
+
+    /**
+     * Enables/Disables RSS bookmarks access in user configuration.
+     *
+     * @param enableRSSBookmarks
+     */
+    public void setRSSBookmarks(final boolean enableRSSBookmarks) {
+        setPermission(enableRSSBookmarks, RSS_BOOKMARKS);
     }
 
     /**
@@ -495,12 +495,30 @@ public class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
+     * Enables/Disables RSS portal access in user configuration.
+     *
+     * @param enableRSSPortal
+     */
+    public void setRSSPortal(final boolean enableRSSPortal) {
+        setPermission(enableRSSPortal, RSS_PORTAL);
+    }
+
+    /**
      * Detects if user configuration allows mobility functionality.
      *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasSyncML() {
         return hasPermission(MOBILITY);
+    }
+
+    /**
+     * Enables/Disables mobility access in user configuration
+     *
+     * @param enableSyncML
+     */
+    public void setSyncML(final boolean enableSyncML) {
+        setPermission(enableSyncML, MOBILITY);
     }
 
     /**
@@ -566,6 +584,13 @@ public class UserConfiguration implements Serializable, Cloneable {
         return !hasPermission(DENIED_PORTAL);
     }
 
+    /**
+     * Sets if this user is denied to access portal.
+     */
+    public void setDeniedPortal(final boolean deniedPortal) {
+        setPermission(deniedPortal, DENIED_PORTAL);
+    }
+    
     /**
      * Determines all accessible modules as defined in user configuration. The returned array of <code>int</code> is sorted according to
      * <code>{@link Arrays#sort(int[])}</code>, thus <code>{@link Arrays#binarySearch(int[], int)}</code> can be used to detect if a user
@@ -638,6 +663,15 @@ public class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
+     * Set enableFullPublicFolderAccess.
+     *
+     * @param enableFullPublicFolderAccess
+     */
+    public void setFullPublicFolderAccess(final boolean enableFullPublicFolderAccess) {
+        setPermission(enableFullPublicFolderAccess, EDIT_PUBLIC_FOLDERS);
+    }
+
+    /**
      * If this permission is not granted, neither folders are allowed to be shared nor shared folders are allowed to be seen by user.
      * Existing permissions are not removed if user loses this right, but the display of shared folders is suppressed.
      *
@@ -645,6 +679,15 @@ public class UserConfiguration implements Serializable, Cloneable {
      */
     public boolean hasFullSharedFolderAccess() {
         return hasPermission(READ_CREATE_SHARED_FOLDERS);
+    }
+
+    /**
+     * Set enableFullSharedFolderAccess.
+     *
+     * @param enableFullSharedFolderAccess
+     */
+    public void setFullSharedFolderAccess(final boolean enableFullSharedFolderAccess) {
+        setPermission(enableFullSharedFolderAccess, READ_CREATE_SHARED_FOLDERS);
     }
 
     /**
@@ -657,12 +700,31 @@ public class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
+     * Sets enableDelegateTasks.
+     *
+     * @param enableDelegateTasks
+     */
+    public void setDelegateTasks(final boolean enableDelegateTasks) {
+        setPermission(enableDelegateTasks, DELEGATE_TASKS);
+    }
+
+    /**
      * Checks if this user configuration indicates to collect email addresses.
      *
      * @return <code>true</code> if this user configuration indicates to collect email addresses; otherwise <code>false</code>
      */
     public boolean isCollectEmailAddresses() {
         return hasPermission(COLLECT_EMAIL_ADDRESSES);
+    }
+
+    /**
+     * Sets if this user configuration indicates to collect email addresses.
+     *
+     * @param collectEmailAddresses <code>true</code> if this user configuration indicates to collect email addresses; otherwise
+     *            <code>false</code>
+     */
+    public void setCollectEmailAddresses(final boolean collectEmailAddresses) {
+        setPermission(collectEmailAddresses, COLLECT_EMAIL_ADDRESSES);
     }
 
     /**
@@ -675,12 +737,32 @@ public class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
+     * Sets if this user configuration indicates to enable multiple mail accounts.
+     *
+     * @param multipleMailAccounts <code>true</code> if this user configuration indicates to enable multiple mail accounts; otherwise
+     *            <code>false</code>
+     */
+    public void setMultipleMailAccounts(final boolean multipleMailAccounts) {
+        setPermission(multipleMailAccounts, MULTIPLE_MAIL_ACCOUNTS);
+    }
+
+    /**
      * Checks if this user configuration indicates to enable subscription.
      *
      * @return <code>true</code> if this user configuration indicates to enable subscription; otherwise <code>false</code>
      */
     public boolean isSubscription() {
         return hasPermission(SUBSCRIPTION);
+    }
+
+    /**
+     * Sets if this user configuration indicates to enable subscription.
+     *
+     * @param subscription <code>true</code> if this user configuration indicates to enable subscription; otherwise <code>false</code>
+     */
+    public void setSubscription(final boolean subscription) {
+        setPermission(subscription, SUBSCRIPTION);
+
     }
 
     /**
@@ -693,10 +775,26 @@ public class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
+     * Sets if this user configuration indicates to enable publication.
+     *
+     * @param publication <code>true</code> if this user configuration indicates to enable publication; otherwise <code>false</code>
+     */
+    public void setPublication(final boolean publication) {
+        setPermission(publication, PUBLICATION);
+    }
+
+    /**
      * Checks if this user configuration indicates that the user may use Exchange Active Sync
      */
     public boolean hasActiveSync() {
         return hasPermission(ACTIVE_SYNC);
+    }
+
+    /**
+     * Sets if this user is able to use Exchange Active Sync
+     */
+    public void setActiveSync(final boolean eas) {
+        setPermission(eas, ACTIVE_SYNC);
     }
 
     /**
@@ -707,10 +805,24 @@ public class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
+     * Sets if this user is able to use USM.
+     */
+    public void setUSM(final boolean usm) {
+        setPermission(usm, USM);
+    }
+
+    /**
      * Checks if this user configuration indicates that the user may use OLOX2.0.
      */
     public boolean hasOLOX20() {
         return hasPermission(OLOX20);
+    }
+
+    /**
+     * Sets if this user is able to user OLOX2.0.
+     */
+    public void setOLOX20(final boolean olox20) {
+        setPermission(olox20, OLOX20);
     }
 
     /**
@@ -723,12 +835,32 @@ public class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
+     * Sets if this user configuration indicates that groups are allowed to be edited.
+     *
+     * @param editGroup <code>true</code> if this user configuration indicates that groups are allowed to be edited; otherwise
+     *            <code>false</code>
+     */
+    public void setEditGroup(final boolean editGroup) {
+        setPermission(editGroup, EDIT_GROUP);
+    }
+
+    /**
      * Checks if this user configuration indicates that resources are allowed to be edited.
      *
      * @return <code>true</code> if this user configuration indicates that resources are allowed to be edited; otherwise <code>false</code>
      */
     public boolean isEditResource() {
         return hasPermission(EDIT_RESOURCE);
+    }
+
+    /**
+     * Sets if this user configuration indicates that resources are allowed to be edited.
+     *
+     * @param editResource <code>true</code> if this user configuration indicates that resources are allowed to be edited; otherwise
+     *            <code>false</code>
+     */
+    public void setEditResource(final boolean editResource) {
+        setPermission(editResource, EDIT_RESOURCE);
     }
 
     /**
@@ -742,24 +874,23 @@ public class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
+     * Sets if this user configuration indicates that user password is allowed to be edited.
+     *
+     * @param editPassword <code>true</code> if this user configuration indicates that user password is allowed to be edited; otherwise
+     *            <code>false</code>
+     */
+    public void setEditPassword(final boolean editPassword) {
+        setPermission(editPassword, EDIT_PASSWORD);
+    }
+
+    /**
      * Checks if this user configuration enables specified permission bit.
      *
      * @param permissionBit The permission bit(s) to check
      * @return <code>true</code> if this user configuration enabled specified permission bit(s); otherwise <code>false</code>
      */
     public boolean hasPermission(final int permissionBit) {
-        if (0 == permissionBit) {
-            // According to previous implementation:
-            //  (permissionBits & permission) == permission
-            return true;
-        }
-        
-        for (final Permission p : Permission.byBits(permissionBit)) {
-            if (!capabilities.contains(toLowerCase(p.name()))) {
-                return false;
-            }
-        }
-        return true;
+        return (permissionBits & permissionBit) == permissionBit;
     }
 
     /**
@@ -772,119 +903,43 @@ public class UserConfiguration implements Serializable, Cloneable {
         if (null == permission) {
             return false;
         }
-        return capabilities.contains(toLowerCase(permission.name()));
+        return hasPermissionInternal(permission);
     }
 
-    /**
-     * Checks if this user configuration enables named permission.
-     *
-     * @param name The permission name
-     * @return <code>true</code> if this user configuration enabled named permission; otherwise <code>false</code>
-     */
-    public boolean hasPermission(final String name) {
-    	return getExtendedPermissions().contains(toLowerCase(name));
+    private boolean hasPermissionInternal(final int permission) {
+        return (permissionBits & permission) == permission;
     }
 
-    /**
-     * Gets the user ID.
-     *
-     * @return The user ID
-     */
+    private boolean hasPermissionInternal(Permission permission) {
+        return permission.isAvailable() && hasPermissionInternal(permission.bit);
+    }
+
+    private void setPermission(final boolean enable, final int permission) {
+        /*
+         * Set or unset specified permission
+         */
+        permissionBits = enable ? (permissionBits | permission) : (permissionBits & ~permission);
+    }
+    
     public int getUserId() {
         return userId;
     }
 
-    /**
-     * Gets the group IDs.
-     *
-     * @return The group IDs
-     */
-    public int[] getGroups() {
-        if (null == groups) {
-            return null;
-        }
-        final int[] clone = new int[groups.length];
-        System.arraycopy(groups, 0, clone, 0, clone.length);
-        return clone;
-    }
-
-    /**
-     * Gets the context.
-     *
-     * @return The context
-     */
-    public Context getContext() {
-        return ctx;
-    }
-
-    @Override
-    public String toString() {
-        return new StringBuilder(32).append("UserConfiguration_").append(userId).append('@').append(capabilities.toString()).toString();
-    }
-
-	/**
-	 * Gets the extended permissions.
-	 *
-	 * @return The extended permissions
-	 */
-    public Set<String> getExtendedPermissions() {
-        return capabilities;
+    public int getContextId() {
+        return contextId;
     }
 
 
-    /**
-     * Calculates this user configuration's extended permissions.
-     *
-     * @return The extended permissions
-     *
-    public Set<String> calcExtendedPermissions() {
-        final Set<String> retval = new HashSet<String>(128);
-        Permission.addByBits(permissionBits, retval);
-        // Now apply modifiers from the config cascade
-        final ConfigViewFactory configViews = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-        if (configViews != null) {
-            try {
-                final ConfigView view = configViews.getView(userId, ctx.getContextId());
-                final String property = PERMISSION_PROPERTY;
-                for (final String scope : configViews.getSearchPath()) {
-                    final String permissions = view.property(property, String.class).precedence(scope).get();
-                    if (permissions != null) {
-                        for (final String permissionModifier : P_SPLIT.split(permissions)) {
-                            final char firstChar = permissionModifier.charAt(0);
-                            if ('-' == firstChar) {
-                                retval.remove(toLowerCase(permissionModifier.substring(1)));
-                            } else {
-                                if ('+' == firstChar) {
-                                    retval.add(toLowerCase(permissionModifier.substring(1)));
-                                } else {
-                                    retval.add(toLowerCase(permissionModifier));
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (final OXException x) {
-                if (UserExceptionCode.USER_NOT_FOUND.equals(x)) {
-                    LOG.debug(x.getMessage(), x);
-                } else {
-                    LOG.error(x.getMessage(), x);
-                }
-            } catch (final RuntimeException x) {
-                LOG.error(x.getMessage(), x);
+    public static int getPermissionBits(Set<String> capabilities) {
+        int bits = 0;
+        for (String string : capabilities) {
+            Permission permission = Permission.valueOf(string);
+            if (permission != null) {
+                bits = bits | permission.bit;
             }
         }
-        return retval;
-    } */
-
-    /** ASCII-wise lower-case */
-    static String toLowerCase(final CharSequence chars) {
-        final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
+        return bits;
     }
+
 
 }

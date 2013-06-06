@@ -47,38 +47,36 @@
  *
  */
 
-package com.openexchange.config.cascade.context.matching;
+package com.openexchange.groupware.userconfiguration;
 
-import java.util.Arrays;
-import java.util.Set;
-import junit.framework.TestCase;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.server.Initialization;
 
+/** Checks if associated {@link Permission permission}'s service is available. */
+public interface AvailabilityChecker extends Initialization {
+    
+    /** Returns always <code>true</code> */
+    public static final AvailabilityChecker TRUE_AVAILABILITY_CHECKER = new AvailabilityChecker() {
 
-/**
- * {@link UserConfigurationAnalyzerTest}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- */
-public class UserConfigurationAnalyzerTest extends TestCase {
-    public void testSample() {
-        UserPermissionBits config = new UserPermissionBits(0, 0, 0);
-        config.setActiveSync(true);
-        config.setEditPassword(true);
-        config.setInfostore(true);
-        config.setWebDAVXML(true);
-
-        UserConfigurationAnalyzer analyzer = new UserConfigurationAnalyzer();
-
-        Set<String> tags = analyzer.getTags(config);
-
-        for(String tag : Arrays.asList("ucActiveSync", "ucEditPassword", "ucInfostore", "ucWebDAVXML")) {
-            assertTrue(tags.toString()+ " did not contain "+tag, tags.remove(tag));
+        @Override
+        public boolean isAvailable(){
+            return true;
         }
 
-        assertTrue(tags.toString()+" were not expected", tags.isEmpty());
+        @Override
+        public void start() {
+            // Nothing to do
+        }
 
-
-    }
+        @Override
+        public void stop() {
+            // Nothing to do
+        }
+    };
+    
+    /**
+     * Indicates if associated {@link Permission permission}'s service is available.
+     *
+     * @return <code>true</code> if available; otherwise <code>false</code>
+     */
+    boolean isAvailable();
 }

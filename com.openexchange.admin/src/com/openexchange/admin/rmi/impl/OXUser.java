@@ -397,7 +397,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
 //      JCS
         try {
-            UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
+            UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
         } catch (final OXException e) {
             log.error("Error removing user "+user.getId()+" in context "+ctx.getId()+" from configuration storage",e);
         }
@@ -471,7 +471,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
 //      JCS
         try {
-            UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
+            UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
         } catch (final OXException e) {
             log.error("Error removing user "+user.getId()+" in context "+ctx.getId()+" from configuration storage",e);
         }
@@ -867,7 +867,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     ucCache.remove(key);
                     usmCache.remove(key);
                     try {
-                        UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId().intValue(),
+                        UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(),
                                 new ContextImpl(ctx.getId().intValue()));
                     } catch (final OXException e) {
                         log.error("Error removing user " + user.getId() + " in context " + ctx.getId()

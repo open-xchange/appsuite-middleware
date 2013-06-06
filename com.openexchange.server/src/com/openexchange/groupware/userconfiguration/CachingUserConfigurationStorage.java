@@ -64,6 +64,7 @@ import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -93,6 +94,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 
     /**
      * Initializes a new {@link CachingUserConfigurationStorage}.
+     * @param capabilities 
      *
      * @throws OXException If an error occurs
      */
@@ -192,35 +194,16 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             this.cache = null;
         }
     }
-
-    /* The ConfigCascade adds an additional layer to the UserConfiguration. It is possible to modify the permissions through the
-     * ConfigCascade while the ConfigCascade itself needs the permissions from the database. To release this the ConfigCascade loads the
-     * UserConfiguration without initializing the extended permissions (initExtendedPermissions == false). Those loaded UserConfigurations
-     * have not been put into cache, because without extended permissions the UserConfiguration gives false answers.
-     * Unfortunately this does not scale out, so we have to cache UserConfigurations without extended permissions. Otherwise we have always
-     * an access to the database here.
-     */
+    
     @Override
-    public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx, final boolean initExtendedPermissions) throws OXException {
+    public UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx) throws OXException {
         final Cache cache = this.cache;
         if (cache == null) {
-            return getFallback().getUserConfiguration(userId, groups, ctx, initExtendedPermissions);
+            return getFallback().getUserConfiguration(userId, groups, ctx);
         }
-        final UserConfiguration userConfig;
-        if (initExtendedPermissions) {
-            userConfig = getUserConfiguration(cache, ctx, userId, groups);
-        } else {
-            userConfig = getUserConfigurationWithoutExtended(cache, ctx, userId, groups);
-        }
-        if (null == userConfig) {
-            // TODO: or -->   throw UserConfigurationCodes.NOT_FOUND.create(Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
-            return getFallback().getUserConfiguration(userId, groups, ctx, initExtendedPermissions);
-        }
-        return userConfig;
+        return getUserConfigurations(cache, ctx, new int[]{userId}, new int[][]{groups})[0];
     }
-
-    /* @see com.openexchange.groupware.userconfiguration.CachingUserConfigurationStorage.getUserConfiguration(int, int[], Context, boolean)
-     */
+    
     @Override
     public UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws OXException {
         final Cache cache = this.cache;
@@ -245,34 +228,19 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
                 groupsToLoad.add(user.getGroups());
             }
         }
-        loadUserConfiguration(cache, map, ctx, toLoad.toArray(), groupsToLoad.toArray(new int[groupsToLoad.size()][]), true);
+        loadUserConfiguration(cache, map, ctx, toLoad.toArray(), groupsToLoad.toArray(new int[groupsToLoad.size()][]));
         return convert(map, userIds);
     }
-
+    
     @Override
-    UserConfiguration[] getUserConfigurationWithoutExtended(Context ctx, int[] userIds, int[][] groups) throws OXException {
+    public UserConfiguration[] getUserConfigurations(Context ctx, int[] userIds, int[][] groups) throws OXException {
         final Cache cache = this.cache;
         if (cache == null) {
-            return getFallback().getUserConfigurationWithoutExtended(ctx, userIds, groups);
+            return getFallback().getUserConfigurations(ctx, userIds, groups);
         }
-        return getUserConfigurationWithoutExtended(cache, ctx, userIds, groups);
+        return getUserConfigurations(cache, ctx, userIds, groups);
     }
-
-    /**
-     * Convenience method for calling the single array style implementation.
-     */
-    private UserConfiguration getUserConfiguration(Cache cache, Context ctx, int userId, int[] groups) throws OXException {
-        return getUserConfiguration(cache, ctx, new int[] { userId }, new int[][] { groups })[0];
-    }
-
-    /**
-     * Convenience method for calling the single array style implementation.
-     */
-    private UserConfiguration getUserConfigurationWithoutExtended(Cache cache, Context ctx, int userId, int[] groups) throws OXException {
-        final UserConfiguration[] ret = getUserConfigurationWithoutExtended(cache, ctx, new int[] { userId }, new int[][] { groups });
-        return null == ret || 0 == ret.length ? null : ret[0];
-    }
-
+    
     private static TIntObjectMap<UserConfiguration> getCachedUserConfiguration(Cache cache, Context ctx, int[] userIds, boolean extendedPermissions) {
         TIntObjectMap<UserConfiguration> map = new TIntObjectHashMap<UserConfiguration>(userIds.length, 1);
         for (int i = 0; i < userIds.length; i++) {
@@ -307,7 +275,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
      * This method should cache those {@link UserConfiguration}s without extended permissions otherwise loading the {@link UserConfiguration}
      * with extended permissions does not scale well. See https://bugs.open-xchange.com/show_bug.cgi?id=25162#c4.
      */
-    private UserConfiguration[] getUserConfigurationWithoutExtended(Cache cache, Context ctx, int[] userIds, int[][] groups) throws OXException {
+    private UserConfiguration[] getUserConfigurations(Cache cache, Context ctx, int[] userIds, int[][] groups) throws OXException {
         TIntObjectMap<UserConfiguration> map = getCachedUserConfiguration(cache, ctx, userIds, false);
         TIntList toLoad = new TIntArrayList(userIds.length - map.size());
         List<int[]> groupsToLoad = new ArrayList<int[]>(userIds.length - map.size());
@@ -317,52 +285,23 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
                 groupsToLoad.add(groups[i]);
             }
         }
-        loadUserConfiguration(cache, map, ctx, toLoad.toArray(), groupsToLoad.toArray(new int[groupsToLoad.size()][]), false);
+        loadUserConfiguration(cache, map, ctx, toLoad.toArray(), groupsToLoad.toArray(new int[groupsToLoad.size()][]));
         return convert(map, userIds);
     }
 
-    /**
-     * This method uses the {@link UserConfiguration} cached without extended permissions and adds to them the extended permissions.
-     * Afterwards puts the fully initialized {@link UserConfiguration} into the normal cache.
-     */
-    private UserConfiguration[] getUserConfiguration(Cache cache, Context ctx, int[] userIds, int[][] groups) throws OXException {
-        TIntObjectMap<UserConfiguration> map = getCachedUserConfiguration(cache, ctx, userIds, true);
-        TIntList toLoad = new TIntArrayList(userIds.length - map.size());
-        List<int[]> groupsToLoad = new ArrayList<int[]>(userIds.length - map.size());
-        for (int i = 0; i < userIds.length; i++) {
-            if (!map.containsKey(userIds[i])) {
-                toLoad.add(userIds[i]);
-                groupsToLoad.add(groups[i]);
-            }
-        }
-        loadUserConfiguration(cache, map, ctx, toLoad.toArray(), groupsToLoad.toArray(new int[groupsToLoad.size()][]), true);
-        return convert(map, userIds);
-    }
-
-    private void loadUserConfiguration(Cache cache, TIntObjectMap<UserConfiguration> map, Context ctx, int[] userIds, int[][] groups, boolean extendedPermissions) throws OXException {
+    private void loadUserConfiguration(Cache cache, TIntObjectMap<UserConfiguration> map, Context ctx, int[] userIds, int[][] groups) throws OXException {
         if (null == userIds || 0 == userIds.length) {
             return;
         }
         final UserConfiguration[] loaded;
-        if (extendedPermissions) {
-            loaded = getUserConfigurationWithoutExtended(cache, ctx, userIds, groups);
-        } else {
-            loaded = delegateStorage.getUserConfigurationWithoutExtended(ctx, userIds, groups);
-        }
+        loaded = delegateStorage.getUserConfigurations(ctx, userIds, groups);
         if (null == loaded) {
             return;
         }
         for (UserConfiguration userConfig : loaded) {
             int userId = userConfig.getUserId();
             CacheKey key;
-            if (extendedPermissions) {
-                // Calculate extended permissions. Reading UserConfiguration by ConfigCascade will be fast now, because UserConfigurations
-                // without extended permissions are already cached.
-                userConfig.setExtendedPermissions(userConfig.calcExtendedPermissions());
-                key = getKey(userId, ctx, cache);
-            } else {
-                key = getKey(cache, ctx, userId, false);
-            }
+            key = getKey(cache, ctx, userId, false);
             cacheWriteLock.lock();
             try {
                 cache.put(key, userConfig, false);
@@ -395,7 +334,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
-    public void removeUserConfiguration(final int userId, final Context ctx) throws OXException {
+    public void invalidateCache(final int userId, final Context ctx) throws OXException {
         final Cache cache = this.cache;
         if (cache == null) {
             return;
@@ -411,11 +350,6 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         } finally {
             cacheWriteLock.unlock();
         }
-    }
-
-    @Override
-    public void saveUserConfiguration(final int permissionBits, final int userId, final Context ctx) throws OXException {
-        delegateStorage.saveUserConfiguration(permissionBits, userId, ctx);
-        removeUserConfiguration(userId, ctx);
+        UserPermissionBitsStorage.getInstance().removeUserPermissionBits(userId, ctx);
     }
 }

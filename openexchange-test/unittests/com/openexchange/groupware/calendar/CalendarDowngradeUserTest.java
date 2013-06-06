@@ -55,6 +55,7 @@ import static com.openexchange.tools.events.EventAssertions.assertModificationEv
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -121,7 +122,7 @@ public class CalendarDowngradeUserTest extends TestCase {
     }
 
     private void runDelete(final int user) {
-        final UserConfiguration config = new UserConfiguration(0, user, tools.getGroups(user, ctx) , ctx);
+        final UserConfiguration config = new UserConfiguration(new HashSet<String>(), user, tools.getGroups(user, ctx) , ctx);
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(ctx);

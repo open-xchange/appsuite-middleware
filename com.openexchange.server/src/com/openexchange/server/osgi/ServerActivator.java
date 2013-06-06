@@ -138,6 +138,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationListener;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
@@ -205,7 +206,9 @@ import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
+import com.openexchange.userconf.internal.UserPermissionServiceImpl;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.spring.SpringParser;
 
@@ -458,7 +461,9 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Distributed files
         track(DistributedFileManagement.class, new DistributedFilesListener());
-
+        
+        // CapabilityService
+        track(CapabilityService.class, new CapabilityRegistrationListener());
         /*
          * Register EventHandler
          */
@@ -540,6 +545,12 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(
             UserConfigurationService.class,
             ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
+
+        ServerServiceRegistry.getInstance().addService(UserPermissionService.class, new UserPermissionServiceImpl());
+        registerService(
+            UserPermissionService.class,
+            ServerServiceRegistry.getInstance().getService(UserPermissionService.class, true));
+        
         registerService(ContextService.class, ServerServiceRegistry.getInstance().getService(ContextService.class, true));
         // Register mail stuff
         {

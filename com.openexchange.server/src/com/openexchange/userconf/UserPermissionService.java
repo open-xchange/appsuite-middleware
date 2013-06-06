@@ -47,38 +47,60 @@
  *
  */
 
-package com.openexchange.config.cascade.context.matching;
+package com.openexchange.userconf;
 
-import java.util.Arrays;
-import java.util.Set;
-import junit.framework.TestCase;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 
 
 /**
- * {@link UserConfigurationAnalyzerTest}
+ * {@link UserPermissionService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class UserConfigurationAnalyzerTest extends TestCase {
-    public void testSample() {
-        UserPermissionBits config = new UserPermissionBits(0, 0, 0);
-        config.setActiveSync(true);
-        config.setEditPassword(true);
-        config.setInfostore(true);
-        config.setWebDAVXML(true);
+public interface UserPermissionService {
+    /**
+     * Determines the instance of <code>UserPermissionBits</code> that corresponds to given user ID.
+     *
+     * @param userId - the user ID
+     * @param ctx - the context
+     * @return the instance of <code>UserPermissionBits</code>
+     * @throws OXException If user's configuration could not be determined
+     * @see #getUserPermissionBits(int, int[], Context)
+     */
+    public UserPermissionBits getUserPermissionBits(final int userId, final Context ctx) throws OXException;
 
-        UserConfigurationAnalyzer analyzer = new UserConfigurationAnalyzer();
+    /**
+     * This method reads several user module access permissions. This method is faster than reading separately the {@link UserPermissionBits}
+     * for every given user.
+     * @param ctx the context
+     * @param users user objects that module access permission should be loaded.
+     * @return an array with the module access permissions of the given users.
+     * @throws OXException if users configuration could not be loaded.
+     */
+    public UserPermissionBits[] getUserPermissionBits(Context ctx, User[] users) throws OXException;
 
-        Set<String> tags = analyzer.getTags(config);
+    /**
+     * <p>
+     * Clears the whole storage. All kept instances of <code>UserPermissionBits</code> are going to be removed from storage.
+     * <p>
+     * <b>NOTE:</b> Only the instances are going to be removed from storage; underlying database is not affected
+     *
+     * @throws OXException If clearing fails
+     */
+    public void clearStorage() throws OXException;
 
-        for(String tag : Arrays.asList("ucActiveSync", "ucEditPassword", "ucInfostore", "ucWebDAVXML")) {
-            assertTrue(tags.toString()+ " did not contain "+tag, tags.remove(tag));
-        }
-
-        assertTrue(tags.toString()+" were not expected", tags.isEmpty());
-
-
-    }
+    /**
+     * <p>
+     * Removes the instance of <code>UserPermissionBits</code> that corresponds to given user ID from storage.
+     * <p>
+     * <b>NOTE:</b> Only the instance is going to be removed from storage; underlying database is not affected
+     *
+     * @param userId - the user ID
+     * @param ctx - the context
+     * @throws OXException If removal fails
+     */
+    public void removeUserPermissionBits(int userId, Context ctx) throws OXException;
 }

@@ -130,6 +130,7 @@ import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.impl.id.IDGeneratorServiceImpl;
 import com.openexchange.groupware.reminder.internal.TargetRegistry;
 import com.openexchange.groupware.update.internal.InternalList;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
@@ -193,7 +194,9 @@ import com.openexchange.tools.file.internal.DBQuotaFileStorageFactory;
 import com.openexchange.user.UserService;
 import com.openexchange.user.internal.UserServiceImpl;
 import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
+import com.openexchange.userconf.internal.UserPermissionServiceImpl;
 import com.openexchange.version.Version;
 import com.openexchange.version.internal.Numbers;
 import com.openexchange.xml.jdom.JDOMParser;
@@ -442,6 +445,7 @@ public final class Init {
                 throw getWrappingOXException(e);
             }
             services.put(UserConfigurationService.class, new UserConfigurationServiceImpl());
+            services.put(UserPermissionService.class, new UserPermissionServiceImpl());
             TestServiceRegistry.getInstance().addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
         }
     }

@@ -25,6 +25,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.MutableUserConfiguration;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -848,16 +849,22 @@ public class FolderTest extends TestCase {
             fail(e.getMessage());
         }
     }
+    
+    private static MutableUserConfigurationStorage STORAGE = null;
 
-    public static final UserConfiguration getUserConfiguration(final Context ctx, final int userId)
+    public static final MutableUserConfiguration getUserConfiguration(final Context ctx, final int userId)
             throws OXException {
-        final UserConfigurationStorage stor = UserConfigurationStorage.getInstance();
-        return stor.getUserConfiguration(userId, ctx);
+        if (STORAGE == null) {
+            STORAGE = new MutableUserConfigurationStorage(UserConfigurationStorage.getInstance());
+        }
+        return STORAGE.getUserConfiguration(userId, ctx).getMutable();
     }
 
     public static final void saveUserConfiguration(final UserConfiguration uc) throws OXException {
-        final UserConfigurationStorage stor = UserConfigurationStorage.getInstance();
-        stor.saveUserConfiguration(uc);
+        if (STORAGE == null) {
+            STORAGE = new MutableUserConfigurationStorage(UserConfigurationStorage.getInstance());
+        }
+        STORAGE.saveUserConfiguration(uc);
     }
 
     public void testWithModifiedUserConfig001() {
@@ -897,7 +904,7 @@ public class FolderTest extends TestCase {
                 /*
                  * Deny creation or modifications of public folders
                  */
-                final UserConfiguration uc = getUserConfiguration(ctx, userId);
+                final MutableUserConfiguration uc = getUserConfiguration(ctx, userId);
                 uc.setFullPublicFolderAccess(false);
                 saveUserConfiguration(uc);
                 /*
@@ -914,7 +921,7 @@ public class FolderTest extends TestCase {
                 }
                 assertTrue(exc != null);
             } finally {
-                final UserConfiguration uc = getUserConfiguration(ctx, userId);
+                final MutableUserConfiguration uc = getUserConfiguration(ctx, userId);
                 uc.setFullPublicFolderAccess(true);
                 saveUserConfiguration(uc);
                 /*
@@ -965,7 +972,7 @@ public class FolderTest extends TestCase {
                 /*
                  * Deny calendar module access
                  */
-                final UserConfiguration uc = getUserConfiguration(ctx, userId);
+                final MutableUserConfiguration uc = getUserConfiguration(ctx, userId);
                 uc.setCalendar(false);
                 saveUserConfiguration(uc);
                 /*
@@ -982,7 +989,7 @@ public class FolderTest extends TestCase {
                 }
                 assertTrue(exc != null);
             } finally {
-                final UserConfiguration uc = getUserConfiguration(ctx, userId);
+                final MutableUserConfiguration uc = getUserConfiguration(ctx, userId);
                 uc.setCalendar(true);
                 saveUserConfiguration(uc);
                 /*
@@ -1140,7 +1147,7 @@ public class FolderTest extends TestCase {
 
     public void testGetSubfoldersWithRestrictedAccess() {
         try {
-            final UserConfiguration uc = getUserConfiguration(ctx, userId);
+            final MutableUserConfiguration uc = getUserConfiguration(ctx, userId);
             uc.setCalendar(false);
             saveUserConfiguration(uc);
             try {
@@ -1166,7 +1173,7 @@ public class FolderTest extends TestCase {
                     it.close();
                 }
             } finally {
-                final UserConfiguration uc0 = getUserConfiguration(ctx, userId);
+                final MutableUserConfiguration uc0 = getUserConfiguration(ctx, userId);
                 uc0.setCalendar(true);
                 saveUserConfiguration(uc0);
             }

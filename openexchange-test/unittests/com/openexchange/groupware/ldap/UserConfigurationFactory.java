@@ -2,11 +2,15 @@ package com.openexchange.groupware.ldap;
 
 import com.openexchange.exception.OXException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.mail.usersetting.UserSettingMail;
 
 /**
@@ -30,7 +34,13 @@ public class UserConfigurationFactory {
 	public UserConfigurationFactory() {
 		try {
 		final Context ctx = new ContextImpl(1);
-		final int permissions = 262143;
+		final int bits = 262143;
+		
+		Set<String> permissions = new HashSet<String>();
+		for (Permission p: Permission.byBits(bits)) {
+		    permissions.add(p.name().toLowerCase());
+		}
+		
 		final MockUserLookup users = new MockUserLookup();
 
 

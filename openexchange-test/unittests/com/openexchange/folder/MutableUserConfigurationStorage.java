@@ -47,56 +47,100 @@
  *
  */
 
-package com.openexchange.userconf.internal;
+package com.openexchange.folder;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.MutableUserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.userconf.UserConfigurationService;
+
 
 /**
- * {@link UserConfigurationServiceImpl}
+ * {@link MutableUserConfigurationStorage}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class UserConfigurationServiceImpl implements UserConfigurationService {
+public class MutableUserConfigurationStorage extends UserConfigurationStorage {
+    
+    private UserConfigurationStorage delegate;
+    
+    private ConcurrentHashMap<Integer, UserConfiguration> overrides = new ConcurrentHashMap<Integer, UserConfiguration>();
 
-    /**
-     * Initializes a new {@link UserConfigurationServiceImpl}.
-     */
-    public UserConfigurationServiceImpl() {
-        super();
+    public MutableUserConfigurationStorage(UserConfigurationStorage delegate) {
+        this.delegate = delegate;
+    }
+    
+    @Override
+    protected void startInternal() throws OXException {
+    }
+
+    @Override
+    protected void stopInternal() throws OXException {
+    }
+    
+    @Override
+    public UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx) throws OXException {
+        UserConfiguration userConfiguration = overrides.get(userId);
+        if (userConfiguration != null) {
+            return userConfiguration;
+        }
+        
+        return delegate.getUserConfiguration(userId, groups, ctx);
+    }
+
+
+    @Override
+    public UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws OXException {
+        Map<Integer, UserConfiguration> ucs = new HashMap<Integer, UserConfiguration>();
+        
+        List<User> toLoad = new ArrayList<User>(users.length);
+
+        for (User user : users) {
+            UserConfiguration configuration = overrides.get(user.getId());
+            if (configuration == null) {
+                toLoad.add(user);
+            } else {
+                ucs.put(user.getId(), configuration);
+            }
+        }
+        
+        if (!toLoad.isEmpty()) {
+            UserConfiguration[] userConfigurations = delegate.getUserConfiguration(ctx, toLoad.toArray(new User[toLoad.size()]));
+            for (UserConfiguration userConfiguration : userConfigurations) {
+                ucs.put(userConfiguration.getUserId(), userConfiguration);
+            }
+        }
+        
+        UserConfiguration[] retval = new UserConfiguration[users.length];
+        
+        int i = 0;
+        for (User user : users) {
+            retval[i++] = ucs.get(user.getId());
+        }
+        
+        return retval;
+    }
+    
+    public void saveUserConfiguration(UserConfiguration configuration) {
+        overrides.put(configuration.getUserId(), configuration);
     }
 
     @Override
     public void clearStorage() throws OXException {
-        UserConfigurationStorage.getInstance().clearStorage();
+        overrides.clear();
     }
 
     @Override
-    public UserConfiguration getUserConfiguration(final int userId, final Context ctx) throws OXException {
-        return getUserConfiguration(userId, ctx, true);
+    public void invalidateCache(int userId, Context ctx) throws OXException {
+        overrides.remove(userId);
     }
 
-    @Override
-    public UserConfiguration getUserConfiguration(final int userId, final Context ctx, final boolean initExtendedPermissions) throws OXException {
-        return UserConfigurationStorage.getInstance().getUserConfiguration(userId, null, ctx);
-    }
 
-    @Override
-    public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws OXException {
-        return UserConfigurationStorage.getInstance().getUserConfiguration(userId, groups, ctx);
-    }
-
-    @Override
-    public UserConfiguration[] getUserConfiguration(final Context ctx, final User[] users) throws OXException {
-        return UserConfigurationStorage.getInstance().getUserConfiguration(ctx, users);
-    }
-
-    @Override
-    public void removeUserConfiguration(final int userId, final Context ctx) throws OXException {
-        UserConfigurationStorage.getInstance().invalidateCache(userId, ctx);
-    }
 }

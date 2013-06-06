@@ -59,6 +59,7 @@ import org.junit.Test;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.userconfiguration.MutableUserConfiguration;
 import com.openexchange.groupware.userconfiguration.OverridingUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -92,7 +93,7 @@ public class Bug8681forCSV extends AbstractContactTest {
             @Override
             public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws OXException {
                 final UserConfiguration orig = delegate.getUserConfiguration(userId, ctx);
-                final UserConfiguration copy = (UserConfiguration) orig.clone();
+                final MutableUserConfiguration copy = orig.getMutable();
                 copy.setContact(false);
                 return copy;
             }
@@ -122,7 +123,7 @@ public class Bug8681forCSV extends AbstractContactTest {
             @Override
             public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws OXException {
                 final UserConfiguration orig = delegate.getUserConfiguration(userId, ctx);
-                final UserConfiguration copy = (UserConfiguration) orig.clone();
+                final MutableUserConfiguration copy = orig.getMutable();
                 copy.setContact(false);
                 return copy;
             }

@@ -49,73 +49,106 @@
 
 package com.openexchange.groupware.userconfiguration;
 
-import java.util.ArrayList;
-import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 
 /**
- * {@link OverridingUserConfigurationStorage}
+ * {@link UserPermissionBitsStorage}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class OverridingUserConfigurationStorage extends UserConfigurationStorage {
+public abstract class UserPermissionBitsStorage {
+    
+    private static UserPermissionBitsStorage singleton;
 
-    /** The delegate */
-    protected final UserConfigurationStorage delegate;
-
-    public OverridingUserConfigurationStorage(final UserConfigurationStorage delegate) {
-        super();
-        this.delegate = delegate;
+    /**
+     * Sets the singleton instance of {@link UserConfigurationStorage}
+     *
+     * @param singleton The singleton instance
+     * @throws OXException If singleton cannot be configured
+     */
+    static void setInstance(final UserPermissionBitsStorage singleton) throws OXException {
+        UserPermissionBitsStorage.singleton = singleton;
+        singleton.start();
     }
 
-    @Override
-    protected void startInternal() throws OXException {
-        delegate.startInternal();
+    /**
+     * Releases the singleton instance of {@link UserConfigurationStorage}
+     *
+     * @throws OXException If singleton cannot be configured
+     */
+    static void releaseInstance() throws OXException {
+        singleton.stop();
+        singleton = null;
     }
 
-    @Override
-    protected void stopInternal() throws OXException {
-        delegate.stopInternal();
+    /**
+     * Factory method for an instance of UserConfigurationStorage.
+     *
+     * @return an instance implementing the
+     *         <code>UserConfigurationStorage</code> interface
+     */
+    public static final UserPermissionBitsStorage getInstance() {
+        return singleton;
     }
 
-    @Override
-    public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws OXException {
-        final UserConfiguration config = getOverride(userId, groups, ctx);
-        return config == null ? delegate.getUserConfiguration(userId, groups, ctx) : config;
-    }
+    private boolean started;
 
-    @Override
-    public UserConfiguration[] getUserConfiguration(final Context ctx, final User[] users) throws OXException {
-        final List<UserConfiguration> retval = new ArrayList<UserConfiguration>();
-        for (final User user : users) {
-            retval.add(getUserConfiguration(user.getId(), user.getGroups(), ctx));
+    private final void start() throws OXException {
+        if (started) {
+            return;
         }
-        return retval.toArray(new UserConfiguration[retval.size()]);
+        startInternal();
+        started = true;
     }
 
-    @Override
-    public void clearStorage() throws OXException {
-        delegate.clearStorage();
+    private final void stop() throws OXException {
+        if (!started) {
+            return;
+        }
+        stopInternal();
+        started = false;
+    }
+    
+    /**
+     * Retrieve the permission bits for the given user
+     */
+    public abstract UserPermissionBits getUserPermissionBits( final int userId, final Context ctx) throws OXException;
+
+    /**
+     * Retrieve the permission bits for the given users
+     */
+    public abstract UserPermissionBits[] getUserPermissionBits(final Context ctx, final User[] users) throws OXException;
+
+    /**
+     * Retrieve the permission bits for the given users
+     */
+    public abstract UserPermissionBits[] getUserPermissionBits(Context ctx, int[] userIds) throws OXException;
+    
+    /**
+     * Forget any locally cached entries
+     */
+    public abstract void clearStorage() throws OXException;
+
+    /**
+     * Forget a locally cached entry
+     */
+    public abstract void removeUserPermissionBits(final int userId, final Context ctx) throws OXException;
+
+    /**
+     * Store the permission bits in the database
+     */
+    public abstract void saveUserPermissionBits(final int permissionBits, final int userId, final Context ctx) throws OXException;
+
+    
+    protected void startInternal() throws OXException {
+        
     }
 
-    @Override
-    public void invalidateCache(final int userId, final Context ctx) throws OXException {
-        delegate.invalidateCache(userId,ctx);
+    protected void stopInternal() throws OXException {
+        
     }
 
-    public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx) throws OXException {
-        return null;
-    }
 
-    public UserConfiguration getOverride(final int userId, final int[] groups, final Context ctx, final boolean initExtendedPermissions) throws OXException {
-        return null;
-    }
-
-    public void override() throws OXException {
-        UserConfigurationStorage.setInstance(this);
-    }
-
-    public void takeBack() throws OXException {
-        UserConfigurationStorage.setInstance(delegate);
-    }
 }

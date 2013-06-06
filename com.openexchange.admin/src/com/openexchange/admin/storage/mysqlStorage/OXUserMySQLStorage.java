@@ -111,8 +111,10 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -2484,7 +2486,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         try {
             read_ox_con = cache.getConnectionForContext(ctx.getId().intValue());
             final int[] all_groups_of_user = getGroupsForUser(ctx, user_id, read_ox_con);
-            final UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(user_id, all_groups_of_user, ctx.getId().intValue(), read_ox_con);
+            final UserPermissionBits user = RdbUserPermissionBitsStorage.adminLoadUserPermissionBits(user_id, all_groups_of_user, ctx.getId().intValue(), read_ox_con);
 
             final UserModuleAccess acc = new UserModuleAccess();
 
@@ -2809,7 +2811,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     private void myChangeInsertModuleAccess(final Context ctx, final int userId, final UserModuleAccess access, final boolean insert, final Connection writeCon, final int[] groups) throws StorageException {
         checkForIllegalCombination(access);
         try {
-            final UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(userId, groups, ctx.getId().intValue(), writeCon);
+            final UserPermissionBits user = RdbUserPermissionBitsStorage.adminLoadUserPermissionBits(userId, groups, ctx.getId().intValue(), writeCon);
             user.setCalendar(access.getCalendar());
             user.setContact(access.getContacts());
             user.setForum(access.getForum());
@@ -2844,10 +2846,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             adminHelper.setGlobalAddressBookDisabled(ctx.getId().intValue(), userId, access.isGlobalAddressBookDisabled(), writeCon);
             adminHelper.setPublicFolderEditable(access.isPublicFolderEditable(), ctx.getId().intValue(), userId, writeCon);
 
-            RdbUserConfigurationStorage.saveUserConfiguration(user, insert, writeCon);
+            RdbUserPermissionBitsStorage.saveUserPermissionBits(user, insert, writeCon);
             if (!insert) {
                 final com.openexchange.groupware.contexts.Context gwCtx = ContextStorage.getInstance().getContext(ctx.getId().intValue());
-                UserConfigurationStorage.getInstance().removeUserConfiguration(user.getUserId(), gwCtx);
+                UserConfigurationStorage.getInstance().invalidateCache(user.getUserId(), gwCtx);
             }
         } catch (final SQLException e) {
             log.error("SQL Error", e);

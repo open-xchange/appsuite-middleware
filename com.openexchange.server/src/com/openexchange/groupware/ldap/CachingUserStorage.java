@@ -316,7 +316,7 @@ public class CachingUserStorage extends UserStorage {
             }
         }
         try {
-            UserConfigurationStorage.getInstance().removeUserConfiguration(userId, ctx);
+            UserConfigurationStorage.getInstance().invalidateCache(userId, ctx);
         } catch (final Exception e) {
             // Ignore
         }

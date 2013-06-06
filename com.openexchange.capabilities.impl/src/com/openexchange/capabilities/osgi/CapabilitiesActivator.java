@@ -63,6 +63,7 @@ import com.openexchange.capabilities.groupware.CapabilityCreateTableTask;
 import com.openexchange.capabilities.groupware.CapabilityDeleteListener;
 import com.openexchange.capabilities.internal.AbstractCapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -72,6 +73,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.TimerService;
+import com.openexchange.userconf.UserPermissionService;
 
 public class CapabilitiesActivator extends HousekeepingActivator {
 
@@ -95,7 +97,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DatabaseService.class, TimerService.class, CacheService.class };
+        return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class, UserPermissionService.class, DatabaseService.class, TimerService.class, CacheService.class };
     }
 
     @Override
