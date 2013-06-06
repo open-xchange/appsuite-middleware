@@ -9,7 +9,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.utils.DelUserFolderDiscoverer;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.CapabilityUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
@@ -62,8 +62,8 @@ public class DelUserFolderDiscovererTest extends TestCase{
 		userA = UserStorage.getInstance().getUser(userIdA, ctx);
 		userB = UserStorage.getInstance().getUser(userIdB, ctx);
 
-		userConfigA = RdbUserConfigurationStorage.loadUserConfiguration(userIdA, ctx);
-		userConfigB = RdbUserConfigurationStorage.loadUserConfiguration(userIdB, ctx);
+		userConfigA = CapabilityUserConfigurationStorage.loadUserConfiguration(userIdA, ctx);
+		userConfigB = CapabilityUserConfigurationStorage.loadUserConfiguration(userIdB, ctx);
 
 
 		session = SessionObjectWrapper.createSessionObject(userIdA, ctx, "blupp");

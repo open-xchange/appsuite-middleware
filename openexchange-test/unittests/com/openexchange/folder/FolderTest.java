@@ -26,7 +26,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.MutableUserConfiguration;
-import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.CapabilityUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
@@ -683,7 +683,7 @@ public class FolderTest extends TestCase {
                 assertTrue(fo.getLastModified().getTime() == lastModified);
                 assertTrue(fo.getModifiedBy() == userId);
                 assertTrue(fo.getParentFolderID() == stdCalFolder);
-                final EffectivePermission ep = fo.getEffectiveUserPermission(secondUserId, RdbUserConfigurationStorage
+                final EffectivePermission ep = fo.getEffectiveUserPermission(secondUserId, CapabilityUserConfigurationStorage
                         .loadUserConfiguration(secondUserId, new ContextImpl(CONTEXT_ID)));
                 assertTrue(ep.isFolderVisible());
                 assertTrue(ep.canCreateSubfolders());

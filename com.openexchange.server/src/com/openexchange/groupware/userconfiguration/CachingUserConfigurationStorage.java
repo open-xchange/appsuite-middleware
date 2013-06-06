@@ -72,7 +72,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link CachingUserConfigurationStorage} - A cache-based implementation of {@link UserConfigurationStorage} with a fallback to
- * {@link RdbUserConfigurationStorage}.
+ * {@link CapabilityUserConfigurationStorage}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -101,7 +101,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     public CachingUserConfigurationStorage() throws OXException {
         super();
         cacheWriteLock = new ReentrantLock();
-        this.delegateStorage = new RdbUserConfigurationStorage();
+        this.delegateStorage = new CapabilityUserConfigurationStorage();
         cacheAvailabilityListener = new CacheAvailabilityListener() {
 
             @Override
@@ -123,7 +123,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             synchronized (this) {
                 fallback = this.fallback;
                 if (null == fallback) {
-                    fallback = new RdbUserConfigurationStorage();
+                    fallback = new CapabilityUserConfigurationStorage();
                     this.fallback = fallback;
                 }
             }

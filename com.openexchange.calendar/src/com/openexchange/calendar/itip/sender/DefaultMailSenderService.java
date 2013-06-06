@@ -84,7 +84,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.groupware.notify.State;
-import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.CapabilityUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.html.HtmlService;
@@ -209,7 +209,7 @@ public class DefaultMailSenderService implements MailSenderService {
     }
 
     private UserConfiguration getUserConfiguration(final int id, final int[] groups, final Context context) throws SQLException, OXException {
-        return RdbUserConfigurationStorage.loadUserConfiguration(id, groups, context);
+        return CapabilityUserConfigurationStorage.loadUserConfiguration(id, groups, context);
     }
 
     private UserSettingMail getUserSettingMail(final int id, final Context context) throws OXException {

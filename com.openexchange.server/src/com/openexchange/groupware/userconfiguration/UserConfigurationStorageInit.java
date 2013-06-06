@@ -73,7 +73,7 @@ public final class UserConfigurationStorageInit implements Initialization {
         /**
          * Database
          */
-        DB("DB", RdbUserConfigurationStorage.class.getName(), CachingUserPermissionBitsStorage.class.getName());
+        DB("DB", CapabilityUserConfigurationStorage.class.getName(), CachingUserPermissionBitsStorage.class.getName());
 
         private final String alias;
 

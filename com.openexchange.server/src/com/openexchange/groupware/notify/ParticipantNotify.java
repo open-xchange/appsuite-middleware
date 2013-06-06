@@ -113,7 +113,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.CapabilityUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.RenderMap;
@@ -312,7 +312,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     }
 
     protected UserConfiguration getUserConfiguration(final int id, final int[] groups, final Context context) throws SQLException, OXException {
-        return RdbUserConfigurationStorage.loadUserConfiguration(id, groups, context);
+        return CapabilityUserConfigurationStorage.loadUserConfiguration(id, groups, context);
     }
 
     protected UserSettingMail getUserSettingMail(final int id, final Context context) throws OXException {
