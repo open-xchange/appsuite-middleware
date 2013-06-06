@@ -55,12 +55,12 @@ import java.util.Comparator;
 import java.util.List;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryVersion;
-import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.actions.AcknowledgeDirectoryAction;
 import com.openexchange.drive.actions.EditDirectoryAction;
+import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
-import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.drive.sync.SyncResult;
 
 
@@ -77,62 +77,74 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
 
     @Override
     public SyncResult<DirectoryVersion> optimize(DriveSession session, SyncResult<DirectoryVersion> result) {
-        List<DriveAction<DirectoryVersion>> optimizedActionsForClient = new ArrayList<DriveAction<DirectoryVersion>>(result.getActionsForClient());
-        List<DriveAction<DirectoryVersion>> optimizedActionsForServer = new ArrayList<DriveAction<DirectoryVersion>>(result.getActionsForServer());
-        List<DriveAction<DirectoryVersion>> renameActionsForClient = new ArrayList<DriveAction<DirectoryVersion>>();
-        List<DriveAction<DirectoryVersion>> renameActionsForServer = new ArrayList<DriveAction<DirectoryVersion>>();
-        for (DriveAction<DirectoryVersion> clientAction : result.getActionsForClient()) {
+        List<AbstractAction<DirectoryVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForClient());
+        List<AbstractAction<DirectoryVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForServer());
+        List<AbstractAction<DirectoryVersion>> renameActionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>();
+        List<AbstractAction<DirectoryVersion>> renameActionsForServer = new ArrayList<AbstractAction<DirectoryVersion>>();
+        /*
+         * Move of subfolder at client: check for client ACKNOWLEDGE / client SYNC / server REMOVE of identical version
+         */
+        for (AbstractAction<DirectoryVersion> serverAction : result.getActionsForServer()) {
             /*
-             * Move of subfolder at client: check for client ACKNOWLEDGE / client SYNC / server REMOVE of identical version
-             *
-             * Client: {"action":"sync","newVersion":null,"version":{"path":"/ANDERS","checksum":"55bd0578618be81d9b4140212e0fae50"}}
-             * Client: {"action":"acknowledge","newVersion":null,"version":{"path":"/wf","checksum":"55bd0578618be81d9b4140212e0fae50"}}
-             * Server: {"action":"remove","newVersion":null,"version":{"path":"/wf","checksum":"55bd0578618be81d9b4140212e0fae50"}}
+             * check each server REMOVE caused by non-conflicting client-deletion
+             * REMOVE [version=/vorher | d41d8cd98f00b204e9800998ecf8427e [59408], newVersion=null, parameters={}]
              */
-            if (Action.SYNC == clientAction.getAction() && false == DriveConstants.ROOT_PATH.equals(clientAction.getVersion().getPath()) &&
-                false == wasConflict(clientAction)) {
-                DriveAction<DirectoryVersion> matchingServerAction = findMatchingRenameAction(
-                    Action.REMOVE, clientAction.getVersion(), optimizedActionsForServer);
-                if (null != matchingServerAction) {
-                    DriveAction<DirectoryVersion> matchingClientAction = findMatchingRenameAction(
-                        Action.ACKNOWLEDGE, clientAction.getVersion(), optimizedActionsForClient);
-                    if (null != matchingClientAction) {
+            if (Action.REMOVE.equals(serverAction.getAction()) && serverAction.wasCausedBy(Change.DELETED, Change.NONE)) {
+                /*
+                 * find matching client ACKNOWLEDGE for the same version
+                 * ACKNOWLEDGE [version={"path":"/vorher","checksum":"d41d8cd98f00b204e9800998ecf8427e"}, newVersion=null, parameters={}]
+                 */
+                for (AbstractAction<DirectoryVersion> clientAction : result.getActionsForClient()) {
+                    if (Action.ACKNOWLEDGE.equals(clientAction.getAction()) && clientAction.wasCausedBy(Change.DELETED, Change.NONE) &&
+                        matchesByPathAndChecksum(clientAction.getVersion(), serverAction.getVersion())) {
                         /*
-                         * edit server directory instead
+                         * find best matching client SYNC caused by a new matching directory at client
+                         * SYNC [version={"path":"/nachher","checksum":"d41d8cd98f00b204e9800998ecf8427e"}, newVersion=null, parameters={}]
                          */
-                        optimizedActionsForClient.remove(clientAction);
-                        optimizedActionsForClient.remove(matchingClientAction);
-                        optimizedActionsForServer.remove(matchingServerAction);
-                        optimizedActionsForClient.add(new AcknowledgeDirectoryAction(matchingClientAction.getVersion(), clientAction.getVersion()));
-                        EditDirectoryAction renameDirectoryAction = new EditDirectoryAction(matchingServerAction.getVersion(), clientAction.getVersion());
-                        optimizedActionsForServer.add(renameDirectoryAction);
-                        renameActionsForServer.add(renameDirectoryAction);
-                        continue;
+                        AbstractAction<DirectoryVersion> clientSync = findBestMatchingAction(
+                            optimizedActionsForClient, Action.SYNC, clientAction.getVersion(), Change.NEW, Change.NONE);
+                        if (null != clientSync) {
+                            /*
+                             * edit server directory instead, acknowledged client move/rename
+                             * EDIT [version=/vorher | d41d8cd98f00b204e9800998ecf8427e [59408], newVersion={"path":"/nachher","checksum":"d41d8cd98f00b204e9800998ecf8427e"}, parameters={}]
+                             * ACKNOWLEDGE [version={"path":"/vorher","checksum":"d41d8cd98f00b204e9800998ecf8427e"}, newVersion={"path":"/nachher","checksum":"d41d8cd98f00b204e9800998ecf8427e"}, parameters={}]
+                             */
+                            optimizedActionsForClient.remove(clientSync);
+                            optimizedActionsForClient.remove(clientAction);
+                            optimizedActionsForServer.remove(serverAction);
+                            optimizedActionsForClient.add(new AcknowledgeDirectoryAction(clientAction.getVersion(), clientSync.getVersion(), null));
+                            EditDirectoryAction renameDirectoryAction = new EditDirectoryAction(serverAction.getVersion(), clientSync.getVersion(), null);
+                            optimizedActionsForServer.add(renameDirectoryAction);
+                            renameActionsForServer.add(renameDirectoryAction);
+                            continue;
+                        }
                     }
                 }
             }
+        }
+        /*
+         * Move of subfolder at server: check for client REMOVE / client SYNC of identical version
+         */
+        for (AbstractAction<DirectoryVersion> clientAction : result.getActionsForClient()) {
             /*
-             * Move of subfolder at server: check for client REMOVE / client SYNC of identical version
-             *
-             * Client: {"action":"remove","newVersion":null,"version":{"path":"/WIEDER ANDERS","checksum":"55bd0578618be81d9b4140212e0fae50"}}
-             * Client: {"action":"sync","newVersion":null,"version":{"path":"/jajaja","checksum":"55bd0578618be81d9b4140212e0fae50"}}
+             * check each client REMOVE caused by a non-conflicting server remove
+             * REMOVE [version=/vorher | d41d8cd98f00b204e9800998ecf8427e [59408], newVersion=null, parameters={}]
              */
-            if (Action.SYNC == clientAction.getAction() && false == DriveConstants.ROOT_PATH.equals(clientAction.getVersion().getPath())) {
-                DriveAction<DirectoryVersion> matchingClientAction = null;
-                for (DriveAction<DirectoryVersion> directoryAction : optimizedActionsForClient) {
-                    if (Action.REMOVE == directoryAction.getAction() && null == directoryAction.getNewVersion() &&
-                        clientAction.getVersion().getChecksum().equals(directoryAction.getVersion().getChecksum())) {
-                        matchingClientAction = directoryAction;
-                        break;
-                    }
-                }
-                if (null != matchingClientAction) {
+            if (Action.REMOVE == clientAction.getAction() && clientAction.wasCausedBy(Change.NONE, Change.DELETED)) {
+                /*
+                 * check each client SYNC caused by a non-conflicting server creation
+                 * SYNC [version={"path":"/nachher","checksum":"d41d8cd98f00b204e9800998ecf8427e"}, newVersion=null, parameters={}]
+                 */
+                AbstractAction<DirectoryVersion> clientSync = findBestMatchingAction(
+                    optimizedActionsForClient, Action.SYNC, clientAction.getVersion(), Change.NONE, Change.NEW);
+                if (null != clientSync) {
                     /*
                      * edit client directory instead
+                     * EDIT [version=/vorher | d41d8cd98f00b204e9800998ecf8427e [59408], newVersion={"path":"/nachher","checksum":"d41d8cd98f00b204e9800998ecf8427e"}, parameters={}]
                      */
                     optimizedActionsForClient.remove(clientAction);
-                    optimizedActionsForClient.remove(matchingClientAction);
-                    EditDirectoryAction renameDirectoryAction = new EditDirectoryAction(matchingClientAction.getVersion(), clientAction.getVersion());
+                    optimizedActionsForClient.remove(clientSync);
+                    EditDirectoryAction renameDirectoryAction = new EditDirectoryAction(clientAction.getVersion(), clientSync.getVersion(), null);
                     optimizedActionsForClient.add(renameDirectoryAction);
                     renameActionsForClient.add(renameDirectoryAction);
                     continue;
@@ -152,13 +164,16 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
          * return new sync results
          */
         return new SyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient);
+
     }
 
-    private DriveAction<DirectoryVersion> findMatchingRenameAction(Action action, DirectoryVersion version, List<DriveAction<DirectoryVersion>> driveActions) {
-        DriveAction<DirectoryVersion> renameAction = null;
+    private static AbstractAction<DirectoryVersion> findBestMatchingAction(List<AbstractAction<DirectoryVersion>> driveActions,
+        Action action, DirectoryVersion version, Change clientChange, Change serverChange) {
+        AbstractAction<DirectoryVersion> renameAction = null;
         int similarityScore = 0;
-        for (DriveAction<DirectoryVersion> driveAction : driveActions) {
-            if (action.equals(driveAction.getAction()) && matchesByChecksum(version, driveAction.getVersion())) {
+        for (AbstractAction<DirectoryVersion> driveAction : driveActions) {
+            if (action.equals(driveAction.getAction()) && matchesByChecksum(version, driveAction.getVersion()) &&
+                driveAction.wasCausedBy(clientChange, serverChange)) {
                 int similarity = calculateSimilarity(version.getPath(), driveAction.getVersion().getPath());
                 if (null == renameAction || similarity > similarityScore) {
                     similarityScore = similarity;
@@ -194,14 +209,14 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
         return score;
     }
 
-    private static List<DriveAction<DirectoryVersion>> getRedundantRenames(List<DriveAction<DirectoryVersion>> renameActions) {
+    private static List<AbstractAction<DirectoryVersion>> getRedundantRenames(List<AbstractAction<DirectoryVersion>> renameActions) {
         /*
          * sort by new directory path
          */
-        Collections.sort(renameActions, new Comparator<DriveAction<DirectoryVersion>>() {
+        Collections.sort(renameActions, new Comparator<AbstractAction<DirectoryVersion>>() {
 
             @Override
-            public int compare(DriveAction<DirectoryVersion> o1, DriveAction<DirectoryVersion> o2) {
+            public int compare(AbstractAction<DirectoryVersion> o1, AbstractAction<DirectoryVersion> o2) {
                 if (null != o1 && null != o2 && Action.EDIT.equals(o1.getAction()) && Action.EDIT.equals(o2.getAction()) &&
                     null != o1.getNewVersion() && null != o2.getNewVersion()) {
                     return o1.getNewVersion().getPath().compareTo(o2.getNewVersion().getPath());
@@ -213,15 +228,15 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
         /*
          * collect effective renames
          */
-        List<DriveAction<DirectoryVersion>> effectiveRenames = new ArrayList<DriveAction<DirectoryVersion>>();
-        for (DriveAction<DirectoryVersion> renameAction : renameActions) {
+        List<AbstractAction<DirectoryVersion>> effectiveRenames = new ArrayList<AbstractAction<DirectoryVersion>>();
+        for (AbstractAction<DirectoryVersion> renameAction : renameActions) {
             String oldPath = renameAction.getVersion().getPath();
             String newPath = renameAction.getNewVersion().getPath();
             boolean redundant = false;
-            for (DriveAction<DirectoryVersion> effectiveRename : effectiveRenames) {
+            for (AbstractAction<DirectoryVersion> effectiveRename : effectiveRenames) {
                 String renamedOldPath = effectiveRename.getVersion().getPath();
                 String renamedNewPath = effectiveRename.getNewVersion().getPath();
-                if (oldPath.startsWith(renamedOldPath) && newPath.startsWith(renamedNewPath)) {
+                if (oldPath.startsWith(renamedOldPath + '/') && newPath.startsWith(renamedNewPath + '/')) {
                     String effectiveOldPath = oldPath.substring(renamedOldPath.length());
                     String effectiveNewPath = newPath.substring(renamedNewPath.length());
                     if (effectiveNewPath.equals(effectiveOldPath)) {
@@ -236,7 +251,7 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
         /*
          * create complement list
          */
-        List<DriveAction<DirectoryVersion>> redundantRenames = new ArrayList<DriveAction<DirectoryVersion>>(renameActions);
+        List<AbstractAction<DirectoryVersion>> redundantRenames = new ArrayList<AbstractAction<DirectoryVersion>>(renameActions);
         redundantRenames.removeAll(effectiveRenames);
         return redundantRenames;
     }

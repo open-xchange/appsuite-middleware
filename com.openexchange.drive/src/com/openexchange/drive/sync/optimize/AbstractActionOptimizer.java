@@ -53,8 +53,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import com.openexchange.drive.Action;
-import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
+import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.comparison.VersionMapper;
 
 /**
@@ -88,9 +88,9 @@ public abstract class AbstractActionOptimizer<T extends DriveVersion> implements
         }
     }
 
-    protected static <T extends DriveVersion> List<DriveAction<T>> filterByAction(List<DriveAction<T>> driveActions, Action action) {
-        List<DriveAction<T>> filteredActions = new ArrayList<DriveAction<T>>();
-        for (DriveAction<T> driveAction : driveActions) {
+    protected static <T extends DriveVersion> List<AbstractAction<T>> filterByAction(List<AbstractAction<T>> driveActions, Action action) {
+        List<AbstractAction<T>> filteredActions = new ArrayList<AbstractAction<T>>();
+        for (AbstractAction<T> driveAction : driveActions) {
             if (null != driveAction && action.equals(driveAction.getAction())) {
                 filteredActions.add(driveAction);
             }

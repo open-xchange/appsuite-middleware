@@ -51,6 +51,7 @@ package com.openexchange.drive.actions;
 
 import com.openexchange.drive.Action;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.comparison.ThreeWayComparison;
 
 /**
  * {@link UploadFileAction}
@@ -62,8 +63,8 @@ import com.openexchange.drive.FileVersion;
  */
 public class UploadFileAction extends AbstractAction<FileVersion> {
 
-    public UploadFileAction(FileVersion file, FileVersion newFile, String path, long offset) {
-        super(file, newFile);
+    public UploadFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, long offset) {
+        super(file, newFile, comparison);
         parameters.put(PARAMETER_OFFSET, Long.valueOf(offset));
         parameters.put(PARAMETER_PATH, path);
     }

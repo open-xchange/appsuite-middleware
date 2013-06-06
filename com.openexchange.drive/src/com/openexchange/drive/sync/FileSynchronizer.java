@@ -61,6 +61,7 @@ import com.openexchange.drive.actions.RemoveFileAction;
 import com.openexchange.drive.actions.UploadFileAction;
 import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.ServerFileVersion;
+import com.openexchange.drive.comparison.ThreeWayComparison;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.internal.UploadHelper;
@@ -90,21 +91,22 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     }
 
     @Override
-    protected void processServerChange(SyncResult<FileVersion> result, Change serverChange, FileVersion originalVersion, FileVersion clientVersion, FileVersion serverVersion) throws OXException {
-        switch (serverChange) {
+    protected void processServerChange(SyncResult<FileVersion> result, ThreeWayComparison<FileVersion> comparison) throws OXException {
+        switch (comparison.getServerChange()) {
         case DELETED:
             /*
              * deleted on server, delete file on client, too
              */
-            result.addActionForClient(new RemoveFileAction(clientVersion, path));
+            result.addActionForClient(new RemoveFileAction(comparison.getClientVersion(), comparison, path));
             break;
         case MODIFIED:
         case NEW:
             /*
              * new/modified on server, let client download the file
              */
-            File serverFile = ServerFileVersion.valueOf(serverVersion, path, session).getFile();
-            result.addActionForClient(new DownloadFileAction(clientVersion, serverVersion, path, serverFile.getFileSize(), serverFile.getFileMIMEType()));
+            File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
+            result.addActionForClient(new DownloadFileAction(
+                comparison.getClientVersion(), comparison.getServerVersion(), comparison, path, serverFile.getFileSize(), serverFile.getFileMIMEType()));
             break;
         default:
             break;
@@ -112,21 +114,22 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     }
 
     @Override
-    protected void processClientChange(SyncResult<FileVersion> result, Change clientChange, FileVersion originalVersion, FileVersion clientVersion, FileVersion serverVersion) throws OXException {
-        switch (clientChange) {
+    protected void processClientChange(SyncResult<FileVersion> result, ThreeWayComparison<FileVersion> comparison) throws OXException {
+        switch (comparison.getClientChange()) {
         case DELETED:
             /*
              * deleted on client, delete on server, too, let client remove it's metadata
              */
-            result.addActionForServer(new RemoveFileAction(serverVersion, path));
-            result.addActionForClient(new AcknowledgeFileAction(originalVersion, null, path));
+            result.addActionForServer(new RemoveFileAction(comparison.getServerVersion(), comparison, path));
+            result.addActionForClient(new AcknowledgeFileAction(comparison.getOriginalVersion(), null, comparison, path));
             break;
         case MODIFIED:
         case NEW:
             /*
              * new/modified on client, let client upload the file
              */
-            result.addActionForClient(new UploadFileAction(serverVersion, clientVersion, path, getUploadOffset(path, clientVersion)));
+            result.addActionForClient(new UploadFileAction(
+                comparison.getServerVersion(), comparison.getClientVersion(), comparison, path, getUploadOffset(path, comparison.getClientVersion())));
             break;
         default:
             break;
@@ -134,48 +137,49 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     }
 
     @Override
-    protected void processConflictingChange(SyncResult<FileVersion> result, Change clientChange, Change serverChange, FileVersion originalVersion, FileVersion clientVersion, FileVersion serverVersion) throws OXException {
-        if (Change.DELETED == serverChange && Change.DELETED == clientChange) {
+    protected void processConflictingChange(SyncResult<FileVersion> result, ThreeWayComparison<FileVersion> comparison) throws OXException {
+        if (Change.DELETED == comparison.getServerChange() && Change.DELETED == comparison.getClientChange()) {
             /*
              * both deleted, just let client remove it's metadata
              */
-            result.addActionForClient(new AcknowledgeFileAction(originalVersion, null, path));
-        } else if ((Change.NEW == clientChange || Change.MODIFIED == clientChange) &&
-            (Change.NEW == serverChange || Change.MODIFIED == serverChange)) {
+            result.addActionForClient(new AcknowledgeFileAction(comparison.getOriginalVersion(), null, comparison, path));
+        } else if ((Change.NEW == comparison.getClientChange() || Change.MODIFIED == comparison.getClientChange()) &&
+            (Change.NEW == comparison.getServerChange() || Change.MODIFIED == comparison.getServerChange())) {
             /*
              * name clash for new/modified files, check file equivalence
              */
-            if (Change.NONE.equals(Change.get(clientVersion, serverVersion))) {
+            if (Change.NONE.equals(Change.get(comparison.getClientVersion(), comparison.getServerVersion()))) {
                 /*
                  * same file version, let client update it's metadata
                  */
-                result.addActionForClient(new AcknowledgeFileAction(originalVersion, clientVersion, path));
+                result.addActionForClient(new AcknowledgeFileAction(comparison.getOriginalVersion(), comparison.getClientVersion(), comparison, path));
             } else {
                 /*
                  * keep both client- and server versions, let client first rename it's file...
                  */
-                FileVersion renamedVersion = getRenamedVersion(clientVersion, usedFilenames);
-                result.addActionForClient(new EditFileAction(clientVersion, renamedVersion, path));
+                FileVersion renamedVersion = getRenamedVersion(comparison.getClientVersion(), usedFilenames);
+                result.addActionForClient(new EditFileAction(comparison.getClientVersion(), renamedVersion, comparison, path));
                 /*
                  * ... then upload it, and download the server version afterwards
                  */
-                result.addActionForClient(new UploadFileAction(null, renamedVersion, path, getUploadOffset(path, renamedVersion)));
-                File serverFile = ServerFileVersion.valueOf(serverVersion, path, session).getFile();
-                result.addActionForClient(new DownloadFileAction(null, serverVersion, path, serverFile.getFileSize(), serverFile.getFileMIMEType()));
+                result.addActionForClient(new UploadFileAction(null, renamedVersion, comparison, path, getUploadOffset(path, renamedVersion)));
+                File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
+                result.addActionForClient(new DownloadFileAction(null, comparison.getServerVersion(), comparison, path, serverFile.getFileSize(), serverFile.getFileMIMEType()));
             }
-        } else if (Change.DELETED == clientChange && (Change.MODIFIED == serverChange || Change.NEW == serverChange)) {
+        } else if (Change.DELETED == comparison.getClientChange() && (Change.MODIFIED == comparison.getServerChange() || Change.NEW == comparison.getServerChange())) {
             /*
              * delete-edit conflict, let client download server version
              */
-            File serverFile = ServerFileVersion.valueOf(serverVersion, path, session).getFile();
-            result.addActionForClient(new DownloadFileAction(null, serverVersion, path, serverFile.getFileSize(), serverFile.getFileMIMEType()));
-        } else if ((Change.NEW == clientChange || Change.MODIFIED == clientChange) && Change.DELETED == serverChange) {
+            File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
+            result.addActionForClient(new DownloadFileAction(null, comparison.getServerVersion(), comparison, path, serverFile.getFileSize(), serverFile.getFileMIMEType()));
+        } else if ((Change.NEW == comparison.getClientChange() || Change.MODIFIED == comparison.getClientChange()) && Change.DELETED == comparison.getServerChange()) {
             /*
              * edit-delete conflict, let client upload it's file
              */
-            result.addActionForClient(new UploadFileAction(null, clientVersion, path, getUploadOffset(path, clientVersion)));
+            result.addActionForClient(new UploadFileAction(
+                null, comparison.getClientVersion(), comparison, path, getUploadOffset(path, comparison.getClientVersion())));
         } else {
-            throw new UnsupportedOperationException("Not implemented: Server: " + serverChange + ", Client: " + clientChange);
+            throw new UnsupportedOperationException("Not implemented: Server: " + comparison.getServerChange() + ", Client: " + comparison.getClientChange());
         }
     }
 

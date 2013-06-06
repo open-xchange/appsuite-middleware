@@ -51,8 +51,8 @@ package com.openexchange.drive.sync;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
+import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.java.StringAllocator;
 
 
@@ -63,24 +63,24 @@ import com.openexchange.java.StringAllocator;
  */
 public class SyncResult<T extends DriveVersion> {
 
-    private final List<DriveAction<T>> actionsForServer;
-    private final List<DriveAction<T>> actionsForClient;
+    private final List<AbstractAction<T>> actionsForServer;
+    private final List<AbstractAction<T>> actionsForClient;
 
-    public SyncResult(List<DriveAction<T>> actionsForServer, List<DriveAction<T>> actionsForClient) {
+    public SyncResult(List<AbstractAction<T>> actionsForServer, List<AbstractAction<T>> actionsForClient) {
         super();
         this.actionsForClient = actionsForClient;
         this.actionsForServer = actionsForServer;
     }
 
     public SyncResult() {
-        this(new ArrayList<DriveAction<T>>(), new ArrayList<DriveAction<T>>());
+        this(new ArrayList<AbstractAction<T>>(), new ArrayList<AbstractAction<T>>());
     }
 
-    public void addActionForClient(DriveAction<T> action) {
+    public void addActionForClient(AbstractAction<T> action) {
         actionsForClient.add(action);
     }
 
-    public void addActionForServer(DriveAction<T> action) {
+    public void addActionForServer(AbstractAction<T> action) {
         actionsForServer.add(action);
     }
 
@@ -93,7 +93,7 @@ public class SyncResult<T extends DriveVersion> {
      *
      * @return The actionsForServer
      */
-    public List<DriveAction<T>> getActionsForServer() {
+    public List<AbstractAction<T>> getActionsForServer() {
         return actionsForServer;
     }
 
@@ -102,7 +102,7 @@ public class SyncResult<T extends DriveVersion> {
      *
      * @return The actionsForClient
      */
-    public List<DriveAction<T>> getActionsForClient() {
+    public List<AbstractAction<T>> getActionsForClient() {
         return actionsForClient;
     }
 
@@ -111,13 +111,13 @@ public class SyncResult<T extends DriveVersion> {
         StringAllocator stringAllocator = new StringAllocator();
         if (null != actionsForServer) {
             stringAllocator.append("Actions for server:\n");
-            for (DriveAction<T> action : actionsForServer) {
+            for (AbstractAction<T> action : actionsForServer) {
                 stringAllocator.append("  ").append(action).append('\n');
             }
         }
         if (null != actionsForClient) {
             stringAllocator.append("Actions for client:\n");
-            for (DriveAction<T> action : actionsForClient) {
+            for (AbstractAction<T> action : actionsForClient) {
                 stringAllocator.append("  ").append(action).append('\n');
             }
         }

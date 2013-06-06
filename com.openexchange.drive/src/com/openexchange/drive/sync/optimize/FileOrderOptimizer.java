@@ -51,8 +51,8 @@ package com.openexchange.drive.sync.optimize;
 
 import java.util.Collections;
 import java.util.List;
-import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.sync.SyncResult;
@@ -76,9 +76,9 @@ public class FileOrderOptimizer extends FileActionOptimizer {
 
     @Override
     public SyncResult<FileVersion> optimize(DriveSession session, SyncResult<FileVersion> result) {
-        List<DriveAction<FileVersion>> actionsForClient = result.getActionsForClient();
+        List<AbstractAction<FileVersion>> actionsForClient = result.getActionsForClient();
         Collections.sort(actionsForClient);
-        List<DriveAction<FileVersion>> actionsForServer = result.getActionsForServer();
+        List<AbstractAction<FileVersion>> actionsForServer = result.getActionsForServer();
         Collections.sort(actionsForServer);
         return new SyncResult<FileVersion>(actionsForServer, actionsForClient);
     }

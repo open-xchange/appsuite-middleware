@@ -55,6 +55,7 @@ import java.util.List;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
 import com.openexchange.drive.actions.DownloadFileAction;
 import com.openexchange.drive.checksum.FileChecksum;
@@ -79,9 +80,9 @@ public class FileCopyOptimizer extends FileActionOptimizer {
 
     @Override
     public SyncResult<FileVersion> optimize(DriveSession session, SyncResult<FileVersion> result) {
-        List<DriveAction<FileVersion>> optimizedActionsForClient = new ArrayList<DriveAction<FileVersion>>(result.getActionsForClient());
-        List<DriveAction<FileVersion>> optimizedActionsForServer = new ArrayList<DriveAction<FileVersion>>(result.getActionsForServer());
-        for (DriveAction<FileVersion> clientAction : result.getActionsForClient()) {
+        List<AbstractAction<FileVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<FileVersion>>(result.getActionsForClient());
+        List<AbstractAction<FileVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<FileVersion>>(result.getActionsForServer());
+        for (AbstractAction<FileVersion> clientAction : result.getActionsForClient()) {
             /*
              * for client UPLOADs, check if file already known on server
              */
@@ -91,14 +92,14 @@ public class FileCopyOptimizer extends FileActionOptimizer {
                     /*
                      * no need to upload, just copy file on server and let client update it's metadata
                      */
-                    String path = (String)clientAction.getParameters().get("path");
+                    String path = (String)clientAction.getParameters().get(DriveAction.PARAMETER_PATH);
                     optimizedActionsForClient.remove(clientAction);
                     DownloadFileAction copyAction = new DownloadFileAction(
-                        clientAction.getVersion(), clientAction.getNewVersion(), path, -1, null);
+                        clientAction.getVersion(), clientAction.getNewVersion(), null, path, -1, null);
                     copyAction.getParameters().put("sourceVersion", knownFile);
                     optimizedActionsForServer.add(copyAction);
-                    optimizedActionsForClient.add(new AcknowledgeFileAction(clientAction.getVersion(), clientAction.getNewVersion(),
-                        (String)clientAction.getParameters().get("path")));
+                    optimizedActionsForClient.add(new AcknowledgeFileAction(clientAction.getVersion(), clientAction.getNewVersion(), null,
+                        (String)clientAction.getParameters().get(DriveAction.PARAMETER_PATH)));
                 }
             }
         }

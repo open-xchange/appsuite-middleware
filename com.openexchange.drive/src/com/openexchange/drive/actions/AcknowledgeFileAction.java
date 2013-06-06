@@ -51,6 +51,7 @@ package com.openexchange.drive.actions;
 
 import com.openexchange.drive.Action;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.comparison.ThreeWayComparison;
 
 /**
  * {@link AcknowledgeFileAction}
@@ -76,8 +77,8 @@ public class AcknowledgeFileAction extends AbstractAction<FileVersion> {
      * @param newFile The new file
      * @param path The path to the parent directory
      */
-    public AcknowledgeFileAction(FileVersion file, FileVersion newFile, String path) {
-        super(file, newFile);
+    public AcknowledgeFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path) {
+        super(file, newFile, comparison);
         parameters.put(PARAMETER_PATH, path);
     }
 

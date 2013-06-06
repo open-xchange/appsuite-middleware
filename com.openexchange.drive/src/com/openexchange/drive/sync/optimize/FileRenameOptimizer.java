@@ -57,6 +57,7 @@ import java.util.Set;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
 import com.openexchange.drive.actions.EditFileAction;
 import com.openexchange.drive.comparison.VersionMapper;
@@ -81,9 +82,9 @@ public class FileRenameOptimizer extends FileActionOptimizer {
 
     @Override
     public SyncResult<FileVersion> optimize(DriveSession session, SyncResult<FileVersion> result) {
-        List<DriveAction<FileVersion>> optimizedActionsForClient = new ArrayList<DriveAction<FileVersion>>(result.getActionsForClient());
-        List<DriveAction<FileVersion>> optimizedActionsForServer = new ArrayList<DriveAction<FileVersion>>(result.getActionsForServer());
-        for (DriveAction<FileVersion> clientAction : result.getActionsForClient()) {
+        List<AbstractAction<FileVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<FileVersion>>(result.getActionsForClient());
+        List<AbstractAction<FileVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<FileVersion>>(result.getActionsForServer());
+        for (AbstractAction<FileVersion> clientAction : result.getActionsForClient()) {
             /*
              * check for client UPLOAD / server REMOVE / client ACKNOWLEDGE of identical file
              *
@@ -102,16 +103,16 @@ Actions for client:
              */
             if (Action.UPLOAD == clientAction.getAction()) {
 
-                DriveAction<FileVersion> matchingServerAction = null;
-                for (DriveAction<FileVersion> fileAction : optimizedActionsForServer) {
+                AbstractAction<FileVersion> matchingServerAction = null;
+                for (AbstractAction<FileVersion> fileAction : optimizedActionsForServer) {
                     if (Action.REMOVE == fileAction.getAction() && matchesByChecksum(clientAction.getNewVersion(), fileAction.getVersion())) {
                         matchingServerAction = fileAction;
                         break;
                     }
                 }
                 if (null != matchingServerAction) {
-                    DriveAction<FileVersion> matchingClientAction = null;
-                    for (DriveAction<FileVersion> fileAction : optimizedActionsForClient) {
+                    AbstractAction<FileVersion> matchingClientAction = null;
+                    for (AbstractAction<FileVersion> fileAction : optimizedActionsForClient) {
                         if (Action.ACKNOWLEDGE == fileAction.getAction() &&
                             matchesByNameAndChecksum(matchingServerAction.getVersion(), fileAction.getVersion())) {
                             matchingClientAction = fileAction;
@@ -126,9 +127,9 @@ Actions for client:
                         optimizedActionsForClient.remove(clientAction);
                         optimizedActionsForClient.remove(matchingClientAction);
                         optimizedActionsForClient.add(
-                            new AcknowledgeFileAction(matchingClientAction.getVersion(), clientAction.getNewVersion(), path));
+                            new AcknowledgeFileAction(matchingClientAction.getVersion(), clientAction.getNewVersion(), null, path));
                         optimizedActionsForServer.remove(matchingServerAction);
-                        EditFileAction editAction = new EditFileAction(matchingServerAction.getVersion(), clientAction.getNewVersion(), path);
+                        EditFileAction editAction = new EditFileAction(matchingServerAction.getVersion(), clientAction.getNewVersion(), null, path);
                         if (null != clientAction.getVersion()) {
                             // old version will be overwritten
                             editAction.getParameters().put("targetVersion", clientAction.getVersion());
@@ -175,14 +176,14 @@ Actions for client:
                         String tempName = FileSynchronizer.findAlternativeName(clientAction.getVersion().getName(), usedFilenames);
                         usedFilenames.add(tempName);
                         SimpleFileVersion tempVersion = new SimpleFileVersion(tempName, clientAction.getVersion().getChecksum());
-                        optimizedActionsForServer.add(new EditFileAction(clientActionServerVersion, tempVersion, path, 1));
-                        optimizedActionsForServer.add(new EditFileAction(matchingActionServerVersion, clientActionServerVersion, path, 2));
-                        optimizedActionsForServer.add(new EditFileAction(tempVersion, matchingActionServerVersion, path, 3));
+                        optimizedActionsForServer.add(new EditFileAction(clientActionServerVersion, tempVersion, null, path, 1));
+                        optimizedActionsForServer.add(new EditFileAction(matchingActionServerVersion, clientActionServerVersion, null, path, 2));
+                        optimizedActionsForServer.add(new EditFileAction(tempVersion, matchingActionServerVersion, null, path, 3));
                         /*
                          * acknowledge client renames
                          */
-                        optimizedActionsForClient.add(new AcknowledgeFileAction(clientAction.getVersion(), clientAction.getNewVersion(), path));
-                        optimizedActionsForClient.add(new AcknowledgeFileAction(matchingAction.getVersion(), matchingAction.getNewVersion(), path));
+                        optimizedActionsForClient.add(new AcknowledgeFileAction(clientAction.getVersion(), clientAction.getNewVersion(), null, path));
+                        optimizedActionsForClient.add(new AcknowledgeFileAction(matchingAction.getVersion(), matchingAction.getNewVersion(), null, path));
                     }
                 }
             }
@@ -193,18 +194,18 @@ Actions for client:
         return new SyncResult<FileVersion>(optimizeRenames(optimizedActionsForServer), optimizeRenames(optimizedActionsForClient));
     }
 
-    private List<DriveAction<FileVersion>> optimizeRenames(List<DriveAction<FileVersion>> actions) {
+    private List<AbstractAction<FileVersion>> optimizeRenames(List<AbstractAction<FileVersion>> actions) {
         /*
          * analyze actions
          */
-        List<DriveAction<FileVersion>> optimizedList = new ArrayList<DriveAction<FileVersion>>(actions);
-        for (DriveAction<FileVersion> action : actions) {
+        List<AbstractAction<FileVersion>> optimizedList = new ArrayList<AbstractAction<FileVersion>>(actions);
+        for (AbstractAction<FileVersion> action : actions) {
             /*
              * check for DELETE + DOWNLOAD of identical file
              */
             if (Action.REMOVE.equals(action.getAction())) {
-                DriveAction<FileVersion> matchingAction = null;
-                for (DriveAction<FileVersion> fileAction : optimizedList) {
+                AbstractAction<FileVersion> matchingAction = null;
+                for (AbstractAction<FileVersion> fileAction : optimizedList) {
                     if (Action.DOWNLOAD == fileAction.getAction() && matchesByChecksum(action.getVersion(), fileAction.getNewVersion())) {
                         matchingAction = fileAction;
                         break;
@@ -220,7 +221,7 @@ Actions for client:
                     /*
                      * merge into corresponding edit action
                      */
-                    optimizedList.add(new EditFileAction(action.getVersion(), matchingAction.getNewVersion(), path));
+                    optimizedList.add(new EditFileAction(action.getVersion(), matchingAction.getNewVersion(), null, path));
                 }
             }
         }

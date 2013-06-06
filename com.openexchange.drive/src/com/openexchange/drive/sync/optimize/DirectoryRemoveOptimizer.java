@@ -49,58 +49,75 @@
 
 package com.openexchange.drive.sync.optimize;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.actions.AbstractAction;
-import com.openexchange.drive.actions.EditDirectoryAction;
+import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.sync.SyncResult;
 
 
 /**
- * {@link DirectoryOrderOptimizer}
+ * {@link DirectoryRemoveOptimizer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DirectoryOrderOptimizer extends DirectoryActionOptimizer {
+public class DirectoryRemoveOptimizer extends DirectoryActionOptimizer {
 
-    public DirectoryOrderOptimizer(VersionMapper<DirectoryVersion> mapper) {
+    public DirectoryRemoveOptimizer(VersionMapper<DirectoryVersion> mapper) {
         super(mapper);
     }
 
     @Override
     public SyncResult<DirectoryVersion> optimize(DriveSession session, SyncResult<DirectoryVersion> result) {
-        List<AbstractAction<DirectoryVersion>> actionsForClient = result.getActionsForClient();
-        List<AbstractAction<DirectoryVersion>> actionsForServer = result.getActionsForServer();
-        Collections.sort(actionsForClient);
-        Collections.sort(actionsForServer);
-        actionsForClient = propagateRenames(actionsForClient);
-        actionsForServer = propagateRenames(actionsForServer);
-        return new SyncResult<DirectoryVersion>(actionsForServer, actionsForClient);
+        List<AbstractAction<DirectoryVersion>> clientActions = result.getActionsForClient();
+        clientActions.removeAll(getRedundantRemoves(clientActions));
+        List<AbstractAction<DirectoryVersion>> serverActions = result.getActionsForServer();
+        serverActions.removeAll(getRedundantRemoves(serverActions));
+        return new SyncResult<DirectoryVersion>(serverActions, clientActions);
     }
 
-    private static List<AbstractAction<DirectoryVersion>> propagateRenames(List<AbstractAction<DirectoryVersion>> actionsForClient) {
+    private static List<AbstractAction<DirectoryVersion>> getRedundantRemoves(List<AbstractAction<DirectoryVersion>> driveActions) {
         /*
-         * propagate previous rename operations
+         * get non-conflicting removes
          */
-        for (int i = 0; i < actionsForClient.size(); i++) {
-            if (Action.EDIT.equals(actionsForClient.get(i).getAction())) {
-                String oldPath = actionsForClient.get(i).getVersion().getPath();
-                String newPath = actionsForClient.get(i).getNewVersion().getPath();
-                for (int j = i + 1; j < actionsForClient.size(); j++) {
-                    if (Action.EDIT.equals(actionsForClient.get(j).getAction()) &&
-                        actionsForClient.get(j).getVersion().getPath().startsWith(oldPath +'/')) {
-                        String newOldPath = newPath + actionsForClient.get(j).getVersion().getPath().substring(oldPath.length());
-                        DirectoryVersion modifiedOldVersion = new SimpleDirectoryVersion(newOldPath, actionsForClient.get(j).getVersion().getChecksum());
-                        actionsForClient.set(j, new EditDirectoryAction(modifiedOldVersion, actionsForClient.get(j).getNewVersion(), actionsForClient.get(j).getComparison()));
-                    }
+        List<AbstractAction<DirectoryVersion>> removeActions = getNonConflictingRemoves(driveActions);
+        /*
+         * sort & reverse order so that parent paths are before their children
+         */
+        Collections.sort(removeActions);
+        Collections.reverse(removeActions);
+        /*
+         * find those removes where the parent directory is already removed
+         */
+        List<AbstractAction<DirectoryVersion>> redundantRemoves = new ArrayList<AbstractAction<DirectoryVersion>>();
+        for (int i = 0; i < removeActions.size(); i++) {
+            String prefix = removeActions.get(i).getVersion().getPath() + '/';
+            for (int j = i + 1; j < removeActions.size(); j++) {
+                if (removeActions.get(j).getVersion().getPath().startsWith(prefix)) {
+                    redundantRemoves.add(removeActions.get(j));
                 }
             }
         }
-        return actionsForClient;
+        /*
+         * those are redundant
+         */
+        return redundantRemoves;
+    }
+
+    private static List<AbstractAction<DirectoryVersion>> getNonConflictingRemoves(List<AbstractAction<DirectoryVersion>> driveActions) {
+        List<AbstractAction<DirectoryVersion>> removeActions = new ArrayList<AbstractAction<DirectoryVersion>>();
+        for (AbstractAction<DirectoryVersion> driveAction : driveActions) {
+            if (Action.REMOVE.equals(driveAction.getAction()) && (driveAction.wasCausedBy(Change.DELETED, Change.NONE) ||
+                driveAction.wasCausedBy(Change.NONE, Change.DELETED) || driveAction.wasCausedBy(Change.DELETED, Change.DELETED))) {
+                removeActions.add(driveAction);
+            }
+        }
+        return removeActions;
     }
 
 }

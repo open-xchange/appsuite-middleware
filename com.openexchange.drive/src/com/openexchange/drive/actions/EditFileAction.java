@@ -52,6 +52,7 @@ package com.openexchange.drive.actions;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.comparison.ThreeWayComparison;
 
 /**
  * {@link EditFileAction}
@@ -62,12 +63,12 @@ public class EditFileAction extends AbstractAction<FileVersion> {
 
     private int sortKey;
 
-    public EditFileAction(FileVersion file, FileVersion newFile, String path) {
-        this(file, newFile, path, 0);
+    public EditFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path) {
+        this(file, newFile, comparison, path, 0);
     }
 
-    public EditFileAction(FileVersion file, FileVersion newFile, String path, int sortKey) {
-        super(file, newFile);
+    public EditFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, int sortKey) {
+        super(file, newFile, comparison);
         this.sortKey = sortKey;
         parameters.put(PARAMETER_PATH, path);
     }

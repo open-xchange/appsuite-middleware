@@ -51,6 +51,7 @@ package com.openexchange.drive.actions;
 
 import com.openexchange.drive.Action;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.comparison.ThreeWayComparison;
 
 /**
  * {@link RemoveFileAction}
@@ -69,8 +70,8 @@ public class RemoveFileAction extends AbstractAction<FileVersion> {
      * @param file The file to delete
      * @param path The path to the parent directory
      */
-    public RemoveFileAction(FileVersion file, String path) {
-        super(file, null);
+    public RemoveFileAction(FileVersion file, ThreeWayComparison<FileVersion> comparison, String path) {
+        super(file, null, comparison);
         parameters.put(PARAMETER_PATH, path);
     }
 

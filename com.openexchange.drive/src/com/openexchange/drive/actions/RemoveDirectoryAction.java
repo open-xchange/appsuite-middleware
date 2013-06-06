@@ -52,6 +52,7 @@ package com.openexchange.drive.actions;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.comparison.ThreeWayComparison;
 
 /**
  * {@link RemoveDirectoryAction}
@@ -60,8 +61,8 @@ import com.openexchange.drive.DriveAction;
  */
 public class RemoveDirectoryAction extends AbstractAction<DirectoryVersion> {
 
-    public RemoveDirectoryAction(DirectoryVersion version) {
-        super(version, null);
+    public RemoveDirectoryAction(DirectoryVersion version, ThreeWayComparison<DirectoryVersion> comparison) {
+        super(version, null, comparison);
     }
 
     @Override

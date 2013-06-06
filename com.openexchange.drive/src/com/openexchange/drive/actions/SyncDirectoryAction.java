@@ -51,6 +51,7 @@ package com.openexchange.drive.actions;
 
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryVersion;
+import com.openexchange.drive.comparison.ThreeWayComparison;
 
 /**
  * {@link SyncDirectoryAction}
@@ -59,8 +60,8 @@ import com.openexchange.drive.DirectoryVersion;
  */
 public class SyncDirectoryAction extends AbstractAction<DirectoryVersion> {
 
-    public SyncDirectoryAction(DirectoryVersion version) {
-        super(version, null);
+    public SyncDirectoryAction(DirectoryVersion version, ThreeWayComparison<DirectoryVersion> comparison) {
+        super(version, null, comparison);
     }
 
     @Override

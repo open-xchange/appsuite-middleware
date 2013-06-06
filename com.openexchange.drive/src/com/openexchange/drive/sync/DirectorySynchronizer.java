@@ -50,11 +50,11 @@
 package com.openexchange.drive.sync;
 
 import com.openexchange.drive.DirectoryVersion;
-import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.actions.AcknowledgeDirectoryAction;
 import com.openexchange.drive.actions.RemoveDirectoryAction;
 import com.openexchange.drive.actions.SyncDirectoryAction;
 import com.openexchange.drive.comparison.Change;
+import com.openexchange.drive.comparison.ThreeWayComparison;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.exception.OXException;
@@ -72,20 +72,20 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion>{
     }
 
     @Override
-    protected void processServerChange(SyncResult<DirectoryVersion> result, Change serverChange, DirectoryVersion originalVersion, DirectoryVersion clientVersion, DirectoryVersion serverVersion) throws OXException {
-        switch (serverChange) {
+    protected void processServerChange(SyncResult<DirectoryVersion> result, ThreeWayComparison<DirectoryVersion> comparison) throws OXException {
+        switch (comparison.getServerChange()) {
         case DELETED:
             /*
              * deleted on server, delete directory on client, too
              */
-            result.addActionForClient(new RemoveDirectoryAction(clientVersion));
+            result.addActionForClient(new RemoveDirectoryAction(comparison.getClientVersion(), comparison));
             break;
         case MODIFIED:
         case NEW:
             /*
              * new/modified on server, let client synchronize the folder
              */
-            result.addActionForClient(new SyncDirectoryAction(serverVersion));
+            result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison));
             break;
         default:
             break;
@@ -93,21 +93,21 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion>{
     }
 
     @Override
-    protected void processClientChange(SyncResult<DirectoryVersion> result, Change clientChange, DirectoryVersion originalVersion, DirectoryVersion clientVersion, DirectoryVersion serverVersion) throws OXException {
-        switch (clientChange) {
+    protected void processClientChange(SyncResult<DirectoryVersion> result, ThreeWayComparison<DirectoryVersion> comparison) throws OXException {
+        switch (comparison.getClientChange()) {
         case DELETED:
             /*
              * deleted on client, delete on server, too, let client remove it's metadata
              */
-            result.addActionForServer(new RemoveDirectoryAction(serverVersion));
-            result.addActionForClient(new AcknowledgeDirectoryAction(originalVersion, null));
+            result.addActionForServer(new RemoveDirectoryAction(comparison.getServerVersion(), comparison));
+            result.addActionForClient(new AcknowledgeDirectoryAction(comparison.getOriginalVersion(), null, comparison));
             break;
         case NEW:
         case MODIFIED:
             /*
              * new/modified on client, let client synchronize the directory
              */
-            result.addActionForClient(new SyncDirectoryAction(clientVersion));
+            result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
             break;
         default:
             break;
@@ -115,44 +115,40 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion>{
     }
 
     @Override
-    protected void processConflictingChange(SyncResult<DirectoryVersion> result, Change clientChange, Change serverChange, DirectoryVersion originalVersion, DirectoryVersion clientVersion, DirectoryVersion serverVersion) throws OXException {
-        if (Change.DELETED == serverChange && Change.DELETED == clientChange) {
+    protected void processConflictingChange(SyncResult<DirectoryVersion> result, ThreeWayComparison<DirectoryVersion> comparison) throws OXException {
+        if (Change.DELETED == comparison.getServerChange() && Change.DELETED == comparison.getClientChange()) {
             /*
              * both deleted, just let client remove it's metadata
              */
-            result.addActionForClient(new AcknowledgeDirectoryAction(originalVersion, null));
-        } else if ((Change.NEW == clientChange || Change.MODIFIED == clientChange) &&
-            (Change.NEW == serverChange || Change.MODIFIED == serverChange)) {
+            result.addActionForClient(new AcknowledgeDirectoryAction(comparison.getOriginalVersion(), null, comparison));
+        } else if ((Change.NEW == comparison.getClientChange() || Change.MODIFIED == comparison.getClientChange()) &&
+            (Change.NEW == comparison.getServerChange() || Change.MODIFIED == comparison.getServerChange())) {
             /*
              * name clash for new/modified directories, check directory content equivalence
              */
-            if (Change.NONE.equals(Change.get(clientVersion, serverVersion))) {
+            if (Change.NONE.equals(Change.get(comparison.getClientVersion(), comparison.getServerVersion()))) {
                 /*
                  * same directory version, let client update it's metadata
                  */
-                result.addActionForClient(new AcknowledgeDirectoryAction(originalVersion, clientVersion));
+                result.addActionForClient(new AcknowledgeDirectoryAction(comparison.getOriginalVersion(), comparison.getClientVersion(), comparison));
             } else {
                 /*
                  * different contents, let client synchronize the directory
                  */
-                result.addActionForClient(new SyncDirectoryAction(clientVersion));
+                result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
             }
-        } else if (Change.DELETED == clientChange && (Change.MODIFIED == serverChange || Change.NEW == serverChange)) {
+        } else if (Change.DELETED == comparison.getClientChange() && (Change.MODIFIED == comparison.getServerChange() || Change.NEW == comparison.getServerChange())) {
             /*
              * delete-edit conflict, let client synchronize the directory
              */
-            DriveAction<DirectoryVersion> action = new SyncDirectoryAction(serverVersion);
-            action.getParameters().put("conflict", Boolean.TRUE);
-            result.addActionForClient(action);
-        } else if ((Change.NEW == clientChange || Change.MODIFIED == clientChange) && Change.DELETED == serverChange) {
+            result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison));
+        } else if ((Change.NEW == comparison.getClientChange() || Change.MODIFIED == comparison.getClientChange()) && Change.DELETED == comparison.getServerChange()) {
             /*
              * edit-delete conflict, create on server, let client synchronize the directory
              */
-            DriveAction<DirectoryVersion> action = new SyncDirectoryAction(clientVersion);
-            action.getParameters().put("conflict", Boolean.TRUE);
-            result.addActionForClient(action);
+            result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
         } else {
-            throw new UnsupportedOperationException("Not implemented: Server: " + serverChange + ", Client: " + clientChange);
+            throw new UnsupportedOperationException("Not implemented: Server: " + comparison.getServerChange() + ", Client: " + comparison.getClientChange());
         }
     }
 

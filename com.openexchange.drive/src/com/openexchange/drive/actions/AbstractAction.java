@@ -54,6 +54,8 @@ import java.util.Map;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
+import com.openexchange.drive.comparison.Change;
+import com.openexchange.drive.comparison.ThreeWayComparison;
 
 /**
  * {@link AbstractAction}
@@ -64,6 +66,7 @@ public abstract class AbstractAction<T extends DriveVersion> implements DriveAct
 
     protected final T version;
     protected final T newVersion;
+    protected ThreeWayComparison<T> comparison;
     protected final Map<String, Object> parameters;
 
     /**
@@ -72,8 +75,9 @@ public abstract class AbstractAction<T extends DriveVersion> implements DriveAct
      * @param version
      * @param newVersion
      */
-    protected AbstractAction(T version, T newVersion) {
+    protected AbstractAction(T version, T newVersion, ThreeWayComparison<T> comparison) {
         super();
+        this.comparison = comparison;
         this.version = version;
         this.newVersion = newVersion;
         this.parameters = new HashMap<String, Object>();
@@ -107,6 +111,22 @@ public abstract class AbstractAction<T extends DriveVersion> implements DriveAct
     @Override
     public String toString() {
         return getAction() + " [version=" + version + ", newVersion=" + newVersion + ", parameters=" + parameters + "]";
+    }
+
+    public boolean wasCausedBy(Change clientChange, Change serverChange) {
+        if (null == this.comparison) {
+            throw new UnsupportedOperationException("no comparison available");
+        }
+        return comparison.getClientChange().equals(clientChange) && comparison.getServerChange().equals(serverChange);
+    }
+
+    /**
+     * Gets the comparison
+     *
+     * @return The comparison
+     */
+    public ThreeWayComparison<T> getComparison() {
+        return comparison;
     }
 
 }

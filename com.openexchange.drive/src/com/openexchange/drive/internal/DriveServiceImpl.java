@@ -134,7 +134,7 @@ public class DriveServiceImpl implements DriveService {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("syncFolders completed after " + (System.currentTimeMillis() - start) + "ms.");
             }
-            return syncResult.getActionsForClient();
+            return new ArrayList<DriveAction<DirectoryVersion>>(syncResult.getActionsForClient());
         }
     }
 
@@ -175,7 +175,7 @@ public class DriveServiceImpl implements DriveService {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("syncFiles completed after " + (System.currentTimeMillis() - start) + "ms.");
             }
-            return syncResult.getActionsForClient();
+            return new ArrayList<DriveAction<FileVersion>>(syncResult.getActionsForClient());
         }
     }
 
@@ -211,15 +211,15 @@ public class DriveServiceImpl implements DriveService {
              */
             FileVersion createdVersion = new ServerFileVersion(createdFile, fileChecksum);
             if (newVersion.getName().equals(createdVersion.getName())) {
-                syncResult.addActionForClient(new AcknowledgeFileAction(originalVersion, createdVersion, path));
+                syncResult.addActionForClient(new AcknowledgeFileAction(originalVersion, createdVersion, null, path));
             } else {
-                syncResult.addActionForClient(new EditFileAction(newVersion, createdVersion, path));
+                syncResult.addActionForClient(new EditFileAction(newVersion, createdVersion, null, path));
             }
         }
         if (LOG.isDebugEnabled()) {
             LOG.debug(syncResult);
         }
-        return syncResult.getActionsForClient();
+        return new ArrayList<DriveAction<FileVersion>>(syncResult.getActionsForClient());
     }
 
     private static SyncResult<DirectoryVersion> syncDirectories(DriveSession session, List<? extends DirectoryVersion> originalVersions,
@@ -295,7 +295,7 @@ public class DriveServiceImpl implements DriveService {
 //                session.getChecksumStore().removeFileChecksumsInFolder(newFolderID)
 
                 for (ServerFileVersion serverFileVersion : serverFileVersions) {
-                    execute(session, action.getVersion().getPath(), new RemoveFileAction(serverFileVersion, action.getVersion().getPath()));
+                    execute(session, action.getVersion().getPath(), new RemoveFileAction(serverFileVersion, null, action.getVersion().getPath()));
                 }
             }
             // delete empty directory

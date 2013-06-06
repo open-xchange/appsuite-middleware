@@ -72,11 +72,26 @@ public class OptimizingDirectorySynchronizer extends DirectorySynchronizer {
     public SyncResult<DirectoryVersion> sync() throws OXException {
         SyncResult<DirectoryVersion> result = super.sync();
         if (false == result.isEmpty()) {
+            String lastResults = null;
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Sync results before optimizations:\n" + result);
+                lastResults = result.toString();
+                LOG.debug("Sync results before optimizations:\n" + lastResults);
             }
-            result = new DirectoryRenameOptimizer(mapper).optimize(session, result);
-            result = new DirectoryOrderOptimizer(mapper).optimize(session, result);
+            DirectoryActionOptimizer[] optimizers = {
+                new DirectoryRemoveOptimizer(mapper),
+                new DirectoryRenameOptimizer(mapper),
+                new DirectoryOrderOptimizer(mapper)
+            };
+            for (DirectoryActionOptimizer optimizer : optimizers) {
+                result = optimizer.optimize(session, result);
+                if (LOG.isTraceEnabled()) {
+                    String currentResults = result.toString();
+                    if (false == currentResults.equals(lastResults)) {
+                        lastResults = currentResults;
+                        LOG.trace("Sync results after optimizations of " + optimizer.getClass().getSimpleName() + ":\n" + lastResults);
+                    }
+                }
+            }
         }
         return result;
     }

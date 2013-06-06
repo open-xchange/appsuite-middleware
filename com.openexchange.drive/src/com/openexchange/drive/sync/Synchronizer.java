@@ -88,9 +88,6 @@ public abstract class Synchronizer<T extends DriveVersion> {
     private void process(SyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException {
         Change clientChange = comparison.getClientChange();
         Change serverChange = comparison.getServerChange();
-        T clientVersion = comparison.getClientVersion();
-        T serverVersion = comparison.getServerVersion();
-        T originalVersion = comparison.getOriginalVersion();
         if (Change.NONE == clientChange && Change.NONE == serverChange) {
             /*
              * nothing to do
@@ -100,24 +97,24 @@ public abstract class Synchronizer<T extends DriveVersion> {
             /*
              * process server-only change
              */
-            processServerChange(result, serverChange, originalVersion, clientVersion, serverVersion);
+            processServerChange(result, comparison);
         } else if (Change.NONE != clientChange && Change.NONE == serverChange) {
             /*
              * process client-only change
              */
-            processClientChange(result, clientChange, originalVersion, clientVersion, serverVersion);
+            processClientChange(result, comparison);
         } else {
             /*
              * process changes on both sides
              */
-            processConflictingChange(result, clientChange, serverChange, originalVersion, clientVersion, serverVersion);
+            processConflictingChange(result, comparison);
         }
     }
 
-    protected abstract void processServerChange(SyncResult<T> result, Change serverChange, T originalVersion, T clientVersion, T serverVersion) throws OXException;
+    protected abstract void processServerChange(SyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException;
 
-    protected abstract void processClientChange(SyncResult<T> result, Change clientChange, T originalVersion, T clientVersion, T serverVersion) throws OXException;
+    protected abstract void processClientChange(SyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException;
 
-    protected abstract void processConflictingChange(SyncResult<T> result, Change clientChange, Change serverChange, T originalVersion, T clientVersion, T serverVersion) throws OXException;
+    protected abstract void processConflictingChange(SyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException;
 
 }
