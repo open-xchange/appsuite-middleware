@@ -654,9 +654,6 @@ public class StatisticTools extends AbstractJMXTools {
                 }
             }
         }
-        /*
-         * maps
-         */
         for (String type : new String[] { "Map", "MultiMap", "Topic", "Queue" }) {
             for (ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",Cluster=*,name=*"), null)) {
                 ObjectName objectName = mbean.getObjectName();
