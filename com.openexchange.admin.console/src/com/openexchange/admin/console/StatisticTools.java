@@ -759,16 +759,17 @@ public class StatisticTools extends AbstractJMXTools {
     }
 
     /**
-     * @param mbeanServerConnection
-     * @param uptimeHours
-     * @return
-     * @throws MalformedObjectNameException
-     * @throws IOException
-     * @throws InstanceNotFoundException
-     * @throws IntrospectionException
-     * @throws ReflectionException
-     * @throws MBeanException
-     * @throws AttributeNotFoundException
+     * Returns the number of uptime hours of the JVM
+     * 
+     * @param mbeanServerConnection - The MBeanServerConnection to be used for querying MBeans.
+     * @throws MalformedObjectNameException - thrown while creating {@link ObjectName}
+     * @throws IOException - thrown while using the {@link MBeanServerConnection}
+     * @throws ReflectionException- thrown while using the {@link MBeanServerConnection}
+     * @throws IntrospectionException - thrown while getting {@link MBeanInfo}
+     * @throws InstanceNotFoundException - thrown while getting {@link MBeanAttributeInfo} or {@link MBeanInfo}
+     * @throws MBeanException - thrown while trying to get the attribute from {@link MBeanServerConnection}
+     * @throws AttributeNotFoundException - thrown while trying to get the attribute from {@link MBeanServerConnection}
+     * @return double - number of uptime hours of the JVM
      */
     private double getUptimeHours(MBeanServerConnection mbeanServerConnection) throws MalformedObjectNameException, IOException, InstanceNotFoundException, IntrospectionException, ReflectionException, MBeanException, AttributeNotFoundException {
         double uptimeHours = 0;

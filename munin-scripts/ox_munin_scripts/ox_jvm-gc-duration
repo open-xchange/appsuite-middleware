@@ -22,7 +22,7 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 	print "graph_title JVM GC duration\n";
 	print "graph_args --base 1024 -l 0\n";
 	print "graph_category Open Xchange\n";
-	print "graph_vlabel GC Duration\n";
+	print "graph_vlabel time in ms\n";
 
 	print "a.label Copy\n";
 	print "a.draw LINE1\n";
