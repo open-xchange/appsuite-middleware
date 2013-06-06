@@ -74,7 +74,6 @@ public final class IdleExpirationPolicy implements EvictionPolicy {
     @Override
     public boolean insertionOrder() {
         return false;
-
     }
 
     @Override
