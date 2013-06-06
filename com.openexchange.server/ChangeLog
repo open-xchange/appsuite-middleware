@@ -2,6 +2,7 @@
 
  - Fix for bug 26933: Fixed removal of contact images
  - Fix for bug 26973: Delete uploaded file if an error occurs during request processing
+ - Fix for bug 26978: Ensure obtained secret is not empty; otherwise throw a "SCR-0003" error
 
 * 2013-06-04 - thorben.betten@open-xchange.com
 
