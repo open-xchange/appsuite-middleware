@@ -431,18 +431,18 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 externalVersion.setBodyPart(textPart);
                 // Generate text for attachment
                 final com.openexchange.java.StringAllocator textBuilder = new com.openexchange.java.StringAllocator(256 * links.size());
-                textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br />");
+                textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br>");
                 appendLinks(links, textBuilder);
                 externalVersion.addEnclosedPart(createLinksAttachment(textBuilder.toString()));
             } else {
                 final String text = (String) textPart.getContent();
                 final com.openexchange.java.StringAllocator textBuilder = new com.openexchange.java.StringAllocator(text.length() + 512);
-                textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br />");
+                textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br>");
                 appendLinks(links, textBuilder);
                 if (elapsedDate != null) {
                     textBuilder.append(
                         htmlFormat(PATTERN_DATE.matcher(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_APPENDIX)).replaceFirst(
-                            DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br /><br />");
+                            DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br><br>");
                 }
                 textBuilder.append(text);
                 textPart.setText(textBuilder.toString());
