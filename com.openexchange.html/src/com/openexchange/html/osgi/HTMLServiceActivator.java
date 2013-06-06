@@ -75,6 +75,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.proxy.ProxyRegistry;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
@@ -88,7 +89,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class };
+        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class, ThreadPoolService.class };
     }
 
     @Override

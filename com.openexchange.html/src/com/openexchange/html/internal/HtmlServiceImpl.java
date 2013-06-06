@@ -96,6 +96,8 @@ import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.StringBuilderStringer;
+import com.openexchange.java.Stringer;
 import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
@@ -912,7 +914,7 @@ public final class HtmlServiceImpl implements HtmlService {
     public String replaceHTMLEntities(final String content) {
         final Matcher m = PAT_ENTITIES.matcher(content);
         final MatcherReplacer mr = new MatcherReplacer(m, content);
-        final StringBuilder sb = new StringBuilder(content.length());
+        final Stringer sb = new StringBuilderStringer(new StringBuilder(content.length()));
         while (m.find()) {
             /*
              * Try decimal syntax; e.g. &#39; (single-quote)
@@ -1032,7 +1034,7 @@ public final class HtmlServiceImpl implements HtmlService {
         String html = htmlContent.substring(0, m.start()) + htmlContent.substring(m.end());
         m = IMG_PATTERN.matcher(html);
         MatcherReplacer mr = new MatcherReplacer(m, html);
-        final StringBuilder sb = new StringBuilder(html.length());
+        final Stringer sb = new StringBuilderStringer(new StringBuilder(html.length()));
         if (m.find()) {
             /*
              * Replace images
@@ -1132,7 +1134,7 @@ public final class HtmlServiceImpl implements HtmlService {
         if (!m.find() || m.end() >= end) {
             return htmlContent;
         }
-        final StringBuilder sb = new StringBuilder(htmlContent.length());
+        final Stringer sb = new StringBuilderStringer(new StringBuilder(htmlContent.length()));
         final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
         do {
             mr.appendLiteralReplacement(sb, "");
@@ -1381,7 +1383,7 @@ public final class HtmlServiceImpl implements HtmlService {
         final Matcher m = PATTERN_XHTML_CDATA.matcher(htmlContent);
         if (m.find()) {
             final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
-            final StringBuilder sb = new StringBuilder(htmlContent.length());
+            final Stringer sb = new StringBuilderStringer(new StringBuilder(htmlContent.length()));
             final String endingComment = "-->";
             StringBuilder tmp = null;
             do {
@@ -1509,7 +1511,7 @@ public final class HtmlServiceImpl implements HtmlService {
             return validated;
         }
         final MatcherReplacer mr = new MatcherReplacer(m, validated);
-        final StringBuilder builder = new StringBuilder(validated.length());
+        final Stringer builder = new StringBuilderStringer(new StringBuilder(validated.length()));
         final StringBuilder tmp = new StringBuilder(8).append("&#");
         do {
             try {
