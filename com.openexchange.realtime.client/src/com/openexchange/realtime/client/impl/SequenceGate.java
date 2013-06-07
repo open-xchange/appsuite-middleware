@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,36 +47,57 @@
  *
  */
 
-package com.openexchange.realtime.client;
+package com.openexchange.realtime.client.impl;
+
+import java.util.List;
+import org.json.JSONValue;
 
 /**
- * {@link RTProtocol} contains the logic to handle all protocol events of the RT protocol like pings and acknowledgements
+ * A {@link SequenceGate} assures an ordered delivery of incoming messages.
  * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface RTProtocol {
+public class SequenceGate {
+
+    private static final int BUFFER_SIZE = 20;
 
     /**
-     * Called when a Ping is sent to the server. If the ping asks for a commit, a Pong message is expected to be send from the server back
-     * to the client.
+     * Initializes a new {@link SequenceGate}.
      */
-    void pingSent(boolean commit);
+    public SequenceGate() {
+        super();
+    }
 
     /**
-     * Called when a Pong is received from the server acknowledging the ping previously sent by the client.
+     * Enqueue an incoming message. Messages will be preserved until they form a
+     * valid sequence. Afterwards they can be removed and delivered. For removal
+     * see {@link #take()}.
+     *
+     * @param message The message.
+     * @param seq The messages sequence number.
+     * @return Whether the message was enqueued or not. If <code>false</code> the
+     * message was not enqueued because of a full buffer. This may happen if one message
+     * is missing in the sequence but lots of messages with higher sequences arrive before
+     * the message is resent by the server. This may also happen if the buffer is not emptied
+     * via {@link #take()}.
      */
-    void pongReceived();
+    public boolean enqueue(JSONValue message, long seq) {
+        // TODO: implement
+        return false;
+    }
 
     /**
-     * A message containing a sequence was sent to the server and needs to be acknowledged.
-     * 
-     * @param seq The sequence number contained in the message
+     * This call blocks until a valid sequence of messages is available in the buffer.
+     * The returned messages will be removed from the buffer. This method should be
+     * called in a loop to receive incoming messages as fast as possible and to keep
+     * the buffer small.
+     *
+     * @return A list with formerly buffered messages. The list is ordered ascending by
+     * sequence numbers.
      */
-    void sequenceSent(long seq);
-
-    /**
-     * A 'received' message was received from the client
-     */
-    void sequenceAcknowledged(long seq);
+    public List<JSONValue> take() throws InterruptedException {
+        // TODO: implement
+        return null;
+    }
 
 }
