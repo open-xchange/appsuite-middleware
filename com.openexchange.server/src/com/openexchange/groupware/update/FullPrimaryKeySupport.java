@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.update.internal;
+package com.openexchange.groupware.update;
 
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
@@ -87,7 +87,7 @@ public class FullPrimaryKeySupport {
     /**
      * Returns the singleton of {@link FullPrimaryKeySupport}
      * 
-     * @return {@link FullPrimaryKeySupport}.
+     * @return
      */
     public static final FullPrimaryKeySupport getInstance() {
         return SINGLETON;
@@ -99,8 +99,8 @@ public class FullPrimaryKeySupport {
      * @return boolean - true, if full primary key is supported
      */
     public boolean isFullPrimaryKeySupported() {
-        if (this.isFullPrimaryKeySupported == null) {
 
+        if (this.isFullPrimaryKeySupported == null) {
             ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
 
             if (configurationService == null) {
@@ -108,6 +108,7 @@ public class FullPrimaryKeySupport {
                 LOG.error(e.getMessage(), e);
                 throw e;
             }
+
             this.isFullPrimaryKeySupported = Boolean.valueOf(configurationService.getBoolProperty(
                 "com.openexchange.server.fullPrimaryKeySupport",
                 false));
