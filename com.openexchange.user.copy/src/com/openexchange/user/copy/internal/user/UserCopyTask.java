@@ -57,8 +57,9 @@ import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 import com.openexchange.user.copy.CopyUserTaskService;
@@ -131,8 +132,8 @@ public class UserCopyTask implements CopyUserTaskService {
              * user configuration
              */
             try {
-                final UserConfiguration[] srcConfiguration = RdbUserConfigurationStorage.loadUserConfiguration(srcCtx, srcCon, new User[] {srcUser});
-                RdbUserConfigurationStorage.saveUserConfiguration(srcConfiguration[0].getPermissionBits(), dstUser.getId(), true, dstCtx, dstCon);
+                final UserPermissionBits[] srcConfiguration = RdbUserPermissionBitsStorage.loadUserPermissionBits(srcCtx, srcCon, new int[] {srcUser.getId()});
+                RdbUserPermissionBitsStorage.saveUserPermissionBits(srcConfiguration[0].getPermissionBits(), dstUser.getId(), true, dstCtx, dstCon);
             } catch (final OXException e) {
                 throw UserCopyExceptionCodes.DB_POOLING_PROBLEM.create(e);
             } catch (final SQLException e) {
