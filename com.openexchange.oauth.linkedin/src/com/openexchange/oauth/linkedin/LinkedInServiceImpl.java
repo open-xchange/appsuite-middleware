@@ -328,11 +328,11 @@ public class LinkedInServiceImpl implements LinkedInService {
             String uri = "http://api.linkedin.com/v1/people-search?first-name=" + URLEncoder.encode(firstName, "UTF-8") + "&last-name=" + URLEncoder.encode(
                 lastName,
                 "UTF-8") + "&sort=distance&format=json";
-            Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri);
+            final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri);
             if (response == null) {
                 return new JSONObject();
             }
-            JSONObject data = extractJson(response);
+            final JSONObject data = extractJson(response);
             if (data.optInt("numResults") > 0) {
                 JSONObject people = data.optJSONObject("people");
                 if (people != null) {
@@ -347,32 +347,8 @@ public class LinkedInServiceImpl implements LinkedInService {
                         }
                     }
                 }
-            } else {
-                uri = "http://api.linkedin.com/v1/people-search?first-name=" + URLEncoder.encode(lastName, "UTF-8") + "&last-name=" + URLEncoder.encode(
-                    firstName,
-                    "UTF-8") + "&sort=distance&format=json";
-                response = performRequest(session, user, contextId, accountId, Verb.GET, uri);
-                if (response == null) {
-                    return new JSONObject();
-                }
-                data = extractJson(response);
-                if (data.optInt("numResults") > 0) {
-                    JSONObject people = data.optJSONObject("people");
-                    if (people != null) {
-                        JSONArray values = people.optJSONArray("values");
-                        if (values.length() > 0) {
-                            JSONObject firstMatch = values.optJSONObject(0);
-                            if (firstMatch != null) {
-                                String id = firstMatch.optString("id");
-                                if (id != null) {
-                                    return getFullProfileById(id, session, user, contextId, accountId);
-                                }
-                            }
-                        }
-                    }
-                }
-                return null;
             }
+            return null;
         } catch (UnsupportedEncodingException e) {
         }
         return null;
