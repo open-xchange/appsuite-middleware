@@ -50,6 +50,7 @@
 package com.openexchange.realtime.group.commands;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.GroupCommand;
 import com.openexchange.realtime.group.GroupDispatcher;
 import com.openexchange.realtime.packet.Stanza;
@@ -64,7 +65,20 @@ public class JoinCommand implements GroupCommand {
 
     @Override
     public void perform(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
-        groupDispatcher.join(stanza.getFrom(), stanza.getSelector());
+        if (isSynchronous(stanza)) {
+            groupDispatcher.join(stanza.getOnBehalfOf(), stanza.getSelector());
+            Stanza welcomeMessage = groupDispatcher.getWelcomeMessage(stanza.getOnBehalfOf());
+            welcomeMessage.setFrom(groupDispatcher.getId());
+            welcomeMessage.setTo(stanza.getFrom());
+           
+            GroupDispatcher.SERVICE_REF.get().getService(MessageDispatcher.class).send(welcomeMessage);
+        } else {
+            groupDispatcher.join(stanza.getFrom(), stanza.getSelector());
+        }
+    }
+
+    private boolean isSynchronous(Stanza stanza) {
+        return stanza.getFrom().getProtocol().equals("call");
     }
 
 }

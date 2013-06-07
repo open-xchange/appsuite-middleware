@@ -80,7 +80,7 @@ public abstract class StanzaSequenceGate {
     /* Keep track of SequencePrincalpal(ID) to thresholds(sequence number of last seen stanza) */
     protected ConcurrentHashMap<ID, AtomicLong> sequenceNumbers = new ConcurrentHashMap<ID, AtomicLong>();
 
-    protected ConcurrentHashMap<ID, List<Stanza>> inboxes = new ConcurrentHashMap<ID, List<Stanza>>();
+    protected ConcurrentHashMap<ID, List<StanzaWithCustomAction>> inboxes = new ConcurrentHashMap<ID, List<StanzaWithCustomAction>>();
 
     private String name;
 
@@ -88,15 +88,23 @@ public abstract class StanzaSequenceGate {
         this.name = name;
     }
 
+    public boolean handle(Stanza stanza, ID recipient) throws OXException {
+        return handle(stanza, recipient, null);
+    }
+
     /**
      * Returns whether the caller is expected to return an ACK for the handled stanza. If <code>false</code> is returned the handled stanza
      * did either not expect an ACK or was not stored because of a full message buffer for the sequence principal.
      */
-    public boolean handle(Stanza stanza, ID recipient) throws OXException {
+    public boolean handle(Stanza stanza, ID recipient, CustomGateAction customAction) throws OXException {
         /* Stanza didn't carry a valid Sequencenumber, just handle it without pestering the gate and return */
         if (stanza.getSequenceNumber() == -1) {
             stanza.trace("Stanza Gate: (" + name + ") : No sequence number, so let it pass");
-            handleInternal(stanza, recipient);
+            if (customAction != null) {
+                customAction.handle(stanza, recipient);
+            } else {
+                handleInternal(stanza, recipient);
+            }
             return false;
         }
 
@@ -112,7 +120,7 @@ public abstract class StanzaSequenceGate {
                  * all members left the GroupDispatcher(SequencePrincipal)
                  */
                 if (meantime == null) {
-                    stanza.getSequencePrincipal().on("dispose", new IDEventHandler() {
+                    stanza.getSequencePrincipal().on(ID.Events.DISPOSE, new IDEventHandler() {
 
                         @Override
                         public void handle(String event, ID id, Object source, Map<String, Object> properties) {
@@ -123,8 +131,6 @@ public abstract class StanzaSequenceGate {
                     threshold = meantime;
                 }
             }
-
-            stanza.trace("Stanza Gate (" + name + ") : " + stanza.getSequencePrincipal() + ":" + stanza.getSequenceNumber() + ":" + threshold);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Stanza Gate (" + name + ") : " + stanza.getSequencePrincipal() + ":" + stanza.getSequenceNumber() + ":" + threshold);
             }
@@ -133,18 +139,22 @@ public abstract class StanzaSequenceGate {
                     LOG.debug("Best case, Threshold: " + threshold.get());
                 }
                 stanza.trace("Passing gate " + name);
-                handleInternal(stanza, recipient);
+                if (customAction != null) {
+                    customAction.handle(stanza, recipient);
+                } else {
+                    handleInternal(stanza, recipient);
+                }
 
                 /* Drain Stanzas accumulated while waiting for the missing SequenceNumber */
-                List<Stanza> stanzas = inboxes.remove(stanza.getSequencePrincipal());
+                List<StanzaWithCustomAction> stanzas = inboxes.remove(stanza.getSequencePrincipal());
                 if (stanzas == null || stanzas.isEmpty()) {
                     return true;
                 }
 
-                Collections.sort(stanzas, new Comparator<Stanza>() {
+                Collections.sort(stanzas, new Comparator<StanzaWithCustomAction>() {
 
-                    public int compare(Stanza arg0, Stanza arg1) {
-                        return (int) (arg0.getSequenceNumber() - arg1.getSequenceNumber());
+                    public int compare(StanzaWithCustomAction arg0, StanzaWithCustomAction arg1) {
+                        return (int) (arg0.stanza.getSequenceNumber() - arg1.stanza.getSequenceNumber());
                     }
                 });
 
@@ -152,9 +162,9 @@ public abstract class StanzaSequenceGate {
                  * There still might be some gaps in the list of accumulated stanzas. Therefore the recursive calling of handle will assure
                  * that affected stanzas are cached again.
                  */
-                for (Stanza s : stanzas) {
-                    s.trace("Handle preserved (" + name + ")");
-                    handle(s, s.getTo());
+                for (StanzaWithCustomAction s : stanzas) {
+                    s.stanza.trace("Handle preserved (" + name + ")");
+                    handle(s.stanza, s.stanza.getTo(), s.action);
                 }
 
                 return true;
@@ -167,10 +177,10 @@ public abstract class StanzaSequenceGate {
                     return true;
                 }
 
-                List<Stanza> inbox = inboxes.get(stanza.getSequencePrincipal());
+                List<StanzaWithCustomAction> inbox = inboxes.get(stanza.getSequencePrincipal());
                 if (inbox == null) {
-                    inbox = Collections.synchronizedList(new ArrayList<Stanza>());
-                    List<Stanza> oldList = inboxes.putIfAbsent(stanza.getSequencePrincipal(), inbox);
+                    inbox = Collections.synchronizedList(new ArrayList<StanzaWithCustomAction>());
+                    List<StanzaWithCustomAction> oldList = inboxes.putIfAbsent(stanza.getSequencePrincipal(), inbox);
                     inbox = (oldList != null) ? oldList : inbox;
                 }
 
@@ -180,7 +190,7 @@ public abstract class StanzaSequenceGate {
                         LOG.debug("Stanzas not in sequence, Threshold: " + threshold.get() + " SequenceNumber: " + stanza.getSequenceNumber());
                     }
 
-                    inbox.add(stanza);
+                    inbox.add(new StanzaWithCustomAction(stanza, customAction));
                     return true;
                 }
 
@@ -195,12 +205,34 @@ public abstract class StanzaSequenceGate {
         }
 
     }
-    
+
     public void freeRessourcesFor(ID sequencePrincipal) {
         sequenceNumbers.remove(sequencePrincipal);
         inboxes.remove(sequencePrincipal);
     }
 
+    /**
+     * Procedure to handle incoming Stanzas. Has to be implemented by the Components that want to make use of a StanzaSequenceGate and have
+     * to adapt the logic of the Stanza handling after the gateway enforced the Sequence of the received Stanzas.
+     * 
+     * @param stanza The incoming Stanza
+     * @param recipient The recipient of the incoming Stanza
+     * @throws OXException If the Stanza couldn't be handled
+     */
     public abstract void handleInternal(Stanza stanza, ID recipient) throws OXException;
+
+    private final class StanzaWithCustomAction {
+
+        public Stanza stanza;
+
+        public CustomGateAction action;
+
+        public StanzaWithCustomAction(Stanza stanza, CustomGateAction action) {
+            super();
+            this.stanza = stanza;
+            this.action = action;
+        }
+
+    }
 
 }

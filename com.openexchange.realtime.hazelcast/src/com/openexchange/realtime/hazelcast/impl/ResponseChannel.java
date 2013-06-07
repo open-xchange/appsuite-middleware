@@ -156,8 +156,10 @@ public class ResponseChannel implements Channel{
         Lock lock = locks.get(recipient);
         try {
             lock.lock();
-            responses.put(recipient, stanza);
-            condition.get(recipient).signal();
+            if (condition.get(recipient) != null) {
+                responses.put(recipient, stanza);
+                condition.get(recipient).signal();
+            }
         } finally {
             lock.unlock();
         }

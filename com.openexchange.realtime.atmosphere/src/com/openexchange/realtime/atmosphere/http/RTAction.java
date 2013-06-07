@@ -47,39 +47,34 @@
  *
  */
 
-package com.openexchange.realtime.group.commands;
+package com.openexchange.realtime.atmosphere.http;
 
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
-import com.openexchange.realtime.group.GroupCommand;
-import com.openexchange.realtime.group.GroupDispatcher;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link LeaveCommand}
+ * {@link RTAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class LeaveCommand implements GroupCommand {
-
-    @Override
-    public void perform(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
-        if (isSynchronous(stanza) && groupDispatcher.isMember(stanza.getOnBehalfOf())) {
-            Stanza signOffMessage = groupDispatcher.getSignOffMessage(stanza.getOnBehalfOf());
-            signOffMessage.setFrom(groupDispatcher.getId());
-            signOffMessage.setTo(stanza.getFrom());
-
-            groupDispatcher.leave(stanza.getOnBehalfOf());
-           
-            GroupDispatcher.SERVICE_REF.get().getService(MessageDispatcher.class).send(signOffMessage);
-        } else {
-            groupDispatcher.leave(stanza.getFrom());
-        }
-    }
+public abstract class RTAction implements AJAXActionService {
     
-    private boolean isSynchronous(Stanza stanza) {
-        return stanza.getFrom().getProtocol().equals("call");
-    }
+    protected ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
+        String userLogin = session.getUserlogin();
+        String contextName = session.getContext().getName();
 
+        String resource = request.getParameter("resource");
+
+        if (resource == null) {
+            throw RealtimeExceptionCodes.INVALID_ID.create();
+        }
+        
+        return new ID(RTAtmosphereChannel.PROTOCOL, null, userLogin, contextName, resource);
+    }
 }

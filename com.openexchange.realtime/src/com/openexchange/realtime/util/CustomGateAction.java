@@ -47,35 +47,17 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl;
-
-import java.util.concurrent.locks.ReentrantLock;
-
-import org.atmosphere.cpr.AtmosphereResource;
+package com.openexchange.realtime.util;
 
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.realtime.packet.Stanza;
+
 
 /**
- * {@link RTAtmosphereState} - Assembles the AtmosphereResource, Serversession and
- * ID into a single class and make it lockable.
+ * {@link CustomGateAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class RTAtmosphereState {
-	public AtmosphereResource atmosphereResource;
-	public ServerSession session;
-	public ID id;
-
-	private final ReentrantLock lock = new ReentrantLock();
-	public boolean handshake = true;
-
-	public void lock() {
-		lock.lock();
-	}
-
-	public void unlock() {
-		lock.unlock();
-	}
-
+public interface CustomGateAction {
+    public void handle(Stanza stanza, ID recipient);
 }

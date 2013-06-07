@@ -47,39 +47,45 @@
  *
  */
 
-package com.openexchange.realtime.group.commands;
+package com.openexchange.realtime.atmosphere.http;
 
+import java.util.Arrays;
+import java.util.Collection;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
-import com.openexchange.realtime.group.GroupCommand;
-import com.openexchange.realtime.group.GroupDispatcher;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.atmosphere.impl.JSONProtocolHandler;
+import com.openexchange.realtime.atmosphere.impl.StateManager;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link LeaveCommand}
+ * {@link RealtimeActions}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class LeaveCommand implements GroupCommand {
+public class RealtimeActions implements AJAXActionServiceFactory {
+    
+    private AJAXActionService SEND = null;
+    private AJAXActionService QUERY = null;
 
-    @Override
-    public void perform(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
-        if (isSynchronous(stanza) && groupDispatcher.isMember(stanza.getOnBehalfOf())) {
-            Stanza signOffMessage = groupDispatcher.getSignOffMessage(stanza.getOnBehalfOf());
-            signOffMessage.setFrom(groupDispatcher.getId());
-            signOffMessage.setTo(stanza.getFrom());
-
-            groupDispatcher.leave(stanza.getOnBehalfOf());
-           
-            GroupDispatcher.SERVICE_REF.get().getService(MessageDispatcher.class).send(signOffMessage);
-        } else {
-            groupDispatcher.leave(stanza.getFrom());
-        }
+    public RealtimeActions(ServiceLookup services, StateManager stateManager, JSONProtocolHandler protocolHandler) {
+        SEND = new SendAction(services, stateManager, protocolHandler);
+        QUERY = new QueryAction(services, protocolHandler.getGate());
     }
     
-    private boolean isSynchronous(Stanza stanza) {
-        return stanza.getFrom().getProtocol().equals("call");
+    @Override
+    public Collection<?> getSupportedServices() {
+        return Arrays.asList("send", "query");
+    }
+
+    @Override
+    public AJAXActionService createActionService(String action) throws OXException {
+        if ("query".equals(action)) {
+            return QUERY;
+        }
+        return SEND;
+
     }
 
 }
