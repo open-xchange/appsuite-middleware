@@ -92,13 +92,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class LinkedInServiceImpl implements LinkedInService {
 
-    private static final String PERSONAL_FIELDS = "id,first-name,last-name,email-address,phone-numbers,headline,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions,industry,public-profile-url";
+    private static final String PERSONAL_FIELDS = "id,first-name,last-name,phone-numbers,headline,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions,industry,public-profile-url";
 
     private static final String RELATION_TO_VIEWER = "relation-to-viewer:(connections:(person:(id,first-name,last-name,picture-url,headline)))";
 
     private static final String PERSONAL_FIELD_QUERY = ":(" + PERSONAL_FIELDS + ")";
 
-    private static final String CONNECTIONS_URL = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,email-address,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
+    private static final String CONNECTIONS_URL = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
 
     private static final String IN_JSON = "?format=json";
 
