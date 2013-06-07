@@ -62,9 +62,6 @@ public class AutoconfigParserTest extends TestCase {
 
     private FileInputStream autoconfigFile;
 
-    /* (non-Javadoc)
-     * @see junit.framework.TestCase#setUp()
-     */
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -76,8 +73,7 @@ public class AutoconfigParserTest extends TestCase {
      * @throws Exception
      */
     public void testFullFile() throws Exception {
-        AutoconfigParser p = new AutoconfigParser(autoconfigFile);
-        ClientConfig config = p.getConfig();
+        ClientConfig config = new AutoconfigParser().getConfig(autoconfigFile);
         assertTrue(true);
     }
 }

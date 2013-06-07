@@ -58,6 +58,7 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -146,18 +147,24 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         final boolean tree;
         {
             final String tmp = requestData.getParameter("tree");
-            tree = Boolean.parseBoolean(tmp);
+            tree = AJAXRequestDataTools.parseBoolParameter(tmp);
+        }
+        // Check for ignoreInvalidTransport parameter
+        final boolean ignoreInvalidTransport;
+        {
+            final String tmp = requestData.getParameter("ignoreInvalidTransport");
+            ignoreInvalidTransport = AJAXRequestDataTools.parseBoolParameter(tmp);
         }
         // List for possible warnings
         final List<OXException> warnings = new ArrayList<OXException>(2);
         if (tree) {
-            return new AJAXRequestResult(actionValidateTree(accountDescription, session, warnings)).addWarnings(warnings);
+            return new AJAXRequestResult(actionValidateTree(accountDescription, session, ignoreInvalidTransport, warnings)).addWarnings(warnings);
         }
-        return new AJAXRequestResult(actionValidateBoolean(accountDescription, session, warnings)).addWarnings(warnings);
+        return new AJAXRequestResult(actionValidateBoolean(accountDescription, session, ignoreInvalidTransport, warnings)).addWarnings(warnings);
     }
 
-    private static Object actionValidateTree(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws JSONException, OXException {
-        if (!actionValidateBoolean(accountDescription, session, warnings).booleanValue()) {
+    private static Object actionValidateTree(final MailAccountDescription accountDescription, final ServerSession session, final boolean ignoreInvalidTransport, final List<OXException> warnings) throws JSONException, OXException {
+        if (!actionValidateBoolean(accountDescription, session, ignoreInvalidTransport, warnings).booleanValue()) {
             // TODO: How to indicate error if folder tree requested?
             return null;
         }
@@ -174,11 +181,12 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
      *
      * @param accountDescription The account description
      * @param session The associated session
+     * @param ignoreInvalidTransport
      * @param warnings The warnings list
      * @return <code>true</code> for successful validation; otherwise <code>false</code>
      * @throws OXException If an severe error occurs
      */
-    public static Boolean actionValidateBoolean(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws OXException {
+    public static Boolean actionValidateBoolean(final MailAccountDescription accountDescription, final ServerSession session, final boolean ignoreInvalidTransport, final List<OXException> warnings) throws OXException {
         // Validate mail server
         boolean validated = checkMailServerURL(accountDescription, session, warnings);
         // Failed?
@@ -189,7 +197,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         if (!isEmpty(accountDescription.getTransportServer())) {
             validated = checkTransportServerURL(accountDescription, session, warnings);
         }
-        return Boolean.valueOf(validated);
+        return Boolean.valueOf(validated || ignoreInvalidTransport);
     }
 
     static boolean checkMailServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws OXException {
