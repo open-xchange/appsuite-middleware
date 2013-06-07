@@ -64,7 +64,7 @@ import com.openexchange.realtime.util.StanzaSequenceGate;
 
 
 /**
- * The {@link RTProtocolImpl} contains the logic to handle all protocol events of the RT protocol.
+ * The {@link RTProtocolImpl} contains the logic to handle all protocol events of the RT protocol like pings and acknowledgements.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

@@ -123,7 +123,7 @@ public class AtmosphereConfig implements Initialization {
 
         // server properties
         isIPCheckEnabled = configService.getBoolProperty("com.openexchange.IPCheck", true);
-        cookieHashSource = CookieHashSource.parse(configService.getProperty(" com.openexchange.cookie.hash", "calculate"));
+        cookieHashSource = CookieHashSource.parse(configService.getProperty("com.openexchange.cookie.hash", "calculate"));
         clientWhitelist = new ClientWhitelist().add(configService.getProperty("com.openexchange.IPCheckWhitelist", ""));
         ipMaskV4 = configService.getProperty("com.openexchange.IPMaskV4", "");
         ipMaskV6 = configService.getProperty("com.openexchange.IPMaskV6", "");
