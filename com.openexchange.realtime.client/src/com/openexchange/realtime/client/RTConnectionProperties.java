@@ -68,7 +68,7 @@ public class RTConnectionProperties {
 
     private String host;
 
-    private int port;
+    private int port = -1;
 
     private boolean secure = true;
 
@@ -221,8 +221,8 @@ public class RTConnectionProperties {
                 throw new IllegalStateException("A host must be set!");
             }
 
-            if (properties.port <= 0) {
-                throw new IllegalStateException("Port must be a valid port number!");
+            if(properties.port != -1 && !(properties.port > 0 && properties.port <= 65535)) {
+                throw new IllegalStateException("Port must be between 1 and 65535!");
             }
 
             return properties;

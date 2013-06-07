@@ -56,6 +56,7 @@ import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
 import com.openexchange.realtime.client.RTUserState;
+import com.openexchange.realtime.client.RTUserStateChangeListener;
 
 /**
  * {@link WasyncRTConnection}
@@ -70,18 +71,31 @@ public class WasyncRTConnection implements RTConnection {
     
     private RTMessageHandler messageHandler;
     
+    RTUserStateChangeListener changeListener;
+    
     private boolean loggedIn = false;
     
     private boolean connected = false;
 
     public WasyncRTConnection(RTConnectionProperties connectionProperties) {
-        Validate.notNull(connectionProperties, "");
+        Validate.notNull(connectionProperties, "ConnectionProperties are needed to create a new Connection");
         this.connectionProperties = connectionProperties;
     }
 
     @Override
-    public void connect(RTMessageHandler messageHandler) throws RTException {
+    public RTUserState connect(RTMessageHandler messageHandler) throws RTException {
+        return connect(messageHandler, new RTUserStateChangeListener() {
+            
+            @Override
+            public void setUserState(RTUserState state) {
+            }
+        });
+    }
+    
+    @Override
+    public RTUserState connect(RTMessageHandler messageHandler, RTUserStateChangeListener changeListener) throws RTException {
         this.messageHandler = messageHandler;
+        this.changeListener = changeListener;
         userState = Login.doLogin(
             connectionProperties.getSecure(),
             connectionProperties.getHost(),
@@ -89,6 +103,7 @@ public class WasyncRTConnection implements RTConnection {
             connectionProperties.getUser(),
             connectionProperties.getPassword());
         loggedIn = true;
+        return userState;
     }
 
     @Override

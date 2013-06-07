@@ -59,15 +59,30 @@ import org.apache.commons.lang.Validate;
 public class RTUserState {
 
     /**
-     * Session that is assigned to the client/user
+     * ConextID of the current client/user
      */
-    private final String session;
+    private final long contextID;
+    
+    /**
+     * SessionID that is assigned to the client/user
+     */
+    private final String sessionID;
 
+    /**
+     * Locale that is configured for the client/user
+     */
+    private final String locale;
+    
     /**
      * Session that is assigned to the client/user
      */
     private final String random;
 
+    /**
+     * User id of the current client/user
+     */
+    private final long userID;
+    
     /**
      * Secret session key that is required for requests
      */
@@ -80,31 +95,48 @@ public class RTUserState {
     private final String secretSessionValue;
 
     /**
-     * Session cookie that is required for requests
+     * JSessionID that is required for request routing
      */
     private final String jSessionID;
+    
+    /**
+     * User name
+     */
+    private final String user;
 
     /**
      * Initializes a new {@link RTUserState}.
      * 
-     * @param name - name of the user
-     * @param session - current session
+     * @param contextID - contextID of the user
+     * @param sessionID - sessionID of the user
+     * @param locale - locae of the user
+     * @param random - current random
+     * @param userID - numeric userID
      * @param secretSessionKey - currently assigned secret session key
      * @param secretSessionValue- currently assigned secret session value
-     * @param cookie- currently assigned cookie
+     * @param jSessionID - currently assigned jSessionID
+     * @param user - name of the user
      */
-    public RTUserState(final String session, final String random, final String secretSessionKey, final String secretSessionValue, final String jSessionID) {
-        Validate.notNull(session, "ERROR: Current session mustn't be null!");
-        Validate.notNull(random, "ERROR: Current random mustn't be null!");
-        Validate.notNull(secretSessionKey, "ERROR: Key for secret session mustn't be null!");
-        Validate.notNull(secretSessionValue, "ERROR: Value for secret session mustn't be null!");
-        Validate.notNull(jSessionID, "ERROR: jSessionID mustn't be null!");
+    public RTUserState(final long contextID, final String sessionID, final String locale, final String random, final long userID, final String user, final String secretSessionKey, final String secretSessionValue, final String jSessionID) {
+        Validate.isTrue(contextID != 0, "ERROR: contextID is missing!");
+        Validate.notEmpty(sessionID, "ERROR: SessionID is missing!");
+        Validate.notEmpty(locale, "ERROR: Locale is missing!");
+        Validate.notEmpty(random, "ERROR: Random is missing!");
+        Validate.isTrue(userID != 0, "ERROR: userID is missing!");
+        Validate.notEmpty(user, "ERROR: user is missing!");
+        Validate.notEmpty(secretSessionKey, "ERROR: Key for secret is missing!");
+        Validate.notEmpty(secretSessionValue, "ERROR: Value for secret is missing!");
+        Validate.notEmpty(jSessionID, "ERROR: jSessionID is missing!");
 
+        this.contextID = contextID;
+        this.sessionID = sessionID;
+        this.locale=locale;
         this.random = random;
-        this.session = session;
+        this.userID = userID;
         this.secretSessionKey = secretSessionKey;
         this.secretSessionValue = secretSessionValue;
         this.jSessionID = jSessionID;
+        this.user = user;
     }
 
     /**
@@ -113,7 +145,7 @@ public class RTUserState {
      * @return The session
      */
     public String getSession() {
-        return this.session;
+        return this.sessionID;
     }
 
     /**
@@ -143,13 +175,64 @@ public class RTUserState {
         return this.secretSessionValue;
     }
 
+    
     /**
-     * Gets the cookie
-     * 
-     * @return The cookie
+     * Gets the contextID
+     *
+     * @return The contextID
      */
-    public String getCookie() {
-        return this.jSessionID;
+    public long getContextID() {
+        return contextID;
     }
+
+    
+    /**
+     * Gets the sessionID
+     *
+     * @return The sessionID
+     */
+    public String getSessionID() {
+        return sessionID;
+    }
+
+    
+    /**
+     * Gets the locale
+     *
+     * @return The locale
+     */
+    public String getLocale() {
+        return locale;
+    }
+
+    /**
+     * Gets the userID
+     *
+     * @return The userID
+     */
+    public long getUserID() {
+        return userID;
+    }
+
+    /**
+     * Gets the jSessionID
+     *
+     * @return The jSessionID
+     */
+    public String getjSessionID() {
+        return jSessionID;
+    }
+
+    
+    /**
+     * Gets the user login
+     *
+     * @return The user login
+     */
+    public String getUser() {
+        return user;
+    }
+    
+    
 
 }

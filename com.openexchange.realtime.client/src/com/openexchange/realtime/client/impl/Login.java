@@ -151,7 +151,7 @@ public class Login {
      */
     private static String buildLoginUrl(boolean secure, String host, int port) {
         Validate.notEmpty(host);
-        Validate.isTrue( port >0 && port < 65535, "The port must be between 1 and 65535: ", port);
+        Validate.isTrue( port == -1 || (port > 0 && port <= 65535), "The port must be between 1 and 65535: ", port);
         
         StringBuilder sb = new StringBuilder();
 
@@ -166,7 +166,9 @@ public class Login {
         }
         sb.append("://").append(host);
         
-        sb.append(":").append(port);
+        if(port != -1) {
+            sb.append(":").append(port);
+        }
         
         sb.append(Constants.LOGIN_PATH);
         
@@ -186,9 +188,15 @@ public class Login {
         try {
             Map<String, String> cookieMap = mapCookies(response.getCookies());
             JSONObject responseBody = new JSONObject(response.getResponseBody());
-            String session = responseBody.getString("session");
+            
+            long contextID = responseBody.getLong("context_id");
+            String sessionID = responseBody.getString("session");
+            String locale = responseBody.getString("locale");
             String random = responseBody.getString("random");
-            return new RTUserState(session, random, cookieMap.get(SECRET_KEY), cookieMap.get(SECRET_VALUE), cookieMap.get(JSESSIONID));
+            long userID = responseBody.getLong("user_id");
+            String user = responseBody.getString("user");
+            
+            return new RTUserState(contextID, sessionID, locale, random, userID, user, cookieMap.get(SECRET_KEY), cookieMap.get(SECRET_VALUE), cookieMap.get(JSESSIONID));
         } catch (JSONException e) {
             throw new RTException(e);
         } catch (IOException e) {

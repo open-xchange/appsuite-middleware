@@ -67,7 +67,19 @@ public interface RTConnection {
      * @return The clients resource identifier.
      * @throws RTException
      */
-     void connect(RTMessageHandler messageHandler) throws RTException;
+     RTUserState connect(RTMessageHandler messageHandler) throws RTException;
+     
+     /**
+      * Establishes a connection to the OX RT component. This includes creating
+      * a valid user session.
+      *
+      * @param messageHandler The message handler that is called on received messages.
+      * If <code>null</code>, incoming messages will be discarded immediately.
+      * @param changeListener A listener that will be invoked upon RTUserState changes
+      * @return The clients resource identifier.
+      * @throws RTException
+      */
+      RTUserState connect(RTMessageHandler messageHandler, RTUserStateChangeListener changeListener) throws RTException;
 
     /**
      * Sends a message to the server.

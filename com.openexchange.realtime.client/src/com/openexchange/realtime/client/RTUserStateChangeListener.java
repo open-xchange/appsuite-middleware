@@ -49,26 +49,13 @@
 
 package com.openexchange.realtime.client;
 
-import org.junit.Test;
-import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
-
-
 /**
- * {@link WasyncConnectionTest}
- *
+ * {@link RTUserStateChangeListener} - Interface for classes that are interested in possible changes of the RTUserState which might occur
+ * due to session loss or reconnect. 
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class WasyncConnectionTest {
-    
-    @Test
-    public void testWasyncConnection() throws RTException {
-        RTConnectionProperties connectionProperties = RTConnectionProperties.newBuilder("marc.arens", "secret")
-            .setHost("localhost")
-            .setConnectionType(RTConnectionType.LONG_POLLING)
-            .setSecure(true)
-            .build();
-        RTConnection newConnection = RTConnectionFactory.newConnection(connectionProperties);
-        RTUserState userState = newConnection.connect(null);
-    }
+public interface RTUserStateChangeListener {
 
+    void setUserState(RTUserState state);
 }
