@@ -832,7 +832,7 @@ public final class MimeReply {
             partContentType.setContentType(part.getContentType());
             if (partContentType.startsWith(TEXT) && (avoidHTML ? !partContentType.startsWith(TEXT_HTM) : true) && MimeProcessingUtility.isInline(part, partContentType) && !MimeProcessingUtility.isSpecial(partContentType.getBaseType())) {
                 if (pc.retvalContentType.getPrimaryType() == null) {
-                    String text = MimeProcessingUtility.handleInlineTextPart(part, pc.retvalContentType, pc.usm.isDisplayHtmlInlineContent());
+                    String text = MimeProcessingUtility.handleInlineTextPart(part, partContentType, pc.usm.isDisplayHtmlInlineContent());
                     if (isEmpty(text)) {
                         final String htmlContent = getHtmlContent(multipartPart, count);
                         if (null != htmlContent) {
