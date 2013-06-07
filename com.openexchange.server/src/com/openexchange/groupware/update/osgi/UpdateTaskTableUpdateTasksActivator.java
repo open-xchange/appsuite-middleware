@@ -52,6 +52,7 @@ package com.openexchange.groupware.update.osgi;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import com.openexchange.groupware.update.FullPrimaryKeySupport;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AddUUIDForUpdateTaskTable;
@@ -78,7 +79,7 @@ public class UpdateTaskTableUpdateTasksActivator extends HousekeepingActivator {
             public Collection<? extends UpdateTaskV2> getUpdateTasks() {
                 List<UpdateTaskV2> updateTasks = new ArrayList<UpdateTaskV2>();
                 updateTasks.add(new AddUUIDForUpdateTaskTable());
-                if (false) { // TODO: Config einlesen
+                if (FullPrimaryKeySupport.getInstance().isFullPrimaryKeySupported()) {
                     updateTasks.add(new MakeUUIDPrimaryForUpdateTaskTable());
                 }
                 return updateTasks;
