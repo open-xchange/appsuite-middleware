@@ -205,6 +205,13 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              * update change exceptions
              */
             for (CalendarDataObject exceptionToSave : exceptionsToSave) {
+                /*
+                 * check if already deleted
+                 */
+                if (containsDeleteException(originalAppointment, exceptionToSave.getRecurrenceDatePosition())) {
+                    LOG.debug("Delete exception " + exceptionToSave + " already exists, skipping update.");
+                    continue;
+                }
                 Appointment originalException = getMatchingException(originalExceptions, exceptionToSave.getRecurrenceDatePosition());
                 if (null != originalException) {
                     /*
