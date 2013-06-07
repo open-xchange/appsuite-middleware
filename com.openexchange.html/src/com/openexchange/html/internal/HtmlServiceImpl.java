@@ -58,6 +58,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -1505,13 +1506,13 @@ public final class HtmlServiceImpl implements HtmlService {
 
     private static final Pattern PAT_HEX_ENTITIES = Pattern.compile("&#x([0-9a-fA-F]+);", Pattern.CASE_INSENSITIVE);
 
-    private static String replaceHexEntities(final String validated) {
-        final Matcher m = PAT_HEX_ENTITIES.matcher(validated);
+    private static String replaceHexEntities(final String htmlContent) {
+        final Matcher m = PAT_HEX_ENTITIES.matcher(htmlContent);
         if (!m.find()) {
-            return validated;
+            return htmlContent;
         }
-        final MatcherReplacer mr = new MatcherReplacer(m, validated);
-        final Stringer builder = new StringBuilderStringer(new StringBuilder(validated.length()));
+        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
+        final Stringer builder = new StringBuilderStringer(new StringBuilder(htmlContent.length()));
         final StringBuilder tmp = new StringBuilder(8).append("&#");
         do {
             try {
@@ -1528,6 +1529,63 @@ public final class HtmlServiceImpl implements HtmlService {
         } while (m.find());
         mr.appendTail(builder);
         return builder.toString();
+    }
+
+    private static final Pattern PAT_SPECIAL_ENTITIES = Pattern.compile("&#([0-9a-fA-F]{5,}+);&#([0-9a-fA-F]{5,}+);");
+
+    private static String replaceSpecialEntities(final String htmlContent) {
+        final Matcher m = PAT_SPECIAL_ENTITIES.matcher(htmlContent);
+        if (!m.find()) {
+            return htmlContent;
+        }
+        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
+        final Stringer builder = new StringBuilderStringer(new StringBuilder(htmlContent.length()));
+        final StringBuilder tmp = new StringBuilder(16);
+        do {
+            try {
+                tmp.setLength(0);
+
+                final char c1 = (char) Integer.parseInt(m.group(1), 10);
+                final char c2 = (char) Integer.parseInt(m.group(2), 10);
+                tmp.append(c1).append(c2);
+
+                final byte[] bytes = tmp.toString().getBytes(Charsets.forName("UTF-32"));
+                tmp.setLength(0);
+                tmp.append("&#").append(Integer.parseInt(asHex(bytes), 16)).append(';');
+                // tmp.append("&#x").append(asHex(bytes)).append(';');
+
+                mr.appendLiteralReplacement(builder, tmp.toString());
+            } catch (final NumberFormatException e) {
+                tmp.setLength(0);
+                tmp.append("&amp;#x").append(m.group(1)).append("&#59;");
+                mr.appendLiteralReplacement(builder, tmp.toString());
+                tmp.setLength(0);
+            }
+        } while (m.find());
+        mr.appendTail(builder);
+        return builder.toString();
+    }
+
+    private static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+
+    /**
+     * Turns array of bytes into string representing each byte as unsigned hex number.
+     *
+     * @param hash Array of bytes to convert to hex-string
+     * @return Generated hex string
+     */
+    private static String asHex(final byte[] hash) {
+        final int length = hash.length;
+        final char[] buf = new char[length * 2];
+        for (int i = 0, x = 0; i < length; i++) {
+            buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
+            buf[x++] = HEX_CHARS[hash[i] & 0xf];
+        }
+        int pos = 0;
+        while (pos < buf.length && '0' == buf[pos]) {
+            pos++;
+        }
+        return new String(buf, pos, buf.length - pos);
     }
 
     private static final Pattern PAT_HEX_NBSP = Pattern.compile(Pattern.quote("&#160;"));
@@ -1568,6 +1626,7 @@ public final class HtmlServiceImpl implements HtmlService {
         props.setOmitDoctypeDeclaration(true);
         props.setOmitXmlDeclaration(true);
         props.setPruneTags("script");
+        props.setTranslateSpecialEntities(true);
         props.setTransSpecialEntitiesToNCR(true);
         props.setTransResCharsToNCR(true);
         props.setRecognizeUnicodeChars(false);
@@ -1588,19 +1647,23 @@ public final class HtmlServiceImpl implements HtmlService {
              *
              * Clean...
              */
-            final TagNode htmlNode = HTML_CLEANER.clean(preprocessWithJSoup(htmlContent));
+            String preprocessed = preprocessWithJSoup(htmlContent);
+            preprocessed = replaceSpecialEntities(preprocessed);
+            final TagNode htmlNode = HTML_CLEANER.clean(preprocessed);
             /*
              * Check for presence of HTML namespace
              */
             if (!htmlNode.hasAttribute("xmlns")) {
-                htmlNode.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+                final Map<String, String> attributes = new HashMap<String, String>(1);
+                attributes.put("xmlns", "http://www.w3.org/1999/xhtml");
+                htmlNode.setAttributes(attributes);
             }
             /*
              * Serialize
              */
-            final StringWriter writer = new StringWriter(htmlContent.length());
+            final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());
             SERIALIZER.write(htmlNode, writer, "UTF-8");
-            final StringBuffer buffer = writer.getBuffer();
+            final StringAllocator buffer = writer.getBuffer();
             /*
              * Insert DOCTYPE if absent
              */

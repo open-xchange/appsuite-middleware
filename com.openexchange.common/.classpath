@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="lib/htmlcleaner-2.5.jar" sourcepath="source/htmlcleaner-2.5-source.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-fileupload-1.2.1-custom.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/concurrentlinkedhashmap-1.0.1.jar" sourcepath="source/concurrentlinkedhashmap-1.0.1-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-examples-0.7.2.jar" sourcepath="source/apache-mime4j-examples-0.7.2-sources.jar"/>
@@ -20,7 +21,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/httpmime-4.2.1.jar" sourcepath="source/httpmime-4.2.1-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/nekohtml-1.9.17.jar" sourcepath="source/nekohtml-1.9.17-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/kxml2-2.3.0.jar" sourcepath="source/kxml2-src-2.3.0.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/htmlcleaner-2.2.jar" sourcepath="source/htmlcleaner-2.2-all.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/jericho-html-3.3.jar" sourcepath="lib/jericho-html-3.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/cssparser-0.9.7.jar" sourcepath="source/cssparser-0.9.7-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/backport-util-concurrent-3.1.jar" sourcepath="lib/backport-util-concurrent-3.1.jar"/>
