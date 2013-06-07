@@ -49,61 +49,19 @@
 
 package com.openexchange.realtime.client.impl;
 
-import org.apache.commons.lang.Validate;
 import org.json.JSONValue;
-import com.openexchange.realtime.client.RTConnection;
 import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
-import com.openexchange.realtime.client.RTMessageHandler;
-import com.openexchange.realtime.client.RTUserState;
-import com.openexchange.realtime.client.RTUserStateChangeListener;
 
 /**
  * {@link WasyncRTConnection}
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class WasyncRTConnection implements RTConnection {
-
-    private RTConnectionProperties connectionProperties;
-
-    private RTUserState userState;
-    
-    private RTMessageHandler messageHandler;
-    
-    RTUserStateChangeListener changeListener;
-    
-    private boolean loggedIn = false;
-    
-    private boolean connected = false;
+public class WasyncRTConnection extends AbstractRTConnection {
 
     public WasyncRTConnection(RTConnectionProperties connectionProperties) {
-        Validate.notNull(connectionProperties, "ConnectionProperties are needed to create a new Connection");
-        this.connectionProperties = connectionProperties;
-    }
-
-    @Override
-    public RTUserState connect(RTMessageHandler messageHandler) throws RTException {
-        return connect(messageHandler, new RTUserStateChangeListener() {
-            
-            @Override
-            public void setUserState(RTUserState state) {
-            }
-        });
-    }
-    
-    @Override
-    public RTUserState connect(RTMessageHandler messageHandler, RTUserStateChangeListener changeListener) throws RTException {
-        this.messageHandler = messageHandler;
-        this.changeListener = changeListener;
-        userState = Login.doLogin(
-            connectionProperties.getSecure(),
-            connectionProperties.getHost(),
-            connectionProperties.getPort(),
-            connectionProperties.getUser(),
-            connectionProperties.getPassword());
-        loggedIn = true;
-        return userState;
+        super(connectionProperties);
     }
 
     @Override
@@ -114,12 +72,6 @@ public class WasyncRTConnection implements RTConnection {
 
     @Override
     public void postReliable(JSONValue message) throws RTException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void close() throws RTException {
         // TODO Auto-generated method stub
 
     }
