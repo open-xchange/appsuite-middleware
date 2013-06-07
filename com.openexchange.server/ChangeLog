@@ -2,6 +2,7 @@
 
  - Fix for bug 26987: Fixed corrupted umlauts on mail reply
  - Fix for bug 26309: Support optional parameter "ignoreInvalidTransport=true" to ignore invalid transport settings
+ - Fix for bug 26963: Ensure a non-null subject attribute to TNEF message arguments
 
 * 2013-06-06 - thorben.betten@open-xchange.com
 
