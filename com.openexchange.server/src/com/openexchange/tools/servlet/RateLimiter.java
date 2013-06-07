@@ -365,17 +365,17 @@ public final class RateLimiter {
         return tmp;
     }
 
-    private static volatile Integer maxRatePerMinute;
+    private static volatile Integer maxRate;
 
-    private static int maxRatePerMinute() {
-        Integer tmp = maxRatePerMinute;
+    private static int maxRate() {
+        Integer tmp = maxRate;
         if (null == tmp) {
             synchronized (CountingHttpServletRequest.class) {
-                tmp = maxRatePerMinute;
+                tmp = maxRate;
                 if (null == tmp) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                     tmp = Integer.valueOf(null == service ? "1500" : service.getProperty("com.openexchange.servlet.maxRate", "1500"));
-                    maxRatePerMinute = tmp;
+                    maxRate = tmp;
                 }
             }
         }
@@ -440,7 +440,7 @@ public final class RateLimiter {
      * @return <code>true</code> if not rate limited; otherwise <code>false</code> if rate limited
      */
     public static boolean checkRequest(final HttpServletRequest servletRequest) {
-        int maxRatePerMinute = maxRatePerMinute();
+        int maxRatePerMinute = maxRate();
         if (maxRatePerMinute <= 0) {
             return true;
         }
