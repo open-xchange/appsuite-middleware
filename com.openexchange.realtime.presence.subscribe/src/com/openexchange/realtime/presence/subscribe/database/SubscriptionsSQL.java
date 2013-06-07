@@ -51,14 +51,18 @@ package com.openexchange.realtime.presence.subscribe.database;
 
 import static com.openexchange.sql.grammar.Constant.ASTERISK;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.presence.subscribe.impl.Subscription;
 import com.openexchange.realtime.presence.subscribe.impl.SubscriptionParticipant;
@@ -100,6 +104,8 @@ public class SubscriptionsSQL {
     private static final Column request = new Column("request");
 
     private static final Column timestamp = new Column("timestamp");
+
+    private static final Column uuid = new Column("uuid");
 
     // @formatter:off
 
@@ -176,6 +182,10 @@ public class SubscriptionsSQL {
             insert = insert.SET(request, PLACEHOLDER);
             update = update.SET(request, PLACEHOLDER);
         }
+        
+        if (null != subscription.getUuid()) {
+            insert = insert.SET(uuid, PLACEHOLDER);
+        }
 
         update.WHERE(p);
 
@@ -202,6 +212,8 @@ public class SubscriptionsSQL {
                 if (subscription.getRequest() != null && !subscription.getRequest().trim().equals("")) {
                     values.add(subscription.getRequest());
                 }
+                byte[] uuidBinary = UUIDs.toByteArray(subscription.getUuid());
+                values.add(uuidBinary);
                 new StatementBuilder().executeStatement(connection, insert, values);
             }
         } catch (SQLException e) {
@@ -332,6 +344,7 @@ public class SubscriptionsSQL {
         }
     }
 
+
     private List<Subscription> handleResultSet(ResultSet rs) throws SQLException {
         List<Subscription> subscriptions = new ArrayList<Subscription>();
 
@@ -351,6 +364,17 @@ public class SubscriptionsSQL {
             String req = rs.getString(request.getName());
             if (req != null && !req.trim().equals("")) {
                 subscription.setRequest(req);
+            }
+
+            try {
+                byte[] uuidBinary = Streams.stream2bytes(rs.getBinaryStream("uuid"));
+            if (!rs.wasNull()) {
+                UUID uuid = UUIDs.toUUID(uuidBinary);
+                subscription.setUuid(uuid);
+            }
+            } catch (IOException e) {
+                UUID uuid = UUID.randomUUID();
+                subscription.setUuid(uuid);
             }
 
             subscriptions.add(subscription);

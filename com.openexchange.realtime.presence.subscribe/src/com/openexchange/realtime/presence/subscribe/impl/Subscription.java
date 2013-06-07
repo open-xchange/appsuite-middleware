@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.presence.subscribe.impl;
 
+import java.util.UUID;
 import com.openexchange.realtime.packet.Presence;
 
 /**
@@ -67,6 +68,8 @@ public class Subscription {
     private String request;
 
     private Presence.Type state;
+    
+    private UUID uuid;
 
     /**
      * Initializes a new {@link Subscription}.
@@ -79,6 +82,22 @@ public class Subscription {
         this.from = from;
         this.to = to;
         this.state = state;
+        this.uuid = UUID.randomUUID();
+    }
+    
+    /**
+     * Initializes a new {@link Subscription}.
+     * 
+     * @param from The user requesting the {@link Subscription}
+     * @param to The recipient of the {@link Subscription}
+     * @param state The current state of the {@link Subscription}
+     * @param uuid The uuid of the {@link Subscription}
+     */
+    public Subscription(SubscriptionParticipant from, SubscriptionParticipant to, Presence.Type state, UUID uuid) {
+        this.from = from;
+        this.to = to;
+        this.state = state;
+        this.uuid = uuid;
     }
 
     public SubscriptionParticipant getFrom() {
@@ -111,6 +130,14 @@ public class Subscription {
 
     public void setRequest(String request) {
         this.request = request;
+    }
+    
+    public UUID getUuid() {
+        return uuid;
+    }
+    
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
 }

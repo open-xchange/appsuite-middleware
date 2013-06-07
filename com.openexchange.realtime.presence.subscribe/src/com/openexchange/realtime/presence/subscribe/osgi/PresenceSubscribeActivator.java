@@ -47,7 +47,6 @@
  *
  */
 
-
 package com.openexchange.realtime.presence.subscribe.osgi;
 
 import java.util.Arrays;
@@ -56,12 +55,15 @@ import org.osgi.framework.BundleContext;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.FullPrimaryKeySupport;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
+import com.openexchange.realtime.presence.subscribe.database.AddPrimaryKeyTask;
+import com.openexchange.realtime.presence.subscribe.database.AddUUIDColumnTask;
 import com.openexchange.realtime.presence.subscribe.database.CreatePresenceSubscriptionDB;
 import com.openexchange.realtime.presence.subscribe.database.PresenceSubscriptionsTable;
 import com.openexchange.realtime.presence.subscribe.database.SubscriptionsSQL;
@@ -70,16 +72,17 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link PresenceSubscribeActivator}
- *
+ * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class PresenceSubscribeActivator extends HousekeepingActivator {
 
-//    private BundleActivator testFragment;
+    // private BundleActivator testFragment;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ResourceDirectory.class, DatabaseService.class, ContextService.class, UserService.class, MessageDispatcher.class };
+        return new Class<?>[] {
+            ResourceDirectory.class, DatabaseService.class, ContextService.class, UserService.class, MessageDispatcher.class };
     }
 
     @Override
@@ -88,21 +91,35 @@ public class PresenceSubscribeActivator extends HousekeepingActivator {
         SubscriptionsSQL.db = dbService;
         registerService(PresenceSubscriptionService.class, new SubscriptionServiceImpl(this));
         registerService(CreateTableService.class, new PresenceSubscriptionsTable());
-        registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
+        if (FullPrimaryKeySupport.getInstance().isFullPrimaryKeySupported()) {
+            registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
-            @Override
-            public Collection<? extends UpdateTask> getUpdateTasks() {
-                return Arrays.asList(new CreatePresenceSubscriptionDB(dbService));
-            }
-        });
+                @Override
+                public Collection<? extends UpdateTask> getUpdateTasks() {
+                    return Arrays.asList(
+                        new CreatePresenceSubscriptionDB(dbService),
+                        new AddUUIDColumnTask(dbService),
+                        new AddPrimaryKeyTask(dbService));
+                }
+            });
+        } else {
+            registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
-//        try {
-//            Class<? extends BundleActivator> clazz = (Class<? extends BundleActivator>) Class.forName("com.openexchange.realtime.presence.subscribe.test.osgi.Activator");
-//            testFragment = clazz.newInstance();
-//            testFragment.start(context);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+                @Override
+                public Collection<? extends UpdateTask> getUpdateTasks() {
+                    return Arrays.asList(new CreatePresenceSubscriptionDB(dbService), new AddUUIDColumnTask(dbService));
+                }
+            });
+        }
+
+        // try {
+        // Class<? extends BundleActivator> clazz = (Class<? extends BundleActivator>)
+        // Class.forName("com.openexchange.realtime.presence.subscribe.test.osgi.Activator");
+        // testFragment = clazz.newInstance();
+        // testFragment.start(context);
+        // } catch (Exception e) {
+        // e.printStackTrace();
+        // }
     }
 
     /*
@@ -111,13 +128,13 @@ public class PresenceSubscribeActivator extends HousekeepingActivator {
      */
     @Override
     public void stop(BundleContext context) throws Exception {
-//        try {
-//            if (testFragment != null) {
-//                testFragment.stop(context);
-//            }
-//        } catch (Exception e) {
-//
-//        }
+        // try {
+        // if (testFragment != null) {
+        // testFragment.stop(context);
+        // }
+        // } catch (Exception e) {
+        //
+        // }
         super.stop(context);
     }
 
