@@ -1,19 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="test"/>
+	<classpathentry excluding="com/openexchange/realtime/client/impl/DefaultRTConnection.java" kind="src" path="src"/>
+	<classpathentry excluding="com/openexchange/realtime/client/RTConnectionTest.java" kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test.performance.realtime"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.json"/>
-	<classpathentry kind="lib" path="lib/commons-codec-1.6.jar"/>
-	<classpathentry kind="lib" path="lib/httpclient-4.2.5.jar" sourcepath="sources/httpclient"/>
-	<classpathentry kind="lib" path="lib/httpcore-4.2.4.jar" sourcepath="sources/httpcore"/>
-	<classpathentry kind="lib" path="lib/async-http-client-1.7.17.jar"/>
+	<classpathentry kind="lib" path="lib/async-http-client-1.7.17.jar" sourcepath="sources/async-http-client-1.7.17-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
 	<classpathentry kind="lib" path="lib/wasync-1.0.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="/com.google.common/lib/guava-14.0.1.jar" sourcepath="/com.google.common/source/guava-14.0.1-sources.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.5.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-jcl-1.7.5.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.logging_1.1.1.v201101211721.jar"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
