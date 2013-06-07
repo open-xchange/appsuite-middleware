@@ -1,3 +1,9 @@
+open-xchange-xerces-ibm (7.2.1-4) UNRELEASED; urgency=low
+
+  * Build for patch 2013-06-20
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 07 Jun 2013 15:35:58 +0200
+
 open-xchange-xerces-ibm (7.2.1-3) UNRELEASED; urgency=low
 
   * Third candidate for 7.2.1 release
