@@ -92,7 +92,16 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
         }
         return retval.toArray(new UserConfiguration[retval.size()]);
     }
-
+    
+    @Override
+    public UserConfiguration[] getUserConfigurations(Context ctx, int[] userIds, int[][] groups) throws OXException {
+        final List<UserConfiguration> retval = new ArrayList<UserConfiguration>();
+        for (int i = 0; i < userIds.length; i++) {
+            retval.add(getUserConfiguration(userIds[i], groups[i], ctx));
+        }
+        return retval.toArray(new UserConfiguration[retval.size()]);
+    }
+    
     @Override
     public void clearStorage() throws OXException {
         delegate.clearStorage();
