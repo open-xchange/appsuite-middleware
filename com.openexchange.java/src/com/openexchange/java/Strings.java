@@ -81,6 +81,23 @@ public class Strings {
     }
 
     /**
+     * Builds up a string from passed objects.
+     *
+     * @param objects The objects
+     * @return The string build up from concatenating objects' string representation
+     */
+    public static String concat(final Object... objects) {
+        if (null == objects || 0 == objects.length) {
+            return "";
+        }
+        final StringAllocator sb = new StringAllocator(2048);
+        for (final Object object : objects) {
+            sb.append(String.valueOf(object));
+        }
+        return sb.toString();
+    }
+
+    /**
      * Gets the lineSeparator
      *
      * @return The lineSeparator

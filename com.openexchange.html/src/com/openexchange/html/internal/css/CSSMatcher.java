@@ -422,7 +422,7 @@ public final class CSSMatcher {
             return false;
         } catch (final TimeoutException e) {
             // Wait time exceeded
-            LOG.warn("Parsing of CSS content exceeded max. response time of " + timeout + " " + toLowerCase(timeUnit.name()));
+            LOG.warn(Strings.concat(Strings.getLineSeparator(), "Parsing of CSS content exceeded max. response time of ", Integer.valueOf(timeout), toLowerCase(timeUnit.name()), Strings.getLineSeparator()));
             cssBuilder.setLength(0);
             f.cancel(true);
             return false;
