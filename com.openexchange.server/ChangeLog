@@ -1,3 +1,7 @@
+* 2013-06-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26987: Fixed corrupted umlauts on mail reply
+
 * 2013-06-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 26933: Fixed removal of contact images
