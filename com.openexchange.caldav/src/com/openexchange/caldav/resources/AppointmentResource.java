@@ -168,10 +168,16 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     protected void saveObject(boolean checkPermissions) throws OXException {
         try {
             /*
-             * get original data
+             * load original appointment and change exceptions
              */
             Appointment originalAppointment = parent.load(this.object, false);
             CalendarDataObject[] originalExceptions = parent.loadChangeExceptions(this.object.getObjectID());
+            /*
+             * transform change- to delete-exceptions where user is removed from participants if needed (bug #26293)
+             */
+            if (null != originalExceptions && 0 < originalExceptions.length) {
+                originalExceptions = Patches.Outgoing.setDeleteExceptionForRemovedParticipant(factory, originalAppointment, originalExceptions);
+            }
             Date clientLastModified = this.object.getLastModified();
             if (clientLastModified.before(originalAppointment.getLastModified())) {
                 throw super.protocolException(HttpServletResponse.SC_CONFLICT);
@@ -341,20 +347,27 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         final List<ConversionWarning> conversionWarnings = new LinkedList<ConversionWarning>();
         try {
             /*
+             * load appointment and change exceptions
+             */
+            CalendarDataObject appointment = parent.load(object, true);
+            CalendarDataObject[] changeExceptions = 0 < object.getRecurrenceID() ? parent.getChangeExceptions(object.getObjectID()) : null;
+            /*
+             * transform change- to delete-exceptions where user is removed from participants if needed (bug #26293)
+             */
+            if (null != changeExceptions && 0 < changeExceptions.length) {
+                changeExceptions = Patches.Outgoing.setDeleteExceptionForRemovedParticipant(factory, appointment, changeExceptions);
+            }
+            /*
              * write appointment
              */
-            icalEmitter.writeAppointment(session, parent.load(object, true),
-                factory.getContext(), conversionErrors, conversionWarnings);
-            if (0 < object.getRecurrenceID()) {
-                CalendarDataObject[] changeExceptions = parent.getChangeExceptions(object.getObjectID());
-                if (null != changeExceptions && 0 < changeExceptions.length) {
-                    /*
-                     * write exceptions
-                     */
-                    for (Appointment changeException : changeExceptions) {
-                        icalEmitter.writeAppointment(session, parent.load(changeException, true),
-                            factory.getContext(), conversionErrors, conversionWarnings);
-                    }
+            icalEmitter.writeAppointment(session, appointment, factory.getContext(), conversionErrors, conversionWarnings);
+            /*
+             * write exceptions
+             */
+            if (null != changeExceptions && 0 < changeExceptions.length) {
+                for (Appointment changeException : changeExceptions) {
+                    icalEmitter.writeAppointment(session, parent.load(changeException, true),
+                        factory.getContext(), conversionErrors, conversionWarnings);
                 }
             }
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -364,7 +377,6 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              */
             String iCal = new String(bytes.toByteArray(), "UTF-8");
             iCal = Patches.Outgoing.removeEmptyRDates(iCal);
-//            iCal = iCal.replace("@premium", "424242669@devel-mail.netline.de");
             return iCal;
         } catch (final UnsupportedEncodingException e) {
             throw protocolException(e);
