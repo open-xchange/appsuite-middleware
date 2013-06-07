@@ -67,7 +67,7 @@ public interface RTConnection {
      * @return The clients resource identifier.
      * @throws RTException
      */
-    String connect(RTMessageHandler messageHandler) throws RTException;
+     void connect(RTMessageHandler messageHandler) throws RTException;
 
     /**
      * Sends a message to the server.

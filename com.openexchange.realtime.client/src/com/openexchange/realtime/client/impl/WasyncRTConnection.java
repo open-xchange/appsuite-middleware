@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,29 +47,66 @@
  *
  */
 
-package com.openexchange.realtime.client;
+package com.openexchange.realtime.client.impl;
 
-import com.openexchange.realtime.client.impl.WasyncRTConnection;
+import org.apache.commons.lang.Validate;
+import org.json.JSONValue;
+import com.openexchange.realtime.client.RTConnection;
+import com.openexchange.realtime.client.RTConnectionProperties;
+import com.openexchange.realtime.client.RTException;
+import com.openexchange.realtime.client.RTMessageHandler;
+import com.openexchange.realtime.client.RTUserState;
 
 /**
- * A {@link RTConnectionFactory} is responsible for instantiating {@link RTConnection}s.
+ * {@link WasyncRTConnection}
  * 
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class RTConnectionFactory {
+public class WasyncRTConnection implements RTConnection {
 
-    private RTConnectionFactory() {
-        super();
+    private RTConnectionProperties connectionProperties;
+
+    private RTUserState userState;
+    
+    private RTMessageHandler messageHandler;
+    
+    private boolean loggedIn = false;
+    
+    private boolean connected = false;
+
+    public WasyncRTConnection(RTConnectionProperties connectionProperties) {
+        Validate.notNull(connectionProperties, "");
+        this.connectionProperties = connectionProperties;
     }
 
-    /**
-     * Create a new connection based on the given properties.
-     * @param properties The properties.
-     * @return The connection.
-     * @throws RTException
-     */
-    public static RTConnection newConnection(RTConnectionProperties properties) throws RTException {
-        return new WasyncRTConnection(properties);
+    @Override
+    public void connect(RTMessageHandler messageHandler) throws RTException {
+        this.messageHandler = messageHandler;
+        userState = Login.doLogin(
+            connectionProperties.getSecure(),
+            connectionProperties.getHost(),
+            connectionProperties.getPort(),
+            connectionProperties.getUser(),
+            connectionProperties.getPassword());
+        loggedIn = true;
+    }
+
+    @Override
+    public void post(JSONValue message) throws RTException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void postReliable(JSONValue message) throws RTException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void close() throws RTException {
+        // TODO Auto-generated method stub
+
     }
 
 }

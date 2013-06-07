@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,27 +49,18 @@
 
 package com.openexchange.realtime.client;
 
-import com.openexchange.realtime.client.impl.WasyncRTConnection;
+import org.junit.Test;
+
 
 /**
- * A {@link RTConnectionFactory} is responsible for instantiating {@link RTConnection}s.
- * 
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * {@link WasyncConnectionTest}
+ *
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class RTConnectionFactory {
-
-    private RTConnectionFactory() {
-        super();
-    }
-
-    /**
-     * Create a new connection based on the given properties.
-     * @param properties The properties.
-     * @return The connection.
-     * @throws RTException
-     */
-    public static RTConnection newConnection(RTConnectionProperties properties) throws RTException {
-        return new WasyncRTConnection(properties);
+public class WasyncConnectionTest {
+    
+    @Test
+    public void testWasynCConnection() {
     }
 
 }

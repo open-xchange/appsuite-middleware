@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,27 +49,34 @@
 
 package com.openexchange.realtime.client;
 
-import com.openexchange.realtime.client.impl.WasyncRTConnection;
-
 /**
- * A {@link RTConnectionFactory} is responsible for instantiating {@link RTConnection}s.
+ * {@link RTProtocol} contains the logic to handle all protocol events of the RT protocol like pings and acknowledgements
  * 
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class RTConnectionFactory {
-
-    private RTConnectionFactory() {
-        super();
-    }
+public interface RTProtocol {
 
     /**
-     * Create a new connection based on the given properties.
-     * @param properties The properties.
-     * @return The connection.
-     * @throws RTException
+     * Called when a Ping is sent to the server. If the ping asks for a commit, a Pong message is expected to be send from the server back
+     * to the client.
      */
-    public static RTConnection newConnection(RTConnectionProperties properties) throws RTException {
-        return new WasyncRTConnection(properties);
-    }
+    void pingSent(boolean commit);
+
+    /**
+     * Called when a Pong is received from the server acknowledging the ping previously sent by the client.
+     */
+    void pongReceived();
+
+    /**
+     * A message containing a sequence was sent to the server and needs to be acknowledged.
+     * 
+     * @param seq The sequence number contained in the message
+     */
+    void sequenceSent(long seq);
+
+    /**
+     * A 'received' message was received from the client
+     */
+    void sequenceAcknowledged(long seq);
 
 }

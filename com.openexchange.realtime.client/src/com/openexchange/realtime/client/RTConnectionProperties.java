@@ -66,11 +66,11 @@ public class RTConnectionProperties {
 
     private RTConnectionType type;
 
-    private String protocol;
-
     private String host;
 
     private int port;
+
+    private boolean secure = true;
 
     private RTConnectionProperties() {
         super();
@@ -113,15 +113,6 @@ public class RTConnectionProperties {
     }
 
     /**
-     * Gets the protocol
-     * 
-     * @return The protocol
-     */
-    public String getProtocol() {
-        return protocol;
-    }
-
-    /**
      * Gets the port
      * 
      * @return The port
@@ -137,6 +128,15 @@ public class RTConnectionProperties {
      */
     public RTConnectionType getConnectionType() {
         return type;
+    }
+
+    /**
+     * Get if the connection should be secure.
+     * 
+     * @return true if the connection should be secure
+     */
+    public boolean getSecure() {
+        return secure;
     }
 
     /**
@@ -192,12 +192,12 @@ public class RTConnectionProperties {
         }
 
         /**
-         * Sets the protocol.
+         * Sets if we want to use a secure connection
          * 
-         * @param protocol The protocol.
+         * @param secure true (by default) for a secure connection, false for an unsafe connection
          */
-        public Builder setProtocol(String protocol) {
-            properties.protocol = protocol;
+        public Builder setSecure(boolean secure) {
+            properties.secure = secure;
             return this;
         }
 
@@ -219,10 +219,6 @@ public class RTConnectionProperties {
 
             if (properties.host == null) {
                 throw new IllegalStateException("A host must be set!");
-            }
-
-            if (properties.protocol == null) {
-                throw new IllegalStateException("A protocol must be set!");
             }
 
             if (properties.port <= 0) {
