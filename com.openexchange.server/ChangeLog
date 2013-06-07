@@ -1,6 +1,7 @@
 * 2013-06-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 26987: Fixed corrupted umlauts on mail reply
+ - Fix for bug 26309: Support optional parameter "ignoreInvalidTransport=true" to ignore invalid transport settings
 
 * 2013-06-06 - thorben.betten@open-xchange.com
 
