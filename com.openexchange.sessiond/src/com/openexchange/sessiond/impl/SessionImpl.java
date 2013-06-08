@@ -56,6 +56,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
@@ -81,7 +82,7 @@ public final class SessionImpl implements PutIfAbsent {
     private final String authId;
     private volatile String hash;
     private volatile String client;
-    private boolean tranzient;
+    private volatile boolean tranzient;
     private final ConcurrentMap<String, Object> parameters;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionImpl.class));
@@ -454,6 +455,20 @@ public final class SessionImpl implements PutIfAbsent {
         }
     }
 
+    @Override
+    public boolean isTransient() {
+        return tranzient;
+    }
+
+    /**
+     * Sets if the session is transient or not.
+     *
+     * @param tranzient <code>true</code> if the session is transient, <code>false</code>, otherwise
+     */
+    public void setTransient(boolean tranzient) {
+        this.tranzient = tranzient;
+    }
+
     /**
      * Sets the client identifier
      *
@@ -473,7 +488,7 @@ public final class SessionImpl implements PutIfAbsent {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder(128);
+        final StringAllocator builder = new StringAllocator(128);
         builder.append('{');
         builder.append("contextId=").append(contextId).append(", userId=").append(userId).append(", ");
         if (sessionId != null) {
@@ -492,23 +507,11 @@ public final class SessionImpl implements PutIfAbsent {
             builder.append("hash=").append(hash).append(", ");
         }
         if (client != null) {
-            builder.append("client=").append(client);
+            builder.append("client=").append(client).append(", ");
         }
+        builder.append("transient=").append(tranzient);
         builder.append('}');
         return builder.toString();
     }
 
-    @Override
-    public boolean isTransient() {
-        return tranzient;
-    }
-
-    /**
-     * Sets if the session is transient or not.
-     *
-     * @param tranzient <code>true</code> if the session is transient, <code>false</code>, otherwise
-     */
-    public void setTransient(boolean tranzient) {
-        this.tranzient = tranzient;
-    }
 }

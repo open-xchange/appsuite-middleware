@@ -70,7 +70,16 @@ public final class OperationKey implements Serializable {
      * Operation type.
      */
     public static enum Type {
-        MSG_COPY, MSG_DELETE, MSG_LABEL_UPDATE, MSG_FLAGS_UPDATE, MSG_APPEND, ;
+        /** Message copy operation */
+        MSG_COPY,
+        /** Message delete operation */
+        MSG_DELETE,
+        /** Message label update operation */
+        MSG_LABEL_UPDATE,
+        /** Message flags update operation */
+        MSG_FLAGS_UPDATE,
+        /** Message append operation */
+        MSG_APPEND, ;
     }
 
     // --------------------------------------------------------------------------------------- //
