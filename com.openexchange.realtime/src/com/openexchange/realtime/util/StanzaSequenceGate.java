@@ -67,7 +67,7 @@ import com.openexchange.realtime.packet.Stanza;
  * one (1, 2, 3, 4....). If a sequence number is skipped the stanza sequence gate will hold back handling the stanza until the missing
  * stanza arrives, and then handle all held back stanzas in turn. If a stanza contains no sequence number (-1) then it will be handled
  * immediately
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class StanzaSequenceGate {
@@ -82,7 +82,7 @@ public abstract class StanzaSequenceGate {
 
     protected ConcurrentHashMap<ID, List<StanzaWithCustomAction>> inboxes = new ConcurrentHashMap<ID, List<StanzaWithCustomAction>>();
 
-    private String name;
+    private final String name;
 
     public StanzaSequenceGate(String name) {
         this.name = name;
@@ -153,6 +153,7 @@ public abstract class StanzaSequenceGate {
 
                 Collections.sort(stanzas, new Comparator<StanzaWithCustomAction>() {
 
+                    @Override
                     public int compare(StanzaWithCustomAction arg0, StanzaWithCustomAction arg1) {
                         return (int) (arg0.stanza.getSequenceNumber() - arg1.stanza.getSequenceNumber());
                     }
@@ -214,14 +215,14 @@ public abstract class StanzaSequenceGate {
     /**
      * Procedure to handle incoming Stanzas. Has to be implemented by the Components that want to make use of a StanzaSequenceGate and have
      * to adapt the logic of the Stanza handling after the gateway enforced the Sequence of the received Stanzas.
-     * 
+     *
      * @param stanza The incoming Stanza
      * @param recipient The recipient of the incoming Stanza
      * @throws OXException If the Stanza couldn't be handled
      */
     public abstract void handleInternal(Stanza stanza, ID recipient) throws OXException;
 
-    private final class StanzaWithCustomAction {
+    protected final class StanzaWithCustomAction {
 
         public Stanza stanza;
 
