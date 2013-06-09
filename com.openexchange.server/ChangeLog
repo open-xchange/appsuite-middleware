@@ -2,6 +2,7 @@
 
  - Fix for bug 26879: Assume "inline" as default disposition
  - Fix for bug 26779: Check user name/password when executing a crawler's workflow
+ - Fix for bug 26542: Accept inline sourced images; e.g. <img src="data:;base64,É>
 
 * 2013-06-07 - thorben.betten@open-xchange.com
 
