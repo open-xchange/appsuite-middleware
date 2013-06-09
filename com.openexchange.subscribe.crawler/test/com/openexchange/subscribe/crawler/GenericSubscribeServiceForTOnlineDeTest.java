@@ -75,7 +75,7 @@ public class GenericSubscribeServiceForTOnlineDeTest extends GenericSubscribeSer
         crawler.setDisplayName("t-online.de");
         crawler.setId("com.openexchange.subscribe.crawler.t-online.de");
         crawler.setCrawlerApiVersion(618);
-        List<Step> steps = new LinkedList<Step>();
+        List<Step<?, ?>> steps = new LinkedList<Step<?, ?>>();
         //
         steps.add(new LoginPageByFormActionStep("Log into the mobile version as the full one does not work", "https://m-email.t-online.de/", "", "", "/", "usr", "pwd", ".*overview.*", 1, ""));
         steps.add(new PageByLinkRegexStep("Click on 'Meine Kontakte'", ".*addresslist.*"));

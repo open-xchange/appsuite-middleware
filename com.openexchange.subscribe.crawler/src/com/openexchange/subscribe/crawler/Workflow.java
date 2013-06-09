@@ -82,7 +82,7 @@ import com.openexchange.subscribe.crawler.osgi.Activator;
  */
 public class Workflow {
 
-    private List<Step> steps;
+    private List<Step<?, ?>> steps;
 
     private String loginStepString;
 
@@ -103,17 +103,25 @@ public class Workflow {
     private boolean quirkyCookieQuotes;
 
     public Workflow() {
-
+        super();
     }
 
-    public Workflow(final List<Step> steps) {
+    public Workflow(final List<Step<?, ?>> steps) {
+        super();
         this.steps = steps;
         useThreadedRefreshHandler = false;
     }
 
     // Convenience method for setting username and password after the workflow was created
     public Object[] execute(final String username, final String password) throws OXException {
-        for (final Step currentStep : steps) {
+        // Ensure username and password are not null
+        if (null == username) {
+            throw SubscriptionErrorMessage.MISSING_ARGUMENT.create("username");
+        }
+        if (null == password) {
+            throw SubscriptionErrorMessage.MISSING_ARGUMENT.create("password");
+        }
+        for (final Step<?, ?> currentStep : steps) {
             if (debuggingEnabled) {
                 currentStep.setDebuggingEnabled(true);
             }
@@ -167,7 +175,7 @@ public class Workflow {
         }
         try {
 
-            Step previousStep = null;
+            Step<?, ?> previousStep = null;
             Object result = null;
 
             for (final Step currentStep : steps) {
@@ -217,11 +225,11 @@ public class Workflow {
         }
     }
 
-    public List<Step> getSteps() {
+    public List<Step<?, ?>> getSteps() {
         return steps;
     }
 
-    public void setSteps(final List<Step> steps) {
+    public void setSteps(final List<Step<?, ?>> steps) {
         this.steps = steps;
     }
 
@@ -292,7 +300,7 @@ public class Workflow {
     }
 
     // This should help to better understand why a step failed. May need to be expanded for other complex inputs without helpful toString()-Method ...
-    private void logBadInput(Step currentStep){
+    private void logBadInput(Step<?, ?> currentStep){
         if (currentStep.getInput() != null){
             if (currentStep.getInput() instanceof Page){
                 LOG.error("Bad Input causing the error at (" + currentStep.getClass() + ") : " + ((Page) currentStep.getInput()).getWebResponse().getContentAsString());

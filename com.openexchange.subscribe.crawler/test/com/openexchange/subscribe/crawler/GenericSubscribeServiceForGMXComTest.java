@@ -75,7 +75,7 @@ public class GenericSubscribeServiceForGMXComTest extends GenericSubscribeServic
         //crawler.setJavascriptEnabled(true);
         crawler.setPriority(12);
 
-        ArrayList<Step> listOfSteps = new ArrayList<Step>();
+        ArrayList<Step<?, ?>> listOfSteps = new ArrayList<Step<?, ?>>();
         listOfSteps.add(new LoginPageByFormActionReturningStringStep("Log into gmx.com", "https://www.gmx.com", "", "", ".*wicket\\:interface.*", "TextfieldEmail", "TextfieldPassword", 1, "", "ButtonLogin", "community=([0-9]*)&lang"));
 
         ArrayList<NameValuePair> parameters = new ArrayList<NameValuePair>();
