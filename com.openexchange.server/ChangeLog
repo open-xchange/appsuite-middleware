@@ -1,3 +1,7 @@
+* 2013-06-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26879: Assume "inline" as default disposition
+
 * 2013-06-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 26987: Fixed corrupted umlauts on mail reply
