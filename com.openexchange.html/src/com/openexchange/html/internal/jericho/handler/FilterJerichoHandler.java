@@ -497,10 +497,6 @@ public final class FilterJerichoHandler implements JerichoHandler {
         return (HTMLElementName.SCRIPT == check || check.startsWith("w:") || check.startsWith("o:"));
     }
 
-    private static final String CID = "cid:";
-
-    private static final Pattern PATTERN_FILENAME = Pattern.compile("([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)");
-
     /**
      * Adds tag occurring in white list to HTML result.
      *
@@ -558,7 +554,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                             attrBuilder.append(' ').append(attr).append("=\"\"");
                             imageURLFound = true;
                         } else if (dropExternalImages && (HTMLElementName.IMG == tagName || HTMLElementName.INPUT == tagName) && "src".equals(attr)) {
-                            if (val.regionMatches(true, 0, CID, 0, 4) || PATTERN_FILENAME.matcher(val).matches()) {
+                            if (isInlineImage(val)) {
                                 // Allow inline images
                                 attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
                             } else {
@@ -585,7 +581,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                                         attrBuilder.append(' ').append(attr).append("=\"\"");
                                         imageURLFound = true;
                                     } else if (dropExternalImages && (HTMLElementName.IMG == tagName || HTMLElementName.INPUT == tagName) && "src".equals(attr)) {
-                                        if (val.regionMatches(true, 0, CID, 0, 4) || PATTERN_FILENAME.matcher(val).matches()) {
+                                        if (isInlineImage(val)) {
                                             // Allow inline images
                                             attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
                                         } else {
@@ -619,6 +615,19 @@ public final class FilterJerichoHandler implements JerichoHandler {
         }
         htmlBuilder.append('>');
     }
+
+    // --------------------------------- Image check --------------------------------------- //
+
+    private static final String CID = "cid:";
+    private static final String DATA_BASE64 = "data:;base64,";
+    private static final Pattern PATTERN_FILENAME = Pattern.compile("([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)");
+
+    private boolean isInlineImage(final String val) {
+        final String tmp = toLowerCase(val);
+        return tmp.startsWith(CID) || tmp.startsWith(DATA_BASE64) || PATTERN_FILENAME.matcher(tmp).matches();
+    }
+
+    // ----------------------------------------------------------------------------------- //
 
     private static final Pattern SPLIT_WORDS = Pattern.compile(" +");
 
