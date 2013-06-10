@@ -823,7 +823,7 @@ public final class HtmlProcessing {
                         imageURL = imgSource.generateUrl(imageLocation, session);
                     }
                     linkBuilder.setLength(0);
-                    linkBuilder.append(imgMatcher.group(1)).append("background=\"").append(imageURL).append('"').append(imgMatcher.group(4));
+                    linkBuilder.append(imgMatcher.group(1)).append("background=\"").append(imageURL).append("\" onmousedown=\"return false;\"").append(imgMatcher.group(4));
                     imgReplacer.appendLiteralReplacement(sb, linkBuilder.toString());
                 } while (imgMatcher.find());
             }
@@ -883,7 +883,7 @@ public final class HtmlProcessing {
                                 imageURL = imgSource.generateUrl(imageLocation, session);
                             }
                             linkBuilder.setLength(0);
-                            linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"').append(" id=\"").append(filename).append('"');
+                            linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"').append(" id=\"").append(filename).append("\" onmousedown=\"return false;\"");
                             mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
                         }
                         mr.appendTail(strBuffer);
@@ -938,7 +938,7 @@ public final class HtmlProcessing {
                     imageURL = imgSource.generateUrl(imageLocation, session);
                 }
                 linkBuilder.setLength(0);
-                linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"').append(" id=\"").append(cid).append('"');
+                linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"').append(" id=\"").append(cid).append("\" onmousedown=\"return false;\"");
                 cidReplacer.appendLiteralReplacement(cidBuffer, linkBuilder.toString());
             } while (cidMatcher.find());
         }
