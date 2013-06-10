@@ -47,6 +47,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/hazelcast/rtStanzaStorage.properties
 
 %changelog
+* Fri Jun 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-06-20
 * Thu May 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Third candidate for 7.2.1 release
 * Wed May 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
