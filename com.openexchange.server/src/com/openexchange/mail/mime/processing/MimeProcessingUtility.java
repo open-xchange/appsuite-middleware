@@ -357,7 +357,7 @@ public final class MimeProcessingUtility {
     /**
      * Creates a {@link String} from given {@link InternetAddress} instance.
      *
-     * @param addrs The {@link InternetAddress} instance
+     * @param addr The {@link InternetAddress} instance
      * @return The address string
      */
     static String addr2String(final InternetAddress addr) {
