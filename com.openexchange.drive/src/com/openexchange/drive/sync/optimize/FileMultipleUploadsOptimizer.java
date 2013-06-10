@@ -49,52 +49,49 @@
 
 package com.openexchange.drive.sync.optimize;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import com.openexchange.drive.Action;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.actions.AbstractAction;
+import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
-import com.openexchange.drive.sync.FileSynchronizer;
 import com.openexchange.drive.sync.SyncResult;
-import com.openexchange.exception.OXException;
 
 
 /**
- * {@link OptimizingFileSynchronizer}
+ * {@link FileMultipleUploadsOptimizer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class OptimizingFileSynchronizer extends FileSynchronizer {
+public class FileMultipleUploadsOptimizer extends FileActionOptimizer {
 
-    public OptimizingFileSynchronizer(DriveSession session, VersionMapper<FileVersion> mapper, String path) throws OXException {
-        super(session, mapper, path);
+    public FileMultipleUploadsOptimizer(VersionMapper<FileVersion> mapper) {
+        super(mapper);
     }
 
     @Override
-    public SyncResult<FileVersion> sync() throws OXException {
-        SyncResult<FileVersion> result = super.sync();
-        if (false == result.isEmpty()) {
-            String lastResults = null;
-            if (LOG.isDebugEnabled()) {
-                lastResults = result.toString();
-                LOG.debug("Sync results before optimizations:\n" + lastResults);
-            }
-            FileActionOptimizer[] optimizers = {
-                new FileRenameOptimizer(mapper),
-                new FileCopyOptimizer(mapper),
-                new FileMultipleUploadsOptimizer(mapper),
-                new FileOrderOptimizer(mapper)
-            };
-            for (FileActionOptimizer optimizer : optimizers) {
-                result = optimizer.optimize(session, result);
-                if (LOG.isTraceEnabled()) {
-                    String currentResults = result.toString();
-                    if (false == currentResults.equals(lastResults)) {
-                        lastResults = currentResults;
-                        LOG.trace("Sync results after optimizations of " + optimizer.getClass().getSimpleName() + ":\n" + lastResults);
-                    }
+    public SyncResult<FileVersion> optimize(DriveSession session, SyncResult<FileVersion> result) {
+        /*
+         * filter out all non-conflicting, duplicate UPLOAD actions so that those can be ACKNOWLEDGEd directly during next
+         * synchronization cycle
+         */
+        List<AbstractAction<FileVersion>> optimizedActionsForClients =
+            new ArrayList<AbstractAction<FileVersion>>(result.getActionsForClient().size());
+        Set<String> uploadedVersionChecksums = new HashSet<String>();
+        for (AbstractAction<FileVersion> action : result.getActionsForClient()) {
+            if (Action.UPLOAD.equals(action.getAction())) {
+                boolean alreadyKnown = false == uploadedVersionChecksums.add(action.getNewVersion().getChecksum());
+                if (action.wasCausedBy(Change.NEW, Change.NONE) && alreadyKnown) {
+                    continue;
                 }
             }
+            optimizedActionsForClients.add(action);
         }
-        return result;
+        return new SyncResult<FileVersion>(result.getActionsForServer(), optimizedActionsForClients);
     }
 
 }
