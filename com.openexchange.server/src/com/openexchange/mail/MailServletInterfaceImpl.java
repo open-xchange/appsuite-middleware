@@ -1046,7 +1046,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     final String fullName = arguments[i].getFullname();
                     final MailMessage origMail = mailAccess.getMessageStorage().getMessage(fullName, fowardMsgUIDs[i], false);
                     if (null == origMail) {
-                        throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], arguments[i].getFullname());
+                        throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], fullName);
                     }
                     long size = origMail.getSize();
                     if (size <= 0) {
