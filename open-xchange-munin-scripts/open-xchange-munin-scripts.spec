@@ -66,6 +66,8 @@ exit 0
 %config(noreplace) /etc/munin/plugin-conf.d/*
 
 %changelog
+* Fri Jun 07 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-06-20
 * Mon Jun 03 2013 Carsten Hoeger <choeger@open-xchange.com>
 First sprint increment for 7.2.2 release
 * Wed May 29 2013 Carsten Hoeger <choeger@open-xchange.com>

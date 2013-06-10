@@ -76,6 +76,8 @@ fi
 %doc com.openexchange.parallels/ChangeLog
 
 %changelog
+* Fri Jun 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-06-20
 * Mon Jun 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First sprint increment for 7.2.2 release
 * Wed May 29 2013 Marcus Klein <marcus.klein@open-xchange.com>

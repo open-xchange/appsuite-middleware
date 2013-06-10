@@ -67,6 +67,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
+* Fri Jun 07 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2013-06-20
 * Mon Jun 03 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 First sprint increment for 7.2.2 release
 * Wed May 29 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>

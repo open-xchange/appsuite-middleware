@@ -61,6 +61,8 @@ fi
 %doc com.openexchange.spamhandler.cloudmark/ChangeLog
 
 %changelog
+* Fri Jun 07 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Build for patch 2013-06-20
 * Mon Jun 03 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 First sprint increment for 7.2.2 release
 * Wed May 29 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
