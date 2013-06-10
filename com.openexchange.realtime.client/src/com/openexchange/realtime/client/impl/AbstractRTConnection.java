@@ -67,7 +67,7 @@ import com.openexchange.realtime.client.RTUserStateChangeListener;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class AbstractRTConnection implements RTConnection, RTProtocolCallback {
-    
+
     protected final RTConnectionProperties connectionProperties;
 
     protected RTProtocol protocol;

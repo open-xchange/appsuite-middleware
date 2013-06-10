@@ -120,7 +120,7 @@ public class PingPongTimer implements Runnable {
     }
 
     public void onPong() {
-        reset();
+        // Nothing to do yet
     }
 
     private void reset() {

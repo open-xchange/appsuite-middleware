@@ -173,7 +173,7 @@ public class RTProtocol {
             for (int j = 0; j < payloads.length(); j++) {
                 JSONObject payload = payloads.getJSONObject(j);
                 if (isPong(payload)) {
-                    resetPingTimer();
+                    pingPongTimer.onPong();
                     if (payloads.length() == 1) {
                         return false;
                     }
