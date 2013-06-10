@@ -78,11 +78,7 @@ public class JsonDirectoryVersion extends JsonDriveVersion implements DirectoryV
 
     @Override
     public String toString() {
-        try {
-            return serialize(this).toString();
-        } catch (JSONException e) {
-            return super.toString();
-        }
+        return getPath() + " | " + getChecksum();
     }
 
     public static JSONObject serialize(DirectoryVersion version) throws JSONException {

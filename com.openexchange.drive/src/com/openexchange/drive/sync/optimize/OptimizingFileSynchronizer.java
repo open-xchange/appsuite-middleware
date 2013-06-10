@@ -72,12 +72,26 @@ public class OptimizingFileSynchronizer extends FileSynchronizer {
     public SyncResult<FileVersion> sync() throws OXException {
         SyncResult<FileVersion> result = super.sync();
         if (false == result.isEmpty()) {
+            String lastResults = null;
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Sync results before optimizations:\n" + result);
+                lastResults = result.toString();
+                LOG.debug("Sync results before optimizations:\n" + lastResults);
             }
-            result = new FileRenameOptimizer(mapper).optimize(session, result);
-            result = new FileCopyOptimizer(mapper).optimize(session, result);
-            result = new FileOrderOptimizer(mapper).optimize(session, result);
+            FileActionOptimizer[] optimizers = {
+                new FileRenameOptimizer(mapper),
+                new FileCopyOptimizer(mapper),
+                new FileOrderOptimizer(mapper)
+            };
+            for (FileActionOptimizer optimizer : optimizers) {
+                result = optimizer.optimize(session, result);
+                if (LOG.isTraceEnabled()) {
+                    String currentResults = result.toString();
+                    if (false == currentResults.equals(lastResults)) {
+                        lastResults = currentResults;
+                        LOG.trace("Sync results after optimizations of " + optimizer.getClass().getSimpleName() + ":\n" + lastResults);
+                    }
+                }
+            }
         }
         return result;
     }

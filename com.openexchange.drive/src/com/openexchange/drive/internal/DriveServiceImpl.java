@@ -251,7 +251,7 @@ public class DriveServiceImpl implements DriveService {
          */
         FileVersionMapper mapper = new FileVersionMapper(originalVersions, clientVersions, serverVersions);
         if (LOG.isDebugEnabled()) {
-            StringAllocator allocator = new StringAllocator("File versions mapped to:\n");
+            StringAllocator allocator = new StringAllocator("File versions in directory " + path + " mapped to:\n");
             allocator.append(mapper).append('\n');
             LOG.debug(allocator);
         }

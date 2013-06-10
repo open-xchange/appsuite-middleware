@@ -78,11 +78,7 @@ public class JsonFileVersion extends JsonDriveVersion implements FileVersion {
 
     @Override
     public String toString() {
-        try {
-            return serialize(this).toString();
-        } catch (JSONException e) {
-            return super.toString();
-        }
+        return getName() + " | " + getChecksum();
     }
 
     public static JSONObject serialize(FileVersion version) throws JSONException {
