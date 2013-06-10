@@ -55,7 +55,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.drive.DriveExceptionCodes;
@@ -258,6 +261,20 @@ public class RdbChecksumStore implements ChecksumStore {
         Connection connection = databaseService.getReadOnly(contextID);
         try {
             return selectMatchingFileChecksums(connection, contextID, serviceID, accountID, checksum);
+        } catch (SQLException e) {
+            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            databaseService.backReadOnly(contextID, connection);
+        }
+    }
+
+    public Map<String, List<FileChecksum>> getMatchingFileChecksums(List<String> checksums) throws OXException {
+        if (null == checksums) {
+            return Collections.emptyMap();
+        }
+        Connection connection = databaseService.getReadOnly(contextID);
+        try {
+            return selectMatchingFileChecksums(connection, contextID, serviceID, accountID, checksums);
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -530,6 +547,37 @@ public class RdbChecksumStore implements ChecksumStore {
                 fileChecksum.setSequenceNumber(resultSet.getLong(5));
                 fileChecksum.setChecksum(checksum);
                 fileChecksums.add(fileChecksum);
+            }
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+        return fileChecksums;
+    }
+
+    private static Map<String, List<FileChecksum>> selectMatchingFileChecksums(Connection connection, int cid, String service, String account, List<String> checksums) throws SQLException {
+        Map<String, List<FileChecksum>> fileChecksums = new HashMap<String, List<FileChecksum>>();
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.SELECT_MATCHING_FILE_CHECKSUMS_STMT(checksums.toArray(new String[checksums.size()])));
+            stmt.setInt(1, cid);
+            stmt.setString(2, service);
+            stmt.setString(3, account);
+            ResultSet resultSet = SQL.logExecuteQuery(stmt);
+            while (resultSet.next()) {
+                FileChecksum fileChecksum = new FileChecksum();
+                fileChecksum.setUuid(resultSet.getString(1));
+                fileChecksum.setFolderID(resultSet.getString(2));
+                fileChecksum.setFileID(resultSet.getString(3));
+                fileChecksum.setVersion(resultSet.getString(4));
+                fileChecksum.setSequenceNumber(resultSet.getLong(5));
+                String checksum = resultSet.getString(6);
+                fileChecksum.setChecksum(checksum);
+                List<FileChecksum> matchingChecksums = fileChecksums.get(checksum);
+                if (null == matchingChecksums) {
+                    matchingChecksums = new ArrayList<FileChecksum>();
+                    fileChecksums.put(checksum, matchingChecksums);
+                }
+                matchingChecksums.add(fileChecksum);
             }
         } finally {
             DBUtils.closeSQLStuff(stmt);
