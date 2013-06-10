@@ -1,6 +1,7 @@
 * 2013-06-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 27015: Ensure proper Content-Typer header on download of a message's source
+ - Fix for bug 26509: Support for multi-byte characters in snippet module
 
 * 2013-06-10 - tobias.friedrich@open-xchange.com
 
