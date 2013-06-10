@@ -1,3 +1,9 @@
+open-xchange-oauth (7.2.1-5) UNRELEASED; urgency=low
+
+  * Build for patch 2013-06-11
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Mon, 10 Jun 2013 15:31:38 +0200
+
 open-xchange-oauth (7.2.1-4) UNRELEASED; urgency=low
 
   * Build for patch 2013-06-20
