@@ -1016,7 +1016,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         boolean sameAccount = true;
         final int accountId = arguments[0].getAccountId();
-        for (int i = 1; sameAccount && i < arguments.length; i++) {
+        final int length = arguments.length;
+        for (int i = 1; sameAccount && i < length; i++) {
             sameAccount = accountId == arguments[i].getAccountId();
         }
         final TransportProperties transportProperties = TransportProperties.getInstance();
@@ -1026,24 +1027,24 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (sameAccount) {
             initConnection(accountId);
             final MailMessage[] originalMails = new MailMessage[folders.length];
+            final int mlength = length - 1;
             if (transportProperties.isPublishOnExceededQuota() && (!transportProperties.isPublishPrimaryAccountOnly() || MailAccount.DEFAULT_ID == accountId)) {
-                for (int i = 0; i < arguments.length; i++) {
-                    final MailMessage origMail = mailAccess.getMessageStorage().getMessage(
-                        arguments[i].getFullname(),
-                        fowardMsgUIDs[i],
-                        false);
+                for (int i = 0; i < length; i++) {
+                    final String fullName = arguments[i].getFullname();
+                    final MailMessage origMail = mailAccess.getMessageStorage().getMessage(fullName, fowardMsgUIDs[i], false);
                     if (null == origMail) {
-                        throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], arguments[i].getFullname());
+                        throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], fullName);
+                    }
+                    if (i < mlength && !fullName.equals(arguments[i + 1].getFullname())) {
+                        origMail.loadContent();
                     }
                     originalMails[i] = origMail;
                 }
             } else {
                 long total = 0;
-                for (int i = 0; i < arguments.length; i++) {
-                    final MailMessage origMail = mailAccess.getMessageStorage().getMessage(
-                        arguments[i].getFullname(),
-                        fowardMsgUIDs[i],
-                        false);
+                for (int i = 0; i < length; i++) {
+                    final String fullName = arguments[i].getFullname();
+                    final MailMessage origMail = mailAccess.getMessageStorage().getMessage(fullName, fowardMsgUIDs[i], false);
                     if (null == origMail) {
                         throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], arguments[i].getFullname());
                     }
@@ -1053,14 +1054,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     }
                     if (maxPerMsg > 0 && size > maxPerMsg) {
                         final String fileName = origMail.getSubject();
-                        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(
-                            Long.valueOf(maxPerMsg),
-                            null == fileName ? "" : fileName,
-                            Long.valueOf(size));
+                        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(Long.valueOf(maxPerMsg), null == fileName ? "" : fileName, Long.valueOf(size));
                     }
                     total += size;
                     if (max > 0 && total > max) {
                         throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(max));
+                    }
+                    if (i < mlength && !fullName.equals(arguments[i + 1].getFullname())) {
+                        origMail.loadContent();
                     }
                     originalMails[i] = origMail;
                 }
@@ -1069,7 +1070,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         final MailMessage[] originalMails = new MailMessage[folders.length];
         if (transportProperties.isPublishOnExceededQuota() && (!transportProperties.isPublishPrimaryAccountOnly() || MailAccount.DEFAULT_ID == accountId)) {
-            for (int i = 0; i < arguments.length && sameAccount; i++) {
+            for (int i = 0; i < length && sameAccount; i++) {
                 final MailAccess<?, ?> ma = initMailAccess(arguments[i].getAccountId());
                 try {
                     final MailMessage origMail = ma.getMessageStorage().getMessage(arguments[i].getFullname(), fowardMsgUIDs[i], false);
@@ -1084,7 +1085,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         } else {
             long total = 0;
-            for (int i = 0; i < arguments.length && sameAccount; i++) {
+            for (int i = 0; i < length && sameAccount; i++) {
                 final MailAccess<?, ?> ma = initMailAccess(arguments[i].getAccountId());
                 try {
                     final MailMessage origMail = ma.getMessageStorage().getMessage(arguments[i].getFullname(), fowardMsgUIDs[i], false);
