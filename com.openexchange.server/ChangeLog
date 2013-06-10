@@ -1,3 +1,7 @@
+* 2013-06-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27015: Ensure proper Content-Typer header on download of a message's source
+
 * 2013-06-10 - tobias.friedrich@open-xchange.com
 
 - Fix for bug 26293: Pretend delete excpetions for change exceptions where the user is not in the participants list
