@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,49 +49,82 @@
 
 package com.openexchange.realtime.client.impl;
 
+import java.util.concurrent.atomic.AtomicLong;
 import org.json.JSONObject;
-import org.json.JSONValue;
-import com.openexchange.realtime.client.RTConnectionProperties;
-import com.openexchange.realtime.client.RTException;
 
 /**
- * {@link WasyncRTConnection}
+ * {@link PingPongTimer}
  * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class WasyncRTConnection extends AbstractRTConnection {
+public class PingPongTimer implements Runnable {
 
-    public WasyncRTConnection(RTConnectionProperties connectionProperties) {
-        super(connectionProperties);
+    private final RTProtocolCallback callback;
+
+    private final long idleTime;
+
+    private final boolean commit;
+
+    private AtomicLong lastContact;
+
+    public PingPongTimer(final RTProtocolCallback callback, final long idleTime, final boolean commit) {
+        super();
+        this.callback = callback;
+        this.idleTime = idleTime;
+        this.commit = commit;
+        lastContact = new AtomicLong(System.currentTimeMillis());
     }
 
-    @Override
-    public void post(JSONValue message) throws RTException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void postReliable(JSONValue message) throws RTException {
-        // TODO Auto-generated method stub
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.client.impl.RTProtocolCallback#sendACK(org.json.JSONObject)
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Runnable#run()
      */
     @Override
-    public void sendACK(JSONObject ack) {
-        // TODO Auto-generated method stub
-        
+    public void run() {
+        while (true) {
+            if (Thread.interrupted()) {
+                return;
+            }
+
+            long now = System.currentTimeMillis();
+            long timeToPing = lastContact.get() + idleTime;
+            try {
+                if (timeToPing <= now) {
+                    /*
+                     * {"type": "ping", "commit": true }
+                     */
+                    try {
+                        JSONObject ping = new JSONObject();
+                        ping.put("type", "ping");
+                        ping.put("commit", commit);
+
+                        callback.sendPing(ping);
+                        reset();
+                    } catch (Throwable e) {
+                        // TODO: log
+                    }
+
+                    Thread.sleep(idleTime);
+                } else {
+                    Thread.sleep(System.currentTimeMillis() - timeToPing);
+                }
+            } catch (InterruptedException e) {
+                // TODO: log
+                return;
+            }
+        }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.client.impl.RTProtocolCallback#sendPing(org.json.JSONObject)
-     */
-    @Override
-    public void sendPing(JSONObject ping) {
-        // TODO Auto-generated method stub
-        
+    public void resetTimer() {
+        reset();
+    }
+
+    public void onPong() {
+        reset();
+    }
+
+    private void reset() {
+        lastContact.set(System.currentTimeMillis());
     }
 
 }

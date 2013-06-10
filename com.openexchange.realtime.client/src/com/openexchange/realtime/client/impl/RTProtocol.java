@@ -49,14 +49,11 @@
 
 package com.openexchange.realtime.client.impl;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.openexchange.realtime.client.RTConnection;
 import com.openexchange.realtime.client.RTException;
 
 
@@ -67,18 +64,32 @@ import com.openexchange.realtime.client.RTException;
  */
 public class RTProtocol {
 
+    private static final long PING_TIME = 60000L;
+
+    private final RTProtocolCallback callback;
+
     private final SequenceGate gate;
 
-    private final BlockingQueue<Long> outstandingACKs;
+    private final PingPongTimer pingPongTimer;
+
+    private final Thread pingPongTimerThread;
 
     /**
      * Initializes a new {@link RTProtocol}.
+     * The protocol takes care about necessary PINGs to signal the server that the client
+     * is still available. Additionally it produces ACKs for incoming messages.
+     *
+     * @param callback A callback to let the connection react to events and to allow the protocol to send
+     * messages like ACKs and PINGs.
      * @param gate The sequence gate to ensure the order of incoming messages.
      */
-    public RTProtocol(SequenceGate gate) {
+    public RTProtocol(RTProtocolCallback callback, SequenceGate gate) {
         super();
+        this.callback = callback;
         this.gate = gate;
-        outstandingACKs = new LinkedBlockingQueue<Long>();
+        pingPongTimer = new PingPongTimer(callback, PING_TIME, true);
+        pingPongTimerThread = new Thread(pingPongTimer);
+        pingPongTimerThread.start();
     }
 
     /**
@@ -119,7 +130,15 @@ public class RTProtocol {
                     return true;
                 } else if (gate != null) {
                     if (gate.enqueue(jsonValue, seq)) {
-                        acknowledge(seq);
+                        /*
+                         * {"type":"ack","seq":["0"]}
+                         */
+                        JSONArray seqNums = new JSONArray();
+                        seqNums.put(seq);
+                        JSONObject ack = new JSONObject();
+                        ack.put("type", "ack");
+                        ack.put("seq", seqNums);
+                        callback.sendACK(ack);
                     }
                 }
             }
@@ -130,18 +149,31 @@ public class RTProtocol {
         }
     }
 
-    private void acknowledge(long seq) {
-        // TODO send ack message or collect
+    /**
+     * Let the {@link RTConnection} reset the PING timeout. That means if the connection just
+     * sent a message to the server the next PING can be delayed to avoid unnecessary traffic.
+     */
+    public void resetPingTimeout() {
+        resetPingTimer();
+    }
+
+    /**
+     * Releases all used resources.
+     */
+    public void release() {
+        pingPongTimerThread.interrupt();
     }
 
     private boolean parseElement(JSONObject element) throws JSONException {
         if (isMessage(element) && element.has("payloads")) {
-            // This might be a pong. We have to look for it in the payload tree.
+            /*
+             * This might be a pong. We have to look for it in the payload tree.
+             */
             JSONArray payloads = element.getJSONArray("payloads");
             for (int j = 0; j < payloads.length(); j++) {
                 JSONObject payload = payloads.getJSONObject(j);
                 if (isPong(payload)) {
-                    onPongReceived();
+                    resetPingTimer();
                     if (payloads.length() == 1) {
                         return false;
                     }
@@ -152,33 +184,10 @@ public class RTProtocol {
         return true;
     }
 
-    private void onPongReceived() {
-        // TODO: reset timer etc.
+    private void resetPingTimer() {
+        pingPongTimer.resetTimer();
     }
 
-    private void collectAck(long seq) {
-        try {
-            if (seq >= 0) {
-                outstandingACKs.put(new Long(seq));
-            }
-        } catch (InterruptedException e) {
-            return;
-        }
-    }
-
-    private void sendOutstandingACKs() throws JSONException {
-        Set<Long> acks = new HashSet<Long>();
-        outstandingACKs.drainTo(acks);
-
-        if (acks.size() > 0) {
-            JSONArray ackArray = new JSONArray(acks);
-            JSONObject message = new JSONObject();
-            message.put("type", "ack");
-            message.put("seq", ackArray);
-
-            // TODO: send message
-        }
-    }
 
     private boolean isMessage(JSONObject element) throws JSONException {
         return element.hasAndNotNull("element") && element.get("element").equals("message");

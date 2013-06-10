@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,48 +50,34 @@
 package com.openexchange.realtime.client.impl;
 
 import org.json.JSONObject;
-import org.json.JSONValue;
-import com.openexchange.realtime.client.RTConnectionProperties;
-import com.openexchange.realtime.client.RTException;
+import com.openexchange.realtime.client.RTConnection;
+
 
 /**
- * {@link WasyncRTConnection}
- * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * A {@link RTProtocolCallback} is used to realize a bidirectional communication between
+ * a {@link RTConnection} and the {@link RTProtocol}. It is meant to be implemented by
+ * concrete {@link RTProtocol} implementations.
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class WasyncRTConnection extends AbstractRTConnection {
+public interface RTProtocolCallback {
 
-    public WasyncRTConnection(RTConnectionProperties connectionProperties) {
-        super(connectionProperties);
-    }
-
-    @Override
-    public void post(JSONValue message) throws RTException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void postReliable(JSONValue message) throws RTException {
-        // TODO Auto-generated method stub
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.client.impl.RTProtocolCallback#sendACK(org.json.JSONObject)
+    /**
+     * The protocol is handling a message containing a sequence number. In these cases the
+     * received message must be acknowledged. The according message has already been prepared
+     * and needs to be sent now by the connection.
+     *
+     * @param ack The ACK message.
      */
-    @Override
-    public void sendACK(JSONObject ack) {
-        // TODO Auto-generated method stub
-        
-    }
+    void sendACK(JSONObject ack);
 
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.client.impl.RTProtocolCallback#sendPing(org.json.JSONObject)
+    /**
+     * Clients have to send PINGs regularly to let the server know that they are still alive.
+     * The protocol does the necessary PING handling and prepares the according messages. These
+     * need to be sent to the server then.
+     *
+     * @param ping The PING message.
      */
-    @Override
-    public void sendPing(JSONObject ping) {
-        // TODO Auto-generated method stub
-        
-    }
+    void sendPing(JSONObject ping);
 
 }
