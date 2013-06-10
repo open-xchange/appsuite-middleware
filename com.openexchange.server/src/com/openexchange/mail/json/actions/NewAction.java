@@ -76,6 +76,8 @@ import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -251,7 +253,7 @@ public final class NewAction extends AbstractMailAction {
         return result;
     }
 
-    private AJAXRequestResult performWithoutUploads(final MailRequest req, final List<OXException> warnings) throws OXException, AddressException, MessagingException, JSONException {
+    private AJAXRequestResult performWithoutUploads(final MailRequest req, final List<OXException> warnings) throws OXException, MessagingException, JSONException {
         /*
          * Non-POST
          */
@@ -267,12 +269,11 @@ public final class NewAction extends AbstractMailAction {
         }
         final boolean force;
         {
-            String tmp = req.getParameter("force");
+            final String tmp = req.getParameter("force");
             if (null == tmp) {
                 force = false;
             } else {
-                tmp = tmp.trim();
-                force = "1".equals(tmp) || Boolean.parseBoolean(tmp);
+                force = AJAXRequestDataTools.parseBoolParameter(tmp);
             }
         }
         // Get rfc822 bytes and create corresponding mail message
@@ -338,7 +339,7 @@ public final class NewAction extends AbstractMailAction {
         MailMessage getMail();
     }
 
-    private JSONObject appendDraft(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MailMessage m) throws OXException, OXException, JSONException {
+    private JSONObject appendDraft(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MailMessage m) throws OXException, JSONException {
         /*
          * Determine the account to transport with
          */
@@ -380,12 +381,11 @@ public final class NewAction extends AbstractMailAction {
                 /*
                  * Copy in sent folder allowed
                  */
-                MailAccess<?, ?> mailAccess = null;
+                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                 try {
                     mailAccess = MailAccess.getInstance(session, accountId);
                     mailAccess.connect();
-                    final String sentFullname =
-                        MailFolderUtility.prepareMailFolderParam(mailAccess.getFolderStorage().getSentFolder()).getFullname();
+                    final String sentFullname = MailFolderUtility.prepareMailFolderParam(mailAccess.getFolderStorage().getSentFolder()).getFullname();
                     final String[] uidArr;
                     try {
                         /*
