@@ -2,6 +2,7 @@
 
  - Fix for bug 27015: Ensure proper Content-Typer header on download of a message's source
  - Fix for bug 26509: Support for multi-byte characters in snippet module
+ - Fix for bug 27048: Check provided capability prior to parsing it (associated configuration scope might return an empty string)
 
 * 2013-06-10 - tobias.friedrich@open-xchange.com
 
