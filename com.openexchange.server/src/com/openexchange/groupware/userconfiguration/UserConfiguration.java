@@ -70,6 +70,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.userconfiguration.osgi.TrackerAvailabilityChecker;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.server.Initialization;
@@ -1354,14 +1355,16 @@ public final class UserConfiguration implements Serializable, Cloneable {
                     final String permissions = view.property(property, String.class).precedence(scope).get();
                     if (permissions != null) {
                         for (final String permissionModifier : P_SPLIT.split(permissions)) {
-                            final char firstChar = permissionModifier.charAt(0);
-                            if ('-' == firstChar) {
-                                retval.remove(toLowerCase(permissionModifier.substring(1)));
-                            } else {
-                                if ('+' == firstChar) {
-                                    retval.add(toLowerCase(permissionModifier.substring(1)));
+                            if (!isEmpty(permissionModifier)) {
+                                final char firstChar = permissionModifier.charAt(0);
+                                if ('-' == firstChar) {
+                                    retval.remove(toLowerCase(permissionModifier.substring(1)));
                                 } else {
-                                    retval.add(toLowerCase(permissionModifier));
+                                    if ('+' == firstChar) {
+                                        retval.add(toLowerCase(permissionModifier.substring(1)));
+                                    } else {
+                                        retval.add(toLowerCase(permissionModifier));
+                                    }
                                 }
                             }
                         }
@@ -1389,6 +1392,19 @@ public final class UserConfiguration implements Serializable, Cloneable {
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
         }
         return builder.toString();
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }
