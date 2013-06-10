@@ -844,7 +844,7 @@ public final class MessageWriter {
         return (time + timeZone.getOffset(time));
     }
 
-    private static final JSONArray EMPTY_JSON_ARR = new JSONArray();
+    private static final JSONArray EMPTY_JSON_ARR = new JSONArray(0);
 
     /**
      * Convert an array of <code>InternetAddress</code> instances into a JSON-Array conforming to:
@@ -857,7 +857,7 @@ public final class MessageWriter {
         if (addrs == null || addrs.length == 0) {
             return EMPTY_JSON_ARR;
         }
-        final JSONArray jsonArr = new JSONArray();
+        final JSONArray jsonArr = new JSONArray(addrs.length);
         for (final InternetAddress address : addrs) {
             jsonArr.put(getAddressAsArray(address));
         }
@@ -868,7 +868,7 @@ public final class MessageWriter {
      * Convert an <code>InternetAddress</code> instance into a JSON-Array conforming to: ["The Personal", "someone@somewhere.com"]
      */
     private static JSONArray getAddressAsArray(final InternetAddress addr) {
-        final JSONArray retval = new JSONArray();
+        final JSONArray retval = new JSONArray(2);
         // Personal
         final String personal = addr.getPersonal();
         retval.put(personal == null || personal.length() == 0 ? JSONObject.NULL : preparePersonal(personal));

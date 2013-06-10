@@ -639,7 +639,7 @@ public final class MimeReply {
                 final InternetAddress[] from = msg.getFrom();
                 replyPrefix =
                     PATTERN_SENDER.matcher(replyPrefix).replaceFirst(
-                        from == null || from.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(from[0].toUnicodeString()));
+                        from == null || from.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.addr2String(from[0])));
             }
             {
                 final char nextLine = '\n';

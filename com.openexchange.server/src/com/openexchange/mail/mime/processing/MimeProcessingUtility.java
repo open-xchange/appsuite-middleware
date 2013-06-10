@@ -60,6 +60,9 @@ import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
+import com.openexchange.java.CharsetDetector;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -69,7 +72,6 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
-import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -332,16 +334,51 @@ public final class MimeProcessingUtility {
      * Creates a {@link String} from given array of {@link InternetAddress} instances through invoking
      * {@link InternetAddress#toUnicodeString()}
      *
-     * @param addrs The rray of {@link InternetAddress} instances
+     * @param addrs The array of {@link InternetAddress} instances
      * @return A comma-separated list of addresses as a {@link String}
      */
     static String addrs2String(final InternetAddress[] addrs) {
         final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(addrs.length << 4);
-        tmp.append(addrs[0].toUnicodeString());
-        for (int i = 1; i < addrs.length; i++) {
-            tmp.append(", ").append(addrs[i].toUnicodeString());
+        boolean first = true;
+        for (int i = 0; i < addrs.length; i++) {
+            final String string = addr2String(addrs[i]);
+            if (!isEmpty(string)) {
+                if (first) {
+                    first = false;
+                } else {
+                    tmp.append(", ");
+                }
+                tmp.append(string);
+            }
         }
-        return tmp.toString();
+        return first ? "" : tmp.toString();
+    }
+
+    /**
+     * Creates a {@link String} from given {@link InternetAddress} instance.
+     *
+     * @param addrs The {@link InternetAddress} instance
+     * @return The address string
+     */
+    static String addr2String(final InternetAddress addr) {
+        if (null == addr) {
+            return "";
+        }
+        final String sAddress = addr.getAddress();
+        final int pos = null == sAddress ? 0 : sAddress.indexOf('/');
+        if (pos <= 0) {
+            // No slash character present
+            return addr.toUnicodeString();
+        }
+        final StringAllocator sb = new StringAllocator(32);
+        final String personal = addr.getPersonal();
+        if (null == personal) {
+            sb.append(MimeProcessingUtility.prepareAddress(sAddress.substring(0, pos)));
+        } else {
+            sb.append(MimeProcessingUtility.preparePersonal(personal));
+            sb.append(" <").append(MimeProcessingUtility.prepareAddress(sAddress.substring(0, pos))).append('>');
+        }
+        return sb.toString();
     }
 
     private static final String CT_TEXT_HTM = "text/htm";
@@ -364,5 +401,46 @@ public final class MimeProcessingUtility {
             // textBuilder.append(new Html2TextConverter().convertWithQuotes(text));
         }
     }
+
+    /**
+     * Prepares specified personal string by surrounding it with quotes if needed.
+     *
+     * @param personal The personal
+     * @return The prepared personal
+     */
+    static String preparePersonal(final String personal) {
+        return MimeMessageUtility.quotePhrase(personal, false);
+    }
+
+    private static final String DUMMY_DOMAIN = "@unspecified-domain";
+
+    /**
+     * Prepares given address string by checking for possible mail-safe encodings.
+     *
+     * @param address The address
+     * @return The prepared address
+     */
+    static String prepareAddress(final String address) {
+        final String decoded = MimeMessageUtility.decodeMultiEncodedHeader(address);
+        final int pos = decoded.indexOf(DUMMY_DOMAIN);
+        if (pos >= 0) {
+            return decoded.substring(0, pos);
+        }
+        return decoded;
+    }
+
+    /** Check for an empty string */
+    static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
 
 }
