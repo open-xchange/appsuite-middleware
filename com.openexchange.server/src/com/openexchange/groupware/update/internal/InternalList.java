@@ -545,7 +545,7 @@ public final class InternalList {
         list.add(new AddUUIDForDListTables());
         
         //Add primary key to infostoreReservedPaths table
-        list.add(new PrimaryKeyForInfostoreReservedPaths());
+        //list.add(new PrimaryKeyForInfostoreReservedPaths());
 
         //Add synthetic primary keys to tables without natural key if full primary key support is enabled
         final FullPrimaryKeySupportService fullPrimaryKeySupportService = ServerServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
