@@ -85,9 +85,8 @@ public class WasyncRTConnection extends AbstractRTConnection {
     }
     
     @Override
-    public RTUserState connect(RTMessageHandler messageHandler, RTUserStateChangeListener changeListener) throws RTException {
-        RTUserState rtUserState = super.connect(messageHandler, changeListener);
-        
+    public RTUserState connect(String selector, RTMessageHandler messageHandler, RTUserStateChangeListener changeListener) throws RTException {
+        RTUserState rtUserState = super.connect(selector, messageHandler, changeListener);
         return rtUserState;
     }
 
@@ -106,12 +105,17 @@ public class WasyncRTConnection extends AbstractRTConnection {
      */
     @Override
     public void post(JSONValue message) throws RTException {
-        resetPingTimer();
+        protocol.resetPingTimeout();
     }
 
     @Override
     public void postReliable(JSONValue message) throws RTException {
-        resetPingTimer();
+        if(isQueryAction(message)) {
+        } else if(isSendAction(message)) {
+        } else {
+            throw new RTException("Couldn't determine the type of message to send");
+        }
+        protocol.resetPingTimeout();
         
         /*
          * - Get next sequence number from SequenceGenerator in protocol
@@ -119,13 +123,6 @@ public class WasyncRTConnection extends AbstractRTConnection {
          * - Return when put returns 
          */
         
-    }
-    
-    /**
-     * We are sending a message so there is no need for a keepalive ping 
-     */
-    private void resetPingTimer() {
-        //protocol.resetPingTimer()
     }
     
     /*
@@ -164,25 +161,38 @@ public class WasyncRTConnection extends AbstractRTConnection {
     }
     
     private boolean isAtmosphereRequest() {
+        // TODO Auto-generated method stub
         return false;
     }
-        // TODO Auto-generated method stub
-    }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.client.impl.RTProtocolCallback#sendACK(org.json.JSONObject)
-     */
     @Override
     public void sendACK(JSONObject ack) {
-        // TODO Auto-generated method stub
+        fireSendRequest(ack);
+        
+    }
+
+    @Override
+    public void sendPing(JSONObject ping) {
+        fireSendRequest(ping);
+    }
+    
+    private void fireQueryRequest(JSONValue jsonValue) {
+//        JSONValue sequencedPayload = protocol.addSequence(jsonValue);
+    }
+    
+    private void fireSendRequest(JSONValue jsonValue) {
+//        JSONValue sequencedPayload = protocol.addSequence(jsonValue);
+    }
+    
+    private void fireAtmosphereRequest(JSONValue jsonValue) {
         
     }
 
     /* (non-Javadoc)
-     * @see com.openexchange.realtime.client.impl.RTProtocolCallback#sendPing(org.json.JSONObject)
+     * @see com.openexchange.realtime.client.RTConnection#removeHandler(java.lang.String)
      */
     @Override
-    public void sendPing(JSONObject ping) {
+    public void removeHandler(String selector) {
         // TODO Auto-generated method stub
         
     }

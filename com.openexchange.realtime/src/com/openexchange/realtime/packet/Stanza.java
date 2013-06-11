@@ -368,10 +368,26 @@ public abstract class Stanza implements Serializable {
         return copiedPayloads;
     }
 
+    /**
+     * Gets the selector that is used to identify GroupDispatcher instances on the server side.
+     * Example: If you join a chatroom or a collaboratively edited document yo may receive messages from this chatroom. Those messages will
+     * contain the sender of the message and a selector that idenifies the chatroom that distributed the message to you. Clients have to
+     * choose a selector when joining a chatroom and have to take care of the mapping selector <-> chatroom themselves. 
+     * 
+     * @return the selector
+     */
     public String getSelector() {
         return selector;
     }
 
+    /**
+     * Sets the selector that is used to identify GroupDispatcher instances on the server side.
+     * Example: If you join a chatroom or a collaboratively edited document yo may receive messages from this chatroom. Those messages will
+     * contain the sender of the message and a selector that idenifies the chatroom that distributed the message to you. Clients have to
+     * choose a selector when joining a chatroom and have to take care of the mapping selector <-> chatroom themselves. 
+     * 
+     * @param selector the selector
+     */
     public void setSelector(String selector) {
         this.selector = selector;
     }

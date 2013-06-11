@@ -49,10 +49,13 @@
 
 package com.openexchange.realtime.client.impl;
 
+import java.util.Iterator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.realtime.client.RTConnection;
 import com.openexchange.realtime.client.RTException;
 
@@ -63,6 +66,8 @@ import com.openexchange.realtime.client.RTException;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class RTProtocol {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(RTProtocol.class);
 
     private static final long PING_TIME = 60000L;
 
@@ -73,6 +78,8 @@ public class RTProtocol {
     private final PingPongTimer pingPongTimer;
 
     private final Thread pingPongTimerThread;
+    
+    private final SequenceGenerator sequenceGenerator;
 
     /**
      * Initializes a new {@link RTProtocol}.
@@ -90,6 +97,7 @@ public class RTProtocol {
         pingPongTimer = new PingPongTimer(callback, PING_TIME, true);
         pingPongTimerThread = new Thread(pingPongTimer);
         pingPongTimerThread.start();
+        sequenceGenerator = new SequenceGenerator();
     }
 
     /**
@@ -155,6 +163,55 @@ public class RTProtocol {
      */
     public void resetPingTimeout() {
         resetPingTimer();
+    }
+    
+    /**
+     * To reliably send messages to the server we have to make use of numeric sequences in every message that gets sent from the client to
+     * the server. The Server uses these sequences to ensure the sequence of incoming messages. The client waits for acknowledges for every
+     * sequence number to ensure successful delivery of messages. This method takes a JSONArray of messages and adds a sequence number to
+     * every single one of them.
+     * 
+     * @param messages The array containing the messages that need to be enhanced with sequence numbers 
+     * @return An array containing the messages that are enhanced with sequence numbers
+     * @throws RTException if the messages array doesn't consist of JSONObjects
+     */
+    public JSONArray addSequence(JSONArray messages) throws RTException {
+        JSONArray sequencedMessages = new JSONArray();
+        Iterator<Object> iterator = messages.iterator();
+        while(iterator.hasNext()) {
+            Object message = iterator.next();
+            if(!(message instanceof JSONObject)) {
+                throw new RTException("Only JSONObjects are allowed in the messages array");
+            }
+            JSONObject sequencedMessage = addSequence((JSONObject)message);
+            sequencedMessages.put(sequencedMessage);
+        }
+        return sequencedMessages;
+    }
+    
+    /**
+     * To reliably send messages to the server we have to make use of numeric sequences in every message that gets sent from the client to
+     * the server. The Server uses these sequences to ensure the sequence of incoming messages. The client waits for acknowledges for every
+     * sequence number to ensure successful delivery of messages. This method takes a message as JSONObject and adds a sequence number to
+     * it.
+     * 
+     * @param message The messages that needs to be enhanced with a sequence number 
+     * @return The messages that is enhanced with a sequence number
+     */
+    public JSONObject addSequence(JSONObject message) {
+        long sequence;
+        JSONObject sequencedMessage=null;
+        try {
+            sequence = sequenceGenerator.nextSequence();
+            sequencedMessage = message.put("seq", sequence);
+            return sequencedMessage;
+        } catch (RTException rte) {
+            // TODO: Implement reset of sequence numbers on the server side if a user should really manage to exhaust 2^63-1 sequences.
+            LOG.error("Error while adding sequence to message object", rte);
+        } catch (JSONException je) {
+            //Can't happen
+        }
+        return sequencedMessage;
     }
 
     /**

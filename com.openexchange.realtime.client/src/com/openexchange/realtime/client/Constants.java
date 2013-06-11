@@ -57,13 +57,24 @@ package com.openexchange.realtime.client;
  */
 public class Constants {
 
+    public static final String API_PATH = "/ajax/api";
+    
     public static final String CLIENT_ID = "open-xchange-realtime";
 
     public static final String LOGIN_PATH = "/ajax/login";
 
     public static final String LOGIN_ACTION = "login";
 
-    public static final String CREATE_ACTION = "/appsuite/api/oxodocumentfilter";
+    public static final String CREATE_PATH = API_PATH + "/oxodocumentfilter";
+    
+    public static final String QUERY_PATH = API_PATH +  "/rt";
+    
+    public static final String QUERY_ACTION = QUERY_PATH +  "?action=query";
+    
+    public static final String SEND_PATH = API_PATH +  "/rt";
+    
+    public static final String SEND_ACTION = QUERY_PATH +  "?action=send";
 
+    public static final String DEFAULT_SELECTOR = "default";
 
 }

@@ -58,28 +58,47 @@ import org.json.JSONValue;
  */
 public interface RTConnection {
 
+
     /**
-     * Establishes a connection to the OX RT component. This includes creating
-     * a valid user session.
-     *
-     * @param messageHandler The message handler that is called on received messages.
-     * If <code>null</code>, incoming messages will be discarded immediately.
-     * @return The clients resource identifier.
-     * @throws RTException
+     * Establishes a connection to the OX RT component. This includes creating a valid user session. The messageHandler will be registered
+     * for the selector "default". See {@link RTConnection#connect(String, RTMessageHandler)} if you want to add message handlers for
+     * selectors besides the default selector.
+     * 
+     * @param messageHandler The message handler that is registered for the selector "default". If <code>null</code>, incoming messages will
+     *            be discarded immediately.
+     * @return The @{link RTUserState} created during login
+     * @throws RTException if connecting failed or would overwrite an aleady existing MessageHandler for the selector "default".
      */
      RTUserState connect(RTMessageHandler messageHandler) throws RTException;
      
-     /**
-      * Establishes a connection to the OX RT component. This includes creating
-      * a valid user session.
-      *
-      * @param messageHandler The message handler that is called on received messages.
-      * If <code>null</code>, incoming messages will be discarded immediately.
-      * @param changeListener A listener that will be invoked upon RTUserState changes
-      * @return The clients resource identifier.
-      * @throws RTException
-      */
-      RTUserState connect(RTMessageHandler messageHandler, RTUserStateChangeListener changeListener) throws RTException;
+    /**
+     * Establishes a connection to the OX RT component. This includes creating a valid user session.
+     * 
+     * @param selector a to associate with the messageHandler so that incoming messages can be allotted to the correct consumer
+     * @param messageHandler The message handler that is called on received messages that contain the associated selector. If
+     *            <code>null</code>, incoming messages will be discarded immediately.
+     * @return The @{link RTUserState} created during login
+     * @throws RTException if connecting would overwrite an aleady existing MessageHandler for the given selector
+     */
+    RTUserState connect(String selector, RTMessageHandler messageHandler) throws RTException;
+     
+    /**
+     * Establishes a connection to the OX RT component. This includes creating a valid user session.
+     * 
+     * @param selector a to associate with the messageHandler so that incoming messages can be allotted to the correct consumer
+     * @param messageHandler The message handler that is called on received messages that contain the associated selector. If
+     *            <code>null</code>, incoming messages will be discarded immediately.
+     * @param changeListener A listener that will be invoked upon RTUserState changes
+     * @return The @{link RTUserState} created during login
+     */
+    RTUserState connect(String selector, RTMessageHandler messageHandler, RTUserStateChangeListener changeListener) throws RTException;
+    
+    /**
+     * Remove the message handler that is associated with the given selector from the connection to let it know that we aren't interestes in
+     * further messages.
+     * @param selector The selecotr
+     */
+    void removeHandler(String selector);
 
     /**
      * Sends a message to the server.
