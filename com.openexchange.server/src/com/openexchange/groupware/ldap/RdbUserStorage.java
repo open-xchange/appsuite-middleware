@@ -832,15 +832,17 @@ public class RdbUserStorage extends UserStorage {
         if (!removed.isEmpty()) {
             PreparedStatement stmtWithUuid = null;
             try {
-                stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=? AND value=?");
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, userId);
                 int size = 0;
                 for (final Map.Entry<String, UserAttribute> entry : removed.entrySet()) {
                     final UserAttribute userAttribute = entry.getValue();
                     for (final String value : userAttribute.getValues()) {
                         final UUID uuid = userAttribute.getUuidFor(value);
                         if (null == uuid) {
+                            if (null == stmt) {
+                                stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=? AND value=?");
+                                stmt.setInt(1, contextId);
+                                stmt.setInt(2, userId);
+                            }
                             stmt.setString(3, entry.getKey());
                             stmt.setString(4, value);
                             stmt.addBatch();
@@ -855,14 +857,16 @@ public class RdbUserStorage extends UserStorage {
                         size++;
                     }
                 }
-                int[] mLines = stmt.executeBatch();
+                int[] mLines = new int[0];
                 int lines = 0;
-                for (final int mLine : mLines) {
-                    lines += mLine;
+                if (null != stmt) {
+                    mLines = stmt.executeBatch();
+                    for (final int mLine : mLines) {
+                        lines += mLine;
+                    }
                 }
                 if (null != stmtWithUuid) {
                     mLines = stmtWithUuid.executeBatch();
-                    lines = 0;
                     for (final int mLine : mLines) {
                         lines += mLine;
                     }
@@ -882,14 +886,16 @@ public class RdbUserStorage extends UserStorage {
         if (!changed.isEmpty()) {
             PreparedStatement stmtWithUuid = null;
             try {
-                stmt = con.prepareStatement("UPDATE user_attribute SET value=? WHERE cid=? AND id=? AND name=? AND value=?");
-                stmt.setInt(2, contextId);
-                stmt.setInt(3, userId);
                 int size = 0;
                 for (final Map.Entry<String, Set<ChangedAttr>> entry : changed.entrySet()) {
                     for (final ChangedAttr value : entry.getValue()) {
                         final UUID uuid = value.uuid;
                         if (null == uuid) {
+                            if (null == stmt) {
+                                stmt = con.prepareStatement("UPDATE user_attribute SET value=? WHERE cid=? AND id=? AND name=? AND value=?");
+                                stmt.setInt(2, contextId);
+                                stmt.setInt(3, userId);
+                            }
                             stmt.setString(4, entry.getKey());
                             stmt.setString(5, value.oldVal);
                             stmt.setString(1, value.newVal);
@@ -901,25 +907,27 @@ public class RdbUserStorage extends UserStorage {
                             }
                             stmtWithUuid.setBytes(3, UUIDs.toByteArray(uuid));
                             stmtWithUuid.setString(1, value.newVal);
-                            stmt.addBatch();
+                            stmtWithUuid.addBatch();
                         }
                         size++;
                     }
                 }
-                int[] mLines = stmt.executeBatch();
+                int[] mLines = new int[0];
                 int lines = 0;
-                for (final int mLine : mLines) {
-                    lines += mLine;
+                if (null != stmt) {
+                    mLines = stmt.executeBatch();
+                    for (final int mLine : mLines) {
+                        lines += mLine;
+                    }
                 }
                 if (null != stmtWithUuid) {
                     mLines = stmtWithUuid.executeBatch();
-                    lines = 0;
                     for (final int mLine : mLines) {
                         lines += mLine;
                     }
                 }
                 if (size != lines) {
-                    // Ignoring the failed update of a clients login timestamp. This only happens if a parallel login with the same client took place.
+                    // Ignoring the failed update of a clients login time stamp. This only happens if a concurrent login with the same client took place.
                     boolean onlyLoginsFailed = true;
                     int j = 0;
                     for (Entry<String, Set<ChangedAttr>> entry : changed.entrySet()) {
@@ -990,14 +998,17 @@ public class RdbUserStorage extends UserStorage {
     }
 
     private static void compareValues(final String name, final UserAttribute oldSet, final UserAttribute newSet, final Map<String, UserAttribute> added, final Map<String, UserAttribute> removed, final Map<String, Set<ChangedAttr>> changed) {
-        final Set<String> addedValues = new LinkedHashSet<String>();
-        final Set<String> removedValues = new LinkedHashSet<String>();
+        final Set<String> addedValues = new LinkedHashSet<String>(newSet.getValues());
+        final Set<String> removedValues = new LinkedHashSet<String>(oldSet.getValues());
         // Find added values for a key.
-        addedValues.addAll(newSet.getValues());
         addedValues.removeAll(oldSet.getValues());
         // Find removed values for a key.
-        removedValues.addAll(oldSet.getValues());
         removedValues.removeAll(newSet.getValues());
+        // Check sets
+        if (addedValues.isEmpty() && removedValues.isEmpty()) {
+            return;
+        }
+        // Proceed
         final Iterator<String> addedIter = addedValues.iterator();
         final Iterator<String> removedIter = removedValues.iterator();
         while (addedIter.hasNext() && removedIter.hasNext()) {

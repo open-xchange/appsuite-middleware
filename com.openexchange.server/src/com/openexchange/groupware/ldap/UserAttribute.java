@@ -138,7 +138,9 @@ public final class UserAttribute {
      */
     public boolean addValue(final String value, final UUID uuid) {
         if (values.add(value)) {
-            uuids.put(value, null == uuid ? UUID.randomUUID() : uuid);
+            if (null != uuid) {
+                uuids.put(value, uuid);
+            }
             return true;
         }
         return false;
