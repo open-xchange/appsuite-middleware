@@ -75,6 +75,7 @@ import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddPrimar
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.MailAccountAddReplyToTask;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUpdateTaskTable;
+import com.openexchange.groupware.update.tasks.PrgLinksAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
 import com.openexchange.log.LogFactory;
 
@@ -527,6 +528,9 @@ public final class InternalList {
 
         //Add Uuid column to updatTask table
         list.add(new AddUUIDForUpdateTaskTable());
+        
+        //Add Uuid column to prg_links table
+        list.add(new PrgLinksAddUuidUpdateTask());
 
         //Add synthetic primary keys to tables without natural key if full primary key support is enabled
         if (FullPrimaryKeySupport.getInstance().isFullPrimaryKeySupported(configService)) {

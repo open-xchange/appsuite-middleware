@@ -62,8 +62,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -77,6 +77,8 @@ import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.util.UUIDs;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -361,6 +363,8 @@ public class Links {
         }
 
         PreparedStatement ps = null;
+        UUID uuid = UUID.randomUUID();
+        byte[] uuidBinary = UUIDs.toByteArray(uuid);
         try {
             ps = writecon.prepareStatement(lms.iFperformLinkStorageInsertString());
             ps.setInt(1, l.getFirstId());
@@ -370,6 +374,7 @@ public class Links {
             ps.setInt(5, l.getSecondType());
             ps.setInt(6, l.getSecondFolder());
             ps.setInt(7, l.getContectId());
+            ps.setBytes(8, uuidBinary);
             ps.execute();
         } catch (final SQLException e) {
             throw LinkExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
