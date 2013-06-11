@@ -71,33 +71,42 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * {@link AddUUIDForUpdateTaskTable}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class AddUUIDForUpdateTaskTable extends UpdateTaskAdapter {
 
     /**
-     * 
+     * Initializes a new {@link AddUUIDForUpdateTaskTable}.
      */
-    private static final String TABLE = "updateTask";
+    public AddUUIDForUpdateTaskTable() {
+        super();
+    }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
         int ctxId = params.getContextId();
         ProgressState progress = params.getProgressState();
         Connection con = Database.getNoTimeout(ctxId, true);
+        boolean rollback = false;
         try {
             startTransaction(con);
+            rollback = true;
             progress.setTotal(getTotalRows(con));
-            if (!Tools.columnExists(con, TABLE, "uuid")) {
-                Tools.addColumns(con, TABLE, new Column("uuid", "BINARY(16)"));
-                fillUUIDs(con, TABLE, progress);
+            if (!Tools.columnExists(con, "updateTask", "uuid")) {
+                Tools.addColumns(con, "updateTask", new Column("uuid", "BINARY(16)"));
+                fillUUIDs(con, "updateTask", progress);
             }
             con.commit();
+            rollback = true;
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             DBUtils.autocommit(con);
             Database.backNoTimeout(ctxId, true, con);
         }

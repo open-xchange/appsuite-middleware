@@ -66,6 +66,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -299,7 +300,7 @@ public final class DBUtils {
         if (length <= 0) {
             return sql;
         }
-        final StringBuilder retval = new StringBuilder(sql);
+        final StringAllocator retval = new StringAllocator(sql);
         retval.append('?');
         for (int i = 1; i < length; i++) {
             retval.append(",?");

@@ -65,16 +65,16 @@ import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link MakeUUIDPrimaryForUpdateTaskTable}
+ * {@link MakeUUIDPrimaryForUserAttributeTable}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MakeUUIDPrimaryForUpdateTaskTable extends UpdateTaskAdapter {
+public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link MakeUUIDPrimaryForUpdateTaskTable}.
+     * Initializes a new {@link MakeUUIDPrimaryForUserAttributeTable}.
      */
-    public MakeUUIDPrimaryForUpdateTaskTable() {
+    public MakeUUIDPrimaryForUserAttributeTable() {
         super();
     }
 
@@ -87,14 +87,14 @@ public class MakeUUIDPrimaryForUpdateTaskTable extends UpdateTaskAdapter {
             DBUtils.startTransaction(connection);
             rollback = true;
             progress.setTotal(getTotalRows(connection));
-            if (!Tools.columnExists(connection, "updateTask", "uuid")) {
+            if (!Tools.columnExists(connection, "user_attribute", "uuid")) {
                 throw UpdateExceptionCodes.COLUMN_NOT_FOUND.create("uuid");
             }
 
-            AddUUIDForUpdateTaskTable.fillUUIDs(connection, "updateTask", progress);
+            AddUUIDForUserAttributeTable.fillUUIDs(connection, "user_attribute", progress);
 
-            Tools.modifyColumns(connection, "updateTask", new Column("uuid", "BINARY(16) NOT NULL"));
-            Tools.createPrimaryKey(connection, "updateTask", new String[] { "uuid" });
+            Tools.modifyColumns(connection, "user_attribute", new Column("uuid", "BINARY(16) NOT NULL"));
+            Tools.createPrimaryKey(connection, "user_attribute", new String[] { "uuid" });
             connection.commit();
             rollback = false;
         } catch (SQLException e) {
@@ -112,7 +112,7 @@ public class MakeUUIDPrimaryForUpdateTaskTable extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { AddUUIDForUpdateTaskTable.class.getName() };
+        return new String[] { AddUUIDForUserAttributeTable.class.getName() };
     }
 
     private int getTotalRows(Connection con) throws SQLException {
@@ -121,7 +121,7 @@ public class MakeUUIDPrimaryForUpdateTaskTable extends UpdateTaskAdapter {
         int rows = 0;
         try {
             stmt = con.createStatement();
-            rs = stmt.executeQuery("SELECT COUNT(taskName) FROM updateTask WHERE uuid IS NULL");
+            rs = stmt.executeQuery("SELECT COUNT(cid) FROM user_attribute WHERE uuid IS NULL");
             while (rs.next()) {
                 rows += rs.getInt(1);
             }
