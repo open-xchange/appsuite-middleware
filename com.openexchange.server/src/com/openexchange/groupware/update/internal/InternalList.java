@@ -84,14 +84,22 @@ public final class InternalList {
 
     private static final InternalList SINGLETON = new InternalList();
 
-    private InternalList() {
-        super();
-    }
-
+    /**
+     * Gets the {@link InternalList} instance
+     *
+     * @return The instance
+     */
     public static final InternalList getInstance() {
         return SINGLETON;
     }
 
+    private InternalList() {
+        super();
+    }
+
+    /**
+     * Starts the internal list.
+     */
     public void start(ConfigurationService config) {
         final DynamicList registry = DynamicList.getInstance();
         for (final UpdateTask task : OLD_TASKS) {
@@ -107,6 +115,9 @@ public final class InternalList {
         }
     }
 
+    /**
+     * Stops the internal list.
+     */
     public void stop() {
         final DynamicList registry = DynamicList.getInstance();
         for (final UpdateTaskV2 task : TASKS) {
@@ -330,10 +341,10 @@ public final class InternalList {
      * All this tasks should extend {@link UpdateTaskAdapter} to fulfill the prerequisites to be sorted among their dependencies.
      */
     private static UpdateTaskV2[] TASKS = null;
-    
+
     private static UpdateTaskV2[] genTaskList(ConfigurationService configService) {
         List<UpdateTaskV2> list = new ArrayList<UpdateTaskV2>();
-        
+
         // Renames "Unified INBOX" to "Unified Mail"
         list.add(new com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask());
 
@@ -500,27 +511,27 @@ public final class InternalList {
 
         // Extends the UID field
         list.add(new com.openexchange.groupware.update.tasks.EnlargeCalendarUid());
-        
+
         // +++++++++++++++++++++++++++++++++ Version 7.4.0 starts here. +++++++++++++++++++++++++++++++++
-        
+
         //Add Uuid column to genconf_attributes_strings table
         list.add(new GenconfAttributesStringsAddUuidUpdateTask());
-        
+
         //Add Uuid column to genconf_attributes_bools table
         list.add(new GenconfAttributesBoolsAddUuidUpdateTask());
-        
+
         //Add synthetic primary keys to tables without natural key if full primary key support is enabled
         if (FullPrimaryKeySupport.getInstance().isFullPrimaryKeySupported(configService)) {
             //Add primary key to vcard_ids table
             list.add(new AddPrimaryKeyVcardIdsTask());
-            
+
             //Add primary key to genconf_attributes_strings table
             list.add(new GenconfAttributesStringsAddPrimaryKey());
-            
+
             //Add primary key to genconf_attributes_bools table
             list.add(new GenconfAttributesBoolsAddPrimaryKey());
         }
-        
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }
