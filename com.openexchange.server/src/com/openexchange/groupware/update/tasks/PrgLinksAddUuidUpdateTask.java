@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.UUID;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -178,14 +179,16 @@ public class PrgLinksAddUuidUpdateTask extends UpdateTaskAdapter {
                     }
                     sb.append("AND last_modified ");
                     long lastModified = rs.getInt(oldPos++);
-                    if (rs.wasNull()) {
+                    boolean lastModifiedNull = rs.wasNull();
+                    if (lastModifiedNull) {
                         sb.append("IS ? ");
                     } else {
                         sb.append("= ? ");
                     }
                     sb.append("AND created_by ");
                     int createdBy = rs.getInt(oldPos++);
-                    if (rs.wasNull()) {
+                    boolean createdByNull = rs.wasNull();
+                    if (createdByNull) {
                         sb.append("IS ? ");
                     } else {
                         sb.append("= ? ");
@@ -201,8 +204,16 @@ public class PrgLinksAddUuidUpdateTask extends UpdateTaskAdapter {
                     stmt2.setInt(newPos++, secondmodule);
                     stmt2.setInt(newPos++, secondfolder);
                     stmt2.setInt(newPos++, cid);
-                    stmt2.setLong(newPos++, lastModified);
-                    stmt2.setInt(newPos++, createdBy);
+                    if (!lastModifiedNull) {
+                        stmt2.setLong(newPos++, lastModified);
+                    } else {
+                        stmt2.setNull(newPos++, Types.BIGINT);
+                    }
+                    if (!createdByNull) {
+                        stmt2.setInt(newPos++, createdBy);
+                    } else {
+                        stmt2.setNull(newPos++, Types.INTEGER);
+                    }
                     stmt2.execute();
                 }
             } finally {
