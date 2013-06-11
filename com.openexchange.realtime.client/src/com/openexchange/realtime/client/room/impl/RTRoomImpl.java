@@ -99,6 +99,11 @@ public class RTRoomImpl implements RTRoom {
     private String toAddress = null;
 
     /**
+     * The name of the room what is also known as 'selector'
+     */
+    private String roomName = null;
+
+    /**
      * Timer to send a ping
      */
     private Timer pingTimer = null;
@@ -112,6 +117,7 @@ public class RTRoomImpl implements RTRoom {
      * Message handler for receiving messages
      */
     private RTMessageHandler rtMessageHandler = null;
+
 
     /**
      * Initializes a new {@link RTRoomImpl}.
@@ -134,27 +140,20 @@ public class RTRoomImpl implements RTRoom {
      * {@inheritDoc}
      */
     @Override
-    public void setupRoom(RTMessageHandler rtMessageHandler) {
-        Validate.notNull(rtMessageHandler);
-
-        this.rtMessageHandler = rtMessageHandler;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void join(String name, String to) throws RTException {
+    public void join(String name, String to, RTMessageHandler messageHandler) throws RTException {
         Validate.notEmpty(name, "Name of the room cannot be null.");
         Validate.notEmpty(to, "To-address cannot be null.");
+        Validate.notNull(rtMessageHandler, "RTMessageHandler must be set.");
 
+        this.roomName = name;
         this.toAddress = to;
+        this.rtMessageHandler = messageHandler;
 
         setupTimer();
         loginAndConnect();
 
         try {
-            JSONValue join = this.createJoinObject(name, to);
+            JSONValue join = this.createJoinObject();
             this.send(join);
         } catch (Exception exception) {
             throw new RTException(exception);
@@ -184,20 +183,18 @@ public class RTRoomImpl implements RTRoom {
         this.rtConnection = RTConnectionFactory.newConnection(rtConnectionProperties);
         Validate.notNull(rtConnection, "Not logged in!");
 
-        this.rtUserState = rtConnection.connect(this.rtMessageHandler);
+        this.rtUserState = rtConnection.connect(this.roomName, this.rtMessageHandler);
         Validate.notNull(rtUserState, "User state cannot be null!");
     }
 
     /**
      * Creates the join object that will be send to the given room and address.
      * 
-     * @param name - String with the name of the room (also known as selector)
-     * @param to - String with the address to send the message to
      * @return {@link JSONValue} with the data to join a room.
      * @throws JSONException
      */
-    private JSONValue createJoinObject(String name, String to) throws JSONException {
-        return RTRoomJSONHelper.createJoinMessage(name, to);
+    private JSONValue createJoinObject() throws JSONException {
+        return RTRoomJSONHelper.createJoinMessage(this.roomName, this.toAddress);
     }
 
     /**
@@ -237,6 +234,8 @@ public class RTRoomImpl implements RTRoom {
         try {
             JSONValue leave = this.createLeaveObject();
             this.send(leave);
+
+            this.rtConnection.removeHandler(this.roomName);
         } catch (Exception exception) {
             throw new RTException(exception);
         }

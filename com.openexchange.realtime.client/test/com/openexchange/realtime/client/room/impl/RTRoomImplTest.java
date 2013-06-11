@@ -116,20 +116,6 @@ public class RTRoomImplTest {
         new RTRoomImpl(mockedUser, mockedConnectionProperties, null);
     }
 
-    @Test
-    public void testSetupRoom_Fine_Everything() {
-        RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties, mockedMessageHandler);
-        room.setupRoom(mockedMessageHandler);
-
-        assertNotNull(room.getRtMessageHandler());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testSetupRoom_messageHandlerMissing_ThrowException() {
-        RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties, mockedMessageHandler);
-        room.setupRoom(null);
-    }
-
     /**
      * Test method for {@link com.openexchange.realtime.client.room.impl.RTRoomImpl#join()}.
      * 
@@ -138,7 +124,7 @@ public class RTRoomImplTest {
     @Test(expected = IllegalArgumentException.class)
     public void testJoin_NameNull_ThrowException() throws RTException {
         RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties, mockedMessageHandler);
-        room.join(null, "theToAddress");
+        room.join(null, "theToAddress", mockedMessageHandler);
     }
 
     /**
@@ -149,7 +135,7 @@ public class RTRoomImplTest {
     @Test(expected = IllegalArgumentException.class)
     public void testJoin_ToNull_ThrowException() throws RTException {
         RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties, mockedMessageHandler);
-        room.join("TheRoomName", null);
+        room.join("TheRoomName", null, mockedMessageHandler);
     }
 
     /**
@@ -161,7 +147,7 @@ public class RTRoomImplTest {
     public void testJoin_Fine_ToAddressSet() throws RTException {
         RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties, mockedMessageHandler) {
             @Override
-            protected void send(JSONValue objectToSend) throws RTException {
+            protected void send(JSONValue objectToSend) {
                 return;
             }
 
@@ -171,12 +157,12 @@ public class RTRoomImplTest {
             }
 
             @Override
-            protected void loginAndConnect() throws RTException {
+            protected void loginAndConnect() {
                 return;
             }
 
         };
-        room.join("TheRoomName", "theToAddress");
+        room.join("TheRoomName", "theToAddress", mockedMessageHandler);
 
         assertNotNull(room.getToAddress());
     }

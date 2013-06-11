@@ -62,20 +62,13 @@ import com.openexchange.realtime.client.RTMessageHandler;
 public interface RTRoom {
 
     /**
-     * Set the {@link RTMessageHandler} which should handle incoming messages.
-     * 
-     * @param rtMessageHandler - {@link RTMessageHandler} to deal with messages
-     * @throws RTException
-     */
-    public void setupRoom(RTMessageHandler rtMessageHandler);
-
-    /**
-     * Join a room.
+     * Join a room. One user is able to join more than one room based
      * 
      * @param name - the name of the room which should be created also known as 'selector'
      * @param to - defines the recipient to join to.
+     * @param messageHandler - {@link RTMessageHandler} to deal with messages
      */
-    public void join(String name, String to) throws RTException;
+    public void join(String name, String to, RTMessageHandler messageHandler) throws RTException;
 
     /**
      * Send a message into the room.
