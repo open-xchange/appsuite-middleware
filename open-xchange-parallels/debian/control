@@ -8,11 +8,13 @@ Homepage: http://www.open-xchange.com
 
 Package: open-xchange-parallels
 Architecture: all
-Depends: ${misc:Depends}, open-xchange-spamhandler-spamassassin (>=@OXVERSION@), open-xchange-admin-soap (>= @OXVERSION@)
+Depends: ${misc:Depends}, open-xchange-spamhandler, open-xchange-admin-soap (>= @OXVERSION@)
+Suggests: open-xchange-spamhandler-parallels (>= @OXVERSION@)
 Replaces: open-xchange-custom-parallels (<< 6.21.0-0)
 Conflicts: open-xchange-authentication-database,open-xchange-authentication-ldap,open-xchange-authentication-imap,open-xchange-authentication-kerberos, open-xchange-custom-parallels (<< 6.21.0-0)
 Provides: open-xchange-authentication
-Description: The Open-Xchange Parallels Extensions. Authentication Plugin, Branding Plugin and SpamdProvider
+Description: Extensions for integration with Parallels
+ This package contains the authentication bundle and a bundle for branding. The spam handler is installed with a separate package.
 
 ###### http://wiki.debian.org/Renaming_a_Package #####
 Package: open-xchange-custom-parallels
@@ -20,4 +22,3 @@ Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-parallels
 Section: oldlibs
 Description: transitional dummy package
-

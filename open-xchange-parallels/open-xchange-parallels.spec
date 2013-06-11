@@ -15,16 +15,16 @@ License:        GPL-2.0
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        The Open-Xchange Parallels Extensions. Authentication Plugin, Branding Plugin and SpamdProvider.
+Summary:        Extensions for integration with Parallels
 Requires:       open-xchange-admin-soap >= @OXVERSION@
-Requires:       open-xchange-spamhandler-spamassassin >= @OXVERSION@
+Requires:       open-xchange-spamhandler
 Provides:       open-xchange-authentication
 Provides:       open-xchange-custom-parallels = %{version}
 Obsoletes:      open-xchange-custom-parallels <= %{version}
 Conflicts:      open-xchange-authentication-database open-xchange-authentication-ldap open-xchange-authentication-imap open-xchange-authentication-kerberos
 
 %description
-The Open-Xchange Parallels Extensions. Authentication Plugin, Branding Plugin and SpamdProvider.
+This package contains the authentication bundle and a bundle for branding. The spam handler is installed with a separate package.
 
 Authors:
 --------
