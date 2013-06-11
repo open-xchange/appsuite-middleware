@@ -54,6 +54,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.update.internal.ExcludedList;
+import com.openexchange.groupware.update.internal.InternalList;
 
 /**
  * {@link ConfigurationCustomizer}
@@ -73,6 +74,7 @@ public class ConfigurationCustomizer implements ServiceTrackerCustomizer<Configu
     public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
         final ConfigurationService configService = context.getService(reference);
         ExcludedList.getInstance().configure(configService);
+        InternalList.getInstance().start(configService);
         return configService;
     }
 
@@ -83,6 +85,7 @@ public class ConfigurationCustomizer implements ServiceTrackerCustomizer<Configu
 
     @Override
     public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
+        InternalList.getInstance().stop();
         context.ungetService(reference);
     }
 }

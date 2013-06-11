@@ -130,7 +130,6 @@ import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.impl.id.IDGeneratorServiceImpl;
 import com.openexchange.groupware.reminder.internal.TargetRegistry;
 import com.openexchange.groupware.update.internal.InternalList;
-import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
@@ -142,7 +141,6 @@ import com.openexchange.i18n.parsing.Translations;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.IMAPStoreCache;
-import com.openexchange.imap.osgi.IMAPActivator;
 import com.openexchange.imap.services.Services;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.config.MailProperties;
@@ -672,7 +670,8 @@ public final class Init {
     	if(databaseUpdateinitialized ) {
             return;
         }
-    	InternalList.getInstance().start();
+    	ConfigurationService config = TestServiceRegistry.getInstance().getService(ConfigurationService.class);
+    	InternalList.getInstance().start(config);
     	databaseUpdateinitialized = true;
     }
 

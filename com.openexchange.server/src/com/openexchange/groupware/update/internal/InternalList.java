@@ -49,10 +49,15 @@
 
 package com.openexchange.groupware.update.internal;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.logging.Log;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.update.FullPrimaryKeySupport;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardIdsTask;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicContextAttributesTask;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicUserAttributesTask;
 import com.openexchange.groupware.update.tasks.CorrectAttachmentCountInAppointments;
@@ -60,6 +65,10 @@ import com.openexchange.groupware.update.tasks.CorrectFileAsInContacts;
 import com.openexchange.groupware.update.tasks.CorrectOrganizerInAppointments;
 import com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnUserAttributesForAliasLookupTask;
+import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddPrimaryKey;
+import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddUuidUpdateTask;
+import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddPrimaryKey;
+import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.MailAccountAddReplyToTask;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
 import com.openexchange.log.LogFactory;
@@ -83,13 +92,14 @@ public final class InternalList {
         return SINGLETON;
     }
 
-    public void start() {
+    public void start(ConfigurationService config) {
         final DynamicList registry = DynamicList.getInstance();
         for (final UpdateTask task : OLD_TASKS) {
             if (!registry.addUpdateTask(task)) {
                 LOG.error("Internal update task \"" + task.getClass().getName() + "\" could not be registered.", new Exception());
             }
         }
+        TASKS = genTaskList(config);
         for (final UpdateTaskV2 task : TASKS) {
             if (!registry.addUpdateTask(task)) {
                 LOG.error("Internal update task \"" + task.getClass().getName() + "\" could not be registered.", new Exception());
@@ -319,42 +329,46 @@ public final class InternalList {
     /**
      * All this tasks should extend {@link UpdateTaskAdapter} to fulfill the prerequisites to be sorted among their dependencies.
      */
-    private static final UpdateTaskV2[] TASKS = new UpdateTaskV2[] {
+    private static UpdateTaskV2[] TASKS = null;
+    
+    private static UpdateTaskV2[] genTaskList(ConfigurationService configService) {
+        List<UpdateTaskV2> list = new ArrayList<UpdateTaskV2>();
+        
         // Renames "Unified INBOX" to "Unified Mail"
-        new com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask(),
+        list.add(new com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask());
 
         // Creates necessary tables for mail header cache
-        new com.openexchange.groupware.update.tasks.HeaderCacheCreateTableTask(),
+        list.add(new com.openexchange.groupware.update.tasks.HeaderCacheCreateTableTask());
 
         // Extends the calendar tables and creates table to store the confirmation data for external participants.
-        new com.openexchange.groupware.update.tasks.ExtendCalendarForIMIPHandlingTask(),
+        list.add(new com.openexchange.groupware.update.tasks.ExtendCalendarForIMIPHandlingTask());
 
         // Enables the bit for the contact collector feature for every user because that bit was not checked before 6.16.
-        new com.openexchange.groupware.update.tasks.ContactCollectorReEnabler(),
+        list.add(new com.openexchange.groupware.update.tasks.ContactCollectorReEnabler());
 
         // +++++++++++++++++++++++++++++++++ Version 6.18 starts here. +++++++++++++++++++++++++++++++++
 
         // Adds a column to the table user_setting_server named folderTree to store the selected folder tree.
-        new com.openexchange.groupware.update.tasks.FolderTreeSelectionTask(),
+        list.add(new com.openexchange.groupware.update.tasks.FolderTreeSelectionTask());
 
         // Repairs appointments where the number of attachments does not match the real amount of attachments.
-        new com.openexchange.groupware.update.tasks.AttachmentCountUpdateTask(),
+        list.add(new com.openexchange.groupware.update.tasks.AttachmentCountUpdateTask());
 
         // Creates an initial empty filestore usage entry for every context that currently did not uploaded anything.
-        new com.openexchange.groupware.update.tasks.AddInitialFilestoreUsage(),
+        list.add(new com.openexchange.groupware.update.tasks.AddInitialFilestoreUsage());
 
         // Currently users contacts are created with the display name attribute filed. Outlook primarily uses the fileAs attribute. This
         // task copies the display name to fileAs if that is empty.
-        new com.openexchange.groupware.update.tasks.AddFileAsForUserContacts(),
+        list.add(new com.openexchange.groupware.update.tasks.AddFileAsForUserContacts());
 
         // Extend field "reason" for participants.
-        new com.openexchange.groupware.update.tasks.ParticipantCommentFieldLength(),
+        list.add(new com.openexchange.groupware.update.tasks.ParticipantCommentFieldLength());
 
         // New table for linking several appointments (from different sources) together that represent the same person.
-        new com.openexchange.groupware.update.tasks.AggregatingContactTableService(),
+        list.add(new com.openexchange.groupware.update.tasks.AggregatingContactTableService());
 
         // Creates new table for multi-purpose ID generation
-        new com.openexchange.groupware.update.tasks.IDCreateTableTask(),
+        list.add(new com.openexchange.groupware.update.tasks.IDCreateTableTask());
 
         // TODO: Enable virtual folder tree update task when needed
         // Migrates existing folder data to new outlook-like folder tree structure
@@ -363,129 +377,150 @@ public final class InternalList {
         // +++++++++++++++++++++++++++++++++ Version 6.20 starts here. +++++++++++++++++++++++++++++++++
 
         // Transforms the "info" field to a TEXT field. This fields seems not to be used anywhere.
-        new com.openexchange.groupware.update.tasks.ContactInfoField2Text(),
+        list.add(new com.openexchange.groupware.update.tasks.ContactInfoField2Text());
 
-        // Creates new Contact fields (First Name, Last Name, Company) for Kana based search in japanese environments.
-        new com.openexchange.groupware.update.tasks.ContactFieldsForJapaneseKanaSearch(),
+        // Creates new Contact fields (First Name); Last Name); Company) for Kana based search in japanese environments.
+        list.add(new com.openexchange.groupware.update.tasks.ContactFieldsForJapaneseKanaSearch());
 
         // Remove facebook subscriptions to force use of new oauth
-        new com.openexchange.groupware.update.tasks.FacebookCrawlerSubscriptionRemoverTask(),
+        list.add(new com.openexchange.groupware.update.tasks.FacebookCrawlerSubscriptionRemoverTask());
 
         // Remove linkedin subscriptions to force use of new oauth
-        new com.openexchange.groupware.update.tasks.LinkedInCrawlerSubscriptionsRemoverTask(),
+        list.add(new com.openexchange.groupware.update.tasks.LinkedInCrawlerSubscriptionsRemoverTask());
 
         // Remove yahoo subscriptions to force use of new oauth
-        new com.openexchange.groupware.update.tasks.DeleteOldYahooSubscriptions(),
+        list.add(new com.openexchange.groupware.update.tasks.DeleteOldYahooSubscriptions());
 
         // Switch the column type of 'value' in contextAttribute to TEXT
-        new AllowTextInValuesOfDynamicContextAttributesTask(),
+        list.add(new AllowTextInValuesOfDynamicContextAttributesTask());
 
         // Switch the column type of 'value' in user_attribute to TEXT
-        new AllowTextInValuesOfDynamicUserAttributesTask(),
+        list.add(new AllowTextInValuesOfDynamicUserAttributesTask());
 
         // Recreate the index on the context attributes table
-        new CreateIndexOnContextAttributesTask(),
+        list.add(new CreateIndexOnContextAttributesTask());
 
         // Recreate the index on the user attributes table for alias lookup
-        new CreateIndexOnUserAttributesForAliasLookupTask(),
+        list.add(new CreateIndexOnUserAttributesForAliasLookupTask());
 
         // Correct the attachment count in the dates table
-        new CorrectAttachmentCountInAppointments(),
+        list.add(new CorrectAttachmentCountInAppointments());
 
         // Corrects the organizer in appointments. When exporting iCal and importing it again the organizer gets value 'null' instead of SQL
         // NULL. This task corrects this.
-        new CorrectOrganizerInAppointments(),
+        list.add(new CorrectOrganizerInAppointments());
 
         // Corrects field90 aka fileAs in contacts to have proper contact names in card view of Outlook OXtender 2.
-        new CorrectFileAsInContacts(),
+        list.add(new CorrectFileAsInContacts());
 
         // Add "sortNum" column to virtual folder table.
-        new VirtualFolderAddSortNumTask(),
+        list.add(new VirtualFolderAddSortNumTask());
 
         // +++++++++++++++++++++++++++++++++ Version 6.20.1 starts here. +++++++++++++++++++++++++++++++++
 
         // Restores the initial permissions on the public root folder.
-        new com.openexchange.groupware.update.tasks.DropIndividualUserPermissionsOnPublicFolderTask(),
+        list.add(new com.openexchange.groupware.update.tasks.DropIndividualUserPermissionsOnPublicFolderTask());
 
         // Adds Outlook address fields to contact tables
-        new com.openexchange.groupware.update.tasks.ContactAddOutlookAddressFieldsTask(),
+        list.add(new com.openexchange.groupware.update.tasks.ContactAddOutlookAddressFieldsTask());
 
         // Add UID field to contact tables.
-        new com.openexchange.groupware.update.tasks.ContactAddUIDFieldTask(),
+        list.add(new com.openexchange.groupware.update.tasks.ContactAddUIDFieldTask());
 
         // Add UIDs to contacts if missing
-        new com.openexchange.groupware.update.tasks.ContactAddUIDValueTask(),
+        list.add(new com.openexchange.groupware.update.tasks.ContactAddUIDValueTask());
 
         // Adds UIDs to tasks.
-        new com.openexchange.groupware.update.tasks.TasksAddUidColumnTask(),
+        list.add(new com.openexchange.groupware.update.tasks.TasksAddUidColumnTask());
 
         // Adds UID indexes.
-        new com.openexchange.groupware.update.tasks.CalendarAddUIDIndexTask(),
+        list.add(new com.openexchange.groupware.update.tasks.CalendarAddUIDIndexTask());
 
         // Drops rather needless foreign keys
-        new com.openexchange.groupware.update.tasks.DropFKTask(),
+        list.add(new com.openexchange.groupware.update.tasks.DropFKTask());
 
-        // Adds 'organizerId', 'principal' and 'principalId' to prg_dates and del_dates
-        new com.openexchange.groupware.update.tasks.AppointmentAddOrganizerIdPrincipalPrincipalIdColumnsTask(),
+        // Adds 'organizerId'); 'principal' and 'principalId' to prg_dates and del_dates
+        list.add(new com.openexchange.groupware.update.tasks.AppointmentAddOrganizerIdPrincipalPrincipalIdColumnsTask());
 
         // Adds index to prg_dates_members and del_dates_members
-        new com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembers(),
+        list.add(new com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembers());
 
         // Adds index to oxfolder_tree and del_oxfolder_tree
-        new com.openexchange.groupware.update.tasks.FolderAddIndex2LastModified(),
+        list.add(new com.openexchange.groupware.update.tasks.FolderAddIndex2LastModified());
 
         // Checks for missing folder 'public_infostore' (15) in any available context
-        new com.openexchange.groupware.update.tasks.CheckForPublicInfostoreFolderTask(),
+        list.add(new com.openexchange.groupware.update.tasks.CheckForPublicInfostoreFolderTask());
 
         // Drops useless foreign keys from 'malPollHash' table
-        new com.openexchange.groupware.update.tasks.MALPollDropConstraintsTask(),
+        list.add( new com.openexchange.groupware.update.tasks.MALPollDropConstraintsTask());
 
         // +++++++++++++++++++++++++++++++++ Version 6.20.3 starts here. +++++++++++++++++++++++++++++++++
 
         // Extends dn fields in calendar tables to 320 chars.
-        new com.openexchange.groupware.update.tasks.CalendarExtendDNColumnTaskV2(),
+        list.add(new com.openexchange.groupware.update.tasks.CalendarExtendDNColumnTaskV2());
 
         // +++++++++++++++++++++++++++++++++ Version 6.20.5 starts here. +++++++++++++++++++++++++++++++++
 
         // Creates indexes on tables "prg_dlist" and "del_dlist" to improve look-up.
-        new com.openexchange.groupware.update.tasks.DListAddIndexForLookup(),
+        list.add(new com.openexchange.groupware.update.tasks.DListAddIndexForLookup());
 
         // +++++++++++++++++++++++++++++++++ Version 6.20.7 starts here. +++++++++++++++++++++++++++++++++
 
-        // Another attempt: Adds 'organizerId', 'principal' and 'principalId' to prg_dates and del_dates
-        new com.openexchange.groupware.update.tasks.AppointmentAddOrganizerIdPrincipalPrincipalIdColumnsTask2(),
+        // Another attempt: Adds 'organizerId'); 'principal' and 'principalId' to prg_dates and del_dates
+        list.add(new com.openexchange.groupware.update.tasks.AppointmentAddOrganizerIdPrincipalPrincipalIdColumnsTask2());
 
         // Add UIDs to appointments if missing.
-        new com.openexchange.groupware.update.tasks.CalendarAddUIDValueTask(),
+        list.add(new com.openexchange.groupware.update.tasks.CalendarAddUIDValueTask());
 
         // +++++++++++++++++++++++++++++++++ Version 6.22.0 starts here. +++++++++++++++++++++++++++++++++
 
         // Add "replyTo" column to mail/transport account table
-        new MailAccountAddReplyToTask(),
+        list.add(new MailAccountAddReplyToTask());
 
         // Migrate "replyTo" information from properties table to account tables
-        new com.openexchange.groupware.update.tasks.MailAccountMigrateReplyToTask(),
+        list.add(new com.openexchange.groupware.update.tasks.MailAccountMigrateReplyToTask());
 
         // Add 'filename' column to appointment tables.
-        new com.openexchange.groupware.update.tasks.AppointmentAddFilenameColumnTask(),
+        list.add(new com.openexchange.groupware.update.tasks.AppointmentAddFilenameColumnTask());
 
         // Add 'filename' column to task tables.
-        new com.openexchange.groupware.update.tasks.TasksAddFilenameColumnTask(),
+        list.add(new com.openexchange.groupware.update.tasks.TasksAddFilenameColumnTask());
 
         // Removes unnecessary indexes from certain tables (see Bug #21882)
-        new com.openexchange.groupware.update.tasks.RemoveUnnecessaryIndexes(),
-        new com.openexchange.groupware.update.tasks.RemoveUnnecessaryIndexes2(),
+        list.add(new com.openexchange.groupware.update.tasks.RemoveUnnecessaryIndexes());
+        list.add(new com.openexchange.groupware.update.tasks.RemoveUnnecessaryIndexes2());
 
         // +++++++++++++++++++++++++++++++++ Version 6.22.1 starts here. +++++++++++++++++++++++++++++++++
-        new com.openexchange.groupware.update.tasks.ContactFixUserDistListReferencesTask(),
+        list.add(new com.openexchange.groupware.update.tasks.ContactFixUserDistListReferencesTask());
 
         // +++++++++++++++++++++++++++++++++ Version 7.0.0 starts here. +++++++++++++++++++++++++++++++++
 
         // Extends the resources' description field
-        new com.openexchange.groupware.update.tasks.EnlargeResourceDescription(),
+        list.add(new com.openexchange.groupware.update.tasks.EnlargeResourceDescription());
 
         // Extends the UID field
-        new com.openexchange.groupware.update.tasks.EnlargeCalendarUid(),
-
-    };
+        list.add(new com.openexchange.groupware.update.tasks.EnlargeCalendarUid());
+        
+        // +++++++++++++++++++++++++++++++++ Version 7.4.0 starts here. +++++++++++++++++++++++++++++++++
+        
+        //Add Uuid column to genconf_attributes_strings table
+        list.add(new GenconfAttributesStringsAddUuidUpdateTask());
+        
+        //Add Uuid column to genconf_attributes_bools table
+        list.add(new GenconfAttributesBoolsAddUuidUpdateTask());
+        
+        //Add synthetic primary keys to tables without natural key if full primary key support is enabled
+        if (FullPrimaryKeySupport.getInstance().isFullPrimaryKeySupported(configService)) {
+            //Add primary key to vcard_ids table
+            list.add(new AddPrimaryKeyVcardIdsTask());
+            
+            //Add primary key to genconf_attributes_strings table
+            list.add(new GenconfAttributesStringsAddPrimaryKey());
+            
+            //Add primary key to genconf_attributes_bools table
+            list.add(new GenconfAttributesBoolsAddPrimaryKey());
+        }
+        
+        return list.toArray(new UpdateTaskV2[list.size()]);
+    }
 }

@@ -59,7 +59,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.internal.CreateUpdateTaskTable;
-import com.openexchange.groupware.update.internal.InternalList;
 
 /**
  * This {@link Activator} currently is only used to initialize some structures within the database update component. Lateron this may used
@@ -91,7 +90,6 @@ public class Activator implements BundleActivator {
             UpdateTaskProviderService.class,
             new UpdateTaskCustomizer(context)));
         trackers.push(new ServiceTracker<CacheService, CacheService>(context, CacheService.class.getName(), new CacheCustomizer(context)));
-        InternalList.getInstance().start();
         for (final ServiceTracker<?, ?> tracker : trackers) {
             tracker.open();
         }
@@ -102,7 +100,6 @@ public class Activator implements BundleActivator {
         while (!trackers.isEmpty()) {
             trackers.pop().close();
         }
-        InternalList.getInstance().stop();
         createTableRegistration.unregister();
     }
 }
