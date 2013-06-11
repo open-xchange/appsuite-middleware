@@ -64,10 +64,9 @@ import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
-
 /**
  * {@link GenconfAttributesBoolsAddUuidUpdateTask}
- *
+ * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class GenconfAttributesBoolsAddUuidUpdateTask extends UpdateTaskAdapter {
@@ -79,7 +78,8 @@ public class GenconfAttributesBoolsAddUuidUpdateTask extends UpdateTaskAdapter {
         super();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
      */
     @Override
@@ -89,7 +89,9 @@ public class GenconfAttributesBoolsAddUuidUpdateTask extends UpdateTaskAdapter {
         Column column = new Column("uuid", "BINARY(16) DEFAULT NULL");
         try {
             con.setAutoCommit(false);
-            Tools.checkAndAddColumns(con, "genconf_attributes_bools", column);
+            if (!Tools.columnExists(con, "genconf_attributes_bools", column.name)) {
+                Tools.checkAndAddColumns(con, "genconf_attributes_bools", column);
+            }
             setUUID(con);
             con.commit();
         } catch (SQLException e) {
@@ -104,14 +106,15 @@ public class GenconfAttributesBoolsAddUuidUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
      */
     @Override
     public String[] getDependencies() {
         return new String[0];
     }
-    
+
     private void setUUID(Connection con) throws SQLException {
         PreparedStatement stmt = null;
         int oldPos, newPos;
