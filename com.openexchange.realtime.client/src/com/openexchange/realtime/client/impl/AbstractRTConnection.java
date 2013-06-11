@@ -80,7 +80,11 @@ public abstract class AbstractRTConnection implements RTConnection {
 
     protected RTUserState userState;
 
+    //did we successfully login to the backend to receive a serversession?
     protected boolean loggedIn = false;
+    
+    //did we establish a "duplex" connection to the backend? 
+    protected boolean isConnected = false;
 
     private Thread deliverer;
 
