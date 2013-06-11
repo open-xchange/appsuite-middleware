@@ -80,6 +80,7 @@ import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddPrimaryKeyUp
 import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddUuidUpdateTask;
+import com.openexchange.groupware.update.tasks.PrimaryKeyForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -542,6 +543,9 @@ public final class InternalList {
 
         //Add Uuid column to dlist tables
         list.add(new AddUUIDForDListTables());
+        
+        //Add primary key to infostoreReservedPaths table
+        list.add(new PrimaryKeyForInfostoreReservedPaths());
 
         //Add synthetic primary keys to tables without natural key if full primary key support is enabled
         final FullPrimaryKeySupportService fullPrimaryKeySupportService = ServerServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
