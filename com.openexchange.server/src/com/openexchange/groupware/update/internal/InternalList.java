@@ -74,6 +74,9 @@ import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddPrimar
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.MailAccountAddReplyToTask;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUpdateTaskTable;
+import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddPrimaryKeyUpdateTask;
+import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddUuidUpdateTask;
+import com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
 import com.openexchange.log.LogFactory;
@@ -531,6 +534,9 @@ public final class InternalList {
         
         //Add Uuid column to prg_links table
         list.add(new PrgLinksAddUuidUpdateTask());
+        
+        //Add Uuid column to prg_contacts_linkage table
+        list.add(new PrgContactsLinkageAddUuidUpdateTask());
 
         //Add synthetic primary keys to tables without natural key if full primary key support is enabled
         final FullPrimaryKeySupportService fullPrimaryKeySupportService = ServerServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
@@ -555,6 +561,12 @@ public final class InternalList {
             
             //Add primary key to ical_principal table
             list.add(new CreateIcalPrincipalPrimaryKeyTask());
+            
+            //Add primary key to prg_links table
+            list.add(new PrgLinksAddPrimaryKeyUpdateTask());
+            
+            //Add primary key to prg_contacts_linkage table
+            list.add(new PrgContactsLinkageAddPrimaryKeyUpdateTask());
         }
 
         return list.toArray(new UpdateTaskV2[list.size()]);
