@@ -83,17 +83,6 @@ public interface RTConnection {
     RTUserState connect(String selector, RTMessageHandler messageHandler) throws RTException;
      
     /**
-     * Establishes a connection to the OX RT component. This includes creating a valid user session.
-     * 
-     * @param selector a to associate with the messageHandler so that incoming messages can be allotted to the correct consumer
-     * @param messageHandler The message handler that is called on received messages that contain the associated selector. If
-     *            <code>null</code>, incoming messages will be discarded immediately.
-     * @param changeListener A listener that will be invoked upon RTUserState changes
-     * @return The @{link RTUserState} created during login
-     */
-    RTUserState connect(String selector, RTMessageHandler messageHandler, RTUserStateChangeListener changeListener) throws RTException;
-    
-    /**
      * Remove the message handler that is associated with the given selector from the connection to let it know that we aren't interestes in
      * further messages.
      * @param selector The selecotr

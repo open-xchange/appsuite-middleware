@@ -78,8 +78,6 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     protected RTMessageHandler messageHandler;
 
-    protected RTUserStateChangeListener changeListener;
-
     protected RTUserState userState;
 
     //did we successfully login to the backend to receive a serversession?
@@ -107,21 +105,11 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     @Override
     public RTUserState connect(String selector, RTMessageHandler messageHandler) throws RTException {
-        return connect(selector, messageHandler, new RTUserStateChangeListener() {
-            @Override
-            public void setUserState(RTUserState state) {
-            }
-        });
-    }
-
-    @Override
-    public RTUserState connect(String selector, RTMessageHandler messageHandler, RTUserStateChangeListener changeListener) throws RTException {
         RTMessageHandler previousHandler = messageHandlers.putIfAbsent(selector, messageHandler);
         if(previousHandler != null) {
             throw new RTException("There is already a mapping selector <-> messageHandler for the selector: " + selector);
         }
         this.messageHandler = messageHandler;
-        this.changeListener = changeListener;
         if (messageHandler != null) {
             gate = new SequenceGate();
             deliverer = new Thread(new MessageDeliverer(messageHandler, gate));

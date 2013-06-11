@@ -85,8 +85,9 @@ public class WasyncRTConnection extends AbstractRTConnection {
     }
     
     @Override
-    public RTUserState connect(String selector, RTMessageHandler messageHandler, RTUserStateChangeListener changeListener) throws RTException {
-        RTUserState rtUserState = super.connect(selector, messageHandler, changeListener);
+    public RTUserState connect(String selector, RTMessageHandler messageHandler) throws RTException {
+        RTUserState rtUserState = super.connect(selector, messageHandler);
+        //connect to atmosphere
         return rtUserState;
     }
 
