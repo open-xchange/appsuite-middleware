@@ -76,44 +76,32 @@ public class RTRoomImplTest {
 
     @Test
     public void testCreateRoom_Fine_Created() {
-        RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties, mockedMessageHandler);
+        RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties);
 
         assertNotNull(room);
     }
 
     @Test
     public void testCreateRoom_Fine_CreatedAndUserNotNull() {
-        RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties, mockedMessageHandler);
+        RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties);
         assertNotNull(room.getRtUser());
     }
 
     @Test
     public void testCreateRoom_Fine_CreatedAndConnectionPropertiesNotNull() {
-        RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties, mockedMessageHandler);
+        RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties);
 
         assertNotNull(room.getRtConnectionProperties());
     }
 
-    @Test
-    public void testCreateRoom_Fine_CreatedAndMessageHandlerNotNull() {
-        RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties, mockedMessageHandler);
-
-        assertNotNull(room.getRtMessageHandler());
-    }
-
     @Test(expected = IllegalArgumentException.class)
     public void testCreateRoom_userMissing_ThrowException() {
-        new RTRoomImpl(null, mockedConnectionProperties, mockedMessageHandler);
+        new RTRoomImpl(null, mockedConnectionProperties);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testCreateRoom_connectionMissing_ThrowException() {
-        new RTRoomImpl(mockedUser, null, mockedMessageHandler);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testCreateRoom_messageHandlerMissing_ThrowException() {
-        new RTRoomImpl(mockedUser, mockedConnectionProperties, null);
+        new RTRoomImpl(mockedUser, null);
     }
 
     /**
@@ -123,7 +111,7 @@ public class RTRoomImplTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testJoin_NameNull_ThrowException() throws RTException {
-        RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties, mockedMessageHandler);
+        RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties);
         room.join(null, "theToAddress", mockedMessageHandler);
     }
 
@@ -134,7 +122,7 @@ public class RTRoomImplTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testJoin_ToNull_ThrowException() throws RTException {
-        RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties, mockedMessageHandler);
+        RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties);
         room.join("TheRoomName", null, mockedMessageHandler);
     }
 
@@ -145,7 +133,7 @@ public class RTRoomImplTest {
      */
     @Test
     public void testJoin_Fine_ToAddressSet() throws RTException {
-        RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties, mockedMessageHandler) {
+        RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties) {
             @Override
             protected void send(JSONValue objectToSend) {
                 return;
@@ -174,7 +162,7 @@ public class RTRoomImplTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testSetupTimer_connectionNull_ThrowExcpetion() {
-        RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties, mockedMessageHandler);
+        RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties);
         room.setupTimer();
     }
 
@@ -185,7 +173,7 @@ public class RTRoomImplTest {
      */
     @Test
     public void testSetupTimer_Fine_TimerInitialized() {
-        RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties, mockedMessageHandler);
+        RTRoomImpl room = new RTRoomImpl(mockedUser, mockedConnectionProperties);
         room.setRtConnection(Mockito.mock(RTConnection.class));
         room.setupTimer();
 

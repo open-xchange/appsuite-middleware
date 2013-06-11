@@ -124,16 +124,13 @@ public class RTRoomImpl implements RTRoom {
      * 
      * @param rtUser - {@link RTUser} that will interact with the room.
      * @param rtConnectionProperties - {@link RTConnectionProperties} related to the user.
-     * @param rtMessageHandler - {@link RTMessageHandler} that should handle the received messages.
      */
-    public RTRoomImpl(RTUser rtUser, RTConnectionProperties rtConnectionProperties, RTMessageHandler rtMessageHandler) {
+    public RTRoomImpl(RTUser rtUser, RTConnectionProperties rtConnectionProperties) {
         Validate.notNull(rtUser);
         Validate.notNull(rtConnectionProperties);
-        Validate.notNull(rtMessageHandler);
 
         this.rtUser = rtUser;
         this.rtConnectionProperties = rtConnectionProperties;
-        this.rtMessageHandler = rtMessageHandler;
     }
 
     /**
@@ -143,7 +140,7 @@ public class RTRoomImpl implements RTRoom {
     public void join(String name, String to, RTMessageHandler messageHandler) throws RTException {
         Validate.notEmpty(name, "Name of the room cannot be null.");
         Validate.notEmpty(to, "To-address cannot be null.");
-        Validate.notNull(rtMessageHandler, "RTMessageHandler must be set.");
+        Validate.notNull(messageHandler, "messageHandler must be set.");
 
         this.roomName = name;
         this.toAddress = to;
@@ -165,6 +162,7 @@ public class RTRoomImpl implements RTRoom {
      */
     protected void setupTimer() {
         Validate.notNull(this.rtConnection);
+        Validate.notNull(this.toAddress);
 
         this.pingTimer = new Timer("Ping");
         this.pingTimerTask = new RTRoomPingTimerTask(rtConnection, this.toAddress);
@@ -177,7 +175,9 @@ public class RTRoomImpl implements RTRoom {
      * @throws RTException
      */
     protected void loginAndConnect() throws RTException {
-        Validate.notNull(rtConnectionProperties, "Connection properties cannot be null!");
+        Validate.notNull(
+            rtConnectionProperties,
+            "Connection properties cannot be null! Use the default constructor com.openexchange.realtime.client.room.impl.RTRoomImpl.RTRoomImpl(RTUser, RTConnectionProperties) for setting the member!");
         Validate.notNull(this.rtMessageHandler, "A RTMessageHandler must be configured to receive messages.");
 
         this.rtConnection = RTConnectionFactory.newConnection(rtConnectionProperties);
