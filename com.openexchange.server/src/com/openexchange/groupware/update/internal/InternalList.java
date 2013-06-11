@@ -58,6 +58,7 @@ import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardIdsTask;
+import com.openexchange.groupware.update.tasks.AddUUIDForUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicContextAttributesTask;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicUserAttributesTask;
 import com.openexchange.groupware.update.tasks.CorrectAttachmentCountInAppointments;
@@ -70,6 +71,7 @@ import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddUuidUpda
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddPrimaryKey;
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.MailAccountAddReplyToTask;
+import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
 import com.openexchange.log.LogFactory;
 
@@ -520,6 +522,9 @@ public final class InternalList {
         //Add Uuid column to genconf_attributes_bools table
         list.add(new GenconfAttributesBoolsAddUuidUpdateTask());
 
+        //Add Uuid column to updatTask table
+        list.add(new AddUUIDForUpdateTaskTable());
+
         //Add synthetic primary keys to tables without natural key if full primary key support is enabled
         if (FullPrimaryKeySupport.getInstance().isFullPrimaryKeySupported(configService)) {
             //Add primary key to vcard_ids table
@@ -530,6 +535,9 @@ public final class InternalList {
 
             //Add primary key to genconf_attributes_bools table
             list.add(new GenconfAttributesBoolsAddPrimaryKey());
+            
+            //Add primary key to updateTask table
+            list.add(new MakeUUIDPrimaryForUpdateTaskTable());
         }
 
         return list.toArray(new UpdateTaskV2[list.size()]);
