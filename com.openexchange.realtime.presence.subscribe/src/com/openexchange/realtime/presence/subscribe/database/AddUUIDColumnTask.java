@@ -93,7 +93,9 @@ public class AddUUIDColumnTask extends UpdateTaskAdapter {
         Column column = new Column("uuid", "BINARY(16) DEFAULT NULL");
         try {
             con.setAutoCommit(false);
-            Tools.checkAndAddColumns(con, "presenceSubscriptions", column);
+            if (!Tools.columnExists(con, "presenceSubscriptions", column.name)) {
+                Tools.checkAndAddColumns(con, "presenceSubscriptions", column);
+            }
             setUUID(con);
             con.commit();
         } catch (SQLException e) {
