@@ -59,22 +59,22 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
+
 /**
- * {@link AddPrimaryKeyVcardIdsTask}
- * 
+ * {@link AddPrimaryKeyVcardPrincipalTask}
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class AddPrimaryKeyVcardIdsTask extends UpdateTaskAdapter {
+public class AddPrimaryKeyVcardPrincipalTask extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link AddPrimaryKeyVcardIdsTask}.
+     * Initializes a new {@link AddPrimaryKeyVcardPrincipalTask}.
      */
-    public AddPrimaryKeyVcardIdsTask() {
+    public AddPrimaryKeyVcardPrincipalTask() {
         super();
     }
 
-    /*
-     * (non-Javadoc)
+    /* (non-Javadoc)
      * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
      */
     @Override
@@ -83,8 +83,8 @@ public class AddPrimaryKeyVcardIdsTask extends UpdateTaskAdapter {
         Connection con = Database.getNoTimeout(cid, true);
         try {
             con.setAutoCommit(false);
-            if (!Tools.hasPrimaryKey(con, "vcard_ids")) {
-                Tools.createPrimaryKey(con, "vcard_ids", new String[] { "object_id", "cid" });
+            if (!Tools.hasPrimaryKey(con, "vcard_principal")) {
+                Tools.createPrimaryKey(con, "vcard_principal", new String[] { "object_id", "cid" });
             }
             con.commit();
         } catch (SQLException e) {
@@ -99,8 +99,7 @@ public class AddPrimaryKeyVcardIdsTask extends UpdateTaskAdapter {
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /* (non-Javadoc)
      * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
      */
     @Override

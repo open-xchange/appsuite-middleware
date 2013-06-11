@@ -58,12 +58,15 @@ import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardIdsTask;
+import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardPrincipalTask;
 import com.openexchange.groupware.update.tasks.AddUUIDForUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicContextAttributesTask;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicUserAttributesTask;
 import com.openexchange.groupware.update.tasks.CorrectAttachmentCountInAppointments;
 import com.openexchange.groupware.update.tasks.CorrectFileAsInContacts;
 import com.openexchange.groupware.update.tasks.CorrectOrganizerInAppointments;
+import com.openexchange.groupware.update.tasks.CreateIcalIdsPrimaryKeyTask;
+import com.openexchange.groupware.update.tasks.CreateIcalPrincipalPrimaryKeyTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnUserAttributesForAliasLookupTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddPrimaryKey;
@@ -529,6 +532,9 @@ public final class InternalList {
         if (FullPrimaryKeySupport.getInstance().isFullPrimaryKeySupported(configService)) {
             //Add primary key to vcard_ids table
             list.add(new AddPrimaryKeyVcardIdsTask());
+            
+            //Add primary key to vcard_principal table
+            list.add(new AddPrimaryKeyVcardPrincipalTask());
 
             //Add primary key to genconf_attributes_strings table
             list.add(new GenconfAttributesStringsAddPrimaryKey());
@@ -538,6 +544,12 @@ public final class InternalList {
             
             //Add primary key to updateTask table
             list.add(new MakeUUIDPrimaryForUpdateTaskTable());
+            
+            //Add primary key to ical_ids table
+            list.add(new CreateIcalIdsPrimaryKeyTask());
+            
+            //Add primary key to ical_principal table
+            list.add(new CreateIcalPrincipalPrimaryKeyTask());
         }
 
         return list.toArray(new UpdateTaskV2[list.size()]);
