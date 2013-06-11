@@ -130,7 +130,6 @@ import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.impl.id.IDGeneratorServiceImpl;
 import com.openexchange.groupware.reminder.internal.TargetRegistry;
 import com.openexchange.groupware.update.internal.InternalList;
-import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
@@ -142,7 +141,6 @@ import com.openexchange.i18n.parsing.Translations;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.IMAPStoreCache;
-import com.openexchange.imap.osgi.IMAPActivator;
 import com.openexchange.imap.services.Services;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.config.MailProperties;
@@ -382,7 +380,7 @@ public final class Init {
         startAndInjectXMLServices();
         startAndInjectSubscribeServices();
         startAndInjectContactStorageServices();
-        startAndInjectContactServices();        
+        startAndInjectContactServices();
         startAndInjectContactCollector();
         startAndInjectImportExportServices();
 
@@ -402,7 +400,7 @@ public final class Init {
         TestServiceRegistry.getInstance().addService(ConfigurationService.class, config);
         AJPv13ServiceRegistry.SERVICE_REGISTRY.set(new ServiceRegistry());
         AJPv13ServiceRegistry.getInstance().addService(ConfigurationService.class, config);
-        
+
     }
 
     private static void startAndInjectThreadPoolBundle() {
@@ -553,7 +551,7 @@ public final class Init {
                 ContactService.class, services.get(ContactService.class));
         }
     }
-    
+
     private static void startAndInjectIDGeneratorService() {
         final IDGeneratorService idService = new IDGeneratorServiceImpl();
         TestServiceRegistry.getInstance().addService(IDGeneratorService.class, idService);
@@ -582,7 +580,7 @@ public final class Init {
                 public <S> S getOptionalService(final Class<? extends S> clazz) {
                     return null;
                 }
-            });                
+            });
         }
     }
 
@@ -672,6 +670,7 @@ public final class Init {
     	if(databaseUpdateinitialized ) {
             return;
         }
+    	// ConfigurationService config = TestServiceRegistry.getInstance().getService(ConfigurationService.class);
     	InternalList.getInstance().start();
     	databaseUpdateinitialized = true;
     }
@@ -818,12 +817,12 @@ public final class Init {
     public static void startAndInjectQuotaService() {
         if (null == TestServiceRegistry.getInstance().getService(QuotaService.class)) {
             QuotaService quotaService = new QuotaService() {
-                
+
                 @Override
                 public Quota getQuotaFor(Resource resource, ResourceDescription desc, Session session) throws OXException {
                     return UnlimitedQuota.getInstance();
                 }
-                
+
                 @Override
                 public Quota getQuotaFor(Resource resource, Session session) throws OXException {
                     return UnlimitedQuota.getInstance();

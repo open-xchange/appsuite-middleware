@@ -68,6 +68,7 @@ import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityExceptionCodes;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.DependentCapabilityChecker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -177,12 +178,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         if (autologin()) {
             capabilities.add(new Capability("autologin", true));
         }
-        // Now the declared ones
-        for (String cap : declaredCapabilities.keySet()) {
-            if (check(cap, serverSession)) {
-                capabilities.add(getCapability(cap));
-            }
-        }
+        
         // ------------- Combined capabilities/permissions ------------ //
         if (!serverSession.isAnonymous()) {
             // Portal
@@ -326,6 +322,13 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 }
             }
         }
+        
+     // Now the declared ones
+        for (String cap : declaredCapabilities.keySet()) {
+            if (check(cap, serverSession, capabilities)) {
+                capabilities.add(getCapability(cap));
+            }
+        }
 
         return capabilities;
     }
@@ -335,13 +338,18 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         return getCapabilities(session.getUserId(), session.getContextId());
     }
 
-    private boolean check(String cap, ServerSession session) throws OXException {
+    private boolean check(String cap, ServerSession session, Set<Capability> allCapabilities) throws OXException {
         final Map<String, List<CapabilityChecker>> checkers = getCheckers();
 
         List<CapabilityChecker> list = checkers.get(cap);
         if (null != list && !list.isEmpty()) {
             for (CapabilityChecker checker : list) {
-                if (!checker.isEnabled(cap, session)) {
+                if (checker instanceof DependentCapabilityChecker) {
+                    DependentCapabilityChecker dependentChecker = (DependentCapabilityChecker) checker;
+                    if (!dependentChecker.isEnabled(cap, session, allCapabilities)) {
+                        return false;
+                    }
+                } else if (!checker.isEnabled(cap, session)) {
                     return false;
                 }
             }
@@ -350,7 +358,12 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         list = checkers.get("*");
         if (null != list && !list.isEmpty()) {
             for (CapabilityChecker checker : list) {
-                if (!checker.isEnabled(cap, session)) {
+                if (checker instanceof DependentCapabilityChecker) {
+                    DependentCapabilityChecker dependentChecker = (DependentCapabilityChecker) checker;
+                    if (!dependentChecker.isEnabled(cap, session, allCapabilities)) {
+                        return false;
+                    }
+                } else if (!checker.isEnabled(cap, session)) {
                     return false;
                 }
             }

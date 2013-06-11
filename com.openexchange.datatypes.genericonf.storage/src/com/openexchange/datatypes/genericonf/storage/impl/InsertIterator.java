@@ -54,7 +54,9 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import com.openexchange.datatypes.genericonf.IterationBreak;
+import com.openexchange.java.util.UUIDs;
 
 /**
  * {@link InsertIterator}
@@ -63,8 +65,8 @@ import com.openexchange.datatypes.genericonf.IterationBreak;
  */
 public class InsertIterator implements MapIterator<String, Object> {
 
-    private static final String INSERT_STRING = "INSERT INTO genconf_attributes_strings (id, cid, name, value) VALUES (?,?,?,?)";
-    private static final String INSERT_BOOL = "INSERT INTO genconf_attributes_bools (id, cid, name, value) VALUES (?,?,?,?)";
+    private static final String INSERT_STRING = "INSERT INTO genconf_attributes_strings (id, cid, name, value, uuid) VALUES (?,?,?,?,?)";
+    private static final String INSERT_BOOL = "INSERT INTO genconf_attributes_bools (id, cid, name, value, uuid) VALUES (?,?,?,?,?)";
 
 
     private SQLException exception;
@@ -100,10 +102,12 @@ public class InsertIterator implements MapIterator<String, Object> {
             exception = new SQLException("Unsupported object type: " + value.getClass().getName());
             throw new IterationBreak();
         }
-
+        UUID uuid = UUID.randomUUID();
+        byte[] uuidBinary = UUIDs.toByteArray(uuid);
         try {
             stmt.setString(3, key);
             stmt.setObject(4, value);
+            stmt.setBytes(5, uuidBinary);
             stmt.executeUpdate();
         } catch (SQLException e) {
             exception = e;

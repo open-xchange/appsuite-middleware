@@ -47,59 +47,40 @@
  *
  */
 
-package com.openexchange.groupware.update.osgi;
+package com.openexchange.capabilities;
 
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.caching.CacheService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.groupware.update.FullPrimaryKeySupportService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.internal.CreateUpdateTaskTable;
-import com.openexchange.groupware.update.internal.ExcludedList;
-import com.openexchange.groupware.update.internal.FullPrimaryKeySupportImpl;
-import com.openexchange.groupware.update.internal.InternalList;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * This {@link Activator} currently is only used to initialize some structures within the database update component. Later on this may used
- * to start up the bundle.
+ * {@link DependentCapabilityChecker}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Activator extends HousekeepingActivator {
+public abstract class DependentCapabilityChecker implements CapabilityChecker {
 
-    // private static final String APPLICATION_ID = "com.openexchange.groupware.update";
-
-    public Activator() {
+    /**
+     * Initializes a new {@link DependentCapabilityChecker}.
+     */
+    protected DependentCapabilityChecker() {
         super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
-    }
+    /**
+     * Check whether the capability should be awarded for a certain user
+     *
+     * @param capability The capability to check
+     * @param session Provides the users session for which to check
+     * @return Whether to award this capability or not
+     * @throws OXException If check fails
+     */
+    public abstract boolean isEnabled(String capability, Session session, Set<Capability> declaredCapabilities) throws OXException;
 
     @Override
-    public void startBundle() {
-        registerService(CreateTableService.class, new CreateUpdateTaskTable());
-
-        final ConfigurationService configService = getService(ConfigurationService.class);
-        registerService(FullPrimaryKeySupportService.class, new FullPrimaryKeySupportImpl(configService));
-
-        ExcludedList.getInstance().configure(configService);
-        InternalList.getInstance().start();
-
-        rememberTracker(new ServiceTracker<UpdateTaskProviderService, UpdateTaskProviderService>(context, UpdateTaskProviderService.class, new UpdateTaskCustomizer(context)));
-        rememberTracker(new ServiceTracker<CacheService, CacheService>(context, CacheService.class.getName(), new CacheCustomizer(context)));
-
-        openTrackers();
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        InternalList.getInstance().stop();
-        super.stopBundle();
+    public boolean isEnabled(String capability, Session session) throws OXException {
+        return isEnabled(capability, session, new HashSet<Capability>());
     }
 
 }

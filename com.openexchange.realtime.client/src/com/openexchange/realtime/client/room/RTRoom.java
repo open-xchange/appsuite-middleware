@@ -47,42 +47,46 @@
  *
  */
 
-package com.openexchange.groupware.update.osgi;
+package com.openexchange.realtime.client.room;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.update.internal.ExcludedList;
+import org.json.JSONValue;
+import com.openexchange.realtime.client.RTException;
+import com.openexchange.realtime.client.RTMessageHandler;
 
 /**
- * {@link ConfigurationCustomizer}
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * Interface that should be implemented when desired to use the chat functionality of the realtime framework.
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
  */
-public class ConfigurationCustomizer implements ServiceTrackerCustomizer<ConfigurationService,ConfigurationService> {
+public interface RTRoom {
 
-    private final BundleContext context;
+    /**
+     * Set the {@link RTMessageHandler} which should handle incoming messages.
+     * 
+     * @param rtMessageHandler - {@link RTMessageHandler} to deal with messages
+     * @throws RTException
+     */
+    public void setupRoom(RTMessageHandler rtMessageHandler);
 
-    public ConfigurationCustomizer(final BundleContext context) {
-        super();
-        this.context = context;
-    }
+    /**
+     * Join a room.
+     * 
+     * @param name - the name of the room which should be created also known as 'selector'
+     * @param to - defines the recipient to join to.
+     */
+    public void join(String name, String to) throws RTException;
 
-    @Override
-    public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
-        final ConfigurationService configService = context.getService(reference);
-        ExcludedList.getInstance().configure(configService);
-        return configService;
-    }
+    /**
+     * Send a message into the room.
+     * 
+     * @param message - {@link JSONValue} with the message to send.
+     */
+    public void say(JSONValue message) throws RTException;
 
-    @Override
-    public void modifiedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
-        // Nothing to do.
-    }
+    /**
+     * Leave the room.
+     */
+    public void leave() throws RTException;
 
-    @Override
-    public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
-        context.ungetService(reference);
-    }
 }

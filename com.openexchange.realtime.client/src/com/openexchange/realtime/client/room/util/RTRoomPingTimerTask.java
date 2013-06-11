@@ -47,61 +47,86 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.realtime.client.room.util;
 
-import org.apache.commons.lang.Validate;
-import com.openexchange.config.ConfigurationService;
+import java.util.TimerTask;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONValue;
+import com.openexchange.realtime.client.RTConnection;
 
 /**
- * This class provides the information if full primary key support should be used. The feature should only exist before OX version 7.6,
- * afterwards only primary key support is available.
+ * Sends a ping into a room to give a heart beat the realtime server and with that to not be removed out of the room.
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-public class FullPrimaryKeySupport {
+public class RTRoomPingTimerTask extends TimerTask {
 
     /**
-     * Singleton with the {@link FullPrimaryKeySupport} instance
+     * Lock for the ping
      */
-    private static final FullPrimaryKeySupport SINGLETON = new FullPrimaryKeySupport();
+    final Object lock = new Object();
 
     /**
-     * Holds if full primary key is supported.
+     * {@link RTConnection} to send the ping
      */
-    private Boolean isFullPrimaryKeySupported = null;
+    private RTConnection rtConnection;
 
     /**
-     * Initializes a new {@link FullPrimaryKeySupport}.
+     * String with the to address to send the ping.
      */
-    private FullPrimaryKeySupport() {
+    private String to;
+
+    /**
+     * Initializes a new {@link RTRoomPingTimerTask}.
+     * 
+     * @param rtConnection
+     * @param to
+     */
+    public RTRoomPingTimerTask(RTConnection rtConnection, String to) {
         super();
+        this.rtConnection = rtConnection;
+        this.to = to;
     }
 
     /**
-     * Returns the singleton of {@link FullPrimaryKeySupport}
-     * 
-     * @return instance of {@link FullPrimaryKeySupport}
+     * {@inheritDoc}
      */
-    public static final FullPrimaryKeySupport getInstance() {
-        return SINGLETON;
-    }
-
-    /**
-     * Returns if full primary key is supported
-     * 
-     * @param configService - The {@link ConfigurationService} to read the property
-     * @return boolean - true, if full primary key is supported
-     */
-    public boolean isFullPrimaryKeySupported(ConfigurationService configService) {
-
-        if (this.isFullPrimaryKeySupported == null) {
-            Validate.notNull(configService, "Configuration cannot be null.");
-
-            this.isFullPrimaryKeySupported = Boolean.valueOf(configService.getBoolProperty(
-                "com.openexchange.server.fullPrimaryKeySupport",
-                false));
+    @Override
+    public void run() {
+        synchronized (this.lock) {
+            try {
+                final JSONValue ping = this.createPingObject();
+                this.rtConnection.post(ping);
+            } catch (final Exception e) {
+                // TODO LOG.error(e.getMessage(), e);
+            }
         }
-        return isFullPrimaryKeySupported.booleanValue();
+    }
+
+    /**
+     * Creates the object to send a ping.
+     * 
+     * @return {@JSONObject} which includes the ping data.
+     * @throws JSONException - thrown when an error while JSON object creation occurs.
+     */
+    private JSONValue createPingObject() throws JSONException {
+        JSONObject pingObject = new JSONObject();
+
+        pingObject.put("element", "message");
+        pingObject.put("to", to);
+
+        JSONObject payload = new JSONObject();
+        payload.put("element", "ping");
+        payload.put("namespace", "group");
+
+        final JSONArray payloads = new JSONArray();
+        payloads.put(payload);
+
+        pingObject.put("payloads", payloads);
+
+        return pingObject;
     }
 }

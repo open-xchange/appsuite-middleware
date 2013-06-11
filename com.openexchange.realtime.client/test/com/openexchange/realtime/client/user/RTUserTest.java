@@ -47,59 +47,49 @@
  *
  */
 
-package com.openexchange.groupware.update.osgi;
+package com.openexchange.realtime.client.user;
 
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.caching.CacheService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.groupware.update.FullPrimaryKeySupportService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.internal.CreateUpdateTaskTable;
-import com.openexchange.groupware.update.internal.ExcludedList;
-import com.openexchange.groupware.update.internal.FullPrimaryKeySupportImpl;
-import com.openexchange.groupware.update.internal.InternalList;
-import com.openexchange.osgi.HousekeepingActivator;
+import junit.framework.Assert;
+import org.junit.Test;
 
 /**
- * This {@link Activator} currently is only used to initialize some structures within the database update component. Later on this may used
- * to start up the bundle.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * Tests for {@link RTUser}
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
  */
-public class Activator extends HousekeepingActivator {
+public class RTUserTest {
 
-    // private static final String APPLICATION_ID = "com.openexchange.groupware.update";
+    private final static String NAME = "username";
 
-    public Activator() {
-        super();
+    private final static String PASSWORD = "username";
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor_NameNull_ThrowException() {
+        RTUser user = new RTUser(null, PASSWORD);
+
+        Assert.assertNull(user);
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor_PasswordNull_ThrowException() {
+        RTUser user = new RTUser(NAME, null);
+
+        Assert.assertNull(user);
     }
 
-    @Override
-    public void startBundle() {
-        registerService(CreateTableService.class, new CreateUpdateTaskTable());
+    @Test
+    public void testConstructor_EverythingFine_CreateUser() {
+        RTUser user = new RTUser(NAME, PASSWORD);
 
-        final ConfigurationService configService = getService(ConfigurationService.class);
-        registerService(FullPrimaryKeySupportService.class, new FullPrimaryKeySupportImpl(configService));
-
-        ExcludedList.getInstance().configure(configService);
-        InternalList.getInstance().start();
-
-        rememberTracker(new ServiceTracker<UpdateTaskProviderService, UpdateTaskProviderService>(context, UpdateTaskProviderService.class, new UpdateTaskCustomizer(context)));
-        rememberTracker(new ServiceTracker<CacheService, CacheService>(context, CacheService.class.getName(), new CacheCustomizer(context)));
-
-        openTrackers();
+        Assert.assertNotNull(user);
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        InternalList.getInstance().stop();
-        super.stopBundle();
+    @Test
+    public void testConstructor_EverythingFine_ResourceSet() {
+        RTUser user = new RTUser(NAME, PASSWORD);
+
+        Assert.assertNotNull(user.getResource());
     }
 
 }

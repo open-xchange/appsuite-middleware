@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,59 +47,66 @@
  *
  */
 
-package com.openexchange.groupware.update.osgi;
+package com.openexchange.groupware.update.tasks;
 
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.caching.CacheService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.groupware.update.FullPrimaryKeySupportService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.internal.CreateUpdateTaskTable;
-import com.openexchange.groupware.update.internal.ExcludedList;
-import com.openexchange.groupware.update.internal.FullPrimaryKeySupportImpl;
-import com.openexchange.groupware.update.internal.InternalList;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Tools;
 
 /**
- * This {@link Activator} currently is only used to initialize some structures within the database update component. Later on this may used
- * to start up the bundle.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * {@link CreateIcalIdsPrimaryKeyTask}
+ * 
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class Activator extends HousekeepingActivator {
+public class CreateIcalIdsPrimaryKeyTask extends UpdateTaskAdapter {
 
-    // private static final String APPLICATION_ID = "com.openexchange.groupware.update";
-
-    public Activator() {
+    /**
+     * Initializes a new {@link CreateIcalIdsPrimaryKeyTask}.
+     */
+    public CreateIcalIdsPrimaryKeyTask() {
         super();
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+    public void perform(PerformParameters params) throws OXException {
+        int cid = params.getContextId();
+        Connection con = Database.getNoTimeout(cid, true);
+        String[] columns = { "cid", "object_id" };
+        try {
+            con.setAutoCommit(false);
+            if (!Tools.hasPrimaryKey(con, "ical_ids")) {
+                Tools.createPrimaryKey(con, "ical_ids", columns);
+            }
+            con.commit();
+        } catch (SQLException e) {
+            DBUtils.rollback(con);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            DBUtils.rollback(con);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            Database.backNoTimeout(cid, true, con);
+        }
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
+     */
     @Override
-    public void startBundle() {
-        registerService(CreateTableService.class, new CreateUpdateTaskTable());
-
-        final ConfigurationService configService = getService(ConfigurationService.class);
-        registerService(FullPrimaryKeySupportService.class, new FullPrimaryKeySupportImpl(configService));
-
-        ExcludedList.getInstance().configure(configService);
-        InternalList.getInstance().start();
-
-        rememberTracker(new ServiceTracker<UpdateTaskProviderService, UpdateTaskProviderService>(context, UpdateTaskProviderService.class, new UpdateTaskCustomizer(context)));
-        rememberTracker(new ServiceTracker<CacheService, CacheService>(context, CacheService.class.getName(), new CacheCustomizer(context)));
-
-        openTrackers();
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        InternalList.getInstance().stop();
-        super.stopBundle();
+    public String[] getDependencies() {
+        return new String[0];
     }
 
 }

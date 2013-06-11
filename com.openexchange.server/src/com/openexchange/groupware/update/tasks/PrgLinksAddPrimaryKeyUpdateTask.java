@@ -47,15 +47,14 @@
  *
  */
 
-package com.openexchange.realtime.presence.subscribe.database;
+package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.UUID;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -65,37 +64,33 @@ import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
+
 /**
- * {@link AddUUIDColumnTask}
- * 
+ * {@link PrgLinksAddPrimaryKeyUpdateTask}
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class AddUUIDColumnTask extends UpdateTaskAdapter {
-
-    private final DatabaseService dbService;
+public class PrgLinksAddPrimaryKeyUpdateTask extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link AddUUIDColumnTask}.
+     * Initializes a new {@link PrgLinksAddPrimaryKeyUpdateTask}.
      */
-    public AddUUIDColumnTask(DatabaseService dbService) {
+    public PrgLinksAddPrimaryKeyUpdateTask() {
         super();
-        this.dbService = dbService;
     }
 
-    /*
-     * (non-Javadoc)
+    /* (non-Javadoc)
      * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
      */
     @Override
     public void perform(PerformParameters params) throws OXException {
         int cid = params.getContextId();
-        Connection con = dbService.getForUpdateTask(cid);
-        Column column = new Column("uuid", "BINARY(16) DEFAULT NULL");
+        Connection con = Database.getNoTimeout(cid, true);
+        Column column = new Column("uuid", "BINARY(16) NOT NULL");
         try {
             con.setAutoCommit(false);
-            if (!Tools.columnExists(con, "presenceSubscriptions", column.name)) {
-                Tools.checkAndAddColumns(con, "presenceSubscriptions", column);
-            }
+            Tools.modifyColumns(con, "prg_links", column);
+            Tools.createPrimaryKey(con, "prg_links", new String[] { column.name });
             setUUID(con);
             con.commit();
         } catch (SQLException e) {
@@ -106,82 +101,88 @@ public class AddUUIDColumnTask extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             DBUtils.autocommit(con);
-            dbService.backForUpdateTask(cid, con);
+            Database.backNoTimeout(cid, true, con);
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /* (non-Javadoc)
      * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
      */
     @Override
     public String[] getDependencies() {
-        return new String[0];
+        return new String[] { "com.openexchange.groupware.update.tasks.PrgLinksAddUuidUpdateTask" };
     }
-
+    
     private void setUUID(Connection con) throws SQLException {
         PreparedStatement stmt = null;
         int oldPos, newPos;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT fromCid, fromUserId, fromId, toCid, toUserId, status, request, timestamp FROM presenceSubscriptions WHERE uuid IS NULL FOR UPDATE");
+            stmt = con.prepareStatement("SELECT firstid, firstmodule, firstfolder, secondid, secondmodule, secondfolder, cid, last_modified, created_by FROM prg_links WHERE uuid IS NULL FOR UPDATE");
             rs = stmt.executeQuery();
             PreparedStatement stmt2 = null;
             try {
                 while (rs.next()) {
                     StringBuilder sb = new StringBuilder();
-                    sb.append("UPDATE presenceSubscriptions SET uuid = ? WHERE fromCid ");
+                    sb.append("UPDATE prg_links SET uuid = ? WHERE firstid ");
                     oldPos = 1;
-                    int fromCid = rs.getInt(oldPos++);
+                    int firstid = rs.getInt(oldPos++);
                     if (rs.wasNull()) {
                         sb.append("IS ? ");
                     } else {
                         sb.append("= ? ");
                     }
-                    sb.append("AND fromUserId ");
-                    int fromUserId = rs.getInt(oldPos++);
+                    sb.append("AND firstmodule ");
+                    int firstmodule = rs.getInt(oldPos++);
                     if (rs.wasNull()) {
                         sb.append("IS ? ");
                     } else {
                         sb.append("= ? ");
                     }
-                    sb.append("AND fromId ");
-                    String fromId = rs.getString(oldPos++);
+                    sb.append("AND firstfolder ");
+                    int firstfolder = rs.getInt(oldPos++);
                     if (rs.wasNull()) {
                         sb.append("IS ? ");
                     } else {
                         sb.append("= ? ");
                     }
-                    sb.append("AND toCid ");
-                    int toCid = rs.getInt(oldPos++);
+                    sb.append("AND secondid ");
+                    int secondid = rs.getInt(oldPos++);
                     if (rs.wasNull()) {
                         sb.append("IS ? ");
                     } else {
                         sb.append("= ? ");
                     }
-                    sb.append("AND toUserId ");
-                    int toUserId = rs.getInt(oldPos++);
+                    sb.append("AND secondmodule ");
+                    int secondmodule = rs.getInt(oldPos++);
                     if (rs.wasNull()) {
                         sb.append("IS ? ");
                     } else {
                         sb.append("= ? ");
                     }
-                    sb.append("AND status ");
-                    String status = rs.getString(oldPos++);
+                    sb.append("AND secondfolder ");
+                    int secondfolder = rs.getInt(oldPos++);
                     if (rs.wasNull()) {
                         sb.append("IS ? ");
                     } else {
                         sb.append("= ? ");
                     }
-                    sb.append("AND request ");
-                    String request = rs.getString(oldPos++);
+                    sb.append("AND cid ");
+                    int cid = rs.getInt(oldPos++);
                     if (rs.wasNull()) {
                         sb.append("IS ? ");
                     } else {
                         sb.append("= ? ");
                     }
-                    sb.append("AND timestamp ");
-                    Timestamp timestamp = rs.getTimestamp(oldPos++);
+                    sb.append("AND last_modified ");
+                    long lastModified = rs.getInt(oldPos++);
+                    if (rs.wasNull()) {
+                        sb.append("IS ? ");
+                    } else {
+                        sb.append("= ? ");
+                    }
+                    sb.append("AND created_by ");
+                    int createdBy = rs.getInt(oldPos++);
                     if (rs.wasNull()) {
                         sb.append("IS ? ");
                     } else {
@@ -191,14 +192,15 @@ public class AddUUIDColumnTask extends UpdateTaskAdapter {
                     newPos = 1;
                     UUID uuid = UUID.randomUUID();
                     stmt2.setBytes(newPos++, UUIDs.toByteArray(uuid));
-                    stmt2.setInt(newPos++, fromCid);
-                    stmt2.setInt(newPos++, fromUserId);
-                    stmt2.setString(newPos++, fromId);
-                    stmt2.setInt(newPos++, toCid);
-                    stmt2.setInt(newPos++, toUserId);
-                    stmt2.setString(newPos++, status);
-                    stmt2.setString(newPos++, request);
-                    stmt2.setTimestamp(newPos++, timestamp);
+                    stmt2.setInt(newPos++, firstid);
+                    stmt2.setInt(newPos++, firstmodule);
+                    stmt2.setInt(newPos++, firstfolder);
+                    stmt2.setInt(newPos++, secondid);
+                    stmt2.setInt(newPos++, secondmodule);
+                    stmt2.setInt(newPos++, secondfolder);
+                    stmt2.setInt(newPos++, cid);
+                    stmt2.setLong(newPos++, lastModified);
+                    stmt2.setInt(newPos++, createdBy);
                     stmt2.execute();
                 }
             } finally {

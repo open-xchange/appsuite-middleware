@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,65 @@
  *
  */
 
-package com.openexchange.groupware.update.osgi;
+package com.openexchange.groupware.update.tasks;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.update.FullPrimaryKeySupport;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.groupware.update.tasks.AddUUIDForUpdateTaskTable;
-import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUpdateTaskTable;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Tools;
+
 
 /**
- * {@link UpdateTaskTableUpdateTasksActivator}
- * 
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * {@link CreateIcalPrincipalPrimaryKeyTask}
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class UpdateTaskTableUpdateTasksActivator extends HousekeepingActivator {
+public class CreateIcalPrincipalPrimaryKeyTask extends UpdateTaskAdapter {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+    /**
+     * Initializes a new {@link CreateIcalPrincipalPrimaryKeyTask}.
+     */
+    public CreateIcalPrincipalPrimaryKeyTask() {
+        super();
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
+     */
     @Override
-    protected void startBundle() throws Exception {
-        registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
-
-            @Override
-            public Collection<? extends UpdateTaskV2> getUpdateTasks() {
-                List<UpdateTaskV2> updateTasks = new ArrayList<UpdateTaskV2>();
-                updateTasks.add(new AddUUIDForUpdateTaskTable());
-
-                final ConfigurationService configurationService = getService(ConfigurationService.class);
-                if (FullPrimaryKeySupport.getInstance().isFullPrimaryKeySupported(configurationService)) {
-                    updateTasks.add(new MakeUUIDPrimaryForUpdateTaskTable());
-                }
-                return updateTasks;
+    public void perform(PerformParameters params) throws OXException {
+        int cid = params.getContextId();
+        Connection con = Database.getNoTimeout(cid, true);
+        String[] columns = { "cid", "object_id" };
+        try {
+            con.setAutoCommit(false);
+            if (!Tools.hasPrimaryKey(con, "ical_principal")) {
+                Tools.createPrimaryKey(con, "ical_principal", columns);
             }
-        });
+            con.commit();
+        } catch (SQLException e) {
+            DBUtils.rollback(con);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            DBUtils.rollback(con);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            Database.backNoTimeout(cid, true, con);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
+     */
+    @Override
+    public String[] getDependencies() {
+        return new String[0];
     }
 
 }
