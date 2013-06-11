@@ -47,34 +47,42 @@
  *
  */
 
-package com.openexchange.realtime.client;
+package com.openexchange.realtime.client.impl;
 
+import java.util.concurrent.atomic.AtomicLong;
+import com.openexchange.realtime.client.RTException;
 
 /**
- * {@link Constants} - Gathers constants used throughout the project.
+ * {@link SequenceGenerator} Generates sequentially raising numbers and can be reset to be reused again.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class Constants {
+public class SequenceGenerator {
 
-    public static final String API_PATH = "/ajax/api";
-    
-    public static final String CLIENT_ID = "open-xchange-realtime";
+    private AtomicLong sequence;
 
-    public static final String LOGIN_PATH = "/ajax/login";
+    public SequenceGenerator() {
+        sequence = new AtomicLong();
+    }
 
-    public static final String LOGIN_ACTION = "login";
+    /**
+     * Generate the next sequence number
+     * 
+     * @return the next sequence number
+     * @throws RTException if incrementing would cause a number overflow to give the user a chance to reset the counter via
+     *             {@link SequenceGenerator#reset()}
+     */
+    public long nextSequence() throws RTException {
+        if (sequence.get() == Long.MAX_VALUE) {
+            throw new RTException("Sequence overflow, reset counter to continue");
+        }
+        return sequence.getAndIncrement();
+    }
 
-    public static final String CREATE_PATH = API_PATH + "/oxodocumentfilter";
-    
-    public static final String QUERY_PATH = API_PATH +  "/rt";
-    
-    public static final String QUERY_ACTION = QUERY_PATH +  "?action=query";
-    
-    public static final String SEND_PATH = API_PATH +  "/rt";
-    
-    public static final String SEND_ACTION = QUERY_PATH +  "?action=send";
-
-    public static final String DEFAULT_SELECTOR = "default";
-
+    /**
+     * Reset the counter to 0.
+     */
+    public void reset() {
+        sequence.set(0);
+    }
 }

@@ -47,34 +47,86 @@
  *
  */
 
-package com.openexchange.realtime.client;
+package com.openexchange.realtime.client.room.util;
 
+import java.util.TimerTask;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONValue;
+import com.openexchange.realtime.client.RTConnection;
 
 /**
- * {@link Constants} - Gathers constants used throughout the project.
+ * Sends a ping into a room to give a heart beat the realtime server and with that to not be removed out of the room.
  * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
  */
-public class Constants {
+public class RTRoomPingTimerTask extends TimerTask {
 
-    public static final String API_PATH = "/ajax/api";
-    
-    public static final String CLIENT_ID = "open-xchange-realtime";
+    /**
+     * Lock for the ping
+     */
+    final Object lock = new Object();
 
-    public static final String LOGIN_PATH = "/ajax/login";
+    /**
+     * {@link RTConnection} to send the ping
+     */
+    private RTConnection rtConnection;
 
-    public static final String LOGIN_ACTION = "login";
+    /**
+     * String with the to address to send the ping.
+     */
+    private String to;
 
-    public static final String CREATE_PATH = API_PATH + "/oxodocumentfilter";
-    
-    public static final String QUERY_PATH = API_PATH +  "/rt";
-    
-    public static final String QUERY_ACTION = QUERY_PATH +  "?action=query";
-    
-    public static final String SEND_PATH = API_PATH +  "/rt";
-    
-    public static final String SEND_ACTION = QUERY_PATH +  "?action=send";
+    /**
+     * Initializes a new {@link RTRoomPingTimerTask}.
+     * 
+     * @param rtConnection
+     * @param to
+     */
+    public RTRoomPingTimerTask(RTConnection rtConnection, String to) {
+        super();
+        this.rtConnection = rtConnection;
+        this.to = to;
+    }
 
-    public static final String DEFAULT_SELECTOR = "default";
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void run() {
+        synchronized (this.lock) {
+            try {
+                final JSONValue ping = this.createPingObject();
+                this.rtConnection.post(ping);
+            } catch (final Exception e) {
+                // TODO LOG.error(e.getMessage(), e);
+            }
+        }
+    }
 
+    /**
+     * Creates the object to send a ping.
+     * 
+     * @return {@JSONObject} which includes the ping data.
+     * @throws JSONException - thrown when an error while JSON object creation occurs.
+     */
+    private JSONValue createPingObject() throws JSONException {
+        JSONObject pingObject = new JSONObject();
+
+        pingObject.put("element", "message");
+        pingObject.put("to", to);
+
+        JSONObject payload = new JSONObject();
+        payload.put("element", "ping");
+        payload.put("namespace", "group");
+
+        final JSONArray payloads = new JSONArray();
+        payloads.put(payload);
+
+        pingObject.put("payloads", payloads);
+
+        return pingObject;
+    }
 }

@@ -47,34 +47,49 @@
  *
  */
 
-package com.openexchange.realtime.client;
+package com.openexchange.realtime.client.user;
 
+import junit.framework.Assert;
+import org.junit.Test;
 
 /**
- * {@link Constants} - Gathers constants used throughout the project.
+ * Tests for {@link RTUser}
  * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
  */
-public class Constants {
+public class RTUserTest {
 
-    public static final String API_PATH = "/ajax/api";
-    
-    public static final String CLIENT_ID = "open-xchange-realtime";
+    private final static String NAME = "username";
 
-    public static final String LOGIN_PATH = "/ajax/login";
+    private final static String PASSWORD = "username";
 
-    public static final String LOGIN_ACTION = "login";
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor_NameNull_ThrowException() {
+        RTUser user = new RTUser(null, PASSWORD);
 
-    public static final String CREATE_PATH = API_PATH + "/oxodocumentfilter";
-    
-    public static final String QUERY_PATH = API_PATH +  "/rt";
-    
-    public static final String QUERY_ACTION = QUERY_PATH +  "?action=query";
-    
-    public static final String SEND_PATH = API_PATH +  "/rt";
-    
-    public static final String SEND_ACTION = QUERY_PATH +  "?action=send";
+        Assert.assertNull(user);
+    }
 
-    public static final String DEFAULT_SELECTOR = "default";
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor_PasswordNull_ThrowException() {
+        RTUser user = new RTUser(NAME, null);
+
+        Assert.assertNull(user);
+    }
+
+    @Test
+    public void testConstructor_EverythingFine_CreateUser() {
+        RTUser user = new RTUser(NAME, PASSWORD);
+
+        Assert.assertNotNull(user);
+    }
+
+    @Test
+    public void testConstructor_EverythingFine_ResourceSet() {
+        RTUser user = new RTUser(NAME, PASSWORD);
+
+        Assert.assertNotNull(user.getResource());
+    }
 
 }

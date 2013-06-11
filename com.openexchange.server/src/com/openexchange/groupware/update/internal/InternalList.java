@@ -58,6 +58,7 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardIdsTask;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardPrincipalTask;
+import com.openexchange.groupware.update.tasks.AddUUIDForDListTables;
 import com.openexchange.groupware.update.tasks.AddUUIDForUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicContextAttributesTask;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicUserAttributesTask;
@@ -73,6 +74,7 @@ import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddUuidUpda
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddPrimaryKey;
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.MailAccountAddReplyToTask;
+import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForDListTables;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddUuidUpdateTask;
@@ -538,6 +540,9 @@ public final class InternalList {
         //Add Uuid column to prg_contacts_linkage table
         list.add(new PrgContactsLinkageAddUuidUpdateTask());
 
+        //Add Uuid column to dlist tables
+        list.add(new AddUUIDForDListTables());
+
         //Add synthetic primary keys to tables without natural key if full primary key support is enabled
         final FullPrimaryKeySupportService fullPrimaryKeySupportService = ServerServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
         if (null != fullPrimaryKeySupportService && fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
@@ -555,7 +560,7 @@ public final class InternalList {
             
             //Add primary key to updateTask table
             list.add(new MakeUUIDPrimaryForUpdateTaskTable());
-            
+
             //Add primary key to ical_ids table
             list.add(new CreateIcalIdsPrimaryKeyTask());
             
@@ -567,6 +572,10 @@ public final class InternalList {
             
             //Add primary key to prg_contacts_linkage table
             list.add(new PrgContactsLinkageAddPrimaryKeyUpdateTask());
+
+            //Add primary key to dlist tables
+            list.add(new MakeUUIDPrimaryForDListTables());
+            
         }
 
         return list.toArray(new UpdateTaskV2[list.size()]);

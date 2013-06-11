@@ -50,10 +50,12 @@
 package com.openexchange.realtime.client.impl;
 
 import java.io.StringReader;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang.Validate;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.openexchange.realtime.client.Constants;
 import com.openexchange.realtime.client.RTConnection;
 import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
@@ -76,41 +78,38 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     protected RTMessageHandler messageHandler;
 
-    protected RTUserStateChangeListener changeListener;
-
     protected RTUserState userState;
 
+    //did we successfully login to the backend to receive a serversession?
     protected boolean loggedIn = false;
+    
+    //did we establish a "duplex" connection to the backend? 
+    protected boolean isConnected = false;
 
     private Thread deliverer;
+    
+    protected ConcurrentHashMap<String, RTMessageHandler> messageHandlers; 
 
 
     protected AbstractRTConnection(RTConnectionProperties connectionProperties) {
         super();
         Validate.notNull(connectionProperties, "ConnectionProperties are needed to create a new Connection");
         this.connectionProperties = connectionProperties;
+        messageHandlers = new ConcurrentHashMap<String, RTMessageHandler>();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.realtime.client.RTConnection#connect(com.openexchange.realtime.client.RTMessageHandler)
-     */
     @Override
     public RTUserState connect(RTMessageHandler messageHandler) throws RTException {
-        return connect(messageHandler, new RTUserStateChangeListener() {
-            @Override
-            public void setUserState(RTUserState state) {
-            }
-        });
+        return connect(Constants.DEFAULT_SELECTOR, messageHandler);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.client.RTConnection#connect(com.openexchange.realtime.client.RTMessageHandler, com.openexchange.realtime.client.RTUserStateChangeListener)
-     */
     @Override
-    public RTUserState connect(RTMessageHandler messageHandler, RTUserStateChangeListener changeListener) throws RTException {
+    public RTUserState connect(String selector, RTMessageHandler messageHandler) throws RTException {
+        RTMessageHandler previousHandler = messageHandlers.putIfAbsent(selector, messageHandler);
+        if(previousHandler != null) {
+            throw new RTException("There is already a mapping selector <-> messageHandler for the selector: " + selector);
+        }
         this.messageHandler = messageHandler;
-        this.changeListener = changeListener;
         if (messageHandler != null) {
             gate = new SequenceGate();
             deliverer = new Thread(new MessageDeliverer(messageHandler, gate));
@@ -128,10 +127,6 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
         return userState;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.realtime.client.RTConnection#close()
-     */
     @Override
     public void close() throws RTException {
         protocol.release();
@@ -159,5 +154,14 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
         } catch (JSONException e) {
             throw new RTException("The given string was not a valid JSON message.", e);
         }
+    }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.realtime.client.RTConnection#removeHandler(java.lang.String)
+     */
+    @Override
+    public void removeHandler(String selector) {
+        // TODO Auto-generated method stub
+        
     }
 }
