@@ -64,5 +64,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-gui-help-plugin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-meta"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-meta-centos"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-parallels"/>
 </provider>
 </psf>
