@@ -118,7 +118,7 @@ public class GenconfAttributesStringsAddPrimaryKey extends UpdateTaskAdapter {
         int oldPos, newPos;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT cid, id, name, value, widget FROM genconf_attributes_strings WHERE uuid IS NULL FOR UPDATE");
+            stmt = con.prepareStatement("SELECT cid, id, name, value FROM genconf_attributes_strings WHERE uuid IS NULL FOR UPDATE");
             rs = stmt.executeQuery();
             PreparedStatement stmt2 = null;
             try {
@@ -153,13 +153,6 @@ public class GenconfAttributesStringsAddPrimaryKey extends UpdateTaskAdapter {
                     } else {
                         sb.append("= ? ");
                     }
-                    sb.append("AND widget ");
-                    String widget = rs.getString(oldPos++);
-                    if (rs.wasNull()) {
-                        sb.append("IS ? ");
-                    } else {
-                        sb.append("= ? ");
-                    }
                     stmt2 = con.prepareStatement(sb.toString());
                     newPos = 1;
                     UUID uuid = UUID.randomUUID();
@@ -168,7 +161,6 @@ public class GenconfAttributesStringsAddPrimaryKey extends UpdateTaskAdapter {
                     stmt2.setInt(newPos++, id);
                     stmt2.setString(newPos++, name);
                     stmt2.setString(newPos++, value);
-                    stmt2.setString(newPos++, widget);
                     stmt2.execute();
                 }
             } finally {

@@ -155,13 +155,6 @@ public class GenconfAttributesBoolsAddUuidUpdateTask extends UpdateTaskAdapter {
                     } else {
                         sb.append("= ? ");
                     }
-                    sb.append("AND widget ");
-                    String widget = rs.getString(oldPos++);
-                    if (rs.wasNull()) {
-                        sb.append("IS ? ");
-                    } else {
-                        sb.append("= ? ");
-                    }
                     stmt2 = con.prepareStatement(sb.toString());
                     newPos = 1;
                     UUID uuid = UUID.randomUUID();
@@ -170,7 +163,6 @@ public class GenconfAttributesBoolsAddUuidUpdateTask extends UpdateTaskAdapter {
                     stmt2.setInt(newPos++, id);
                     stmt2.setString(newPos++, name);
                     stmt2.setShort(newPos++, value);
-                    stmt2.setString(newPos++, widget);
                     stmt2.execute();
                 }
             } finally {
