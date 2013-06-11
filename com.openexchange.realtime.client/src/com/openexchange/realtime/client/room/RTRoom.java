@@ -54,7 +54,7 @@ import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
 
 /**
- * Interface that should be implemented when desired to use the chat functionality of the realtime framework.
+ * Interface that should be implemented when it is desired to use the chat functionality of the realtime framework.
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
@@ -62,7 +62,8 @@ import com.openexchange.realtime.client.RTMessageHandler;
 public interface RTRoom {
 
     /**
-     * Join a room. One user is able to join more than one room based
+     * Use this to join a room. One user is able to join many different rooms. For each room an own {@link RTMessageHandler} implementation
+     * is required which means, that you should avoid joining a room twice and using {@link RTMessageHandler} implementation twice.
      * 
      * @param name - the name of the room which should be created also known as 'selector'
      * @param to - defines the recipient to join to.
@@ -71,14 +72,16 @@ public interface RTRoom {
     public void join(String name, String to, RTMessageHandler messageHandler) throws RTException;
 
     /**
-     * Send a message into the room.
+     * Use this method to say something into a room. Based on settings made with com.openexchange.realtime.client.room.RTRoom.join(String,
+     * String, RTMessageHandler) your message will be transferred to all users joined the room.
      * 
      * @param message - {@link JSONValue} with the message to send.
      */
     public void say(JSONValue message) throws RTException;
 
     /**
-     * Leave the room.
+     * Use this to leave the room joined with com.openexchange.realtime.client.room.RTRoom.join(String, String, RTMessageHandler) before.
+     * After leaving the room you are allowed to use the instance of {@link RTMessageHandler} again.
      */
     public void leave() throws RTException;
 
