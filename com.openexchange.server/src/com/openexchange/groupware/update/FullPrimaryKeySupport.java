@@ -49,9 +49,8 @@
 
 package com.openexchange.groupware.update;
 
-import org.apache.commons.logging.Log;
+import org.apache.commons.lang.Validate;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * This class provides the information if full primary key support should be used. The feature should only exist before OX version 7.6,
@@ -61,11 +60,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * @since 7.4
  */
 public class FullPrimaryKeySupport {
-
-    /**
-     * Logger
-     */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FullPrimaryKeySupport.class);
 
     /**
      * Singleton with the {@link FullPrimaryKeySupport} instance
@@ -87,7 +81,7 @@ public class FullPrimaryKeySupport {
     /**
      * Returns the singleton of {@link FullPrimaryKeySupport}
      * 
-     * @return
+     * @return instance of {@link FullPrimaryKeySupport}
      */
     public static final FullPrimaryKeySupport getInstance() {
         return SINGLETON;
@@ -96,20 +90,15 @@ public class FullPrimaryKeySupport {
     /**
      * Returns if full primary key is supported
      * 
+     * @param configService - The {@link ConfigurationService} to read the property
      * @return boolean - true, if full primary key is supported
      */
-    public boolean isFullPrimaryKeySupported() {
+    public boolean isFullPrimaryKeySupported(ConfigurationService configService) {
 
         if (this.isFullPrimaryKeySupported == null) {
-            ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            Validate.notNull(configService, "Configuration cannot be null.");
 
-            if (configurationService == null) {
-                IllegalStateException e = new IllegalStateException("Configuration service not initialized yet.");
-                LOG.error(e.getMessage(), e);
-                throw e;
-            }
-
-            this.isFullPrimaryKeySupported = Boolean.valueOf(configurationService.getBoolProperty(
+            this.isFullPrimaryKeySupported = Boolean.valueOf(configService.getBoolProperty(
                 "com.openexchange.server.fullPrimaryKeySupport",
                 false));
         }

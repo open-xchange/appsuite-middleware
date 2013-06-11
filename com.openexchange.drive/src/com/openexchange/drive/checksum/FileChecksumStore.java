@@ -50,6 +50,7 @@
 package com.openexchange.drive.checksum;
 
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 
 /**
@@ -88,6 +89,8 @@ public interface FileChecksumStore {
     List<FileChecksum> getFileChecksums(String folderID) throws OXException;
 
     List<FileChecksum> getMatchingFileChecksums(String checksum) throws OXException;
+
+    Map<String, List<FileChecksum>> getMatchingFileChecksums(List<String> checksums) throws OXException;
 
 }
 

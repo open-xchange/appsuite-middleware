@@ -60,9 +60,10 @@ public class Constants {
     public static final String CLIENT_ID = "open-xchange-realtime";
 
     public static final String LOGIN_PATH = "/ajax/login";
-    
+
     public static final String LOGIN_ACTION = "login";
-    
-    
+
+    public static final String CREATE_ACTION = "/appsuite/api/oxodocumentfilter";
+
 
 }

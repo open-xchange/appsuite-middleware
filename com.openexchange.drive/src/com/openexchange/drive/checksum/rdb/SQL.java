@@ -155,8 +155,14 @@ public class SQL {
         "DELETE FROM directoryChecksums " +
         "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?);";
 
-    /** SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,checksum FROM directoryChecksums WHERE cid=? AND service=? AND account=? AND REVERSE(folder) IN (...);" */
+    /**
+     * SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,checksum FROM directoryChecksums
+     * WHERE cid=? AND service=? AND account=? AND REVERSE(folder) IN (...);"
+     */
     public static final String SELECT_DIRECTORY_CHECKSUMS_STMT(String[] folderIDs) {
+        if (null == folderIDs || 0 == folderIDs.length) {
+            throw new IllegalArgumentException("folderIDs");
+        }
         StringAllocator allocator = new StringAllocator();
         allocator.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,LOWER(HEX(checksum)) FROM directoryChecksums ");
         allocator.append("WHERE cid=? AND service=? AND account=? AND REVERSE(folder) IN (");
@@ -167,6 +173,29 @@ public class SQL {
             allocator.append(',').append(folderIDs[i]);
         }
         allocator.append(");");
+        return allocator.toString();
+    }
+
+    /**
+     * SELECT LOWER(HEX(uuid)),REVERSE(folder),REVERSE(file),version,sequence,LOWER(HEX(checksum)) FROM fileChecksums
+     * WHERE cid=? AND service=? AND account=? AND checksum IN (...);"
+     */
+    public static final String SELECT_MATCHING_FILE_CHECKSUMS_STMT(String[] checksums) {
+        if (null == checksums || 0 == checksums.length) {
+            throw new IllegalArgumentException("checksums");
+        }
+        StringAllocator allocator = new StringAllocator();
+        allocator.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),REVERSE(file),version,sequence,LOWER(HEX(checksum)) FROM fileChecksums ");
+        allocator.append("WHERE cid=? AND service=? AND account=? AND LOWER(HEX(checksum))");
+        if (1 == checksums.length) {
+            allocator.append("='").append(checksums[0]).append("';");
+        } else {
+            allocator.append(" IN ('").append(checksums[0]);
+            for (int i = 1; i < checksums.length; i++) {
+                allocator.append("','").append(checksums[i]);
+            }
+            allocator.append("');");
+        }
         return allocator.toString();
     }
 

@@ -6,7 +6,8 @@ Bundle-Version: 7.4.0
 Bundle-Activator: com.openexchange.realtime.presence.subscribe.osgi.PresenceSubscribeActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.context,
+Import-Package: com.openexchange.config,
+ com.openexchange.context,
  com.openexchange.database,
  com.openexchange.databaseold,
  com.openexchange.exception,

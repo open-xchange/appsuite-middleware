@@ -51,7 +51,7 @@ package com.openexchange.realtime.presence.subscribe.osgi;
 
 import java.util.Arrays;
 import java.util.Collection;
-import org.osgi.framework.BundleContext;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
@@ -77,12 +77,11 @@ import com.openexchange.user.UserService;
  */
 public class PresenceSubscribeActivator extends HousekeepingActivator {
 
-    // private BundleActivator testFragment;
-
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ResourceDirectory.class, DatabaseService.class, ContextService.class, UserService.class, MessageDispatcher.class };
+            ResourceDirectory.class, DatabaseService.class, ContextService.class, UserService.class, MessageDispatcher.class,
+            ConfigurationService.class };
     }
 
     @Override
@@ -91,7 +90,9 @@ public class PresenceSubscribeActivator extends HousekeepingActivator {
         SubscriptionsSQL.db = dbService;
         registerService(PresenceSubscriptionService.class, new SubscriptionServiceImpl(this));
         registerService(CreateTableService.class, new PresenceSubscriptionsTable());
-        if (FullPrimaryKeySupport.getInstance().isFullPrimaryKeySupported()) {
+
+        final ConfigurationService configurationService = getService(ConfigurationService.class);
+        if (FullPrimaryKeySupport.getInstance().isFullPrimaryKeySupported(configurationService)) {
             registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
                 @Override
@@ -111,31 +112,5 @@ public class PresenceSubscribeActivator extends HousekeepingActivator {
                 }
             });
         }
-
-        // try {
-        // Class<? extends BundleActivator> clazz = (Class<? extends BundleActivator>)
-        // Class.forName("com.openexchange.realtime.presence.subscribe.test.osgi.Activator");
-        // testFragment = clazz.newInstance();
-        // testFragment.start(context);
-        // } catch (Exception e) {
-        // e.printStackTrace();
-        // }
     }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#stop(org.osgi.framework.BundleContext)
-     */
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        // try {
-        // if (testFragment != null) {
-        // testFragment.stop(context);
-        // }
-        // } catch (Exception e) {
-        //
-        // }
-        super.stop(context);
-    }
-
 }

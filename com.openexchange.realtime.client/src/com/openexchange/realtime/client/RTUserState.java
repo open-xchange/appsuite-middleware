@@ -62,7 +62,7 @@ public class RTUserState {
      * ConextID of the current client/user
      */
     private final long contextID;
-    
+
     /**
      * SessionID that is assigned to the client/user
      */
@@ -72,7 +72,7 @@ public class RTUserState {
      * Locale that is configured for the client/user
      */
     private final String locale;
-    
+
     /**
      * Session that is assigned to the client/user
      */
@@ -82,7 +82,7 @@ public class RTUserState {
      * User id of the current client/user
      */
     private final long userID;
-    
+
     /**
      * Secret session key that is required for requests
      */
@@ -98,7 +98,7 @@ public class RTUserState {
      * JSessionID that is required for request routing
      */
     private final String jSessionID;
-    
+
     /**
      * User name
      */
@@ -175,7 +175,7 @@ public class RTUserState {
         return this.secretSessionValue;
     }
 
-    
+
     /**
      * Gets the contextID
      *
@@ -185,7 +185,7 @@ public class RTUserState {
         return contextID;
     }
 
-    
+
     /**
      * Gets the sessionID
      *
@@ -195,7 +195,7 @@ public class RTUserState {
         return sessionID;
     }
 
-    
+
     /**
      * Gets the locale
      *
@@ -223,7 +223,7 @@ public class RTUserState {
         return jSessionID;
     }
 
-    
+
     /**
      * Gets the user login
      *
@@ -232,7 +232,31 @@ public class RTUserState {
     public String getUser() {
         return user;
     }
-    
-    
 
+    /**
+     * Returns the current status of the object in string representation
+     * 
+     * @return String with the status of the object
+     */
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        String newLine = System.getProperty("line.separator");
+
+        result.append(this.getClass().getName());
+        result.append(" Object {");
+        result.append(newLine);
+        result.append(" User: " + this.user + newLine);
+        result.append(" userID: " + this.userID + newLine);
+        result.append(" ContextID " + this.contextID + newLine);
+        result.append(" jSessionID: " + this.jSessionID + newLine);
+        result.append(" locale: " + this.locale + newLine);
+        result.append(" random: " + this.random + newLine);
+        result.append(" secretSessionKey: " + this.secretSessionKey + newLine);
+        result.append(" secretSessionValue: " + this.secretSessionValue + newLine);
+        result.append(" sessionID: " + this.sessionID + newLine);
+        result.append("}");
+
+        return result.toString();
+    }
 }

@@ -166,5 +166,25 @@ public class WasyncRTConnection extends AbstractRTConnection {
     private boolean isAtmosphereRequest() {
         return false;
     }
+        // TODO Auto-generated method stub
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.realtime.client.impl.RTProtocolCallback#sendACK(org.json.JSONObject)
+     */
+    @Override
+    public void sendACK(JSONObject ack) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.realtime.client.impl.RTProtocolCallback#sendPing(org.json.JSONObject)
+     */
+    @Override
+    public void sendPing(JSONObject ping) {
+        // TODO Auto-generated method stub
+        
+    }
 
 }

@@ -66,8 +66,8 @@ import com.openexchange.realtime.client.RTUserStateChangeListener;
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class AbstractRTConnection implements RTConnection {
-    
+public abstract class AbstractRTConnection implements RTConnection, RTProtocolCallback {
+
     protected final RTConnectionProperties connectionProperties;
 
     protected RTProtocol protocol;
@@ -121,7 +121,7 @@ public abstract class AbstractRTConnection implements RTConnection {
             deliverer.start();
         }
 
-        protocol = new RTProtocol(gate);
+        protocol = new RTProtocol(this, gate);
         userState = Login.doLogin(
             connectionProperties.getSecure(),
             connectionProperties.getHost(),
@@ -138,6 +138,8 @@ public abstract class AbstractRTConnection implements RTConnection {
      */
     @Override
     public void close() throws RTException {
+        protocol.release();
+
         if (deliverer != null) {
             deliverer.interrupt();
             deliverer = null;

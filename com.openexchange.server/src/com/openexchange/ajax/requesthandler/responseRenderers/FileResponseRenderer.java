@@ -532,8 +532,23 @@ public class FileResponseRenderer implements ResponseRenderer {
                 } else {
                     final int len = BUFLEN;
                     final byte[] buf = new byte[len];
-                    for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
-                        outputStream.write(buf, 0, read);
+                    if (length > 0) {
+                        // Check actual transferred number of bytes against provided length
+                        long count = 0L;
+                        for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
+                            outputStream.write(buf, 0, read);
+                            count += read;
+                        }
+                        if (length != count) {
+                            StringAllocator sb = new StringAllocator("Transferred ").append((length > count ? "less" : "more"));
+                            sb.append(" bytes than signaled through \"Content-Length\" response header. File download may get paused (less) or be corrupted (more).");
+                            sb.append(" Associated file \"").append(fileName).append("\" with indicated length of ").append(length).append(", but is ").append(count);
+                            LOG.warn(sb.toString());
+                        }
+                    } else {
+                        for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
+                            outputStream.write(buf, 0, read);
+                        }
                     }
                 }
                 outputStream.flush();
