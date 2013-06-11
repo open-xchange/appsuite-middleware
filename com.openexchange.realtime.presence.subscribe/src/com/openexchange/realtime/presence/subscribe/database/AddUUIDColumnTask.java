@@ -124,7 +124,7 @@ public class AddUUIDColumnTask extends UpdateTaskAdapter {
         int oldPos, newPos;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT fromCid, fromUserId, fromId, toCid, toUserId, status, request, timestamp FROM presenceSubscriptions FOR UPDATE");
+            stmt = con.prepareStatement("SELECT fromCid, fromUserId, fromId, toCid, toUserId, status, request, timestamp FROM presenceSubscriptions WHERE uuid IS NULL FOR UPDATE");
             rs = stmt.executeQuery();
             PreparedStatement stmt2 = null;
             try {
