@@ -54,13 +54,20 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
-
 /**
  * {@link DependentCapabilityChecker}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class DependentCapabilityChecker implements CapabilityChecker {
+
+    /**
+     * Initializes a new {@link DependentCapabilityChecker}.
+     */
+    protected DependentCapabilityChecker() {
+        super();
+    }
+
     /**
      * Check whether the capability should be awarded for a certain user
      *
