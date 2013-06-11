@@ -47,23 +47,86 @@
  *
  */
 
-package com.openexchange.realtime.client;
+package com.openexchange.realtime.client.user;
 
+import java.util.UUID;
+import org.apache.commons.lang.Validate;
 
 /**
- * {@link Constants} - Gathers constants used throughout the project.
+ * Represents the user that would like to interact with the various kinds of realtime clients.
  * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
  */
-public class Constants {
+public class RTUser {
 
-    public static final String CLIENT_ID = "open-xchange-realtime";
+    /**
+     * Name of the realtime user
+     */
+    private String name = null;
 
-    public static final String LOGIN_PATH = "/ajax/login";
+    /**
+     * Password of the realtime user
+     */
+    private String password = null;
 
-    public static final String LOGIN_ACTION = "login";
+    /**
+     * Resource that is assigned to the realtime user
+     */
+    private String resource = null;
 
-    public static final String CREATE_ACTION = "/appsuite/api/oxodocumentfilter";
+    /**
+     * Initializes a new {@link RTUser}.
+     * 
+     * @param name - String with the name of the user
+     * @param password - String with the password of the user
+     */
+    public RTUser(String name, String password) {
+        this(name, password, UUID.randomUUID().toString());
+    }
+
+    /**
+     * Initializes a new {@link RTUser}.
+     * 
+     * @param name - String with the name of the user
+     * @param password - String with the password of the user
+     * @param resource - String with the resource assigned to the user
+     */
+    public RTUser(String name, String password, String resource) {
+        Validate.notNull(name);
+        Validate.notNull(password);
+        Validate.notNull(resource);
+
+        this.name = name;
+        this.password = password;
+        this.resource = resource;
+    }
 
 
+    /**
+     * Gets the name
+     * 
+     * @return The name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Gets the password
+     * 
+     * @return The password
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Gets the resource
+     * 
+     * @return The resource
+     */
+    public String getResource() {
+        return resource;
+    }
 }
