@@ -55,7 +55,7 @@ import com.openexchange.config.ConfigurationService;
 /**
  * This class provides the information if full primary key support should be used. The feature should only exist before OX version 7.6,
  * afterwards only primary key support is available.
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
@@ -69,7 +69,7 @@ public class FullPrimaryKeySupport {
     /**
      * Holds if full primary key is supported.
      */
-    private Boolean isFullPrimaryKeySupported = null;
+    private volatile Boolean isFullPrimaryKeySupported;
 
     /**
      * Initializes a new {@link FullPrimaryKeySupport}.
@@ -80,7 +80,7 @@ public class FullPrimaryKeySupport {
 
     /**
      * Returns the singleton of {@link FullPrimaryKeySupport}
-     * 
+     *
      * @return instance of {@link FullPrimaryKeySupport}
      */
     public static final FullPrimaryKeySupport getInstance() {
@@ -89,19 +89,24 @@ public class FullPrimaryKeySupport {
 
     /**
      * Returns if full primary key is supported
-     * 
+     *
      * @param configService - The {@link ConfigurationService} to read the property
      * @return boolean - true, if full primary key is supported
      */
     public boolean isFullPrimaryKeySupported(ConfigurationService configService) {
+        Boolean tmp = isFullPrimaryKeySupported;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = isFullPrimaryKeySupported;
+                if (null == tmp) {
+                    Validate.notNull(configService, "Configuration cannot be null.");
 
-        if (this.isFullPrimaryKeySupported == null) {
-            Validate.notNull(configService, "Configuration cannot be null.");
-
-            this.isFullPrimaryKeySupported = Boolean.valueOf(configService.getBoolProperty(
-                "com.openexchange.server.fullPrimaryKeySupport",
-                false));
+                    tmp = Boolean.valueOf(configService.getBoolProperty("com.openexchange.server.fullPrimaryKeySupport", false));
+                    isFullPrimaryKeySupported = tmp;
+                }
+            }
         }
-        return isFullPrimaryKeySupported.booleanValue();
+        return tmp.booleanValue();
     }
+
 }
