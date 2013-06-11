@@ -175,7 +175,7 @@ public class SequenceGateTest {
     }
 
     @Test
-    public void testMultipleGaps() throws Exception {
+    public void testFirstFillHigherThenFillLowerGap() throws Exception {
         JSONValue m0 = createMessage();
         JSONValue m1 = createMessage();
         JSONValue m2 = createMessage();
@@ -211,6 +211,40 @@ public class SequenceGateTest {
         Assert.assertEquals("Wrong order of receivedMessages", m3, receivedMessages.get(2));
         Assert.assertEquals("Wrong order of receivedMessages", m4, receivedMessages.get(3));
         Assert.assertEquals("Wrong order of receivedMessages", m5, receivedMessages.get(4));
+    }
+    
+    @Test
+    public void testFirstFillLowerThenFillHigherGap() throws Exception {
+        JSONValue m0 = createMessage();
+        JSONValue m1 = createMessage();
+        JSONValue m2 = createMessage();
+        JSONValue m3 = createMessage();
+        JSONValue m4 = createMessage();
+        JSONValue m5 = createMessage();
+
+        Assert.assertTrue("Could not enqueue message.", gate.enqueue(m1, 1L));
+        Assert.assertTrue("Could not enqueue message.", gate.enqueue(m2, 2L));
+        Assert.assertTrue("Could not enqueue message.", gate.enqueue(m3, 3L));
+        Assert.assertTrue("Could not enqueue message.", gate.enqueue(m5, 5L));
+        Assert.assertTrue("Could not enqueue message.", gate.enqueue(m0, 0L));
+        barrier.await(3, TimeUnit.SECONDS);
+        List<JSONValue> receivedMessages = taker.getReceivedMessages();
+        
+        Assert.assertNotNull("receivedMessages was null.", receivedMessages);
+        Assert.assertEquals("Wrong size for receivedMessages", 4, receivedMessages.size());
+        Assert.assertEquals("Wrong order of receivedMessages", m0, receivedMessages.get(0));
+        Assert.assertEquals("Wrong order of receivedMessages", m1, receivedMessages.get(1));
+        Assert.assertEquals("Wrong order of receivedMessages", m2, receivedMessages.get(2));
+        Assert.assertEquals("Wrong order of receivedMessages", m3, receivedMessages.get(3));
+
+        barrier.reset();
+        Assert.assertTrue("Could not enqueue message.", gate.enqueue(m4, 4L));
+        barrier.await(3, TimeUnit.SECONDS);
+        receivedMessages = taker.getReceivedMessages();
+        Assert.assertNotNull("receivedMessages was not null.", receivedMessages);
+        Assert.assertEquals("Wrong size for receivedMessages", 2, receivedMessages.size());
+        Assert.assertEquals("Wrong order of receivedMessages", m4, receivedMessages.get(0));
+        Assert.assertEquals("Wrong order of receivedMessages", m5, receivedMessages.get(1));
     }
 
     @Test

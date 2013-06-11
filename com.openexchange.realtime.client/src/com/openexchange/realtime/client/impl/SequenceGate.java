@@ -114,12 +114,13 @@ public class SequenceGate {
                 while (it.hasNext()) {
                     EnqueuedMessage enqueued = it.next();
                     long currentSeq = enqueued.getSeq();
-                    if (currentSeq > highestSeq) {
+                    if (currentSeq == highestSeq + 1) {
                         highestSeq = currentSeq;
+                        toTake.put(enqueued);
+                        it.remove();
+                    } else {
+                        break;
                     }
-
-                    toTake.put(enqueued);
-                    it.remove();
                 }
 
                 threshold = ++highestSeq;
