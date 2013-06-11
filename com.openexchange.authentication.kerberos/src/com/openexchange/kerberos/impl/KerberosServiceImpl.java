@@ -72,12 +72,14 @@ public final class KerberosServiceImpl implements KerberosService {
 
     private static final GSSManager MANAGER = GSSManager.getInstance();
     private final String moduleName;
+    private final String userModuleName;
     private Subject serviceSubject;
     private LoginContext lc;
 
-    public KerberosServiceImpl(String moduleName) {
+    public KerberosServiceImpl(String moduleName, String userModuleName) {
         super();
         this.moduleName = moduleName;
+        this.userModuleName = userModuleName;
     }
 
     /*
@@ -147,6 +149,24 @@ public final class KerberosServiceImpl implements KerberosService {
                 final GSSException ge = (GSSException) nested;
                 throw KerberosExceptionCodes.TICKET_WRONG.create(ge, ge.getMessage());
             }
+            throw KerberosExceptionCodes.UNKNOWN.create(e, e.getMessage());
+        }
+        return principal;
+    }
+
+    @Override
+    public ClientPrincipal authenticate(String username, String password) throws OXException {
+        final ClientPrincipalImpl principal;
+        Subject mysubject = new Subject(); 
+        LoginContext userLc;
+        try {
+            userLc = new LoginContext(userModuleName, mysubject, new KerberosCallbackHandler(username, password));
+            userLc.login();
+            principal = new ClientPrincipalImpl();
+            principal.setClientSubject(userLc.getSubject());
+            principal.setDelegateSubject(userLc.getSubject());
+        } catch (LoginException e) {
+            // If an exception is caused here, it's likely the ~/.java.login.config file is wrong
             throw KerberosExceptionCodes.UNKNOWN.create(e, e.getMessage());
         }
         return principal;

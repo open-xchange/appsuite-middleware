@@ -1,3 +1,7 @@
+* 2013-06-11 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26859: Implemented username and password authentication for Kerberos authentication implementation.
+
 * 2013-05-22 - marc.arens@open-xchange.com
 
  - Fix for bug 26580: Remove superfluous warning

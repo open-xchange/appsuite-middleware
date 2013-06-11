@@ -50,14 +50,18 @@
 package com.openexchange.authentication.kerberos.impl;
 
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
+import static com.openexchange.authentication.kerberos.impl.ConfigurationProperty.PROXY_DELIMITER;
+import static com.openexchange.authentication.kerberos.impl.ConfigurationProperty.PROXY_USER;
 import java.util.List;
 import java.util.Map;
 import javax.security.auth.login.LoginException;
+import org.apache.commons.logging.Log;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -78,26 +82,56 @@ import com.openexchange.user.UserService;
  */
 public class KerberosAuthentication implements AuthenticationService {
 
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(KerberosAuthentication.class);
+
     private final KerberosService kerberosService;
     private final ContextService contextService;
     private final UserService userService;
+    private final String proxyDelimiter;
+    private final String proxyUser;
 
-    public KerberosAuthentication(KerberosService kerberosService, ContextService contextService, UserService userService) {
+    public KerberosAuthentication(KerberosService kerberosService, ContextService contextService, UserService userService, ConfigurationService configService) {
         super();
         this.kerberosService = kerberosService;
         this.contextService = contextService;
         this.userService = userService;
+        proxyDelimiter = configService.getProperty(PROXY_DELIMITER.getName(), PROXY_DELIMITER.getDefault());
+        proxyUser = configService.getProperty(PROXY_USER.getName(), PROXY_USER.getDefault());
     }
 
     @Override
     public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
         final String authHeader = parseAuthheader(loginInfo);
         final ClientPrincipal principal;
+        String proxyAs = null;
+        String uid = null;
+
         if (Authorization.checkForKerberosAuthorization(authHeader)) {
             final byte[] ticket = Base64.decode(authHeader.substring("Negotiate ".length()));
             principal = kerberosService.verifyAndDelegate(ticket);
         } else {
-            throw LoginExceptionCodes.UNKNOWN.create("Unknown authentication method.");
+            uid = loginInfo.getUsername();
+            if (null != proxyUser && null != proxyDelimiter && uid.contains(proxyDelimiter)) {
+                proxyAs = uid.substring(uid.indexOf(proxyDelimiter) + proxyDelimiter.length(), uid.length());
+                uid = uid.substring(0, uid.indexOf(proxyDelimiter));
+                boolean foundProxy = false;
+                for (final String pu : proxyUser.split(",")) {
+                    if (pu.trim().equalsIgnoreCase(uid)) {
+                        foundProxy = true;
+                        break;
+                    }
+                }
+                if (!foundProxy) {
+                    LOG.error("none of the proxy user is matching");
+                    throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                }
+            }
+            try {
+                principal = kerberosService.authenticate(uid, loginInfo.getPassword());
+            } catch (OXException e) {
+                LOG.error(e,e.getCause());
+                throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+            }
         }
         final String[] splitted = split(principal.getName());
         final int ctxId = contextService.getContextId(splitted[0]);
@@ -107,7 +141,11 @@ public class KerberosAuthentication implements AuthenticationService {
         final Context ctx = contextService.getContext(ctxId);
         final int userId;
         try {
-            userId = userService.getUserId(splitted[1], ctx);
+            if (null != proxyAs) {
+                userId = userService.getUserId(proxyAs, ctx);
+            } else {
+                userId = userService.getUserId(splitted[1], ctx);
+            }
         } catch (OXException e) {
             if (LdapExceptionCode.USER_NOT_FOUND.equals(e)) {
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
@@ -115,6 +153,9 @@ public class KerberosAuthentication implements AuthenticationService {
             throw e;
         }
         userService.getUser(userId, ctx);
+        if (null != proxyAs) {
+            return new Authed(splitted[0], uid + proxyDelimiter + proxyAs, principal);
+        }
         return new Authed(splitted[0], splitted[1], principal);
     }
 

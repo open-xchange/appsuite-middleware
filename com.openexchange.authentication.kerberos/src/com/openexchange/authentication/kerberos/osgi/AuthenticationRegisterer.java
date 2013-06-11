@@ -59,6 +59,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.kerberos.impl.KerberosAuthentication;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.kerberos.KerberosService;
 import com.openexchange.user.UserService;
@@ -79,6 +80,7 @@ public final class AuthenticationRegisterer implements ServiceTrackerCustomizer<
     private KerberosService kerberosService;
     private ContextService contextService;
     private UserService userService;
+    private ConfigurationService configService;
 
     public AuthenticationRegisterer(BundleContext context) {
         super();
@@ -100,7 +102,10 @@ public final class AuthenticationRegisterer implements ServiceTrackerCustomizer<
             if (obj instanceof UserService) {
                 userService = (UserService) obj;
             }
-            needsRegistration = null != kerberosService && null != contextService && null != userService && registration == null;
+            if (obj instanceof ConfigurationService) {
+                configService = (ConfigurationService) obj;
+            }
+            needsRegistration = null != kerberosService && null != contextService && null != userService && null != configService && registration == null;
         } finally {
             lock.unlock();
         }
@@ -109,7 +114,8 @@ public final class AuthenticationRegisterer implements ServiceTrackerCustomizer<
             registration = context.registerService(AuthenticationService.class, new KerberosAuthentication(
                 kerberosService,
                 contextService,
-                userService), null);
+                userService,
+                configService), null);
         }
         return obj;
     }
@@ -132,6 +138,9 @@ public final class AuthenticationRegisterer implements ServiceTrackerCustomizer<
             }
             if (service instanceof KerberosService) {
                 kerberosService = null;
+            }
+            if (service instanceof ConfigurationService) {
+                configService = null;
             }
             if (registration != null && (null == contextService || null == userService || null == kerberosService)) {
                 unregister = registration;

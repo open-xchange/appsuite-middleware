@@ -83,7 +83,7 @@ public class KerberosServiceRegisterer implements ServiceTrackerCustomizer<Confi
         final ConfigurationService configService = context.getService(reference);
         final boolean configured = KerberosConfiguration.configure(configService);
         if (configured) {
-            impl = new KerberosServiceImpl(KerberosConfiguration.getModuleName());
+            impl = new KerberosServiceImpl(KerberosConfiguration.getModuleName(), KerberosConfiguration.getUserModuleName());
             try {
                 impl.login();
                 registration = context.registerService(KerberosService.class, impl, null);
