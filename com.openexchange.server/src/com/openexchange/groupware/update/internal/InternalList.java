@@ -52,8 +52,7 @@ package com.openexchange.groupware.update.internal;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.update.FullPrimaryKeySupport;
+import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
@@ -77,6 +76,7 @@ import com.openexchange.groupware.update.tasks.MailAccountAddReplyToTask;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
 import com.openexchange.log.LogFactory;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * Lists all update tasks of the com.openexchange.server bundle.
@@ -105,14 +105,14 @@ public final class InternalList {
     /**
      * Starts the internal list.
      */
-    public void start(ConfigurationService config) {
+    public void start() {
         final DynamicList registry = DynamicList.getInstance();
         for (final UpdateTask task : OLD_TASKS) {
             if (!registry.addUpdateTask(task)) {
                 LOG.error("Internal update task \"" + task.getClass().getName() + "\" could not be registered.", new Exception());
             }
         }
-        TASKS = genTaskList(config);
+        TASKS = genTaskList();
         for (final UpdateTaskV2 task : TASKS) {
             if (!registry.addUpdateTask(task)) {
                 LOG.error("Internal update task \"" + task.getClass().getName() + "\" could not be registered.", new Exception());
@@ -347,7 +347,7 @@ public final class InternalList {
      */
     private static UpdateTaskV2[] TASKS = null;
 
-    private static UpdateTaskV2[] genTaskList(ConfigurationService configService) {
+    private static UpdateTaskV2[] genTaskList() {
         List<UpdateTaskV2> list = new ArrayList<UpdateTaskV2>();
 
         // Renames "Unified INBOX" to "Unified Mail"
@@ -529,7 +529,8 @@ public final class InternalList {
         list.add(new AddUUIDForUpdateTaskTable());
 
         //Add synthetic primary keys to tables without natural key if full primary key support is enabled
-        if (FullPrimaryKeySupport.getInstance().isFullPrimaryKeySupported(configService)) {
+        final FullPrimaryKeySupportService fullPrimaryKeySupportService = ServerServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
+        if (null != fullPrimaryKeySupportService && fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
             //Add primary key to vcard_ids table
             list.add(new AddPrimaryKeyVcardIdsTask());
             

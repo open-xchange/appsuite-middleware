@@ -55,7 +55,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.FullPrimaryKeySupport;
+import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -66,13 +66,12 @@ import com.openexchange.realtime.presence.subscribe.database.AddPrimaryKeyTask;
 import com.openexchange.realtime.presence.subscribe.database.AddUUIDColumnTask;
 import com.openexchange.realtime.presence.subscribe.database.CreatePresenceSubscriptionDB;
 import com.openexchange.realtime.presence.subscribe.database.PresenceSubscriptionsTable;
-import com.openexchange.realtime.presence.subscribe.database.SubscriptionsSQL;
 import com.openexchange.realtime.presence.subscribe.impl.SubscriptionServiceImpl;
 import com.openexchange.user.UserService;
 
 /**
  * {@link PresenceSubscribeActivator}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class PresenceSubscribeActivator extends HousekeepingActivator {
@@ -81,18 +80,18 @@ public class PresenceSubscribeActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ResourceDirectory.class, DatabaseService.class, ContextService.class, UserService.class, MessageDispatcher.class,
-            ConfigurationService.class };
+            ConfigurationService.class, FullPrimaryKeySupportService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         final DatabaseService dbService = getService(DatabaseService.class);
-        SubscriptionsSQL.db = dbService;
+        // SubscriptionsSQL.db = dbService;
         registerService(PresenceSubscriptionService.class, new SubscriptionServiceImpl(this));
         registerService(CreateTableService.class, new PresenceSubscriptionsTable());
 
-        final ConfigurationService configurationService = getService(ConfigurationService.class);
-        if (FullPrimaryKeySupport.getInstance().isFullPrimaryKeySupported(configurationService)) {
+        final FullPrimaryKeySupportService fullPrimaryKeySupportService = getService(FullPrimaryKeySupportService.class);
+        if (null != fullPrimaryKeySupportService && fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
             registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
                 @Override

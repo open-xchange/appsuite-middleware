@@ -79,13 +79,13 @@ import com.openexchange.sql.grammar.UPDATE;
 
 /**
  * {@link SubscriptionsSQL}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class SubscriptionsSQL {
 
-    public static DatabaseService db;
+    // public static volatile DatabaseService db;
 
     private static final Table table = new Table("presenceSubscriptions");
 
@@ -131,7 +131,7 @@ public class SubscriptionsSQL {
 
     /**
      * Persist a Subscription
-     * 
+     *
      * @param subscription the Subscrption to persist
      * @throws OXException
      */
@@ -182,7 +182,7 @@ public class SubscriptionsSQL {
             insert = insert.SET(request, PLACEHOLDER);
             update = update.SET(request, PLACEHOLDER);
         }
-        
+
         if (null != subscription.getUuid()) {
             insert = insert.SET(uuid, PLACEHOLDER);
         }
@@ -232,7 +232,7 @@ public class SubscriptionsSQL {
 
     /**
      * Get a list of Subscriptions the SubscriptionParticipant sent TO others.
-     * 
+     *
      * @param recipient the SubscriptionParticipant that sent the subscriptions
      * @return a list of subscriptions the SubscriptionParticipant sent to others
      * @throws OXException
@@ -274,7 +274,7 @@ public class SubscriptionsSQL {
 
     /**
      * Get a list of Subscriptions the SubscriptionParticipant received FROM others.
-     * 
+     *
      * @param recipient the SubscriptionParticipant that received the subscriptions
      * @return a list of subscriptions the SubscriptionParticipant received
      * @throws OXException
@@ -310,7 +310,7 @@ public class SubscriptionsSQL {
     /**
      * Get the pending Subscriptions for a SubscriptionParticipant. This will return all the subscriptions sent TO the recipient by others
      * and haven't been approved or canceled by the recipient, yet.
-     * 
+     *
      * @param recipient the SubscriptionParticipant
      * @return the list of subscriptions that haven't been approved or canceled by the recipient and are in a pending state
      * @throws OXException
