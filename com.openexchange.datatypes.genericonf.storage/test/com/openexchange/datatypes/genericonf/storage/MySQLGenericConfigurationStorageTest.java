@@ -53,11 +53,13 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.impl.MySQLGenericConfigurationStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.sql.SQLTestCase;
 
 /**
@@ -106,9 +108,12 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
     }
 
     public void testLoadDynamicConfiguration() throws SQLException, OXException {
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'field', 'value')");
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'otherField', 'otherValue')");
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'booleanField', 1)");
+        byte[] uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, uuid) VALUES (1002,1001,'field', 'value')");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, uuid) VALUES (1002,1001,'otherField', 'otherValue')");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, uuid) VALUES (1002,1001,'booleanField', 1)");
 
         final Map<String, Object> content = new HashMap<String, Object>();
 
@@ -128,13 +133,18 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
     }
 
     public void testUpdateDynamicConfiguration() throws SQLException, OXException {
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'field', 'value')");
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'otherField', 'otherValue')");
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'thirdField', 'thirdValue')");
-
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'bool', 0)");
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'otherBool', 0)");
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'thirdBool', 0)");
+        byte[] uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, uuid) VALUES (1002,1001,'field', 'value', " + uuid + ")");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, uuid) VALUES (1002,1001,'otherField', 'otherValue', " + uuid + ")");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, uuid) VALUES (1002,1001,'thirdField', 'thirdValue', " + uuid + ")");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, uuid) VALUES (1002,1001,'bool', 0, " + uuid + ")");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, uuid) VALUES (1002,1001,'otherBool', 0, " + uuid + ")");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, uuid) VALUES (1002,1001,'thirdBool', 0, " + uuid + ")");
 
         final Map<String, Object> content = new HashMap<String, Object>();
 
@@ -166,17 +176,22 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
     }
 
     public void testDeleteDynamicConfiguration() throws SQLException, OXException {
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'field', 'value')");
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'otherField', 'otherValue')");
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'thirdField', 'thirdValue')");
-
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1004,'otherID', 'otherID')");
-
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'bool', 1)");
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'otherBool', 1)");
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'thirdBool', 1)");
-
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1004,'otherBoolID', 1)");
+        byte[] uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, uuid) VALUES (1002,1001,'field', 'value', " + uuid + ")");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, uuid) VALUES (1002,1001,'otherField', 'otherValue', " + uuid + ")");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, uuid) VALUES (1002,1001,'thirdField', 'thirdValue', " + uuid + ")");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, uuid) VALUES (1002,1004,'otherID', 'otherID', " + uuid + ")");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, uuid) VALUES (1002,1001,'bool', 1, " + uuid + ")");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, uuid) VALUES (1002,1001,'otherBool', 1, " + uuid + ")");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, uuid) VALUES (1002,1001,'thirdBool', 1, " + uuid + ")");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, uuid) VALUES (1002,1004,'otherBoolID', 1, " + uuid + ")");
 
 
         final int id = 1001;
@@ -194,17 +209,22 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
     }
 
     public void testSearchDynamicConfiguration() throws SQLException, OXException {
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'field', 'value')");
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'otherField', 'otherValue')");
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'thirdField', 'thirdValue')");
-
-        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1004,'otherID', 'otherID')");
-
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'bool', 1)");
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'otherBool', 1)");
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'thirdBool', 1)");
-
-        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1004,'otherBoolID', 1)");
+        byte[] uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, uuid) VALUES (1002,1001,'field', 'value', " + uuid + ")");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, uuid) VALUES (1002,1001,'otherField', 'otherValue', " + uuid + ")");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, uuid) VALUES (1002,1001,'thirdField', 'thirdValue', " + uuid + ")");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_strings (cid, id, name, value, uuid) VALUES (1002,1004,'otherID', 'otherID', " + uuid + ")");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, uuid) VALUES (1002,1001,'bool', 1, " + uuid + ")");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, uuid) VALUES (1002,1001,'otherBool', 1, " + uuid + ")");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, uuid) VALUES (1002,1001,'thirdBool', 1, " + uuid + ")");
+        uuid = getUUID();
+        exec("INSERT INTO genconf_attributes_bools (cid, id, name, value, uuid) VALUES (1002,1004,'otherBoolID', 1, " + uuid + ")");
 
 
         final Map<String, Object> query = new HashMap<String, Object>();
@@ -226,6 +246,13 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
     }
 
     // Save encrypted passwords
+    
+    //Generate uuid
+    private byte[] getUUID() {
+        UUID uuid = UUID.randomUUID();
+        byte[] uuidBinary = UUIDs.toByteArray(uuid);
+        return uuidBinary;
+    }
 
 
 }
