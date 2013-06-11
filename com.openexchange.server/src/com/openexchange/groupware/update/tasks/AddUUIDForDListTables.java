@@ -117,8 +117,9 @@ public class AddUUIDForDListTables extends UpdateTaskAdapter {
             select = con.createStatement();
             result = select.executeQuery("SELECT intfield01, intfield02, intfield03, intfield04, field01, field02, field03, cid FROM " + table + " WHERE uuid IS NULL");
             while (result.next()) {
-                String update = "UPDATE " + table + " SET uuid=UNHEX(REPLACE(UUID(), '-', '')) WHERE uuid IS NULL ";
+                String update = "UPDATE " + table + " SET uuid=? WHERE uuid IS NULL ";
                 List<Object> values = new ArrayList<Object>();
+                values.add(UUIDs.toByteArray(UUID.randomUUID()));
 
                 update += "AND intfield01";
                 int intfield01 = result.getInt("intfield01");
@@ -191,6 +192,8 @@ public class AddUUIDForDListTables extends UpdateTaskAdapter {
                     update += EQUALS;
                     values.add(cid);
                 }
+                
+                update += " LIMIT 1";
 
                 upd = con.prepareStatement(update);
                 for (int i = 0; i < values.size(); i++) {

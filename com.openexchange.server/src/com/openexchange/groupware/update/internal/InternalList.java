@@ -535,7 +535,7 @@ public final class InternalList {
         list.add(new PrgLinksAddUuidUpdateTask());
 
         //Add Uuid column to dlist tables
-        //list.add(new AddUUIDForDListTables());
+        list.add(new AddUUIDForDListTables());
 
         //Add synthetic primary keys to tables without natural key if full primary key support is enabled
         final FullPrimaryKeySupportService fullPrimaryKeySupportService = ServerServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
@@ -562,7 +562,7 @@ public final class InternalList {
             list.add(new CreateIcalPrincipalPrimaryKeyTask());
 
             //Add primary key to dlist tables
-            //list.add(new MakeUUIDPrimaryForDListTables());
+            list.add(new MakeUUIDPrimaryForDListTables());
         }
 
         return list.toArray(new UpdateTaskV2[list.size()]);
