@@ -80,7 +80,6 @@ import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddPrimaryKeyUp
 import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddUuidUpdateTask;
-import com.openexchange.groupware.update.tasks.PrimaryKeyForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -545,7 +544,7 @@ public final class InternalList {
         list.add(new AddUUIDForDListTables());
         
         //Add primary key to infostoreReservedPaths table
-        list.add(new PrimaryKeyForInfostoreReservedPaths());
+//        list.add(new PrimaryKeyForInfostoreReservedPaths());
         
         //Add primary key to ical_ids table
         list.add(new CreateIcalIdsPrimaryKeyTask());
