@@ -532,7 +532,7 @@ public final class InternalList {
         //Add Uuid column to genconf_attributes_bools table
         list.add(new GenconfAttributesBoolsAddUuidUpdateTask());
 
-        //Add Uuid column to updatTask table
+        //Add Uuid column to updateTask table
         list.add(new AddUUIDForUpdateTaskTable());
         
         //Add Uuid column to prg_links table
@@ -545,17 +545,24 @@ public final class InternalList {
         list.add(new AddUUIDForDListTables());
         
         //Add primary key to infostoreReservedPaths table
-        //list.add(new PrimaryKeyForInfostoreReservedPaths());
+        list.add(new PrimaryKeyForInfostoreReservedPaths());
+        
+        //Add primary key to ical_ids table
+        list.add(new CreateIcalIdsPrimaryKeyTask());
+        
+        //Add primary key to ical_principal table
+        list.add(new CreateIcalPrincipalPrimaryKeyTask());
+        
+        //Add primary key to vcard_ids table
+        list.add(new AddPrimaryKeyVcardIdsTask());
+        
+        //Add primary key to vcard_principal table
+        list.add(new AddPrimaryKeyVcardPrincipalTask());
 
         //Add synthetic primary keys to tables without natural key if full primary key support is enabled
         final FullPrimaryKeySupportService fullPrimaryKeySupportService = ServerServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
         if (null != fullPrimaryKeySupportService && fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
-            //Add primary key to vcard_ids table
-            list.add(new AddPrimaryKeyVcardIdsTask());
             
-            //Add primary key to vcard_principal table
-            list.add(new AddPrimaryKeyVcardPrincipalTask());
-
             //Add primary key to genconf_attributes_strings table
             list.add(new GenconfAttributesStringsAddPrimaryKey());
 
@@ -565,12 +572,6 @@ public final class InternalList {
             //Add primary key to updateTask table
             list.add(new MakeUUIDPrimaryForUpdateTaskTable());
 
-            //Add primary key to ical_ids table
-            list.add(new CreateIcalIdsPrimaryKeyTask());
-            
-            //Add primary key to ical_principal table
-            list.add(new CreateIcalPrincipalPrimaryKeyTask());
-            
             //Add primary key to prg_links table
             list.add(new PrgLinksAddPrimaryKeyUpdateTask());
             
