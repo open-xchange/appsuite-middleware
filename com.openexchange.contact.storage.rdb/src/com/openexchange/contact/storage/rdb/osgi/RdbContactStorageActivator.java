@@ -55,6 +55,7 @@ import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
 import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
 import com.openexchange.contact.storage.rdb.sql.AddFilenameColumnTask;
 import com.openexchange.contact.storage.rdb.sql.CorrectNumberOfImagesTask;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
@@ -81,7 +82,7 @@ public class RdbContactStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, QuotaService.class };
+        return new Class<?>[] { DatabaseService.class, QuotaService.class, ContextService.class };
     }
 
     @Override

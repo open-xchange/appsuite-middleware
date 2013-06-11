@@ -487,5 +487,8 @@ public final class InternalList {
         // Extends the UID field
         new com.openexchange.groupware.update.tasks.EnlargeCalendarUid(),
 
+        // Sets the changing date once for users with a different defaultSendAddress
+        new com.openexchange.groupware.update.tasks.ContactAdjustLastModifiedForChangedSenderAddress(),
+
     };
 }

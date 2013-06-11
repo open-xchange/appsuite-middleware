@@ -1,6 +1,7 @@
 * 2013-06-11 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 25240: Restore original task status / percentage for specific client updates via CalDAV
+ - Fix for bug 24582: Always pass default sender address as value for email1 for internal users  
  
 * 2013-06-10 - thorben.betten@open-xchange.com
 
