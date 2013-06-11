@@ -47,45 +47,34 @@
  *
  */
 
-package com.openexchange.groupware.update.osgi;
+package com.openexchange.groupware.update.internal;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.update.internal.ExcludedList;
-import com.openexchange.groupware.update.internal.InternalList;
+import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 
 /**
- * {@link ConfigurationCustomizer}
+ * {@link FullPrimaryKeySupportImpl}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ConfigurationCustomizer implements ServiceTrackerCustomizer<ConfigurationService,ConfigurationService> {
+public class FullPrimaryKeySupportImpl implements FullPrimaryKeySupportService {
 
-    private final BundleContext context;
+    /**
+     * Holds if full primary key is supported.
+     */
+    private final boolean fullPrimaryKeySupported;
 
-    public ConfigurationCustomizer(final BundleContext context) {
+    /**
+     * Initializes a new {@link FullPrimaryKeySupportImpl}.
+     */
+    public FullPrimaryKeySupportImpl(ConfigurationService configService) {
         super();
-        this.context = context;
+        fullPrimaryKeySupported = null == configService ? false : configService.getBoolProperty("com.openexchange.server.fullPrimaryKeySupport", false);
     }
 
     @Override
-    public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
-        final ConfigurationService configService = context.getService(reference);
-        ExcludedList.getInstance().configure(configService);
-        InternalList.getInstance().start(configService);
-        return configService;
+    public boolean isFullPrimaryKeySupported() {
+        return fullPrimaryKeySupported;
     }
 
-    @Override
-    public void modifiedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
-        // Nothing to do.
-    }
-
-    @Override
-    public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
-        InternalList.getInstance().stop();
-        context.ungetService(reference);
-    }
 }

@@ -49,64 +49,22 @@
 
 package com.openexchange.groupware.update;
 
-import org.apache.commons.lang.Validate;
-import com.openexchange.config.ConfigurationService;
 
 /**
  * This class provides the information if full primary key support should be used. The feature should only exist before OX version 7.6,
  * afterwards only primary key support is available.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4
  */
-public class FullPrimaryKeySupport {
+public interface FullPrimaryKeySupportService {
 
     /**
-     * Singleton with the {@link FullPrimaryKeySupport} instance
-     */
-    private static final FullPrimaryKeySupport SINGLETON = new FullPrimaryKeySupport();
-
-    /**
-     * Holds if full primary key is supported.
-     */
-    private volatile Boolean isFullPrimaryKeySupported;
-
-    /**
-     * Initializes a new {@link FullPrimaryKeySupport}.
-     */
-    private FullPrimaryKeySupport() {
-        super();
-    }
-
-    /**
-     * Returns the singleton of {@link FullPrimaryKeySupport}
+     * Checks if full primary key is supported.
      *
-     * @return instance of {@link FullPrimaryKeySupport}
+     * @return <code>true</code> if full primary key is supported; otherwise <code>false</code>
      */
-    public static final FullPrimaryKeySupport getInstance() {
-        return SINGLETON;
-    }
-
-    /**
-     * Returns if full primary key is supported
-     *
-     * @param configService - The {@link ConfigurationService} to read the property
-     * @return boolean - true, if full primary key is supported
-     */
-    public boolean isFullPrimaryKeySupported(ConfigurationService configService) {
-        Boolean tmp = isFullPrimaryKeySupported;
-        if (null == tmp) {
-            synchronized (this) {
-                tmp = isFullPrimaryKeySupported;
-                if (null == tmp) {
-                    Validate.notNull(configService, "Configuration cannot be null.");
-
-                    tmp = Boolean.valueOf(configService.getBoolProperty("com.openexchange.server.fullPrimaryKeySupport", false));
-                    isFullPrimaryKeySupported = tmp;
-                }
-            }
-        }
-        return tmp.booleanValue();
-    }
+    public boolean isFullPrimaryKeySupported();
 
 }

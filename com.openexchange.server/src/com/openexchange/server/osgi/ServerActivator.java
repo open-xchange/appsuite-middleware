@@ -138,6 +138,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationListener;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
@@ -260,7 +261,7 @@ public final class ServerActivator extends HousekeepingActivator {
         CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class, IDBasedFileAccessFactory.class,
         FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class, CryptoService.class, HttpService.class,
         SystemNameService.class, ImageTransformationService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
-        TextXtractService.class, SecretEncryptionFactoryService.class, QuotaService.class };
+        TextXtractService.class, SecretEncryptionFactoryService.class, QuotaService.class, FullPrimaryKeySupportService.class };
 
     private static volatile BundleContext CONTEXT;
 
@@ -461,7 +462,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Distributed files
         track(DistributedFileManagement.class, new DistributedFilesListener());
-        
+
         // CapabilityService
         track(CapabilityService.class, new CapabilityRegistrationListener());
         /*
@@ -550,7 +551,7 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(
             UserPermissionService.class,
             ServerServiceRegistry.getInstance().getService(UserPermissionService.class, true));
-        
+
         registerService(ContextService.class, ServerServiceRegistry.getInstance().getService(ContextService.class, true));
         // Register mail stuff
         {

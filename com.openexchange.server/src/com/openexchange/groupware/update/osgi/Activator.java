@@ -49,57 +49,57 @@
 
 package com.openexchange.groupware.update.osgi;
 
-import java.util.Stack;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
+import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.internal.CreateUpdateTaskTable;
+import com.openexchange.groupware.update.internal.ExcludedList;
+import com.openexchange.groupware.update.internal.FullPrimaryKeySupportImpl;
+import com.openexchange.groupware.update.internal.InternalList;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * This {@link Activator} currently is only used to initialize some structures within the database update component. Lateron this may used
+ * This {@link Activator} currently is only used to initialize some structures within the database update component. Later on this may used
  * to start up the bundle.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
 
     // private static final String APPLICATION_ID = "com.openexchange.groupware.update";
-
-    private final Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
-
-    private ServiceRegistration<CreateTableService> createTableRegistration;
 
     public Activator() {
         super();
     }
 
     @Override
-    public void start(final BundleContext context) {
-        createTableRegistration = context.registerService(CreateTableService.class, new CreateUpdateTaskTable(), null);
-        trackers.push(new ServiceTracker<ConfigurationService, ConfigurationService>(
-            context,
-            ConfigurationService.class,
-            new ConfigurationCustomizer(context)));
-        trackers.push(new ServiceTracker<UpdateTaskProviderService, UpdateTaskProviderService>(
-            context,
-            UpdateTaskProviderService.class,
-            new UpdateTaskCustomizer(context)));
-        trackers.push(new ServiceTracker<CacheService, CacheService>(context, CacheService.class.getName(), new CacheCustomizer(context)));
-        for (final ServiceTracker<?, ?> tracker : trackers) {
-            tracker.open();
-        }
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
-    public void stop(final BundleContext context) {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
-        }
-        createTableRegistration.unregister();
+    public void startBundle() {
+        registerService(CreateTableService.class, new CreateUpdateTaskTable());
+
+        final ConfigurationService configService = getService(ConfigurationService.class);
+        registerService(FullPrimaryKeySupportService.class, new FullPrimaryKeySupportImpl(configService));
+
+        ExcludedList.getInstance().configure(configService);
+        InternalList.getInstance().start();
+
+        rememberTracker(new ServiceTracker<UpdateTaskProviderService, UpdateTaskProviderService>(context, UpdateTaskProviderService.class, new UpdateTaskCustomizer(context)));
+        rememberTracker(new ServiceTracker<CacheService, CacheService>(context, CacheService.class.getName(), new CacheCustomizer(context)));
+
+        openTrackers();
     }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        InternalList.getInstance().stop();
+        super.stopBundle();
+    }
+
 }

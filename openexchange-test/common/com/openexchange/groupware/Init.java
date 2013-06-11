@@ -380,7 +380,7 @@ public final class Init {
         startAndInjectXMLServices();
         startAndInjectSubscribeServices();
         startAndInjectContactStorageServices();
-        startAndInjectContactServices();        
+        startAndInjectContactServices();
         startAndInjectContactCollector();
         startAndInjectImportExportServices();
 
@@ -400,7 +400,7 @@ public final class Init {
         TestServiceRegistry.getInstance().addService(ConfigurationService.class, config);
         AJPv13ServiceRegistry.SERVICE_REGISTRY.set(new ServiceRegistry());
         AJPv13ServiceRegistry.getInstance().addService(ConfigurationService.class, config);
-        
+
     }
 
     private static void startAndInjectThreadPoolBundle() {
@@ -551,7 +551,7 @@ public final class Init {
                 ContactService.class, services.get(ContactService.class));
         }
     }
-    
+
     private static void startAndInjectIDGeneratorService() {
         final IDGeneratorService idService = new IDGeneratorServiceImpl();
         TestServiceRegistry.getInstance().addService(IDGeneratorService.class, idService);
@@ -580,7 +580,7 @@ public final class Init {
                 public <S> S getOptionalService(final Class<? extends S> clazz) {
                     return null;
                 }
-            });                
+            });
         }
     }
 
@@ -670,8 +670,8 @@ public final class Init {
     	if(databaseUpdateinitialized ) {
             return;
         }
-    	ConfigurationService config = TestServiceRegistry.getInstance().getService(ConfigurationService.class);
-    	InternalList.getInstance().start(config);
+    	// ConfigurationService config = TestServiceRegistry.getInstance().getService(ConfigurationService.class);
+    	InternalList.getInstance().start();
     	databaseUpdateinitialized = true;
     }
 
@@ -817,12 +817,12 @@ public final class Init {
     public static void startAndInjectQuotaService() {
         if (null == TestServiceRegistry.getInstance().getService(QuotaService.class)) {
             QuotaService quotaService = new QuotaService() {
-                
+
                 @Override
                 public Quota getQuotaFor(Resource resource, ResourceDescription desc, Session session) throws OXException {
                     return UnlimitedQuota.getInstance();
                 }
-                
+
                 @Override
                 public Quota getQuotaFor(Resource resource, Session session) throws OXException {
                     return UnlimitedQuota.getInstance();
