@@ -68,7 +68,7 @@ public class PrimaryKeyForInfostoreReservedPaths extends UpdateTaskAdapter {
 
     private static final String TABLE = "infostoreReservedPaths";
 
-    private static final String[] COLUMNS = new String[] { "cid", "folder" };
+    private static final String[] COLUMNS = new String[] { "cid", "folder", "name" };
 
     @Override
     public void perform(PerformParameters params) throws OXException {
