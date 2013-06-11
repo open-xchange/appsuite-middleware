@@ -60,6 +60,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
@@ -191,7 +192,7 @@ public final class RateLimiter {
                                 list.add(new ParameterKeyPartProvider(s.substring(10)));
                             }
                         }
-                        tmp = Collections.unmodifiableList(new ArrayList<KeyPartProvider>(list));
+                        tmp = Collections.unmodifiableList(list);
                     }
                     keyPartProviders = tmp;
                 }
@@ -299,7 +300,7 @@ public final class RateLimiter {
 
         @Override
         public String toString() {
-            StringAllocator builder = new StringAllocator(256);
+            final StringAllocator builder = new StringAllocator(256);
             builder.append("Key [");
             if (remotePort > 0) {
                 builder.append("remotePort=").append(remotePort).append(", ");
@@ -316,7 +317,6 @@ public final class RateLimiter {
             builder.append("hash=").append(hash).append("]");
             return builder.toString();
         }
-
 
     } // End of class Key
 
@@ -478,20 +478,149 @@ public final class RateLimiter {
         }
     }
 
+    // ------------------------- Lenient clients ----------------------------------------- //
+
+    private static interface UserAgentChecker {
+
+        boolean isLenient(String userAgent);
+    }
+
+    private static final class StartsWithUserAgentChecker implements UserAgentChecker {
+
+        private final String[] prefixes;
+
+        StartsWithUserAgentChecker(final List<String> prefixes) {
+            super();
+            final int size = prefixes.size();
+            final String[] newArray = new String[size];
+            for (int i = 0; i < size; i++) {
+                newArray[i] = toLowerCase(prefixes.get(i));
+            }
+            this.prefixes = newArray;
+        }
+
+        @Override
+        public boolean isLenient(final String userAgent) {
+            final String lc = toLowerCase(userAgent);
+            for (final String prefix : prefixes) {
+                if (lc.startsWith(prefix)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+    }
+
+    private static final class IgnoreCaseUserAgentChecker implements UserAgentChecker {
+
+        private final String userAgent;
+
+        IgnoreCaseUserAgentChecker(final String userAgent) {
+            super();
+            this.userAgent = toLowerCase(userAgent);
+        }
+
+        @Override
+        public boolean isLenient(final String userAgent) {
+            return this.userAgent.equals(toLowerCase(userAgent));
+        }
+
+    }
+
+    private static final class PatternUserAgentChecker implements UserAgentChecker {
+
+        private final Pattern pattern;
+
+        PatternUserAgentChecker(final String wildcard) {
+            super();
+            pattern = Pattern.compile(wildcardToRegex(wildcard), Pattern.CASE_INSENSITIVE);
+        }
+
+        @Override
+        public boolean isLenient(final String userAgent) {
+            return pattern.matcher(userAgent).matches();
+        }
+
+    }
+
+    private static volatile List<UserAgentChecker> userAgentCheckers;
+
+    private static List<UserAgentChecker> userAgentCheckers() {
+        List<UserAgentChecker> tmp = userAgentCheckers;
+        if (null == tmp) {
+            synchronized (CountingHttpServletRequest.class) {
+                tmp = userAgentCheckers;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final String sProviders;
+                    {
+                        final String defaultValue = "\"Open-Xchange .NET HTTP Client*\", \"Open-Xchange USM HTTP Client*\", \"Jakarta Commons-HttpClient*\"";
+                        sProviders = null == service ? defaultValue : service.getProperty("com.openexchange.servlet.maxRateLenientClients", defaultValue);
+                    }
+                    if (isEmpty(sProviders)) {
+                        tmp = Collections.emptyList();
+                    } else {
+                        final List<UserAgentChecker> list = new LinkedList<UserAgentChecker>();
+                        final List<String> startsWiths = new LinkedList<String>();
+                        for (final String sChecker : Strings.splitByComma(sProviders)) {
+                            String s = unquote(sChecker);
+                            if (!isEmpty(s)) {
+                                s = s.trim();
+                                if (isStartsWith(s)) {
+                                    // Starts-with
+                                    startsWiths.add(s.substring(0, s.length() - 1));
+                                } else if (s.indexOf('*') >= 0 || s.indexOf('?') >= 0) {
+                                    // Pattern
+                                    list.add(new PatternUserAgentChecker(s));
+                                } else {
+                                    list.add(new IgnoreCaseUserAgentChecker(s));
+                                }
+                            }
+                        }
+                        if (!startsWiths.isEmpty()) {
+                            list.add(0, new StartsWithUserAgentChecker(startsWiths));
+                        }
+                        tmp = list.isEmpty() ? Collections.<UserAgentChecker> emptyList() : (1 == list.size() ? Collections.singletonList(list.get(0)) : Collections.unmodifiableList(list));
+                    }
+                    userAgentCheckers = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
     private static boolean lenientCheckForUserAgent(final String userAgent) {
         if (null != userAgent) {
-            final String lc = toLowerCase(userAgent);
-            if (lc.startsWith("open-xchange .net http client")) {
-                return true;
-            }
-            if (lc.startsWith("open-xchange usm http client")) {
-                return true;
-            }
-            if (lc.startsWith("jakarta commons-httpclient")) {
-                return true;
+            for (final UserAgentChecker checker : userAgentCheckers()) {
+                if (checker.isLenient(userAgent)) {
+                    return true;
+                }
             }
         }
         return false;
+    }
+
+    /** Converts specified wild-card string to a regular expression */
+    static String wildcardToRegex(final String wildcard) {
+        final StringBuilder s = new StringBuilder(wildcard.length());
+        s.append('^');
+        final int len = wildcard.length();
+        for (int i = 0; i < len; i++) {
+            final char c = wildcard.charAt(i);
+            if (c == '*') {
+                s.append(".*");
+            } else if (c == '?') {
+                s.append('.');
+            } else if (c == '(' || c == ')' || c == '[' || c == ']' || c == '$' || c == '^' || c == '.' || c == '{' || c == '}' || c == '|' || c == '\\') {
+                s.append('\\');
+                s.append(c);
+            } else {
+                s.append(c);
+            }
+        }
+        s.append('$');
+        return (s.toString());
     }
 
     /** Check for an empty string */
@@ -519,6 +648,31 @@ public final class RateLimiter {
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
         }
         return builder.toString();
+    }
+
+    /** Checks for starts-with notation */
+    private static boolean isStartsWith(final String s) {
+        if (!s.endsWith("*")) {
+            return false;
+        }
+        final int mlen = s.length() - 1;
+        int pos = s.indexOf("?");
+        if (pos >= 0) {
+            return false;
+        }
+        pos = s.indexOf("*");
+        if (pos >= 0 && pos < mlen) {
+            return false;
+        }
+        return true;
+    }
+
+    /** Removes single or double quotes from a string if its quoted. */
+    private static String unquote(final String s) {
+        if (!isEmpty(s) && ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")))) {
+            return s.substring(1, s.length() - 1);
+        }
+        return s;
     }
 
 }
