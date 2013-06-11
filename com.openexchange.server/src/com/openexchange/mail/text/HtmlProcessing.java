@@ -794,6 +794,8 @@ public final class HtmlProcessing {
         return ret;
     }
 
+    private static final String EVENT_RESTRICTIONS = "\" onmousedown=\"return false;\" oncontextmenu=\"return false;\"";
+
     private static String filterBackgroundInlineImages(final String content, final Session session, final MailPath msgUID) {
         String reval = content;
         try {
@@ -823,7 +825,7 @@ public final class HtmlProcessing {
                         imageURL = imgSource.generateUrl(imageLocation, session);
                     }
                     linkBuilder.setLength(0);
-                    linkBuilder.append(imgMatcher.group(1)).append("background=\"").append(imageURL).append("\" onmousedown=\"return false;\" oncontextmenu=\"return false;\"").append(imgMatcher.group(4));
+                    linkBuilder.append(imgMatcher.group(1)).append("background=\"").append(imageURL).append(EVENT_RESTRICTIONS).append(imgMatcher.group(4));
                     imgReplacer.appendLiteralReplacement(sb, linkBuilder.toString());
                 } while (imgMatcher.find());
             }
@@ -883,7 +885,7 @@ public final class HtmlProcessing {
                                 imageURL = imgSource.generateUrl(imageLocation, session);
                             }
                             linkBuilder.setLength(0);
-                            linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"').append(" id=\"").append(filename).append("\" onmousedown=\"return false;\" oncontextmenu=\"return false;\"");
+                            linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"').append(" id=\"").append(filename).append(EVENT_RESTRICTIONS);
                             mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
                         }
                         mr.appendTail(strBuffer);
@@ -938,7 +940,7 @@ public final class HtmlProcessing {
                     imageURL = imgSource.generateUrl(imageLocation, session);
                 }
                 linkBuilder.setLength(0);
-                linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"').append(" id=\"").append(cid).append("\" onmousedown=\"return false;\" oncontextmenu=\"return false;\"");
+                linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"').append(" id=\"").append(cid).append(EVENT_RESTRICTIONS);
                 cidReplacer.appendLiteralReplacement(cidBuffer, linkBuilder.toString());
             } while (cidMatcher.find());
         }
