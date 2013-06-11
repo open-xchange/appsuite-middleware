@@ -71,6 +71,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
@@ -283,6 +284,34 @@ public class Patches {
                 } else {
                     prunedParticipants.add(participant);
                 }
+            }
+        }
+
+        /**
+         * Tries to restore the original task status and percent-completed in case the updated task does not look like a 'done' / 'undone'
+         * operation by the client (relevant for bugs #23058, #25240, 24812)
+         *
+         * @param originalTask
+         * @param updatedTask
+         */
+        public static void adjustTaskStatus(Task originalTask, Task updatedTask) {
+            if (Task.DONE == updatedTask.getStatus() && Task.DONE != originalTask.getStatus()) {
+                /*
+                 * 'Done' in Mac OS client: STATUS:COMPLETED / PERCENT-COMPLETE:100
+                 */
+                updatedTask.setPercentComplete(100);
+                updatedTask.setStatus(Task.DONE);
+            } else if (Task.NOT_STARTED == updatedTask.getStatus() && Task.DONE == originalTask.getStatus()) {
+                /*
+                 * 'Undone' in Mac OS client: STATUS:NEEDS-ACTION
+                 */
+                updatedTask.setPercentComplete(0);
+            } else if (Task.NOT_STARTED == updatedTask.getStatus() && Task.NOT_STARTED != originalTask.getStatus()) {
+                /*
+                 * neither done/undone transition, restore from original task
+                 */
+                updatedTask.setPercentComplete(originalTask.getPercentComplete());
+                updatedTask.setStatus(originalTask.getStatus());
             }
         }
 
