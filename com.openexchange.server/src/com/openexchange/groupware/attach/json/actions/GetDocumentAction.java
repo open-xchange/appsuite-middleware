@@ -113,14 +113,16 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
         moduleId = requireNumber(requestData, AJAXServlet.PARAMETER_MODULE);
         id = requireNumber(requestData, AJAXServlet.PARAMETER_ID);
 
-        if(!requestData.getFormat().equals("preview_image"))
+        if(!requestData.getFormat().equals("preview_image")) {
             requestData.setFormat("file");
+        }
         return document(
             session, folderId,
             attachedId,
             moduleId,
             id,
             contentType,
+            requestData.getParameter(AJAXServlet.PARAMETER_DELIVERY),
             session.getContext(),
             session.getUser(),
             session.getUserConfiguration(),
@@ -129,7 +131,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
 
     private static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
 
-    private AJAXRequestResult document(Session session, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig, final AJAXRequestData requestData) throws OXException {
+    private AJAXRequestResult document(Session session, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final String delivery, final Context ctx, final User user, final UserConfiguration userConfig, final AJAXRequestData requestData) throws OXException {
         try {
             ATTACHMENT_BASE.startTransaction();
             final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
@@ -186,14 +188,15 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             }
             /*-
              * Try direct output if non-image data
-             * 
+             *
              * Ignore in case of image data since subsequent transformation might be supposed to be applied
              */
             if (!isImage) {
                 final OutputStream directOutputStream = requestData.optOutputStream();
                 if (null != directOutputStream) {
-                    requestData.setResponseHeader("Content-Type", sContentType);                    
-                    final StringAllocator sb = new StringAllocator(toLowerCase(sContentType).startsWith(APPLICATION_OCTET_STREAM) ? "attachment" : "inline");
+                    final String cts = "download".equalsIgnoreCase(delivery) ? APPLICATION_OCTET_STREAM : sContentType;
+                    requestData.setResponseHeader("Content-Type", cts);
+                    final StringAllocator sb = new StringAllocator(toLowerCase(cts).startsWith(APPLICATION_OCTET_STREAM) ? "attachment" : "inline");
                     appendFilenameParameter(attachment.getFilename(), null, requestData.getUserAgent(), sb);
                     requestData.setResponseHeader("Content-Disposition", sb.toString());
                     requestData.removeCachingHeader();
@@ -213,7 +216,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             }
             /*-
              * The regular way...
-             * 
+             *
              * Read from stream
              */
             final ThresholdFileHolder fileHolder = new ThresholdFileHolder();
@@ -227,6 +230,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
              */
             fileHolder.setContentType(sContentType);
             fileHolder.setName(attachment.getFilename());
+            fileHolder.setDelivery(delivery);
             ATTACHMENT_BASE.commit();
             return new AJAXRequestResult(fileHolder, "file");
         } catch (final Throwable t) {
