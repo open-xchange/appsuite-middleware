@@ -15,8 +15,8 @@ require 'sinatra'
 #
 # settings
 #
-PIVOTAL_USERNAME = Base64.decode64("dG9iaWFzLnByaW56QG9wZW4teGNoYW5nZS5jb20=")
-PIVOTAL_PASSWORD = Base64.decode64("dHlnZ2Vy")
+PIVOTAL_USERNAME = Base64.decode64("cGl2b3RhbHppbGxhQG9wZW4teGNoYW5nZS5jb20=")
+PIVOTAL_PASSWORD = Base64.decode64("anVpTW9vejJidQ==")
 
 MAIL_USERNAME = Base64.decode64("bm9ib2R5")
 MAIL_PASSWORD = Base64.decode64("bmV0bGluZTEzMzcj")
