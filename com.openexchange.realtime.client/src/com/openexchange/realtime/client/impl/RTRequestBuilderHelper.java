@@ -75,10 +75,10 @@ public class RTRequestBuilderHelper extends RequestBuilder {
      */
     public static RequestBuilder newSendRequest(final RTConnectionProperties connectionProperties, final RTUserState state) {
         RequestBuilder builder = new RequestBuilder("PUT");
-        builder.setUrl(Constants.SEND_PATH);
+        builder.setUrl(buildUrl(Constants.SEND_PATH, connectionProperties));
         builder.setHeader("Content-Type", "Content-Type:text/javascript; charset=UTF-8");
         builder.setHeader("Cookie", cookieHeaderFromUserState(state));
-        builder.setParameters(getSendParameters(connectionProperties.getResource(), state));
+        builder.setQueryParameters(getSendParameters(connectionProperties.getResource(), state));
         return builder;
     }
 
@@ -94,7 +94,6 @@ public class RTRequestBuilderHelper extends RequestBuilder {
         builder.setHeader("Content-Type", "Content-Type:text/javascript; charset=UTF-8");
         builder.setHeader("Cookie", cookieHeaderFromUserState(state));
         builder.setQueryParameters(getQueryParameters(connectionProperties.getResource(), state));
-        builder.setParameters(getQueryParameters(connectionProperties.getResource(), state));
         return builder;
     }
 
