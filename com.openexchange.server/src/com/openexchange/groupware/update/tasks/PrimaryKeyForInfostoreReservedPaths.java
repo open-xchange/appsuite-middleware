@@ -47,42 +47,51 @@
  *
  */
 
-package com.openexchange.realtime.client.room;
+package com.openexchange.groupware.update.tasks;
 
-import org.json.JSONValue;
-import com.openexchange.realtime.client.RTException;
-import com.openexchange.realtime.client.RTMessageHandler;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Tools;
 
 /**
- * Interface that should be implemented when it is desired to use the chat functionality of the realtime framework.
+ * {@link PrimaryKeyForInfostoreReservedPaths}
  * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public interface RTRoom {
+public class PrimaryKeyForInfostoreReservedPaths extends UpdateTaskAdapter {
 
-    /**
-     * Use this to join a room. One user is able to join many different rooms. For each room an own {@link RTMessageHandler} implementation
-     * is required which means, that you should avoid joining a room twice and using {@link RTMessageHandler} implementation twice.
-     * 
-     * @param name - the name of the room which should be created also known as 'selector'
-     * @param to - defines the recipient to join to.
-     * @param messageHandler - {@link RTMessageHandler} to deal with messages
-     */
-    public void join(String name, String to, RTMessageHandler messageHandler) throws RTException;
+    private static final String TABLE = "infostoreReservedPaths";
 
-    /**
-     * Use this method to say something into a room. Based on settings made with com.openexchange.realtime.client.room.RTRoom.join(String,
-     * String, RTMessageHandler) your message will be transferred to all users joined the room.
-     * 
-     * @param message - {@link JSONValue} with the message to send.
-     */
-    public void say(JSONValue message) throws RTException;
+    private static final String[] COLUMNS = new String[] { "cid", "folder", "name" };
 
-    /**
-     * Use this to leave the room joined with com.openexchange.realtime.client.room.RTRoom.join(String, String, RTMessageHandler) before.
-     * After leaving the room you are allowed to use the instance of {@link RTMessageHandler} again.
-     */
-    public void leave() throws RTException;
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        Connection con = Database.getNoTimeout(params.getContextId(), true);
+
+        try {
+            con.setAutoCommit(false);
+            if (!Tools.hasPrimaryKey(con, TABLE)) {
+                Tools.createPrimaryKey(con, TABLE, COLUMNS);
+            }
+            con.commit();
+        } catch (SQLException e) {
+            DBUtils.rollback(con);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            Database.backNoTimeout(params.getContextId(), true, con);
+        }
+    }
+
+    @Override
+    public String[] getDependencies() {
+        return new String[] {};
+    }
 
 }

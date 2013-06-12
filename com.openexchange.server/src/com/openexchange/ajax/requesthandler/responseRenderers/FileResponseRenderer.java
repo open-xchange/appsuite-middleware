@@ -155,9 +155,9 @@ public class FileResponseRenderer implements ResponseRenderer {
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();
         // Check if file is actually supplied by the request URL.
-        if (file == null) {
+        if (file == null || hasNoFileItem(file)) {
             try {
-                // Do your thing if the file is not supplied to the request URL.
+                // Do your thing if the file is not supplied to the request URL or if there is no file item associated with specified file
                 // Throw an exception, or send 404, or show default/warning page, or just ignore it.
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             } catch (final IOException e) {
@@ -893,6 +893,11 @@ public class FileResponseRenderer implements ResponseRenderer {
                 break;
             }
         }
+    }
+
+    private boolean hasNoFileItem(final IFileHolder file) {
+        final String fileMIMEType = file.getContentType();
+        return ((isEmpty(fileMIMEType) || SAVE_AS_TYPE.equals(fileMIMEType)) && isEmpty(file.getName()) && (file.getLength() <= 0L));
     }
 
     private static final class Range {

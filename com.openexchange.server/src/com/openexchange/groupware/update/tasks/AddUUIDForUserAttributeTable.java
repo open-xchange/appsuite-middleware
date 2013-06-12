@@ -72,27 +72,41 @@ import com.openexchange.tools.update.Tools;
 /**
  * {@link AddUUIDForUserAttributeTable}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AddUUIDForUserAttributeTable extends UpdateTaskAdapter {
+
+    /**
+     * Initializes a new {@link AddUUIDForUserAttributeTable}.
+     */
+    public AddUUIDForUserAttributeTable() {
+        super();
+    }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
         int ctxId = params.getContextId();
         ProgressState progress = params.getProgressState();
         Connection con = Database.getNoTimeout(ctxId, true);
+        boolean rollback = false;
         try {
             startTransaction(con);
+            rollback = true;
             progress.setTotal(getTotalRows(con));
             if (!Tools.columnExists(con, "user_attribute", "uuid")) {
                 Tools.addColumns(con, "user_attribute", new Column("uuid", "BINARY(16)"));
                 fillUUIDs(con, "user_attribute", progress);
             }
             con.commit();
+            rollback = false;
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             DBUtils.autocommit(con);
             Database.backNoTimeout(ctxId, true, con);
         }
@@ -104,14 +118,20 @@ public class AddUUIDForUserAttributeTable extends UpdateTaskAdapter {
         PreparedStatement stmt2 = null;
         try {
             stmt1 = con.createStatement();
-            result = stmt1.executeQuery("SELECT cid, taskName FROM " + table + " WHERE uuid IS NULL");
-            stmt2 = con.prepareStatement("UPDATE " + table + " SET uuid=? WHERE cid=? AND taskName=?");
+            result = stmt1.executeQuery("SELECT cid, id, name, value FROM " + table + " WHERE uuid IS NULL");
+            stmt2 = con.prepareStatement("UPDATE " + table + " SET uuid=? WHERE cid=? AND id=? AND name=? AND value=?");
             while (result.next()) {
+                // Read columns
                 int cid = result.getInt(1);
-                String taskName = result.getString(2);
+                int userId = result.getInt(2);
+                String name = result.getString(3);
+                String value = result.getString(4);
+                // Set update statement
                 stmt2.setBytes(1, UUIDs.toByteArray(UUID.randomUUID()));
                 stmt2.setInt(2, cid);
-                stmt2.setString(3, taskName);
+                stmt2.setInt(3, userId);
+                stmt2.setString(4, name);
+                stmt2.setString(5, value);
                 stmt2.addBatch();
                 progress.incrementState();
             }
@@ -128,7 +148,7 @@ public class AddUUIDForUserAttributeTable extends UpdateTaskAdapter {
         int rows = 0;
         try {
             stmt = con.createStatement();
-            rs = stmt.executeQuery("SELECT COUNT(taskName) FROM updateTask");
+            rs = stmt.executeQuery("SELECT COUNT(cid) FROM user_attribute");
             while (rs.next()) {
                 rows += rs.getInt(1);
             }

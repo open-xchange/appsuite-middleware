@@ -60,6 +60,7 @@ import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardIdsTask;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardPrincipalTask;
 import com.openexchange.groupware.update.tasks.AddUUIDForDListTables;
 import com.openexchange.groupware.update.tasks.AddUUIDForUpdateTaskTable;
+import com.openexchange.groupware.update.tasks.AddUUIDForUserAttributeTable;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicContextAttributesTask;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicUserAttributesTask;
 import com.openexchange.groupware.update.tasks.CorrectAttachmentCountInAppointments;
@@ -76,6 +77,10 @@ import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddUuidUp
 import com.openexchange.groupware.update.tasks.MailAccountAddReplyToTask;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForDListTables;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUpdateTaskTable;
+import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUserAttributeTable;
+import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddPrimaryKeyUpdateTask;
+import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddUuidUpdateTask;
+import com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
 import com.openexchange.log.LogFactory;
@@ -522,47 +527,79 @@ public final class InternalList {
 
         // +++++++++++++++++++++++++++++++++ Version 7.4.0 starts here. +++++++++++++++++++++++++++++++++
 
-        //Add Uuid column to genconf_attributes_strings table
+        // Add UUID column to genconf_attributes_strings table
         list.add(new GenconfAttributesStringsAddUuidUpdateTask());
 
-        //Add Uuid column to genconf_attributes_bools table
+        // Add UUID column to genconf_attributes_bools table
         list.add(new GenconfAttributesBoolsAddUuidUpdateTask());
 
-        //Add Uuid column to updatTask table
+        // Add UUID column to updatTask table
         list.add(new AddUUIDForUpdateTaskTable());
-        
+
         //Add Uuid column to prg_links table
         list.add(new PrgLinksAddUuidUpdateTask());
+
+        //Add Uuid column to prg_contacts_linkage table
+        list.add(new PrgContactsLinkageAddUuidUpdateTask());
 
         //Add Uuid column to dlist tables
         list.add(new AddUUIDForDListTables());
 
-        //Add synthetic primary keys to tables without natural key if full primary key support is enabled
+        //Add primary key to infostoreReservedPaths table
+//        list.add(new PrimaryKeyForInfostoreReservedPaths());
+
+        //Add primary key to ical_ids table
+        list.add(new CreateIcalIdsPrimaryKeyTask());
+
+        //Add primary key to ical_principal table
+        list.add(new CreateIcalPrincipalPrimaryKeyTask());
+
+        //Add primary key to vcard_ids table
+        list.add(new AddPrimaryKeyVcardIdsTask());
+
+        //Add primary key to vcard_principal table
+        list.add(new AddPrimaryKeyVcardPrincipalTask());
+
+        // Add UUID column to user_attribute table
+        list.add(new AddUUIDForUserAttributeTable());
+
+        // Add synthetic primary keys to tables without natural key if full primary key support is enabled
         final FullPrimaryKeySupportService fullPrimaryKeySupportService = ServerServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
         if (null != fullPrimaryKeySupportService && fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
-            //Add primary key to vcard_ids table
+
+            // Add primary key to vcard_ids table
             list.add(new AddPrimaryKeyVcardIdsTask());
-            
-            //Add primary key to vcard_principal table
+
+            // Add primary key to vcard_principal table
             list.add(new AddPrimaryKeyVcardPrincipalTask());
 
-            //Add primary key to genconf_attributes_strings table
+            // Add primary key to genconf_attributes_strings table
             list.add(new GenconfAttributesStringsAddPrimaryKey());
 
-            //Add primary key to genconf_attributes_bools table
+            // Add primary key to genconf_attributes_bools table
             list.add(new GenconfAttributesBoolsAddPrimaryKey());
-            
-            //Add primary key to updateTask table
+
+            // Add primary key to updateTask table
             list.add(new MakeUUIDPrimaryForUpdateTaskTable());
 
-            //Add primary key to ical_ids table
+            // Add primary key to user_attribute table
+            list.add(new MakeUUIDPrimaryForUserAttributeTable());
+
+            // Add primary key to ical_ids table
             list.add(new CreateIcalIdsPrimaryKeyTask());
-            
-            //Add primary key to ical_principal table
+
+            // Add primary key to ical_principal table
             list.add(new CreateIcalPrincipalPrimaryKeyTask());
+
+            //Add primary key to prg_links table
+            list.add(new PrgLinksAddPrimaryKeyUpdateTask());
+
+            //Add primary key to prg_contacts_linkage table
+            list.add(new PrgContactsLinkageAddPrimaryKeyUpdateTask());
 
             //Add primary key to dlist tables
             list.add(new MakeUUIDPrimaryForDListTables());
+
         }
 
         return list.toArray(new UpdateTaskV2[list.size()]);

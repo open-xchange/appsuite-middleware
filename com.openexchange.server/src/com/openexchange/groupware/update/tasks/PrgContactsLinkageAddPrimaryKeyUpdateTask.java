@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.UUID;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -65,34 +64,33 @@ import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
+
 /**
- * {@link PrgLinksAddUuidUpdateTask}
- * 
+ * {@link PrgContactsLinkageAddPrimaryKeyUpdateTask}
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class PrgLinksAddUuidUpdateTask extends UpdateTaskAdapter {
+public class PrgContactsLinkageAddPrimaryKeyUpdateTask extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link PrgLinksAddUuidUpdateTask}.
+     * Initializes a new {@link PrgContactsLinkageAddPrimaryKeyUpdateTask}.
      */
-    public PrgLinksAddUuidUpdateTask() {
+    public PrgContactsLinkageAddPrimaryKeyUpdateTask() {
         super();
     }
 
-    /*
-     * (non-Javadoc)
+    /* (non-Javadoc)
      * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
      */
     @Override
     public void perform(PerformParameters params) throws OXException {
         int cid = params.getContextId();
         Connection con = Database.getNoTimeout(cid, true);
-        Column column = new Column("uuid", "BINARY(16) DEFAULT NULL");
+        Column column = new Column("uuid", "BINARY(16) NOT NULL");
         try {
             con.setAutoCommit(false);
-            if (!Tools.columnExists(con, "prg_links", column.name)) {
-                Tools.checkAndAddColumns(con, "prg_links", column);
-            }
+            Tools.modifyColumns(con, "prg_contacts_linkage", column);
+            Tools.createPrimaryKey(con, "prg_contacts_linkage", new String[] { column.name });
             setUUID(con);
             con.commit();
         } catch (SQLException e) {
@@ -107,64 +105,49 @@ public class PrgLinksAddUuidUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /* (non-Javadoc)
      * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
      */
     @Override
     public String[] getDependencies() {
-        return new String[0];
+        return new String[] { "com.openexchange.groupware.update.tasks.PrgContactsLinkageAddUuidUpdateTask" };
     }
-
+    
     private void setUUID(Connection con) throws SQLException {
         PreparedStatement stmt = null;
         int oldPos, newPos;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT firstid, firstmodule, firstfolder, secondid, secondmodule, secondfolder, cid, last_modified, created_by FROM prg_links WHERE uuid IS NULL FOR UPDATE");
+            stmt = con.prepareStatement("SELECT intfield01, intfield02, field01, field02, cid FROM prg_contacts_linkage WHERE uuid IS NULL FOR UPDATE");
             rs = stmt.executeQuery();
             PreparedStatement stmt2 = null;
             try {
                 while (rs.next()) {
                     StringBuilder sb = new StringBuilder();
-                    sb.append("UPDATE prg_links SET uuid = ? WHERE firstid ");
+                    sb.append("UPDATE prg_contacts_linkage SET uuid = ? WHERE intfield01 ");
                     oldPos = 1;
-                    int firstid = rs.getInt(oldPos++);
+                    int intfield01 = rs.getInt(oldPos++);
                     if (rs.wasNull()) {
                         sb.append("IS ? ");
                     } else {
                         sb.append("= ? ");
                     }
-                    sb.append("AND firstmodule ");
-                    int firstmodule = rs.getInt(oldPos++);
+                    sb.append("AND intfield02 ");
+                    int intfield02 = rs.getInt(oldPos++);
                     if (rs.wasNull()) {
                         sb.append("IS ? ");
                     } else {
                         sb.append("= ? ");
                     }
-                    sb.append("AND firstfolder ");
-                    int firstfolder = rs.getInt(oldPos++);
+                    sb.append("AND field01 ");
+                    String field01 = rs.getString(oldPos++);
                     if (rs.wasNull()) {
                         sb.append("IS ? ");
                     } else {
                         sb.append("= ? ");
                     }
-                    sb.append("AND secondid ");
-                    int secondid = rs.getInt(oldPos++);
-                    if (rs.wasNull()) {
-                        sb.append("IS ? ");
-                    } else {
-                        sb.append("= ? ");
-                    }
-                    sb.append("AND secondmodule ");
-                    int secondmodule = rs.getInt(oldPos++);
-                    if (rs.wasNull()) {
-                        sb.append("IS ? ");
-                    } else {
-                        sb.append("= ? ");
-                    }
-                    sb.append("AND secondfolder ");
-                    int secondfolder = rs.getInt(oldPos++);
+                    sb.append("AND field02 ");
+                    String field02 = rs.getString(oldPos++);
                     if (rs.wasNull()) {
                         sb.append("IS ? ");
                     } else {
@@ -177,43 +160,15 @@ public class PrgLinksAddUuidUpdateTask extends UpdateTaskAdapter {
                     } else {
                         sb.append("= ? ");
                     }
-                    sb.append("AND last_modified ");
-                    long lastModified = rs.getInt(oldPos++);
-                    boolean lastModifiedNull = rs.wasNull();
-                    if (lastModifiedNull) {
-                        sb.append("IS ? ");
-                    } else {
-                        sb.append("= ? ");
-                    }
-                    sb.append("AND created_by ");
-                    int createdBy = rs.getInt(oldPos++);
-                    boolean createdByNull = rs.wasNull();
-                    if (createdByNull) {
-                        sb.append("IS ? ");
-                    } else {
-                        sb.append("= ? ");
-                    }
                     stmt2 = con.prepareStatement(sb.toString());
                     newPos = 1;
                     UUID uuid = UUID.randomUUID();
                     stmt2.setBytes(newPos++, UUIDs.toByteArray(uuid));
-                    stmt2.setInt(newPos++, firstid);
-                    stmt2.setInt(newPos++, firstmodule);
-                    stmt2.setInt(newPos++, firstfolder);
-                    stmt2.setInt(newPos++, secondid);
-                    stmt2.setInt(newPos++, secondmodule);
-                    stmt2.setInt(newPos++, secondfolder);
+                    stmt2.setInt(newPos++, intfield01);
+                    stmt2.setInt(newPos++, intfield02);
+                    stmt2.setString(newPos++, field01);
+                    stmt2.setString(newPos++, field02);
                     stmt2.setInt(newPos++, cid);
-                    if (!lastModifiedNull) {
-                        stmt2.setLong(newPos++, lastModified);
-                    } else {
-                        stmt2.setNull(newPos++, Types.BIGINT);
-                    }
-                    if (!createdByNull) {
-                        stmt2.setInt(newPos++, createdBy);
-                    } else {
-                        stmt2.setNull(newPos++, Types.INTEGER);
-                    }
                     stmt2.execute();
                 }
             } finally {
