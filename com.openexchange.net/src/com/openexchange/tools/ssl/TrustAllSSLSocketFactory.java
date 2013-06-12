@@ -56,7 +56,11 @@ import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
@@ -110,31 +114,58 @@ public final class TrustAllSSLSocketFactory extends SSLSocketFactory {
 
     @Override
     public Socket createSocket() throws IOException {
-        return factory.createSocket();
+        return checkProtocols(factory.createSocket());
     }
 
     @Override
     public Socket createSocket(final Socket s, final String host, final int port, final boolean autoClose) throws IOException {
-        return factory.createSocket(s, host, port, autoClose);
+        return checkProtocols(factory.createSocket(s, host, port, autoClose));
     }
 
     @Override
     public Socket createSocket(final String host, final int port) throws IOException, UnknownHostException {
-        return factory.createSocket(host, port);
+        return checkProtocols(factory.createSocket(host, port));
     }
 
     @Override
     public Socket createSocket(final String host, final int port, final InetAddress localAddress, final int localPort) throws IOException, UnknownHostException {
-        return factory.createSocket(host, port, localAddress, localPort);
+        return checkProtocols(factory.createSocket(host, port, localAddress, localPort));
     }
 
     @Override
     public Socket createSocket(final InetAddress host, final int port) throws IOException {
-        return factory.createSocket(host, port);
+        return checkProtocols(factory.createSocket(host, port));
     }
 
     @Override
     public Socket createSocket(final InetAddress address, final int port, final InetAddress localAddress, final int localPort) throws IOException {
-        return factory.createSocket(address, port, localAddress, localPort);
+        return checkProtocols(factory.createSocket(address, port, localAddress, localPort));
     }
+
+    private static Socket checkProtocols(final Socket socket) {
+        if (socket instanceof SSLSocket) {
+            final SSLSocket sslSocket = (SSLSocket) socket;
+
+            tryAddProtocol("SSLv3", sslSocket);
+            tryAddProtocol("SSLv2", sslSocket);
+            tryAddProtocol("TLSv1", sslSocket);
+            tryAddProtocol("SSLv23", sslSocket);
+        }
+        return socket;
+    }
+
+    private static boolean tryAddProtocol(final String protocol, final SSLSocket sslSocket) {
+        final Set<String> protocols = new LinkedHashSet<String>(Arrays.asList(sslSocket.getEnabledProtocols()));
+        if (protocols.add(protocol)) {
+            try {
+                sslSocket.setEnabledProtocols(protocols.toArray(new String[0]));
+            } catch (final IllegalArgumentException e) {
+                // Unable to add specified protocol
+                return false;
+            }
+        }
+        // Already included or has been successfully added
+        return true;
+    }
+
 }
