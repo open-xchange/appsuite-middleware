@@ -1,3 +1,7 @@
+* 2013-06-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26988: Removed JSON pooling
+
 * 2013-06-11 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 25240: Restore original task status / percentage for specific client updates via CalDAV
