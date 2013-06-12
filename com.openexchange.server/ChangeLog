@@ -2,6 +2,7 @@
 
  - Fix for bug 26988: Removed JSON pooling
  - Fix for bug 26995: Honor "delivery" parameter on attachment download
+ - Fix for bug 26984: Accept optional parameter "ignoreTranslation" to signal no translation of folder names
 
 * 2013-06-11 - tobias.friedrich@open-xchange.com
 
