@@ -23,8 +23,7 @@ Obsoletes:      open-xchange-custom-parallels <= %{version}
 Conflicts:      open-xchange-authentication-database open-xchange-authentication-ldap open-xchange-authentication-imap open-xchange-authentication-kerberos
 
 %description
-This package contains the authentication bundle and a bundle for branding. The
-spam handler is installed with a separate package.
+This package contains the authentication bundle and a bundle for branding. The spam handler is installed with a separate package.
 
 Authors:
 --------
@@ -76,6 +75,8 @@ fi
 %doc com.openexchange.parallels/ChangeLog
 
 %changelog
+* Tue Jun 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-06-13
 * Fri Jun 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-06-20
 * Tue May 28 2013 Marcus Klein <marcus.klein@open-xchange.com>

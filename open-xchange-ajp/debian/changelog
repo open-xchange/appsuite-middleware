@@ -394,6 +394,12 @@ open-xchange-ajp (6.22.1-0) unstable; urgency=low
 
  -- Marc Arens <marc.arens@open-xchange.com>  Fri, 26 Oct 2012 10:03:10 +0200
 
+open-xchange-ajp (6.22.0-12) unstable; urgency=low
+
+  * Build for patch 2013-06-13
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Tue, 11 Jun 2013 09:46:19 +0200
+
 open-xchange-ajp (6.22.0-11) unstable; urgency=low
 
   * Build for patch 2013-05-09

@@ -388,6 +388,12 @@ open-xchange-authentication-ldap (6.22.1-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 10:03:14 +0200
 
+open-xchange-authentication-ldap (6.22.0-12) unstable; urgency=low
+
+  * Build for patch 2013-06-13
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 11 Jun 2013 09:46:21 +0200
+
 open-xchange-authentication-ldap (6.22.0-11) unstable; urgency=low
 
   * Build for patch 2013-05-09
