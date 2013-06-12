@@ -49,6 +49,10 @@
 
 package com.openexchange.realtime.client.impl;
 
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.apache.commons.lang.Validate;
 import org.atmosphere.wasync.impl.AtmosphereClient;
 import org.json.JSONArray;
@@ -57,11 +61,17 @@ import org.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.ListenableFuture;
+import com.ning.http.client.Request;
+import com.ning.http.client.RequestBuilder;
+import com.ning.http.client.Response;
+import com.openexchange.realtime.client.Constants;
 import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
 import com.openexchange.realtime.client.RTUserState;
 import com.openexchange.realtime.client.RTUserStateChangeListener;
+import com.openexchange.realtime.client.user.RTUser;
 
 /**
  * {@link WasyncRTConnection}
@@ -85,7 +95,7 @@ public class WasyncRTConnection extends AbstractRTConnection {
     }
     
     @Override
-    public RTUserState connect(String selector, RTMessageHandler messageHandler) throws RTException {
+    public RTUserState connect( String selector, RTMessageHandler messageHandler) throws RTException {
         RTUserState rtUserState = super.connect(selector, messageHandler);
         //connect to atmosphere
         return rtUserState;
@@ -112,7 +122,9 @@ public class WasyncRTConnection extends AbstractRTConnection {
     @Override
     public void postReliable(JSONValue message) throws RTException {
         if(isQueryAction(message)) {
+            fireQueryRequest(message);
         } else if(isSendAction(message)) {
+            fireSendRequest(message);
         } else {
             throw new RTException("Couldn't determine the type of message to send");
         }
@@ -167,22 +179,50 @@ public class WasyncRTConnection extends AbstractRTConnection {
     }
 
     @Override
-    public void sendACK(JSONObject ack) {
+    public void sendACK(JSONObject ack) throws RTException {
         fireSendRequest(ack);
-        
     }
 
     @Override
-    public void sendPing(JSONObject ping) {
+    public void sendPing(JSONObject ping) throws RTException {
         fireSendRequest(ping);
     }
-    
-    private void fireQueryRequest(JSONValue jsonValue) {
-//        JSONValue sequencedPayload = protocol.addSequence(jsonValue);
+
+    private void fireQueryRequest(JSONValue jsonValue) throws RTException {
+        RequestBuilder queryRequestBuilder = RTRequestBuilderHelper.newQueryRequest(connectionProperties, userState);
+        queryRequestBuilder.setBody(jsonValue.toString());
+        Request request = queryRequestBuilder.build();
+        try {
+            ListenableFuture<Response> requestFuture = asyncHttpClient.executeRequest(request);
+            Response response = requestFuture.get(Constants.REQUEST_TIMEOUT, TimeUnit.SECONDS);
+            protocol.handleIncoming(new JSONObject(response.getResponseBody()));
+        } catch (Exception e) {
+            LOG.error("Exception while executing query request.", e);
+            throw new RTException("Exception while executing query request.", e);
+        }
     }
-    
-    private void fireSendRequest(JSONValue jsonValue) {
-//        JSONValue sequencedPayload = protocol.addSequence(jsonValue);
+
+    private void fireSendRequest(JSONValue jsonValue) throws RTException {
+        //TODO: what of acks, pings, messages has to be sequenced 
+        JSONValue sequencedPayload = null;
+        if(jsonValue.isArray()) {
+            sequencedPayload = protocol.addSequence(jsonValue.toArray());
+        } else if (jsonValue.isObject()){
+            sequencedPayload = protocol.addSequence(jsonValue.toObject());
+        } else {
+            throw new RTException("jsonValue must be either JSONArray or JSONObject");
+        }
+        RequestBuilder builder = RTRequestBuilderHelper.newSendRequest(connectionProperties, userState);
+        builder.setBody(sequencedPayload.toString());
+        Request request = builder.build();
+        try {
+            ListenableFuture<Response> requestFuture = asyncHttpClient.executeRequest(request);
+            Response response = requestFuture.get(Constants.REQUEST_TIMEOUT, TimeUnit.SECONDS);
+            protocol.handleIncoming(new JSONObject(response.getResponseBody()));
+        } catch (Exception e) {
+            LOG.error("Exception while executing send request.", e);
+            throw new RTException("Exception while executing send request.", e);
+        }
     }
     
     private void fireAtmosphereRequest(JSONValue jsonValue) {

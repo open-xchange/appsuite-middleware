@@ -50,6 +50,7 @@
 package com.openexchange.realtime.client;
 
 import com.openexchange.realtime.client.impl.WasyncRTConnection;
+import com.openexchange.realtime.client.user.RTUser;
 
 /**
  * A {@link RTConnectionFactory} is responsible for instantiating {@link RTConnection}s.

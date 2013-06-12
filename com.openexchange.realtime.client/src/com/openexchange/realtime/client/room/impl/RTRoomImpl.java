@@ -146,8 +146,8 @@ public class RTRoomImpl implements RTRoom {
         this.toAddress = to;
         this.rtMessageHandler = messageHandler;
 
-        setupTimer();
         loginAndConnect();
+        setupTimer();
 
         try {
             JSONValue join = this.createJoinObject();

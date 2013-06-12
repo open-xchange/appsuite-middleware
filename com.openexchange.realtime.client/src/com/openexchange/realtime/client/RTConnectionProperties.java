@@ -49,6 +49,8 @@
 
 package com.openexchange.realtime.client;
 
+import com.openexchange.realtime.client.user.RTUser;
+
 /**
  * {@link RTConnectionProperties} are used to configure a {@link RTConnection}.
  * 
@@ -63,6 +65,8 @@ public class RTConnectionProperties {
     private String user;
 
     private String password;
+    
+    private String resource;
 
     private RTConnectionType type;
 
@@ -94,6 +98,15 @@ public class RTConnectionProperties {
         return password;
     }
 
+    /**
+     * Gets the unique resource identifying the client.
+     * 
+     * @return the resource
+     */
+    public String getResource() {
+        return resource;
+    }
+    
     /**
      * Gets the type
      * 
@@ -142,23 +155,34 @@ public class RTConnectionProperties {
     /**
      * Factory method for creating a new {@link Builder}.
      * 
-     * @param user The OX user.
+     * @param username The OX username.
      * @param password The password.
-     * @return
+     * @parm resource the resource
+     * @return a RTConnectionProperties builder
      */
-    public static Builder newBuilder(String user, String password) {
-        return new Builder(user, password);
+    public static Builder newBuilder(String username, String password, String resource) {
+        return new Builder(username, password, resource);
     }
-
+    
+    /**
+     * Factory method for creating a new {@link Builder}.
+     * @param user the user
+     * @return a RTConnectionProperties builder
+     */
+    public static Builder newBuilder(RTUser user) {
+        return new Builder(user.getName(), user.getPassword(), user.getResource());
+    }
+    
     public static class Builder {
 
         private final RTConnectionProperties properties;
 
-        private Builder(String user, String password) {
+        private Builder(String user, String password, String resource) {
             super();
             properties = new RTConnectionProperties();
             properties.user = user;
             properties.password = password;
+            properties.resource = resource;
         }
 
         /**
@@ -210,6 +234,10 @@ public class RTConnectionProperties {
             }
 
             if (properties.password == null) {
+                throw new IllegalStateException("A password must be set!");
+            }
+            
+            if (properties.resource == null) {
                 throw new IllegalStateException("A password must be set!");
             }
 

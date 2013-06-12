@@ -49,8 +49,11 @@
 
 package com.openexchange.realtime.client;
 
+import org.json.JSONValue;
 import org.junit.Test;
 import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
+import com.openexchange.realtime.client.room.impl.RTRoomImpl;
+import com.openexchange.realtime.client.user.RTUser;
 
 
 /**
@@ -62,13 +65,31 @@ public class WasyncConnectionTest {
     
     @Test
     public void testWasyncConnection() throws RTException {
-        RTConnectionProperties connectionProperties = RTConnectionProperties.newBuilder("marc.arens", "secret")
+        RTConnectionProperties connectionProperties = RTConnectionProperties.newBuilder("marc.arens", "secret", "chineseRoom")
             .setHost("localhost")
             .setConnectionType(RTConnectionType.LONG_POLLING)
             .setSecure(true)
             .build();
         RTConnection newConnection = RTConnectionFactory.newConnection(connectionProperties);
-        RTUserState userState = newConnection.connect(null);
+    }
+    
+    @Test
+    public void testRoom() throws RTException {
+        RTUser user = new RTUser("marc.arens@premium", "secret", "desktop");
+        RTConnectionProperties connectionProperties = RTConnectionProperties.newBuilder(user)
+            .setHost("localhost")
+            .setConnectionType(RTConnectionType.LONG_POLLING)
+            .setSecure(true)
+            .build();
+        RTRoomImpl chineseRoom = new RTRoomImpl(user, connectionProperties);
+        chineseRoom.join("chineseRoomSelector", "synthetic.china://room1", new RTMessageHandler() {
+            
+            @Override
+            public void onMessage(JSONValue message) {
+                System.out.println(message.toString());
+            }
+        });
+        chineseRoom.leave();
     }
 
 }

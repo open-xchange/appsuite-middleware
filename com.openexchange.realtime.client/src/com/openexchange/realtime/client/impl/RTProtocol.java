@@ -131,7 +131,7 @@ public class RTProtocol {
         } catch (JSONException e) {
             throw new RTException("The contained sequence number '" + element.opt("seq") + "' is not a valid long.", e);
         }
-
+        //TODO: Can jsonValue contain several Stanzas with sequencenumbers?
         try {
             if (parseElement(jsonValue.toObject())) {
                 if (seq < 0) {
@@ -221,6 +221,12 @@ public class RTProtocol {
         pingPongTimerThread.interrupt();
     }
 
+    /**
+     * Parse an element for for a pong message from the server.
+     * @param element the element to parse
+     * @return false if the message contains only a pong as payload, true otherwise
+     * @throws JSONException
+     */
     private boolean parseElement(JSONObject element) throws JSONException {
         if (isMessage(element) && element.has("payloads")) {
             /*

@@ -51,6 +51,7 @@ package com.openexchange.realtime.client.user;
 
 import java.util.UUID;
 import org.apache.commons.lang.Validate;
+import com.openexchange.realtime.client.RTUserState;
 
 /**
  * Represents the user that would like to interact with the various kinds of realtime clients.
@@ -74,6 +75,11 @@ public class RTUser {
      * Resource that is assigned to the realtime user
      */
     private String resource = null;
+    
+    /**
+     * State after login
+     */
+    private RTUserState userState = null;
 
     /**
      * Initializes a new {@link RTUser}.
@@ -129,4 +135,26 @@ public class RTUser {
     public String getResource() {
         return resource;
     }
+
+    
+    /**
+     * Gets the userState
+     *
+     * @return The userState
+     */
+    public RTUserState getUserState() {
+        return userState;
+    }
+
+    
+    /**
+     * Sets the userState
+     *
+     * @param userState The userState to set
+     */
+    public void setUserState(RTUserState userState) {
+        this.userState = userState;
+    }
+    
+    
 }

@@ -50,7 +50,13 @@
 package com.openexchange.realtime.client.impl;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
 
 
@@ -62,7 +68,9 @@ import com.openexchange.realtime.client.RTMessageHandler;
  */
 public class MessageDeliverer implements Runnable {
 
-    private final RTMessageHandler messageHandler;
+    private final static Logger LOG = LoggerFactory.getLogger(MessageDeliverer.class);
+    
+    private final ConcurrentHashMap<String, RTMessageHandler> messageHandlers;
 
     private final SequenceGate gate;
 
@@ -71,9 +79,9 @@ public class MessageDeliverer implements Runnable {
      * @param messageHandler
      * @param gate
      */
-    public MessageDeliverer(RTMessageHandler messageHandler, SequenceGate gate) {
+    public MessageDeliverer(ConcurrentHashMap<String, RTMessageHandler> messageHandlers, SequenceGate gate) {
         super();
-        this.messageHandler = messageHandler;
+        this.messageHandlers = messageHandlers;
         this.gate = gate;
     }
 
@@ -90,14 +98,37 @@ public class MessageDeliverer implements Runnable {
             try {
                 List<JSONValue> messages = gate.take();
                 for (JSONValue message : messages) {
-                    messageHandler.onMessage(message);
+                    if(!message.isObject()) {
+                        LOG.error("The JSONValue did not contain a valid JSONObject:" + message.toString());
+                    } else {
+                        RTMessageHandler handlerForSelector = getHandlerForSelector(message.toObject());
+                        if(handlerForSelector == null) {
+                            LOG.warn("Couldn't find handler for message, discarding: "+ message.toString());
+                        } else {
+                            handlerForSelector.onMessage(message);
+                        }
+                    }
                 }
             } catch (InterruptedException e) {
                 return;
             } catch (Throwable t) {
-                // TODO: log
+                LOG.error("Exception during MessageDelivery run", t);
             }
         }
+    }
+
+    /**
+     * Get the proper handler for the selector found in the message.
+     * @param message The message to be delivered to a @{link RTMessageHandler}
+     * @return the @{link RTMessageHandler} associated with the selector found in the message or null
+     */
+    private RTMessageHandler getHandlerForSelector(JSONObject message) {
+        RTMessageHandler associatedHandler = null;
+        String selector = message.optString("selector");
+        if(selector != null) {
+            associatedHandler = messageHandlers.get(selector);
+        }
+        return associatedHandler;
     }
 
 

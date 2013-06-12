@@ -55,6 +55,8 @@ import org.apache.commons.lang.Validate;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.realtime.client.Constants;
 import com.openexchange.realtime.client.RTConnection;
 import com.openexchange.realtime.client.RTConnectionProperties;
@@ -62,6 +64,7 @@ import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
 import com.openexchange.realtime.client.RTUserState;
 import com.openexchange.realtime.client.RTUserStateChangeListener;
+import com.openexchange.realtime.client.user.RTUser;
 
 /**
  * {@link AbstractRTConnection}
@@ -69,6 +72,8 @@ import com.openexchange.realtime.client.RTUserStateChangeListener;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class AbstractRTConnection implements RTConnection, RTProtocolCallback {
+    
+    private final static Logger LOG = LoggerFactory.getLogger(AbstractRTConnection.class);
 
     protected final RTConnectionProperties connectionProperties;
 
@@ -105,25 +110,31 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     @Override
     public RTUserState connect(String selector, RTMessageHandler messageHandler) throws RTException {
+        Validate.notEmpty(selector, "The obligatory parameter selector is missing");
         RTMessageHandler previousHandler = messageHandlers.putIfAbsent(selector, messageHandler);
         if(previousHandler != null) {
             throw new RTException("There is already a mapping selector <-> messageHandler for the selector: " + selector);
         }
-        this.messageHandler = messageHandler;
         if (messageHandler != null) {
             gate = new SequenceGate();
-            deliverer = new Thread(new MessageDeliverer(messageHandler, gate));
+            deliverer = new Thread(new MessageDeliverer(messageHandlers, gate));
             deliverer.start();
         }
 
         protocol = new RTProtocol(this, gate);
-        userState = Login.doLogin(
-            connectionProperties.getSecure(),
-            connectionProperties.getHost(),
-            connectionProperties.getPort(),
-            connectionProperties.getUser(),
-            connectionProperties.getPassword());
-        loggedIn = true;
+        
+        if (!loggedIn) {
+            userState = Login.doLogin(
+                connectionProperties.getSecure(),
+                connectionProperties.getHost(),
+                connectionProperties.getPort(),
+                connectionProperties.getUser(),
+                connectionProperties.getPassword());
+            loggedIn = true;
+        } else {
+            LOG.info("User is already logged in. Returning existing user state.");
+        }
+        
         return userState;
     }
 
@@ -156,12 +167,8 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
         }
     }
     
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.client.RTConnection#removeHandler(java.lang.String)
-     */
     @Override
     public void removeHandler(String selector) {
-        // TODO Auto-generated method stub
-        
+        messageHandlers.remove(selector);
     }
 }

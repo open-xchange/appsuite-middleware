@@ -57,7 +57,10 @@ package com.openexchange.realtime.client;
  */
 public class Constants {
 
-    public static final String API_PATH = "/ajax/api";
+    //Urls
+    public static final String HOST = "localhost";
+    
+    public static final String API_PATH = "/appsuite/api";
     
     public static final String CLIENT_ID = "open-xchange-realtime";
 
@@ -76,5 +79,11 @@ public class Constants {
     public static final String SEND_ACTION = QUERY_PATH +  "?action=send";
 
     public static final String DEFAULT_SELECTOR = "default";
+    
+    //Cookies
+    public static final String JSESSIONID_NAME = "JSESSIONID";
+
+    //Request
+    public static final long REQUEST_TIMEOUT = 30;
 
 }

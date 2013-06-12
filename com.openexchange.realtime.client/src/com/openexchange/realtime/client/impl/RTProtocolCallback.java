@@ -51,6 +51,7 @@ package com.openexchange.realtime.client.impl;
 
 import org.json.JSONObject;
 import com.openexchange.realtime.client.RTConnection;
+import com.openexchange.realtime.client.RTException;
 
 
 /**
@@ -69,7 +70,7 @@ public interface RTProtocolCallback {
      *
      * @param ack The ACK message.
      */
-    void sendACK(JSONObject ack);
+    void sendACK(JSONObject ack) throws RTException;
 
     /**
      * Clients have to send PINGs regularly to let the server know that they are still alive.
@@ -78,6 +79,6 @@ public interface RTProtocolCallback {
      *
      * @param ping The PING message.
      */
-    void sendPing(JSONObject ping);
+    void sendPing(JSONObject ping) throws RTException;
 
 }
