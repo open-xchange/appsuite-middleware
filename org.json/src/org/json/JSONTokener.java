@@ -207,59 +207,8 @@ public class JSONTokener {
      * @throws JSONException Unterminated string.
      */
     public String nextString(final char quote) throws JSONException {
-        char c;
-
-        if (JSONObject.USE_CHAR_POOL.get()) {
-            final DynamicCharArray sb = new DynamicCharArray();
-            try {
-                for (;;) {
-                    c = next();
-                    switch (c) {
-                    case 0:
-                    case '\n':
-                    case '\r':
-                        throw syntaxError("Unterminated string");
-                    case '\\':
-                        c = next();
-                        switch (c) {
-                        case 'b':
-                            sb.append('\b');
-                            break;
-                        case 't':
-                            sb.append('\t');
-                            break;
-                        case 'n':
-                            sb.append('\n');
-                            break;
-                        case 'f':
-                            sb.append('\f');
-                            break;
-                        case 'r':
-                            sb.append('\r');
-                            break;
-                        case 'u':
-                            sb.append((char) Integer.parseInt(next(4), 16));
-                            break;
-                        case 'x':
-                            sb.append((char) Integer.parseInt(next(2), 16));
-                            break;
-                        default:
-                            sb.append(c);
-                        }
-                        break;
-                    default:
-                        if (c == quote) {
-                            return sb.toString();
-                        }
-                        sb.append(c);
-                    }
-                }
-            } finally {
-                sb.reset();
-            }
-        }
-
         char[] ca = new char[256];
+        char c;
         int len = ca.length;
         int pos = 0;
         for (;;) {
@@ -445,19 +394,7 @@ public class JSONTokener {
         final String s;
         final char b = c;
 
-        if (JSONObject.USE_CHAR_POOL.get()) {
-            final DynamicCharArray sb = new DynamicCharArray();
-            try {
-                while (c >= ' ' && DELIMS.indexOf(c) < 0) {
-                    sb.append(c);
-                    c = next();
-                }
-                back();
-                s = sb.toString().trim();
-            } finally {
-                sb.reset();
-            }
-        } else {
+        {
             char[] ca = new char[256];
             int len = ca.length;
             int pos = 0;
