@@ -94,7 +94,7 @@ public final class DatabaseFolderConverter {
 
     private static interface FolderConverter {
 
-        DatabaseFolder convert(FolderObject fo, boolean altNames) throws OXException;
+        DatabaseFolder convert(FolderObject fo, boolean altNames, boolean translate) throws OXException;
     }
 
     private static final TIntObjectMap<FolderConverter> SYSTEM_CONVERTERS;
@@ -106,22 +106,22 @@ public final class DatabaseFolderConverter {
         m.put(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, new FolderConverter() {
 
             @Override
-            public DatabaseFolder convert(final FolderObject fo, final boolean altNames) throws OXException {
-                return SystemPublicFolder.getSystemPublicFolder(fo);
+            public DatabaseFolder convert(final FolderObject fo, final boolean altNames, final boolean translate) throws OXException {
+                return SystemPublicFolder.getSystemPublicFolder(fo, translate);
             }
         });
         m.put(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, new FolderConverter() {
 
             @Override
-            public DatabaseFolder convert(final FolderObject fo, final boolean altNames) throws OXException {
-                return SystemInfostoreFolder.getSystemInfostoreFolder(fo, altNames);
+            public DatabaseFolder convert(final FolderObject fo, final boolean altNames, final boolean translate) throws OXException {
+                return SystemInfostoreFolder.getSystemInfostoreFolder(fo, altNames, translate);
             }
         });
         m.put(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, new FolderConverter() {
 
             @Override
-            public DatabaseFolder convert(final FolderObject fo, final boolean altNames) throws OXException {
-                return SystemPrivateFolder.getSystemPrivateFolder(fo);
+            public DatabaseFolder convert(final FolderObject fo, final boolean altNames, final boolean translate) throws OXException {
+                return SystemPrivateFolder.getSystemPrivateFolder(fo, translate);
             }
         });
         SYSTEM_CONVERTERS = m;
@@ -130,8 +130,8 @@ public final class DatabaseFolderConverter {
         m.put(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, new FolderConverter() {
 
             @Override
-            public DatabaseFolder convert(final FolderObject fo, final boolean altNames) throws OXException {
-                final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
+            public DatabaseFolder convert(final FolderObject fo, final boolean altNames, final boolean translate) throws OXException {
+                final DatabaseFolder retval = translate ? new LocalizedDatabaseFolder(fo) : new DatabaseFolder(fo);
                 retval.setName(altNames ? FolderStrings.SYSTEM_PUBLIC_FILES_FOLDER_NAME : FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME);
                 return retval;
             }
@@ -139,8 +139,8 @@ public final class DatabaseFolderConverter {
         m.put(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, new FolderConverter() {
 
             @Override
-            public DatabaseFolder convert(final FolderObject fo, final boolean altNames) throws OXException {
-                final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
+            public DatabaseFolder convert(final FolderObject fo, final boolean altNames, final boolean translate) throws OXException {
+                final DatabaseFolder retval = translate ? new LocalizedDatabaseFolder(fo) : new DatabaseFolder(fo);
                 retval.setName(altNames ? FolderStrings.SYSTEM_USER_FILES_FOLDER_NAME : FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME);
                 return retval;
             }
@@ -148,8 +148,8 @@ public final class DatabaseFolderConverter {
         m.put(FolderObject.SYSTEM_LDAP_FOLDER_ID, new FolderConverter() {
 
             @Override
-            public DatabaseFolder convert(final FolderObject fo, final boolean altNames) throws OXException {
-                final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
+            public DatabaseFolder convert(final FolderObject fo, final boolean altNames, final boolean translate) throws OXException {
+                final DatabaseFolder retval = translate ? new LocalizedDatabaseFolder(fo) : new DatabaseFolder(fo);
                 retval.setName(FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
                 retval.setParentID(FolderStorage.PUBLIC_ID);
                 return retval;
@@ -158,8 +158,8 @@ public final class DatabaseFolderConverter {
         m.put(FolderObject.SYSTEM_GLOBAL_FOLDER_ID, new FolderConverter() {
 
             @Override
-            public DatabaseFolder convert(final FolderObject fo, final boolean altNames) throws OXException {
-                final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
+            public DatabaseFolder convert(final FolderObject fo, final boolean altNames, final boolean translate) throws OXException {
+                final DatabaseFolder retval = translate ? new LocalizedDatabaseFolder(fo) : new DatabaseFolder(fo);
                 retval.setName(FolderStrings.SYSTEM_GLOBAL_FOLDER_NAME);
                 retval.setParentID(FolderStorage.PUBLIC_ID);
                 return retval;
@@ -247,11 +247,12 @@ public final class DatabaseFolderConverter {
      * @param ctx The context
      * @param session The user session
      * @param altNames <code>true</code> to use alternative names for former InfoStore folders; otherwise <code>false</code>
+     * @param translate Whether to translate folders according to user's locale
      * @param con The connection
      * @return The converted {@link DatabaseFolder} instance
      * @throws OXException If conversion fails
      */
-    public static DatabaseFolder convert(final FolderObject fo, final User user, final UserConfiguration userConfiguration, final Context ctx, final Session session, final boolean altNames, final Connection con) throws OXException {
+    public static DatabaseFolder convert(final FolderObject fo, final User user, final UserConfiguration userConfiguration, final Context ctx, final Session session, final boolean altNames, final boolean translate, final Connection con) throws OXException {
         try {
             final int folderId = fo.getObjectID();
             if (folderId < FolderObject.MIN_FOLDER_ID) { // Possibly a system folder
@@ -259,7 +260,7 @@ public final class DatabaseFolderConverter {
                     /*
                      * The system shared folder
                      */
-                    return SystemSharedFolder.getSystemSharedFolder(fo, user, userConfiguration, ctx, con);
+                    return SystemSharedFolder.getSystemSharedFolder(fo, user, userConfiguration, translate, ctx, con);
                 }
                 /*
                  * Look-up a system converter
@@ -269,7 +270,7 @@ public final class DatabaseFolderConverter {
                     /*
                      * Return immediately
                      */
-                    final DatabaseFolder databaseFolder = folderConverter.convert(fo, altNames);
+                    final DatabaseFolder databaseFolder = folderConverter.convert(fo, altNames, translate);
                     if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId && !InfostoreFacades.isInfoStoreAvailable()) {
                         final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
                         if (null != defaultAccount) {
@@ -284,7 +285,7 @@ public final class DatabaseFolderConverter {
                  */
                 folderConverter = CONVERTERS.get(folderId);
                 if (null != folderConverter) {
-                    final DatabaseFolder databaseFolder = folderConverter.convert(fo, altNames);
+                    final DatabaseFolder databaseFolder = folderConverter.convert(fo, altNames, translate);
                     return handleDatabaseFolder(databaseFolder, folderId, fo, session, user, userConfiguration, ctx, con);
                 }
             }
@@ -298,26 +299,26 @@ public final class DatabaseFolderConverter {
                  */
                 final int module = fo.getModule();
                 if (module == FolderObject.TASK) {
-                    retval = new LocalizedDatabaseFolder(fo);
+                    retval = translate ? new LocalizedDatabaseFolder(fo) : new DatabaseFolder(fo);
                     retval.setName(FolderStrings.DEFAULT_TASK_FOLDER_NAME);
                 } else if (module == FolderObject.CONTACT) {
-                    retval = new LocalizedDatabaseFolder(fo);
+                    retval = translate ? new LocalizedDatabaseFolder(fo) : new DatabaseFolder(fo);
                     retval.setName(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME);
                 } else if (module == FolderObject.CALENDAR) {
-                    retval = new LocalizedDatabaseFolder(fo);
+                    retval = translate ? new LocalizedDatabaseFolder(fo) : new DatabaseFolder(fo);
                     retval.setName(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME);
                 } else if (module == FolderObject.INFOSTORE) {
                     if (preferDisplayName()) {
                         final int ownerId = fo.getCreatedBy();
                         if (user.getId() == ownerId) {
                             // Requestor is owner
-                            retval = new LocalizedDatabaseFolder(fo);
+                            retval = translate ? new LocalizedDatabaseFolder(fo) : new DatabaseFolder(fo);
                             retval.setName(user.getDisplayName());
                         } else {
                             DatabaseFolder tmp = null;
                             try {
                                 final User owner = UserStorage.getInstance().getUser(ownerId, ctx);
-                                tmp = new LocalizedDatabaseFolder(fo);
+                                tmp = translate ? new LocalizedDatabaseFolder(fo) : new DatabaseFolder(fo);
                                 tmp.setName(owner.getDisplayName());
                             } catch (final Exception ignore) {
                                 // Ignore
@@ -332,10 +333,10 @@ public final class DatabaseFolderConverter {
                     retval = new DatabaseFolder(fo);
                 }
             } else if (folderId == getContactCollectorFolder(session, con)) {
-                retval = new LocalizedDatabaseFolder(fo);
+                retval = translate ? new LocalizedDatabaseFolder(fo) : new DatabaseFolder(fo);
                 retval.setName(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
             } else if (folderId == getPublishedMailAttachmentsFolder(session)) {
-                retval = new LocalizedDatabaseFolder(fo);
+                retval = translate ? new LocalizedDatabaseFolder(fo) : new DatabaseFolder(fo);
                 retval.setName(FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME);
             } else {
                 retval = new DatabaseFolder(fo);
