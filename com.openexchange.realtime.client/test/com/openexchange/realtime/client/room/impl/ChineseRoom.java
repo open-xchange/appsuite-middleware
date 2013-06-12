@@ -47,55 +47,71 @@
  *
  */
 
-package com.openexchange.realtime.client;
+package com.openexchange.realtime.client.room.impl;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONValue;
-import org.junit.Test;
-import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
-import com.openexchange.realtime.client.room.impl.ChineseRoom;
-import com.openexchange.realtime.client.room.impl.RTRoomImpl;
+import com.openexchange.realtime.client.RTConnectionProperties;
+import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.user.RTUser;
 
 
 /**
- * {@link WasyncConnectionTest}
+ * {@link ChineseRoom}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class WasyncConnectionTest {
-    
-    @Test
-    public void testWasyncConnection() throws RTException {
-        RTConnectionProperties connectionProperties = RTConnectionProperties.newBuilder("marc.arens", "secret", "chineseRoom")
-            .setHost("localhost")
-            .setConnectionType(RTConnectionType.LONG_POLLING)
-            .setSecure(true)
-            .build();
-        RTConnection newConnection = RTConnectionFactory.newConnection(connectionProperties);
+public class ChineseRoom extends RTRoomImpl {
+
+    /**
+     * Initializes a new {@link ChineseRoom}.
+     * @param rtUser
+     * @param rtConnectionProperties
+     */
+    public ChineseRoom(RTUser rtUser, RTConnectionProperties rtConnectionProperties) {
+        super(rtUser, rtConnectionProperties);
     }
-    
-    @Test
-    public void testRoom() throws Exception {
-        RTUser user = new RTUser("marc.arens@premium", "secret", "desktop");
-        RTConnectionProperties connectionProperties = RTConnectionProperties.newBuilder(user)
-            .setHost("localhost")
-            .setConnectionType(RTConnectionType.LONG_POLLING)
-            .setSecure(true)
-            .build();
-        ChineseRoom chineseRoom = new ChineseRoom(user, connectionProperties);
-        chineseRoom.join("chineseRoomSelector", "synthetic.china://room1", new RTMessageHandler() {
-            
-            @Override
-            public void onMessage(JSONValue message) {
-                System.out.println(message.toString());
-            }
-        });
-        chineseRoom.say("Hello World");
-        Thread.sleep(20000);
-        chineseRoom.say("This is Marc speaking");
-        chineseRoom.leave();
+    /**
+     * 
+     * @param message
+     * @throws JSONException 
+     * @throws RTException 
+     */
+//    [
+//     {
+//       "seq": 3,
+//       "to": "synthetic.china://room1",
+//       "payloads": [
+//         {
+//           "data": "say",
+//           "element": "action"
+//         },
+//         {
+//           "data": "Hallo, Hamburg! Gl..ckwunsch zum Einj..hrigen!",
+//           "namespace": "china",
+//           "element": "message"
+//         }
+//       ],
+//       "element": "message"
+//     }
+//   ]
+    public void say(String message) throws JSONException, RTException {
+        JSONArray payloads = new JSONArray();
+        JSONObject actionPayload = new JSONObject();
+        JSONObject messagePayload = new JSONObject();
+        
+        actionPayload.put("element", "action");
+        actionPayload.put("data", "say");
+        
+        messagePayload.put("element", "message");
+        messagePayload.put("namespace", "china");
+        messagePayload.put("data", message);
+        
+        payloads.put(actionPayload);
+        payloads.put(messagePayload);
+        
+        super.say(payloads);
     }
 
 }
