@@ -47,20 +47,77 @@
  *
  */
 
-package com.openexchange.realtime.client;
+package com.openexchange.file.storage.events;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStorageService;
 
 /**
- * {@link Constants} - Gathers constants used throughout the project.
- * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * {@link WrappedFileStorageAccountAccess}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class Constants {
-    
-    //Cookies
-    public static final String JSESSIONID_NAME = "JSESSIONID";
+public class WrappedFileStorageAccountAccess implements FileStorageAccountAccess {
 
-    //Request
-    public static final long REQUEST_TIMEOUT = 30;
+    private final FileStorageAccountAccess delegate;
+
+    public WrappedFileStorageAccountAccess(FileStorageAccountAccess delegate) {
+        super();
+        this.delegate = delegate;
+    }
+
+    @Override
+    public void connect() throws OXException {
+        delegate.connect();
+    }
+
+    @Override
+    public boolean isConnected() {
+        return delegate.isConnected();
+    }
+
+    @Override
+    public void close() {
+        delegate.close();
+    }
+
+    @Override
+    public boolean ping() throws OXException {
+        return delegate.ping();
+    }
+
+    @Override
+    public boolean cacheable() {
+        return delegate.cacheable();
+    }
+
+    @Override
+    public String getAccountId() {
+        return delegate.getAccountId();
+    }
+
+    @Override
+    public FileStorageFileAccess getFileAccess() throws OXException {
+        return delegate.getFileAccess();
+    }
+
+    @Override
+    public FileStorageFolderAccess getFolderAccess() throws OXException {
+        return new WrappedFileStorageFolderAccess(delegate.getFolderAccess());
+    }
+
+    @Override
+    public FileStorageFolder getRootFolder() throws OXException {
+        return delegate.getRootFolder();
+    }
+
+    @Override
+    public FileStorageService getService() {
+        return delegate.getService();
+    }
 
 }

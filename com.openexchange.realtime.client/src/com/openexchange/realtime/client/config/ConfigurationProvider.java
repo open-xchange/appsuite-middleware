@@ -55,11 +55,16 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
 
 /**
- * Provides configurations required to be able to send requests with the realtime client framework. Use
- * com.openexchange.realtime.client.config.ConfigurationProvider.getInstance().toString() to get the currently used configuration.
+ * Provides configurations required to be able to send requests with help of the realtime client framework. Use
+ * com.openexchange.realtime.client.config.ConfigurationProvider.getInstance().toString() to get the currently used configuration. If a file
+ * with the name 'config.properties' is provided in the 'conf' folder, the configuration made there will be used for further processing. A
+ * template of the configuration file can be found within the 'tmp' folder. If no file is provided, the default will be used.
+ * Programmatically, each configuration entry can be changed with the provided setter.
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
@@ -79,7 +84,7 @@ public class ConfigurationProvider {
     /**
      * Id that will be used to identify the client
      */
-    private String clientId = "open-xchange-realtime";
+    protected String clientId = "open-xchange-realtime";
 
     /**
      * Selector (or roomname) that will be used for requests
@@ -142,24 +147,24 @@ public class ConfigurationProvider {
     /**
      * Port to address the requests
      */
-    private int port = 80;
+    private AtomicInteger port = new AtomicInteger(80);
 
     /**
      * Flag to identify if secured connections (https) should be used
      */
-    private boolean secure = true;
+    private AtomicBoolean secure = new AtomicBoolean(true);
 
     /**
-     * Initializes a new {@link ConfigurationProvider}.
+     * Initializes a new {@link ConfigurationProvider} - only internal
      */
     private ConfigurationProvider() {
-
+        // prevent instantiation
     }
 
     /**
      * Get an instance of the {@link ConfigurationProvider}. Use this if you would like to use the default configuration.
      * 
-     * @return
+     * @return {@link ConfigurationProvider} instance, based on properties file if provided
      */
     public static final synchronized ConfigurationProvider getInstance() {
         if (SINGLETON == null) {
@@ -167,29 +172,24 @@ public class ConfigurationProvider {
 
             try {
                 loadPropertiesFile();
-
-            } catch (IllegalArgumentException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (SecurityException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
             } catch (IllegalAccessException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                // Error in reading property file content
             } catch (NoSuchFieldException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                // Error in reading property file content
             }
-            System.out.println(SINGLETON.toString());
         }
         return SINGLETON;
     }
 
-    private static void loadPropertiesFile() throws IllegalArgumentException, IllegalAccessException, IOException, SecurityException, NoSuchFieldException {
+    /**
+     * Try to load the properties from the file 'config.properties' from the 'conf' folder. A template of the used properties-file can be
+     * found in 'tmp' folder. Use this as default and copy it to the 'conf' folder. If a value is set within the file, the default will be
+     * overridden. If there is no value set, the default will be used.
+     * 
+     * @throws IllegalAccessException
+     * @throws NoSuchFieldException
+     */
+    private static void loadPropertiesFile() throws IllegalAccessException, NoSuchFieldException {
         Properties prop = new Properties();
 
         try {
@@ -226,9 +226,10 @@ public class ConfigurationProvider {
             }
             SINGLETON.initializedWithPropertiesFile = true;
         } catch (FileNotFoundException fileNotFoundException) {
-            // TODO log: no properties file provided -use default
+            // No properties file provided - use default
+        } catch (IOException ioException) {
+            // No properties file provided - use default
         }
-
     }
 
     /**
@@ -237,7 +238,7 @@ public class ConfigurationProvider {
      * @return String with the status of the object
      */
     @Override
-    public String toString() {
+    public synchronized String toString() {
         StringBuilder result = new StringBuilder();
         String newLine = System.getProperty("line.separator");
 
@@ -484,7 +485,7 @@ public class ConfigurationProvider {
      * @return The port
      */
     public int getPort() {
-        return port;
+        return port.get();
     }
 
     /**
@@ -493,7 +494,7 @@ public class ConfigurationProvider {
      * @param port The port to set
      */
     public void setPort(int port) {
-        this.port = port;
+        this.port.set(port);
     }
 
     /**
@@ -502,7 +503,7 @@ public class ConfigurationProvider {
      * @return The secure
      */
     public boolean isSecure() {
-        return secure;
+        return secure.get();
     }
 
     /**
@@ -511,7 +512,7 @@ public class ConfigurationProvider {
      * @param secure The secure to set
      */
     public void setSecure(boolean secure) {
-        this.secure = secure;
+        this.secure.set(secure);
     }
 
     /**

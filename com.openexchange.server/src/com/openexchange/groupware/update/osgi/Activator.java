@@ -60,6 +60,7 @@ import com.openexchange.groupware.update.internal.ExcludedList;
 import com.openexchange.groupware.update.internal.FullPrimaryKeySupportImpl;
 import com.openexchange.groupware.update.internal.InternalList;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * This {@link Activator} currently is only used to initialize some structures within the database update component. Later on this may used
@@ -85,7 +86,9 @@ public class Activator extends HousekeepingActivator {
         registerService(CreateTableService.class, new CreateUpdateTaskTable());
 
         final ConfigurationService configService = getService(ConfigurationService.class);
-        registerService(FullPrimaryKeySupportService.class, new FullPrimaryKeySupportImpl(configService));
+        final FullPrimaryKeySupportImpl fullPrimaryKeySupport = new FullPrimaryKeySupportImpl(configService);
+        registerService(FullPrimaryKeySupportService.class, fullPrimaryKeySupport);
+        ServerServiceRegistry.getInstance().addService(FullPrimaryKeySupportService.class, fullPrimaryKeySupport);
 
         ExcludedList.getInstance().configure(configService);
         InternalList.getInstance().start();
@@ -99,6 +102,7 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         InternalList.getInstance().stop();
+        ServerServiceRegistry.getInstance().removeService(FullPrimaryKeySupportService.class);
         super.stopBundle();
     }
 
