@@ -54,6 +54,7 @@ import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
 import com.openexchange.calendar.printing.CPServlet;
 import com.openexchange.calendar.printing.preferences.CalendarPrintingEnabled;
 import com.openexchange.calendar.printing.templating.CalendarTemplateHelperFactory;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.group.GroupService;
@@ -91,6 +92,9 @@ public class CalendarPrintingActivator extends AbstractSessionServletActivator {
         register();
         registerService(PreferencesItemService.class, new CalendarPrintingEnabled());
         registerService(TemplateHelperFactory.class, new CalendarTemplateHelperFactory(this));
+
+        final CapabilityService capabilityService = getService(CapabilityService.class);
+        capabilityService.declareCapability("printing");
     }
 
     private void register() {
