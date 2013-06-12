@@ -57,14 +57,12 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.realtime.client.Constants;
 import com.openexchange.realtime.client.RTConnection;
 import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
 import com.openexchange.realtime.client.RTUserState;
-import com.openexchange.realtime.client.RTUserStateChangeListener;
-import com.openexchange.realtime.client.user.RTUser;
+import com.openexchange.realtime.client.config.ConfigurationProvider;
 
 /**
  * {@link AbstractRTConnection}
@@ -72,7 +70,7 @@ import com.openexchange.realtime.client.user.RTUser;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class AbstractRTConnection implements RTConnection, RTProtocolCallback {
-    
+
     private final static Logger LOG = LoggerFactory.getLogger(AbstractRTConnection.class);
 
     protected final RTConnectionProperties connectionProperties;
@@ -85,15 +83,15 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     protected RTUserState userState;
 
-    //did we successfully login to the backend to receive a serversession?
+    //did we successfully login to the b ackend to receive a serversession?
     protected boolean loggedIn = false;
-    
-    //did we establish a "duplex" connection to the backend? 
-    protected boolean isConnected = false;
+
+    //did we establish a "duplex" connection to the backend?
+    protected  boolean isConnected = false;
 
     private Thread deliverer;
-    
-    protected ConcurrentHashMap<String, RTMessageHandler> messageHandlers; 
+
+    protected ConcurrentHashMap<String, RTMessageHandler> messageHandlers;
 
 
     protected AbstractRTConnection(RTConnectionProperties connectionProperties) {
@@ -105,7 +103,7 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     @Override
     public RTUserState connect(RTMessageHandler messageHandler) throws RTException {
-        return connect(Constants.DEFAULT_SELECTOR, messageHandler);
+        return connect(ConfigurationProvider.getInstance().getDefaultSelector(), messageHandler);
     }
 
     @Override
@@ -122,7 +120,7 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
         }
 
         protocol = new RTProtocol(this, gate);
-        
+
         if (!loggedIn) {
             userState = Login.doLogin(
                 connectionProperties.getSecure(),
@@ -134,7 +132,7 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
         } else {
             LOG.info("User is already logged in. Returning existing user state.");
         }
-        
+
         return userState;
     }
 
@@ -166,9 +164,10 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
             throw new RTException("The given string was not a valid JSON message.", e);
         }
     }
-    
+
     @Override
     public void removeHandler(String selector) {
         messageHandlers.remove(selector);
     }
+
 }

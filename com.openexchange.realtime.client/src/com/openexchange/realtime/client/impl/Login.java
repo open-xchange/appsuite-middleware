@@ -64,9 +64,9 @@ import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Cookie;
 import com.ning.http.client.Response;
 import com.ning.http.client.generators.InputStreamBodyGenerator;
-import com.openexchange.realtime.client.Constants;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTUserState;
+import com.openexchange.realtime.client.config.ConfigurationProvider;
 
 /**
  * {@link Login}
@@ -78,16 +78,20 @@ public class Login {
     private static final String HTTP = "http";
 
     private static final String HTTPS = "https";
-    
+
     private static final String JSESSIONID = "JSESSIONID";
-    
+
     private static final String SECRET_KEY = "open-xchange-secret-key";
-    
+
     private static final String SECRET_VALUE = "open-xchange-secret-value";
-    
+
     public static RTUserState doLogin(final boolean secure, String host, int port, String username, String password) throws RTException {
         String loginUrl = buildLoginUrl(secure, host, port);
-        String loginBody = buildLoginBody(Constants.LOGIN_ACTION, username, password, Constants.CLIENT_ID);
+        String loginBody = buildLoginBody(
+            ConfigurationProvider.getInstance().getLoginAction(),
+            username,
+            password,
+            ConfigurationProvider.getInstance().getClientId());
 
         try {
             AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
@@ -97,11 +101,11 @@ public class Login {
                 .execute();
             Response response = f.get();
             int statusCode = response.getStatusCode();
-            
+
             if(statusCode != 200) {
                 throw new RTException("Login failed, expected HTTP 200 status instead of " + statusCode);
             }
-            
+
             return createUserState(response);
         } catch (UnsupportedEncodingException e) {
             throw new RTException("Login failed.", e);
@@ -128,7 +132,7 @@ public class Login {
         Validate.notEmpty(username);
         Validate.notEmpty(password);
         Validate.notEmpty(clientID);
-        
+
         StringBuilder sb = new StringBuilder();
 
         sb.append("action=").append(action);
@@ -152,7 +156,7 @@ public class Login {
     private static String buildLoginUrl(boolean secure, String host, int port) {
         Validate.notEmpty(host);
         Validate.isTrue( port == -1 || (port > 0 && port <= 65535), "The port must be between 1 and 65535: ", port);
-        
+
         StringBuilder sb = new StringBuilder();
 
         if (host.endsWith("/")) {
@@ -165,13 +169,13 @@ public class Login {
             sb.append(HTTP);
         }
         sb.append("://").append(host);
-        
+
         if(port != -1) {
             sb.append(":").append(port);
         }
-        
-        sb.append(Constants.LOGIN_PATH);
-        
+
+        sb.append(ConfigurationProvider.getInstance().getLoginPath());
+
         return sb.toString();
     }
 
@@ -184,18 +188,18 @@ public class Login {
      */
     private static RTUserState createUserState(Response response) throws RTException {
         Validate.notNull(response, "Response must not be null");
-        
+
         try {
             Map<String, String> cookieMap = mapCookies(response.getCookies());
             JSONObject responseBody = new JSONObject(response.getResponseBody());
-            
+
             long contextID = responseBody.getLong("context_id");
             String sessionID = responseBody.getString("session");
             String locale = responseBody.getString("locale");
             String random = responseBody.getString("random");
             long userID = responseBody.getLong("user_id");
             String user = responseBody.getString("user");
-            
+
             return new RTUserState(contextID, sessionID, locale, random, userID, user, cookieMap.get(SECRET_KEY), cookieMap.get(SECRET_VALUE), cookieMap.get(JSESSIONID));
         } catch (JSONException e) {
             throw new RTException(e);
@@ -213,7 +217,7 @@ public class Login {
      */
     private static Map<String, String> mapCookies(List<Cookie> cookies) throws RTException {
         Validate.notNull(cookies, "ERROR: Cookie list mustn't be null!");
-        
+
         Map<String, String> cookieMap = new HashMap<String, String>();
         String secretKey = null;
         String secretValue = null;
