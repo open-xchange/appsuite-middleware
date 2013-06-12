@@ -997,7 +997,13 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected static boolean stringToBool(final String string) {
-        return "yes".equals(string) || "true".equals(string);
+        return parseBool(string);
+    }
+
+    private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true","1","yes","y","on")));
+
+    private static boolean parseBool(final String parameter) {
+        return (null != parameter) && BOOL_VALS.contains(toLowerCase(parameter.trim()));
     }
 
     protected static Credentials getCreds(final String[] nextLine, final int[] idarray) {
@@ -2142,10 +2148,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             // on
             return true;
         }
-        if (optionValue.trim().length() > 0 && optionValue.trim().equalsIgnoreCase("on")) {
-            return true;
-        }
-        return false;
+        return stringToBool(optionValue);
     }
 
     /**
@@ -2285,10 +2288,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected final boolean accessOption2BooleanChange(final AdminParser parser, final CLIOption accessOption) {
         // option was set, check what text was sent
         final String optionValue = (String) parser.getOptionValue(accessOption);
-        if (optionValue.trim().length() > 0 && optionValue.trim().equalsIgnoreCase("on")) {
-            return true;
-        }
-        return false;
+        return stringToBool(optionValue);
     }
 
     /**
