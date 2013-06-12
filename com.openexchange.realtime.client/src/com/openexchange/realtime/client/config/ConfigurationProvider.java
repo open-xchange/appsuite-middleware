@@ -55,6 +55,8 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
 
 /**
@@ -145,12 +147,12 @@ public class ConfigurationProvider {
     /**
      * Port to address the requests
      */
-    private int port = 80;
+    private AtomicInteger port = new AtomicInteger(80);
 
     /**
      * Flag to identify if secured connections (https) should be used
      */
-    private boolean secure = true;
+    private AtomicBoolean secure = new AtomicBoolean(true);
 
     /**
      * Initializes a new {@link ConfigurationProvider} - only internal
@@ -236,7 +238,7 @@ public class ConfigurationProvider {
      * @return String with the status of the object
      */
     @Override
-    public String toString() {
+    public synchronized String toString() {
         StringBuilder result = new StringBuilder();
         String newLine = System.getProperty("line.separator");
 
@@ -483,7 +485,7 @@ public class ConfigurationProvider {
      * @return The port
      */
     public int getPort() {
-        return port;
+        return port.get();
     }
 
     /**
@@ -492,7 +494,7 @@ public class ConfigurationProvider {
      * @param port The port to set
      */
     public void setPort(int port) {
-        this.port = port;
+        this.port.set(port);
     }
 
     /**
@@ -501,7 +503,7 @@ public class ConfigurationProvider {
      * @return The secure
      */
     public boolean isSecure() {
-        return secure;
+        return secure.get();
     }
 
     /**
@@ -510,7 +512,7 @@ public class ConfigurationProvider {
      * @param secure The secure to set
      */
     public void setSecure(boolean secure) {
-        this.secure = secure;
+        this.secure.set(secure);
     }
 
     /**
