@@ -886,7 +886,8 @@ public class RdbUserStorage extends UserStorage {
         if (!changed.isEmpty()) {
             PreparedStatement stmtWithUuid = null;
             try {
-                int size = 0;
+                int size1 = 0;
+                int size2 = 0;
                 for (final Map.Entry<String, Set<ChangedAttr>> entry : changed.entrySet()) {
                     for (final ChangedAttr value : entry.getValue()) {
                         final UUID uuid = value.uuid;
@@ -900,6 +901,7 @@ public class RdbUserStorage extends UserStorage {
                             stmt.setString(5, value.oldVal);
                             stmt.setString(1, value.newVal);
                             stmt.addBatch();
+                            size1++;
                         } else {
                             if (null == stmtWithUuid) {
                                 stmtWithUuid = con.prepareStatement("UPDATE user_attribute SET value=? WHERE cid=? AND uuid=?");
@@ -908,30 +910,32 @@ public class RdbUserStorage extends UserStorage {
                             stmtWithUuid.setBytes(3, UUIDs.toByteArray(uuid));
                             stmtWithUuid.setString(1, value.newVal);
                             stmtWithUuid.addBatch();
+                            size2++;
                         }
-                        size++;
                     }
                 }
-                int[] mLines = new int[0];
-                int lines = 0;
+                int[] mLines1 = new int[0];
+                int lines1 = 0;
                 if (null != stmt) {
-                    mLines = stmt.executeBatch();
-                    for (final int mLine : mLines) {
-                        lines += mLine;
+                    mLines1 = stmt.executeBatch();
+                    for (final int mLine : mLines1) {
+                        lines1 += mLine;
                     }
                 }
+                int[] mLines2 = new int[0];
+                int lines2 = 0;
                 if (null != stmtWithUuid) {
-                    mLines = stmtWithUuid.executeBatch();
-                    for (final int mLine : mLines) {
-                        lines += mLine;
+                    mLines2 = stmtWithUuid.executeBatch();
+                    for (final int mLine : mLines2) {
+                        lines2 += mLine;
                     }
                 }
-                if (size != lines) {
+                if (size1 != lines1) {
                     // Ignoring the failed update of a clients login time stamp. This only happens if a concurrent login with the same client took place.
                     boolean onlyLoginsFailed = true;
                     int j = 0;
                     for (Entry<String, Set<ChangedAttr>> entry : changed.entrySet()) {
-                        if (!entry.getKey().startsWith("client:") && mLines[j] != 1) {
+                        if (!entry.getKey().startsWith("client:") && mLines1[j] != 1) {
                             onlyLoginsFailed = false;
                             break;
                         }
@@ -940,7 +944,30 @@ public class RdbUserStorage extends UserStorage {
                     if (!onlyLoginsFailed) {
                         final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
                         LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
-                        LOG.error("Expected lines: " + size + " Updated lines: " + lines);
+                        LOG.error("Expected lines: " + size1 + " Updated lines: " + lines1);
+                        final Map<Integer, UserImpl> map = createSingleUserMap(userId);
+                        loadAttributes(contextId, con, map, false);
+                        for (int i : map.keySet()) {
+                            LOG.error("User " + i + ": " + map.get(I(i)).getAttributes().toString());
+                        }
+                        throw e;
+                    }
+                }
+                if (size2 != lines2) {
+                    // Ignoring the failed update of a clients login time stamp. This only happens if a concurrent login with the same client took place.
+                    boolean onlyLoginsFailed = true;
+                    int j = 0;
+                    for (Entry<String, Set<ChangedAttr>> entry : changed.entrySet()) {
+                        if (!entry.getKey().startsWith("client:") && mLines2[j] != 1) {
+                            onlyLoginsFailed = false;
+                            break;
+                        }
+                        j++;
+                    }
+                    if (!onlyLoginsFailed) {
+                        final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
+                        LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
+                        LOG.error("Expected lines: " + size2 + " Updated lines: " + lines2);
                         final Map<Integer, UserImpl> map = createSingleUserMap(userId);
                         loadAttributes(contextId, con, map, false);
                         for (int i : map.keySet()) {

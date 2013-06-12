@@ -59,6 +59,7 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardIdsTask;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardPrincipalTask;
 import com.openexchange.groupware.update.tasks.AddUUIDForDListTables;
+import com.openexchange.groupware.update.tasks.AddUUIDForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.AddUUIDForUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.AddUUIDForUserAttributeTable;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicContextAttributesTask;
@@ -76,6 +77,7 @@ import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddPrimar
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.MailAccountAddReplyToTask;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForDListTables;
+import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUserAttributeTable;
 import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddPrimaryKeyUpdateTask;
@@ -545,9 +547,6 @@ public final class InternalList {
         //Add Uuid column to dlist tables
         list.add(new AddUUIDForDListTables());
 
-        //Add primary key to infostoreReservedPaths table
-//        list.add(new PrimaryKeyForInfostoreReservedPaths());
-
         //Add primary key to ical_ids table
         list.add(new CreateIcalIdsPrimaryKeyTask());
 
@@ -562,6 +561,9 @@ public final class InternalList {
 
         // Add UUID column to user_attribute table
         list.add(new AddUUIDForUserAttributeTable());
+        
+        //Add UUID column to infostoreReservedPaths table
+        list.add(new AddUUIDForInfostoreReservedPaths());
 
         // Add synthetic primary keys to tables without natural key if full primary key support is enabled
         final FullPrimaryKeySupportService fullPrimaryKeySupportService = ServerServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
@@ -599,6 +601,9 @@ public final class InternalList {
 
             //Add primary key to dlist tables
             list.add(new MakeUUIDPrimaryForDListTables());
+            
+            //Add primary key to infostoreReservedPaths table;
+            list.add(new MakeUUIDPrimaryForInfostoreReservedPaths());
 
         }
 

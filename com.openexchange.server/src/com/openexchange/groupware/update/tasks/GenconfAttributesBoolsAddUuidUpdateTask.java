@@ -120,7 +120,7 @@ public class GenconfAttributesBoolsAddUuidUpdateTask extends UpdateTaskAdapter {
         int oldPos, newPos;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT cid, id, name, value FROM genconf_attributes_bools WHERE uuid IS FOR UPDATE");
+            stmt = con.prepareStatement("SELECT cid, id, name, value FROM genconf_attributes_bools WHERE uuid IS NULL FOR UPDATE");
             rs = stmt.executeQuery();
             PreparedStatement stmt2 = null;
             try {

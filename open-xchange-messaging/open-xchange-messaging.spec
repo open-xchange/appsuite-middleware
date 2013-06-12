@@ -84,6 +84,8 @@ fi
 %dir /opt/open-xchange/etc/
 
 %changelog
+* Tue Jun 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-06-13
 * Fri Jun 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-06-20
 * Tue May 28 2013 Marcus Klein <marcus.klein@open-xchange.com>

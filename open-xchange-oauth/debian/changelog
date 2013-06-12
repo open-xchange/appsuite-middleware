@@ -388,6 +388,12 @@ open-xchange-oauth (6.22.1-0) unstable; urgency=low
 
  -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 10:03:29 +0200
 
+open-xchange-oauth (6.22.0-14) unstable; urgency=low
+
+  * Build for patch 2013-06-13
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Tue, 11 Jun 2013 09:46:29 +0200
+
 open-xchange-oauth (6.22.0-13) unstable; urgency=low
 
   * Build for patch 2013-05-09
