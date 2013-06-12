@@ -47,68 +47,69 @@
  *
  */
 
-package com.openexchange.file.storage.json.actions.accounts;
+package com.openexchange.file.storage.events;
 
-import java.util.ArrayList;
 import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import java.util.Set;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.json.FileStorageAccountConstants;
-import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.session.Session;
 
 /**
- * A class implementing the "all" action for listing file storage accounts. Optionally only accounts of a certain service
- * are returned. Parameters are:
- * <dl>
- *  <dt>filestorageService</dt><dd>(optional) The ID of the file storage service. If present lists only accounts of this service.</dd>
- * </dl>
- * Returns a JSONArray of JSONObjects representing the file storage accounts.
+ * {@link WrappedFileStorageService}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AllAction extends AbstractFileStorageAccountAction {
+public class WrappedFileStorageService implements FileStorageService, AccountAware {
 
-    public AllAction(final FileStorageServiceRegistry registry) {
-        super(registry);
+    private final FileStorageService delegate;
+
+    public WrappedFileStorageService(FileStorageService delegate) {
+        super();
+        this.delegate = delegate;
     }
 
     @Override
-    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
-
-        final String fsServiceId = request.getParameter(FileStorageAccountConstants.FILE_STORAGE_SERVICE);
-
-        final List<FileStorageService> services = new ArrayList<FileStorageService>();
-        if(fsServiceId != null) {
-            services.add(registry.getFileStorageService(fsServiceId));
-        } else {
-            services.addAll(registry.getAllServices());
+    public List<FileStorageAccount> getAccounts(Session session) throws OXException {
+        if (AccountAware.class.isInstance(delegate)) {
+            return ((AccountAware)delegate).getAccounts(session);
         }
+        return null;
+    }
 
-        final JSONArray result = new JSONArray();
+    @Override
+    public String getId() {
+        return delegate.getId();
+    }
 
-        for (final FileStorageService fsService : services) {
-            List<FileStorageAccount> userAccounts = null;
-            if (fsService instanceof AccountAware) {
-                userAccounts = ((AccountAware) fsService).getAccounts(session);
-            }
-            if (null == userAccounts) {
-                userAccounts = fsService.getAccountManager().getAccounts(session);
-            }
-            for (final FileStorageAccount account : userAccounts) {
-                result.put(writer.write(account));
-            }
-        }
+    @Override
+    public String getDisplayName() {
+        return delegate.getDisplayName();
+    }
 
-        return new AJAXRequestResult(result);
+    @Override
+    public DynamicFormDescription getFormDescription() {
+        return delegate.getFormDescription();
+    }
+
+    @Override
+    public Set<String> getSecretProperties() {
+        return delegate.getSecretProperties();
+    }
+
+    @Override
+    public FileStorageAccountManager getAccountManager() throws OXException {
+        return delegate.getAccountManager();
+    }
+
+    @Override
+    public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws OXException {
+        return new WrappedFileStorageAccountAccess(delegate.getAccountAccess(accountId, session));
     }
 
 }

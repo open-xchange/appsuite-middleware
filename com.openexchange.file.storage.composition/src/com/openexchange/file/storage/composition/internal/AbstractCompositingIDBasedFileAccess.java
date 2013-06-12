@@ -830,10 +830,11 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         final List<FileStorageService> allFileStorageServices = getAllFileStorageServices();
         final List<FileStorageFileAccess> retval = new ArrayList<FileStorageFileAccess>(allFileStorageServices.size());
         for (final FileStorageService fsService : allFileStorageServices) {
-            final List<FileStorageAccount> accounts;
+            List<FileStorageAccount> accounts = null;
             if (fsService instanceof AccountAware) {
                 accounts = ((AccountAware) fsService).getAccounts(session);
-            } else {
+            }
+            if (null == accounts) {
                 accounts = fsService.getAccountManager().getAccounts(session);
             }
             for (final FileStorageAccount fileStorageAccount : accounts) {

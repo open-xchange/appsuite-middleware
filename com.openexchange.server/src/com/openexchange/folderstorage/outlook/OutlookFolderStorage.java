@@ -1581,10 +1581,11 @@ public final class OutlookFolderStorage implements FolderStorage {
                                     /*
                                      * Check if file storage service provides a root folder
                                      */
-                                    final List<FileStorageAccount> userAccounts;
+                                    List<FileStorageAccount> userAccounts = null;
                                     if (fsService instanceof AccountAware) {
                                         userAccounts = ((AccountAware) fsService).getAccounts(session);
-                                    } else {
+                                    }
+                                    if (null == userAccounts) {
                                         userAccounts = fsService.getAccountManager().getAccounts(session);
                                     }
                                     final Props props = LogProperties.getLogProperties();
