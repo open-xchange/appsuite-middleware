@@ -270,9 +270,11 @@ public class RTRoomImpl implements RTRoom {
      * Resets the ping timer
      */
     private void resetTimer() {
-        pingTimer.cancel();
-        pingTimer = new Timer();
-        this.pingTimer.scheduleAtFixedRate(this.pingTimerTask, 30000, 30000);
+        this.pingTimer.cancel();
+        this.pingTimerTask.cancel();
+        this.pingTimer = null;
+        this.pingTimerTask = null;
+        setupTimer();
     }
 
     /**
