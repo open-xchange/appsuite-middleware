@@ -50,48 +50,74 @@
 package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
+
 /**
- * {@link PrimaryKeyForInfostoreReservedPaths}
- * 
+ * {@link MakeUUIDPrimaryForInfostoreReservedPaths}
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class PrimaryKeyForInfostoreReservedPaths extends UpdateTaskAdapter {
+public class MakeUUIDPrimaryForInfostoreReservedPaths extends UpdateTaskAdapter {
 
     private static final String TABLE = "infostoreReservedPaths";
 
-    private static final String[] COLUMNS = new String[] { "cid", "folder", "name" };
+    private static final String COLUMN = "uuid";
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        Connection con = Database.getNoTimeout(params.getContextId(), true);
-
+        ProgressState progress = params.getProgressState();
+        Connection connection = Database.getNoTimeout(params.getContextId(), true);
         try {
-            con.setAutoCommit(false);
-            if (!Tools.hasPrimaryKey(con, TABLE)) {
-                Tools.createPrimaryKey(con, TABLE, COLUMNS);
+            DBUtils.startTransaction(connection);
+            progress.setTotal(getTotalRows(connection));
+            if (!Tools.columnExists(connection, TABLE, COLUMN)) {
+                throw UpdateExceptionCodes.COLUMN_NOT_FOUND.create(COLUMN, TABLE);
             }
-            con.commit();
+
+            AddUUIDForInfostoreReservedPaths.fillUUIDs(connection, TABLE, progress);
+            Tools.modifyColumns(connection, TABLE, new Column(COLUMN, "BINARY(16) NOT NULL"));
+            Tools.createPrimaryKey(connection, TABLE, new String[] { COLUMN });
+            connection.commit();
         } catch (SQLException e) {
-            DBUtils.rollback(con);
+            DBUtils.rollback(connection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(con);
-            Database.backNoTimeout(params.getContextId(), true, con);
+            DBUtils.autocommit(connection);
+            Database.backNoTimeout(params.getContextId(), true, connection);
         }
     }
 
     @Override
     public String[] getDependencies() {
-        return new String[] {};
+        return new String[] { "com.openexchange.groupware.update.tasks.AddUUIDForInfostoreReservedPaths" };
+    }
+
+    private int getTotalRows(Connection con) throws SQLException {
+        Statement stmt = null;
+        ResultSet rs = null;
+        int rows = 0;
+        try {
+            stmt = con.createStatement();
+            rs = stmt.executeQuery("SELECT COUNT(*) FROM " + TABLE + " WHERE uuid IS NULL");
+            while (rs.next()) {
+                rows += rs.getInt(1);
+            }
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+        return rows;
     }
 
 }
