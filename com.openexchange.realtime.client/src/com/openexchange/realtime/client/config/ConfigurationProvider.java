@@ -167,24 +167,17 @@ public class ConfigurationProvider {
 
             try {
                 loadPropertiesFile();
-
             } catch (IllegalArgumentException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                // Error in reading property file content
             } catch (SecurityException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                // Error in reading property file content
             } catch (IllegalAccessException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                // Error in reading property file content
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                // Error in reading property file content
             } catch (NoSuchFieldException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                // Error in reading property file content
             }
-            System.out.println(SINGLETON.toString());
         }
         return SINGLETON;
     }

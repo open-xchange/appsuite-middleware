@@ -56,29 +56,6 @@ package com.openexchange.realtime.client;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class Constants {
-
-    //Urls
-    public static final String HOST = "localhost";
-    
-    public static final String API_PATH = "/appsuite/api";
-    
-    public static final String CLIENT_ID = "open-xchange-realtime";
-
-    public static final String LOGIN_PATH = "/ajax/login";
-
-    public static final String LOGIN_ACTION = "login";
-
-    public static final String CREATE_PATH = API_PATH + "/oxodocumentfilter";
-    
-    public static final String QUERY_PATH = API_PATH +  "/rt";
-    
-    public static final String QUERY_ACTION = QUERY_PATH +  "?action=query";
-    
-    public static final String SEND_PATH = API_PATH +  "/rt";
-    
-    public static final String SEND_ACTION = QUERY_PATH +  "?action=send";
-
-    public static final String DEFAULT_SELECTOR = "default";
     
     //Cookies
     public static final String JSESSIONID_NAME = "JSESSIONID";

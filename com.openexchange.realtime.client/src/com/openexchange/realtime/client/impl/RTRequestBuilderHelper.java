@@ -49,16 +49,12 @@
 
 package com.openexchange.realtime.client.impl;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import org.apache.commons.lang.Validate;
 import com.ning.http.client.FluentStringsMap;
 import com.ning.http.client.RequestBuilder;
 import com.openexchange.realtime.client.Constants;
 import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTUserState;
+import com.openexchange.realtime.client.config.ConfigurationProvider;
 
 /**
  * {@link RTRequestBuilderHelper} Utility to create preconfigured {@link RequestBuilders} for realtime request.
@@ -75,7 +71,7 @@ public class RTRequestBuilderHelper extends RequestBuilder {
      */
     public static RequestBuilder newSendRequest(final RTConnectionProperties connectionProperties, final RTUserState state) {
         RequestBuilder builder = new RequestBuilder("PUT");
-        builder.setUrl(Constants.SEND_PATH);
+        builder.setUrl(ConfigurationProvider.getInstance().getSendPath());
         builder.setHeader("Content-Type", "Content-Type:text/javascript; charset=UTF-8");
         builder.setHeader("Cookie", cookieHeaderFromUserState(state));
         builder.setParameters(getSendParameters(connectionProperties.getResource(), state));
@@ -90,7 +86,7 @@ public class RTRequestBuilderHelper extends RequestBuilder {
      */
     public static RequestBuilder newQueryRequest(final RTConnectionProperties connectionProperties, final RTUserState state) {
         RequestBuilder builder = new RequestBuilder("PUT");
-        builder.setUrl(buildUrl(Constants.QUERY_PATH, connectionProperties));
+        builder.setUrl(buildUrl(ConfigurationProvider.getInstance().getQueryPath(), connectionProperties));
         builder.setHeader("Content-Type", "Content-Type:text/javascript; charset=UTF-8");
         builder.setHeader("Cookie", cookieHeaderFromUserState(state));
         builder.setQueryParameters(getQueryParameters(connectionProperties.getResource(), state));
