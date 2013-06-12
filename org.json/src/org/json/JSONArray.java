@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.json.helpers.CharArrayWriter;
 import org.json.helpers.UnsynchronizedStringReader;
 import org.json.helpers.UnsynchronizedStringWriter;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -816,18 +815,6 @@ public class JSONArray extends AbstractJSONValue {
                 return EMPTY;
             }
 
-            // Check whether to use character array pool
-            if (JSONObject.USE_CHAR_POOL.get()) {
-                final CharArrayWriter writer = new CharArrayWriter(n << 4);
-                try {
-                    write(writer);
-                    return writer.toString();
-                } finally {
-                    writer.resetCharArray();
-                }
-            }
-
-            // Regular
             final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(n << 4);
             write(writer, asciiOnly);
             return writer.toString();
@@ -854,23 +841,6 @@ public class JSONArray extends AbstractJSONValue {
             return EMPTY;
         }
 
-        // Check whether to use character array pool
-        if (JSONObject.USE_CHAR_POOL.get()) {
-            final CharArrayWriter writer = new CharArrayWriter(n << 4);
-            JsonGenerator jGenerator = null;
-            try {
-                jGenerator = createGenerator(writer, false);
-                jGenerator.setPrettyPrinter(STANDARD_DEFAULT_PRETTY_PRINTER);
-                write(this, jGenerator);
-                return writer.toString();
-            } catch (final IOException e) {
-                throw new JSONException(e);
-            } finally {
-                close(jGenerator);
-                writer.resetCharArray();
-            }
-        }
-
         return toString(indentFactor, 0);
     }
 
@@ -882,22 +852,6 @@ public class JSONArray extends AbstractJSONValue {
         final int len = length();
         if (len == 0) {
             return EMPTY;
-        }
-
-        if (JSONObject.USE_CHAR_POOL.get()) {
-            final CharArrayWriter writer = new CharArrayWriter(len << 4);
-            JsonGenerator jGenerator = null;
-            try {
-                jGenerator = createGenerator(writer, false);
-                jGenerator.setPrettyPrinter(STANDARD_DEFAULT_PRETTY_PRINTER);
-                write(this, jGenerator);
-                return writer.toString();
-            } catch (final IOException e) {
-                throw new JSONException(e);
-            } finally {
-                close(jGenerator);
-                writer.resetCharArray();
-            }
         }
 
         JsonGenerator jGenerator = null;
