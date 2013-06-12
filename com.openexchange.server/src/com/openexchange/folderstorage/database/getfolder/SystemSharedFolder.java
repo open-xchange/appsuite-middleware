@@ -102,16 +102,17 @@ public final class SystemSharedFolder {
      * @param fo The folder object fetched from database
      * @param user The user
      * @param userConfiguration The user configuration
+     * @param translate Whether to translate folders according to user's locale
      * @param ctx The context
      * @param con The connection
      * @return The database folder representing system shared folder for given user
      * @throws OXException
      */
-    public static DatabaseFolder getSystemSharedFolder(final FolderObject fo, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
+    public static DatabaseFolder getSystemSharedFolder(final FolderObject fo, final User user, final UserConfiguration userConfiguration, final boolean translate, final Context ctx, final Connection con) throws OXException {
         /*
          * The system shared folder
          */
-        final DatabaseFolder retval = new LocalizedDatabaseFolder(fo, false);
+        final DatabaseFolder retval = translate ? new LocalizedDatabaseFolder(fo, false) : new DatabaseFolder(fo, false);
         retval.setName(FolderStrings.SYSTEM_SHARED_FOLDER_NAME);
         // Enforce getSubfolders() from storage if at least one shared folder is accessible for user
         ConditionTreeMap treeMap;

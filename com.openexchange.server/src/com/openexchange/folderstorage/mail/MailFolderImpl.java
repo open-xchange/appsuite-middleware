@@ -164,11 +164,12 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
      * @param mailConfig The mail configuration
      * @param user The user
      * @param context The context
-     * @param fullnameProvider The (optional) fullname provider
+     * @param fullnameProvider The (optional) full name provider
+     * @param translate Whether to translate folders according to user's locale
      * @throws OXException If creation fails
      */
-    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final StorageParameters params, final DefaultFolderFullnameProvider fullnameProvider) throws OXException {
-        this(mailFolder, accountId, mailConfig, params.getUser(), params.getContext(), fullnameProvider);
+    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final StorageParameters params, final DefaultFolderFullnameProvider fullnameProvider, final boolean translate) throws OXException {
+        this(mailFolder, accountId, mailConfig, params.getUser(), params.getContext(), fullnameProvider, translate);
     }
 
     /**
@@ -182,9 +183,10 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
      * @param user The user
      * @param context The context
      * @param fullnameProvider The (optional) full name provider
+     * @param translate Whether to translate folders according to user#s locale
      * @throws OXException If creation fails
      */
-    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final User user, final Context context, final DefaultFolderFullnameProvider fullnameProvider) throws OXException {
+    public MailFolderImpl(final MailFolder mailFolder, final int accountId, final MailConfig mailConfig, final User user, final Context context, final DefaultFolderFullnameProvider fullnameProvider, final boolean translate) throws OXException {
         super();
         this.accountId = accountId;
         userId = user.getId();
@@ -192,7 +194,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         fullName = mailFolder.getFullname();
         id = MailFolderUtility.prepareFullname(accountId, fullName);
         final String folderName = mailFolder.getName();
-        name = "INBOX".equals(fullName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.INBOX) : folderName;
+        name = translate ? ("INBOX".equals(fullName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.INBOX) : folderName) : folderName;
         // FolderObject.SYSTEM_PRIVATE_FOLDER_ID
         parent =
             mailFolder.isRootFolder() ? FolderStorage.PRIVATE_ID : MailFolderUtility.prepareFullname(
@@ -246,7 +248,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                 }
             }
             final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            final boolean translateDefaultFolders = null == configurationService || configurationService.getBoolProperty("com.openexchange.mail.translateDefaultFolders", true);
+            final boolean translateDefaultFolders = translate && (null == configurationService || configurationService.getBoolProperty("com.openexchange.mail.translateDefaultFolders", true));
             if (mailFolder.containsDefaultFolderType()) {
                 switch (mailFolder.getDefaultFolderType()) {
                 case INBOX:
@@ -269,10 +271,10 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                     mailFolderType = MailFolderType.DRAFTS;
                     break;
                 case CONFIRMED_SPAM:
-                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM);
+                    name = translate ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM) : folderName;
                     break;
                 case CONFIRMED_HAM:
-                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
+                    name = translate ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_HAM) : folderName;
                     break;
                 default:
                     // Nope
@@ -297,9 +299,9 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                             name = translateDefaultFolders ? (StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH)) : (MailStrings.TRASH.equals(folderName) ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH) : folderName);
                             mailFolderType = MailFolderType.TRASH;
                         } else if (fullName.equals(fullnameProvider.getConfirmedSpamFolder())) {
-                            name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM);
+                            name = translate ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM) : folderName;
                         } else if (fullName.equals(fullnameProvider.getConfirmedHamFolder())) {
-                            name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
+                            name = translate ? StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_HAM) : folderName;
                         }
                     } catch (final OXException e) {
                         com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailFolderImpl.class)).error(e.getMessage(), e);
