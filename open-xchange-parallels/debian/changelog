@@ -406,6 +406,12 @@ open-xchange-parallels (6.22.1-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 10:04:13 +0200
 
+open-xchange-parallels (6.22.0-2) unstable; urgency=low
+
+  * Build for patch 2013-06-13
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 11 Jun 2013 09:47:12 +0200
+
 open-xchange-parallels (6.22.0-1) unstable; urgency=low
 
   * First release candidate for 6.22.0

@@ -65,6 +65,8 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/mailfilter.properties
 
 %changelog
+* Tue Jun 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-06-13
 * Fri Jun 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-06-20
 * Mon Jun 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
