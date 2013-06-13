@@ -110,7 +110,7 @@ public class GenconfAttributesStringsAddPrimaryKey extends UpdateTaskAdapter {
      */
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.groupware.update.tasks.GenconfAttributesStringAddUuidUpdateTask" };
+        return new String[] { "com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddUuidUpdateTask" };
     }
     
     private void setUUID(Connection con) throws SQLException {
