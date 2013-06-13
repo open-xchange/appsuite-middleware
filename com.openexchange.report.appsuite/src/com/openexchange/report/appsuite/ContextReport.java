@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,46 @@
  *
  */
 
-package com.openexchange.report.osgi;
+package com.openexchange.report.appsuite;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.report.LoginCounterService;
-import com.openexchange.report.internal.LastLoginUpdater;
-import com.openexchange.report.internal.LoginCounterImpl;
-import com.openexchange.sessiond.SessiondEventConstants;
+import java.io.Serializable;
+import javax.annotation.concurrent.NotThreadSafe;
+import com.openexchange.groupware.contexts.Context;
 
 
 /**
- * {@link ReportActivator} - The activator for reporting.
+ * A {@link ContextReport} holds the information discovered about a certain context. See {@link Report}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class ReportActivator extends HousekeepingActivator {
+public @NotThreadSafe class ContextReport extends Report {
 
+    private static final long serialVersionUID = 3879587797122632468L;
+    
+    private Context ctx;
+    
     /**
-     * Initializes a new {@link ReportActivator}.
+     * Initializes a new {@link ContextReport}.
+     * @param uuid The UUID of the report this context report belongs to
+     * @param type The report type. This determines which analyzers and cumulators partake in this report run.
+     * @param ctx The context about which this report is
      */
-    public ReportActivator() {
-        super();
+    public ContextReport(String uuid, String type, Context ctx) {
+        super(uuid, type, -1);
+        this.ctx = ctx;
     }
-
+    
+    /**
+     * @see Report#set(String, String, Serializable)
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public ContextReport set(String ns, String key, Serializable value) {
+        super.set(ns, key, value);
+        return this;
     }
-
-    @Override
-    protected void startBundle() throws Exception {
-        final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
-        dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_TOUCH_SESSION);
-        registerService(EventHandler.class, new LastLoginUpdater(), dict);
-        registerService(LoginCounterService.class, new LoginCounterImpl());
+    
+    public Context getContext() {
+        return ctx;
     }
-
+    
 }

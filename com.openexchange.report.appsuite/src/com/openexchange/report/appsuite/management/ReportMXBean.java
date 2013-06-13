@@ -47,44 +47,59 @@
  *
  */
 
-package com.openexchange.report.internal;
+package com.openexchange.report.appsuite.management;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import javax.management.MBeanException;
-import com.openexchange.exception.OXException;
-
+import com.openexchange.report.appsuite.ReportService;
 
 /**
- * {@link LoginCounter}
+ * The {@link ReportMXBean} defines the JMX operations for running reports according to the MXBean conventions. These
+ * methods are the equivalents of the methods in the {@link ReportService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class LoginCounter implements LoginCounterMBean {
+public interface ReportMXBean {
+
+    /**
+     * Same as calling {@link #run(String)} with the 'default' reportType
+     */
+    public abstract String run() throws Exception;
     
-    private LoginCounterImpl counter;
+    /**
+     * Run a report of the given reportType. Note that when a report of this type is already running, no new report is 
+     * triggered and the uuid of the running report is returned instead
+     * @return The uuid of triggered or the already running report
+     */
+    public abstract String run(String reportType) throws Exception;
 
-    public LoginCounter(LoginCounterImpl counter) {
-        this.counter = counter;
-    }
+    /**
+     * Same as calling {@link #getLastReport(String)} with the 'default' reportType
+     */
+    public abstract JMXReport retrieveLastReport(String reportType) throws Exception;
     
-    @Override
-    public Map<String, Integer> getNumberOfLogins(Date startDate, Date endDate, boolean aggregate, String regex) throws MBeanException {
-        try {
-            return counter.getNumberOfLogins(startDate, endDate, aggregate, regex);
-        } catch (OXException e) {
-            throw new MBeanException(e);
-        }
-    }
+    /**
+     * Get the last finished report of the given reportType or null if during the uptime of this cluster, no report has been produced.
+     */
+    public abstract JMXReport retrieveLastReport() throws Exception;
 
-    @Override
-    public List<Object[]> getLastLoginTimeStamp(int userId, int contextId, String client) throws MBeanException {
-        try {
-            return counter.getLastLoginTimeStamp(userId, contextId, client);
-        } catch (OXException e) {
-            throw new MBeanException(e);
-        }
-    }
+    /**
+     * Get a list of currently running reports. You can check the progress of these reports by examining the startTime, pendingTasks and numberOfTasks of the running reports
+     */
+    public abstract JMXReport[] retrievePendingReports(String reportType) throws Exception;
+    
+    /**
+     * Same as calling {@link #getPendingReports(String)} with the 'default' reportType
+     */
+    public abstract JMXReport[] retrievePendingReports() throws Exception;
+    
+    /**
+     * Remove the hazelcast markers for the pending report with the given uuid, to make way to start a new report. Useful to cancel crashed reports.
+     */
+    public abstract void flushPending(String uuid, String reportType) throws Exception;
 
+    /**
+     * Same as calling {@link #flushPending(String, String)} with the 'default' reportType
+     */
+    public abstract void flushPending(String uuid) throws Exception;
+
+    
 }

@@ -49,15 +49,23 @@
 
 package com.openexchange.report.client.impl;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.management.InstanceNotFoundException;
 import javax.management.InvalidAttributeValueException;
+import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
+import javax.management.openmbean.CompositeData;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.admin.console.AbstractJMXTools;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
@@ -99,6 +107,30 @@ public class ReportClient extends AbstractJMXTools {
 
     private static final char OPT_SHOWCOMBINATION_SHORT = 'b';
 
+    // AppSuite options
+
+    private static final char OPT_APPSUITE_RUN_REPORT_SHORT = 'e';
+
+    private static final String OPT_APPSUITE_RUN_REPORT_LONG = "run-appsuite-report";
+
+    private static final String OPT_APPSUITE_INSPECT_REPORTS_LONG = "inspect-appsuite-reports";
+
+    private static final String OPT_APPSUITE_CANCEL_REPORTS_LONG = "cancel-appsuite-reports";
+
+    private static final char OPT_APPSUITE_GET_REPORT_SHORT = 'g';
+
+    private static final String OPT_APPSUITE_GET_REPORT_LONG = "get-appsuite-report";
+
+    private static final char OPT_APPSUITE_REPORT_TYPE_SHORT = 't';
+
+    private static final String OPT_APPSUITE_REPORT_TYPE_LONG = "report-type";
+
+    private static final char OPT_APPSUITE_RUN_AND_DELIVER_REPORT_SHORT = 'x';
+
+    private static final String OPT_APPSUITE_RUN_AND_DELIVER_REPORT_LONG = "run-and-deliver-report";
+    
+    private static final String OPT_APPSUITE_SILENT_LONG = "silent";
+    
     private CLIOption displayonly = null;
 
     private CLIOption sendonly = null;
@@ -109,8 +141,24 @@ public class ReportClient extends AbstractJMXTools {
 
     private CLIOption savereport = null;
 
+    // Appsuite Options
+
     private CLIOption showcombi = null;
 
+    private CLIOption runAsReport = null;
+
+    private CLIOption inspectAsReports = null;
+
+    private CLIOption cancelAsReports = null;
+
+    private CLIOption getAsReport = null;
+
+    private CLIOption runAndDeliverAsReport = null;
+
+    private CLIOption asReportType = null;
+
+    private CLIOption asSilent = null;
+    
     public enum ReportMode {
         SENDONLY, DISPLAYONLY, SAVEONLY, MULTIPLE, DISPLAYANDSEND, NONE
     };
@@ -156,6 +204,27 @@ public class ReportClient extends AbstractJMXTools {
 
             System.out.println("Starting the Open-Xchange report client. Note that the report generation may take a little while.");
             final MBeanServerConnection initConnection = initConnection(false, env);
+
+            // Is one of the appsuite report options set? In that case do something completely different.
+
+            if (null != parser.getOptionValue(this.runAsReport)) {
+                runASReport(parser.getOptionValue(this.asReportType), initConnection);
+                inspectASReports(parser.getOptionValue(this.asReportType), initConnection);
+                return;
+            } else if (null != parser.getOptionValue(this.inspectAsReports)) {
+                inspectASReports(parser.getOptionValue(this.asReportType), initConnection);
+                return;
+            } else if (null != parser.getOptionValue(this.cancelAsReports)) {
+                cancelASReports(parser.getOptionValue(this.asReportType), initConnection);
+                return;
+            } else if (null != parser.getOptionValue(this.getAsReport)) {
+                getASReport(parser.getOptionValue(this.asReportType), mode, savereport, initConnection);
+                return;
+            } else if (null != parser.getOptionValue(this.runAndDeliverAsReport)) {
+                runAndDeliverASReport(parser.getOptionValue(this.asReportType), mode, null != parser.getOptionValue(this.asReportType), savereport, initConnection);
+                return;
+            }
+
             final List<Total> totals = ObjectHandler.getTotalObjects(initConnection);
             List<ContextDetail> contextDetails = null;
             if (null != parser.getOptionValue(this.advancedreport)) {
@@ -245,6 +314,49 @@ public class ReportClient extends AbstractJMXTools {
             "Show access combination for bitmask",
             true,
             NeededQuadState.notneeded);
+
+        this.runAsReport = setShortLongOpt(
+            parser,
+            OPT_APPSUITE_RUN_REPORT_SHORT,
+            OPT_APPSUITE_RUN_REPORT_LONG,
+            "Schedule an appsuite style report. Will print out the reports UUID or, if a report is being generated, the UUID of the pending report",
+            false,
+            NeededQuadState.notneeded);
+
+        this.asReportType = setShortLongOpt(
+            parser,
+            OPT_APPSUITE_REPORT_TYPE_SHORT,
+            OPT_APPSUITE_REPORT_TYPE_LONG,
+            "The type of the report to run. Leave this off for the 'default' report.",
+            true,
+            NeededQuadState.notneeded);
+
+        this.inspectAsReports = setLongOpt(
+            parser,
+            OPT_APPSUITE_INSPECT_REPORTS_LONG,
+            "Prints information about currently running reports",
+            false,
+            false);
+
+        this.cancelAsReports = setLongOpt(parser, OPT_APPSUITE_CANCEL_REPORTS_LONG, "Cancels pending reports", false, false);
+
+        this.getAsReport = setShortLongOpt(
+            parser,
+            OPT_APPSUITE_GET_REPORT_SHORT,
+            OPT_APPSUITE_GET_REPORT_LONG,
+            "Retrieve the report that was generated, can (and should) be combined with the options for sending, displaying or saving the report",
+            false,
+            NeededQuadState.notneeded);
+
+        this.runAndDeliverAsReport = setShortLongOpt(
+            parser,
+            OPT_APPSUITE_RUN_AND_DELIVER_REPORT_SHORT,
+            OPT_APPSUITE_RUN_AND_DELIVER_REPORT_LONG,
+            "Create a new report and send it immediately. Note: This command will run until the report is finished, and that could take a while. Can (and should) be combined with the options for sending, displaying or saving the report ",
+            false,
+            NeededQuadState.notneeded);
+        
+        this.asSilent = setLongOpt(parser, OPT_APPSUITE_SILENT_LONG, "Do not print out the status line. To be used with " + OPT_APPSUITE_RUN_AND_DELIVER_REPORT_LONG + ".", false, false);
     }
 
     private void print(final List<Total> totals, final List<ContextDetail> contextDetails, final List<MacDetail> macDetails, final String[] versions, final AdminParser parser, final ClientLoginCount clc, final ClientLoginCount clcYear) {
@@ -383,5 +495,301 @@ public class ReportClient extends AbstractJMXTools {
             System.exit(1);
         }
         System.exit(0);
+    }
+
+    private ObjectName getAppSuiteReportingName() {
+        try {
+            return new ObjectName("com.openexchange.reporting.appsuite", "name", "AppSuiteReporting");
+        } catch (MalformedObjectNameException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+        return null;
+    }
+
+    private void getASReport(Object reportType, ReportMode mode, boolean savereport, MBeanServerConnection server) {
+        if (reportType == null) {
+            reportType = "default";
+        }
+        try {
+            CompositeData report = (CompositeData) server.invoke(
+                getAppSuiteReportingName(),
+                "retrieveLastReport",
+                new Object[] { reportType },
+                new String[] { String.class.getCanonicalName() });
+            System.out.println("");
+            switch (mode) {
+            case SENDONLY:
+            case SAVEONLY:
+                new TransportHandler().sendASReport(report, savereport);
+                break;
+
+            case DISPLAYONLY:
+                printASReport(report);
+                break;
+
+            case NONE:
+                System.out.println("No option selected. Using the default (display and send)");
+            case MULTIPLE:
+                if (ReportMode.NONE != mode) {
+                    System.out.println("Too many arguments. Using the default (display and send)");
+                }
+            case DISPLAYANDSEND:
+            default:
+                savereport = false;
+                new TransportHandler().sendASReport(report, savereport);
+                printASReport(report);
+                break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+    }
+
+    private void runAndDeliverASReport(Object reportType, ReportMode mode, boolean silent, boolean savereport, MBeanServerConnection server) {
+        if (reportType == null) {
+            reportType = "default";
+        }
+        try {
+           String uuid = (String) server.invoke(
+                getAppSuiteReportingName(),
+                "run",
+                new Object[] { reportType },
+                new String[] { String.class.getCanonicalName() });
+           
+           
+           // Start polling
+           boolean done = false;
+           int charNum = 0;
+           
+           while (!done) {
+               CompositeData[] reports = (CompositeData[]) server.invoke(
+                   getAppSuiteReportingName(),
+                   "retrievePendingReports",
+                   new Object[] { reportType },
+                   new String[] { String.class.getCanonicalName() });
+               
+               boolean found = false;
+               for (CompositeData report : reports) {
+                   if (report.get("uuid").equals(uuid)) {
+                       found = true;
+                       if (!silent) {
+                           eraseStatusLine(charNum);
+                           charNum = printStatusLine(report);
+                       }
+                   }
+               }
+               
+               done = !found;
+               
+               if (!done) {
+                   Thread.sleep(silent ? 60000 : 1000);
+               }
+           }
+           
+           
+           
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
+        getASReport(reportType, mode, savereport, server);
+    }
+
+    private int printStatusLine(CompositeData report) {
+        Long start = (Long) report.get("startTime");
+        Long now = System.currentTimeMillis();
+
+        long elapsedTime = now - start;
+
+        Integer totalContexts = (Integer) report.get("tasks");
+        Integer pendingContexts = (Integer) report.get("pendingTasks");
+
+        int finishedContexts = totalContexts - pendingContexts;
+
+        long timePerContext = -1;
+        if (finishedContexts > 0) {
+            timePerContext = elapsedTime / finishedContexts;
+
+        }
+        
+        StringBuilder b = new StringBuilder();
+        
+        b.append(report.get("uuid")).append(": ");
+        b.append(String.format(
+            "%d/%d (%.2f %%) ",
+            finishedContexts,
+            totalContexts,
+            ((float) finishedContexts / totalContexts) * 100f));
+        if (timePerContext > 0) {
+            b.append("ETA: " + prettyPrintTimeInterval(timePerContext * pendingContexts));
+        }
+        
+        System.out.print(b);
+        
+        return b.length();
+    }
+
+    private void eraseStatusLine(int charNum) {
+        StringBuilder b = new StringBuilder(charNum + 1);
+        b.append("\n\b");
+        for(int i = 0; i < charNum; i++) {
+            b.append('\b');
+        }
+        System.out.print(b);
+    }
+
+    private void cancelASReports(Object reportType, MBeanServerConnection server) {
+        if (reportType == null) {
+            reportType = "default";
+        }
+        try {
+            CompositeData[] reports = (CompositeData[]) server.invoke(
+                getAppSuiteReportingName(),
+                "retrievePendingReports",
+                new Object[] { reportType },
+                new String[] { String.class.getCanonicalName() });
+            System.out.println("");
+            if (reports.length == 0) {
+                System.out.println("Nothing to cancel, there are no reports currently pending.");
+            }
+            for (int i = 0; i < reports.length; i++) {
+                CompositeData report = reports[i];
+                Object uuid = report.get("uuid");
+                System.out.println("Cancelling " + uuid);
+
+                server.invoke(
+                    getAppSuiteReportingName(),
+                    "flushPending",
+                    new Object[] { uuid, reportType },
+                    new String[] { String.class.getCanonicalName(), String.class.getCanonicalName() });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+    }
+
+    private void inspectASReports(Object reportType, MBeanServerConnection server) {
+        if (reportType == null) {
+            reportType = "default";
+        }
+        try {
+            CompositeData[] reports = (CompositeData[]) server.invoke(
+                getAppSuiteReportingName(),
+                "retrievePendingReports",
+                new Object[] { reportType },
+                new String[] { String.class.getCanonicalName() });
+            System.out.println("");
+            if (reports.length == 0) {
+                System.out.println("There are no reports currently pending.");
+            }
+            for (int i = 0; i < reports.length; i++) {
+                printASDiagnostics(reports[i]);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+    }
+
+    private void runASReport(Object reportType, MBeanServerConnection server) {
+        if (reportType == null) {
+            reportType = "default";
+        }
+        try {
+            System.out.println("\nRunning report with uuid: " + server.invoke(
+                getAppSuiteReportingName(),
+                "run",
+                new Object[] { reportType },
+                new String[] { String.class.getCanonicalName() }));
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+    }
+
+    private void printASDiagnostics(CompositeData compositeData) {
+        Long start = (Long) compositeData.get("startTime");
+        Long now = System.currentTimeMillis();
+
+        long elapsedTime = now - start;
+
+        Integer totalContexts = (Integer) compositeData.get("tasks");
+        Integer pendingContexts = (Integer) compositeData.get("pendingTasks");
+
+        int finishedContexts = totalContexts - pendingContexts;
+
+        long timePerContext = -1;
+        if (finishedContexts > 0) {
+            timePerContext = elapsedTime / finishedContexts;
+
+        }
+
+        System.out.println("UUID: " + compositeData.get("uuid"));
+        System.out.println("Type: " + compositeData.get("type"));
+        System.out.println("Current elapsed time: " + prettyPrintTimeInterval(elapsedTime));
+        System.out.println("Finished contexts: " + String.format(
+            "%d/%d (%.2f %%)",
+            finishedContexts,
+            totalContexts,
+            ((float) finishedContexts / totalContexts) * 100f));
+        if (timePerContext > 0) {
+            System.out.println("Avg. time per context: " + prettyPrintTimeInterval(timePerContext));
+            System.out.println("Projected time left: " + prettyPrintTimeInterval(timePerContext * pendingContexts));
+        }
+    }
+
+    private void printASReport(CompositeData report) {
+        try {
+            Long start = (Long) report.get("startTime");
+            Long end = (Long) report.get("stopTime");
+
+            long elapsedTime = end - start;
+
+            Integer totalContexts = (Integer) report.get("tasks");
+
+            long timePerContext = elapsedTime / totalContexts;
+
+            System.out.println("UUID: " + report.get("uuid"));
+            System.out.println("Type: " + report.get("type"));
+            System.out.println("Total time: " + prettyPrintTimeInterval(elapsedTime));
+            System.out.println("Avg. time per context: " + prettyPrintTimeInterval(timePerContext));
+            System.out.println("Report was finished: " + new Date(end));
+            System.out.println("\n------ report -------");
+            System.out.println(new JSONObject((String) report.get("data")).toString(4));
+            System.out.println("------ end -------\n");
+        } catch (JSONException e) {
+            System.out.println("Illegal data sent from server!");
+            e.printStackTrace();
+        }
+    }
+
+    private String prettyPrintTimeInterval(long interval) {
+        // FROM: http://stackoverflow.com/questions/635935/how-can-i-calculate-a-time-span-in-java-and-format-the-output
+
+        if (interval < 1000) {
+            return interval + " milliseconds";
+        }
+        long diffInSeconds = interval / 1000;
+
+        long diff[] = new long[] { 0, 0, 0 };
+        /* sec */diff[2] = (diffInSeconds >= 60 ? diffInSeconds % 60 : diffInSeconds);
+        /* min */diff[1] = (diffInSeconds = (diffInSeconds / 60)) >= 60 ? diffInSeconds % 60 : diffInSeconds;
+        /* hours */diff[0] = (diffInSeconds = diffInSeconds / 60);
+
+        return String.format(
+            "%d hour%s, %d minute%s, %d second%s",
+            diff[0],
+            diff[0] > 1 || diff[0] == 0 ? "s" : "",
+            diff[1],
+            diff[1] > 1 || diff[1] == 0 ? "s" : "",
+            diff[2],
+            diff[2] > 1 || diff[2] == 0 ? "s" : "");
     }
 }

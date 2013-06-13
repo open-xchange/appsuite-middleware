@@ -47,44 +47,60 @@
  *
  */
 
-package com.openexchange.report.internal;
+package com.openexchange.report;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javax.management.MBeanException;
 import com.openexchange.exception.OXException;
+import com.openexchange.report.internal.LoginCounterMBean;
 
 
 /**
- * {@link LoginCounter}
+ * {@link LoginCounterMBean}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com>Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class LoginCounter implements LoginCounterMBean {
-    
-    private LoginCounterImpl counter;
 
-    public LoginCounter(LoginCounterImpl counter) {
-        this.counter = counter;
-    }
-    
-    @Override
-    public Map<String, Integer> getNumberOfLogins(Date startDate, Date endDate, boolean aggregate, String regex) throws MBeanException {
-        try {
-            return counter.getNumberOfLogins(startDate, endDate, aggregate, regex);
-        } catch (OXException e) {
-            throw new MBeanException(e);
-        }
-    }
+public interface LoginCounterService {
+    /**
+     * The key to receive the summed up number of logins.
+     */
+    public static final String SUM = "sum";
 
-    @Override
-    public List<Object[]> getLastLoginTimeStamp(int userId, int contextId, String client) throws MBeanException {
-        try {
-            return counter.getLastLoginTimeStamp(userId, contextId, client);
-        } catch (OXException e) {
-            throw new MBeanException(e);
-        }
-    }
+    /**
+     * Gets the number of logins happened in specified range.
+     * This is a mapping "client identifier => number of logins in time range".
+     * The map always contains a key "sum" that sums up all logins. If the aggregate parameter
+     * is set to <code>true</code>, the map only contains the sum key. Use {@link #SUM} to receive the according number.
+     *
+     * @param startDate The start time
+     * @param endDate The end time
+     * @param aggregate Set to <code>true</code> if you want to aggregate the sum of logins by users. 
+     * That means that the sum value does not contain duplicate logins caused by multiple clients of one user.
+     * This also means that the sum value likely does not match the addition of all single values.
+     * @param regex A regular expression to filter results by client identifiers. May be <code>null</code> to not filter clients at all.
+     * @return The number of logins happened in specified range by client identifier.
+     * @throws OXException 
+     * @throws MBeanException If an error occurs while counting
+     */
+    public Map<String, Integer> getNumberOfLogins(Date startDate, Date endDate, boolean aggregate, String regex) throws OXException;
+
+    /**
+     * Gets the time stamp of last login for specified user for given client.
+     * <p>
+     * The number of milliseconds since January 1, 1970, 00:00:00 GMT.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param client The client identifier
+     * @return The time stamp of last login as UTC <code>long</code><br>
+     *         (the number of milliseconds since January 1, 1970, 00:00:00 GMT)
+     * @throws OXException 
+     * @throws MBeanException If retrieval fails
+     */
+    List<Object[]> getLastLoginTimeStamp(int userId, int contextId, String client) throws OXException;
 
 }

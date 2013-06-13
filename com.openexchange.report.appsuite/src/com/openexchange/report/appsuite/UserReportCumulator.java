@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,24 @@
  *
  */
 
-package com.openexchange.report.osgi;
-
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.report.LoginCounterService;
-import com.openexchange.report.internal.LastLoginUpdater;
-import com.openexchange.report.internal.LoginCounterImpl;
-import com.openexchange.sessiond.SessiondEventConstants;
+package com.openexchange.report.appsuite;
 
 
 /**
- * {@link ReportActivator} - The activator for reporting.
+ * A {@link UserReportCumulator} knows how to cumulate data about a user ( the {@link UserReport} ) into the {@link ContextReport}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class ReportActivator extends HousekeepingActivator {
+public interface UserReportCumulator {
 
     /**
-     * Initializes a new {@link ReportActivator}.
+     * Add and possibly cumulate data from the userReport into the contextReport
      */
-    public ReportActivator() {
-        super();
-    }
+    void merge(UserReport userReport, ContextReport contextReport);
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
-        dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_TOUCH_SESSION);
-        registerService(EventHandler.class, new LastLoginUpdater(), dict);
-        registerService(LoginCounterService.class, new LoginCounterImpl());
-    }
+    /**
+     * Declare whether to run as part of this reportType
+     */
+    boolean appliesTo(String reportType);
 
 }

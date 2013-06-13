@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,67 @@
  *
  */
 
-package com.openexchange.report.osgi;
+package com.openexchange.report.appsuite.management;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.report.LoginCounterService;
-import com.openexchange.report.internal.LastLoginUpdater;
-import com.openexchange.report.internal.LoginCounterImpl;
-import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.exception.OXException;
+import com.openexchange.report.appsuite.Report;
+import com.openexchange.report.appsuite.jobs.Orchestration;
 
 
 /**
- * {@link ReportActivator} - The activator for reporting.
+ * The {@link ReportMXBeanImpl} implements the MXBean interface by delegating all calls to
+ * the {@link Orchestration} singleton and wrapping reports as {@link JMXReport} instances
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class ReportActivator extends HousekeepingActivator {
+public class ReportMXBeanImpl implements ReportMXBean {
 
-    /**
-     * Initializes a new {@link ReportActivator}.
-     */
-    public ReportActivator() {
-        super();
+    @Override
+    public String run() throws Exception {
+        try {
+            return Orchestration.getInstance().run();
+        } catch (OXException e) {
+            throw new Exception(e.getMessage());
+        }
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public String run(String reportType) throws Exception {
+        try {
+            return Orchestration.getInstance().run();
+        } catch (OXException e) {
+            throw new Exception(e.getMessage());
+        }
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
-        dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_TOUCH_SESSION);
-        registerService(EventHandler.class, new LastLoginUpdater(), dict);
-        registerService(LoginCounterService.class, new LoginCounterImpl());
+    public JMXReport retrieveLastReport(String reportType) throws Exception {
+        return new JMXReport(Orchestration.getInstance().getLastReport(reportType));
+    }
+    
+    @Override
+    public JMXReport retrieveLastReport() throws Exception {
+        return new JMXReport(Orchestration.getInstance().getLastReport());
+    }
+
+    @Override
+    public JMXReport[] retrievePendingReports(String reportType) throws Exception {
+        return JMXReport.wrap(Orchestration.getInstance().getPendingReports(reportType));
+    }
+    
+    @Override
+    public JMXReport[] retrievePendingReports() throws Exception {
+        return JMXReport.wrap(Orchestration.getInstance().getPendingReports());
+    }
+
+    @Override
+    public void flushPending(String uuid, String reportType) {
+        Orchestration.getInstance().flushPending(uuid, reportType);
+    }
+
+    @Override
+    public void flushPending(String uuid) {
+        Orchestration.getInstance().flushPending(uuid);
     }
 
 }

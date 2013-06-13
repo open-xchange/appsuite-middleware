@@ -146,7 +146,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
      * @throws OXException - if a writable connection could not be obtained from database
      */
     public static void saveUserPermissionBits(final UserPermissionBits perms, final boolean insert, final Connection writeCon) throws SQLException, OXException {
-        saveUserPermissionBits(perms.getPermissionBits(), perms.getUserId(), insert, getContext(perms), writeCon);
+        saveUserPermissionBits(perms.getPermissionBits(), perms.getUserId(), insert, perms.getContextId(), writeCon);
     }
 
     private static Context getContext(UserPermissionBits perms) throws OXException {
@@ -179,7 +179,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
             } finally {
                 closeResources(rs, stmt, readCon, true, ctx);
             }
-            saveUserPermissionBits(permissionBits, userId, insert, ctx, null);
+            saveUserPermissionBits(permissionBits, userId, insert, ctx.getContextId(), null);
         } catch (final SQLException e) {
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
@@ -201,10 +201,11 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
      * @throws SQLException If saving fails due to a SQL error
      * @throws OXException If a writable connection could not be obtained from database
      */
-    public static void saveUserPermissionBits(final int permissionBits, final int userId, final boolean insert, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
+    public static void saveUserPermissionBits(final int permissionBits, final int userId, final boolean insert, final int ctxId, final Connection writeConArg) throws SQLException, OXException {
         Connection writeCon = writeConArg;
         boolean closeConnection = false;
         PreparedStatement stmt = null;
+        ContextImpl ctx = new ContextImpl(ctxId);
         try {
             if (writeCon == null) {
                 writeCon = DBPool.pickupWriteable(ctx);
@@ -212,13 +213,13 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
             }
             if (insert) {
                 stmt = writeCon.prepareStatement(INSERT_USER_CONFIGURATION);
-                stmt.setInt(1, ctx.getContextId());
+                stmt.setInt(1, ctxId);
                 stmt.setInt(2, userId);
                 stmt.setInt(3, permissionBits);
             } else {
                 stmt = writeCon.prepareStatement(UPDATE_USER_CONFIGURATION);
                 stmt.setInt(1, permissionBits);
-                stmt.setInt(2, ctx.getContextId());
+                stmt.setInt(2, ctxId);
                 stmt.setInt(3, userId);
             }
             stmt.executeUpdate();

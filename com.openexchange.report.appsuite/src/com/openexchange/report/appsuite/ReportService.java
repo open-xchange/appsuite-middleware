@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,57 @@
  *
  */
 
-package com.openexchange.report.osgi;
+package com.openexchange.report.appsuite;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.report.LoginCounterService;
-import com.openexchange.report.internal.LastLoginUpdater;
-import com.openexchange.report.internal.LoginCounterImpl;
-import com.openexchange.sessiond.SessiondEventConstants;
-
+import com.openexchange.exception.OXException;
 
 /**
- * {@link ReportActivator} - The activator for reporting.
+ * The {@link ReportService} runs reports and manages pending and finished reports. This service is available via OSGi
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class ReportActivator extends HousekeepingActivator {
+public interface ReportService {
 
     /**
-     * Initializes a new {@link ReportActivator}.
+     * Same as calling {@link #run(String)} with the 'default' reportType
      */
-    public ReportActivator() {
-        super();
-    }
+    public abstract String run() throws OXException;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
+    /**
+     * Run a report of the given reportType. Note that when a report of this type is already running, no new report is 
+     * triggered and the uuid of the running report is returned instead
+     * @return The uuid of triggered or the already running report
+     */
+    public abstract String run(String reportType) throws OXException;
 
-    @Override
-    protected void startBundle() throws Exception {
-        final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
-        dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_TOUCH_SESSION);
-        registerService(EventHandler.class, new LastLoginUpdater(), dict);
-        registerService(LoginCounterService.class, new LoginCounterImpl());
-    }
+    /**
+     * Same as calling {@link #getLastReport(String)} with the 'default' reportType
+     */
+    public abstract Report getLastReport();
+    
+    /**
+     * Get the last finished report of the given reportType or null if during the uptime of this cluster, no report has been produced.
+     */
+    public abstract Report getLastReport(String reportType);
+
+    /**
+     * Get a list of currently running reports. You can check the progress of these reports by examining the startTime, pendingTasks and numberOfTasks of the running reports
+     */
+    public abstract Report[] getPendingReports(String reportType);
+
+    /**
+     * Same as calling {@link #getPendingReports(String)} with the 'default' reportType
+     */
+    public abstract Report[] getPendingReports();
+
+    /**
+     * Remove the hazelcast markers for the pending report with the given uuid, to make way to start a new report. Useful to cancel crashed reports.
+     */
+    public abstract void flushPending(String uuid, String reportType);
+
+    /**
+     * Same as calling {@link #flushPending(String, String)} with the 'default' reportType
+     */
+    public abstract void flushPending(String uuid);
 
 }

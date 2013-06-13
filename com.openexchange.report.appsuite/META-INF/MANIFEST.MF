@@ -1,0 +1,32 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Report Generation Framework
+Bundle-SymbolicName: com.openexchange.report.appsuite
+Bundle-Version: 7.4.0.0
+Bundle-Activator: com.openexchange.report.appsuite.osgi.ReportActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.hazelcast.core,
+ com.openexchange.ajax.tools,
+ com.openexchange.capabilities,
+ com.openexchange.context,
+ com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.filestore,
+ com.openexchange.groupware.ldap,
+ com.openexchange.java.util,
+ com.openexchange.log,
+ com.openexchange.management,
+ com.openexchange.osgi,
+ com.openexchange.report,
+ com.openexchange.server,
+ com.openexchange.tools.file,
+ com.openexchange.tools.strings,
+ com.openexchange.user,
+ com.openexchange.version,
+ javax.annotation.concurrent,
+ org.apache.commons.logging,
+ org.json,
+ org.osgi.framework;version="1.3.0"
+Export-Package: com.openexchange.report.appsuite,
+ com.openexchange.report.appsuite.defaultHandlers

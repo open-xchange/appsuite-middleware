@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,50 @@
  *
  */
 
-package com.openexchange.report.osgi;
+package com.openexchange.report.appsuite.defaultHandlers;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.report.LoginCounterService;
-import com.openexchange.report.internal.LastLoginUpdater;
-import com.openexchange.report.internal.LoginCounterImpl;
-import com.openexchange.sessiond.SessiondEventConstants;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.report.appsuite.ContextReport;
+import com.openexchange.report.appsuite.ContextReportCumulator;
+import com.openexchange.report.appsuite.Report;
 
 
 /**
- * {@link ReportActivator} - The activator for reporting.
+ * The {@link Total} cumulator sums up the number of contexts and users. It is based on the results of the {@link CapabilityHandler}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class ReportActivator extends HousekeepingActivator {
-
-    /**
-     * Initializes a new {@link ReportActivator}.
-     */
-    public ReportActivator() {
-        super();
-    }
+public class Total implements ContextReportCumulator{
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public boolean appliesTo(String reportType) {
+        return "default".equals(reportType);
     }
-
+    
     @Override
-    protected void startBundle() throws Exception {
-        final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
-        dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_TOUCH_SESSION);
-        registerService(EventHandler.class, new LastLoginUpdater(), dict);
-        registerService(LoginCounterService.class, new LoginCounterImpl());
+    public void merge(ContextReport contextReport, Report report) {
+        // Count up one for each context
+        long contexts = report.get("total", "contexts", 0l, Long.class);
+        report.set("total", "contexts", contexts + 1);
+        
+        // Sum up the totals of the capabilities combinations from the CapabilityHandler
+        long users = report.get("total", "users", 0l, Long.class);
+        
+        Map<String, Object> macdetail = contextReport.getNamespace("macdetail");
+        
+        for(Map.Entry<String, Object> entry: macdetail.entrySet()) {
+            HashMap<String, Long> counts = (HashMap) entry.getValue();
+            
+            if (counts != null && counts.containsKey("total")) {
+                users += (Long) counts.get("total");
+            }
+        }
+        
+        report.set("total", "users", users);
+        
+        report.set("total", "report-format", "appsuite-short");
     }
+        
 
 }

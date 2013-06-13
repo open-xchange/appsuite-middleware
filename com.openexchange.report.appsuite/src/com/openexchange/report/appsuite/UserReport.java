@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,62 @@
  *
  */
 
-package com.openexchange.report.osgi;
+package com.openexchange.report.appsuite;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.report.LoginCounterService;
-import com.openexchange.report.internal.LastLoginUpdater;
-import com.openexchange.report.internal.LoginCounterImpl;
-import com.openexchange.sessiond.SessiondEventConstants;
-
+import java.io.Serializable;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 
 /**
- * {@link ReportActivator} - The activator for reporting.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * A {@link UserReport} holds information about a user
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class ReportActivator extends HousekeepingActivator {
+public class UserReport extends Report {
+
+    private static final long serialVersionUID = -8802071039164053141L;
+
+    private Context ctx;
+
+    private User user;
+
+    private ContextReport contextReport;
 
     /**
-     * Initializes a new {@link ReportActivator}.
+     * 
+     * Initializes a new {@link UserReport}.
+     * @param uuid The uuid of this report run
+     * @param type The type of report to run
+     * @param ctx The context the analyzed user belongs to
+     * @param user The analyzed user
+     * @param contextReport The accompanying contextReport
      */
-    public ReportActivator() {
-        super();
+    public UserReport(String uuid, String type, Context ctx, User user, ContextReport contextReport) {
+        super(uuid, type, -1);
+        this.ctx = ctx;
+        this.user = user;
+        this.contextReport = contextReport;
     }
 
+    /**
+     * see {@link Report#set(String, String, Serializable)}
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public UserReport set(String ns, String key, Serializable value) {
+        super.set(ns, key, value);
+        return this;
     }
-
-    @Override
-    protected void startBundle() throws Exception {
-        final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
-        dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_TOUCH_SESSION);
-        registerService(EventHandler.class, new LastLoginUpdater(), dict);
-        registerService(LoginCounterService.class, new LoginCounterImpl());
+    
+    public ContextReport getContextReport() {
+        return contextReport;
+    }
+    
+    public User getUser() {
+        return user;
+    }
+    
+    public Context getContext() {
+        return ctx;
     }
 
 }
