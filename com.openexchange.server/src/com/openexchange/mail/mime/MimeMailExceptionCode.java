@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 
 /**
@@ -313,7 +314,7 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      */
     IN_USE_ERROR(MimeMailExceptionMessage.IN_USE_ERROR_MSG, CATEGORY_USER_INPUT, PROCESSING_ERROR.detailNumber, LogLevel.ERROR),
     /**
-     * That mailbox is already in use by another process on %1$s mail server for login %2$s (user=%3$s, context=%4$s). Please try again.<br>
+     * That mailbox is already in use by another process on %1$s mail server for login %2$s (user=%3$s, context=%4$s). Please try again later.<br>
      * Error message: %5$s
      */
     IN_USE_ERROR_EXT(MimeMailExceptionMessage.IN_USE_ERROR_EXT_MSG, CATEGORY_USER_INPUT, PROCESSING_ERROR.detailNumber, LogLevel.ERROR),
@@ -407,19 +408,16 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
         final Category category = getCategory();
         final MimeMailException ret;
         if (category.getLogLevel().implies(LogLevel.DEBUG)) {
-            ret = new MimeMailException(getNumber(), getMessage(), cause, args);
+            ret = new MimeMailException(getNumber(), prepareDisplayMessage(getMessage()), cause, args);
+            ret.setLogMessage(getMessage(), args);
         } else {
             if (DISPLAYABLE.contains(category.getType())) {
                 // Displayed message is equal to logged one
-                ret = new MimeMailException(getNumber(), getMessage(), cause, args);
+                ret = new MimeMailException(getNumber(), prepareDisplayMessage(getMessage()), cause, args);
                 ret.setLogMessage(getMessage(), args);
             } else {
-                ret =
-                    new MimeMailException(
-                        getNumber(),
-                        Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
-                        cause,
-                        new Object[0]);
+                final String displayMessage = Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE;
+                ret = new MimeMailException(getNumber(), displayMessage, cause, new Object[0]);
                 ret.setLogMessage(getMessage(), args);
             }
         }
@@ -430,4 +428,27 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
         }
         return ret;
     }
+
+    private static String prepareDisplayMessage(final String displayMessage) {
+        if (null == displayMessage) {
+            return displayMessage;
+        }
+        final int pos = toLowerCase(displayMessage).indexOf("error message: ");
+        return pos < 0 ? displayMessage : displayMessage.substring(0, pos);
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
+    }
+
 }

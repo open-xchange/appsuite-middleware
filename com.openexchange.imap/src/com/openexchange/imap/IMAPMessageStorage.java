@@ -1270,6 +1270,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 if (!IMAPSessionStorageAccess.hasSessionStorage(accountId, imapFolder, session)) {
                     IMAPSessionStorageAccess.fillSessionStorage(accountId, imapFolder, session);
                 }
+
+                final boolean throwInUse = false; // Fake an [INUSE] error
+                if (throwInUse) {
+                    final CommandFailedException cfe = new CommandFailedException("NO [INUSE] Mailbox already in use");
+                    throw new MessagingException(cfe.getMessage(), cfe);
+                }
+
                 /*
                  * Check if an all-fetch can be performed to only obtain UIDs of all folder's messages: FETCH 1: (UID)
                  */
