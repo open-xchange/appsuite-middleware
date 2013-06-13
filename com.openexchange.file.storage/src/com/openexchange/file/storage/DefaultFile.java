@@ -104,6 +104,8 @@ public class DefaultFile extends AbstractFile {
     private String versionComment;
 
     private boolean isCurrentVersion;
+    
+    private Map<String, Object> dynamicProperties;
 
     private static final String DEFAULT_TYPE = "application/octet-stream";
 
@@ -374,6 +376,16 @@ public class DefaultFile extends AbstractFile {
     @Override
     public void setVersionComment(final String string) {
         versionComment = string;
+    }
+    
+    @Override
+    public void setDynamicProperties(Map<String, Object> properties) {
+        this.dynamicProperties = properties;
+    }
+    
+    @Override
+    public Map<String, Object> getDynamicProperties() {
+        return dynamicProperties;
     }
 
 }

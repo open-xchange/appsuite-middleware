@@ -56,6 +56,7 @@ import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AbstractFileFieldHandler;
 import com.openexchange.file.storage.File;
@@ -151,6 +152,16 @@ public class FileMetadataWriter {
             switch (field) {
             case CATEGORIES:
                 return handleCategories((String) value);
+            case DYNAMIC_PROPERTIES:
+                try {
+                    if (value == null) {
+                        return null;
+                    }
+                    return JSONCoercion.coerceToJSON(value);
+                } catch (JSONException e) {
+                    LOG.error(e.getMessage(), e);
+                    return null;
+                }
             default: // do nothing;
             }
 
