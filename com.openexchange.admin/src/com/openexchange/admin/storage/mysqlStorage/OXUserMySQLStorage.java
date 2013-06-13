@@ -110,11 +110,11 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
-import com.openexchange.groupware.userconfiguration.CapabilityUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -502,11 +502,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.close();
                 for (final String elem : alias) {
                     if (elem != null && elem.trim().length() > 0) {
-                        stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value) VALUES (?,?,?,?)");
+                        stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value,uuid) VALUES (?,?,?,?,?)");
+                        UUID uuid = UUID.randomUUID();
+                        byte[] uuidBinary = UUIDs.toByteArray(uuid);
                         stmt.setInt(1, contextId);
                         stmt.setInt(2, userId);
                         stmt.setString(3, "alias");
                         stmt.setString(4, elem);
+                        stmt.setBytes(5, uuidBinary);
                         stmt.executeUpdate();
                         stmt.close();
                     }
@@ -526,9 +529,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmtupdateattribute.setInt(2, contextId);
                 stmtupdateattribute.setInt(3, userId);
 
-                stmtinsertattribute = con.prepareStatement("INSERT INTO user_attribute (value, cid, id, name) VALUES (?, ?, ?, ?)");
+                stmtinsertattribute = con.prepareStatement("INSERT INTO user_attribute (value, cid, id, name, uuid) VALUES (?, ?, ?, ?, ?)");
+                UUID uuid = UUID.randomUUID();
+                byte[] uuidBinary = UUIDs.toByteArray(uuid);
                 stmtinsertattribute.setInt(2, contextId);
                 stmtinsertattribute.setInt(3, userId);
+                stmtinsertattribute.setBytes(5, uuidBinary);
 
                 stmtdelattribute = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
                 stmtdelattribute.setInt(1, contextId);
@@ -1401,11 +1407,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     while (itr.hasNext()) {
                         final String tmp_mail = itr.next().toString().trim();
                         if (tmp_mail.length() > 0) {
-                            stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value) VALUES (?,?,?,?)");
+                            stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value,uuid) VALUES (?,?,?,?,?)");
+                            UUID uuid = UUID.randomUUID();
+                            byte[] uuidBinary = UUIDs.toByteArray(uuid);
                             stmt.setInt(1, ctx.getId());
                             stmt.setInt(2, userId);
                             stmt.setString(3, "alias");
                             stmt.setString(4, tmp_mail);
+                            stmt.setBytes(5, uuidBinary);
                             stmt.executeUpdate();
                             stmt.close();
                         }
@@ -1566,7 +1575,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         PreparedStatement stmt = null;
 
         try {
-            stmt = write_ox_con.prepareStatement("INSERT INTO user_attribute (cid, id, name, value) VALUES (?, ?, ?, ?)");
+            stmt = write_ox_con.prepareStatement("INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?)");
             stmt.setInt(1, cid);
             stmt.setInt(2, userId);
             for(final Map.Entry<String, Map<String, String>> namespaced : dynamicValues.entrySet()) {
@@ -1576,6 +1585,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     final String value = pair.getValue();
                     stmt.setString(3, name);
                     stmt.setString(4, value);
+                    UUID uuid = UUID.randomUUID();
+                    byte[] uuidBinary = UUIDs.toByteArray(uuid);
+                    stmt.setBytes(5, uuidBinary);
                     stmt.executeUpdate();
                 }
             }
