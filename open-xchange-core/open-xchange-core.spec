@@ -454,8 +454,10 @@ fi
 
 # SoftwareChange_Request-1214
 # SoftwareChange_Request-1429
+# SoftwareChange_Request-1467
 pfile=/opt/open-xchange/etc/file-logging.properties
-for opt in org.apache.cxf.level com.openexchange.soap.cxf.logger.level org.jaudiotagger.level; do
+for opt in org.apache.cxf.level com.openexchange.soap.cxf.logger.level org.jaudiotagger.level \
+    com.gargoylesoftware.htmlunit.level; do
     if ! ox_exists_property $opt $pfile; then
        ox_set_property $opt WARNING $pfile
     fi
