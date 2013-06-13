@@ -56,11 +56,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.capabilities.Capability;
-import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -90,7 +86,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
-    
+
 
     @Override
     public UserPermissionBits[] getUserPermissionBits(final Context ctx, final User[] users) throws OXException {
@@ -104,7 +100,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
-    
+
     @Override
     public UserPermissionBits[] getUserPermissionBits(Context ctx, int[] userIds) throws OXException {
         try {
@@ -114,18 +110,18 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
         }
     }
 
-    
+
     @Override
     public void clearStorage() {
     }
 
-    
+
     @Override
     public void removeUserPermissionBits(final int userId, final Context ctx) {
 
     }
 
-    
+
     @Override
     public void saveUserPermissionBits(final int permissionBits, final int userId, final Context ctx) throws OXException {
         saveUserPermissionBits0(permissionBits, userId, ctx);
@@ -280,8 +276,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
-            final UserPermissionBits uc = rs.next() ? new UserPermissionBits( rs.getInt(1) , userId, ctx.getContextId()) : new UserPermissionBits(0, userId, ctx.getContextId());
-            return uc;
+            return rs.next() ? new UserPermissionBits( rs.getInt(1) , userId, ctx.getContextId()) : new UserPermissionBits(0, userId, ctx.getContextId());
         } finally {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
         }
@@ -360,7 +355,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
                 throw UserConfigurationCodes.NOT_FOUND.create(Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
             }
             final UserPermissionBits UserPermissionBits = new UserPermissionBits(rs.getInt(1), userId, ctx.getContextId());
-            
+
             return UserPermissionBits;
         } finally {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
@@ -419,13 +414,13 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
                 stmt.setInt(1, ctx.getContextId());
             }
             result = stmt.executeQuery();
-            
+
             while (result.next()) {
                 final int userId = result.getInt(1);
                 if (userMap.containsKey(userId)) {
                     final int index = userMap.get(userId);
                     final UserPermissionBits UserPermissionBits = new UserPermissionBits(result.getInt(2), userId, ctx.getContextId());
-                    
+
                     retval[index] = UserPermissionBits;
                 }
             }
