@@ -64,6 +64,7 @@ import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.mail.FullnameArgument;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -219,7 +220,7 @@ public final class InlineImageDataSource implements ImageDataSource {
             final String cid = dataArguments.get(ARGS[2]);
             mailPart = getImagePart(arg.getAccountId(), fullname, mailId, cid, session);
             if (null == mailPart) {
-                throw DataExceptionCodes.ERROR.create("Requested image mail part does not exist: " + fullname + "/" + mailId + ":" + cid);
+                throw MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.create(cid, mailId, fullname);
             }
             final ContentType contentType = mailPart.getContentType();
             if (contentType == null) {
