@@ -569,12 +569,6 @@ public final class InternalList {
         final FullPrimaryKeySupportService fullPrimaryKeySupportService = ServerServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
         if (null != fullPrimaryKeySupportService && fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
 
-            // Add primary key to vcard_ids table
-            list.add(new AddPrimaryKeyVcardIdsTask());
-
-            // Add primary key to vcard_principal table
-            list.add(new AddPrimaryKeyVcardPrincipalTask());
-
             // Add primary key to genconf_attributes_strings table
             list.add(new GenconfAttributesStringsAddPrimaryKey());
 
@@ -586,12 +580,6 @@ public final class InternalList {
 
             // Add primary key to user_attribute table
             list.add(new MakeUUIDPrimaryForUserAttributeTable());
-
-            // Add primary key to ical_ids table
-            list.add(new CreateIcalIdsPrimaryKeyTask());
-
-            // Add primary key to ical_principal table
-            list.add(new CreateIcalPrincipalPrimaryKeyTask());
 
             //Add primary key to prg_links table
             list.add(new PrgLinksAddPrimaryKeyUpdateTask());
