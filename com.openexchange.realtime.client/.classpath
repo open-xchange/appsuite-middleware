@@ -7,5 +7,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
 	<classpathentry kind="lib" path="lib/wasync-1.0.0-SNAPSHOT.jar"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-jcl-1.7.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

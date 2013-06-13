@@ -51,6 +51,8 @@ package com.openexchange.realtime.client.impl;
 
 import java.util.concurrent.atomic.AtomicLong;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link PingPongTimer}
@@ -58,6 +60,8 @@ import org.json.JSONObject;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class PingPongTimer implements Runnable {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(PingPongTimer.class);
 
     private final RTProtocolCallback callback;
 
@@ -87,9 +91,14 @@ public class PingPongTimer implements Runnable {
             }
 
             long now = System.currentTimeMillis();
+            LOG.debug("Now: {}", now);
+            LOG.debug("lastContact: {}", lastContact.get());
+            LOG.debug("idleTime: {}", idleTime);
             long timeToPing = lastContact.get() + idleTime;
+            LOG.debug("timeToPing adds up to: {}", timeToPing);
             try {
                 if (timeToPing <= now) {
+                    LOG.debug("timeToPing <= now");
                     /*
                      * {"type": "ping", "commit": true }
                      */
@@ -106,7 +115,8 @@ public class PingPongTimer implements Runnable {
 
                     Thread.sleep(idleTime);
                 } else {
-                    Thread.sleep(System.currentTimeMillis() - timeToPing);
+                    LOG.debug("Thread.sleep(timeToPing - System.currentTimeMillis()): {}", timeToPing - System.currentTimeMillis());
+                    Thread.sleep(timeToPing - System.currentTimeMillis());
                 }
             } catch (InterruptedException e) {
                 // TODO: log
