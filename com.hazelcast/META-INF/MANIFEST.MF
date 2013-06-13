@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Activator: com.hazelcast.osgi.HzActivator
 Bundle-Name: Hazelcast library
 Bundle-SymbolicName: com.hazelcast
-Bundle-Version: 7.2.0
+Bundle-Version: 7.2.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BuddyPolicy: registered
