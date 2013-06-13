@@ -1,3 +1,8 @@
+* 2013-06-13 - choeger@open-xchange.com
+
+ - Fix for bug 25205: Restarting the groupware process leads to a 'Port already
+   in use: 9999' error
+
 * 2013-06-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 26911: Turned into an abstract class

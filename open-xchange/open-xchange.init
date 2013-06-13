@@ -230,7 +230,12 @@ case "$1" in
 	## Stop daemon with killproc(8) and if this fails
 	## killproc sets the return value according to LSB.
 
+	pidfile=/var/run/open-xchange.pid
+	test -e $pidfile && read pid < $pidfile
 	ox_stop_daemon $(basename $OX_BIN)
+	while ox_is_running open-xchange "/opt/open-xchange/sbin/open-xchange" $pid; do
+	     sleep 1
+	done
 
 	# Remember status and be verbose
 	rc_status -v
@@ -254,11 +259,7 @@ case "$1" in
     restart)
 	## Stop the service and regardless of whether it was
 	## running or not, start it again.
-        read pid < /var/run/open-xchange.pid
 	$0 stop
-	while ox_is_running open-xchange "/opt/open-xchange/sbin/open-xchange" $pid; do
-	     sleep 1
-	done
 	$0 start
 
 	# Remember status and be quiet
