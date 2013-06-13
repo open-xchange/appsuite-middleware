@@ -9612,7 +9612,8 @@ msgid ""
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:355
-msgid "That mailbox is already in use by another process. Please try again."
+msgid ""
+"That mailbox is already in use by another process. Please try again later."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:355
