@@ -49,12 +49,8 @@
 
 package com.openexchange.oauth.twitter;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
-import com.openexchange.session.Session;
 
 /**
  * {@link OAuthServiceMetaDataTwitterImpl}
@@ -62,16 +58,6 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaData {
-
-    /**
-     * The default API key.
-     */
-    private static final String KEY_API = "";
-
-    /**
-     * The default secret key.
-     */
-    private static final String KEY_SECRET = "";
 
     public OAuthServiceMetaDataTwitterImpl() {
         super();
