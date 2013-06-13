@@ -54,6 +54,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.realtime.client.RTConnection;
 
 /**
@@ -63,6 +65,11 @@ import com.openexchange.realtime.client.RTConnection;
  * @since 7.4
  */
 public class RTRoomPingTimerTask extends TimerTask {
+
+    /**
+     * The logger
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(RTRoomPingTimerTask.class);
 
     /**
      * Lock for the ping
@@ -101,7 +108,7 @@ public class RTRoomPingTimerTask extends TimerTask {
                 final JSONValue ping = this.createPingObject();
                 this.rtConnection.post(ping);
             } catch (final Exception e) {
-                // TODO LOG.error(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }
