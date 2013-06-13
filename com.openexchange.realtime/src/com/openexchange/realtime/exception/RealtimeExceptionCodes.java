@@ -52,62 +52,77 @@ package com.openexchange.realtime.exception;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
-import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link RealtimeExceptionCodes} - Error codes for message dispatcher.
+ * {@link RealtimeStanzaExceptionCodes} - Stanza error codes for the realtime framework.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public enum RealtimeExceptionCodes implements OXExceptionCode {
-    /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
-    NO_APPROPRIATE_CHANNEL(RealtimeExceptionMessages.NO_APPROPRIATE_CHANNEL, Category.EnumCategory.CONNECTIVITY, 2),
-    /** The following needed service is missing: "%1$s" */
-    NEEDED_SERVICE_MISSING(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 3),
-    /** Unexpected error: %1$s */
-    UNEXPECTED_ERROR(RealtimeExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 4),
-    /** Invalid ID. Resource identifier is missing. */
-    INVALID_ID(RealtimeExceptionMessages.INVALID_ID, CATEGORY_ERROR, 5),
-    /** Resource not available. */
-    RESOURCE_NOT_AVAILABLE(RealtimeExceptionMessages.RESOURCE_NOT_AVAILABLE_MSG, CATEGORY_ERROR, 6),
+    /*
+     * Define Channel specific Codes first as generic codes should be able to reference them.
+     */
     
+    // XMPP
     //--- elements from stanza error namespace http://xmpp.org/rfcs/rfc3920.html#def C.7.
-    STANZA_BAD_REQUEST(RealtimeExceptionMessages.STANZA_BAD_REQUEST_MSG, CATEGORY_USER_INPUT, 7),
-    STANZA_CONFILCT(RealtimeExceptionMessages.STANZA_CONFILCT_MSG, CATEGORY_SERVICE_DOWN, 8),
-    STANZA_FEATURE_NOT_IMPLEMENTED(RealtimeExceptionMessages.STANZA_FEATURE_NOT_IMPLEMENTED_MSG, CATEGORY_SERVICE_DOWN, 9),
-    STANZA_FORBIDDEN(RealtimeExceptionMessages.STANZA_FORBIDDEN_MSG, CATEGORY_SERVICE_DOWN, 10),
-    STANZA_GONE(RealtimeExceptionMessages.STANZA_GONE_MSG, CATEGORY_SERVICE_DOWN, 11),
-    STANZA_INTERNAL_SERVER_ERROR(RealtimeExceptionMessages.STANZA_INTERNAL_SERVER_ERROR_MSG, CATEGORY_SERVICE_DOWN, 12),
-    STANZA_ITEM_NOT_FOUND(RealtimeExceptionMessages.STANZA_ITEM_NOT_FOUND_MSG, CATEGORY_SERVICE_DOWN, 13),
-    STANZA_JID_MALFORMED(RealtimeExceptionMessages.STANZA_JID_MALFORMED_MSG, CATEGORY_SERVICE_DOWN, 14),
-    STANZA_NOT_ACCEPTABLE(RealtimeExceptionMessages.STANZA_NOT_ACCEPTABLE_MSG, CATEGORY_SERVICE_DOWN, 15),
-    STANZA_NOT_AUTHORIZED(RealtimeExceptionMessages.STANZA_NOT_AUTHORIZED_MSG, CATEGORY_SERVICE_DOWN, 16),
-    STANZA_NOT_ALLOWED(RealtimeExceptionMessages.STANZA_NOT_ALLOWED_MSG, CATEGORY_SERVICE_DOWN, 17),
-    STANZA_PAYMENT_REQUIRED(RealtimeExceptionMessages.STANZA_PAYMENT_REQUIRED_MSG, CATEGORY_SERVICE_DOWN, 18),
-    STANZA_POLICY_VIOLATION(RealtimeExceptionMessages.STANZA_POLICY_VIOLATION_MSG, CATEGORY_SERVICE_DOWN, 19),
-    STANZA_RECIPIENT_UNAVAILABLE(RealtimeExceptionMessages.STANZA_RECIPIENT_UNAVAILABLE_MSG, CATEGORY_SERVICE_DOWN, 20),
-    STANZA_REDIRECT(RealtimeExceptionMessages.STANZA_REDIRECT_MSG, CATEGORY_SERVICE_DOWN, 21),
-    STANZA_REGISTRATION_REQUIRED(RealtimeExceptionMessages.STANZA_REGISTRATION_REQUIRED_MSG, CATEGORY_SERVICE_DOWN, 22),
-    STANZA_REMOTE_SERVER_NOT_FOUND(RealtimeExceptionMessages.STANZA_REMOTE_SERVER_NOT_FOUND_MSG, CATEGORY_SERVICE_DOWN, 23),
-    STANZA_REMOTE_SERVER_TIMEOUT(RealtimeExceptionMessages.STANZA_REMOTE_SERVER_TIMEOUT_MSG, CATEGORY_SERVICE_DOWN, 24),
-    STANZA_RESOURCE_CONSTRAINT(RealtimeExceptionMessages.STANZA_RESOURCE_CONSTRAINT_MSG, CATEGORY_SERVICE_DOWN, 25),
-    STANZA_SERVICE_UNAVAILABLE(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 26),
-    STANZA_SUBSCRIPTION_REQUIRED(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 27),
-    STANZA_UNDEFINED_CONDITION(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 28),
-    STANZA_UNEXPECTED_REQUEST(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 29),
-    ;
+    STANZA_BAD_REQUEST(RealtimeExceptionMessages.STANZA_BAD_REQUEST_MSG, CATEGORY_USER_INPUT, 1),
+    STANZA_CONFILCT(RealtimeExceptionMessages.STANZA_CONFILCT_MSG, CATEGORY_SERVICE_DOWN, 2),
+    STANZA_FEATURE_NOT_IMPLEMENTED(RealtimeExceptionMessages.STANZA_FEATURE_NOT_IMPLEMENTED_MSG, CATEGORY_SERVICE_DOWN, 3),
+    STANZA_FORBIDDEN(RealtimeExceptionMessages.STANZA_FORBIDDEN_MSG, CATEGORY_SERVICE_DOWN, 4),
+    STANZA_GONE(RealtimeExceptionMessages.STANZA_GONE_MSG, CATEGORY_SERVICE_DOWN, 5),
+    STANZA_INTERNAL_SERVER_ERROR(RealtimeExceptionMessages.STANZA_INTERNAL_SERVER_ERROR_MSG, CATEGORY_SERVICE_DOWN, 6),
+    STANZA_ITEM_NOT_FOUND(RealtimeExceptionMessages.STANZA_ITEM_NOT_FOUND_MSG, CATEGORY_SERVICE_DOWN, 7),
+    STANZA_JID_MALFORMED(RealtimeExceptionMessages.STANZA_JID_MALFORMED_MSG, CATEGORY_SERVICE_DOWN, 8),
+    STANZA_NOT_ACCEPTABLE(RealtimeExceptionMessages.STANZA_NOT_ACCEPTABLE_MSG, CATEGORY_SERVICE_DOWN, 9),
+    STANZA_NOT_AUTHORIZED(RealtimeExceptionMessages.STANZA_NOT_AUTHORIZED_MSG, CATEGORY_SERVICE_DOWN, 10),
+    STANZA_NOT_ALLOWED(RealtimeExceptionMessages.STANZA_NOT_ALLOWED_MSG, CATEGORY_SERVICE_DOWN, 11),
+    STANZA_PAYMENT_REQUIRED(RealtimeExceptionMessages.STANZA_PAYMENT_REQUIRED_MSG, CATEGORY_SERVICE_DOWN, 12),
+    STANZA_POLICY_VIOLATION(RealtimeExceptionMessages.STANZA_POLICY_VIOLATION_MSG, CATEGORY_SERVICE_DOWN, 13),
+    STANZA_RECIPIENT_UNAVAILABLE(RealtimeExceptionMessages.STANZA_RECIPIENT_UNAVAILABLE_MSG, CATEGORY_SERVICE_DOWN, 14),
+    STANZA_REDIRECT(RealtimeExceptionMessages.STANZA_REDIRECT_MSG, CATEGORY_SERVICE_DOWN, 15),
+    STANZA_REGISTRATION_REQUIRED(RealtimeExceptionMessages.STANZA_REGISTRATION_REQUIRED_MSG, CATEGORY_SERVICE_DOWN, 16),
+    STANZA_REMOTE_SERVER_NOT_FOUND(RealtimeExceptionMessages.STANZA_REMOTE_SERVER_NOT_FOUND_MSG, CATEGORY_SERVICE_DOWN, 17),
+    STANZA_REMOTE_SERVER_TIMEOUT(RealtimeExceptionMessages.STANZA_REMOTE_SERVER_TIMEOUT_MSG, CATEGORY_SERVICE_DOWN, 18),
+    STANZA_RESOURCE_CONSTRAINT(RealtimeExceptionMessages.STANZA_RESOURCE_CONSTRAINT_MSG, CATEGORY_SERVICE_DOWN, 19),
+    STANZA_SERVICE_UNAVAILABLE(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 20),
+    STANZA_SUBSCRIPTION_REQUIRED(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 21),
+    STANZA_UNDEFINED_CONDITION(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 22),
+    STANZA_UNEXPECTED_REQUEST(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 23),
 
+    // Atmosphere
+    
+    // Generic (start with code 1000)
+    /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
+    NO_APPROPRIATE_CHANNEL(RealtimeExceptionMessages.NO_APPROPRIATE_CHANNEL, Category.EnumCategory.CONNECTIVITY, 1000, STANZA_INTERNAL_SERVER_ERROR, STANZA_INTERNAL_SERVER_ERROR),
+    /** The following needed service is missing: "%1$s" */
+    NEEDED_SERVICE_MISSING(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 1001, STANZA_INTERNAL_SERVER_ERROR, STANZA_INTERNAL_SERVER_ERROR),
+    /** Unexpected error: %1$s */
+    UNEXPECTED_ERROR(RealtimeExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1002, STANZA_INTERNAL_SERVER_ERROR, STANZA_INTERNAL_SERVER_ERROR),
+    /** Invalid ID. Resource identifier is missing. */
+    INVALID_ID(RealtimeExceptionMessages.INVALID_ID, CATEGORY_ERROR, 1003, STANZA_INTERNAL_SERVER_ERROR, STANZA_INTERNAL_SERVER_ERROR),
+    /** Resource not available. */
+    RESOURCE_NOT_AVAILABLE(RealtimeExceptionMessages.RESOURCE_NOT_AVAILABLE_MSG, CATEGORY_ERROR, 1004, STANZA_INTERNAL_SERVER_ERROR, STANZA_INTERNAL_SERVER_ERROR),
+    ;
+    
     private int number;
 
     private Category category;
 
     private String message;
+    
+    private Transformer transformer;
 
     private RealtimeExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this(message, category, detailNumber, null, null);
+    }
+
+    private RealtimeExceptionCodes(final String message, final Category category, final int detailNumber, RealtimeExceptionCodes atmosphere, RealtimeExceptionCodes xmpp) {
         this.message = message;
         this.number = detailNumber;
         this.category = category;
+
+        this.transformer = new Transformer(this, atmosphere == null ? this : atmosphere, xmpp == null ? this : xmpp);
+        
     }
 
     @Override
@@ -122,7 +137,7 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "RT";
+        return "RT_STANZA";
     }
 
     @Override
@@ -132,7 +147,11 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
 
     @Override
     public boolean equals(final OXException e) {
-        return OXExceptionFactory.getInstance().equals(this, e);
+        return RealtimeExceptionFactory.getInstance().equals(this, e);
+    }
+    
+    public Transformer getTransformer() {
+        return transformer;
     }
 
     /**
@@ -141,7 +160,7 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
-        return OXExceptionFactory.getInstance().create(this, new Object[0]);
+        return RealtimeExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
     /**
@@ -151,7 +170,7 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Object... args) {
-        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+        return RealtimeExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
     /**
@@ -162,7 +181,7 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Throwable cause, final Object... args) {
-        return OXExceptionFactory.getInstance().create(this, cause, args);
+        return RealtimeExceptionFactory.getInstance().create(this, cause, args);
     }
 
 }
