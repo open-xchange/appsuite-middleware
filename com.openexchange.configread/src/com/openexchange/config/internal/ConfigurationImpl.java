@@ -362,31 +362,24 @@ public final class ConfigurationImpl implements ConfigurationService {
      * {@inheritDoc}
      */
     public Properties getFile(final String filename, final PropertyListener listener) {
-        String key = null;
-        for (final String k : propertiesByFile.keySet()) {
-            if (k.endsWith(filename)) {
-                key = k;
-                break;
-            }
-        }
-
-        if (key == null) {
+        if (null == filename) {
             return new Properties();
         }
 
-        final Properties tmp = propertiesByFile.get(key);
-        final Properties retval = new Properties();
-
-        for (final Entry<Object, Object> entry : tmp.entrySet()) {
-            retval.put(entry.getKey(), entry.getValue());
-        }
-
-        if (listener != null) {
-            for (final Object k : retval.keySet()) {
-                getProperty((String) k, listener);
+        for (final Entry<String, Properties> entry : propertiesByFile.entrySet()) {
+            if (entry.getKey().endsWith(filename)) {
+                final Properties retval = new Properties();
+                retval.putAll(entry.getValue());
+                if (listener != null) {
+                    for (final Object k : retval.keySet()) {
+                        getProperty((String) k, listener);
+                    }
+                }
+                return retval;
             }
         }
-        return retval;
+
+        return new Properties();
     }
 
     @Override
