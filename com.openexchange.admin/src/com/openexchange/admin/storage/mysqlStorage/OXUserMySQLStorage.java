@@ -2484,7 +2484,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         try {
             read_ox_con = cache.getConnectionForContext(ctx.getId().intValue());
             final int[] all_groups_of_user = getGroupsForUser(ctx, user_id, read_ox_con);
-            final UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(user_id, all_groups_of_user, ctx.getId().intValue(), read_ox_con);
+            final UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(user_id, all_groups_of_user, true, ctx.getId().intValue(), read_ox_con);
 
             final UserModuleAccess acc = new UserModuleAccess();
 
@@ -2809,7 +2809,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     private void myChangeInsertModuleAccess(final Context ctx, final int userId, final UserModuleAccess access, final boolean insert, final Connection writeCon, final int[] groups) throws StorageException {
         checkForIllegalCombination(access);
         try {
-            final UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(userId, groups, ctx.getId().intValue(), writeCon);
+            final UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(userId, groups, false, ctx.getId().intValue(), writeCon);
             user.setCalendar(access.getCalendar());
             user.setContact(access.getContacts());
             user.setForum(access.getForum());

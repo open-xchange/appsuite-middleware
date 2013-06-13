@@ -293,7 +293,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
      * @throws SQLException - if user configuration could not be loaded from database
      * @throws OXException - if a readable connection could not be obtained from connection pool
      */
-    public static UserConfiguration adminLoadUserConfiguration(final int userId, final int[] groups, final int cid, final Connection readConArg) throws SQLException, OXException {
+    public static UserConfiguration adminLoadUserConfiguration(final int userId, final int[] groups, final boolean initializeExtendedPermissons, final int cid, final Connection readConArg) throws SQLException, OXException {
         final Context ctx = new ContextImpl(cid);
         Connection readCon = readConArg;
         boolean closeReadCon = false;
@@ -308,9 +308,14 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
-            final UserConfiguration uc = rs.next() ? new UserConfiguration(rs.getInt(1), userId, groups, ctx) : new UserConfiguration(0, userId, groups, ctx);
-            if (initExtendedPermissions.get()) {
-                uc.setExtendedPermissions(uc.calcExtendedPermissions());
+            final UserConfiguration uc;
+            if (rs.next()) {
+                uc = new UserConfiguration(rs.getInt(1), userId, groups, ctx);
+                if (initializeExtendedPermissons) {
+                    uc.setExtendedPermissions(uc.calcExtendedPermissions());
+                }
+            } else {
+                uc = new UserConfiguration(0, userId, groups, ctx);
             }
             return uc;
         } finally {
