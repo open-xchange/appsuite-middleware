@@ -50,8 +50,10 @@
 package com.openexchange.realtime.client.impl;
 
 import java.io.StringReader;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang.Validate;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -157,9 +159,31 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
     protected void onReceive(String message) throws RTException {
         try {
             JSONValue json = JSONObject.parse(new StringReader(message));
-            if (protocol.handleIncoming(json) && messageHandler != null) {
-                messageHandler.onMessage(json);
+            //Array or Object
+            if(json.isArray()) {
+                JSONArray stanzas = (JSONArray) json;
+                Iterator<Object> stanzaIterator = stanzas.iterator();
+                while (stanzaIterator.hasNext()) {
+                    Object next = stanzaIterator.next();
+                    if(!(next instanceof JSONObject)) {
+                        throw new RTException("Array must only contain JSONObjects");
+                    }
+                    JSONObject stanza = (JSONObject) next;
+                    RTMessageHandler handlerForSelector = getHandlerForSelector(stanza);
+                    if (protocol.handleIncoming(json) && handlerForSelector != null) {
+                        messageHandler.onMessage(json);
+                    }
+                }
+            } else if(json.isObject()){
+                JSONObject stanza = (JSONObject)json;
+                RTMessageHandler handlerForSelector = getHandlerForSelector(stanza);
+                if (protocol.handleIncoming(json) && handlerForSelector != null) {
+                    messageHandler.onMessage(json);
+                }
+            } else {
+                throw new RTException("Messages must consist of a single JSONObject or an JSONArray of JSONObjects");
             }
+            
         } catch (JSONException e) {
             throw new RTException("The given string was not a valid JSON message.", e);
         }
@@ -168,6 +192,20 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
     @Override
     public void removeHandler(String selector) {
         messageHandlers.remove(selector);
+    }
+    
+    /**
+     * Get the proper handler for the selector found in the message.
+     * @param message The message to be delivered to a @{link RTMessageHandler}
+     * @return the @{link RTMessageHandler} associated with the selector found in the message or null
+     */
+    private RTMessageHandler getHandlerForSelector(JSONObject message) {
+        RTMessageHandler associatedHandler = null;
+        String selector = message.optString("selector");
+        if(selector != null) {
+            associatedHandler = messageHandlers.get(selector);
+        }
+        return associatedHandler;
     }
 
 }
