@@ -153,7 +153,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
      * @param serviceId The service identifier
      * @param fullnameProvider The (optional) fullname provider
      */
-    public MessagingFolderImpl(final MessagingFolder messagingFolder, final int accountId, final String serviceId, final User user, final DefaultFolderFullnameProvider fullnameProvider) {
+    public MessagingFolderImpl(final MessagingFolder messagingFolder, final int accountId, final String serviceId, final User user, final DefaultFolderFullnameProvider fullnameProvider, final boolean translate) {
         super();
         final String fullname = messagingFolder.getId();
         id = MessagingFolderIdentifier.getFQN(serviceId, accountId, fullname);
@@ -191,16 +191,24 @@ public final class MessagingFolderImpl extends AbstractFolder {
             messagingFolderType = TYPES.get(messagingFolder.getDefaultFolderType());
             switch (messagingFolderType) {
             case DRAFTS:
-                name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS);
+                if (translate) {
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS);
+                }
                 break;
             case SENT:
-                name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT);
+                if (translate) {
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT);
+                }
                 break;
             case SPAM:
-                name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM);
+                if (translate) {
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM);
+                }
                 break;
             case TRASH:
-                name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH);
+                if (translate) {
+                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH);
+                }
                 break;
             default:
                 break;
@@ -210,18 +218,26 @@ public final class MessagingFolderImpl extends AbstractFolder {
         } else if (null != fullname) {
             try {
                 if (fullname.equals(fullnameProvider.getDraftsFolder())) {
-                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS);
+                    if (translate) {
+                        name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS);
+                    }
                     messagingFolderType = MessagingFolderType.DRAFTS;
                 } else if (fullname.equals(fullnameProvider.getINBOXFolder())) {
                     messagingFolderType = MessagingFolderType.INBOX;
                 } else if (fullname.equals(fullnameProvider.getSentFolder())) {
-                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT);
+                    if (translate) {
+                        name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT);
+                    }
                     messagingFolderType = MessagingFolderType.SENT;
                 } else if (fullname.equals(fullnameProvider.getSpamFolder())) {
-                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM);
+                    if (translate) {
+                        name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM);
+                    }
                     messagingFolderType = MessagingFolderType.SPAM;
                 } else if (fullname.equals(fullnameProvider.getTrashFolder())) {
-                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH);
+                    if (translate) {
+                        name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH);
+                    }
                     messagingFolderType = MessagingFolderType.TRASH;
                 } else {
                     messagingFolderType = MessagingFolderType.NONE;

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/open-xchange-admin-plugin-hosting/src/com/openexchange/admin/console/user/Create.java"/>
+<listEntry value="/com.openexchange.admin.console/src/com/openexchange/admin/console/user/Create.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.openexchange.admin.console.user.Create"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-c 424242669 -A oxadmin -P secret -u deleteme -d &quot;Delete Me&quot; -g Delete -s Me -p secret --access-combination-name all -e deleteme@premium --imapserver imap://devel-mail.netline.de --smtpserver smtp://devel-mail.netline.de --imaplogin deleteme424242669"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="open-xchange-admin-plugin-hosting"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-c 424242669 -A oxadmin -P secret -u deleteme3 -d &quot;Delete Me3&quot; -g Delete -s Me3 -p secret --access-combination-name all -e deleteme3@premium --imapserver imap://devel-mail.netline.de --smtpserver smtp://devel-mail.netline.de --imaplogin deleteme3424242669"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.openexchange.admin.console"/>
 </launchConfiguration>

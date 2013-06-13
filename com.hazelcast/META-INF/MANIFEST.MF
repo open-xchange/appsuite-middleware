@@ -7,7 +7,7 @@ Bundle-Version: 7.2.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BuddyPolicy: registered
-Bundle-ClassPath: lib/hazelcast-2.5.jar,
+Bundle-ClassPath: lib/hazelcast-2.6.jar,
  .
 Export-Package: com.hazelcast.cluster,
  com.hazelcast.config,

@@ -91,36 +91,36 @@ public final class MultipleAttachmentTest extends AbstractMailTest {
 		try {
 			{
 			    final String eml =
-		            ("Date: Mon, 19 Nov 2012 21:36:51 +0100 (CET)\n" + 
-		            "From: #ADDR#\n" + 
-		            "To: #ADDR#\n" + 
-		            "Message-ID: <1508703313.17483.1353357411049>\n" + 
-		            "Subject: MultipleAttachmentTest\n" + 
-		            "MIME-Version: 1.0\n" + 
-		            "Content-Type: multipart/alternative; \n" + 
-		            "    boundary=\"----=_Part_17482_1388684087.1353357411002\"\n" + 
-		            "\n" + 
-		            "------=_Part_17482_1388684087.1353357411002\n" + 
-		            "MIME-Version: 1.0\n" + 
-		            "Content-Type: text/plain; charset=UTF-8\n" + 
-		            "Content-Transfer-Encoding: 7bit\n" + 
-		            "\n" + 
-		            "MultipleAttachmentTest\n" + 
-		            "------=_Part_17482_1388684087.1353357411002\n" + 
-		            "MIME-Version: 1.0\n" + 
-		            "Content-Type: text/html; charset=UTF-8\n" + 
-		            "Content-Transfer-Encoding: 7bit\n" + 
-		            "\n" + 
+		            ("Date: Mon, 19 Nov 2012 21:36:51 +0100 (CET)\n" +
+		            "From: #ADDR#\n" +
+		            "To: #ADDR#\n" +
+		            "Message-ID: <1508703313.17483.1353357411049>\n" +
+		            "Subject: MultipleAttachmentTest\n" +
+		            "MIME-Version: 1.0\n" +
+		            "Content-Type: multipart/alternative; \n" +
+		            "    boundary=\"----=_Part_17482_1388684087.1353357411002\"\n" +
+		            "\n" +
+		            "------=_Part_17482_1388684087.1353357411002\n" +
+		            "MIME-Version: 1.0\n" +
+		            "Content-Type: text/plain; charset=UTF-8\n" +
+		            "Content-Transfer-Encoding: 7bit\n" +
+		            "\n" +
+		            "MultipleAttachmentTest\n" +
+		            "------=_Part_17482_1388684087.1353357411002\n" +
+		            "MIME-Version: 1.0\n" +
+		            "Content-Type: text/html; charset=UTF-8\n" +
+		            "Content-Transfer-Encoding: 7bit\n" +
+		            "\n" +
 		            "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">" +
-		            " <head>\n" + 
-		            "    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\"/>\n" + 
-		            " </head><body style=\"font-family: verdana,geneva; font-size: 10pt; \">\n" + 
-		            " \n" + 
-		            "  <div>\n" + 
-		            "   MultipleAttachmentTest\n" + 
-		            "  </div>\n" + 
-		            " \n" + 
-		            "</body></html>\n" + 
+		            " <head>\n" +
+		            "    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\"/>\n" +
+		            " </head><body style=\"font-family: verdana,geneva; font-size: 10pt; \">\n" +
+		            " \n" +
+		            "  <div>\n" +
+		            "   MultipleAttachmentTest\n" +
+		            "  </div>\n" +
+		            " \n" +
+		            "</body></html>\n" +
 		            "------=_Part_17482_1388684087.1353357411002--\n").replaceAll("#ADDR#", getSendAddress());
 		        NewMailResponse newMailResponse = getClient().execute(new NewMailRequest(client.getValues().getInboxFolder(), eml, -1, true));
 		        String folder = newMailResponse.getFolder();
@@ -169,7 +169,8 @@ public final class MultipleAttachmentTest extends AbstractMailTest {
 			assertEquals("No ZIP content", "application/zip", webResponse.getContentType());
 			final String disp = webResponse.getHeaderField("Content-disposition");
 			assertNotNull("No Content-disposition header", disp);
-			assertTrue("Disposition is not set to 'attachment'", disp.startsWith("attachment"));
+			// Behavior changed with bug 26879
+			//assertTrue("Disposition is not set to 'attachment'", disp.startsWith("attachment"));
 			assertTrue("'filename' parameter not found in Content-disposition", disp.indexOf("filename=") >= 0);
 
 		} catch (final Exception e) {
