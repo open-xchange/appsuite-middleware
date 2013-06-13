@@ -83,7 +83,7 @@ public class ListenerRegistrar  {
 
     private ListenerRegistrar() {
         super();
-        listeners = CacheBuilder.newBuilder().expireAfterAccess(60, TimeUnit.SECONDS)
+        listeners = CacheBuilder.newBuilder().expireAfterAccess(300, TimeUnit.SECONDS)
             .removalListener(new RemovalListener<String, LongPollingListener>() {
 
                 @Override

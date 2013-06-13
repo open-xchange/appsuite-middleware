@@ -51,6 +51,7 @@ package com.openexchange.drive.json.osgi;
 
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.drive.json.action.DriveActionFactory;
@@ -74,7 +75,7 @@ public class DriveJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveService.class, DriveEventService.class };
+        return new Class<?>[] { DriveService.class, DriveEventService.class, ConfigurationService.class };
     }
 
     @Override

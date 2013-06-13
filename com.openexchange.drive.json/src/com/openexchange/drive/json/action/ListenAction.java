@@ -56,11 +56,13 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.json.internal.ListenerRegistrar;
 import com.openexchange.drive.json.internal.LongPollingListener;
+import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.JsonDriveAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -80,9 +82,20 @@ public class ListenAction implements AJAXActionService {
         /*
          * get request data
          */
-        final String rootFolderID = requestData.getParameter("root");
+        String rootFolderID = requestData.getParameter("root");
         if (Strings.isEmpty(rootFolderID)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
+        }
+        long timeout;
+        String timeoutValue = requestData.getParameter("timeout");
+        if (false == Strings.isEmpty(timeoutValue)) {
+            try {
+                timeout = Long.valueOf(timeoutValue).longValue();
+            } catch (NumberFormatException e) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "timeout", timeoutValue);
+            }
+        } else {
+            timeout = getDefaultTimeout();
         }
         /*
          * get or create a polling listener for this session and await event
@@ -90,7 +103,7 @@ public class ListenAction implements AJAXActionService {
         DriveEvent event = null;
         try {
             LongPollingListener listener = ListenerRegistrar.getInstance().getOrCreate(session, rootFolderID);
-            event = listener.await(10 * 1000);
+            event = listener.await(timeout);
         } catch (ExecutionException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (InterruptedException e) {
@@ -107,6 +120,22 @@ public class ListenAction implements AJAXActionService {
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static long getDefaultTimeout() {
+        ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+        if (null != configurationService) {
+            String value = configurationService.getProperty("com.openexchange.drive.listenTimeout");
+            if (false == Strings.isEmpty(value)) {
+                try {
+                    return Long.valueOf(value).longValue();
+                } catch (NumberFormatException e) {
+                    com.openexchange.log.Log.loggerFor(ListenAction.class).error(
+                        "Invalid configuration value for \"com.openexchange.drive.listenTimeout\"", e);
+                }
+            }
+        }
+        return 90 * 1000;
     }
 
 }
