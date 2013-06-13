@@ -61,6 +61,6 @@ public class Constants {
     public static final String JSESSIONID_NAME = "JSESSIONID";
 
     //Request
-    public static final long REQUEST_TIMEOUT = 30;
+    public static final long REQUEST_TIMEOUT = 100;
 
 }

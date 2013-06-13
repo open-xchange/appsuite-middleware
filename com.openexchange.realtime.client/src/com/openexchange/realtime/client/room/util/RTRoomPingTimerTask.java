@@ -128,12 +128,16 @@ public class RTRoomPingTimerTask extends TimerTask {
         JSONObject payload = new JSONObject();
         payload.put("element", "ping");
         payload.put("namespace", "group");
+        payload.put("data", "1");
 
         final JSONArray payloads = new JSONArray();
         payloads.put(payload);
 
         pingObject.put("payloads", payloads);
+        
+        JSONArray pingArray = new JSONArray();
+        pingArray.put(pingObject);
 
-        return pingObject;
+        return pingArray;
     }
 }
