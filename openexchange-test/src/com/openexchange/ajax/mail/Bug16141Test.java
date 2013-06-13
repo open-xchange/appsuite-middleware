@@ -108,8 +108,6 @@ public class Bug16141Test extends AbstractAJAXSession {
         JSONArray json = (JSONArray) importResp.getData();
 
         int err = 0;
-        System.out.println("Huhuhuhuhuhuhuhu1234");
-        System.out.println(importResp.getData());
         for (int i = 0; i < json.length(); i++) {
             JSONObject jo = json.getJSONObject(i);
             if (jo.has("Error")) {
