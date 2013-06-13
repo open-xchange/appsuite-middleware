@@ -139,8 +139,7 @@ public class WrappedFileStorageFolderAccess implements FileStorageFolderAccess {
     @Override
     public String renameFolder(String folderId, String newName) throws OXException {
         String newId = delegate.renameFolder(folderId, newName);
-        fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(folderId)));
-        fire(new Event(FileStorageEventConstants.CREATE_FOLDER_TOPIC, getEventProperties(newId)));
+        fire(new Event(FileStorageEventConstants.UPDATE_FOLDER_TOPIC, getEventProperties(newId)));
         return newId;
     }
 

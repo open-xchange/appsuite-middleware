@@ -59,13 +59,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.context.ContextService;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
+import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.folder.FolderService;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
@@ -79,6 +79,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -529,6 +530,7 @@ public class EventClient {
 
         final Event event = new Event("com/openexchange/groupware/folder/insert", ht);
         triggerEvent(event);
+        triggerEvent(new Event(FileStorageEventConstants.CREATE_FOLDER_TOPIC, getEventProperties(folder)));
 
         final EventObject eventObject = new EventObject(folder, CREATED, session);
         EventQueue.add(eventObject);
@@ -543,6 +545,7 @@ public class EventClient {
 
         final Event event = new Event("com/openexchange/groupware/folder/update", ht);
         triggerEvent(event);
+        triggerEvent(new Event(FileStorageEventConstants.UPDATE_FOLDER_TOPIC, getEventProperties(newFolder)));
 
         final EventObject eventObject = new EventObject(newFolder, CHANGED, session);
         EventQueue.add(eventObject);
@@ -576,6 +579,7 @@ public class EventClient {
 
         final Event event = new Event("com/openexchange/groupware/folder/delete", ht);
         triggerEvent(event);
+        triggerEvent(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(folder)));
 
         final EventObject eventObject = new EventObject(folder, DELETED, session);
         EventQueue.add(eventObject);
@@ -679,6 +683,15 @@ public class EventClient {
             throw new OXException().setLogMessage("event service not available");
         }
         eventAdmin.postEvent(event);
+    }
+
+    private Dictionary<String, Object> getEventProperties(FolderObject folder) {
+        Dictionary<String, Object> properties = new Hashtable<String, Object>(5);
+        properties.put(FileStorageEventConstants.SESSION, session);
+        properties.put(FileStorageEventConstants.FOLDER_ID, String.valueOf(folder.getObjectID()));
+        properties.put(FileStorageEventConstants.ACCOUNT_ID, "infostore");
+        properties.put(FileStorageEventConstants.SERVICE, "com.openexchange.infostore");
+        return properties;
     }
 
     private FolderObject getFolder(final int folderId, final Context ctx) throws OXException {
