@@ -66,7 +66,6 @@ import com.openexchange.realtime.client.RTConnection;
  */
 public class RTRoomPingTimerTask extends TimerTask {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RTRoomPingTimerTask.class);
     /**
      * The logger
      */
