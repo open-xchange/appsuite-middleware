@@ -857,14 +857,16 @@ public final class DatabaseFolderStorage implements FolderStorage {
                          * A virtual database folder
                          */
                         final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
-                        retval = VirtualListFolder.getVirtualListFolder(folderId, altNames);
+                        final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
+                        retval = VirtualListFolder.getVirtualListFolder(folderId, altNames, translate);
                     } else {
                         /*
                          * A non-virtual database folder
                          */
                         final FolderObject fo = getFolderObject(folderId, ctx, con);
                         final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
-                        retval = DatabaseFolderConverter.convert(fo, user, userConfiguration, ctx, storageParameters.getSession(), altNames, con);
+                        final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
+                        retval = DatabaseFolderConverter.convert(fo, user, userConfiguration, ctx, storageParameters.getSession(), altNames, translate, con);
                     }
                 }
             } else {
@@ -936,6 +938,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 }
             }
             final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
+            final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
             /*
              * Either from working or from backup storage type
              */
@@ -958,7 +961,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
                             ret[index] = SystemRootFolder.getSystemRootFolder();
                         } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
-                            ret[index] = VirtualListFolder.getVirtualListFolder(folderId, altNames);
+                            ret[index] = VirtualListFolder.getVirtualListFolder(folderId, altNames, translate);
                         } else {
                             map.put(folderId, index);
                         }
@@ -974,7 +977,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     for (final FolderObject folderObject : getFolderObjects(map.keys(), ctx, con)) {
                         if (null != folderObject) {
                             final int index = map.get(folderObject.getObjectID());
-                            ret[index] = DatabaseFolderConverter.convert(folderObject, user, userConfiguration, ctx, session, altNames, con);
+                            ret[index] = DatabaseFolderConverter.convert(folderObject, user, userConfiguration, ctx, session, altNames, translate, con);
                         }
                     }
                 }
@@ -1069,6 +1072,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
                 }
             }
+            final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
 
             final int iType = getTypeByFolderTypeWithShared(type);
             final int iModule = getModuleByContentType(contentType);
@@ -1097,7 +1101,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                      */
                     final FolderObject gab = getFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx, con);
                     if (gab.isVisible(userId, userConfiguration)) {
-                        gab.setFolderName(StringHelper.valueOf(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
+                        gab.setFolderName(translate ? StringHelper.valueOf(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME) : FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
                         list.add(gab);
                     }
                 } catch (final RuntimeException e) {
@@ -1116,20 +1120,32 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     if (folderObject.isDefaultFolder()) {
                         final int module = folderObject.getModule();
                         if (FolderObject.CALENDAR == module) {
-                            if (null == stringHelper) {
-                                stringHelper = StringHelper.valueOf(user.getLocale());
+                            if (translate) {
+                                if (null == stringHelper) {
+                                    stringHelper = StringHelper.valueOf(user.getLocale());
+                                }
+                                folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
+                            } else {
+                                folderObject.setFolderName(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME);
                             }
-                            folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
                         } else if (FolderObject.CONTACT == module) {
-                            if (null == stringHelper) {
-                                stringHelper = StringHelper.valueOf(user.getLocale());
+                            if (translate) {
+                                if (null == stringHelper) {
+                                    stringHelper = StringHelper.valueOf(user.getLocale());
+                                }
+                                folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
+                            } else {
+                                folderObject.setFolderName(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME);
                             }
-                            folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
                         } else if (FolderObject.TASK == module) {
-                            if (null == stringHelper) {
-                                stringHelper = StringHelper.valueOf(user.getLocale());
+                            if (translate) {
+                                if (null == stringHelper) {
+                                    stringHelper = StringHelper.valueOf(user.getLocale());
+                                }
+                                folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
+                            } else {
+                                folderObject.setFolderName(FolderStrings.DEFAULT_TASK_FOLDER_NAME);
                             }
-                            folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
                         }
                     }
                 }
@@ -1191,7 +1207,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final int parentId = Integer.parseInt(parentIdentifier);
 
             if (FolderObject.SYSTEM_ROOT_FOLDER_ID == parentId) {
-                final List<String[]> subfolderIds = SystemRootFolder.getSystemRootFolderSubfolder(storageParameters.getUser().getLocale());
+                final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
+                final List<String[]> subfolderIds = SystemRootFolder.getSystemRootFolderSubfolder(storageParameters.getUser().getLocale(), translate);
                 final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.size());
                 int i = 0;
                 for (final String[] sa : subfolderIds) {
@@ -1241,7 +1258,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
                     }
                 }
-                final List<String[]> subfolderIds = SystemPrivateFolder.getSystemPrivateFolderSubfolders(user, userConfiguration, ctx, con);
+                final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
+                final List<String[]> subfolderIds = SystemPrivateFolder.getSystemPrivateFolderSubfolders(user, userConfiguration, translate, ctx, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int i = 0; i < size; i++) {
@@ -1291,7 +1309,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
                     }
                 }
-                final List<String[]> subfolderIds = SystemPublicFolder.getSystemPublicFolderSubfolders(user, userConfiguration, ctx, con);
+                final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
+                final List<String[]> subfolderIds = SystemPublicFolder.getSystemPublicFolderSubfolders(user, userConfiguration, translate, ctx, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int i = 0; i < size; i++) {
@@ -1317,8 +1336,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     }
                 }
                 final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
-                final List<String[]> subfolderIds =
-                    SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userConfiguration, ctx, altNames, con);
+                final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
+                final List<String[]> subfolderIds = SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userConfiguration, ctx, altNames, translate, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int i = 0; i < size; i++) {

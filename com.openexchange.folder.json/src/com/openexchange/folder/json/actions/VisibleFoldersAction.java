@@ -144,7 +144,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
                 all,
                 session,
                 new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(
-                    "mailRootFolders", mailRootFolders).put(sAltNames, altNames));
+                    "mailRootFolders", mailRootFolders).put(sAltNames, altNames).put("ignoreTranslation", request.getParameter("ignoreTranslation")));
         /*
          * Get all shared folders
          */

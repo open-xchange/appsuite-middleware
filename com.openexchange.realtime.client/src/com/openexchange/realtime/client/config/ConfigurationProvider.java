@@ -61,10 +61,14 @@ import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
 
 /**
  * Provides configurations required to be able to send requests with help of the realtime client framework. Use
- * com.openexchange.realtime.client.config.ConfigurationProvider.getInstance().toString() to get the currently used configuration. If a file
- * with the name 'config.properties' is provided in the 'conf' folder, the configuration made there will be used for further processing. A
- * template of the configuration file can be found within the 'tmp' folder. If no file is provided, the default will be used.
- * Programmatically, each configuration entry can be changed with the provided setter.
+ * com.openexchange.realtime.client.config.ConfigurationProvider.getInstance().toString() to get the currently used configuration.<br>
+ * <br>
+ * If a file with the name 'config.properties' is provided in the 'conf' folder, the configuration made there will be used for further
+ * processing. A template of the configuration file can be found within the 'tmp' folder. <br>
+ * <br>
+ * Second possibility to configure the parameters (besides providing a config-file) is to use {@link ConfigurationProvider.Builder}. Use
+ * this class to override the default configuration by setting each parameter by your preferred value. If you do not set a parameter, the
+ * default will be used.
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
@@ -273,30 +277,12 @@ public class ConfigurationProvider {
     }
 
     /**
-     * Sets the clientId
-     * 
-     * @param clientId The clientId to set
-     */
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
-    /**
      * Gets the defaultSelector
      * 
      * @return The defaultSelector
      */
     public String getDefaultSelector() {
         return defaultSelector;
-    }
-
-    /**
-     * Sets the defaultSelector
-     * 
-     * @param defaultSelector The defaultSelector to set
-     */
-    public void setDefaultSelector(String defaultSelector) {
-        this.defaultSelector = defaultSelector;
     }
 
     /**
@@ -309,30 +295,12 @@ public class ConfigurationProvider {
     }
 
     /**
-     * Sets the apiPath
-     * 
-     * @param apiPath The apiPath to set
-     */
-    public void setApiPath(String apiPath) {
-        this.apiPath = apiPath;
-    }
-
-    /**
      * Gets the loginPath
      * 
      * @return The loginPath
      */
     public String getLoginPath() {
         return loginPath;
-    }
-
-    /**
-     * Sets the loginPath
-     * 
-     * @param loginPath The loginPath to set
-     */
-    public void setLoginPath(String loginPath) {
-        this.loginPath = loginPath;
     }
 
     /**
@@ -345,30 +313,12 @@ public class ConfigurationProvider {
     }
 
     /**
-     * Sets the createPath
-     * 
-     * @param createPath The createPath to set
-     */
-    public void setCreatePath(String createPath) {
-        this.createPath = createPath;
-    }
-
-    /**
      * Gets the queryPath
      * 
      * @return The queryPath
      */
     public String getQueryPath() {
         return queryPath;
-    }
-
-    /**
-     * Sets the queryPath
-     * 
-     * @param queryPath The queryPath to set
-     */
-    public void setQueryPath(String queryPath) {
-        this.queryPath = queryPath;
     }
 
     /**
@@ -381,30 +331,12 @@ public class ConfigurationProvider {
     }
 
     /**
-     * Sets the sendPath
-     * 
-     * @param sendPath The sendPath to set
-     */
-    public void setSendPath(String sendPath) {
-        this.sendPath = sendPath;
-    }
-
-    /**
      * Gets the loginAction
      * 
      * @return The loginAction
      */
     public String getLoginAction() {
         return loginAction;
-    }
-
-    /**
-     * Sets the loginAction
-     * 
-     * @param loginAction The loginAction to set
-     */
-    public void setLoginAction(String loginAction) {
-        this.loginAction = loginAction;
     }
 
     /**
@@ -417,30 +349,12 @@ public class ConfigurationProvider {
     }
 
     /**
-     * Sets the queryAction
-     * 
-     * @param queryAction The queryAction to set
-     */
-    public void setQueryAction(String queryAction) {
-        this.queryAction = queryAction;
-    }
-
-    /**
      * Gets the sendAction
      * 
      * @return The sendAction
      */
     public String getSendAction() {
         return sendAction;
-    }
-
-    /**
-     * Sets the sendAction
-     * 
-     * @param sendAction The sendAction to set
-     */
-    public void setSendAction(String sendAction) {
-        this.sendAction = sendAction;
     }
 
     /**
@@ -453,30 +367,12 @@ public class ConfigurationProvider {
     }
 
     /**
-     * Sets the connectionType
-     * 
-     * @param connectionType The connectionType to set
-     */
-    public void setConnectionType(RTConnectionType connectionType) {
-        this.connectionType = connectionType;
-    }
-
-    /**
      * Gets the host
      * 
      * @return The host
      */
     public String getHost() {
         return host;
-    }
-
-    /**
-     * Sets the host
-     * 
-     * @param host The host to set
-     */
-    public void setHost(String host) {
-        this.host = host;
     }
 
     /**
@@ -489,15 +385,6 @@ public class ConfigurationProvider {
     }
 
     /**
-     * Sets the port
-     * 
-     * @param port The port to set
-     */
-    public void setPort(int port) {
-        this.port.set(port);
-    }
-
-    /**
      * Gets the secure
      * 
      * @return The secure
@@ -507,20 +394,180 @@ public class ConfigurationProvider {
     }
 
     /**
-     * Sets the secure
-     * 
-     * @param secure The secure to set
-     */
-    public void setSecure(boolean secure) {
-        this.secure.set(secure);
-    }
-
-    /**
      * Gets the initializedWithPropertiesFile
      * 
      * @return The initializedWithPropertiesFile
      */
     public boolean isInitializedWithPropertiesFile() {
         return this.initializedWithPropertiesFile;
+    }
+
+    /**
+     * Factory method for creating a new {@link ConfigurationProvider.Builder} to create a configured instance of
+     * {@link ConfigurationProvider}
+     * 
+     * @return a {@link ConfigurationProvider.Builder}
+     */
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    /**
+     * Static class that should be used to configure a new {@link ConfigurationProvider}. By calling the setter-methods the default values
+     * will be overridden which means, calling no setter will create a {@link ConfigurationProvider} with the default settings (also created
+     * by {@link ConfigurationProvider#getInstance()}.
+     * 
+     * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+     * @since 7.4
+     */
+    public static class Builder {
+
+        private final ConfigurationProvider configurationProvider;
+
+        private Builder() {
+            super();
+            configurationProvider = new ConfigurationProvider();
+        }
+
+        /**
+         * Sets the apiPath.
+         * 
+         * @param apiPath - Path for api calls.
+         */
+        public Builder setApiPath(String apiPath) {
+            configurationProvider.apiPath = apiPath;
+            return this;
+        }
+
+        /**
+         * Sets the clientId.
+         * 
+         * @param clientId - Id of the client.
+         */
+        public Builder setClientId(String clientId) {
+            configurationProvider.clientId = clientId;
+            return this;
+        }
+
+        /**
+         * Sets the connectionType.
+         * 
+         * @param connectionType - {@link RTConnectionType} the client would like to use.
+         */
+        public Builder setConnectionType(RTConnectionType connectionType) {
+            configurationProvider.connectionType = connectionType;
+            return this;
+        }
+
+        /**
+         * Sets the createPath.
+         * 
+         * @param createPath - the createPath.
+         */
+        public Builder setCreatePath(String createPath) {
+            configurationProvider.createPath = createPath;
+            return this;
+        }
+
+        /**
+         * Sets the defaultSelector.
+         * 
+         * @param defaultSelector - the defaultSelector.
+         */
+        public Builder setDefaultSelector(String defaultSelector) {
+            configurationProvider.defaultSelector = defaultSelector;
+            return this;
+        }
+
+        /**
+         * Sets the host.
+         * 
+         * @param host - the host.
+         */
+        public Builder setHost(String host) {
+            configurationProvider.host = host;
+            return this;
+        }
+
+        /**
+         * Sets the loginAction.
+         * 
+         * @param loginAction - the loginAction.
+         */
+        public Builder setLoginAction(String loginAction) {
+            configurationProvider.loginAction = loginAction;
+            return this;
+        }
+
+        /**
+         * Sets the loginPath.
+         * 
+         * @param loginPath - the loginPath.
+         */
+        public Builder setLoginPath(String loginPath) {
+            configurationProvider.loginPath = loginPath;
+            return this;
+        }
+
+        /**
+         * Sets the port.
+         * 
+         * @param port - the port.
+         */
+        public Builder setPort(int port) {
+            configurationProvider.port = new AtomicInteger(port);
+            return this;
+        }
+
+        /**
+         * Sets the queryAction.
+         * 
+         * @param queryAction - the queryAction.
+         */
+        public Builder setQueryAction(String queryAction) {
+            configurationProvider.queryAction = queryAction;
+            return this;
+        }
+
+        /**
+         * Sets the queryPath.
+         * 
+         * @param queryPath - the queryPath.
+         */
+        public Builder setQueryPath(String queryPath) {
+            configurationProvider.queryPath = queryPath;
+            return this;
+        }
+
+        /**
+         * Sets the sendAction.
+         * 
+         * @param sendAction - the sendAction.
+         */
+        public Builder setSendAction(String sendAction) {
+            configurationProvider.sendAction = sendAction;
+            return this;
+        }
+
+        /**
+         * Sets the sendPath.
+         * 
+         * @param sendPath - the sendPath.
+         */
+        public Builder setSendPath(String sendPath) {
+            configurationProvider.sendPath = sendPath;
+            return this;
+        }
+
+        /**
+         * @return A valid {@link ConfigurationProvider} instance.
+         */
+        public ConfigurationProvider build() {
+            if (configurationProvider.port.get() != -1 && !(configurationProvider.port.get() > 0 && configurationProvider.port.get() <= 65535)) {
+                throw new IllegalStateException("Port must be between 1 and 65535!");
+            }
+            SINGLETON = configurationProvider;
+            return configurationProvider;
+        }
     }
 }

@@ -68,6 +68,11 @@ public class RTRoomPingTimerTask extends TimerTask {
 
     private static final Logger LOG = LoggerFactory.getLogger(RTRoomPingTimerTask.class);
     /**
+     * The logger
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(RTRoomPingTimerTask.class);
+
+    /**
      * Lock for the ping
      */
     final Object lock = new Object();
