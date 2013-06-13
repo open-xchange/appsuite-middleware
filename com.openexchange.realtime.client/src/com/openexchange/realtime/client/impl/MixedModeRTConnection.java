@@ -84,7 +84,7 @@ import com.openexchange.realtime.client.user.RTUser;
  *   <ol>
  *     <li> Query actions
  *       <ol>
- *         <li> Join a room
+ *         <li> Join a room via PUT
  *           <pre>
  *           {
  *              "payloads": [
@@ -99,7 +99,7 @@ import com.openexchange.realtime.client.user.RTUser;
  *             "to": "synthetic.china://room1"
  *           }
  *           </pre>
- *         <li> Leave a room
+ *         <li> Leave a room via PUT
  *         <pre>
  *         {
  *           "payloads": [
@@ -127,6 +127,19 @@ import com.openexchange.realtime.client.user.RTUser;
  *           </pre>
  *         <li> Send a ping into a room to verify that you didn't leve the room without a proper leave message
  *           <pre>
+ *           [
+ *             {
+ *               "payloads": [
+ *                 {
+ *                   "data": 1,
+ *                   "namespace": "group",
+ *                   "element": "ping"
+ *                 }
+ *               ],
+ *               "to": "synthetic.china://room1",
+ *               "element": "message"
+ *             }
+ *           ]
  *           </pre>
  *         <li> Generally send messages to the server, e.g. say something into a room
  *         <pre>
@@ -151,8 +164,14 @@ import com.openexchange.realtime.client.user.RTUser;
  *   </ol>
  * <li> Asynchronous call(back)s to the atmosphere/rt interface
  *   <ol>
- *     <li> Send pings to keep the long polling connection alive
- *     <li> Receive message from the server e.g. from Chatrooms that you are a member of
+ *     <li> Send pings via POST to keep the long polling connection alive
+ *       <pre>
+ *       {
+ *         "commit": true,
+ *         "type": "ping"
+ *       }
+ *       </pre>
+ *     <li> Receive message from the server e.g. from Chatrooms that you are a member of via a long running GET
  *   <ol>
  * </ol>
  * 
@@ -191,12 +210,25 @@ public class MixedModeRTConnection extends AbstractRTConnection {
      * {"data":{"acknowledgements":[]}}
      */
     @Override
-    public void post(JSONValue message) throws RTException {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public void post(JSONValue value) throws RTException {
+        doPost(value);
     }
 
     @Override
-    public void postReliable(JSONValue message) throws RTException {
+    public void postReliable(JSONValue jsonValue) throws RTException {
+        JSONValue sequencedPayload = null;
+        if(jsonValue.isArray()) {
+            sequencedPayload = protocol.addSequence(jsonValue.toArray());
+        } else if (jsonValue.isObject()){
+            sequencedPayload = protocol.addSequence(jsonValue.toObject());
+        } else {
+            throw new RTException("jsonValue must be either JSONArray or JSONObject");
+        }
+        doPost(sequencedPayload);
+        protocol.resetPingTimeout();
+    }
+    
+    private void doPost(JSONValue message) throws RTException {
         if(isQueryAction(message)) {
             fireQueryRequest(message);
         } else if(isSendAction(message)) {
@@ -204,7 +236,6 @@ public class MixedModeRTConnection extends AbstractRTConnection {
         } else {
             throw new RTException("Couldn't determine the type of message to send");
         }
-        protocol.resetPingTimeout();
     }
     
     @Override
@@ -217,11 +248,7 @@ public class MixedModeRTConnection extends AbstractRTConnection {
         fireAtmosphereRequest(ping);
     }
     
-    /*
-     *query
-     *  join room: {"element":"message","selector":"rt-group-0","payloads":[{"element":"command","namespace":"group","data":"join"}],"to":"synthetic.office://operations/33341.27381","seq":0}
-     *  leave room: {"element":"message","payloads":[{"element":"command","namespace":"group","data":"leave"}],"to":"synthetic.office://operations/33341.27381","seq":2}
-     */
+
     private boolean isQueryAction(JSONValue json) {
         // query actions consist of a single json object
         if(json.isObject()) {
@@ -242,70 +269,68 @@ public class MixedModeRTConnection extends AbstractRTConnection {
         return false;
     }
     
-    /*
-     *       acks: {"type":"ack","seq":["0"]}
-     *       ping groupdispatcher: [{"element":"message","to":"synthetic.office://operations/33341.27381","payloads":[{"element":"ping","namespace":"group","data":1}]}]
-     *       messages: [{"element":"message","payloads":[{"element":"action","data":"applyactions"},{"namespace":"office","element":"actions","data":[{"operations":[{...}]]]
-     */
+
     private boolean isSendAction(JSONValue json) {
-        return true;
-//        if (json.isObject()) {
-//            // ack?
-//            JSONObject object = json.toObject();
-//            String type = object.optString("type");
-//            if (type != null && type.equalsIgnoreCase("ack")) {
-//                return true;
-//            }
-//            return false;
-//        } else {
-//            if (json.isArray()) {
-//                JSONArray jsonArray = json.toArray();
-//                if (jsonArray.length() == 1) {
-//                    // group ping?
-//                    Object stanzaObject = jsonArray.opt(0);
-//                    if (!(stanzaObject instanceof JSONObject)) {
-//                        return false;
-//                    }
-//                    JSONObject stanza = (JSONObject) stanzaObject;
-//                    if (!"message".equalsIgnoreCase(stanza.optString("element"))) {
-//                        return false;
-//                    }
-//                    Object payloadsObject = stanza.opt("payloads");
-//                    if (!(payloadsObject instanceof JSONArray)) {
-//                        return false;
-//                    }
-//                    JSONArray payloadsArray = (JSONArray) payloadsObject;
-//                    if (payloadsArray.length() != 1) {
-//                        return false;
-//                    }
-//                    Object payloadObject = payloadsArray.opt(0);
-//                    if (!(payloadObject instanceof JSONObject)) {
-//                        return false;
-//                    }
-//                    JSONObject payload = (JSONObject) payloadObject;
-//                    String element = payload.optString("element");
-//                    String namespace = payload.optString("namespace");
-//                    if ("ping".equalsIgnoreCase(element) && "group".equalsIgnoreCase(namespace)) {
-//                        return true;
-//                    }
-//                    return false;
-//                } else if (jsonArray.length() > 1) {
-//                    // message?
-//                    Object stanzaObject = jsonArray.opt(0);
-//                    if (!(stanzaObject instanceof JSONObject)) {
-//                        return false;
-//                    }
-//                    JSONObject stanza = (JSONObject) stanzaObject;
-//                    if ("message".equalsIgnoreCase(stanza.optString("element"))) {
-//                        return true;
-//                    }
-//                    return false;
-//                }
-//                return false;
-//            } else {
-//                return false;
-//            }
-//        }
+        if (json.isObject()) {
+            // ack or single message
+            JSONObject object = json.toObject();
+            String type = object.optString("type");
+            String element = object.optString("element");
+            if ("ack".equalsIgnoreCase(type)) {
+                return true;
+            } else if ("message".equalsIgnoreCase(element)) {
+                return true;
+            }
+            return false;
+        } else {
+            if (json.isArray()) {
+                JSONArray jsonArray = json.toArray();
+                if (jsonArray.length() == 1) {
+                    // group ping?
+                    Object stanzaObject = jsonArray.opt(0);
+                    if (!(stanzaObject instanceof JSONObject)) {
+                        return false;
+                    }
+                    JSONObject stanza = (JSONObject) stanzaObject;
+                    if (!"message".equalsIgnoreCase(stanza.optString("element"))) {
+                        return false;
+                    }
+                    Object payloadsObject = stanza.opt("payloads");
+                    if (!(payloadsObject instanceof JSONArray)) {
+                        return false;
+                    }
+                    JSONArray payloadsArray = (JSONArray) payloadsObject;
+                    if (payloadsArray.length() != 1) {
+                        return false;
+                    }
+                    Object payloadObject = payloadsArray.opt(0);
+                    if (!(payloadObject instanceof JSONObject)) {
+                        return false;
+                    }
+                    JSONObject payload = (JSONObject) payloadObject;
+                    String element = payload.optString("element");
+                    String namespace = payload.optString("namespace");
+                    if ("ping".equalsIgnoreCase(element) && "group".equalsIgnoreCase(namespace)) {
+                        return true;
+                    }
+                    return false;
+                } else if (jsonArray.length() > 1) {
+                    // message?
+                    Object stanzaObject = jsonArray.opt(0);
+                    if (!(stanzaObject instanceof JSONObject)) {
+                        return false;
+                    }
+                    JSONObject stanza = (JSONObject) stanzaObject;
+                    if ("message".equalsIgnoreCase(stanza.optString("element"))) {
+                        return true;
+                    }
+                    return false;
+                }
+                return false;
+            } else {
+                return false;
+            }
+        }
     }
     
     /*
@@ -333,17 +358,8 @@ public class MixedModeRTConnection extends AbstractRTConnection {
     }
 
     private void fireSendRequest(JSONValue jsonValue) throws RTException {
-        //TODO: what of acks, pings, messages has to be sequenced 
-        JSONValue sequencedPayload = null;
-        if(jsonValue.isArray()) {
-            sequencedPayload = protocol.addSequence(jsonValue.toArray());
-        } else if (jsonValue.isObject()){
-            sequencedPayload = protocol.addSequence(jsonValue.toObject());
-        } else {
-            throw new RTException("jsonValue must be either JSONArray or JSONObject");
-        }
         RequestBuilder builder = RTRequestBuilderHelper.newSendRequest(connectionProperties, userState);
-        builder.setBody(sequencedPayload.toString());
+        builder.setBody(jsonValue.toString());
         Request request = builder.build();
         fireSynchronousRequest(request);
     }
