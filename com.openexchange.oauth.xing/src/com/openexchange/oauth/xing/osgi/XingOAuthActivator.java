@@ -75,7 +75,7 @@ public final class XingOAuthActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final ConfigurationService service = getService(ConfigurationService.class);
-        if (service.getBoolProperty("com.openexchange.oauth.xing", false)) {
+        if (!service.getBoolProperty("com.openexchange.oauth.xing", false)) {
             // Do nothing
             final Log log = com.openexchange.log.Log.loggerFor(XingOAuthActivator.class);
             final String ls = System.getProperty("line.separator");
