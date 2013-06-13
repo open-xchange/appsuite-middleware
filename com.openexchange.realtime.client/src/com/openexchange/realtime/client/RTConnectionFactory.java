@@ -49,7 +49,7 @@
 
 package com.openexchange.realtime.client;
 
-import com.openexchange.realtime.client.impl.WasyncRTConnection;
+import com.openexchange.realtime.client.impl.MixedModeRTConnection;
 import com.openexchange.realtime.client.user.RTUser;
 
 /**
@@ -70,7 +70,7 @@ public class RTConnectionFactory {
      * @throws RTException
      */
     public static RTConnection newConnection(RTConnectionProperties properties) throws RTException {
-        return new WasyncRTConnection(properties);
+        return new MixedModeRTConnection(properties);
     }
 
 }

@@ -53,6 +53,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
 import com.openexchange.realtime.client.room.impl.ChineseRoom;
 import com.openexchange.realtime.client.room.impl.RTRoomImpl;
@@ -60,11 +62,11 @@ import com.openexchange.realtime.client.user.RTUser;
 
 
 /**
- * {@link WasyncConnectionTest}
+ * {@link MixedModeConnectionTest}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class WasyncConnectionTest {
+public class MixedModeConnectionTest {
     
     @Test
     public void testWasyncConnection() throws RTException {
@@ -78,7 +80,7 @@ public class WasyncConnectionTest {
     
     @Test
     public void testRoom() throws Exception {
-        RTUser user = new RTUser("marc.arens@premium", "secret", "desktop");
+        RTUser user = new RTUser("marc.arens@premium", "secret", "desktop1");
         RTConnectionProperties connectionProperties = RTConnectionProperties.newBuilder(user)
             .setHost("localhost")
             .setConnectionType(RTConnectionType.LONG_POLLING)
@@ -93,7 +95,7 @@ public class WasyncConnectionTest {
             }
         });
         chineseRoom.say("Hello World");
-        Thread.sleep(20000);
+        Thread.sleep(120000);
         chineseRoom.say("This is Marc speaking");
         chineseRoom.leave();
     }

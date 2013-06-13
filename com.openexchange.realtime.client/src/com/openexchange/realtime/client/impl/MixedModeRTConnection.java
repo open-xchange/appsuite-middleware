@@ -74,13 +74,93 @@ import com.openexchange.realtime.client.RTUserStateChangeListener;
 import com.openexchange.realtime.client.user.RTUser;
 
 /**
- * {@link WasyncRTConnection}
+ * {@link MixedModeRTConnection} This Connection class is needed to communicate with the realtime interfaces of our backend after the
+ * refactoring in 05.13.
+ * 
+ * It's a mixed mode connection because we use two different types of communication here.
+ * 
+ * <ol>
+ * <li> Synchronous calls to the api/rt interface
+ *   <ol>
+ *     <li> Query actions
+ *       <ol>
+ *         <li> Join a room
+ *           <pre>
+ *           {
+ *              "payloads": [
+ *               {
+ *                 "namespace": "group",
+ *                 "data": "join",
+ *                 "element": "command"
+ *               }
+ *             ],
+ *             "element": "message",
+ *             "selector": "chineseRoomSelector",
+ *             "to": "synthetic.china://room1"
+ *           }
+ *           </pre>
+ *         <li> Leave a room
+ *         <pre>
+ *         {
+ *           "payloads": [
+ *             {
+ *               "namespace": "group",
+ *               "data": "leave",
+ *               "element": "command"
+ *             }
+ *           ],
+ *           "element": "message",
+ *           "to": "synthetic.china://room1"
+ *         }
+ *         </pre>
+ *       </ol>
+ *     <li> Send actions
+ *       <ol>
+ *         <li> Send an acknowledgement
+ *           <pre>
+ *           {
+ *             "seq": [
+ *               "0"
+ *             ],
+ *             "type": "ack"
+ *           }
+ *           </pre>
+ *         <li> Send a ping into a room to verify that you didn't leve the room without a proper leave message
+ *           <pre>
+ *           </pre>
+ *         <li> Generally send messages to the server, e.g. say something into a room
+ *         <pre>
+ *         {
+ *           "payloads": [
+ *             {
+ *               "data": "say",
+ *               "element": "action"
+ *             },
+ *             {
+ *               "namespace": "china",
+ *               "data": "Hello World",
+ *               "element": "message"
+ *             }
+ *           ],
+ *           "seq": 0,
+ *           "element": "message",
+ *           "to": "synthetic.china://room1"
+ *         }
+ *         </pre>
+ *       </ol>
+ *   </ol>
+ * <li> Asynchronous call(back)s to the atmosphere/rt interface
+ *   <ol>
+ *     <li> Send pings to keep the long polling connection alive
+ *     <li> Receive message from the server e.g. from Chatrooms that you are a member of
+ *   <ol>
+ * </ol>
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class WasyncRTConnection extends AbstractRTConnection {
+public class MixedModeRTConnection extends AbstractRTConnection {
 
-    private static final Logger LOG = LoggerFactory.getLogger(WasyncRTConnection.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MixedModeRTConnection.class);
     
     //Data received by these clients has to be handled by super.onReceive(). Post reliable may not return before 
     private AsyncHttpClient asyncHttpClient;
@@ -88,7 +168,7 @@ public class WasyncRTConnection extends AbstractRTConnection {
     
     SequenceGenerator sequenceGenerator = new SequenceGenerator();
     
-    public WasyncRTConnection(RTConnectionProperties connectionProperties) {
+    public MixedModeRTConnection(RTConnectionProperties connectionProperties) {
         super(connectionProperties);
         asyncHttpClient = new AsyncHttpClient();
         atmosphereClient = new AtmosphereClient();
@@ -102,6 +182,14 @@ public class WasyncRTConnection extends AbstractRTConnection {
         return rtUserState;
     }
 
+    /* atmosphere ping pong
+     * {"type": "ping", "commit": true }
+     * [{"selector":"default","element":"message","payloads":[{"element":"pong","data":"1","namespace":"atmosphere"}],"from":"ox://marc.arens@premium/68ef1855-242c-cbc4-b7aa-0b2c9738b6bb"}]
+     * 
+     * group ping
+     * [{"element":"message","to":"synthetic.china://room1","payloads":[{"element":"ping","namespace":"group","data":1}]}]
+     * {"data":{"acknowledgements":[]}}
+     */
     @Override
     public void post(JSONValue message) throws RTException {
         throw new UnsupportedOperationException("Not implemented yet");
@@ -160,63 +248,64 @@ public class WasyncRTConnection extends AbstractRTConnection {
      *       messages: [{"element":"message","payloads":[{"element":"action","data":"applyactions"},{"namespace":"office","element":"actions","data":[{"operations":[{...}]]]
      */
     private boolean isSendAction(JSONValue json) {
-        if (json.isObject()) {
-            // ack?
-            JSONObject object = json.toObject();
-            String type = object.optString("type");
-            if (type != null && type.equalsIgnoreCase("ack")) {
-                return true;
-            }
-            return false;
-        } else {
-            if (json.isArray()) {
-                JSONArray jsonArray = json.toArray();
-                if (jsonArray.length() == 1) {
-                    // group ping?
-                    Object stanzaObject = jsonArray.opt(0);
-                    if (!(stanzaObject instanceof JSONObject)) {
-                        return false;
-                    }
-                    JSONObject stanza = (JSONObject) stanzaObject;
-                    if (!"message".equalsIgnoreCase(stanza.optString("element"))) {
-                        return false;
-                    }
-                    Object payloadsObject = stanza.opt("payloads");
-                    if (!(payloadsObject instanceof JSONArray)) {
-                        return false;
-                    }
-                    JSONArray payloadsArray = (JSONArray) payloadsObject;
-                    if (payloadsArray.length() != 1) {
-                        return false;
-                    }
-                    Object payloadObject = payloadsArray.opt(0);
-                    if (!(payloadObject instanceof JSONObject)) {
-                        return false;
-                    }
-                    JSONObject payload = (JSONObject) payloadObject;
-                    String element = payload.optString("element");
-                    String namespace = payload.optString("namespace");
-                    if ("ping".equalsIgnoreCase(element) && "group".equalsIgnoreCase(namespace)) {
-                        return true;
-                    }
-                    return false;
-                } else if (jsonArray.length() > 1) {
-                    // message?
-                    Object stanzaObject = jsonArray.opt(0);
-                    if (!(stanzaObject instanceof JSONObject)) {
-                        return false;
-                    }
-                    JSONObject stanza = (JSONObject) stanzaObject;
-                    if ("message".equalsIgnoreCase(stanza.optString("element"))) {
-                        return true;
-                    }
-                    return false;
-                }
-                return false;
-            } else {
-                return false;
-            }
-        }
+        return true;
+//        if (json.isObject()) {
+//            // ack?
+//            JSONObject object = json.toObject();
+//            String type = object.optString("type");
+//            if (type != null && type.equalsIgnoreCase("ack")) {
+//                return true;
+//            }
+//            return false;
+//        } else {
+//            if (json.isArray()) {
+//                JSONArray jsonArray = json.toArray();
+//                if (jsonArray.length() == 1) {
+//                    // group ping?
+//                    Object stanzaObject = jsonArray.opt(0);
+//                    if (!(stanzaObject instanceof JSONObject)) {
+//                        return false;
+//                    }
+//                    JSONObject stanza = (JSONObject) stanzaObject;
+//                    if (!"message".equalsIgnoreCase(stanza.optString("element"))) {
+//                        return false;
+//                    }
+//                    Object payloadsObject = stanza.opt("payloads");
+//                    if (!(payloadsObject instanceof JSONArray)) {
+//                        return false;
+//                    }
+//                    JSONArray payloadsArray = (JSONArray) payloadsObject;
+//                    if (payloadsArray.length() != 1) {
+//                        return false;
+//                    }
+//                    Object payloadObject = payloadsArray.opt(0);
+//                    if (!(payloadObject instanceof JSONObject)) {
+//                        return false;
+//                    }
+//                    JSONObject payload = (JSONObject) payloadObject;
+//                    String element = payload.optString("element");
+//                    String namespace = payload.optString("namespace");
+//                    if ("ping".equalsIgnoreCase(element) && "group".equalsIgnoreCase(namespace)) {
+//                        return true;
+//                    }
+//                    return false;
+//                } else if (jsonArray.length() > 1) {
+//                    // message?
+//                    Object stanzaObject = jsonArray.opt(0);
+//                    if (!(stanzaObject instanceof JSONObject)) {
+//                        return false;
+//                    }
+//                    JSONObject stanza = (JSONObject) stanzaObject;
+//                    if ("message".equalsIgnoreCase(stanza.optString("element"))) {
+//                        return true;
+//                    }
+//                    return false;
+//                }
+//                return false;
+//            } else {
+//                return false;
+//            }
+//        }
     }
     
     /*
@@ -267,7 +356,7 @@ public class WasyncRTConnection extends AbstractRTConnection {
                 throw new RTException("Expected a HTTP status code but got: " + response.getStatusCode());
             }
             JSONObject jsonResponse = new JSONObject(response.getResponseBody());
-            if(jsonResponse.optString("error") != null) {
+            if(jsonResponse.optString("error") != "") {
                 throw new RTException("Request caused server side error: " + jsonResponse.toString());
             }
             protocol.handleIncoming(jsonResponse);
