@@ -202,20 +202,6 @@ public class AdminDaemon {
      */
     static List<Bundle> bundlelist = new CopyOnWriteArrayList<Bundle>();
 
-    private static com.openexchange.admin.rmi.impl.OXUser oxuser_v2 = null;
-
-    private static com.openexchange.admin.rmi.impl.OXGroup oxgrp_v2 = null;
-
-    private static com.openexchange.admin.rmi.impl.OXResource oxres_v2 = null;
-
-    private static com.openexchange.admin.rmi.impl.OXLogin oxlogin_v2 = null;
-
-    private static OXAdminCoreImpl oxadmincore = null;
-
-    private static OXTaskMgmtImpl oxtaskmgmt = null;
-
-    private static OXPublication oxpublication = null;
-
     /**
      * Checks if a simple check shall be performed in order to determine if a bundle is needed for admin to work:
      * <p>
@@ -332,13 +318,13 @@ public class AdminDaemon {
 
     public void initRMI(final BundleContext context) {
         try {
-            oxuser_v2 = new com.openexchange.admin.rmi.impl.OXUser(context);
-            oxgrp_v2 = new com.openexchange.admin.rmi.impl.OXGroup(context);
-            oxres_v2 = new com.openexchange.admin.rmi.impl.OXResource(context);
-            oxlogin_v2 = new com.openexchange.admin.rmi.impl.OXLogin(context);
-            oxadmincore = new OXAdminCoreImpl(context);
-            oxtaskmgmt = new OXTaskMgmtImpl();
-            oxpublication = new OXPublication();
+            final com.openexchange.admin.rmi.impl.OXUser oxuser_v2 = new com.openexchange.admin.rmi.impl.OXUser(context);
+            final com.openexchange.admin.rmi.impl.OXGroup oxgrp_v2 = new com.openexchange.admin.rmi.impl.OXGroup(context);
+            final com.openexchange.admin.rmi.impl.OXResource oxres_v2 = new com.openexchange.admin.rmi.impl.OXResource(context);
+            final com.openexchange.admin.rmi.impl.OXLogin oxlogin_v2 = new com.openexchange.admin.rmi.impl.OXLogin(context);
+            final OXAdminCoreImpl oxadmincore = new OXAdminCoreImpl(context);
+            final OXTaskMgmtImpl oxtaskmgmt = new OXTaskMgmtImpl();
+            final OXPublication oxpublication = new OXPublication();
 
             services.add(context.registerService(Remote.class, oxuser_v2, null));
             services.add(context.registerService(Remote.class, oxgrp_v2, null));
