@@ -1,3 +1,7 @@
+* 2013-06-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27083: Throw appropriate error if an inline image cannot be found inside a message
+
 * 2013-06-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 26988: Removed JSON pooling
