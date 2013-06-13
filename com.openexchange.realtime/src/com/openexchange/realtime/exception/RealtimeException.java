@@ -218,10 +218,6 @@ public class RealtimeException extends OXException {
         return delegate.getCategory();
     }
 
-    public Throwable fillInStackTrace() {
-        return delegate.fillInStackTrace();
-    }
-
     public List<Category> getCategories() {
         return delegate.getCategories();
     }
