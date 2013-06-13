@@ -215,6 +215,12 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1459
+pfile=/opt/open-xchange/etc/mail.properties
+if ! ox_exists_property com.openexchange.mail.supportMsisdnAddresses $pfile; then
+    ox_set_property com.openexchange.mail.supportMsisdnAddresses false $pfile
+fi
+
 # SoftwareChange_Request-1455
 pfile=/opt/open-xchange/etc/sessiond.properties
 if ! ox_exists_property com.openexchange.sessiond.asyncPutToSessionStorage $pfile; then
