@@ -2,6 +2,7 @@
 
  - Fix for bug 27083: Throw appropriate error if an inline image cannot be found inside a message
  - Fix for bug 25503: Don't initialize extended capabilities if about to create associated config's user
+ - Fix for bug 26562: Fixed condition check
 
 * 2013-06-12 - thorben.betten@open-xchange.com
 
