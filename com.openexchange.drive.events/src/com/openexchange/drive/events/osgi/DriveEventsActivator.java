@@ -47,47 +47,61 @@
  *
  */
 
-package com.openexchange.drive.json.osgi;
+package com.openexchange.drive.events.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.apache.commons.logging.Log;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.drive.DriveService;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.drive.events.DriveEventService;
-import com.openexchange.drive.json.action.DriveActionFactory;
-import com.openexchange.drive.json.internal.Services;
+import com.openexchange.drive.events.internal.DriveEventServiceImpl;
+import com.openexchange.drive.events.internal.DriveEventServiceLookup;
+import com.openexchange.file.storage.FileStorageEventConstants;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link DriveJsonActivator}
+ * {@link DriveEventsActivator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DriveJsonActivator extends AJAXModuleActivator {
+public class DriveEventsActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveJsonActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveEventsActivator.class);
 
     /**
-     * Initializes a new {@link DriveJsonActivator}.
+     * Initializes a new {@link DriveEventsActivator}.
      */
-    public DriveJsonActivator() {
+    public DriveEventsActivator() {
         super();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveService.class, DriveEventService.class };
+        return new Class<?>[] { IDBasedFileAccessFactory.class, ManagedFileManagement.class, FileStorageServiceRegistry.class,
+            DatabaseService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
-        Services.set(this);
-        registerModule(new DriveActionFactory(), "drive");
+        DriveEventServiceLookup.set(this);
+        DriveEventServiceImpl service = new DriveEventServiceImpl();
+        registerService(DriveEventService.class, service);
+        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put(EventConstants.EVENT_TOPIC,
+            new String[] { FileStorageEventConstants.ALL_TOPICS, FileStorageEventConstants.ALL_FOLDER_TOPICS });
+        registerService(EventHandler.class, service, serviceProperties);
     }
 
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
-        Services.set(null);
+        DriveEventServiceLookup.set(null);
         super.stopBundle();
     }
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +47,59 @@
  *
  */
 
-package com.openexchange.drive.json.osgi;
+package com.openexchange.drive.events.internal;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.drive.DriveService;
-import com.openexchange.drive.events.DriveEventService;
-import com.openexchange.drive.json.action.DriveActionFactory;
-import com.openexchange.drive.json.internal.Services;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link DriveJsonActivator}
+ * {@link DriveEventServiceLookup}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DriveJsonActivator extends AJAXModuleActivator {
-
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveJsonActivator.class);
+public final class DriveEventServiceLookup {
 
     /**
-     * Initializes a new {@link DriveJsonActivator}.
+     * Initializes a new {@link DriveEventServiceLookup}.
      */
-    public DriveJsonActivator() {
+    private DriveEventServiceLookup() {
         super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveService.class, DriveEventService.class };
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
-        Services.set(this);
-        registerModule(new DriveActionFactory(), "drive");
+    /**
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
+     */
+    public static void set(ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
-        Services.set(null);
-        super.stopBundle();
+    public static <S extends Object> S getService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        return service;
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        S service = getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
+        }
+        return service;
     }
 
 }

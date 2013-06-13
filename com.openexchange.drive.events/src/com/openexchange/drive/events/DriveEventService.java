@@ -47,48 +47,18 @@
  *
  */
 
-package com.openexchange.drive.json.osgi;
-
-import org.apache.commons.logging.Log;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.drive.DriveService;
-import com.openexchange.drive.events.DriveEventService;
-import com.openexchange.drive.json.action.DriveActionFactory;
-import com.openexchange.drive.json.internal.Services;
+package com.openexchange.drive.events;
 
 /**
- * {@link DriveJsonActivator}
+ * {@link DriveEventService}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DriveJsonActivator extends AJAXModuleActivator {
+public interface DriveEventService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveJsonActivator.class);
+    void registerListener(DriveEventListener listener, String rootFolderID, int contextID);
 
-    /**
-     * Initializes a new {@link DriveJsonActivator}.
-     */
-    public DriveJsonActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveService.class, DriveEventService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
-        Services.set(this);
-        registerModule(new DriveActionFactory(), "drive");
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
-        Services.set(null);
-        super.stopBundle();
-    }
+    void unregisterListener(DriveEventListener listener, String rootFolderID, int contextID);
 
 }
+

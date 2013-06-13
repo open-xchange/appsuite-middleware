@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,40 +49,64 @@
 
 package com.openexchange.drive.json.action;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.DriveVersion;
+import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.json.internal.ListenerRegistrar;
+import com.openexchange.drive.json.internal.LongPollingListener;
+import com.openexchange.drive.json.json.JsonDriveAction;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link DriveActionFactory}
+ * {@link ListenAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DriveActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions;
-
-    public DriveActionFactory() {
-        super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(1);
-        actions.put("syncfolders", new SyncFoldersAction());
-        actions.put("syncfiles", new SyncFilesAction());
-        actions.put("upload", new UploadAction());
-        actions.put("download", new DownloadAction());
-        actions.put("listen", new ListenAction());
-    }
+public class ListenAction implements AJAXActionService {
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    public AJAXRequestResult perform(AJAXRequestData requestData, final ServerSession session) throws OXException {
+        /*
+         * get request data
+         */
+        final String rootFolderID = requestData.getParameter("root");
+        if (Strings.isEmpty(rootFolderID)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
+        }
+        /*
+         * get or create a polling listener for this session and await event
+         */
+        DriveEvent event = null;
+        try {
+            LongPollingListener listener = ListenerRegistrar.getInstance().getOrCreate(session, rootFolderID);
+            event = listener.await(10 * 1000);
+        } catch (ExecutionException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+        /*
+         * create and return resulting actions if available
+         */
+        List<DriveAction<? extends DriveVersion>> actions = null != event ? event.getActions() :
+            new ArrayList<DriveAction<? extends DriveVersion>>(0);
+        try {
+            return new AJAXRequestResult(JsonDriveAction.serialize(actions), "json");
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 
 }

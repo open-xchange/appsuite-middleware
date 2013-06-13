@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +47,20 @@
  *
  */
 
-package com.openexchange.drive.json.osgi;
+package com.openexchange.drive.events;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.drive.DriveService;
-import com.openexchange.drive.events.DriveEventService;
-import com.openexchange.drive.json.action.DriveActionFactory;
-import com.openexchange.drive.json.internal.Services;
+import java.util.List;
+import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.DriveVersion;
+
 
 /**
- * {@link DriveJsonActivator}
+ * {@link DriveEvent}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DriveJsonActivator extends AJAXModuleActivator {
+public interface DriveEvent {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveJsonActivator.class);
-
-    /**
-     * Initializes a new {@link DriveJsonActivator}.
-     */
-    public DriveJsonActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveService.class, DriveEventService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
-        Services.set(this);
-        registerModule(new DriveActionFactory(), "drive");
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
-        Services.set(null);
-        super.stopBundle();
-    }
+    List<DriveAction<? extends DriveVersion>> getActions();
 
 }

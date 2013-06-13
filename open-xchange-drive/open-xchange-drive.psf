@@ -3,5 +3,6 @@
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.drive"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.drive.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.drive.events"/>
 </provider>
 </psf>
