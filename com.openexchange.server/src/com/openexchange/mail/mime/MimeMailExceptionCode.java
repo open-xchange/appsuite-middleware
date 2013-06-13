@@ -308,7 +308,7 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      */
     PROCESSING_ERROR_WE_EXT(MimeMailExceptionMessage.PROCESSING_ERROR_WE_EXT_MSG, CATEGORY_ERROR, PROCESSING_ERROR_WE.detailNumber, LogLevel.ERROR),
     /**
-     * That mailbox is already in use by another process. Please try again.<br>
+     * That mailbox is already in use by another process. Please try again later.<br>
      * Error message: %1$s
      */
     IN_USE_ERROR(MimeMailExceptionMessage.IN_USE_ERROR_MSG, CATEGORY_USER_INPUT, PROCESSING_ERROR.detailNumber, LogLevel.ERROR),
