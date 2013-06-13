@@ -60,7 +60,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.events.WrappedFileStorageService;
+import com.openexchange.file.storage.internal.WrappedFileStorageService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 
 /**

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,59 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.file.storage.internal;
 
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link FileStorageEventConstants}
+ * {@link FileStorageServiceLookup}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class FileStorageEventConstants {
+public final class FileStorageServiceLookup {
 
-    public static final String UPDATE_TOPIC = "com/openexchange/groupware/infostore/update";
+    /**
+     * Initializes a new {@link DriveEventServiceLookup}.
+     */
+    private FileStorageServiceLookup() {
+        super();
+    }
 
-    public static final String CREATE_TOPIC = "com/openexchange/groupware/infostore/insert";
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
 
-    public static final String DELETE_TOPIC = "com/openexchange/groupware/infostore/delete";
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
+    }
 
-    public static final String ALL_TOPICS = "com/openexchange/groupware/infostore/*";
+    /**
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
+     */
+    public static void set(ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
+    }
 
-    public static final String UPDATE_FOLDER_TOPIC = "com/openexchange/groupware/fsfolder/update";
+    public static <S extends Object> S getService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        return service;
+    }
 
-    public static final String CREATE_FOLDER_TOPIC = "com/openexchange/groupware/fsfolder/insert";
-
-    public static final String DELETE_FOLDER_TOPIC = "com/openexchange/groupware/fsfolder/delete";
-
-    public static final String ALL_FOLDER_TOPICS = "com/openexchange/groupware/fsfolder/*";
-
-    public static final String SESSION = "session";
-
-    public static final String SERVICE = "service";
-
-    public static final String ACCOUNT_ID = "accountId";
-
-    public static final String FOLDER_ID = "folderId";
-
-    public static final String FOLDER_PATH = "folderPath";
-
-    public static final String OBJECT_ID = "objectId";
-
-    public static final String VERSIONS = "versions";
-
-    public static final String E_TAG = "eTag";
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        S service = getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
+        }
+        return service;
+    }
 
 }

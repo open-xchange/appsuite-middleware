@@ -47,13 +47,22 @@
  *
  */
 
-package com.openexchange.file.storage.events;
+package com.openexchange.file.storage.internal;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.apache.commons.logging.Log;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.session.Session;
 
 /**
  * {@link WrappedFileStorageFolderAccess}
@@ -62,11 +71,17 @@ import com.openexchange.file.storage.Quota.Type;
  */
 public class WrappedFileStorageFolderAccess implements FileStorageFolderAccess {
 
-    private final FileStorageFolderAccess delegate;
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(WrappedFileStorageFolderAccess.class);
 
-    public WrappedFileStorageFolderAccess(FileStorageFolderAccess delegate) {
+    private final FileStorageFolderAccess delegate;
+    private final FileStorageAccountAccess parent;
+    private final Session session;
+
+    public WrappedFileStorageFolderAccess(FileStorageFolderAccess delegate, FileStorageAccountAccess parent, Session session) {
         super();
         this.delegate = delegate;
+        this.parent = parent;
+        this.session = session;
     }
 
     @Override
@@ -102,43 +117,45 @@ public class WrappedFileStorageFolderAccess implements FileStorageFolderAccess {
     @Override
     public String createFolder(FileStorageFolder toCreate) throws OXException {
         String newId = delegate.createFolder(toCreate);
-        //
+        fire(new Event(FileStorageEventConstants.CREATE_FOLDER_TOPIC, getEventProperties(newId)));
         return newId;
     }
 
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
         String newId = delegate.updateFolder(identifier, toUpdate);
-        //
+        fire(new Event(FileStorageEventConstants.UPDATE_FOLDER_TOPIC, getEventProperties(newId)));
         return newId;
     }
 
     @Override
     public String moveFolder(String folderId, String newParentId) throws OXException {
         String newId = delegate.moveFolder(folderId, newParentId);
-        //
+        fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(folderId)));
+        fire(new Event(FileStorageEventConstants.CREATE_FOLDER_TOPIC, getEventProperties(newId)));
         return newId;
     }
 
     @Override
     public String renameFolder(String folderId, String newName) throws OXException {
         String newId = delegate.renameFolder(folderId, newName);
-        //
+        fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(folderId)));
+        fire(new Event(FileStorageEventConstants.CREATE_FOLDER_TOPIC, getEventProperties(newId)));
         return newId;
     }
 
     @Override
     public String deleteFolder(String folderId) throws OXException {
-        String id = delegate.deleteFolder(folderId);
-        //
-        return id;
+        String oldId = delegate.deleteFolder(folderId);
+        fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(oldId)));
+        return oldId;
     }
 
     @Override
     public String deleteFolder(String folderId, boolean hardDelete) throws OXException {
-        String id = delegate.deleteFolder(folderId, hardDelete);
-        //
-        return id;
+        String oldId = delegate.deleteFolder(folderId, hardDelete);
+        fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(oldId)));
+        return oldId;
     }
 
     @Override
@@ -169,6 +186,52 @@ public class WrappedFileStorageFolderAccess implements FileStorageFolderAccess {
     @Override
     public Quota[] getQuotas(String folder, Type[] types) throws OXException {
         return delegate.getQuotas(folder, types);
+    }
+
+    private Dictionary<String, Object> getEventProperties(String folderId) {
+        Dictionary<String, Object> properties = new Hashtable<String, Object>(5);
+        properties.put(FileStorageEventConstants.SESSION, session);
+        properties.put(FileStorageEventConstants.FOLDER_ID, folderId);
+        properties.put(FileStorageEventConstants.ACCOUNT_ID, parent.getAccountId());
+        properties.put(FileStorageEventConstants.SERVICE, parent.getService().getId());
+        try {
+            FileStorageFolder[] folders = delegate.getPath2DefaultFolder(folderId);
+            if (null != folders) {
+                String[] folderPath = new String[folders.length];
+                for (int i = 0; i < folders.length; i++) {
+                    folderPath[i] = folders[i].getId();
+                }
+                properties.put(FileStorageEventConstants.FOLDER_PATH, folderPath);
+            }
+        } catch (OXException e) {
+            LOG.warn("Error getting path to default folder for event", e);
+        }
+        return properties;
+    }
+
+    private static void fire(Event event) {
+        EventAdmin eventAdmin = FileStorageServiceLookup.getService(EventAdmin.class);
+        if (null != eventAdmin) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Publishing: " + dump(event));
+            }
+            eventAdmin.postEvent(event);
+        } else if (LOG.isWarnEnabled()) {
+            LOG.warn("Unable to access event admin, unable to publish event " + dump(event));
+        }
+    }
+
+    private static String dump(Event event) {
+        if (null != event) {
+            return new StringAllocator().append(event.getTopic())
+                .append(": folderId=").append(event.getProperty(FileStorageEventConstants.FOLDER_ID))
+                .append(", folderPath=").append(event.getProperty(FileStorageEventConstants.FOLDER_PATH))
+                .append(", service=").append(event.getProperty(FileStorageEventConstants.SERVICE))
+                .append(", accountId=").append(event.getProperty(FileStorageEventConstants.ACCOUNT_ID))
+                .append(", session=").append(event.getProperty(FileStorageEventConstants.SESSION))
+                .toString();
+        }
+        return null;
     }
 
 }

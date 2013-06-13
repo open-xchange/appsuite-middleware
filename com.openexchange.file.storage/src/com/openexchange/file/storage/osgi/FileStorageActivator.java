@@ -49,7 +49,9 @@
 
 package com.openexchange.file.storage.osgi;
 
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
+import com.openexchange.file.storage.internal.FileStorageServiceLookup;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -73,7 +75,7 @@ public final class FileStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class[] { EventAdmin.class };
     }
 
     @Override
@@ -83,6 +85,10 @@ public final class FileStorageActivator extends HousekeepingActivator {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.file.storage");
             }
+            /*
+             * Keep lookup reference
+             */
+            FileStorageServiceLookup.set(this);
             /*
              * Start registry tracking
              */
@@ -130,6 +136,10 @@ public final class FileStorageActivator extends HousekeepingActivator {
                 registry.stop();
                 this.registry = null;
             }
+            /*
+             * Clear lookup reference
+             */
+            FileStorageServiceLookup.set(null);
             cleanUp();
         } catch (final Exception e) {
             log.error("Stopping bundle \"com.openexchange.file.storage\" failed.", e);

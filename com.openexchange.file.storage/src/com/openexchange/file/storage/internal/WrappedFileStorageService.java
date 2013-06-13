@@ -47,77 +47,69 @@
  *
  */
 
-package com.openexchange.file.storage.events;
+package com.openexchange.file.storage.internal;
 
+import java.util.List;
+import java.util.Set;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.AccountAware;
+import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.session.Session;
 
 /**
- * {@link WrappedFileStorageAccountAccess}
+ * {@link WrappedFileStorageService}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class WrappedFileStorageAccountAccess implements FileStorageAccountAccess {
+public class WrappedFileStorageService implements FileStorageService, AccountAware {
 
-    private final FileStorageAccountAccess delegate;
+    private final FileStorageService delegate;
 
-    public WrappedFileStorageAccountAccess(FileStorageAccountAccess delegate) {
+    public WrappedFileStorageService(FileStorageService delegate) {
         super();
         this.delegate = delegate;
     }
 
     @Override
-    public void connect() throws OXException {
-        delegate.connect();
+    public List<FileStorageAccount> getAccounts(Session session) throws OXException {
+        if (AccountAware.class.isInstance(delegate)) {
+            return ((AccountAware)delegate).getAccounts(session);
+        }
+        return null;
     }
 
     @Override
-    public boolean isConnected() {
-        return delegate.isConnected();
+    public String getId() {
+        return delegate.getId();
     }
 
     @Override
-    public void close() {
-        delegate.close();
+    public String getDisplayName() {
+        return delegate.getDisplayName();
     }
 
     @Override
-    public boolean ping() throws OXException {
-        return delegate.ping();
+    public DynamicFormDescription getFormDescription() {
+        return delegate.getFormDescription();
     }
 
     @Override
-    public boolean cacheable() {
-        return delegate.cacheable();
+    public Set<String> getSecretProperties() {
+        return delegate.getSecretProperties();
     }
 
     @Override
-    public String getAccountId() {
-        return delegate.getAccountId();
+    public FileStorageAccountManager getAccountManager() throws OXException {
+        return delegate.getAccountManager();
     }
 
     @Override
-    public FileStorageFileAccess getFileAccess() throws OXException {
-        return delegate.getFileAccess();
-    }
-
-    @Override
-    public FileStorageFolderAccess getFolderAccess() throws OXException {
-        return new WrappedFileStorageFolderAccess(delegate.getFolderAccess());
-    }
-
-    @Override
-    public FileStorageFolder getRootFolder() throws OXException {
-        return delegate.getRootFolder();
-    }
-
-    @Override
-    public FileStorageService getService() {
-        return delegate.getService();
+    public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws OXException {
+        return new WrappedFileStorageAccountAccess(delegate.getAccountAccess(accountId, session), session);
     }
 
 }
