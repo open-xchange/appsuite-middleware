@@ -584,6 +584,10 @@ public final class HtmlServiceImpl implements HtmlService {
 //        HTMLParser.parse(htmlContent, handler);
 //        return handler.getText();
 
+        if (isEmpty(htmlContent)) {
+            return htmlContent;
+        }
+
         try {
             String prepared = prepareSignatureStart(htmlContent);
             prepared = prepareHrTag(prepared);

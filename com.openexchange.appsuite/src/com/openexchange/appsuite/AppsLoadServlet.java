@@ -152,7 +152,7 @@ public class AppsLoadServlet extends HttpServlet {
         resp.setDateHeader("Expires", System.currentTimeMillis() + (long) 3e10); // + almost a year
         final OutputStream out = resp.getOutputStream();
         for (int i = 1; i < length; i++) {
-            final String module = modules[i];
+            final String module = modules[i].replace(' ', '+');
 
             // Module names may only contain letters, digits, '_', '-', '/' and
             // '.', but not "..".
