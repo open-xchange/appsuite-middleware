@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.composition.internal;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.FileID;
@@ -233,6 +234,11 @@ public class IDManglingFile implements File {
     public boolean isCurrentVersion() {
         return file.isCurrentVersion();
     }
+    
+    @Override
+    public Map<String, Object> getDynamicProperties() {
+        return file.getDynamicProperties();
+    }
 
     @Override
     public void setCategories(final String categories) {
@@ -333,4 +339,10 @@ public class IDManglingFile implements File {
     public void setVersionComment(final String string) {
         file.setVersionComment(string);
     }
+    
+    @Override
+    public void setDynamicProperties(Map<String, Object> properties) {
+        file.setDynamicProperties(properties);
+    }
+
 }

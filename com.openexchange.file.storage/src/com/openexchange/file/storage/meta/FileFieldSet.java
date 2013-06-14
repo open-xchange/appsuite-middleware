@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.meta;
 
+import java.util.Map;
 import com.openexchange.file.storage.AbstractFileFieldSwitcher;
 
 /**
@@ -192,6 +193,12 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
     public Object versionComment(final Object... args) {
         md(args).setVersionComment(string(1, args));
         return ret(args);
+    }
+    
+    @Override
+    public Object dynamicProperties(Object... args) {
+        md(args).setDynamicProperties((Map<String, Object>) args[1]);
+        return null;
     }
 
     private Object ret(final Object[] args) {

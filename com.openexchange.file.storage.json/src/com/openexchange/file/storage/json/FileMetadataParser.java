@@ -54,6 +54,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AbstractFileFieldHandler;
 import com.openexchange.file.storage.DefaultFile;
@@ -61,6 +62,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.meta.FileFieldSet;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
+import com.openexchange.json.JSONCondition;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -152,6 +154,11 @@ public class FileMetadataParser implements FileMetadataParserService{
                 }
                 return categories((JSONArray) val);
             }
+            case DYNAMIC_PROPERTIES:
+                if (value == null || value == JSONObject.NULL) {
+                    return null;
+                }
+                return JSONCoercion.coerceToNative(value);
             default: return val;
             }
         }

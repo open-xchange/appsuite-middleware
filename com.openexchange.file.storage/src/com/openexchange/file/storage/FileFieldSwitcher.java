@@ -79,4 +79,5 @@ public interface FileFieldSwitcher {
     Object colorLabel(Object...args);
     Object lastModifiedUtc(Object...args);
     Object numberOfVersions(Object...args);
+    Object dynamicProperties(Object...args);
 }

@@ -47,75 +47,29 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.file.storage.dummy;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.InMemoryFileStorageFileAccess;
 
 
 /**
- * {@link VersionContainer}
+ * {@link DummyFileStorageFileAccess}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class VersionContainer {
+public class DummyFileStorageFileAccess extends InMemoryFileStorageFileAccess {
 
-    private final Map<Integer, FileHolder> versions = new HashMap<Integer, FileHolder>();
+    private FileStorageAccountAccess accountAccess;
 
-    private int currentVersion;
-
-    /**
-     * Initializes a new {@link VersionContainer}.
-     * @param version
-     * @param fileHolder
-     */
-    public VersionContainer() {
-        super();
-        currentVersion = -1;
-    }
-
-    public boolean containsVersion(int version) {
-        return versions.containsKey(version);
-    }
-
-    public FileHolder getVersion(int version) {
-        return versions.get(version);
-    }
-
-    public int addVersion(FileHolder fileHolder) {
-        int version = ++currentVersion;
-        versions.put(version, fileHolder);
-        fileHolder.getInternalFile().setVersion("" + version);
-
-        return version;
-    }
-
-    public FileHolder removeVersion(int version)  {
-        FileHolder removed = versions.remove(version);
-        if (version == currentVersion) {
-            int tmp = -1;
-            for (int v : versions.keySet()) {
-                if (v > tmp) {
-                    tmp = v;
-                }
-            }
-
-            currentVersion = tmp;
-        }
-
-        return removed;
-    }
-
-    public FileHolder getCurrentVersion() {
-        return versions.get(currentVersion);
-    }
-
-    public int getCurrentVersionNumber() {
-        return currentVersion;
+    public DummyFileStorageFileAccess(String serviceId, String accountId, FileStorageAccountAccess accountAccess) {
+        super(serviceId, accountId);
+        this.accountAccess = accountAccess;
     }
     
-    public Collection<FileHolder> getAllVersions() {
-        return versions.values();
+    @Override
+    public FileStorageAccountAccess getAccountAccess() {
+        return accountAccess;
     }
+
 }

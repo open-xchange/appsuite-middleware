@@ -1,6 +1,7 @@
 package com.openexchange.file.storage.infostore;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.file.storage.AbstractFile;
 import com.openexchange.file.storage.File;
@@ -339,6 +340,18 @@ public class InfostoreFile extends AbstractFile implements File {
     @Override
     public void setVersionComment(final String string) {
         document.setVersionComment(string);
+    }
+
+
+    @Override
+    public Map<String, Object> getDynamicProperties() {
+        return null;
+    }
+
+
+    @Override
+    public void setDynamicProperties(Map<String, Object> properties) {
+        
     }
 
 
