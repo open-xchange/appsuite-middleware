@@ -230,12 +230,6 @@ if ! ox_exists_property com.openexchange.servlet.maxRateKeyPartProviders $pfile;
     ox_set_property com.openexchange.servlet.maxRateKeyPartProviders '' $pfile
 fi
 
-# SoftwareChange_Request-1470
-pfile=/opt/open-xchange/etc/imap.properties
-if ox_exists_property com.openexchange.imap.maxIMAPConnectionIdleTime $pfile; then
-    ox_remove_property com.openexchange.imap.maxIMAPConnectionIdleTime $pfile
-fi
-
 # SoftwareChange_Request-1459
 pfile=/opt/open-xchange/etc/mail.properties
 if ! ox_exists_property com.openexchange.mail.supportMsisdnAddresses $pfile; then
