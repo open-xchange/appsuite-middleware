@@ -112,8 +112,8 @@ final class ForwardedTGTDelegateGenerator implements PrivilegedExceptionAction<C
         } finally {
             context.dispose();
         }
-        KerberosUtils.logSubject(principal.getClientSubject());
-        KerberosUtils.logSubject(principal.getDelegateSubject());
+//        KerberosUtils.logSubject(principal.getClientSubject());
+//        KerberosUtils.logSubject(principal.getDelegateSubject());
         return principal;
     }
 }

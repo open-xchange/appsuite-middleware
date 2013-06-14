@@ -1,6 +1,10 @@
+* 2013-06-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26859: Patched javax.mail implementation to create a Kerberos security context before SASL login takes place.
+
 * 2013-06-11 - marcus.klein@open-xchange.com
 
- - Fix for bug 26859: Implemented username and password authentication for Kerberos authentication implementation.
+ - Fix for bug 26860: Implemented username and password authentication for Kerberos authentication implementation.
 
 * 2013-05-22 - marc.arens@open-xchange.com
 
