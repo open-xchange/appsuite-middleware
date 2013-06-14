@@ -391,6 +391,7 @@ fi
 # SoftwareChange_Request-1243
 # SoftwareChange_Request-1245
 # SoftwareChange_Request-1392
+# SoftwareChange_Request-1468
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/ox-scriptconf.sh
 jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
@@ -404,7 +405,8 @@ fi
 # -----------------------------------------------------------------------
 for opt in "-XX:+DisableExplicitGC" "-server" "-Djava.awt.headless=true" \
     "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=" \
-    "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB"; do
+    "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB" \
+    "-XX:-OmitStackTraceInFastThrow"; do
     if ! echo $nopts | grep -- $opt > /dev/null; then
         if [ "$opt" = "-XX:CMSInitiatingOccupancyFraction=" ]; then
             opt="-XX:CMSInitiatingOccupancyFraction=75"
