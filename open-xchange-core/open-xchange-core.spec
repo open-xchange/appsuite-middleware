@@ -215,6 +215,14 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1492
+pfile=/opt/open-xchange/etc/server.properties
+for key in com.openexchange.json.poolEnabled com.openexchange.json.poolSize com.openexchange.json.poolCharArrayLength; do
+    if ox_exists_property $key $pfile; then
+       ox_remove_property $key $pfile
+    fi
+done
+
 # SoftwareChange_Request-1483
 pfile=/opt/open-xchange/etc/server.properties
 if ! ox_exists_property com.openexchange.servlet.maxRateTimeWindow $pfile; then
