@@ -62,7 +62,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.meta.FileFieldSet;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
-import com.openexchange.json.JSONCondition;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
