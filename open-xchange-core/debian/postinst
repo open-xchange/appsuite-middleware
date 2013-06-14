@@ -118,6 +118,21 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1483
+pfile=/opt/open-xchange/etc/server.properties
+if ! ox_exists_property com.openexchange.servlet.maxRateTimeWindow $pfile; then
+    ox_set_property com.openexchange.servlet.maxRateTimeWindow 300000 $pfile
+fi
+if ! ox_exists_property com.openexchange.servlet.maxRate $pfile; then
+    ox_set_property com.openexchange.servlet.maxRate 1500 $pfile
+fi
+if ! ox_exists_property com.openexchange.servlet.maxRateLenientClients $pfile; then
+    ox_set_property com.openexchange.servlet.maxRateLenientClients '"Open-Xchange .NET HTTP Client*", "Open-Xchange USM HTTP Client*", "Jakarta Commons-HttpClient*"' $pfile
+fi
+if ! ox_exists_property com.openexchange.servlet.maxRateKeyPartProviders $pfile; then
+    ox_set_property com.openexchange.servlet.maxRateKeyPartProviders '' $pfile
+fi
+
 # SoftwareChange_Request-1470
 pfile=/opt/open-xchange/etc/imap.properties
 if ox_exists_property com.openexchange.imap.maxIMAPConnectionIdleTime $pfile; then
