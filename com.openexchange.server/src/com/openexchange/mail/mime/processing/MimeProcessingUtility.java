@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.processing;
 
+import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
 import static com.openexchange.mail.text.HtmlProcessing.htmlFormat;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -421,7 +422,7 @@ public final class MimeProcessingUtility {
      * @return The prepared address
      */
     static String prepareAddress(final String address) {
-        final String decoded = MimeMessageUtility.decodeMultiEncodedHeader(address);
+        final String decoded = toIDN(MimeMessageUtility.decodeMultiEncodedHeader(address));
         final int pos = decoded.indexOf(DUMMY_DOMAIN);
         if (pos >= 0) {
             return decoded.substring(0, pos);

@@ -874,7 +874,7 @@ public final class MessageWriter {
         retval.put(personal == null || personal.length() == 0 ? JSONObject.NULL : preparePersonal(personal));
         // Address
         final String address = addr.getAddress();
-        retval.put(address == null || address.length() == 0 ? JSONObject.NULL : prepareAddress(toIDN(address)));
+        retval.put(address == null || address.length() == 0 ? JSONObject.NULL : prepareAddress(address));
 
         return retval;
     }
@@ -888,8 +888,14 @@ public final class MessageWriter {
     private static final String DUMMY_DOMAIN = "@unspecified-domain";
 
     private static String prepareAddress(final String address) {
-        final String decoded = MimeMessageUtility.decodeMultiEncodedHeader(address);
-        final int pos = decoded.indexOf(DUMMY_DOMAIN);
+        String decoded = toIDN(MimeMessageUtility.decodeMultiEncodedHeader(address));
+        // Check for slash character
+        int pos = decoded.indexOf('/');
+        if (pos > 0) {
+            decoded = decoded.substring(0, pos);
+        }
+        // Check for dummy domain
+        pos = decoded.indexOf(DUMMY_DOMAIN);
         if (pos >= 0) {
             return decoded.substring(0, pos);
         }

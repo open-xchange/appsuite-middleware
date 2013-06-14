@@ -1176,6 +1176,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 charEnc = null == rce ? ServerConfig.getProperty(Property.DefaultEncoding) : rce;
             }
             final String uploadDir = ServerConfig.getProperty(Property.UploadDirectory);
+            final String fileName = req.getParameter("filename");
             for (final FileItem fileItem : items) {
                 if (fileItem.isFormField()) {
                     try {
@@ -1186,7 +1187,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 } else {
                     if (fileItem.getSize() > 0 || !isEmpty(fileItem.getName())) {
                         try {
-                            uploadEvent.addUploadFile(processUploadedFile(fileItem, uploadDir));
+                            uploadEvent.addUploadFile(processUploadedFile(fileItem, uploadDir, fileName));
                         } catch (final Exception e) {
                             throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
                         }
@@ -1239,11 +1240,15 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return isWhitespace;
     }
 
- 	private static final UploadFile processUploadedFile(final FileItem item, final String uploadDir) throws Exception {
+ 	private static final UploadFile processUploadedFile(final FileItem item, final String uploadDir, final String fileName) throws Exception {
         try {
             final UploadFile retval = new UploadFileImpl();
             retval.setFieldName(item.getFieldName());
-            retval.setFileName(item.getName());
+            if (isEmpty(fileName)) {
+                retval.setFileName(item.getName());
+            } else {
+                retval.setFileName(fileName);
+            }
             retval.setContentType(item.getContentType());
             retval.setSize(item.getSize());
             final File tmpFile = File.createTempFile("openexchange", null, new File(uploadDir));

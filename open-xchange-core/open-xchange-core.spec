@@ -215,6 +215,21 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1483
+pfile=/opt/open-xchange/etc/server.properties
+if ! ox_exists_property com.openexchange.servlet.maxRateTimeWindow $pfile; then
+    ox_set_property com.openexchange.servlet.maxRateTimeWindow 300000 $pfile
+fi
+if ! ox_exists_property com.openexchange.servlet.maxRate $pfile; then
+    ox_set_property com.openexchange.servlet.maxRate 1500 $pfile
+fi
+if ! ox_exists_property com.openexchange.servlet.maxRateLenientClients $pfile; then
+    ox_set_property com.openexchange.servlet.maxRateLenientClients '"Open-Xchange .NET HTTP Client*", "Open-Xchange USM HTTP Client*", "Jakarta Commons-HttpClient*"' $pfile
+fi
+if ! ox_exists_property com.openexchange.servlet.maxRateKeyPartProviders $pfile; then
+    ox_set_property com.openexchange.servlet.maxRateKeyPartProviders '' $pfile
+fi
+
 # SoftwareChange_Request-1459
 pfile=/opt/open-xchange/etc/mail.properties
 if ! ox_exists_property com.openexchange.mail.supportMsisdnAddresses $pfile; then
@@ -391,6 +406,7 @@ fi
 # SoftwareChange_Request-1243
 # SoftwareChange_Request-1245
 # SoftwareChange_Request-1392
+# SoftwareChange_Request-1468
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/ox-scriptconf.sh
 jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
@@ -404,7 +420,8 @@ fi
 # -----------------------------------------------------------------------
 for opt in "-XX:+DisableExplicitGC" "-server" "-Djava.awt.headless=true" \
     "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=" \
-    "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB"; do
+    "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB" \
+    "-XX:-OmitStackTraceInFastThrow"; do
     if ! echo $nopts | grep -- $opt > /dev/null; then
         if [ "$opt" = "-XX:CMSInitiatingOccupancyFraction=" ]; then
             opt="-XX:CMSInitiatingOccupancyFraction=75"
@@ -535,7 +552,7 @@ if ! ox_exists_property com.openexchange.carddav.exposedCollections $pfile; then
 fi
 # SoftwareChange_Request-1091
 pfile=/opt/open-xchange/etc/contact.properties
-if ! ox_exists_property contactldap.configuration.path $pfile; then
+if ox_exists_property contactldap.configuration.path $pfile; then
     ox_remove_property contactldap.configuration.path $pfile
 fi
 
