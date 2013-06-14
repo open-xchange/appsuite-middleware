@@ -543,7 +543,7 @@ if ! ox_exists_property com.openexchange.carddav.exposedCollections $pfile; then
 fi
 # SoftwareChange_Request-1091
 pfile=/opt/open-xchange/etc/contact.properties
-if ! ox_exists_property contactldap.configuration.path $pfile; then
+if ox_exists_property contactldap.configuration.path $pfile; then
     ox_remove_property contactldap.configuration.path $pfile
 fi
 
