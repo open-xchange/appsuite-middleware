@@ -51,10 +51,12 @@ package com.openexchange.realtime.atmosphere.impl;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.protocol.RTClientState;
 import com.openexchange.realtime.atmosphere.protocol.RTProtocol;
 import com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
@@ -69,6 +71,8 @@ import com.openexchange.realtime.util.StanzaSequenceGate;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class RTProtocolImpl implements RTProtocol {
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(RTProtocol.class);
     
     private static final AtomicReference<RTProtocolImpl> PROTOCOL = new AtomicReference<RTProtocolImpl>();
 
@@ -182,7 +186,7 @@ public class RTProtocolImpl implements RTProtocol {
      * @see com.openexchange.realtime.atmosphere.protocol.RTProtocol#emptyBuffer(com.openexchange.realtime.atmosphere.protocol.RTClientState, com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter)
      */
     @Override
-    public void emptyBuffer(RTClientState state, StanzaTransmitter transmitter) throws OXException {
+    public void emptyBuffer(RTClientState state, StanzaTransmitter transmitter) {
         if (transmitter == null) {
             return;
         }
@@ -195,8 +199,12 @@ public class RTProtocolImpl implements RTProtocol {
                 transmitter.suspend();
                 return;
             }
-            if (transmitter.send(stanzasToSend)) {
-                state.purge();
+            try {
+                if (transmitter.send(stanzasToSend)) {
+                    state.purge();
+                }
+            } catch (OXException e) {
+                handleOXException(state.getId(), e, null);
             }
         } finally {
             state.unlock();
@@ -242,27 +250,21 @@ public class RTProtocolImpl implements RTProtocol {
         state.enqueue(s);
     }
 
-
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.atmosphere.protocol.RTProtocol#handleOXException(com.openexchange.exception.OXException)
-     */
     @Override
-    public void handleOXException(OXException e) {
+    public void handleRealtimeException(ID recipient, RealtimeException exception, Stanza stanza) {
         // TODO Auto-generated method stub
-        
+        if(recipient != null) {
+            if(stanza == null) {
+                stanza = getGenericErrorStanza(recipient);
+            }
+            stanza.setError(exception);
+        } else {
+            LOG.error(exception.getMessage(), exception);
+        }
     }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.atmosphere.protocol.RTProtocol#handleException(java.lang.Exception)
-     */
-    @Override
-    public void handleException(Exception e) {
-        // TODO Auto-generated method stub
-        
-    }
-
-
-
-
     
+    private Stanza getGenericErrorStanza(ID recipient) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
 }

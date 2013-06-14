@@ -47,47 +47,54 @@
  *
  */
 
-package com.openexchange.realtime.exception;
+package com.openexchange.realtime.atmosphere.payload.converter;
+
+import static org.junit.Assert.*;
+import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.payload.converter.sim.SimpleConverterSim;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link Transformer} used to map RealtimException codes to codes that can be used for specific {@link Channel} implementations like
- * Atmosphere or Realtime.
- * 
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * {@link ThrowableToJSONConverterTest}
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class Transformer {
+public class ThrowableToJSONConverterTest {
 
-    private RealtimeExceptionCodes origin;
-    private RealtimeExceptionCodes atmosphere;
-    private RealtimeExceptionCodes xmpp;
+    ThrowableToJSONConverter converter = null;
+    SimpleConverterSim simpleConverter = null;
+    Throwable throwable = null;
 
-    /**
-     * Initializes a new {@link Transformer}.
-     * 
-     * @param origin The original ExceptionCode
-     * @param atmosphere The code that should be used when transfering this Exception over an Atmosphere channel
-     * @param xmpp The code that should be used when transfering this Exception over an XMPP channel
-     */
-    public Transformer(RealtimeExceptionCodes origin, RealtimeExceptionCodes atmosphere, RealtimeExceptionCodes xmpp) {
-        this.origin = origin;
-        this.atmosphere = atmosphere;
-        this.xmpp = xmpp;
+    @Before
+    public void setUp() throws Exception {
+        converter = new ThrowableToJSONConverter();
+        simpleConverter = new SimpleConverterSim();
+        simpleConverter.registerConverter(new StackTraceElementToJSONConverter());
+        throwable = new Throwable("First throwable");
     }
-    
-    /**
-     * Get the XMPP specific exception code that corresponds to this RealtimeExceptionCode
-     * @return the XMPP specific exception code that corresponds to this RealtimeExceptionCode
-     */
-    public RealtimeExceptionCodes getXMPP() {
-        return xmpp;
+
+    @Test
+    public void testGetInputFormat() {
+        assertEquals(Throwable.class.getSimpleName(), converter.getInputFormat());
     }
-    
-    /**
-     * Get the Atmosphere specific exception code that corresponds to this RealtimeExceptionCode
-     * @return the Atmosphere specific exception code that corresponds to this RealtimeExceptionCode
-     */
-    public RealtimeExceptionCodes getAtmosphere() {
-        return atmosphere;
+
+    @Test
+    public void testConvert() throws OXException {
+        Object object = converter.convert(throwable, null, simpleConverter);
+        assertNotNull(object);
+        assertTrue(object instanceof JSONObject);
+        JSONObject throwableJSON = JSONObject.class.cast(object);
+        assertEquals(throwableJSON.optString("message"), "First throwable");
     }
+
+    @Test
+    public void testGetOutputFormat() {
+        assertEquals("json", converter.getOutputFormat());
+    }
+
 }

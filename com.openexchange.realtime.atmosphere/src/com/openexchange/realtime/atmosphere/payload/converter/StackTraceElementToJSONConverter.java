@@ -47,47 +47,41 @@
  *
  */
 
-package com.openexchange.realtime.exception;
+package com.openexchange.realtime.atmosphere.payload.converter;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.conversion.DataExceptionCodes;
+import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Transformer} used to map RealtimException codes to codes that can be used for specific {@link Channel} implementations like
- * Atmosphere or Realtime.
+ * {@link StackTraceElementToJSONConverter}
  * 
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class Transformer {
+public class StackTraceElementToJSONConverter extends AbstractPOJOConverter {
 
-    private RealtimeExceptionCodes origin;
-    private RealtimeExceptionCodes atmosphere;
-    private RealtimeExceptionCodes xmpp;
+    @Override
+    public String getInputFormat() {
+        return StackTraceElement.class.getSimpleName();
+    }
 
-    /**
-     * Initializes a new {@link Transformer}.
-     * 
-     * @param origin The original ExceptionCode
-     * @param atmosphere The code that should be used when transfering this Exception over an Atmosphere channel
-     * @param xmpp The code that should be used when transfering this Exception over an XMPP channel
-     */
-    public Transformer(RealtimeExceptionCodes origin, RealtimeExceptionCodes atmosphere, RealtimeExceptionCodes xmpp) {
-        this.origin = origin;
-        this.atmosphere = atmosphere;
-        this.xmpp = xmpp;
+    @Override
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        try {
+            StackTraceElement stackTraceElement = (StackTraceElement) data;
+            JSONObject stackTraceObject = new JSONObject();
+            stackTraceObject.put("fileName", stackTraceElement.getFileName());
+            stackTraceObject.put("className", stackTraceElement.getClassName());
+            stackTraceObject.put("methodName", stackTraceElement.getMethodName());
+            stackTraceObject.put("lineNumber", stackTraceElement.getLineNumber());
+            return stackTraceObject;
+        } catch (JSONException e) {
+            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(data.toString(), e);
+        }
     }
-    
-    /**
-     * Get the XMPP specific exception code that corresponds to this RealtimeExceptionCode
-     * @return the XMPP specific exception code that corresponds to this RealtimeExceptionCode
-     */
-    public RealtimeExceptionCodes getXMPP() {
-        return xmpp;
-    }
-    
-    /**
-     * Get the Atmosphere specific exception code that corresponds to this RealtimeExceptionCode
-     * @return the Atmosphere specific exception code that corresponds to this RealtimeExceptionCode
-     */
-    public RealtimeExceptionCodes getAtmosphere() {
-        return atmosphere;
-    }
+
 }

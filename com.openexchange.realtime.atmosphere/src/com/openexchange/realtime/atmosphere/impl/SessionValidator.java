@@ -74,7 +74,9 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.realtime.atmosphere.AtmosphereConfig;
 import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import com.openexchange.realtime.exception.RealtimeExceptionFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
@@ -139,9 +141,15 @@ public class SessionValidator {
      * @return the sessionId the client sent to the server
      * @throws OXException if retrieval of the sessionId fails
      */
-    public String getSessionId() throws OXException {
+    public String getSessionId() throws RealtimeException {
         if (this.sessionId == null) {
-            this.sessionId = getSessionId(getSessionFromParameters(request));
+            try {
+                this.sessionId = getSessionId(getSessionFromParameters(request));
+            } catch (OXException oxe) {
+                RealtimeException realtimeException = RealtimeExceptionFactory.getInstance().create(RealtimeExceptionCodes.SESSION_INVALID);
+                LOG.error("Couldn't find session id.", realtimeException);
+                throw realtimeException;
+            }
         }
         return sessionId;
     }
@@ -152,9 +160,15 @@ public class SessionValidator {
      * @return the validated {@link ServerSession} that is associated with the client that sent the request
      * @throws OXException if retrieval or validation of the serverSession fails
      */
-    public ServerSession getServerSession() throws OXException {
+    public ServerSession getServerSession() throws RealtimeException {
         if (!isAlreadyValidated) {
-            this.serverSession = getValidatedServerSession();
+            try {
+                this.serverSession = getValidatedServerSession();
+            } catch (OXException e) {
+                RealtimeException realtimeException = RealtimeExceptionFactory.getInstance().create(RealtimeExceptionCodes.SESSION_INVALID);
+                LOG.error("Couldn't get ServerSession.", realtimeException);
+                throw realtimeException;
+            }
         }
         return this.serverSession;
     }
@@ -249,7 +263,7 @@ public class SessionValidator {
      * @param whitelist The optional IP check whitelist (by client identifier)
      * @throws OXException if the IP addresses don't match.
      */
-    public void checkIP(final boolean doCheck, final List<IPRange> ranges, final Session session, final String actual, final ClientWhitelist whitelist) throws OXException {
+    private void checkIP(final boolean doCheck, final List<IPRange> ranges, final Session session, final String actual, final ClientWhitelist whitelist) throws OXException {
         if (null == actual || !actual.equals(session.getLocalIp())) {
             // IP is missing or changed
             SubnetMask allowedSubnet = atmosphereConfig.getAllowedSubnet();
@@ -305,7 +319,7 @@ public class SessionValidator {
      * @param ranges The whitelisted IP ranges
      * @return true if the remote IP of the client is contained in the whitelisted IP ranges, else false
      */
-    public boolean isWhitelistedFromIPCheck(final String actual, final List<IPRange> ranges) {
+    private boolean isWhitelistedFromIPCheck(final String actual, final List<IPRange> ranges) {
         for (final IPRange range : ranges) {
             if (range.contains(actual)) {
                 return true;
@@ -365,7 +379,7 @@ public class SessionValidator {
      * @param client the remembered client from the session.
      * @return The secret string or <code>null</code>
      */
-    public static String extractSecret(final CookieHashSource cookieHash, final HttpServletRequest req, final String hash, final String client) {
+    private static String extractSecret(final CookieHashSource cookieHash, final HttpServletRequest req, final String hash, final String client) {
         final Cookie[] cookies = req.getCookies();
         if (null != cookies) {
             final String cookieName = Login.SECRET_PREFIX + getHash(cookieHash, req, hash, client);
@@ -392,7 +406,7 @@ public class SessionValidator {
      * @param client The client identifier
      * @return The appropriate hash
      */
-    public static String getHash(final CookieHashSource cookieHash, final HttpServletRequest req, final String hash, final String client) {
+    private static String getHash(final CookieHashSource cookieHash, final HttpServletRequest req, final String hash, final String client) {
         if (CookieHashSource.REMEMBER == cookieHash) {
             return hash;
         }

@@ -50,7 +50,6 @@
 package com.openexchange.realtime.atmosphere.osgi;
 
 import org.osgi.framework.BundleContext;
-
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
@@ -62,6 +61,8 @@ import com.openexchange.realtime.atmosphere.AtmosphereConfig;
 import com.openexchange.realtime.atmosphere.http.RealtimeActions;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
+import com.openexchange.realtime.atmosphere.payload.converter.JSONToRealtimeExceptionConverter;
+import com.openexchange.realtime.atmosphere.payload.converter.RealtimeExceptionToJSONConverter;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.ByteToJSONConverter;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.JSONToByteConverter;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.JSONToStringConverter;
@@ -70,9 +71,11 @@ import com.openexchange.realtime.atmosphere.presence.converter.JSONToPresenceSta
 import com.openexchange.realtime.atmosphere.presence.converter.PresenceStateToJSONConverter;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.handle.StanzaQueueService;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.PresenceState;
+import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -111,12 +114,15 @@ public class AtmosphereRTActivator extends AJAXModuleActivator {
         registerService(SimplePayloadConverter.class, new JSONToStringConverter());
         registerService(SimplePayloadConverter.class, new JSONToPresenceStateConverter());
         registerService(SimplePayloadConverter.class, new PresenceStateToJSONConverter());
+        registerService(SimplePayloadConverter.class, new JSONToRealtimeExceptionConverter());
+        registerService(SimplePayloadConverter.class, new RealtimeExceptionToJSONConverter());
 
         // Add Transformers using Converters
         PayloadTreeConverter converter = getService(PayloadTreeConverter.class);
         converter.declarePreferredFormat(Presence.STATUS_PATH, PresenceState.class.getSimpleName());
         converter.declarePreferredFormat(Presence.MESSAGE_PATH, String.class.getSimpleName());
         converter.declarePreferredFormat(Presence.PRIORITY_PATH, Byte.class.getSimpleName());
+        converter.declarePreferredFormat(Stanza.ERROR_PATH, RealtimeException.class.getSimpleName());
         
         registerModule(new RealtimeActions(this, handler.getStateManager(), handler.getProtocolHandler()), "rt");
 

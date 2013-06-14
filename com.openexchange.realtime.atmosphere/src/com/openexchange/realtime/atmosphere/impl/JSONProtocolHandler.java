@@ -84,14 +84,14 @@ public class JSONProtocolHandler {
     
     /**
      * Handles a list of messages, and calls the appropriate protocol messages
+     * 
      * @param constructedId The ID for the client
      * @param serverSession His session
      * @param entry The stateEntry
      * @param stanzas the Stanzas
      * @param acknowledgements TODO
-     * @throws OXException
      */
-    public void handleIncomingMessages(ID constructedId, ServerSession serverSession, StateEntry entry, List<JSONObject> stanzas, List<Long> acknowledgements) throws OXException {
+    public void handleIncomingMessages(ID constructedId, ServerSession serverSession, StateEntry entry, List<JSONObject> stanzas, List<Long> acknowledgements) {
         for (JSONObject json : stanzas) {
             if (json.has("type")) {
                 String type = json.optString("type");

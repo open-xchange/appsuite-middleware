@@ -50,31 +50,34 @@
 package com.openexchange.realtime.atmosphere.protocol;
 
 import java.util.List;
+import org.atmosphere.cpr.AtmosphereResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.StanzaSequenceGate;
 
 /**
  * {@link RTProtocol}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface RTProtocol {
 
     /**
-     * Called when a GET request is received from the client. 
+     * Called when a GET request is received from the client.
+     * 
      * @param state - the client state
-     * @param transmitter - the client transmitter 
-     * @throws OXException 
+     * @param transmitter - the client transmitter
+     * @throws OXException
      */
     public abstract void getReceived(RTClientState state, StanzaTransmitter transmitter) throws OXException;
 
     /**
-     * Called when a Ping is received from the client. If the ping asks for a commit, a Pong message is generated, enqueued and the buffer is emptied, otherwise only the states
-     * timestamp is touched.
-     * @throws OXException 
+     * Called when a Ping is received from the client. If the ping asks for a commit, a Pong message is generated, enqueJSONExceptionued and the buffer
+     * is emptied, otherwise only the states timestamp is touched.
+     * 
+     * @throws OXException
      */
     public abstract void ping(ID from, boolean commit, RTClientState state, StanzaTransmitter transmitter) throws OXException;
 
@@ -85,31 +88,36 @@ public interface RTProtocol {
 
     /**
      * Enqueus a stanza and empties the buffer
-     * @throws OXException 
+     * 
+     * @throws OXException
      */
     public abstract void send(Stanza stanza, RTClientState state, StanzaTransmitter transmitter) throws OXException;
 
     /**
      * A message was received from the client
-     * @param newState 
-     * @throws OXException 
+     * 
+     * @param newState
+     * @throws OXException
      */
     public abstract void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean newState, StanzaTransmitter transmitter) throws OXException;
 
     /**
-     * A message was received from the client. Instead of sending acknlowledgements, they will be collected in the passed acknowledgements list.
+     * A message was received from the client. Instead of sending acknlowledgements, they will be collected in the passed acknowledgements
+     * list.
      */
     public abstract void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean b, StanzaTransmitter transmitter, List<Long> acknowledgements) throws OXException;
 
     /**
      * Empties the buffer, if there are messages to be sent
-     * @throws OXException 
      */
-    public abstract void emptyBuffer(RTClientState state, StanzaTransmitter transmitter) throws OXException;
+    public abstract void emptyBuffer(RTClientState state, StanzaTransmitter transmitter);
 
-    public abstract void handleOXException(OXException e);
-
-    public abstract void handleException(Exception e);
-
+    /**
+     * Handle RealtimeExceptions that occured during protocol processing. 
+     * @param recipient The client that you want to inform about the error. If null the exception will only appear in the server logs.
+     * @param exception The exception that occurred
+     * @param stanza The stanza that caused the exception. This helps the client to relate the error to one of his actions. May be null 
+     */
+    public abstract void handleRealtimeException(ID recipient, RealtimeException eexception, Stanza stanza);
 
 }

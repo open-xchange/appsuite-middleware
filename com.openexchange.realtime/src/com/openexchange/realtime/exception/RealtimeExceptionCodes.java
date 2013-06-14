@@ -79,7 +79,7 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
     <not-authorized/> -- the sender must provide proper credentials before being allowed to perform the action, or has provided improper credentials; the associated error type SHOULD be "auth".
     <payment-required/> -- the requesting entity is not authorized to access the requested service because payment is required; the associated error type SHOULD be "auth".
     <recipient-unavailable/> -- the intended recipient is temporarily unavailable; the associated error type SHOULD be "wait" (note: an application MUST NOT return this error if doing so would provide information about the intended recipient's network availability to an entity that is not authorized to know such information).
-    <redirect/> -- the recipient or server is redirecting requests for this information to another entity, usually temporarily (the error stanza SHOULD contain the alternate address, which MUST be a valid JID, in the XML character data of the <redirect/> element); the associated error type SHOULD be "modify".
+    <redirect/> -- the recipient or server is rediRealtimeExceptionCodesrecting requests for this information to another entity, usually temporarily (the error stanza SHOULD contain the alternate address, which MUST be a valid JID, in the XML character data of the <redirect/> element); the associated error type SHOULD be "modify".
     <registration-required/> -- the requesting entity is not authorized to access the requested service because registration is required; the associated error type SHOULD be "auth".
     <remote-server-not-found/> -- a remote server or service specified as part or all of the JID of the intended recipient does not exist; the associated error type SHOULD be "cancel".
     <remote-server-timeout/> -- a remote server or service specified as part or all of the JID of the intended recipient (or required to fulfill a request) could not be contacted within a reasonable amount of time; the associated error type SHOULD be "wait".
@@ -186,7 +186,7 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
      *
      * @return The newly created {@link OXException} instance
      */
-    public OXException create() {
+    public RealtimeException create() {
         return RealtimeExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
@@ -196,7 +196,7 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... args) {
+    public RealtimeException create(final Object... args) {
         return RealtimeExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
@@ -207,8 +207,39 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... args) {
+    public RealtimeException create(final Throwable cause, final Object... args) {
         return RealtimeExceptionFactory.getInstance().create(this, cause, args);
+    }
+    
+    /**
+     * Create a RealtimeException based on the code number of the RealtimeExceptionCode. Useful to instantiate a POJO from other
+     * representations. This POJO can then be tranformed to the appropriate channel representation. 
+     * 
+     * @param codeNumber The code number of the {@link RealtimeExceptionCodes}
+     * @param cause the cause
+     * @param args the log arguments
+     * @return the initialized RealtimeException
+     */
+    public static RealtimeException create(final int codeNumber, final Throwable cause, final Object... args) {
+        return fromCodeNumber(codeNumber).create(cause, args);
+    }
+    
+    /**
+     * Lookup RealtimeExceptionCode based in its number.
+     * 
+     * @param wantedNumber the number of the exception code that we are looking for
+     * @return the matching RealtimeExceptionCode
+     * @throws IllegalStateException if no matching RealtimeExceptionCode can be found. All number must be matchable to
+     *             RealtimeExceptionCodes.
+     */
+    private static RealtimeExceptionCodes fromCodeNumber(int wantedNumber) {
+        for (RealtimeExceptionCodes realtimeExceptionCode : RealtimeExceptionCodes.values()) {
+            int codeNumber = realtimeExceptionCode.getNumber();
+            if (codeNumber == wantedNumber) {
+                return realtimeExceptionCode;
+            }
+        }
+        throw new IllegalStateException("Couldn't find matching RealtimeExceptionCode");
     }
 
 }

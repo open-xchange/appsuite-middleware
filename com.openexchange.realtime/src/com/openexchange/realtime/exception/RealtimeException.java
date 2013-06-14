@@ -98,16 +98,45 @@ public class RealtimeException extends OXException {
         return RealtimeExceptionFactory.getInstance().create(transformer.getAtmosphere());
     }
 
-    public int hashCode() {
-        return delegate.hashCode();
-    }
-
-    public boolean equals(Object obj) {
-        return delegate.equals(obj);
-    }
-
     public String getLocalizedMessage() {
         return delegate.getLocalizedMessage();
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((delegate == null) ? 0 : delegate.hashCode());
+        result = prime * result + ((transformer == null) ? 0 : transformer.hashCode());
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof RealtimeException))
+            return false;
+        RealtimeException other = (RealtimeException) obj;
+        if (delegate == null) {
+            if (other.delegate != null)
+                return false;
+        } else if (!delegate.equals(other.delegate))
+            return false;
+        if (transformer == null) {
+            if (other.transformer != null)
+                return false;
+        } else if (!transformer.equals(other.transformer))
+            return false;
+        return true;
     }
 
     public Throwable getCause() {

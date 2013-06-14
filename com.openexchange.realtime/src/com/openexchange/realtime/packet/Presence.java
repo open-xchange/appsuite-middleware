@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.List;
 import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
@@ -104,7 +105,7 @@ public class Presence extends Stanza {
 
     public static final ElementPath PRIORITY_PATH = new ElementPath("priority");
 
-    public static final ElementPath ERROR_PATH = new ElementPath("error");
+
 
     private static final ArrayList<ElementPath> defaultElements = new ArrayList<ElementPath>();
 
@@ -196,11 +197,6 @@ public class Presence extends Stanza {
     private byte priority = 0;
 
     /**
-     * The error object for Presence Stanza of type error
-     */
-    private OXException error = null;
-
-    /**
      * Gets the type of Presence Stanza
      * 
      * @return The type
@@ -274,25 +270,6 @@ public class Presence extends Stanza {
     }
 
     /**
-     * Get the error element describing the error-type Stanza in more detail.
-     * 
-     * @return Null or the OXException representing the error
-     */
-    public OXException getError() {
-        return error;
-    }
-
-    /**
-     * Set the error element describing the error-type Stanza in more detail.
-     * 
-     * @param error The OXException representing the error
-     */
-    public void setError(OXException error) {
-        this.error = error;
-        writeThrough(ERROR_PATH, error);
-    }
-
-    /**
      * Get the default payloads.
      * 
      * @return The default payloads as defined in the Presence specification.
@@ -308,42 +285,6 @@ public class Presence extends Stanza {
      */
     public Collection<PayloadTree> getExtensions() {
         return filterPayloads(getExtensionsPredicate());
-    }
-
-    /**
-     * Write a payload to the PayloadTree identified by the ElementPath. There is only one tree for the default elements which only contains
-     * one node so we can set the data by directly writing to the root node.
-     * 
-     * @param path The ElementPath identifying the PayloadTree.
-     * @param data The payload data to write into the root node.
-     */
-    private void writeThrough(ElementPath path, Object data) {
-        List<PayloadTree> payloadTrees = payloads.get(path);
-        if (payloadTrees == null) {
-            payloadTrees = new ArrayList<PayloadTree>();
-        }
-        if (payloadTrees.size() > 1) {
-            throw new IllegalStateException("Stanza shouldn't contain more than one PayloadTree per basic ElementPath");
-        }
-        PayloadTree tree;
-        if (payloadTrees.isEmpty()) {
-            PayloadElement payloadElement = new PayloadElement(
-                data,
-                data.getClass().getSimpleName(),
-                path.getNamespace(),
-                path.getElement());
-            PayloadTreeNode payloadTreeNode = new PayloadTreeNode(payloadElement);
-            tree = new PayloadTree(payloadTreeNode);
-            addPayload(tree);
-        } else {
-            tree = payloadTrees.get(0);
-            PayloadTreeNode node = tree.getRoot();
-            if (node == null) {
-                throw new IllegalStateException("PayloadTreeNode removed? This shouldn't happen!");
-            }
-            node.setData(data, data.getClass().getSimpleName());
-        }
-
     }
 
     @Override
@@ -496,7 +437,7 @@ public class Presence extends Stanza {
          * @param error the error of the Presence stanza.
          * @return the builder for further modification or building of the current Presence
          */
-        public Builder error(OXException error) {
+        public Builder error(RealtimeException error) {
             presence.setError(error);
             return this;
         }

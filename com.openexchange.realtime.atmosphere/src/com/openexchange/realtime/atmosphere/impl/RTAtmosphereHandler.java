@@ -73,6 +73,7 @@ import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.dispatch.StanzaSender;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.handle.StanzaQueueService;
 import com.openexchange.realtime.packet.ID;
@@ -125,9 +126,11 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         response.setCharacterEncoding("UTF-8");
         String method = request.getMethod();
         SessionValidator sessionValidator = new SessionValidator(resource);
-        try {
-            ServerSession serverSession = sessionValidator.getServerSession();
-            ID constructedId = constructId(resource, serverSession);
+        ServerSession serverSession = null;
+        ID constructedId = null;
+//        try {
+            serverSession = sessionValidator.getServerSession();
+            constructedId = constructId(resource, serverSession);
             if (method.equalsIgnoreCase("GET")) {
 
                 AtmosphereStanzaTransmitter transmitter = new AtmosphereStanzaTransmitter(resource, constructedId, stateManager);
@@ -148,16 +151,21 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     LOG.trace("Incoming: " + postData);
                 }
 
-                handlePost(postData, constructedId, serverSession, entry);
+                try {
+                    handlePost(postData, constructedId, serverSession, entry);
+                } catch (JSONException e) {
+                    //inform client about malformed payload 
+                }
             }
-        } catch (OXException e) {
-            protocol.handleOXException(e);
-        } catch (Exception e) {
-            protocol.handleException(e);
-        }
+//        } catch (OXException e) {
+//            protocol.handleOXException(e, response);
+//        }
+//        catch (Exception e) {
+//            protocol.handleException(e, response);
+//        }
     }
 
-    protected void handlePost(String postData, ID constructedId, ServerSession serverSession, StateEntry entry) throws Exception {
+    protected void handlePost(String postData, ID constructedId, ServerSession serverSession, StateEntry entry) throws JSONException {
         if (postData != null) {
             List<JSONObject> stanzas = parseJSON(postData);
 
