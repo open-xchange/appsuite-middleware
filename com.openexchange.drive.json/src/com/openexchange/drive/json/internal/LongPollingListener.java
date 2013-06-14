@@ -90,6 +90,10 @@ public class LongPollingListener implements DriveEventListener {
 
     @Override
     public void onEvent(DriveEvent event) {
+        if (false == isInteresting(event)) {
+            LOG.debug("Skipping uninteresting event: " + event);
+            return;
+        }
         lock.lock();
         try {
             this.event = event;
@@ -117,11 +121,7 @@ public class LongPollingListener implements DriveEventListener {
             } else {
                 LOG.debug("Stored event available, no need to wait.");
             }
-            if (isInteresting(this.event)) {
-                data = this.event;
-            } else if (null != this.event) {
-                LOG.debug("Skipping uninteresting event: " + event);
-            }
+            data = this.event;
             this.event = null;
         } finally {
             lock.unlock();
