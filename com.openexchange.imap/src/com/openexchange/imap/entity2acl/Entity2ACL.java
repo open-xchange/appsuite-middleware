@@ -50,8 +50,6 @@
 package com.openexchange.imap.entity2acl;
 
 import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -67,20 +65,6 @@ import com.sun.mail.imap.IMAPStore;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class Entity2ACL {
-
-    private static final ConcurrentMap<String, String> GREETING_CACHE = new ConcurrentHashMap<String, String>(16);
-
-    private static String getGreeting(final IMAPStore imapStore, final IMAPConfig imapConfig) throws MessagingException {
-        String greeting = GREETING_CACHE.get(imapConfig.getServer());
-        if (null == greeting) {
-            final String grt = imapStore.getGreeting();
-            greeting = GREETING_CACHE.putIfAbsent(imapConfig.getServer(), grt);
-            if (null == greeting) {
-                greeting = grt;
-            }
-        }
-        return greeting;
-    }
 
     private static volatile boolean instantiated;
 
@@ -138,7 +122,7 @@ public abstract class Entity2ACL {
         try {
             Entity2ACL cached = imapConfig.getParameter(PARAM_NAME, Entity2ACL.class);
             if (null == cached) {
-                cached = Entity2ACLAutoDetector.implFor(getGreeting(imapStore, imapConfig), imapConfig);
+                cached = Entity2ACLAutoDetector.implFor(imapStore.getGreeting(), imapConfig);
                 imapConfig.setParameter(PARAM_NAME, cached);
             }
             return cached;

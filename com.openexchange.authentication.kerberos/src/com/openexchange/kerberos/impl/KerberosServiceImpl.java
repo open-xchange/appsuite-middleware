@@ -157,7 +157,7 @@ public final class KerberosServiceImpl implements KerberosService {
     @Override
     public ClientPrincipal authenticate(String username, String password) throws OXException {
         final ClientPrincipalImpl principal;
-        Subject mysubject = new Subject(); 
+        Subject mysubject = new Subject();
         LoginContext userLc;
         try {
             userLc = new LoginContext(userModuleName, mysubject, new KerberosCallbackHandler(username, password));
