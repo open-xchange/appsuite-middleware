@@ -157,14 +157,14 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
     }
 
 
-    private void notifyListeners(int contextID, String folderID, Object data) {
+    private void notifyListeners(int contextID, String folderID, Event event) {
         List<DriveEventListener> listeners = getListeners(contextID, folderID, false);
         if (null != listeners && 0 < listeners.size()) {
             for (DriveEventListener listener : listeners) {
                 SyncDirectoriesAction syncDirectoriesAction = new SyncDirectoriesAction();
                 List<DriveAction<? extends DriveVersion>> actions = new ArrayList<DriveAction<? extends DriveVersion>>(1);
                 actions.add(syncDirectoriesAction);
-                listener.onEvent(new DriveEventImpl(actions));
+                listener.onEvent(new DriveEventImpl(actions, event));
             }
         }
     }

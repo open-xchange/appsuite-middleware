@@ -53,8 +53,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
+import org.osgi.service.event.Event;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventListener;
+import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.session.Session;
 
 /**
@@ -115,7 +117,11 @@ public class LongPollingListener implements DriveEventListener {
             } else {
                 LOG.debug("Stored event available, no need to wait.");
             }
-            data = this.event;
+            if (isInteresting(this.event)) {
+                data = this.event;
+            } else if (null != this.event) {
+                LOG.debug("Skipping uninteresting event: " + event);
+            }
             this.event = null;
         } finally {
             lock.unlock();
@@ -126,6 +132,20 @@ public class LongPollingListener implements DriveEventListener {
             LOG.debug("Available event: " + data);
         }
         return data;
+    }
+
+    private boolean isInteresting(DriveEvent event) {
+        if (null != event) {
+            Event osgiEvent = event.getEvent();
+            if (null != osgiEvent) {
+                Session session = (Session)osgiEvent.getProperty(FileStorageEventConstants.SESSION);
+                if (null != session && this.session.getSessionID().equals(session.getSessionID())) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     /**

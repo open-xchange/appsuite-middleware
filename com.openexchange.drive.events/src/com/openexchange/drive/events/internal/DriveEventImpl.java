@@ -50,6 +50,7 @@
 package com.openexchange.drive.events.internal;
 
 import java.util.List;
+import org.osgi.service.event.Event;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.events.DriveEvent;
@@ -62,15 +63,22 @@ import com.openexchange.drive.events.DriveEvent;
 public class DriveEventImpl implements DriveEvent {
 
     private final List<DriveAction<? extends DriveVersion>> actions;
+    private final Event event;
 
-    public DriveEventImpl(List<DriveAction<? extends DriveVersion>> actions) {
+    public DriveEventImpl(List<DriveAction<? extends DriveVersion>> actions, Event event) {
         super();
         this.actions = actions;
+        this.event = event;
     }
 
     @Override
     public List<DriveAction<? extends DriveVersion>> getActions() {
         return actions;
+    }
+
+    @Override
+    public Event getEvent() {
+        return event;
     }
 
 }
