@@ -197,7 +197,7 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
     
     @Override
     public Object dynamicProperties(Object... args) {
-        md(args).setDynamicProperties((Map<String, Object>) args[0]);
+        md(args).setDynamicProperties((Map<String, Object>) args[1]);
         return null;
     }
 
