@@ -1,3 +1,7 @@
+* 2013-06-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27098: Added missing imports to MANIFEST.MF file
+
 * 2013-06-13 - choeger@open-xchange.com
 
  - Fix for bug 25205: Restarting the groupware process leads to a 'Port already
