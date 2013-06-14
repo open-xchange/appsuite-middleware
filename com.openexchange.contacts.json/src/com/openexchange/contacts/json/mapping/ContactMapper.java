@@ -49,6 +49,7 @@
 
 package com.openexchange.contacts.json.mapping;
 
+import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -87,6 +88,9 @@ import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
 import com.openexchange.groupware.tools.mappings.json.TimeMapping;
 import com.openexchange.image.ImageLocation;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.session.Session;
 
 /**
@@ -1665,7 +1669,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public String get(Contact contact) {
-                return contact.getEmail1();
+                return addr2String(contact.getEmail1());
             }
 
             @Override
@@ -1688,7 +1692,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public String get(Contact contact) {
-                return contact.getEmail2();
+                return addr2String(contact.getEmail2());
             }
 
             @Override
@@ -1711,7 +1715,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public String get(Contact contact) {
-                return contact.getEmail3();
+                return addr2String(contact.getEmail3());
             }
 
             @Override
@@ -3268,5 +3272,58 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
 		return mappings;
 	}
+
+	static String addr2String(final String primaryAddress) {
+        if (null == primaryAddress) {
+            return primaryAddress;
+        }
+        try {
+            final QuotedInternetAddress addr = new QuotedInternetAddress(primaryAddress);
+            final String sAddress = addr.getAddress();
+            final int pos = null == sAddress ? 0 : sAddress.indexOf('/');
+            if (pos <= 0) {
+                // No slash character present
+                return addr.toUnicodeString();
+            }
+            final StringAllocator sb = new StringAllocator(32);
+            final String personal = addr.getPersonal();
+            if (null == personal) {
+                sb.append(prepareAddress(sAddress.substring(0, pos)));
+            } else {
+                sb.append(preparePersonal(personal));
+                sb.append(" <").append(prepareAddress(sAddress.substring(0, pos))).append('>');
+            }
+            return sb.toString();
+        } catch (final Exception e) {
+            return primaryAddress;
+        }
+    }
+
+    /**
+     * Prepares specified personal string by surrounding it with quotes if needed.
+     *
+     * @param personal The personal
+     * @return The prepared personal
+     */
+    static String preparePersonal(final String personal) {
+        return MimeMessageUtility.quotePhrase(personal, false);
+    }
+
+    private static final String DUMMY_DOMAIN = "@unspecified-domain";
+
+    /**
+     * Prepares given address string by checking for possible mail-safe encodings.
+     *
+     * @param address The address
+     * @return The prepared address
+     */
+    static String prepareAddress(final String address) {
+        final String decoded = toIDN(MimeMessageUtility.decodeMultiEncodedHeader(address));
+        final int pos = decoded.indexOf(DUMMY_DOMAIN);
+        if (pos >= 0) {
+            return decoded.substring(0, pos);
+        }
+        return decoded;
+    }
 
 }
