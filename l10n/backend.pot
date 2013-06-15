@@ -9748,6 +9748,34 @@ msgstr ""
 msgid "Could not connect to transport server \"%1$s\" for login %2$s"
 msgstr ""
 
+#. Default port specified for mail protocol "%1$s", but SSL is enabled. Please review if appropriate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:129
+msgid ""
+"Default port specified for mail protocol \"%1$s\", but SSL is enabled. "
+"Please review if appropriate."
+msgstr ""
+
+#. Secure port specified for mail protocol "%1$s", but SSL is not enabled. Please review if appropriate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:132
+msgid ""
+"Secure port specified for mail protocol \"%1$s\", but SSL is not enabled. "
+"Please review if appropriate."
+msgstr ""
+
+#. Default port specified for transport protocol "%1$s", but SSL is enabled. Please review if appropriate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:135
+msgid ""
+"Default port specified for transport protocol \"%1$s\", but SSL is enabled. "
+"Please review if appropriate."
+msgstr ""
+
+#. Secure port specified for transport protocol "%1$s", but SSL is not enabled. Please review if appropriate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:138
+msgid ""
+"Secure port specified for transport protocol \"%1$s\", but SSL is not "
+"enabled. Please review if appropriate."
+msgstr ""
+
 #. *
 #. * SQL Problem: "%1$s".
 #.
