@@ -1,3 +1,7 @@
+* 2013-06-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26994: Output exception (+ stack trace) to log file if message transport fails due to a wrong password
+
 * 2013-06-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 27083: Throw appropriate error if an inline image cannot be found inside a message
