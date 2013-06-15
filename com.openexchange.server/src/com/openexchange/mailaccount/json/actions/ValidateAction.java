@@ -51,7 +51,7 @@ package com.openexchange.mailaccount.json.actions;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -118,7 +118,8 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         }
 
         final MailAccountDescription accountDescription = new MailAccountDescription();
-        MailAccountParser.getInstance().parse(accountDescription, jData.toObject());
+        final List<OXException> warnings = new LinkedList<OXException>();
+        MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
 
         if (accountDescription.getId() >= 0 && null == accountDescription.getPassword()) {
             /*
@@ -155,8 +156,6 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             final String tmp = requestData.getParameter("ignoreInvalidTransport");
             ignoreInvalidTransport = AJAXRequestDataTools.parseBoolParameter(tmp);
         }
-        // List for possible warnings
-        final List<OXException> warnings = new ArrayList<OXException>(2);
         if (tree) {
             return new AJAXRequestResult(actionValidateTree(accountDescription, session, ignoreInvalidTransport, warnings)).addWarnings(warnings);
         }

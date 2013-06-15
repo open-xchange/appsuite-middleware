@@ -53,7 +53,7 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import org.json.JSONException;
@@ -111,7 +111,8 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
         }
 
         final MailAccountDescription accountDescription = new MailAccountDescription();
-        MailAccountParser.getInstance().parse(accountDescription, jData.toObject());
+        final List<OXException> warnings = new LinkedList<OXException>();
+        MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
 
         checkNeededFields(accountDescription);
 
@@ -130,9 +131,6 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
 
         final MailAccountStorageService storageService =
             ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-
-        // List for possible warnings
-        final List<OXException> warnings = new ArrayList<OXException>(2);
 
         {
             // Don't check for POP3 account due to access restrictions (login only allowed every n minutes)

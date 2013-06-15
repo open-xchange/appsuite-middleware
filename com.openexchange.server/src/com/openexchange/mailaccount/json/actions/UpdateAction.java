@@ -53,9 +53,9 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -135,7 +135,8 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
         final MailAccountDescription accountDescription = new MailAccountDescription();
-        final Set<Attribute> fieldsToUpdate = MailAccountParser.getInstance().parse(accountDescription, jData.toObject());
+        final List<OXException> warnings = new LinkedList<OXException>();
+        final Set<Attribute> fieldsToUpdate = MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
 
         final Set<Attribute> notAllowed = new HashSet<Attribute>(fieldsToUpdate);
         notAllowed.removeAll(WEBMAIL_ALLOWED);
@@ -164,8 +165,6 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
                 Integer.valueOf(contextId));
         }
 
-        // List for possible warnings
-        final List<OXException> warnings = new ArrayList<OXException>(2);
         boolean clearStamp = false;
         {
             // Don't check for POP3 account due to access restrictions (login only allowed every n minutes)
