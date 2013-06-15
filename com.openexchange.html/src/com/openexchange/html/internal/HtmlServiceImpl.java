@@ -1021,6 +1021,10 @@ public final class HtmlServiceImpl implements HtmlService {
         "(<[a-zA-Z]+[^>]*?)(?:(?:background=([^\\s>]*))|(?:background=\"([^\"]*)\"))([^>]*/?>)",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
+    private static final Pattern HREF_PATTERN = Pattern.compile(
+        "(<[a-zA-Z]+[^>]*?)(?:(?:href=([^\\s>]*))|(?:href=\"([^\"]*)\"))([^>]*/?>)",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
     private static String checkBaseTag(final String htmlContent, final boolean externalImagesAllowed, final int end) {
         Matcher m = PATTERN_BASE_TAG.matcher(htmlContent);
         if (!m.find() || m.end() >= end) {
@@ -1081,28 +1085,65 @@ public final class HtmlServiceImpl implements HtmlService {
              * Replace images
              */
             do {
-                final String backgroundTag = m.group();
-                /*
-                 * Extract href
-                 */
-                int pos;
-                int epos;
-                String href = m.group(2);
-                if (href == null) {
-                    href = m.group(3);
-                    pos = m.start(3);
-                    epos = m.end(3);
-                } else {
-                    pos = m.start(2);
-                    epos = m.end(2);
-                }
-                href = trimHref(href);
-                if (!href.startsWith("cid") && !href.startsWith("http")) {
-                    if (href.charAt(0) != '/') {
-                        href = '/' + href;
+                final String hrefTag = m.group();
+                final int pos = hrefTag.indexOf("background=");
+                final int epos;
+                if (pos >= 0) {
+                    String href;
+                    final char c = hrefTag.charAt(pos+11);
+                    if ('"' == c) {
+                        epos = hrefTag.indexOf('"', pos+12);
+                        href = hrefTag.substring(pos+12, epos);
+                    } else if ('\'' == c) {
+                        epos = hrefTag.indexOf('\'', pos+12);
+                        href = hrefTag.substring(pos+12, epos);
+                    } else {
+                        epos = hrefTag.indexOf('>', pos+11);
+                        href = hrefTag.substring(pos+11, epos);
                     }
-                    final String replacement = backgroundTag.substring(0, pos) + base + href + backgroundTag.substring(epos);
-                    mr.appendLiteralReplacement(sb, replacement);
+                    if (!href.startsWith("cid") && !href.startsWith("http")) {
+                        if (href.charAt(0) != '/') {
+                            href = '/' + href;
+                        }
+                        final String replacement = hrefTag.substring(0, pos) + "background=\"" + base + href + "\"" + hrefTag.substring(epos);
+                        mr.appendLiteralReplacement(sb, replacement);
+                    }
+                }
+            } while (m.find());
+        }
+        mr.appendTail(sb);
+        html = sb.toString();
+        sb.setLength(0);
+        m = HREF_PATTERN.matcher(html);
+        mr = new MatcherReplacer(m, html);
+        if (m.find()) {
+            /*
+             * Replace images
+             */
+            do {
+                final String hrefTag = m.group();
+                final int pos = hrefTag.indexOf("href=");
+                final int epos;
+                if (pos >= 0) {
+                    String href;
+                    final char c = hrefTag.charAt(pos+5);
+                    if ('"' == c) {
+                        epos = hrefTag.indexOf('"', pos+6);
+                        href = hrefTag.substring(pos+6, epos);
+                    } else if ('\'' == c) {
+                        epos = hrefTag.indexOf('\'', pos+6);
+                        href = hrefTag.substring(pos+6, epos);
+                    } else {
+                        epos = hrefTag.indexOf('>', pos+5);
+                        href = hrefTag.substring(pos+5, epos);
+                    }
+                    if (!href.startsWith("cid") && !href.startsWith("http")) {
+                        if (href.charAt(0) != '/') {
+                            href = '/' + href;
+                        }
+                        final String replacement = hrefTag.substring(0, pos) + "href=\"" + base + href + "\"" + hrefTag.substring(epos);
+                        mr.appendLiteralReplacement(sb, replacement);
+                    }
                 }
             } while (m.find());
         }
