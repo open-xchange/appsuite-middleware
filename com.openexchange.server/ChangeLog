@@ -1,6 +1,7 @@
 * 2013-06-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 26994: Output exception (+ stack trace) to log file if message transport fails due to a wrong password
+ - Fix for bug 25194: Removed auto-check of ports vs. SSL flag, but drop a warning instead
 
 * 2013-06-13 - thorben.betten@open-xchange.com
 
