@@ -1589,20 +1589,19 @@ public final class HtmlServiceImpl implements HtmlService {
         do {
             try {
                 tmp.setLength(0);
-
+                // Check for valid surrogate pair
                 final char c1 = (char) Integer.parseInt(m.group(1), 10);
                 final char c2 = (char) Integer.parseInt(m.group(2), 10);
-                tmp.append(c1).append(c2);
-
-                final byte[] bytes = tmp.toString().getBytes(Charsets.forName("UTF-32"));
-                tmp.setLength(0);
-                tmp.append("&#").append(Integer.parseInt(asHex(bytes), 16)).append(';');
-                // tmp.append("&#x").append(asHex(bytes)).append(';');
-
-                mr.appendLiteralReplacement(builder, tmp.toString());
+                if (Character.isSurrogatePair(c1, c2)) {
+                    final int codePoint = Character.toCodePoint(c1, c2);
+                    tmp.setLength(0);
+                    tmp.append("&#").append(codePoint).append(';');
+                    mr.appendLiteralReplacement(builder, tmp.toString());
+                }
             } catch (final NumberFormatException e) {
                 tmp.setLength(0);
                 tmp.append("&amp;#x").append(m.group(1)).append("&#59;");
+                tmp.append("&amp;#x").append(m.group(2)).append("&#59;");
                 mr.appendLiteralReplacement(builder, tmp.toString());
                 tmp.setLength(0);
             }

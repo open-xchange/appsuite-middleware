@@ -58,7 +58,7 @@ import org.json.helpers.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link JSONInputStream} - Directly converts a given {@link JSONValue} to a readable input stream.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONInputStream extends InputStream {
@@ -69,21 +69,21 @@ public final class JSONInputStream extends InputStream {
 
         /**
          * Gets the closing character
-         * 
+         *
          * @return The closing character
          */
         char getClosing();
 
         /**
          * Signals if there is another element to write
-         * 
+         *
          * @return <code>true</code> if further element available; otherwise <code>false</code>
          */
         boolean hasNext();
 
         /**
          * Gets the next element to write
-         * 
+         *
          * @return The next element
          * @throws IOException If next element cannot be returned
          */
@@ -91,7 +91,7 @@ public final class JSONInputStream extends InputStream {
 
         /**
          * Attempts to write more bytes.
-         * 
+         *
          * @return <code>true</code> if more bytes available to write; otherwise <code>false</code> if no more bytes are available
          * @throws IOException If an I/O error occurs
          */
@@ -164,8 +164,15 @@ public final class JSONInputStream extends InputStream {
             final StringAllocator sa = new StringAllocator((length * 3) / 2 + 1);
             for (int i = 0; i < length; i++) {
                 final char c = str.charAt(i);
-                if (c > 127) {
-                    appendAsJsonUnicode(c, sa);
+                if ((c > 127) || (c < 32)) {
+                    if (Character.isSupplementaryCodePoint(c)) {
+                        final char[] chars = Character.toChars(c);
+                        for (int j = 0; j < chars.length; j++) {
+                            appendAsJsonUnicode(chars[j], sa);
+                        }
+                    } else {
+                        appendAsJsonUnicode(c, sa);
+                    }
                 } else {
                     sa.append(c);
                 }
@@ -184,11 +191,13 @@ public final class JSONInputStream extends InputStream {
 
         private boolean isAscii(final String s, final int length) {
             boolean isAscci = true;
-            for (int i = 0; (i < length) && isAscci; i++) {
-                isAscci = (s.charAt(i) < 128);
+            for (int i = 0; isAscci && (i < length); i++) {
+                final char c = s.charAt(i);
+                isAscci = (c < 128) && (c > 31);
             }
             return isAscci;
         }
+
     }
 
     private final class ArrayBufferer extends AbstractBufferer {
@@ -259,7 +268,7 @@ public final class JSONInputStream extends InputStream {
 
     /**
      * Initializes a new {@link JSONInputStream}.
-     * 
+     *
      * @param jsonValue The JSON value to read from
      * @param charset The charset
      */
