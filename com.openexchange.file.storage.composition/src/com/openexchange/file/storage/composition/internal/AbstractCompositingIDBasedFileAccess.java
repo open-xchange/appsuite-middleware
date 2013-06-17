@@ -55,12 +55,14 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
@@ -80,12 +82,14 @@ import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
+import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FileStreamHandler;
 import com.openexchange.file.storage.composition.FileStreamHandlerRegistry;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
+import com.openexchange.file.storage.composition.IDBasedSequenceNumberProvider;
 import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
@@ -106,7 +110,7 @@ import com.openexchange.tx.TransactionException;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class AbstractCompositingIDBasedFileAccess extends AbstractService<Transaction> implements IDBasedIgnorableVersionFileAccess {
+public abstract class AbstractCompositingIDBasedFileAccess extends AbstractService<Transaction> implements IDBasedIgnorableVersionFileAccess, IDBasedSequenceNumberProvider {
 
     private static final AtomicReference<FileStreamHandlerRegistry> HANDLER_REGISTRY = new AtomicReference<FileStreamHandlerRegistry>();
 
@@ -181,6 +185,50 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             order,
             ignoreDeleted);
         return fixIDs(delta, folderID.getService(), folderID.getAccountId());
+    }
+
+    @Override
+    public Map<String, Long> getSequenceNumbers(List<String> folderIds) throws OXException {
+        if (null == folderIds || 0 == folderIds.size()) {
+            return Collections.emptyMap();
+        }
+        /*
+         * determine the file access for queried folders
+         */
+        Map<FileStorageFileAccess, List<String>> foldersPerFileAccess = new HashMap<FileStorageFileAccess, List<String>>();
+        for (String folderId : folderIds) {
+            FolderID folderID = new FolderID(folderId);
+            FileStorageFileAccess fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
+            List<String> folders = foldersPerFileAccess.get(fileAccess);
+            if (null == folders) {
+                folders = new ArrayList<String>();
+                foldersPerFileAccess.put(fileAccess, folders);
+            }
+            folders.add(folderID.getFolderId());
+        }
+        /*
+         * get folder sequence numbers from file access
+         */
+        Map<String, Long> sequenceNumbers = new HashMap<String, Long>(folderIds.size());
+        for (Entry<FileStorageFileAccess, List<String>> entry : foldersPerFileAccess.entrySet()) {
+            FileStorageFileAccess fileAccess = entry.getKey();
+            if (FileStorageSequenceNumberProvider.class.isInstance(fileAccess)) {
+                /*
+                 * use optimized sequence number access
+                 */
+                sequenceNumbers.putAll(((FileStorageSequenceNumberProvider)fileAccess).getSequenceNumbers(entry.getValue()));
+            } else {
+                /*
+                 * determine sequence numbers via delta as fallback
+                 */
+                List<Field> fields = Arrays.asList(new Field[] { Field.SEQUENCE_NUMBER });
+                for (String folderId : entry.getValue()) {
+                    Delta<File> delta = fileAccess.getDelta(folderId, 0, fields, Field.SEQUENCE_NUMBER, SortDirection.DESC, false);
+                    sequenceNumbers.put(folderId, Long.valueOf(delta.sequenceNumber()));
+                }
+            }
+        }
+        return sequenceNumbers;
     }
 
     @Override

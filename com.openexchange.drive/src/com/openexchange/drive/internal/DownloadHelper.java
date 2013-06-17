@@ -58,8 +58,8 @@ import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.FileStorageRandomFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 
 /**
  * {@link DownloadHelper}
@@ -110,19 +110,17 @@ public class DownloadHelper {
     }
 
     private InputStream getInputStream(File file, long offset, long length) throws OXException {
-        FileStorageFileAccess fileAccess = session.getStorage().getFileAccess();
+        IDBasedFileAccess fileAccess = session.getStorage().getFileAccess();
         InputStream inputStream = null;
         if (0 < offset || 0 < length) {
             /*
              * offset or maximum length is requested, get partial stream
              */
-            if (FileStorageRandomFileAccess.class.isInstance(fileAccess)) {
-                inputStream = ((FileStorageRandomFileAccess)fileAccess).getDocument(
-                    file.getFolderId(), file.getId(), file.getVersion(), offset, length);
+            if (IDBasedRandomFileAccess.class.isInstance(fileAccess)) {
+                inputStream = ((IDBasedRandomFileAccess)fileAccess).getDocument(file.getId(), file.getVersion(), offset, length);
             } else {
                 try {
-                    inputStream = new PartialInputStream(
-                        fileAccess.getDocument(file.getFolderId(), file.getId(), file.getVersion()), offset, length);
+                    inputStream = new PartialInputStream(fileAccess.getDocument(file.getId(), file.getVersion()), offset, length);
                 } catch (IOException e) {
                     throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
                 }
@@ -131,7 +129,7 @@ public class DownloadHelper {
             /*
              * get complete stream by default
              */
-            inputStream = fileAccess.getDocument(file.getFolderId(), file.getId(), file.getVersion());
+            inputStream = fileAccess.getDocument(file.getId(), file.getVersion());
         }
         return inputStream;
     }

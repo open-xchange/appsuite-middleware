@@ -67,9 +67,9 @@ import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
@@ -148,7 +148,7 @@ public class UploadHelper {
          * process upload
          */
         String checksum = null;
-        FileStorageFileAccess fileAccess = session.getStorage().getFileAccess();
+        IDBasedFileAccess fileAccess = session.getStorage().getFileAccess();
         List<Field> modifiedFields = Arrays.asList(File.Field.FILE_SIZE, File.Field.FILE_MIMETYPE);
         if (0 == offset) {
             /*
@@ -194,9 +194,9 @@ public class UploadHelper {
         DigestInputStream digestStream = null;
         try {
             digestStream = new DigestInputStream(inputStream, MessageDigest.getInstance("MD5"));
-            FileStorageFileAccess fileAccess = session.getStorage().getFileAccess();
-            if (ignoreVersion && FileStorageIgnorableVersionFileAccess.class.isInstance(fileAccess)) {
-                ((FileStorageIgnorableVersionFileAccess)fileAccess).saveDocument(file, digestStream, sequenceNumber, modifiedFields, true);
+            IDBasedFileAccess fileAccess = session.getStorage().getFileAccess();
+            if (ignoreVersion && IDBasedIgnorableVersionFileAccess.class.isInstance(fileAccess)) {
+                ((IDBasedIgnorableVersionFileAccess)fileAccess).saveDocument(file, digestStream, sequenceNumber, modifiedFields, true);
             } else {
                 fileAccess.saveDocument(file, digestStream, sequenceNumber, modifiedFields);
             }

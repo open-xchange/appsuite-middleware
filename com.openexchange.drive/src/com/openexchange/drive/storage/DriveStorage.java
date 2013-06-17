@@ -74,13 +74,14 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.composition.IDBasedSequenceNumberProvider;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -98,7 +99,7 @@ public class DriveStorage {
     private final DriveSession session;
     private final FolderCache knownFolders;
 
-    private FileStorageFileAccess fileAccess;
+    private IDBasedFileAccess fileAccess;
     private FileStorageFolderAccess folderAccess;
     private FileStorageAccountAccess accountAccess;
 
@@ -132,14 +133,12 @@ public class DriveStorage {
         copiedFile.setLastModified(new Date());
         copiedFile.setVersion("1");
         List<Field> fileFields = Arrays.asList(new Field[] { Field.FILENAME, Field.TITLE, Field.FOLDER_ID });
-        IDTuple sourceId = new IDTuple(sourceFile.getFolderId(), sourceFile.getId());
         if (LOG.isDebugEnabled()) {
             LOG.debug(this.toString() + "cp " + combine(getPath(sourceFile.getFolderId()), sourceFile.getFileName()) + " " +
                 combine(targetPath, targetFileName));
         }
-        IDTuple targetId = getFileAccess().copy(sourceId, copiedFile.getFolderId(), copiedFile, null, fileFields);
-        copiedFile.setFolderId(targetId.getFolder());
-        copiedFile.setId(targetId.getId());
+        String targetId = getFileAccess().copy(sourceFile.getId(), copiedFile.getFolderId(), copiedFile, null, fileFields);
+        copiedFile.setId(targetId);
         return copiedFile;
     }
 
@@ -152,14 +151,15 @@ public class DriveStorage {
      * @throws OXException
      */
     public File copyFile(File sourceFile, File targetFile) throws OXException {
-        targetFile.setLastModified(new Date());
-        targetFile.setFileSize(sourceFile.getFileSize());
+        File copiedFile = new DefaultFile(targetFile);
+        copiedFile.setLastModified(new Date());
+        copiedFile.setFileSize(sourceFile.getFileSize());
         if (LOG.isDebugEnabled()) {
             LOG.debug(this.toString() + "cp " + combine(getPath(sourceFile.getFolderId()), sourceFile.getFileName()) + " " +
-                combine(getPath(targetFile.getFolderId()), targetFile.getFileName()));
+                combine(getPath(copiedFile.getFolderId()), copiedFile.getFileName()));
         }
-        getFileAccess().saveDocument(targetFile, getDocument(sourceFile), targetFile.getSequenceNumber());
-        return targetFile;
+        getFileAccess().saveDocument(copiedFile, getDocument(sourceFile), copiedFile.getSequenceNumber());
+        return copiedFile;
     }
 
     /**
@@ -184,11 +184,10 @@ public class DriveStorage {
      * @throws OXException
      */
     public File deleteFile(File file) throws OXException {
-        IDTuple id = new IDTuple(file.getFolderId(), file.getId());
         if (LOG.isDebugEnabled()) {
             LOG.debug(this.toString() + "rm " + combine(getPath(file.getFolderId()), file.getFileName()));
         }
-        List<IDTuple> notRemoved = getFileAccess().removeDocument(Arrays.asList(new IDTuple[] { id }), file.getSequenceNumber());
+        List<String> notRemoved = getFileAccess().removeDocument(Arrays.asList(new String[] { file.getId() }), file.getSequenceNumber());
         if (null != notRemoved && 0 < notRemoved.size()) {
             throw DriveExceptionCodes.FILE_NOT_FOUND.create();//TODO: exception for this
         }
@@ -362,7 +361,7 @@ public class DriveStorage {
      * @throws OXException
      */
     public boolean supportsFolderSequenceNumbers() throws OXException {
-        return FileStorageSequenceNumberProvider.class.isInstance(getFileAccess());
+        return IDBasedSequenceNumberProvider.class.isInstance(getFileAccess());
     }
 
     /**
@@ -377,15 +376,15 @@ public class DriveStorage {
         if (null == folderIDs || 0 == folderIDs.size()) {
             return Collections.emptyMap();
         }
-        FileStorageFileAccess fileStorageFileAccess = getFileAccess();
-        if (false == FileStorageSequenceNumberProvider.class.isInstance(fileStorageFileAccess)) {
-            throw new UnsupportedOperationException("FileStorageSequenceNumberProvider is needed");
+        IDBasedFileAccess fileStorageFileAccess = getFileAccess();
+        if (false == IDBasedSequenceNumberProvider.class.isInstance(fileStorageFileAccess)) {
+            throw new UnsupportedOperationException("IDBasedSequenceNumberProvider is needed");
         }
-        return ((FileStorageSequenceNumberProvider)fileStorageFileAccess).getSequenceNumbers(folderIDs);
+        return ((IDBasedSequenceNumberProvider)fileStorageFileAccess).getSequenceNumbers(folderIDs);
     }
 
     public InputStream getDocument(File file) throws OXException {
-        return getFileAccess().getDocument(file.getFolderId(), file.getId(), file.getVersion());
+        return getFileAccess().getDocument(file.getId(), file.getVersion());
     }
 
     private SearchIterator<File> getFilesIterator(String folderID, String pattern) throws OXException {
@@ -402,7 +401,7 @@ public class DriveStorage {
     }
 
     public File getFile(String path, String id, String version) throws OXException {
-        return getFileAccess().getFileMetadata(getFolderID(path), id, version);
+        return getFileAccess().getFileMetadata(id, version);
     }
 
     public List<File> getFiles(String path) throws OXException {
@@ -605,9 +604,10 @@ public class DriveStorage {
         return folderAccess;
     }
 
-    public FileStorageFileAccess getFileAccess() throws OXException {
+    public IDBasedFileAccess getFileAccess() throws OXException {
         if (null == fileAccess) {
-            fileAccess = getAccountAccess().getFileAccess();
+            IDBasedFileAccessFactory factory = DriveServiceLookup.getService(IDBasedFileAccessFactory.class, true);
+            fileAccess = factory.createAccess(session.getServerSession());
         }
         return fileAccess;
     }
