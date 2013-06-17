@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,32 +47,49 @@
  *
  */
 
-package com.openexchange.tokenlogin;
+package com.openexchange.tokenlogin.impl;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap.Entry;
+import com.javacodegeeks.concurrent.EvictionPolicy;
 
 /**
- * {@link TokenLoginExceptionMessages}
+ * {@link IdleExpirationPolicy}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class TokenLoginExceptionMessages implements LocalizableStrings {
+public final class IdleExpirationPolicy implements EvictionPolicy {
 
-    /**
-     * Initializes a new {@link TokenLoginExceptionMessages}.
-     */
-    private TokenLoginExceptionMessages() {
+    private final long idleTimeThresholdMillis;
+
+    public IdleExpirationPolicy(final long idleTimeThresholdMillis) {
         super();
+        this.idleTimeThresholdMillis = idleTimeThresholdMillis;
     }
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+    @Override
+    public boolean accessOrder() {
+        return true;
+    }
 
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+    @Override
+    public boolean insertionOrder() {
+        return false;
+    }
 
-    // No such token: %1$s
-    public static final String NO_SUCH_TOKEN_MSG = "No such token: %1$s";
+    @Override
+    public Entry<?, ?> evictElement(final Entry<?, ?> head) {
+        return head.getAfter();
+    }
+
+    @Override
+    public Entry<?, ?> recordInsertion(final Entry<?, ?> head, final Entry<?, ?> insertedEntry) {
+        return null;
+    }
+
+    @Override
+    public Entry<?, ?> recordAccess(final Entry<?, ?> head, final Entry<?, ?> accessedEntry) {
+        final long accessedEntryIdleTime = (System.currentTimeMillis() - accessedEntry.getLastAccessTime());
+        return accessedEntryIdleTime < idleTimeThresholdMillis ? head : accessedEntry.getAfter();
+    }
 
 }

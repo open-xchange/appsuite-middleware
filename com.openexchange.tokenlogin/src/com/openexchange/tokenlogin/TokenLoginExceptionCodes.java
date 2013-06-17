@@ -70,6 +70,10 @@ public enum TokenLoginExceptionCodes implements OXExceptionCode {
      * An I/O error occurred: %1$s
      */
     IO_ERROR(TokenLoginExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+    /**
+     * No such token: %1$s
+     */
+    NO_SUCH_TOKEN(TokenLoginExceptionMessages.NO_SUCH_TOKEN_MSG, CATEGORY_ERROR, 3),
 
     ;
 
