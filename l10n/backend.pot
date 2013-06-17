@@ -11642,6 +11642,11 @@ msgstr ""
 msgid "This template was not whitelisted,"
 msgstr ""
 
+#. No such token: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tokenlogin/src/com/openexchange/tokenlogin/TokenLoginExceptionMessages.java:76
+msgid "No such token: %1$s"
+msgstr ""
+
 #. The consumer key/consumer secret pair is missing in configuration.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:72
 msgid "The consumer key/consumer secret pair is missing in configuration."
