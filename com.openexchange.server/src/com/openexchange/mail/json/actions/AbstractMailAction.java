@@ -97,7 +97,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractMailAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractMailAction implements AJAXActionService, MailActionConstants {
@@ -129,7 +129,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     /**
      * Gets the service of specified type
-     * 
+     *
      * @param clazz The service's class
      * @return The service or <code>null</code> is absent
      */
@@ -139,7 +139,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     /**
      * Gets the mail interface.
-     * 
+     *
      * @param mailRequest The mail request
      * @return The mail interface
      * @throws OXException If mail interface cannot be initialized
@@ -168,7 +168,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     /**
      * Gets the closeables.
-     * 
+     *
      * @param mailRequest The mail request
      * @return The closeables or <code>null</code> if state is absent
      * @throws OXException If closebales cannot be returned
@@ -219,7 +219,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     /**
      * Performs specified mail request.
-     * 
+     *
      * @param req The mail request
      * @return The result
      * @throws OXException If an error occurs
@@ -229,7 +229,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     /**
      * Triggers the contact collector for specified mail's addresses.
-     * 
+     *
      * @param session The session
      * @param mail The mail
      */
@@ -268,7 +268,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     /**
      * Triggers the contact collector for specified JSON mail's addresses.
-     * 
+     *
      * @param session The session
      * @param mail The JSON mail
      */
@@ -316,7 +316,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     /**
      * Detects the display mode.
-     * 
+     *
      * @param modifyable whether modifiable.
      * @param view the view
      * @param usm The user mail settings
@@ -351,7 +351,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     /**
      * Gets the result filled with JSON <code>NULL</code>.
-     * 
+     *
      * @return The result with JSON <code>NULL</code>.
      */
     protected static AJAXRequestResult getJSONNullResult() {
@@ -360,7 +360,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     /**
      * Resolves specified "from" address to associated account identifier
-     * 
+     *
      * @param session The session
      * @param from The from address
      * @param checkTransportSupport <code>true</code> to check transport support
@@ -416,6 +416,11 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                     }
                     if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
                         MsisdnUtility.addMsisdnAddress(validAddrs, session);
+                        final String address = from.getAddress();
+                        final int pos = address.indexOf('/');
+                        if (pos > 0) {
+                            from.setAddress(address.substring(0, pos));
+                        }
                     }
                     if (!validAddrs.contains(from)) {
                         throw MailExceptionCode.INVALID_SENDER.create(from.toString());

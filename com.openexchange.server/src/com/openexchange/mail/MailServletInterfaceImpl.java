@@ -1855,12 +1855,22 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 for (final String alias : user.getAliases()) {
                     validAddrs.add(new QuotedInternetAddress(alias));
                 }
-                if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
+                final boolean supportMsisdnAddresses = MailProperties.getInstance().isSupportMsisdnAddresses();
+                if (supportMsisdnAddresses) {
                     MsisdnUtility.addMsisdnAddress(validAddrs, this.session);
                 }
                 for (final MailMessage mail : mails) {
                     final InternetAddress[] from = mail.getFrom();
                     final List<InternetAddress> froms = Arrays.asList(from);
+                    if (supportMsisdnAddresses) {
+                        for (final InternetAddress internetAddress : froms) {
+                            final String address = internetAddress.getAddress();
+                            final int pos = address.indexOf('/');
+                            if (pos > 0) {
+                                internetAddress.setAddress(address.substring(0, pos));
+                            }
+                        }
+                    }
                     if (!validAddrs.containsAll(froms)) {
                         throw MailExceptionCode.INVALID_SENDER.create(froms.size() == 1 ? froms.get(0).toString() : Arrays.toString(from));
                     }
@@ -3066,10 +3076,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     for (final String alias : user.getAliases()) {
                         validAddrs.add(new QuotedInternetAddress(alias));
                     }
+                    final QuotedInternetAddress fromAddress = new QuotedInternetAddress(fromAddr);
                     if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
                         MsisdnUtility.addMsisdnAddress(validAddrs, session);
+                        final String address = fromAddress.getAddress();
+                        final int pos = address.indexOf('/');
+                        if (pos > 0) {
+                            fromAddress.setAddress(address.substring(0, pos));
+                        }
                     }
-                    if (!validAddrs.contains(new QuotedInternetAddress(fromAddr))) {
+                    if (!validAddrs.contains(fromAddress)) {
                         throw MailExceptionCode.INVALID_SENDER.create(fromAddr);
                     }
                 } catch (final AddressException e) {
