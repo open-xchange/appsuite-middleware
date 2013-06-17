@@ -56,6 +56,7 @@ import com.openexchange.documentation.annotations.Actions;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
@@ -113,7 +114,7 @@ public class UpdateAction extends AbstractWriteAction {
             fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns());
         }
 
-        return success(file.getSequenceNumber());
+        return result(fileAccess.getFileMetadata(file.getId(), FileStorageFileAccess.CURRENT_VERSION), request);
     }
 
 }
