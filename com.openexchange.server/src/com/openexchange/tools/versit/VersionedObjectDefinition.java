@@ -55,6 +55,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import com.openexchange.java.Charsets;
 
 /**
  * @author Viktor Pracht
@@ -106,7 +107,7 @@ public class VersionedObjectDefinition extends ObjectDefinition {
 
     @Override
     public Reader getReader(final InputStream stream, final String charset) throws IOException {
-        return new ReaderScanner(new InputStreamReader(stream, charset));
+        return new ReaderScanner(new InputStreamReader(stream, Charsets.forName(charset)));
     }
 
     @Override
