@@ -68,7 +68,8 @@ public class CreateIcalVcardTables extends AbstractCreateTableImpl {
         + "cid INT4 UNSIGNED NOT NULL," 
         + "principal text NOT NULL," 
         + "calendarfolder INT4 UNSIGNED NOT NULL," 
-        + "taskfolder INT4 UNSIGNED NOT NULL" 
+        + "taskfolder INT4 UNSIGNED NOT NULL,"
+        + "PRIMARY KEY (cid, object_id)"
       + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     
     private static final String createIcalIdsTable = "CREATE TABLE ical_ids ("
@@ -77,14 +78,16 @@ public class CreateIcalVcardTables extends AbstractCreateTableImpl {
         + "principal_id INT4 UNSIGNED NOT NULL,"
         + "client_id text,"
         + "target_object_id int,"
-        + "module int"
+        + "module int,"
+        + "PRIMARY KEY (cid, object_id)"
       + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     
     private static final String createVcardPrincipalTable = "CREATE TABLE vcard_principal ("
         + "object_id int NOT NULL,"
         + "cid INT4 UNSIGNED NOT NULL,"
         + "principal text,"
-        + "contactfolder int"
+        + "contactfolder int,"
+        + "PRIMARY KEY (cid, object_id)"
       + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     
     private static final String createVcardIdsTable = "CREATE TABLE vcard_ids ("
@@ -92,7 +95,8 @@ public class CreateIcalVcardTables extends AbstractCreateTableImpl {
         + "cid INT4 UNSIGNED NOT NULL,"
         + "principal_id int,"
         + "client_id text,"
-        + "target_object_id int"
+        + "target_object_id int,"
+        + "PRIMARY KEY (cid, object_id)"
       + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     
     /**

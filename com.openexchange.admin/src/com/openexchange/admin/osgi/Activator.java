@@ -78,6 +78,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -102,8 +103,10 @@ public class Activator extends HousekeepingActivator {
         track(PublicationTargetDiscoveryService.class, new RegistryServiceTrackerCustomizer<PublicationTargetDiscoveryService>(context, AdminServiceRegistry.getInstance(), PublicationTargetDiscoveryService.class));
         AdminCache.compareAndSetBundleContext(null, context);
         final ConfigurationService configurationService = getService(ConfigurationService.class);
+        final FullPrimaryKeySupportService fullPrimaryKeySupportService = getService(FullPrimaryKeySupportService.class);
         AdminCache.compareAndSetConfigurationService(null, configurationService);
         AdminServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
+        AdminServiceRegistry.getInstance().addService(FullPrimaryKeySupportService.class, fullPrimaryKeySupportService);
         track(CreateTableService.class, new CreateTableCustomizer(context));
         openTrackers();
 
@@ -193,6 +196,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, FullPrimaryKeySupportService.class };
     }
 }

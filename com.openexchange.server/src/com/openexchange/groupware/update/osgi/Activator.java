@@ -83,7 +83,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     public void startBundle() {
-        registerService(CreateTableService.class, new CreateUpdateTaskTable());
 
         final ConfigurationService configService = getService(ConfigurationService.class);
         final FullPrimaryKeySupportImpl fullPrimaryKeySupport = new FullPrimaryKeySupportImpl(configService);
@@ -97,6 +96,8 @@ public class Activator extends HousekeepingActivator {
         rememberTracker(new ServiceTracker<CacheService, CacheService>(context, CacheService.class.getName(), new CacheCustomizer(context)));
 
         openTrackers();
+        
+        registerService(CreateTableService.class, new CreateUpdateTaskTable(fullPrimaryKeySupport));
     }
 
     @Override

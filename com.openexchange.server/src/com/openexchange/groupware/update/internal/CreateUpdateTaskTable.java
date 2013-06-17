@@ -51,6 +51,7 @@ package com.openexchange.groupware.update.internal;
 
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.CreateTableService;
+import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 
 /**
  * Implements the {@link CreateTableService} for creating the updateTask table.
@@ -58,6 +59,8 @@ import com.openexchange.database.CreateTableService;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class CreateUpdateTaskTable extends AbstractCreateTableImpl {
+    
+    private final FullPrimaryKeySupportService fullPrimaryKeySupportService;
 
     private static final String[] CREATED_TABLES = { "updateTask" };
 
@@ -65,15 +68,24 @@ public final class CreateUpdateTaskTable extends AbstractCreateTableImpl {
         // Using full index is not possible to convert to a primary key because two different tasks may have same beginning letters that
         // fit into the index and causing a collision.
         "CREATE TABLE updateTask (cid INT4 UNSIGNED NOT NULL,taskName VARCHAR(1024) NOT NULL,successful BOOLEAN NOT NULL," +
-        "lastModified INT8 NOT NULL,uuid BINARY(16),INDEX full (cid,taskName(255))) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
+        "lastModified INT8 NOT NULL,uuid BINARY(16) DEFAULT NULL,INDEX full (cid,taskName(255))) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
+    };
+    
+    static final String[] CREATES_PRIMARY_KEY = {
+        "CREATE TABLE updateTask (cid INT4 UNSIGNED NOT NULL,taskName VARCHAR(1024) NOT NULL,successful BOOLEAN NOT NULL," +
+            "lastModified INT8 NOT NULL,uuid BINARY(16) NOT NULL,PRIMARY KEY (uuid),INDEX full (cid,taskName(255))) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
     };
 
-    public CreateUpdateTaskTable() {
+    public CreateUpdateTaskTable(FullPrimaryKeySupportService fullPrimaryKeySupportService) {
         super();
+        this.fullPrimaryKeySupportService = fullPrimaryKeySupportService;
     }
 
     @Override
     protected String[] getCreateStatements() {
+        if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
+            return CREATES_PRIMARY_KEY;
+        }
         return CREATES.clone();
     }
 

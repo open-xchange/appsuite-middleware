@@ -91,7 +91,7 @@ public class PresenceSubscribeActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, new PresenceSubscriptionsTable());
 
         final FullPrimaryKeySupportService fullPrimaryKeySupportService = getService(FullPrimaryKeySupportService.class);
-        if (null != fullPrimaryKeySupportService && fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
+        if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
             registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
                 @Override

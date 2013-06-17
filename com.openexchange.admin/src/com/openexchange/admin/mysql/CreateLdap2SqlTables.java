@@ -49,7 +49,9 @@
 
 package com.openexchange.admin.mysql;
 
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.database.AbstractCreateTableImpl;
+import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 
 
 /**
@@ -156,9 +158,21 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "id INT4 UNSIGNED NOT NULL,"
        + "name VARCHAR(128) NOT NULL,"
        + "value TEXT NOT NULL,"
+       + "uuid BINARY(16) DEFAULT NULL,"
        + "INDEX (cid,name,value(20)),"
        + "FOREIGN KEY (cid, id) REFERENCES user(cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    
+    private static final String createUserAttributeTablePrimaryKey = "CREATE TABLE user_attribute ("
+        + "cid INT4 UNSIGNED NOT NULL,"
+        + "id INT4 UNSIGNED NOT NULL,"
+        + "name VARCHAR(128) NOT NULL,"
+        + "value TEXT NOT NULL,"
+        + "uuid BINARY(16) NOT NULL,"
+        + "PRIMARY KEY (uuid),"
+        + "INDEX (cid,name,value(20)),"
+        + "FOREIGN KEY (cid, id) REFERENCES user(cid, id)"
+      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     
     private static final String createResourceTable = "CREATE TABLE resource ("
        + "cid INT4 UNSIGNED NOT NULL,"
@@ -214,9 +228,13 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
      */
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { createGroupsTable, createDelGroupsTable, createUserTable, createDelUserTable,
-            createGroupsMemberTable, createLogin2UserTable, createUserAttributeTable, createResourceTable,
-            createDelResourceTable };
+        FullPrimaryKeySupportService fullPrimaryKeySupportService = AdminServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
+        if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
+            return new String[] { createGroupsTable, createDelGroupsTable, createUserTable, createDelUserTable, createGroupsMemberTable,
+                createLogin2UserTable, createUserAttributeTablePrimaryKey, createResourceTable, createDelResourceTable };
+        }
+        return new String[] { createGroupsTable, createDelGroupsTable, createUserTable, createDelUserTable, createGroupsMemberTable,
+            createLogin2UserTable, createUserAttributeTable, createResourceTable, createDelResourceTable };
     }
 
 }

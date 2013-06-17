@@ -567,7 +567,7 @@ public final class InternalList {
 
         // Add synthetic primary keys to tables without natural key if full primary key support is enabled
         final FullPrimaryKeySupportService fullPrimaryKeySupportService = ServerServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
-        if (null != fullPrimaryKeySupportService && fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
+        if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
 
             // Add primary key to genconf_attributes_strings table
             list.add(new GenconfAttributesStringsAddPrimaryKey());

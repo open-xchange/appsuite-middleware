@@ -49,7 +49,9 @@
 
 package com.openexchange.admin.mysql;
 
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.database.AbstractCreateTableImpl;
+import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 
 
 /**
@@ -73,6 +75,24 @@ public class CreateMiscTables extends AbstractCreateTableImpl {
         + "cid INT4 UNSIGNED NOT NULL,"
         + "last_modified INT8,"
         + "created_by INT4 UNSIGNED,"
+        + "uuid BINARY(16) DEFAULT NULL,"
+        + "INDEX (firstid),"
+        + "INDEX (secondid),"
+        + "INDEX (cid)"
+      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    
+    private static final String createPrgLinksTablePrimaryKey = "CREATE TABLE prg_links ("
+        + "firstid INT4 UNSIGNED NOT NULL,"
+        + "firstmodule INT4 UNSIGNED NOT NULL,"
+        + "firstfolder INT4 UNSIGNED NOT NULL,"
+        + "secondid INT4 UNSIGNED NOT NULL,"
+        + "secondmodule INT4 UNSIGNED NOT NULL,"
+        + "secondfolder INT4 UNSIGNED NOT NULL,"
+        + "cid INT4 UNSIGNED NOT NULL,"
+        + "last_modified INT8,"
+        + "created_by INT4 UNSIGNED,"
+        + "uuid BINARY(16) DEFAULT NULL,"
+        + "PRIMARY KEY (uuid),"
         + "INDEX (firstid),"
         + "INDEX (secondid),"
         + "INDEX (cid)"
@@ -129,6 +149,10 @@ public class CreateMiscTables extends AbstractCreateTableImpl {
      */
     @Override
     protected String[] getCreateStatements() {
+        FullPrimaryKeySupportService fullPrimaryKeySupportService = AdminServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
+        if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
+            return new String[] { createPrgLinksTablePrimaryKey, createReminderTable, createFilestoreUsageTable };
+        }
         return new String[] { createPrgLinksTable, createReminderTable, createFilestoreUsageTable };
     }
 
