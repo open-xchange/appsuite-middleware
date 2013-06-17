@@ -49,7 +49,10 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -60,7 +63,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -81,32 +83,28 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         ProgressState progress = params.getProgressState();
-        Connection connection = Database.getNoTimeout(params.getContextId(), true);
-        boolean rollback = false;
+        Connection con = Database.getNoTimeout(params.getContextId(), true);
         try {
-            DBUtils.startTransaction(connection);
-            rollback = true;
-            progress.setTotal(getTotalRows(connection));
-            if (!Tools.columnExists(connection, "user_attribute", "uuid")) {
+            startTransaction(con);
+            progress.setTotal(getTotalRows(con));
+            if (!Tools.columnExists(con, "user_attribute", "uuid")) {
                 throw UpdateExceptionCodes.COLUMN_NOT_FOUND.create("uuid");
             }
 
-            AddUUIDForUserAttributeTable.fillUUIDs(connection, "user_attribute", progress);
+            AddUUIDForUserAttributeTable.fillUUIDs(con, progress);
 
-            Tools.modifyColumns(connection, "user_attribute", new Column("uuid", "BINARY(16) NOT NULL"));
-            Tools.createPrimaryKey(connection, "user_attribute", new String[] { "uuid" });
-            connection.commit();
-            rollback = false;
+            Tools.modifyColumns(con, "user_attribute", new Column("uuid", "BINARY(16) NOT NULL"));
+            Tools.createPrimaryKey(con, "user_attribute", new String[] { "uuid" });
+            con.commit();
         } catch (SQLException e) {
+            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
+            rollback(con);
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                DBUtils.rollback(connection);
-            }
-            DBUtils.autocommit(connection);
-            Database.backNoTimeout(params.getContextId(), true, connection);
+            autocommit(con);
+            Database.backNoTimeout(params.getContextId(), true, con);
         }
     }
 
@@ -115,13 +113,13 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
         return new String[] { AddUUIDForUserAttributeTable.class.getName() };
     }
 
-    private int getTotalRows(Connection con) throws SQLException {
+    private static int getTotalRows(Connection con) throws SQLException {
         Statement stmt = null;
         ResultSet rs = null;
         int rows = 0;
         try {
             stmt = con.createStatement();
-            rs = stmt.executeQuery("SELECT COUNT(cid) FROM user_attribute WHERE uuid IS NULL");
+            rs = stmt.executeQuery("SELECT COUNT(*) FROM user_attribute WHERE uuid IS NULL");
             while (rs.next()) {
                 rows += rs.getInt(1);
             }
@@ -130,5 +128,4 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
         }
         return rows;
     }
-
 }

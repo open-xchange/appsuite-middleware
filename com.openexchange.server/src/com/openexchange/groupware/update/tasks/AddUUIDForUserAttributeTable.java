@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.sql.DBUtils.startTransaction;
@@ -65,7 +66,6 @@ import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -88,38 +88,34 @@ public class AddUUIDForUserAttributeTable extends UpdateTaskAdapter {
         int ctxId = params.getContextId();
         ProgressState progress = params.getProgressState();
         Connection con = Database.getNoTimeout(ctxId, true);
-        boolean rollback = false;
         try {
             startTransaction(con);
-            rollback = true;
             progress.setTotal(getTotalRows(con));
             if (!Tools.columnExists(con, "user_attribute", "uuid")) {
                 Tools.addColumns(con, "user_attribute", new Column("uuid", "BINARY(16)"));
-                fillUUIDs(con, "user_attribute", progress);
+                fillUUIDs(con, progress);
             }
             con.commit();
-            rollback = false;
-        } catch (RuntimeException e) {
-            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (SQLException e) {
+            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            rollback(con);
+            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
-            }
-            DBUtils.autocommit(con);
+            autocommit(con);
             Database.backNoTimeout(ctxId, true, con);
         }
     }
 
-    public static void fillUUIDs(Connection con, String table, ProgressState progress) throws SQLException {
+    public static void fillUUIDs(Connection con, ProgressState progress) throws SQLException {
         Statement stmt1 = null;
         ResultSet result = null;
         PreparedStatement stmt2 = null;
         try {
             stmt1 = con.createStatement();
-            result = stmt1.executeQuery("SELECT cid, id, name, value FROM " + table + " WHERE uuid IS NULL");
-            stmt2 = con.prepareStatement("UPDATE " + table + " SET uuid=? WHERE cid=? AND id=? AND name=? AND value=?");
+            result = stmt1.executeQuery("SELECT cid, id, name, value FROM user_attribute WHERE uuid IS NULL");
+            stmt2 = con.prepareStatement("UPDATE user_attribute SET uuid=? WHERE cid=? AND id=? AND name=? AND value=?");
             while (result.next()) {
                 // Read columns
                 int cid = result.getInt(1);
@@ -148,7 +144,7 @@ public class AddUUIDForUserAttributeTable extends UpdateTaskAdapter {
         int rows = 0;
         try {
             stmt = con.createStatement();
-            rs = stmt.executeQuery("SELECT COUNT(cid) FROM user_attribute");
+            rs = stmt.executeQuery("SELECT COUNT(*) FROM user_attribute");
             while (rs.next()) {
                 rows += rs.getInt(1);
             }
@@ -162,5 +158,4 @@ public class AddUUIDForUserAttributeTable extends UpdateTaskAdapter {
     public String[] getDependencies() {
         return new String[0];
     }
-
 }
