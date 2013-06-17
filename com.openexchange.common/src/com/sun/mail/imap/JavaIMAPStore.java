@@ -139,11 +139,7 @@ public class JavaIMAPStore extends IMAPStore {
      * @param url The URL
      */
     public JavaIMAPStore(final Session session, final URLName url) {
-        super(session, url);
-        enableSASL = PropUtil.getBooleanSessionProperty(session, "mail.imap.sasl.enable", false);
-        if (enableSASL) {
-            kerberosSubject = (Subject) session.getProperties().get("mail.imap.sasl.kerberosSubject");
-        }
+        this(session, url, "imap", false);
     }
 
     @Override
@@ -197,6 +193,4 @@ public class JavaIMAPStore extends IMAPStore {
         }
         throw new ProtocolException(e.getMessage(), cause);
     }
-
-
 }
