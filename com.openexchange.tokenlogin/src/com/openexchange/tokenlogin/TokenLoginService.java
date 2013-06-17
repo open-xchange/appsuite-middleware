@@ -52,27 +52,28 @@ package com.openexchange.tokenlogin;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
-
 /**
- * {@link TokenLoginService}
+ * {@link TokenLoginService} - The token-login service.
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public interface TokenLoginService {
-    
+
     /**
-     * Get token for token login
-     * @param session 
-     * @return Token for token login as String
-     * @throws OXException On error
+     * Acquires a unique token for specified session.
+     *
+     * @param session The associated session
+     * @return The token as a string
+     * @throws OXException If token cannot be generated for any reason
      */
     public String acquireToken(Session session) throws OXException;
-    
+
     /**
-     * Get session from token
-     * @param token 
-     * @return Session requested by token
-     * @throws OXException On error
+     * Redeems given token and generates an appropriate session.
+     *
+     * @param token The token previously generated
+     * @return The generated session
+     * @throws OXException If token cannot be turned into a valid session
      */
     public Session redeemToken(String token) throws OXException;
 

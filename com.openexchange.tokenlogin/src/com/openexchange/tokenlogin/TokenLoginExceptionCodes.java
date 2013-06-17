@@ -47,24 +47,36 @@
  *
  */
 
-package com.openexchange.tokenlogin.exceptions;
+package com.openexchange.tokenlogin;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
-
 /**
- * {@link OXTokenLoginExceptionCodes}
+ * {@link TokenLoginExceptionCodes} - Error codes for token-login module.
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum OXTokenLoginExceptionCodes implements OXExceptionCode {
-    
+public enum TokenLoginExceptionCodes implements OXExceptionCode {
+
+    /**
+     * An error occurred: %1$s
+     */
+    UNEXPECTED_ERROR(TokenLoginExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    /**
+     * An I/O error occurred: %1$s
+     */
+    IO_ERROR(TokenLoginExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+
     ;
-    
-    private static final String PREFIX = "TOKENLOGIN";
+
+    /**
+     * The error code prefix for token-login module.
+     */
+    public static final String PREFIX = "TOKENLOGIN";
 
     /**
      * Message of the exception.
@@ -82,52 +94,67 @@ public enum OXTokenLoginExceptionCodes implements OXExceptionCode {
     private final int detailNumber;
 
     /**
-     * Initializes a new {@link OXTokenLoginExceptionCodes}.
+     * Initializes a new {@link TokenLoginExceptionCodes}.
      */
-    private OXTokenLoginExceptionCodes(String message, int detailNumber, Category category) {
+    private TokenLoginExceptionCodes(String message, Category category, int detailNumber) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.exception.OXExceptionCode#equals(com.openexchange.exception.OXException)
-     */
-    @Override
-    public boolean equals(OXException e) {
-        return OXExceptionFactory.getInstance().equals(this, e);
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.exception.OXExceptionCode#getNumber()
-     */
-    @Override
-    public int getNumber() {
-        return detailNumber;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.exception.OXExceptionCode#getCategory()
-     */
     @Override
     public Category getCategory() {
         return category;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.exception.OXExceptionCode#getPrefix()
-     */
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public int getNumber() {
+        return detailNumber;
+    }
+
     @Override
     public String getPrefix() {
         return PREFIX;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.exception.OXExceptionCode#getMessage()
-     */
     @Override
-    public String getMessage() {
-        return message;
+    public boolean equals(final OXException e) {
+        return OXExceptionFactory.getInstance().equals(this, e);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 
 }

@@ -47,23 +47,29 @@
  *
  */
 
-package com.openexchange.tokenlogin.exceptions;
+package com.openexchange.tokenlogin;
 
 import com.openexchange.i18n.LocalizableStrings;
 
-
 /**
- * {@link OXTokenLoginExceptionMessages}
+ * {@link TokenLoginExceptionMessages}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OXTokenLoginExceptionMessages implements LocalizableStrings {
+public class TokenLoginExceptionMessages implements LocalizableStrings {
 
     /**
-     * Initializes a new {@link OXTokenLoginExceptionMessages}.
+     * Initializes a new {@link TokenLoginExceptionMessages}.
      */
-    private OXTokenLoginExceptionMessages() {
+    private TokenLoginExceptionMessages() {
         super();
     }
+
+    // An error occurred: %1$s
+    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+
+    // An I/O error occurred: %1$s
+    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
 
 }

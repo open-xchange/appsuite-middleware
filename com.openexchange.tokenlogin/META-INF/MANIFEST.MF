@@ -10,5 +10,4 @@ Import-Package: com.openexchange.exception,
  com.openexchange.log,
  com.openexchange.session,
  org.apache.commons.logging
-Export-Package: com.openexchange.tokenlogin,
- com.openexchange.tokenlogin.exceptions
+Export-Package: com.openexchange.tokenlogin
