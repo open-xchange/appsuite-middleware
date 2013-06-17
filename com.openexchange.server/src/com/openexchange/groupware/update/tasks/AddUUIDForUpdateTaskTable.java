@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.sql.DBUtils.startTransaction;
@@ -65,20 +66,17 @@ import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link AddUUIDForUpdateTaskTable}
+ * Adds the column uuid to the table updateTask. The task {@link MakeUUIDPrimaryForUpdateTaskTable} will create then the primary key for the
+ * table if this is configured as wanted with the 7.4.0 release and at least with the 7.6.0 release.
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class AddUUIDForUpdateTaskTable extends UpdateTaskAdapter {
 
-    /**
-     * Initializes a new {@link AddUUIDForUpdateTaskTable}.
-     */
     public AddUUIDForUpdateTaskTable() {
         super();
     }
@@ -88,38 +86,34 @@ public class AddUUIDForUpdateTaskTable extends UpdateTaskAdapter {
         int ctxId = params.getContextId();
         ProgressState progress = params.getProgressState();
         Connection con = Database.getNoTimeout(ctxId, true);
-        boolean rollback = false;
         try {
             startTransaction(con);
-            rollback = true;
             progress.setTotal(getTotalRows(con));
             if (!Tools.columnExists(con, "updateTask", "uuid")) {
                 Tools.addColumns(con, "updateTask", new Column("uuid", "BINARY(16)"));
-                fillUUIDs(con, "updateTask", progress);
+                fillUUIDs(con, progress);
             }
             con.commit();
-            rollback = true;
         } catch (SQLException e) {
+            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
+            rollback(con);
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
-            }
-            DBUtils.autocommit(con);
+            autocommit(con);
             Database.backNoTimeout(ctxId, true, con);
         }
     }
 
-    public static void fillUUIDs(Connection con, String table, ProgressState progress) throws SQLException {
+    public static void fillUUIDs(Connection con, ProgressState progress) throws SQLException {
         Statement stmt1 = null;
         ResultSet result = null;
         PreparedStatement stmt2 = null;
         try {
             stmt1 = con.createStatement();
-            result = stmt1.executeQuery("SELECT cid, taskName FROM " + table + " WHERE uuid IS NULL");
-            stmt2 = con.prepareStatement("UPDATE " + table + " SET uuid=? WHERE cid=? AND taskName=?");
+            result = stmt1.executeQuery("SELECT cid, taskName FROM updateTask WHERE uuid IS NULL");
+            stmt2 = con.prepareStatement("UPDATE updateTask SET uuid=? WHERE cid=? AND taskName=?");
             while (result.next()) {
                 int cid = result.getInt(1);
                 String taskName = result.getString(2);
@@ -136,7 +130,7 @@ public class AddUUIDForUpdateTaskTable extends UpdateTaskAdapter {
         }
     }
 
-    private static int getTotalRows(Connection con) throws SQLException {
+    public static int getTotalRows(Connection con) throws SQLException {
         Statement stmt = null;
         ResultSet rs = null;
         int rows = 0;
@@ -156,5 +150,4 @@ public class AddUUIDForUpdateTaskTable extends UpdateTaskAdapter {
     public String[] getDependencies() {
         return new String[0];
     }
-
 }
