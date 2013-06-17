@@ -3,6 +3,7 @@
  - Fix for bug 27060: Offer possibility to disable Hazelcast JMX MBean and logging system.
                       Refactored ConditionTreeMap management to use an improved concurrent collection to ensure
                       cached items are properly evicted after 5 minutres time-to-live threshold.
+ - Fix for bug 23459: Remove foreign key constraints from obsolete tables
 
 * 2013-06-15 - thorben.betten@open-xchange.com
 
