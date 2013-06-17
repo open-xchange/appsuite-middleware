@@ -1,3 +1,7 @@
+* 2013-06-17 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 27097: Added missing columns to CreateTableServices
+
 * 2013-06-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 27098: Added missing imports to MANIFEST.MF file
