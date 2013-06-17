@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange token login bundle
+Bundle-SymbolicName: com.openexchange.tokenlogin
+Bundle-Version: 7.4.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.log,
+ com.openexchange.session,
+ org.apache.commons.logging
+Export-Package: com.openexchange.tokenlogin,
+ com.openexchange.tokenlogin.exceptions
