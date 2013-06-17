@@ -114,18 +114,18 @@ public final class TokenLoginActivator extends HousekeepingActivator {
             if (hazelcastConfig.isEnabled()) {
                 // Track HazelcastInstance service
                 final ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> customizer = new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
-    
+
                     @Override
                     public void removedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
                         removeService(HazelcastInstance.class);
                         context.ungetService(reference);
                     }
-    
+
                     @Override
                     public void modifiedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
                         // Ignore
                     }
-    
+
                     @Override
                     public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
                         final HazelcastInstance hazelcastInstance = context.getService(reference);
@@ -184,11 +184,11 @@ public final class TokenLoginActivator extends HousekeepingActivator {
             registerService(EventHandler.class, eventHandler, serviceProperties);
         }
 
-        // Register service instance
-        registerService(TokenLoginService.class, serviceImpl);
-
         // Open trackers
         openTrackers();
+
+        // Register service instance
+        registerService(TokenLoginService.class, serviceImpl);
     }
 
     @Override
