@@ -169,7 +169,7 @@ public final class JSONInputStream extends InputStream {
             final StringAllocator sa = new StringAllocator((length * 3) / 2 + 1);
             for (int i = 0; i < length; i++) {
                 final char c = str.charAt(i);
-                if ((c > 127) || (c < 32)) {
+                if ((c > 127) || (c < 32) || ('"' == c)) {
                     if (Character.isSupplementaryCodePoint(c)) {
                         final char[] chars = Character.toChars(c);
                         for (int j = 0; j < chars.length; j++) {
@@ -198,7 +198,7 @@ public final class JSONInputStream extends InputStream {
             boolean isAscci = true;
             for (int i = 0; isAscci && (i < length); i++) {
                 final char c = s.charAt(i);
-                isAscci = (c < 128) && (c > 31);
+                isAscci = (c < 128) && (c > 31) && (c != '"');
             }
             return isAscci;
         }
@@ -272,7 +272,7 @@ public final class JSONInputStream extends InputStream {
         public Object next() throws IOException {
             final Entry<String, Object> entry = objIterator.next();
             out.write('"');
-            out.write(toAsciiBytes(entry.getKey()));
+            out.write(toAsciiBytes(toAscii(entry.getKey())));
             out.write('"');
             out.write(':');
             return entry.getValue();
