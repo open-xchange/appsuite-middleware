@@ -490,5 +490,8 @@ public final class InternalList {
         // Sets the changing date once for users with a different defaultSendAddress
         new com.openexchange.groupware.update.tasks.ContactAdjustLastModifiedForChangedSenderAddress(),
 
+        // Drop foreign key constraints from obsolete tables
+        new com.openexchange.groupware.update.tasks.HeaderCacheDropFKTask(),
+
     };
 }
