@@ -53,6 +53,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.json.helpers.StringAllocator;
 import org.json.helpers.UnsynchronizedByteArrayOutputStream;
 
@@ -100,8 +102,11 @@ public final class JSONInputStream extends InputStream {
 
     private abstract class AbstractBufferer implements Bufferer {
 
+        private final Pattern patternSupplementaryCodePoints;
+
         protected AbstractBufferer() {
             super();
+            patternSupplementaryCodePoints = Pattern.compile("\\\\u([0-9a-fA-F]{5,})");
         }
 
         @Override
@@ -159,7 +164,7 @@ public final class JSONInputStream extends InputStream {
             }
             final int length = str.length();
             if (0 == length || isAscii(str, length)) {
-                return str;
+                return replaceSupplementaryCodePoints(str);
             }
             final StringAllocator sa = new StringAllocator((length * 3) / 2 + 1);
             for (int i = 0; i < length; i++) {
@@ -177,7 +182,7 @@ public final class JSONInputStream extends InputStream {
                     sa.append(c);
                 }
             }
-            return sa.toString();
+            return replaceSupplementaryCodePoints(sa.toString());
         }
 
         private void appendAsJsonUnicode(final int ch, final StringAllocator sa) {
@@ -196,6 +201,24 @@ public final class JSONInputStream extends InputStream {
                 isAscci = (c < 128) && (c > 31);
             }
             return isAscci;
+        }
+
+        private String replaceSupplementaryCodePoints(final String str) {
+            final Matcher m = patternSupplementaryCodePoints.matcher(str);
+            final StringBuffer sb = new StringBuffer(str.length());
+            while (m.find()) {
+                int codePoint = Integer.parseInt(m.group(1), 16);
+                if (Character.isSupplementaryCodePoint(codePoint)) {
+                    final char[] chars = Character.toChars(codePoint);
+                    final StringAllocator tmp = new StringAllocator(32);
+                    for (int j = 0; j < chars.length; j++) {
+                        appendAsJsonUnicode(chars[j], tmp);
+                    }
+                    m.appendReplacement(sb, Matcher.quoteReplacement(tmp.toString()));
+                }
+            }
+            m.appendTail(sb);
+            return sb.toString();
         }
 
     }
