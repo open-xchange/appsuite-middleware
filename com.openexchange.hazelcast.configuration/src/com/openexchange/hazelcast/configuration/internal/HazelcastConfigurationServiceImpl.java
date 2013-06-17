@@ -61,6 +61,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.MapIndexConfig;
@@ -94,13 +96,17 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
     /** Name of the subdirectory containing the hazelcast data structure properties */
     private static final String DIRECTORY_NAME = "hazelcast";
 
+    /** The bundle context */
+    private final BundleContext context;
+
     /**
      * Initializes a new {@link HazelcastConfigurationServiceImpl}.
      *
      * @param configService A reference to the configuration service
      */
-    public HazelcastConfigurationServiceImpl() {
+    public HazelcastConfigurationServiceImpl(final BundleContext context) {
         super();
+        this.context = context;
     }
 
     @Override
@@ -128,6 +134,27 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                     "value \"ox\". Please do so to make this warning disappear." + lf);
         }
         config.getGroupConfig().setName(groupName).setPassword("YXV0b2JhaG4=");
+        /*
+         * Logging system
+         */
+        {
+            final boolean loggingEnabled = configService.getBoolProperty("com.openexchange.hazelcast.logging.enabled", true);
+            if (loggingEnabled) {
+                // Check if log4j is running
+                boolean hasLog4J = false;
+                final Bundle[] bundles = context.getBundles();
+                for (int i = 0; !hasLog4J && i < bundles.length; i++) {
+                    hasLog4J = ("org.apache.commons.logging.log4j".equals(bundles[i].getSymbolicName()));
+                }
+                if (hasLog4J) {
+                    System.setProperty("hazelcast.logging.type", "log4j");
+                    config.setProperty("hazelcast.logging.type", "log4j");
+                }
+            } else {
+                System.setProperty("hazelcast.logging.type", "none");
+                config.setProperty("hazelcast.logging.type", "none");
+            }
+        }
         /*
          * JMX
          */

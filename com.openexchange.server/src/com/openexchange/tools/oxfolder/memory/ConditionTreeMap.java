@@ -49,7 +49,6 @@
 
 package com.openexchange.tools.oxfolder.memory;
 
-import gnu.trove.ConcurrentTIntObjectHashMap;
 import gnu.trove.EmptyTIntSet;
 import gnu.trove.TIntCollection;
 import gnu.trove.map.TIntObjectMap;
@@ -66,6 +65,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -80,7 +81,7 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link ConditionTreeMap}
+ * {@link ConditionTreeMap} - Stores context-related condition trees for individual entities (users/groups).
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -88,20 +89,18 @@ public final class ConditionTreeMap {
 
     private static final EmptyTIntSet EMPTY_SET = EmptyTIntSet.getInstance();
 
-    private final ConcurrentTIntObjectHashMap<ConditionTree> trees;
-
+    private final ConcurrentMap<Integer, ConditionTree> trees;
     private final int contextId;
-
     protected final long stamp;
 
     /**
      * Initializes a new {@link ConditionTreeMap}.
      */
-    public ConditionTreeMap(final int contextId) {
+    public ConditionTreeMap(final int contextId, final long now) {
         super();
-        trees = new ConcurrentTIntObjectHashMap<ConditionTree>(1024);
+        trees = new ConcurrentHashMap<Integer, ConditionTree>(1024);
         this.contextId = contextId;
-        stamp = System.currentTimeMillis();
+        stamp = now;
     }
 
     /**
@@ -162,7 +161,7 @@ public final class ConditionTreeMap {
      * @param entity The entity identifier
      */
     public void removeFor(final int entity) {
-        trees.remove(entity);
+        trees.remove(Integer.valueOf(entity));
     }
 
     /**
@@ -172,10 +171,11 @@ public final class ConditionTreeMap {
      */
     public void insert(final Permission permission) {
         final int entity = permission.entity;
-        ConditionTree tree = trees.get(entity);
+        final Integer key = Integer.valueOf(entity);
+        ConditionTree tree = trees.get(key);
         if (null == tree) {
             final ConditionTree newTree = new ConditionTree();
-            tree = trees.putIfAbsent(entity, newTree);
+            tree = trees.putIfAbsent(key, newTree);
             if (null == tree) {
                 tree = newTree;
             }
@@ -194,7 +194,7 @@ public final class ConditionTreeMap {
      * @return The identifiers of visible folders
      */
     public TIntSet getVisibleForUser(final int userId, final int[] groups, final int[] accessibleModules, final Condition... conditions) {
-        final ConditionTree tree = trees.get(userId);
+        final ConditionTree tree = trees.get(Integer.valueOf(userId));
         if (null == tree) {
             return EMPTY_SET;
         }
@@ -205,7 +205,7 @@ public final class ConditionTreeMap {
         final TIntSet set = tree.getVisibleFolderIds(condition);
         if (null != groups) {
             for (final int group : groups) {
-                final ConditionTree gtree = trees.get(group);
+                final ConditionTree gtree = trees.get(Integer.valueOf(group));
                 if (null != gtree) {
                     set.addAll(gtree.getVisibleFolderIds(condition));
                 }
@@ -227,7 +227,7 @@ public final class ConditionTreeMap {
      * @return The identifiers of visible folders
      */
     public TIntSet getVisibleForUser(final int userId, final int[] groups, final int[] accessibleModules, final Collection<Condition> conditions) {
-        final ConditionTree tree = trees.get(userId);
+        final ConditionTree tree = trees.get(Integer.valueOf(userId));
         if (null == tree) {
             return EMPTY_SET;
         }
@@ -238,7 +238,7 @@ public final class ConditionTreeMap {
         final TIntSet set = tree.getVisibleFolderIds(condition);
         if (null != groups) {
             for (final int group : groups) {
-                final ConditionTree gtree = trees.get(group);
+                final ConditionTree gtree = trees.get(Integer.valueOf(group));
                 if (null != gtree) {
                     set.addAll(gtree.getVisibleFolderIds(condition));
                 }
@@ -260,7 +260,7 @@ public final class ConditionTreeMap {
      * @return <code>true</code> if visible; otherwise <code>false</code>
      */
     public boolean isVisibleFolder(final int userId, final int[] groups, final int[] accessibleModules, final int folderId) {
-        final ConditionTree tree = trees.get(userId);
+        final ConditionTree tree = trees.get(Integer.valueOf(userId));
         if (null == tree) {
             return false;
         }
@@ -274,7 +274,7 @@ public final class ConditionTreeMap {
         }
         if (null != groups) {
             for (final int group : groups) {
-                final ConditionTree gtree = trees.get(group);
+                final ConditionTree gtree = trees.get(Integer.valueOf(group));
                 if (null != gtree) {
                     set = gtree.getVisibleFolderIds(condition);
                     if (!set.isEmpty() && set.contains(folderId)) {
@@ -296,7 +296,7 @@ public final class ConditionTreeMap {
      * @return The identifiers of visible folders
      */
     public boolean hasSharedFolder(final int userId, final int[] groups, final int[] accessibleModules) {
-        final ConditionTree tree = trees.get(userId);
+        final ConditionTree tree = trees.get(Integer.valueOf(userId));
         if (null == tree) {
             return false;
         }
@@ -310,7 +310,7 @@ public final class ConditionTreeMap {
         }
         if (null != groups) {
             for (final int group : groups) {
-                final ConditionTree gtree = trees.get(group);
+                final ConditionTree gtree = trees.get(Integer.valueOf(group));
                 if (null != gtree && !gtree.getVisibleFolderIds(condition).isEmpty()) {
                     return true;
                 }
@@ -329,7 +329,7 @@ public final class ConditionTreeMap {
      * @return The identifiers of visible folders
      */
     public TIntSet getVisibleTypeForUser(final int userId, final int[] groups, final int[] accessibleModules, final int type) {
-        final ConditionTree tree = trees.get(userId);
+        final ConditionTree tree = trees.get(Integer.valueOf(userId));
         if (null == tree) {
             return EMPTY_SET;
         }
@@ -340,7 +340,7 @@ public final class ConditionTreeMap {
         final TIntSet set = tree.getVisibleFolderIds(condition);
         if (null != groups) {
             for (final int group : groups) {
-                final ConditionTree gtree = trees.get(group);
+                final ConditionTree gtree = trees.get(Integer.valueOf(group));
                 if (null != gtree) {
                     set.addAll(gtree.getVisibleFolderIds(condition));
                 }
@@ -362,7 +362,7 @@ public final class ConditionTreeMap {
      * @return The identifiers of visible folders
      */
     public TIntSet getVisibleModuleForUser(final int userId, final int[] groups, final int[] accessibleModules, final int module) {
-        final ConditionTree tree = trees.get(userId);
+        final ConditionTree tree = trees.get(Integer.valueOf(userId));
         if (null == tree) {
             return EMPTY_SET;
         }
@@ -382,7 +382,7 @@ public final class ConditionTreeMap {
         final TIntSet set = tree.getVisibleFolderIds(condition);
         if (null != groups) {
             for (final int group : groups) {
-                final ConditionTree gtree = trees.get(group);
+                final ConditionTree gtree = trees.get(Integer.valueOf(group));
                 if (null != gtree) {
                     set.addAll(gtree.getVisibleFolderIds(condition));
                 }
@@ -405,7 +405,7 @@ public final class ConditionTreeMap {
      * @return The identifiers of visible folders
      */
     public TIntSet getVisibleForUser(final int userId, final int[] groups, final int[] accessibleModules, final int module, final int type) {
-        final ConditionTree tree = trees.get(userId);
+        final ConditionTree tree = trees.get(Integer.valueOf(userId));
         if (null == tree) {
             return EMPTY_SET;
         }
@@ -425,7 +425,7 @@ public final class ConditionTreeMap {
         final TIntSet set = tree.getVisibleFolderIds(condition);
         if (null != groups) {
             for (final int group : groups) {
-                final ConditionTree gtree = trees.get(group);
+                final ConditionTree gtree = trees.get(Integer.valueOf(group));
                 if (null != gtree) {
                     set.addAll(gtree.getVisibleFolderIds(condition));
                 }
