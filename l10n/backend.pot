@@ -244,6 +244,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/TextXtractExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tokenlogin/src/com/openexchange/tokenlogin/TokenLoginExceptionMessages.java:73
 msgid "An I/O error occurred: %1$s"
 msgstr ""
 
@@ -1104,6 +1105,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/TextXtractExceptionMessages.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tokenlogin/src/com/openexchange/tokenlogin/TokenLoginExceptionMessages.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.voipnow.json/src/com/openexchange/voipnow/json/VoipNowExceptionMessages.java:62
 msgid "An error occurred: %1$s"
