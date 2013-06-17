@@ -1,3 +1,9 @@
+* 2013-06-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27060: Offer possibility to disable Hazelcast JMX MBean and logging system.
+                      Refactored ConditionTreeMap management to use an improved concurrent collection to ensure
+                      cached items are properly evicted after 5 minutres time-to-live threshold.
+
 * 2013-06-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 26994: Output exception (+ stack trace) to log file if message transport fails due to a wrong password
