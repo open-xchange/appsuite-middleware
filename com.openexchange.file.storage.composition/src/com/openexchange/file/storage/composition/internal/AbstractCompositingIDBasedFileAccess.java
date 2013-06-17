@@ -363,7 +363,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 }
                 String folderId = new FolderID(serviceId, accountId, fileFolder).toUniqueID();
                 String objectId = new FileID(serviceId, accountId, fileFolder, id).toUniqueID();
-                postEvent(FileStorageEventHelper.buildDeleteEvent(session, serviceId, accountId, folderId, objectId, null));
+                postEvent(FileStorageEventHelper.buildDeleteEvent(session, serviceId, accountId, folderId, objectId, null, null));
             }
         }
         return notDeleted;
@@ -389,17 +389,19 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         String objectId = fileID.getFileId();
         FolderID folderID;
         String fileFolder = fileID.getFolderId();
+        String fileName = null;
         if (fileFolder == null) {
             /*
              * Reload the document to get it's folder id.
              */
             File fileMetadata = access.getFileMetadata(fileFolder, objectId, FileStorageFileAccess.CURRENT_VERSION);
+            fileName = fileMetadata.getFileName();
             folderID = new FolderID(serviceId, accountId, fileMetadata.getFolderId());
         } else {
             folderID = new FolderID(serviceId, accountId, fileFolder);
         }
 
-        postEvent(FileStorageEventHelper.buildDeleteEvent(session, serviceId, accountId, folderID.toUniqueID(), fileID.toUniqueID(), removed));
+        postEvent(FileStorageEventHelper.buildDeleteEvent(session, serviceId, accountId, folderID.toUniqueID(), fileID.toUniqueID(), fileName, removed));
         return notRemoved;
     }
 
@@ -428,7 +430,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             }
 
             document.setId(fileID.getFileId());
-            event = FileStorageEventHelper.buildUpdateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID());
+            event = FileStorageEventHelper.buildUpdateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID(), document.getFileName());
         }
 
         document.setFolderId(folderID.getFolderId());
@@ -444,10 +446,10 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         document.setId(fileID.toUniqueID());
         document.setFolderId(new FolderID(folderID.getService(), folderID.getAccountId(), document.getFolderId()).toUniqueID());
         if (event == null) {
-            event = FileStorageEventHelper.buildCreateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID());
+            event = FileStorageEventHelper.buildCreateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID(), document.getFileName());
         } else if (modifiedColumns != null && modifiedColumns.contains(Field.FOLDER_ID) && !folderID.equals(srcFolder)) {
-            event = FileStorageEventHelper.buildCreateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID());
-            postEvent(FileStorageEventHelper.buildDeleteEvent(session, fileID.getService(), fileID.getAccountId(), srcFolder.toUniqueID(), fileID.toUniqueID(), null));
+            event = FileStorageEventHelper.buildCreateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID(), document.getFileName());
+            postEvent(FileStorageEventHelper.buildDeleteEvent(session, fileID.getService(), fileID.getAccountId(), srcFolder.toUniqueID(), fileID.toUniqueID(), document.getFileName(), null));
         }
 
         postEvent(event);
@@ -491,8 +493,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
         sourceAccess.removeDocument(Arrays.asList(new FileStorageFileAccess.IDTuple(id.getFolderId(), id.getFileId())), sequenceNumber);
 
-        Event deleteEvent = FileStorageEventHelper.buildDeleteEvent(session, id.getService(), id.getAccountId(), new FolderID(id.getService(), id.getAccountId(), id.getFolderId()).toUniqueID(), id.toUniqueID(), null);
-        Event createEvent = FileStorageEventHelper.buildCreateEvent(session, folderId.getService(), folderId.getAccountId(), folderId.toUniqueID(), newId.toUniqueID());
+        Event deleteEvent = FileStorageEventHelper.buildDeleteEvent(session, id.getService(), id.getAccountId(), new FolderID(id.getService(), id.getAccountId(), id.getFolderId()).toUniqueID(), id.toUniqueID(), document.getFileName(), null);
+        Event createEvent = FileStorageEventHelper.buildCreateEvent(session, folderId.getService(), folderId.getAccountId(), folderId.toUniqueID(), newId.toUniqueID(), document.getFileName());
         postEvent(deleteEvent);
         postEvent(createEvent);
     }
@@ -721,14 +723,16 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
          */
         String fileFolder = fileID.getFolderId();
         FolderID folderID;
+        String fileName = null;
         if (fileFolder == null) {
             File metadata = fileAccess.getFileMetadata(null, id, FileStorageFileAccess.CURRENT_VERSION);
+            fileName = metadata.getFileName();
             folderID = new FolderID(metadata.getFolderId());
         } else {
             folderID = new FolderID(fileID.getService(), fileID.getAccountId(), fileID.getFolderId());
         }
 
-        Event event = FileStorageEventHelper.buildUpdateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID());
+        Event event = FileStorageEventHelper.buildUpdateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID(), fileName);
         postEvent(event);
     }
 
