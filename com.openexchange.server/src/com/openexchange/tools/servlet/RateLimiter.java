@@ -453,7 +453,8 @@ public final class RateLimiter {
         }
         final String userAgent = servletRequest.getHeader("User-Agent");
         if (lenientCheckForUserAgent(userAgent)) {
-            maxRatePerMinute <<= 2;
+            return true;
+            //maxRatePerMinute <<= 2;
         }
         final ConcurrentMap<Key, Rate> bucketMap = bucketMap();
         final Key key = new Key(servletRequest, userAgent);
