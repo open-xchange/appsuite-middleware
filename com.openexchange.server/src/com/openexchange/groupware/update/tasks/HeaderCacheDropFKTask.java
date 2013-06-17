@@ -54,12 +54,8 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -70,16 +66,16 @@ import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link DropFKTask} - Drops rather needless foreign keys from pop3 tables.
+ * {@link HeaderCacheDropFKTask} - Drops rather needless foreign keys from pop3 tables.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DropFKTask extends UpdateTaskAdapter {
+public final class HeaderCacheDropFKTask extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link DropFKTask}.
+     * Initializes a new {@link HeaderCacheDropFKTask}.
      */
-    public DropFKTask() {
+    public HeaderCacheDropFKTask() {
         super();
     }
 
@@ -92,106 +88,49 @@ public final class DropFKTask extends UpdateTaskAdapter {
     public void perform(final PerformParameters params) throws OXException {
         final int cid = params.getContextId();
         final Connection con = Database.getNoTimeout(cid, true);
+        boolean doRollback = false;
         try {
             Databases.startTransaction(con);
+            doRollback = true;
 
             /*
              * Drop foreign keys
              */
             {
-                final List<String> tables =
-                    Arrays.asList(
-                        "pop3_storage_deleted",
-                        "pop3_storage_ids",
-                        "user_mail_account_properties",
-                        "user_mail_account",
-                        "user_transport_account_properties",
-                        "user_transport_account",
-                        "virtualBackupPermission",
-                        "virtualBackupSubscription",
-                        "virtualBackupTree",
-                        "virtualPermission",
-                        "virtualSubscription",
-                        "virtualTree");
+                final List<String> tables = Arrays.asList("mailUUID", "headersAsBlob");
                 for (final String table : tables) {
                     dropForeignKeysFrom(table, con);
                 }
             }
-            /*
-             * Check indexes
-             */
-            {
-                final Map<String, List<List<String>>> indexes = new LinkedHashMap<String, List<List<String>>>();
-
-                List<List<String>> indexList = new ArrayList<List<String>>(4);
-                indexList.add(Arrays.asList("cid", "tree", "user", "parentId"));
-                indexList.add(Arrays.asList("cid", "tree", "user", "shadow"));
-                indexList.add(Arrays.asList("cid", "user"));
-                indexList.add(Arrays.asList("cid", "modifiedBy"));
-                indexes.put("virtualTree", indexList);
-
-                indexList = new ArrayList<List<String>>(1);
-                indexList.add(Arrays.asList("cid", "tree", "user", "folderId"));
-                indexes.put("virtualPermission", indexList);
-
-                indexList = new ArrayList<List<String>>(4);
-                indexList.add(Arrays.asList("cid", "tree", "user", "parentId"));
-                indexList.add(Arrays.asList("cid", "tree", "user", "shadow"));
-                indexList.add(Arrays.asList("cid", "user"));
-                indexList.add(Arrays.asList("cid", "modifiedBy"));
-                indexes.put("virtualTree", indexList);
-
-                indexList = new ArrayList<List<String>>(1);
-                indexList.add(Arrays.asList("cid", "tree", "user", "folderId"));
-                indexes.put("virtualPermission", indexList);
-
-                indexList = new ArrayList<List<String>>(2);
-                indexList.add(Arrays.asList("cid", "user"));
-                indexList.add(Arrays.asList("cid", "user", "id"));
-                indexes.put("pop3_storage_ids", indexList);
-
-                indexList = new ArrayList<List<String>>(2);
-                indexList.add(Arrays.asList("cid", "user"));
-                indexList.add(Arrays.asList("cid", "user", "id"));
-                indexes.put("pop3_storage_deleted", indexList);
-
-                for (final Entry<String, List<List<String>>> entry : indexes.entrySet()) {
-                    final String table = entry.getKey();
-                    for (final List<String> cols : entry.getValue()) {
-                        checkIndex(table, cols.toArray(new String[cols.size()]), null, con);
-                    }
-                }
-            }
 
             con.commit();
+            doRollback = false;
         } catch (final SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (doRollback) {
+                rollback(con);
+            }
             autocommit(con);
             Database.backNoTimeout(cid, true, con);
         }
     }
 
     private void dropForeignKeysFrom(final String table, final Connection con) throws SQLException {
-        final List<String> keyNames = Tools.allForeignKey(con, table);
-        Statement stmt = null;
-        for (final String keyName : keyNames) {
-            try {
-                stmt = con.createStatement();
-                stmt.execute("ALTER TABLE " + table + " DROP FOREIGN KEY " + keyName);
-            } finally {
-                DBUtils.closeSQLStuff(null, stmt);
+        if (Tools.tableExists(con, table)) {
+            final List<String> keyNames = Tools.allForeignKey(con, table);
+            Statement stmt = null;
+            for (final String keyName : keyNames) {
+                try {
+                    stmt = con.createStatement();
+                    stmt.execute("ALTER TABLE " + table + " DROP FOREIGN KEY " + keyName);
+                } finally {
+                    DBUtils.closeSQLStuff(null, stmt);
+                }
             }
         }
     }
 
-    private void checkIndex(final String table, final String[] columns, final String optName, final Connection con) throws SQLException {
-        if (null == Tools.existsIndex(con, table, columns)) {
-            Tools.createIndex(con, table, optName, columns, false);
-        }
-    }
 }
