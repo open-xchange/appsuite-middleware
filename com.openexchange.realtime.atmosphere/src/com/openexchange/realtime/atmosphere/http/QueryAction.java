@@ -124,7 +124,7 @@ public class QueryAction extends RTAction {
                 public void handle(final Stanza stanza, ID recipient) {
                     
                     try {
-                        values.put("answer", services.getService(MessageDispatcher.class).sendSynchronously(stanza, request.isSet("timeout") ? request.getIntParameter("timeout") : 30, TimeUnit.SECONDS));
+                        values.put("answer", services.getService(MessageDispatcher.class).sendSynchronously(stanza, request.isSet("timeout") ? request.getIntParameter("timeout") : 50, TimeUnit.SECONDS));
                     } catch (OXException e) {
                         values.put("exception", e);
                     }
