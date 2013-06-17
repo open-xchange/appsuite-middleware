@@ -24,3 +24,4 @@ Import-Package: com.hazelcast.config,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.util.tracker
+Bundle-Activator: com.openexchange.tokenlogin.impl.osgi.TokenLoginActivator
