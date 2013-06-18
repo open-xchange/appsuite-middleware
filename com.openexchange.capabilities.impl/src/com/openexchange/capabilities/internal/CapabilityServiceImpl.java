@@ -73,6 +73,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -285,6 +286,7 @@ public class CapabilityServiceImpl implements CapabilityService {
                         return false;
                     }
                 } catch (Throwable t) {
+                    ExceptionUtils.handleThrowable(t);
                     if (t instanceof OXException) {
                         throw (OXException) t;
                     }
@@ -303,6 +305,7 @@ public class CapabilityServiceImpl implements CapabilityService {
                         return false;
                     }
                 } catch (Throwable t) {
+                    ExceptionUtils.handleThrowable(t);
                     if (t instanceof OXException) {
                         throw (OXException) t;
                     }
