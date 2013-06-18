@@ -74,5 +74,8 @@ public class TokenLoginExceptionMessages implements LocalizableStrings {
 
     // No such token: %1$s
     public static final String NO_SUCH_TOKEN_MSG = "No such token: %1$s";
+    
+    // Token login service is not available.
+    public static final String SERVICE_NOT_AVAILABLE_MSG = "Token login service is not available.";
 
 }

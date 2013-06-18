@@ -74,6 +74,10 @@ public enum TokenLoginExceptionCodes implements OXExceptionCode {
      * No such token: %1$s
      */
     NO_SUCH_TOKEN(TokenLoginExceptionMessages.NO_SUCH_TOKEN_MSG, CATEGORY_ERROR, 3),
+    /**
+     * Token login service is not available.
+     */
+    SERVICE_NOT_AVAILABLE(TokenLoginExceptionMessages.SERVICE_NOT_AVAILABLE_MSG, CATEGORY_ERROR, 4),
 
     ;
 
