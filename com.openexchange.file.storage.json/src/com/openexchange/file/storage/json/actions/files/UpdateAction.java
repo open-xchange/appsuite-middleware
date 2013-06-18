@@ -113,8 +113,11 @@ public class UpdateAction extends AbstractWriteAction {
         } else {
             fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns());
         }
-
-        return result(fileAccess.getFileMetadata(file.getId(), FileStorageFileAccess.CURRENT_VERSION), request);
+        if (request.extendedResponse()) {
+            return result(fileAccess.getFileMetadata(file.getId(), FileStorageFileAccess.CURRENT_VERSION), request);
+        } else {
+            return success(file.getSequenceNumber());
+        }
     }
 
 }
