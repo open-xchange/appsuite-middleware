@@ -88,7 +88,7 @@ public class DefaultTokenLoginSecret implements TokenLoginSecret {
 
     @Override
     public Map<String, Object> getParameters() {
-        return parameters;
+        return null == parameters ? Collections.<String, Object> emptyMap() : parameters;
     }
 
     /**
