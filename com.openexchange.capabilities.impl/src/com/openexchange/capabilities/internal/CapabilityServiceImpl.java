@@ -280,7 +280,16 @@ public class CapabilityServiceImpl implements CapabilityService {
         List<CapabilityChecker> list = checkers.get(cap);
         if (null != list && !list.isEmpty()) {
             for (CapabilityChecker checker : list) {
-                if (!checker.isEnabled(cap, session)) {
+                try {
+                    if (!checker.isEnabled(cap, session)) {
+                        return false;
+                    }
+                } catch (Throwable t) {
+                    if (t instanceof OXException) {
+                        throw (OXException) t;
+                    }
+
+                    LOG.error("Error while checking capability. Returning 'false'.", t);
                     return false;
                 }
             }
@@ -289,7 +298,16 @@ public class CapabilityServiceImpl implements CapabilityService {
         list = checkers.get("*");
         if (null != list && !list.isEmpty()) {
             for (CapabilityChecker checker : list) {
-                if (!checker.isEnabled(cap, session)) {
+                try {
+                    if (!checker.isEnabled(cap, session)) {
+                        return false;
+                    }
+                } catch (Throwable t) {
+                    if (t instanceof OXException) {
+                        throw (OXException) t;
+                    }
+
+                    LOG.error("Error while checking capability. Returning 'false'.", t);
                     return false;
                 }
             }
