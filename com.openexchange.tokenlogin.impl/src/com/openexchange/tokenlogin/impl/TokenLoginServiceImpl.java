@@ -49,17 +49,32 @@
 
 package com.openexchange.tokenlogin.impl;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.DefaultAddSessionParameter;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.tokenlogin.DefaultTokenLoginSecret;
 import com.openexchange.tokenlogin.TokenLoginExceptionCodes;
+import com.openexchange.tokenlogin.TokenLoginSecret;
 import com.openexchange.tokenlogin.TokenLoginService;
-
 
 /**
  * {@link TokenLoginServiceImpl} - Implementation of {@code TokenLoginService}.
@@ -71,16 +86,103 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
     private volatile String hzMapName;
     private final ConcurrentMap<String, String> token2sessionId;
     private final ConcurrentMap<String, String> sessionId2token;
+    private final Map<String, TokenLoginSecret> secrets;
 
     /**
      * Initializes a new {@link TokenLoginServiceImpl}.
      */
-    public TokenLoginServiceImpl(final int maxIdleTime) {
+    public TokenLoginServiceImpl(final int maxIdleTime, final ConfigurationService configService) throws OXException {
         super();
         final IdleExpirationPolicy evictionPolicy = new IdleExpirationPolicy(maxIdleTime);
         token2sessionId = new ConcurrentLinkedHashMap<String, String>(1024, 0.75f, 16, Integer.MAX_VALUE, evictionPolicy);
         sessionId2token = new ConcurrentLinkedHashMap<String, String>(1024, 0.75f, 16, Integer.MAX_VALUE, evictionPolicy);
+        // Parse app secrets
+        secrets = initSecrets(configService.getFileByName("tokenlogin-secrets"));
     }
+
+    // -------------------------------------------------------------------------------------------------------- //
+
+    private Map<String, TokenLoginSecret> initSecrets(final File secretsFile) throws OXException {
+        if (null == secretsFile) {
+            return Collections.emptyMap();
+        }
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(secretsFile));
+            final Map<String, TokenLoginSecret> map = new LinkedHashMap<String, TokenLoginSecret>(16);
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!isEmpty(line)) {
+                    line = line.trim();
+                    if (!line.startsWith("#") && !line.startsWith("!")) {
+                        // Parse secret + parameters
+                        int pos = line.indexOf(';');
+                        if (pos < 0) {
+                            map.put(line, new DefaultTokenLoginSecret().setSecret(line));
+                        } else {
+                            final String secret = line.substring(0, pos).trim();
+                            final DefaultTokenLoginSecret tokenLoginSecret = new DefaultTokenLoginSecret().setSecret(secret);
+                            final Map<String, Object> params = new LinkedHashMap<String, Object>(4);
+                            // Parse parameters
+                            do {
+                                final int start = pos + 1;
+                                pos = line.indexOf(';', start);
+                                if (pos < 0) {
+                                    parseParameter(line.substring(start).trim(), params);
+                                } else {
+                                    parseParameter(line.substring(start, pos).trim(), params);
+                                }
+                            } while (pos > 0);
+                            tokenLoginSecret.setParameters(params);
+                            map.put(secret, tokenLoginSecret);
+                        }
+                    }
+                }
+            }
+            return map;
+        } catch (final IOException e) {
+            throw TokenLoginExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(reader);
+        }
+    }
+
+    private void parseParameter(final String param, final Map<String, Object> params) {
+        if (!isEmpty(param)) {
+            final int pos = param.indexOf('=');
+            if (pos < 0) {
+                params.put(param, Boolean.TRUE);
+            } else {
+                final String value = unquote(param.substring(pos + 1).trim());
+                if ("true".equalsIgnoreCase(value)) {
+                    params.put(param.substring(0, pos).trim(), Boolean.TRUE);
+                } else if ("false".equalsIgnoreCase(value)) {
+                    params.put(param.substring(0, pos).trim(), Boolean.TRUE);
+                } else {
+                    try {
+                        final Integer i = Integer.valueOf(value);
+                        params.put(param.substring(0, pos).trim(), i);
+                    } catch (final NumberFormatException nfe1) {
+                        // Try parse to long
+                        try {
+                            final Long l = Long.valueOf(value);
+                            params.put(param.substring(0, pos).trim(), l);
+                        } catch (final NumberFormatException nfe2) {
+                            // Assume String value
+                            params.put(param.substring(0, pos).trim(), value);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public TokenLoginSecret getTokenLoginSecret(final String secret) {
+        return isEmpty(secret) ? null : secrets.get(secret);
+    }
+
+    // -------------------------------------------------------------------------------------------------------- //
 
     /**
      * Sets the name of the Hazelcast map.
@@ -99,7 +201,7 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
         if (null == hzMapName) {
             return null;
         }
-        HazelcastInstance hazelcastInstance = Services.getService(HazelcastInstance.class);
+        final HazelcastInstance hazelcastInstance = Services.getService(HazelcastInstance.class);
         if (hazelcastInstance == null || !hazelcastInstance.getLifecycleService().isRunning()) {
             return null;
         }
@@ -113,7 +215,7 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
         }
     }
 
-    private void putToHzMap(String token, final String sessionId) {
+    private void putToHzMap(final String token, final String sessionId) {
         final IMap<String, String> hzMap = hzMap();
         if (null != hzMap) {
             hzMap.putAsync(token, sessionId);
@@ -121,7 +223,11 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     @Override
-    public String acquireToken(final Session session) throws OXException {
+    public String acquireToken(final Session session, final String appSecret) throws OXException {
+        final TokenLoginSecret tokenLoginSecret = getTokenLoginSecret(appSecret);
+        if (null == tokenLoginSecret) {
+            throw TokenLoginExceptionCodes.ACQUIRE_TOKEN_DENIED.create();
+        }
         // Only one token per session
         final String sessionId = session.getSessionID();
         String token = sessionId2token.get(sessionId);
@@ -138,16 +244,47 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     @Override
-    public Session redeemToken(final String token) throws OXException {
-        final String sessionId = token2sessionId.remove(token);
+    public Session redeemToken(final String token, final String optClientId) throws OXException {
+        String sessionId = token2sessionId.remove(token);
         if (null == sessionId) {
-            throw TokenLoginExceptionCodes.NO_SUCH_TOKEN.create(token);
+            // Look-up in Hazelcast map
+            final IMap<String, String> hzMap = hzMap();
+            if (null != hzMap) {
+                sessionId = hzMap.remove(token);
+            }
+            if (null == sessionId) {
+                throw TokenLoginExceptionCodes.NO_SUCH_TOKEN.create(token);
+            }
+        } else {
+            // Local HIT, remove from Hazelcast map
+            removeFromHzMap(token);
         }
+        // Remove from other mapping, too
         sessionId2token.remove(sessionId);
-        removeFromHzMap(token);
-        // TODO: Create duplicate session
-
-        return null;
+        // Create duplicate session
+        final SessiondService sessiondService = Services.getService(SessiondService.class);
+        if (null == sessiondService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
+        }
+        final Session session = sessiondService.getSession(sessionId);
+        if (null == session) {
+            throw TokenLoginExceptionCodes.NO_SUCH_SESSION_FOR_TOKEN.create(token);
+        }
+        // Create parameter object
+        final DefaultAddSessionParameter parameter = new DefaultAddSessionParameter().setUserId(session.getUserId());
+        parameter.setAuthId(session.getAuthId()).setClient(isEmpty(optClientId) ? session.getClient() : optClientId);
+        parameter.setClientIP(session.getLocalIp()).setFullLogin(session.getLogin());
+        {
+            final ContextService contextService = Services.getService(ContextService.class);
+            if (null == contextService) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
+            }
+            parameter.setContext(contextService.getContext(session.getContextId()));
+        }
+        parameter.setHash(session.getHash()).setUserLoginInfo(session.getLoginName()).setTransient(session.isTransient());
+        parameter.setPassword(session.getPassword());
+        // Add & return session
+        return sessiondService.addSession(parameter);
     }
 
     /**
@@ -161,6 +298,27 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
             token2sessionId.remove(token);
             removeFromHzMap(token);
         }
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    /** Removes single or double quotes from a string if its quoted. */
+    private static String unquote(final String s) {
+        if (!isEmpty(s) && ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")))) {
+            return s.substring(1, s.length() - 1);
+        }
+        return s;
     }
 
 }

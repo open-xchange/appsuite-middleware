@@ -78,6 +78,14 @@ public enum TokenLoginExceptionCodes implements OXExceptionCode {
      * Token login service is not available.
      */
     SERVICE_NOT_AVAILABLE(TokenLoginExceptionMessages.SERVICE_NOT_AVAILABLE_MSG, CATEGORY_ERROR, 4),
+    /**
+     * No such session for token: %1$s
+     */
+    NO_SUCH_SESSION_FOR_TOKEN(TokenLoginExceptionMessages.NO_SUCH_SESSION_FOR_TOKEN_MSG, CATEGORY_ERROR, 5),
+    /**
+     * Acquiring token denied.
+     */
+    ACQUIRE_TOKEN_DENIED(TokenLoginExceptionMessages.ACQUIRE_TOKEN_DENIED_MSG, CATEGORY_PERMISSION_DENIED, 6),
 
     ;
 

@@ -63,11 +63,13 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tokenlogin.TokenLoginService;
 import com.openexchange.tokenlogin.impl.Services;
 import com.openexchange.tokenlogin.impl.TokenLoginServiceImpl;
@@ -91,7 +93,7 @@ public final class TokenLoginActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, HazelcastConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, HazelcastConfigurationService.class, SessiondService.class, ContextService.class };
     }
 
     @Override
@@ -106,7 +108,7 @@ public final class TokenLoginActivator extends HousekeepingActivator {
         final int maxIdleTime = configService.getIntProperty("com.openexchange.tokenlogin.maxIdleTime", 300000);
 
         // Create service instance
-        final TokenLoginServiceImpl serviceImpl = new TokenLoginServiceImpl(maxIdleTime);
+        final TokenLoginServiceImpl serviceImpl = new TokenLoginServiceImpl(maxIdleTime, configService);
 
         // Check Hazelcast stuff
         {

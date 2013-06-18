@@ -63,18 +63,28 @@ public interface TokenLoginService {
      * Acquires a unique token for specified session.
      *
      * @param session The associated session
+     * @param appSecret The secret identifier associated with requesting Web service/application
      * @return The token as a string
      * @throws OXException If token cannot be generated for any reason
      */
-    public String acquireToken(Session session) throws OXException;
+    String acquireToken(Session session, String appSecret) throws OXException;
 
     /**
      * Redeems given token and generates an appropriate session.
      *
      * @param token The token previously generated
+     * @param optClientId The optional client identifier
      * @return The generated session
      * @throws OXException If token cannot be turned into a valid session
      */
-    public Session redeemToken(String token) throws OXException;
+    Session redeemToken(String token, String optClientId) throws OXException;
+
+    /**
+     * Gets the token-login secret (and its parameters) for specified secret identifier.
+     *
+     * @param secret The secret identifier
+     * @return The associated token-login secret or <code>null</code> if there is none associated with given secret identifier
+     */
+    TokenLoginSecret getTokenLoginSecret(String secret);
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,39 +49,28 @@
 
 package com.openexchange.tokenlogin;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.Map;
+
 
 /**
- * {@link TokenLoginExceptionMessages}
+ * {@link TokenLoginSecret} - A token-login secret.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class TokenLoginExceptionMessages implements LocalizableStrings {
+public interface TokenLoginSecret {
 
     /**
-     * Initializes a new {@link TokenLoginExceptionMessages}.
+     * Gets the application's secret.
+     *
+     * @return The secret
      */
-    private TokenLoginExceptionMessages() {
-        super();
-    }
+    String getSecret();
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // No such token: %1$s
-    public static final String NO_SUCH_TOKEN_MSG = "No such token: %1$s";
-    
-    // Token login service is not available.
-    public static final String SERVICE_NOT_AVAILABLE_MSG = "Token login service is not available.";
-
-    // No such session for token: %1$s
-    public static final String NO_SUCH_SESSION_FOR_TOKEN_MSG = "No such session for token: %1$s";
-
-    // Acquiring token denied.
-    public static final String ACQUIRE_TOKEN_DENIED_MSG = "Acquiring token denied.";
+    /**
+     * Gets the parameters associated with this application's secret.
+     *
+     * @return The secret's parameters
+     */
+    Map<String, Object> getParameters();
 
 }

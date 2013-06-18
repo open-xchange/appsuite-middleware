@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,39 +49,71 @@
 
 package com.openexchange.tokenlogin;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.Collections;
+import java.util.Map;
+import com.openexchange.java.StringAllocator;
 
 /**
- * {@link TokenLoginExceptionMessages}
+ * {@link DefaultTokenLoginSecret} - The default implementation for {@link TokenLoginSecret}.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class TokenLoginExceptionMessages implements LocalizableStrings {
+public class DefaultTokenLoginSecret implements TokenLoginSecret {
+
+    private String secret;
+    private Map<String, Object> parameters;
 
     /**
-     * Initializes a new {@link TokenLoginExceptionMessages}.
+     * Initializes a new {@link DefaultTokenLoginSecret}.
      */
-    private TokenLoginExceptionMessages() {
+    public DefaultTokenLoginSecret() {
         super();
     }
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+    @Override
+    public String getSecret() {
+        return secret;
+    }
 
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+    /**
+     * Sets the secret
+     *
+     * @param secret The secret to set
+     * @return This instance with new argument applied
+     */
+    public DefaultTokenLoginSecret setSecret(final String secret) {
+        this.secret = secret;
+        return this;
+    }
 
-    // No such token: %1$s
-    public static final String NO_SUCH_TOKEN_MSG = "No such token: %1$s";
-    
-    // Token login service is not available.
-    public static final String SERVICE_NOT_AVAILABLE_MSG = "Token login service is not available.";
+    @Override
+    public Map<String, Object> getParameters() {
+        return parameters;
+    }
 
-    // No such session for token: %1$s
-    public static final String NO_SUCH_SESSION_FOR_TOKEN_MSG = "No such session for token: %1$s";
+    /**
+     * Sets the parameters
+     *
+     * @param parameters The parameters to set
+     * @return This instance with new argument applied
+     */
+    public DefaultTokenLoginSecret setParameters(final Map<String, Object> parameters) {
+        this.parameters = Collections.unmodifiableMap(parameters);
+        return this;
+    }
 
-    // Acquiring token denied.
-    public static final String ACQUIRE_TOKEN_DENIED_MSG = "Acquiring token denied.";
+    @Override
+    public String toString() {
+        final StringAllocator builder = new StringAllocator(64);
+        builder.append("DefaultTokenLoginSecret [");
+        if (secret != null) {
+            builder.append("secret=").append(secret).append(", ");
+        }
+        if (parameters != null) {
+            builder.append("parameters=").append(parameters);
+        }
+        builder.append("]");
+        return builder.toString();
+    }
 
 }
