@@ -91,8 +91,12 @@ public class NewAction extends AbstractWriteAction {
         } else {
             fileAccess.saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
         }
-
-        return new AJAXRequestResult(file.getId(), new Date(file.getSequenceNumber()));
+        
+        if (request.extendedResponse()) {
+            return result(fileAccess.getFileMetadata(file.getId(), FileStorageFileAccess.CURRENT_VERSION), request);
+        } else {
+            return new AJAXRequestResult(file.getId(), new Date(file.getSequenceNumber()));
+        }
     }
 
 }

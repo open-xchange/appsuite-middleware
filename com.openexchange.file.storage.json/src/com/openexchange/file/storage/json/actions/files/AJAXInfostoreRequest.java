@@ -551,6 +551,11 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     public int getAttachment() {
         return getInt(Param.ATTACHMENT);
     }
+    
+    @Override
+    public boolean extendedResponse() throws OXException {
+        return data.isSet("extendedResponse") && data.getParameter("extendedResponse", Boolean.class); 
+    }
 
     @Override
     public int getModule() {
@@ -560,6 +565,6 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     private int getInt(final Param param) {
         return Integer.parseInt(data.getParameter(param.getName()));
     }
-
+    
 
 }

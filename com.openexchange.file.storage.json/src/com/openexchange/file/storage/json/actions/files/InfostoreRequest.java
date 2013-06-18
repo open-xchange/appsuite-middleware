@@ -160,4 +160,6 @@ public interface InfostoreRequest {
     List<String> getFolders();
 
 	boolean isForSpecificVersion();
+
+    boolean extendedResponse() throws OXException;
 }
