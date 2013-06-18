@@ -255,12 +255,29 @@ public final class UserConfiguration implements Serializable, Cloneable {
          * @return The associated permissions
          */
         public static List<Permission> byBits(final int bits) {
-            final Permission[] pa = values();
+            return byBits(bits, true);
+        }
+
+        /**
+         * Gets the permissions associated with given bits.
+         * 
+         * @param bits - The bits to check for permissions
+         * @param useChecker - Indicates if the service checker should be used for checking the available permissions
+         * @return The associated permissions
+         */
+        public static List<Permission> byBits(final int bits, final boolean useChecker) {
+            final Permission[] pa = Permission.values();
             final List<Permission> permissions = new ArrayList<Permission>(pa.length);
             for (final Permission p : pa) {
                 final int bit = p.bit;
-                if (((bits & bit) == bit) && p.checker.isAvailable()) {
-                    permissions.add(p);
+                if ((bits & bit) == bit) {
+                    if (useChecker) {
+                        if (p.checker.isAvailable()) {
+                            permissions.add(p);
+                        }
+                    } else {
+                        permissions.add(p);
+                    }
                 }
             }
             return permissions;
@@ -459,10 +476,10 @@ public final class UserConfiguration implements Serializable, Cloneable {
      */
     private final Context ctx;
 
-	/**
-	 * The set of extended permissions.
-	 */
-	private volatile Set<String> extendedPermissions;
+    /**
+     * The set of extended permissions.
+     */
+    private volatile Set<String> extendedPermissions;
 
     /**
      * Initializes a new {@link UserConfiguration}.
@@ -532,12 +549,12 @@ public final class UserConfiguration implements Serializable, Cloneable {
         int hash = 7;
         hash = 31 * hash + userId;
         for(String p: getExtendedPermissions()) {
-        	hash = 31 * hash + p.hashCode();
+            hash = 31 * hash + p.hashCode();
         }
         if (null != groups) {
             Arrays.sort(groups);
-            for (int i = 0; i < groups.length; i++) {
-                hash = 31 * hash + groups[i];
+            for (int group : groups) {
+                hash = 31 * hash + group;
             }
         }
         if (null != ctx) {
@@ -1231,7 +1248,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
             return true;
         }
         final Set<String> extendedPermissions = getExtendedPermissions();
-        for (final Permission p : Permission.byBits(permissionBit)) {
+        for (final Permission p : Permission.byBits(permissionBit, false)) {
             if (!extendedPermissions.contains(toLowerCase(p.name()))) {
                 return false;
             }
@@ -1259,7 +1276,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration enabled named permission; otherwise <code>false</code>
      */
     public boolean hasPermission(final String name) {
-    	return getExtendedPermissions().contains(toLowerCase(name));
+        return getExtendedPermissions().contains(toLowerCase(name));
     }
 
     private boolean hasPermissionInternal(final int permission) {
@@ -1267,7 +1284,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     }
 
     private boolean hasPermissionInternal(Permission permission) {
-    	return permission.isAvailable() && hasPermissionInternal(permission.bit);
+        return permission.isAvailable() && hasPermissionInternal(permission.bit);
     }
 
     private void setPermission(final boolean enable, final int permission) {
@@ -1315,11 +1332,11 @@ public final class UserConfiguration implements Serializable, Cloneable {
         return new StringBuilder(32).append("UserConfiguration_").append(userId).append('@').append(Integer.toBinaryString(permissionBits)).toString();
     }
 
-	/**
-	 * Gets the extended permissions.
-	 *
-	 * @return The extended permissions
-	 */
+    /**
+     * Gets the extended permissions.
+     *
+     * @return The extended permissions
+     */
     public Set<String> getExtendedPermissions() {
         Set<String> tmp = extendedPermissions;
         if (tmp == null) {
