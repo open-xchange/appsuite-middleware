@@ -174,5 +174,10 @@ public class SimSubscribeService implements SubscribeService {
     public void cleanUp(String secret, Session session) throws OXException {
         // Ignore
     }
+    
+    @Override
+    public void touch(Context ctx, int subscriptionId) throws OXException {
+        
+    }
 
 }

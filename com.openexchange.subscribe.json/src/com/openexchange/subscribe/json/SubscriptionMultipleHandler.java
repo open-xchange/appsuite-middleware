@@ -63,6 +63,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -329,11 +330,19 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         final int id = request.getInt("id");
         final String source = request.optString("source");
         final Subscription subscription = loadSubscription(id, session, source, secretService.getSecret(session));
-        return createResponse(subscription, request.optString("__serverURL"));
+        String sTimeZone = request.optString("timezone");
+        TimeZone tz;
+        if (sTimeZone != null) {
+            tz = TimeZone.getTimeZone(sTimeZone);
+        } else {
+            tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
+        }
+        
+        return createResponse(subscription, request.optString("__serverURL"), tz);
     }
 
-    private Object createResponse(final Subscription subscription, final String urlPrefix) throws JSONException, OXException {
-        final JSONObject object = new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription(), urlPrefix);
+    private Object createResponse(final Subscription subscription, final String urlPrefix, TimeZone tz) throws JSONException, OXException {
+        final JSONObject object = new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription(), urlPrefix, tz);
         return object;
     }
 

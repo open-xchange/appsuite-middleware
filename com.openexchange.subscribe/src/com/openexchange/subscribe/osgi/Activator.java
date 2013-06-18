@@ -66,7 +66,8 @@ public class Activator extends CompositeBundleActivator {
         new FolderFieldActivator(),
         new TrackerActivator(),
         new UpdateTaskActivator(),
-        new FilterActivator()};
+        new FilterActivator(),
+        new AutoUpdateActivator()};
 
     @Override
     protected BundleActivator[] getActivators() {

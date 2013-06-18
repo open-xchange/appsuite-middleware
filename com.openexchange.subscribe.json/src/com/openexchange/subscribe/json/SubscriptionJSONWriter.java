@@ -51,6 +51,7 @@ package com.openexchange.subscribe.json;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -84,13 +85,14 @@ public class SubscriptionJSONWriter {
 
     private static final String ENABLED = "enabled";
 
-    public JSONObject write(final Subscription subscription, final DynamicFormDescription form, final String urlPrefix) throws JSONException, OXException {
+    public JSONObject write(final Subscription subscription, final DynamicFormDescription form, final String urlPrefix, TimeZone tz) throws JSONException, OXException {
         final JSONObject object = new JSONObject();
         object.put(ID, subscription.getId());
         object.put(FOLDER, subscription.getFolderId());
         object.put(ENABLED, subscription.isEnabled());
         object.put(DISPLAYNAME, subscription.getDisplayName());
         object.put(SOURCE, subscription.getSource().getId());
+        object.put("lastUpdated", subscription.getLastUpdate() + tz.getOffset(subscription.getLastUpdate()));
         writeConfiguration(object, subscription.getSource().getId(), subscription.getConfiguration(), form, urlPrefix);
         return object;
     }
