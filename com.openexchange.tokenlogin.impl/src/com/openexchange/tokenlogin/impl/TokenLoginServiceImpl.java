@@ -252,7 +252,7 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
         }
         final ContextService contextService = Services.getService(ContextService.class);
         if (null == contextService) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContextService.class.getName());
         }
         // Look-up session identifier
         String sessionId = token2sessionId.remove(token);
