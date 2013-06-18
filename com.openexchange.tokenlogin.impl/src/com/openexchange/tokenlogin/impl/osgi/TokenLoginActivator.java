@@ -213,7 +213,7 @@ public final class TokenLoginActivator extends HousekeepingActivator {
         final Map<String, MapConfig> mapConfigs = config.getMapConfigs();
         if (null != mapConfigs && !mapConfigs.isEmpty()) {
             for (final String mapName : mapConfigs.keySet()) {
-                if (mapName.startsWith("tokenLogin-")) {
+                if (mapName.startsWith("tokenlogin-")) {
                     LOG.info("Using distributed token-login '" + mapName + "'.");
                     return mapName;
                 }
