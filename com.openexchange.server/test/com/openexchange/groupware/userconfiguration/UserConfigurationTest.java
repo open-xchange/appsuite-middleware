@@ -53,8 +53,6 @@ import static org.junit.Assert.assertNotNull;
 import java.util.List;
 import junit.framework.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import com.openexchange.groupware.userconfiguration.UserConfiguration.Permission;
 
 
@@ -64,7 +62,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration.Permission
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.2.2
  */
-@RunWith(JUnit4.class)
 public class UserConfigurationTest {
 
     @Test

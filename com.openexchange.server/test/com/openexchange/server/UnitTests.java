@@ -76,6 +76,7 @@ public class UnitTests {
         tests.addTest(new JUnit4TestAdapter(com.openexchange.tools.net.URIParserTest.class));
         tests.addTestSuite(com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class);
         tests.addTest(new JUnit4TestAdapter(com.openexchange.mail.utils.MsisdnUtilityTest.class));
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.groupware.userconfiguration.UserConfigurationTest.class));
         return tests;
     }
 }
