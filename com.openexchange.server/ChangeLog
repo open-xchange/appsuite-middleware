@@ -1,3 +1,7 @@
+* 2013-06-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26381: Handle possible RuntimeExceptions more gracefully
+
 * 2013-06-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 27060: Offer possibility to disable Hazelcast JMX MBean and logging system.
