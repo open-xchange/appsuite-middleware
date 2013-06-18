@@ -50,10 +50,12 @@
 package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
+import static com.openexchange.ajax.fields.LoginFields.APPSECRET;
 import static com.openexchange.ajax.fields.LoginFields.AUTHID_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.CLIENT_IP_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.CLIENT_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.PASSWORD_PARAM;
+import static com.openexchange.ajax.fields.LoginFields.TOKEN;
 import static com.openexchange.ajax.fields.LoginFields.VERSION_PARAM;
 import static com.openexchange.login.Interface.HTTP_JSON;
 import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
@@ -143,6 +145,14 @@ public final class LoginTools {
 
     public static String parseClient(HttpServletRequest req, boolean strict, String defaultClient) throws OXException {
         return parseParameter(req, CLIENT_PARAM, strict, defaultClient);
+    }
+    
+    public static String parseToken(HttpServletRequest req) throws OXException {
+        return parseParameter(req, TOKEN);
+    }
+    
+    public static String parseAppSecret(HttpServletRequest req) throws OXException {
+        return parseParameter(req, APPSECRET);
     }
 
     public static String parseParameter(HttpServletRequest req, String paramName, boolean strict, String fallback) throws OXException {

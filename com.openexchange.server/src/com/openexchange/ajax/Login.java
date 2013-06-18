@@ -96,6 +96,7 @@ import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
+import com.openexchange.ajax.login.RedeemToken;
 import com.openexchange.ajax.login.TokenLogin;
 import com.openexchange.ajax.login.Tokens;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
@@ -196,6 +197,7 @@ public class Login extends AJAXServlet {
     public static final String ACTION_FORMLOGIN = "formlogin";
     public static final String ACTION_TOKENLOGIN = "tokenLogin";
     public static final String ACTION_TOKENS = "tokens";
+    public static final String ACTION_REDEEM_TOKEN = "redeemToken";
 
     /**
      * <code>"changeip"</code>
@@ -752,6 +754,8 @@ public class Login extends AJAXServlet {
         handlerMap.put(ACTION_FORMLOGIN, new FormLogin(conf));
         handlerMap.put(ACTION_TOKENLOGIN, new TokenLogin(conf));
         handlerMap.put(ACTION_TOKENS,  new Tokens(conf));
+        handlerMap.put(ACTION_REDEEM_TOKEN, new RedeemToken(conf));
+        
     }
 
     @Override
