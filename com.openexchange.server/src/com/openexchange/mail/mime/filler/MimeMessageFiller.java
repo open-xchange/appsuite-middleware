@@ -1765,8 +1765,7 @@ public class MimeMessageFiller {
                             m.appendLiteralReplacement(sb, null == blankImageTag ? blankSrc(imageTag) : blankImageTag);
                             continue;
                         }
-                        final ImageDataSource dataSource =
-                            (ImageDataSource) conversionService.getDataSource(imageLocation.getRegistrationName());
+                        final ImageDataSource dataSource = (ImageDataSource) conversionService.getDataSource(imageLocation.getRegistrationName());
                         if (null == dataSource) {
                             if (LOG.isWarnEnabled()) {
                                 tmp.setLength(0);
@@ -1789,6 +1788,11 @@ public class MimeMessageFiller {
                                 continue;
                             }
                             throw e;
+                        } catch (final RuntimeException rte) {
+                            LOG.warn("Couldn't load image data", rte);
+                            tmp.setLength(0);
+                            m.appendLiteralReplacement(sb, blankSrc(imageTag));
+                            continue;
                         }
                     }
                     final String iid;
