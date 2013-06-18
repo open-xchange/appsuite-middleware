@@ -245,9 +245,19 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
         if (null == tokenLoginSecret) {
             throw TokenLoginExceptionCodes.TOKEN_REDEEM_DENIED.create();
         }
+        // Check available services needed for session creation
+        final SessiondService sessiondService = Services.getService(SessiondService.class);
+        if (null == sessiondService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
+        }
+        final ContextService contextService = Services.getService(ContextService.class);
+        if (null == contextService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
+        }
+        // Look-up session identifier
         String sessionId = token2sessionId.remove(token);
         if (null == sessionId) {
-            // Look-up in Hazelcast map
+            // Local MISS, look up in Hazelcast map
             final IMap<String, String> hzMap = hzMap();
             if (null != hzMap) {
                 sessionId = hzMap.remove(token);
@@ -262,10 +272,6 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
         // Remove from other mapping, too
         sessionId2token.remove(sessionId);
         // Create duplicate session
-        final SessiondService sessiondService = Services.getService(SessiondService.class);
-        if (null == sessiondService) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
-        }
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
             throw TokenLoginExceptionCodes.NO_SUCH_SESSION_FOR_TOKEN.create(token);
@@ -274,13 +280,7 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
         final DefaultAddSessionParameter parameter = new DefaultAddSessionParameter().setUserId(session.getUserId());
         parameter.setAuthId(session.getAuthId()).setClient(isEmpty(optClientId) ? session.getClient() : optClientId);
         parameter.setClientIP(session.getLocalIp()).setFullLogin(session.getLogin());
-        {
-            final ContextService contextService = Services.getService(ContextService.class);
-            if (null == contextService) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
-            }
-            parameter.setContext(contextService.getContext(session.getContextId()));
-        }
+        parameter.setContext(contextService.getContext(session.getContextId()));
         parameter.setHash(session.getHash()).setUserLoginInfo(session.getLoginName()).setTransient(session.isTransient());
         parameter.setPassword(session.getPassword());
         // Add & return session
