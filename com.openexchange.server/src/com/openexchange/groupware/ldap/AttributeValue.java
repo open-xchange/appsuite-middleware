@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,106 +49,92 @@
 
 package com.openexchange.groupware.ldap;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.UUID;
 
 /**
- * Represents a user attribute with possible multiple values and their unique identifiers in form of a UUID.
+ * Correlates an attribute value with its unique identifier. Additionally objects of this class can carry a new value for the attribute for
+ * the update process of user attributes. Updating attributes instead of deleting all and inserting all again reduces deadlocks on the
+ * database. Deadlocks are reduced because all user attributes are locked using row locks and multiple threads will be serialized based on
+ * the database row locks.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class UserAttribute {
+public class AttributeValue {
 
-    private final String name;
-    private final Set<AttributeValue> values;
+    private final String value;
+    private final UUID uuid;
+    private String newValue;
 
-    public UserAttribute(String name) {
+    public AttributeValue(String value, UUID uuid, String newValue) {
         super();
-        this.name = name;
-        values = new HashSet<AttributeValue>();
+        this.value = value;
+        this.uuid = uuid;
+        this.newValue = newValue;
     }
 
-    public UserAttribute(String name, Set<String> values) {
-        this(name);
-        for (String value : values) {
-            addValue(value);
-        }
+    public AttributeValue(String value, UUID uuid) {
+        this(value, uuid, null);
     }
 
-    public String getName() {
-        return name;
+    public AttributeValue(String value) {
+        this(value, null);
     }
 
-    public Set<AttributeValue> getValues() {
-        return values;
+    public AttributeValue(AttributeValue other, String newValue) {
+        this(other.value, other.uuid, newValue);
     }
 
-    public Set<String> getStringValues() {
-        Set<String> retval = new HashSet<String>();
-        for (AttributeValue value : values) {
-            retval.add(value.getValue());
-        }
-        return Collections.unmodifiableSet(retval);
+    public String getValue() {
+        return value;
     }
 
-    AttributeValue getValue(String value) {
-        for (AttributeValue tmp : values) {
-            if (tmp.getValue().equals(value)) {
-                return tmp;
-            }
-        }
-        return null;
+    public UUID getUuid() {
+        return uuid;
     }
 
-    /**
-     * Adds specified value aside with its unique identifier.
-     * @param value the value
-     * @param uuid the associated UUID
-     * @return <code>true</code> if successfully added; otherwise <code>false</code> if already present
-     */
-    public boolean addValue(AttributeValue value) {
-        return values.add(value);
+    public String getNewValue() {
+        return newValue;
     }
 
-    void addValue(String value) {
-        values.add(new AttributeValue(value));
-    }
-
-    /**
-     * Gets the number of attribute values.
-     * @return the number of values.
-     */
-    public int size() {
-        return values.size();
+    public void setNewValue(String newValue) {
+        this.newValue = newValue;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((values == null) ? 0 : values.hashCode());
+        result = prime * result + ((value == null) ? 0 : value.hashCode());
+        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+        // newValue is not part of the hashCode because this class is kept in a HashSet - an attribute may have multiple values - and
+        // add/contains/remove operations need to work based on value and uuid.
         return result;
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof UserAttribute)) {
+        if (obj == null) {
             return false;
         }
-        final UserAttribute other = (UserAttribute) obj;
-        if (name == null) {
-            if (other.name != null) {
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        AttributeValue other = (AttributeValue) obj;
+        if (value == null) {
+            if (other.value != null) {
                 return false;
             }
-        } else if (!name.equals(other.name)) {
+        } else if (!value.equals(other.value)) {
             return false;
         }
-        if (!values.equals(other.values)) {
+        if (uuid == null) {
+            if (other.uuid != null) {
+                return false;
+            }
+        } else if (!uuid.equals(other.uuid)) {
             return false;
         }
         return true;
@@ -156,16 +142,12 @@ public final class UserAttribute {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder(256);
-        builder.append(name).append("=").append("[");
-        for (AttributeValue value : values) {
-            builder.append(value.toString()).append(',');
+        StringBuilder sb = new StringBuilder();
+        sb.append(value);
+        if (null != newValue) {
+            sb.append("=>").append(newValue);
         }
-        if (values.size() > 0) {
-            builder.setCharAt(builder.length() - 1, ']');
-        } else {
-            builder.append("]");
-        }
-        return builder.toString();
+        sb.append('(').append(uuid).append(')');
+        return sb.toString();
     }
 }
