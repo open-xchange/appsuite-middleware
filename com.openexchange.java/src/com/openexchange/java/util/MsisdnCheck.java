@@ -75,10 +75,7 @@ public class MsisdnCheck {
         if (isEmpty(number)) {
             return false;
         }
-        String num = number.trim();
-        if (num.charAt(0) == '+') {
-            num = num.substring(1);
-        }
+        String num = cleanup(number);
         final int len = num.length();
         boolean isDigit = true;
         for (int i = 0; isDigit && i < len; i++) {
@@ -98,6 +95,10 @@ public class MsisdnCheck {
             isWhitespace = Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    public static String cleanup(String number) {
+        return number.replaceAll("[+()/ ]", "");
     }
 
 }

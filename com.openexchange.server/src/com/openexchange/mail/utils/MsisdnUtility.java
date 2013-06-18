@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.utils;
 
+import java.util.List;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.contact.ContactService;
@@ -57,6 +58,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -102,9 +104,10 @@ public class MsisdnUtility {
                     final Set<String> set = ContactUtil.gatherTelephoneNumbers(contact);
                     for (final String number : set) {
                         try {
-                            addresses.add(new QuotedInternetAddress(number));
+                            addresses.add(new QuotedInternetAddress(MsisdnCheck.cleanup(number)));
                         } catch (final Exception e) {
                             // Ignore invalid number
+                            e.printStackTrace();
                         }
                     }
                 } catch (final Exception e) {
