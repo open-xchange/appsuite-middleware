@@ -74,10 +74,12 @@ public interface TokenLoginService {
      * @param token The token previously generated
      * @param appSecret The secret identifier associated with requesting Web service/application
      * @param optClientId The optional client identifier
+     * @param optAuthId The optional authentication identifier
+     * @param optHash The optional hash value that applies to newly generated session
      * @return The generated session
      * @throws OXException If token cannot be turned into a valid session
      */
-    Session redeemToken(String token, String appSecret, String optClientId) throws OXException;
+    Session redeemToken(String token, String appSecret, String optClientId, String optAuthId, String optHash) throws OXException;
 
     /**
      * Gets the token-login secret (and its parameters) for specified secret identifier.

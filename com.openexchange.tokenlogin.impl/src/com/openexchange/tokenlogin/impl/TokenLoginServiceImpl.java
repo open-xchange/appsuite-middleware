@@ -240,7 +240,7 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     @Override
-    public Session redeemToken(final String token, final String appSecret, final String optClientId) throws OXException {
+    public Session redeemToken(final String token, final String appSecret, final String optClientId, final String optAuthId, final String optHash) throws OXException {
         final TokenLoginSecret tokenLoginSecret = isEmpty(appSecret) ? null : getTokenLoginSecret(appSecret);
         if (null == tokenLoginSecret) {
             throw TokenLoginExceptionCodes.TOKEN_REDEEM_DENIED.create();
@@ -278,11 +278,15 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
         }
         // Create parameter object
         final DefaultAddSessionParameter parameter = new DefaultAddSessionParameter().setUserId(session.getUserId());
-        parameter.setAuthId(session.getAuthId()).setClient(isEmpty(optClientId) ? session.getClient() : optClientId);
-        parameter.setClientIP(session.getLocalIp()).setFullLogin(session.getLogin());
+        parameter.setClientIP(session.getLocalIp()).setFullLogin(session.getLogin()).setPassword(session.getPassword());
         parameter.setContext(contextService.getContext(session.getContextId()));
-        parameter.setHash(session.getHash()).setUserLoginInfo(session.getLoginName()).setTransient(session.isTransient());
-        parameter.setPassword(session.getPassword());
+        parameter.setUserLoginInfo(session.getLoginName()).setTransient(session.isTransient());
+        // Client identifier
+        parameter.setClient(isEmpty(optClientId) ? session.getClient() : optClientId);
+        // Authentication identifier
+        parameter.setAuthId(isEmpty(optAuthId) ? session.getAuthId() : optAuthId);
+        // Hash value
+        parameter.setHash(isEmpty(optHash) ? session.getHash() : optHash);
         // Add & return session
         return sessiondService.addSession(parameter);
     }
