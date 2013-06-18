@@ -57,6 +57,7 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
@@ -69,13 +70,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -86,7 +84,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -112,7 +109,7 @@ public class RdbUserStorage extends UserStorage {
 
     private static final String SELECT_USER = SELECT_ALL_USER + " AND id IN (";
 
-    private static final String SELECT_ATTRS = "SELECT id,name,value FROM user_attribute WHERE cid=? AND id IN (";
+    private static final String SELECT_ATTRS = "SELECT id,uuid,name,value FROM user_attribute WHERE cid=? AND id IN (";
 
     private static final String SELECT_CONTACT = "SELECT intfield01,field03,field02,field01 FROM prg_contacts WHERE cid=? AND intfield01 IN (";
 
@@ -475,52 +472,11 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private static Map<String, UserAttribute> loadAttributesWithUUID(int contextId, Connection con, int userId, boolean lockRows) throws OXException {
-        final Map<String, UserAttribute> attrs = new HashMap<String, UserAttribute>(32);
-        try {
-            PreparedStatement stmt = null;
-            ResultSet result = null;
-            try {
-                final String sql;
-                {
-                    final StringAllocator sb = new StringAllocator("SELECT id,name,value,uuid FROM user_attribute WHERE cid=? AND id=?");
-                    if (lockRows) {
-                        sb.append(" FOR UPDATE");
-                    }
-                    sql = sb.toString();
-                }
-                stmt = con.prepareStatement(sql);
-                int pos = 1;
-                stmt.setInt(pos++, contextId);
-                stmt.setInt(pos++, userId);
-                result = stmt.executeQuery();
-                if (!result.next()) {
-                    throw UserExceptionCode.USER_NOT_FOUND.create(I(userId), I(contextId));
-                }
-                do {
-                    final String name = result.getString(2);
-                    UserAttribute set = attrs.get(name);
-                    if (null == set) {
-                        set = new UserAttribute(name);
-                        attrs.put(name, set);
-                    }
-                    set.addValue(result.getString(3), UUIDs.toUUID(result.getBytes(4)));
-                } while (result.next());
-            } finally {
-                closeSQLStuff(result, stmt);
-            }
-        } catch (final SQLException e) {
-            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        }
-
-        return attrs;
-    }
-
     private static void loadAttributes(int contextId, Connection con, Map<Integer, UserImpl> users, boolean lockRows) throws OXException {
         if (lockRows && users.size() != 1) {
             throw UserExceptionCode.LOCKING_NOT_ALLOWED.create(I(users.size()));
         }
-        final Map<Integer, Map<String, Set<String>>> usersAttrs = new HashMap<Integer, Map<String, Set<String>>>();
+        final Map<Integer, Map<String, UserAttribute>> usersAttrs = new HashMap<Integer, Map<String, UserAttribute>>();
         try {
             final Iterator<Integer> iter = users.keySet().iterator();
             for (int i = 0; i < users.size(); i += IN_LIMIT) {
@@ -538,41 +494,48 @@ public class RdbUserStorage extends UserStorage {
                     for (int j = 0; j < length; j++) {
                         final int userId = i(iter.next());
                         stmt.setInt(pos++, userId);
-                        usersAttrs.put(I(userId), new HashMap<String, Set<String>>());
+                        usersAttrs.put(I(userId), new HashMap<String, UserAttribute>());
                     }
                     result = stmt.executeQuery();
                     // Gather attributes
                     while (result.next()) {
-                        final Map<String, Set<String>> attrs = usersAttrs.get(I(result.getInt(1)));
-                        final String name = result.getString(2);
-                        Set<String> set = attrs.get(name);
-                        if (null == set) {
-                            set = new HashSet<String>();
-                            attrs.put(name, set);
+                        Map<String, UserAttribute> attrs = usersAttrs.get(I(result.getInt(1)));
+                        String name = result.getString(3);
+                        UserAttribute attribute = attrs.get(name);
+                        if (null == attribute) {
+                            attribute = new UserAttribute(name);
+                            attrs.put(name, attribute);
                         }
-                        set.add(result.getString(3));
+                        final UUID uuid;
+                        byte[] bytes = result.getBytes(2);
+                        if (result.wasNull()) {
+                            uuid = null;
+                        } else {
+                            uuid = UUIDs.toUUID(bytes);
+                        }
+                        attribute.addValue(new AttributeValue(result.getString(4), uuid));
                     }
                 } finally {
                     closeSQLStuff(result, stmt);
                 }
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         // Proceed iterating users
         for (final UserImpl user : users.values()) {
-            final Map<String, Set<String>> attrs = usersAttrs.get(I(user.getId()));
+            final Map<String, UserAttribute> attrs = usersAttrs.get(I(user.getId()));
             // Check for aliases
             {
-                final Set<String> aliases = attrs.get("alias");
+                UserAttribute aliases = attrs.get("alias");
                 if (aliases == null) {
                     user.setAliases(new String[0]);
                 } else {
                     final List<String> tmp = new ArrayList<String>(aliases.size());
-                    for (final String alias : aliases) {
+                    for (final String alias : aliases.getStringValues()) {
                         try {
                             tmp.add(new QuotedInternetAddress(alias, false).toUnicodeString());
-                        } catch (final Exception e) {
+                        } catch (Exception e) {
                             tmp.add(alias);
                         }
                     }
@@ -580,10 +543,7 @@ public class RdbUserStorage extends UserStorage {
                 }
             }
             // Apply attributes
-            for (final Map.Entry<String, Set<String>> entry : attrs.entrySet()) {
-                entry.setValue(Collections.unmodifiableSet(entry.getValue()));
-            }
-            user.setAttributes(Collections.unmodifiableMap(attrs));
+            user.setAttributesInternal(attrs);
         }
     }
 
@@ -608,7 +568,7 @@ public class RdbUserStorage extends UserStorage {
                 }
                 condition.resetTransactionRollbackException();
                 try {
-                    DBUtils.startTransaction(con);
+                    startTransaction(con);
                     // Update attribute defined through UserMapper
                     UserField[] fields = MAPPER.getAssignedFields(user);
                     if (fields.length > 0) {
@@ -722,12 +682,14 @@ public class RdbUserStorage extends UserStorage {
     }
 
     private static void setAttribute(int contextId, Connection con, int userId, String name, String value) throws SQLException, OXException {
-        Map<String, UserAttribute> oldAttributes = loadAttributesWithUUID(contextId, con, userId, true);
+        Map<Integer, UserImpl> userMap = createSingleUserMap(userId);
+        loadAttributes(contextId, con, userMap, true);
+        Map<String, UserAttribute> oldAttributes = userMap.get(I(userId)).getAttributesInternal();
         Map<String, UserAttribute> attributes = new HashMap<String, UserAttribute>(oldAttributes);
         if (null == value) {
             attributes.remove(name);
         } else {
-            final UserAttribute newAttribute = new UserAttribute(name);
+            UserAttribute newAttribute = new UserAttribute(name);
             newAttribute.addValue(value);
             attributes.put(name, newAttribute);
         }
@@ -771,30 +733,20 @@ public class RdbUserStorage extends UserStorage {
     private static void updateAttributes(Context ctx, User user, Connection con) throws SQLException, OXException {
         final int contextId = ctx.getContextId();
         final int userId = user.getId();
-        final Map<String, UserAttribute> oldAttributes = loadAttributesWithUUID(ctx.getContextId(), con, userId, true);
-
-        final Map<String, UserAttribute> attributes;
-        {
-            final Map<String, Set<String>> attrs = user.getAttributes();
-            attributes = new LinkedHashMap<String, UserAttribute>(attrs.size());
-
-            for (final Entry<String, Set<java.lang.String>> entry : attrs.entrySet()) {
-                String key = entry.getKey();
-                final UserAttribute userAttribute = new UserAttribute(key);
-                userAttribute.addValues(entry.getValue());
-                attributes.put(key, userAttribute);
-            }
-        }
-
+        final Map<Integer, UserImpl> loadMap = createSingleUserMap(userId);
+        loadAttributes(ctx.getContextId(), con, loadMap, true);
+        final Map<String, UserAttribute> oldAttributes = loadMap.get(I(userId)).getAttributesInternal();
+        final Map<String, UserAttribute> attributes = UserImpl.toInternal(user.getAttributes());
         updateAttributes(contextId, userId, con, oldAttributes, attributes);
     }
 
     private static void updateAttributes(int contextId, int userId, Connection con, Map<String, UserAttribute> oldAttributes, Map<String, UserAttribute> attributes) throws SQLException, OXException {
         final Map<String, UserAttribute> added = new HashMap<String, UserAttribute>();
         final Map<String, UserAttribute> removed = new HashMap<String, UserAttribute>();
-        final Map<String, Set<ChangedAttr>> changed = new LinkedHashMap<String, Set<ChangedAttr>>();
+        final Map<String, UserAttribute> changed = new HashMap<String, UserAttribute>();
         calculateDifferences(oldAttributes, attributes, added, removed, changed);
         PreparedStatement stmt = null;
+        PreparedStatement stmt2 = null;
         // Add new attributes
         if (!added.isEmpty()) {
             try {
@@ -802,139 +754,111 @@ public class RdbUserStorage extends UserStorage {
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 int size = 0;
-                for (final Entry<String, UserAttribute> entry : added.entrySet()) {
-                    final UserAttribute userAttribute = entry.getValue();
-                    for (final String value : userAttribute.getValues()) {
-                        stmt.setString(3, entry.getKey());
-                        stmt.setString(4, value);
-                        final UUID uuid = userAttribute.getUuidFor(value);
+                for (Entry<String, UserAttribute> entry : added.entrySet()) {
+                    UserAttribute userAttribute = entry.getValue();
+                    for (AttributeValue value : userAttribute.getValues()) {
+                        stmt.setString(3, userAttribute.getName());
+                        stmt.setString(4, value.getValue());
+                        final UUID uuid = value.getUuid();
                         stmt.setBytes(5, UUIDs.toByteArray(null == uuid ? UUID.randomUUID() : uuid));
                         stmt.addBatch();
                         size++;
                     }
                 }
-                final int[] mLines = stmt.executeBatch();
                 int lines = 0;
-                for (final int mLine : mLines) {
+                for (final int mLine : stmt.executeBatch()) {
                     lines += mLine;
                 }
                 if (size != lines) {
                     final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
-                    LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
+                    LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, changed), e);
                     throw e;
                 }
             } finally {
                 closeSQLStuff(stmt);
-                stmt = null;
             }
         }
         // Remove attributes
         if (!removed.isEmpty()) {
-            PreparedStatement stmtWithUuid = null;
             try {
+                stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=? AND value=?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                stmt2 = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND uuid=?");
+                stmt2.setInt(1, contextId);
                 int size = 0;
-                for (final Map.Entry<String, UserAttribute> entry : removed.entrySet()) {
-                    final UserAttribute userAttribute = entry.getValue();
-                    for (final String value : userAttribute.getValues()) {
-                        final UUID uuid = userAttribute.getUuidFor(value);
+                for (UserAttribute attribute : removed.values()) {
+                    for (AttributeValue value : attribute.getValues()) {
+                        final UUID uuid = value.getUuid();
                         if (null == uuid) {
-                            if (null == stmt) {
-                                stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=? AND value=?");
-                                stmt.setInt(1, contextId);
-                                stmt.setInt(2, userId);
-                            }
-                            stmt.setString(3, entry.getKey());
-                            stmt.setString(4, value);
+                            stmt.setString(3, attribute.getName());
+                            stmt.setString(4, value.getValue());
                             stmt.addBatch();
                         } else {
-                            if (null == stmtWithUuid) {
-                                stmtWithUuid = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND uuid=?");
-                                stmtWithUuid.setInt(1, contextId);
-                            }
-                            stmtWithUuid.setBytes(2, UUIDs.toByteArray(uuid));
-                            stmtWithUuid.addBatch();
+                            stmt2.setBytes(2, UUIDs.toByteArray(uuid));
+                            stmt2.addBatch();
                         }
                         size++;
                     }
                 }
-                int[] mLines = new int[0];
                 int lines = 0;
-                if (null != stmt) {
-                    mLines = stmt.executeBatch();
-                    for (final int mLine : mLines) {
-                        lines += mLine;
-                    }
+                for (final int mLine : stmt.executeBatch()) {
+                    lines += mLine;
                 }
-                if (null != stmtWithUuid) {
-                    mLines = stmtWithUuid.executeBatch();
-                    for (final int mLine : mLines) {
-                        lines += mLine;
-                    }
+                for (final int mLine : stmt2.executeBatch()) {
+                    lines += mLine;
                 }
                 if (size != lines) {
                     final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
-                    LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
+                    LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, changed), e);
                     throw e;
                 }
             } finally {
                 closeSQLStuff(stmt);
-                stmt = null;
-                closeSQLStuff(stmtWithUuid);
+                closeSQLStuff(stmt2);
             }
         }
-        // Update attributes -------------------------------------------
+        // Update attributes
         if (!changed.isEmpty()) {
-            PreparedStatement stmtWithUuid = null;
             try {
+                stmt = con.prepareStatement("UPDATE user_attribute SET value=? WHERE cid=? AND id=? AND name=? AND value=?");
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, userId);
+                stmt2 = con.prepareStatement("UPDATE user_attribute SET value=? WHERE cid=? AND uuid=?");
+                stmt2.setInt(2, contextId);
                 int size1 = 0;
                 int size2 = 0;
-                for (final Map.Entry<String, Set<ChangedAttr>> entry : changed.entrySet()) {
-                    for (final ChangedAttr value : entry.getValue()) {
-                        final UUID uuid = value.uuid;
+                for (UserAttribute attribute : changed.values()) {
+                    for (AttributeValue value : attribute.getValues()) {
+                        stmt2.setString(1, value.getNewValue());
+                        UUID uuid = value.getUuid();
                         if (null == uuid) {
-                            if (null == stmt) {
-                                stmt = con.prepareStatement("UPDATE user_attribute SET value=? WHERE cid=? AND id=? AND name=? AND value=?");
-                                stmt.setInt(2, contextId);
-                                stmt.setInt(3, userId);
-                            }
-                            stmt.setString(4, entry.getKey());
-                            stmt.setString(5, value.oldVal);
-                            stmt.setString(1, value.newVal);
+                            stmt.setString(4, attribute.getName());
+                            stmt.setString(5, value.getValue());
                             stmt.addBatch();
                             size1++;
                         } else {
-                            if (null == stmtWithUuid) {
-                                stmtWithUuid = con.prepareStatement("UPDATE user_attribute SET value=? WHERE cid=? AND uuid=?");
-                                stmtWithUuid.setInt(2, contextId);
-                            }
-                            stmtWithUuid.setBytes(3, UUIDs.toByteArray(uuid));
-                            stmtWithUuid.setString(1, value.newVal);
-                            stmtWithUuid.addBatch();
+                            stmt2.setBytes(3, UUIDs.toByteArray(uuid));
+                            stmt2.addBatch();
                             size2++;
                         }
                     }
                 }
-                int[] mLines1 = new int[0];
                 int lines1 = 0;
-                if (null != stmt) {
-                    mLines1 = stmt.executeBatch();
-                    for (final int mLine : mLines1) {
-                        lines1 += mLine;
-                    }
+                int[] mLines1 = stmt.executeBatch();
+                for (final int mLine : mLines1) {
+                    lines1 += mLine;
                 }
-                int[] mLines2 = new int[0];
                 int lines2 = 0;
-                if (null != stmtWithUuid) {
-                    mLines2 = stmtWithUuid.executeBatch();
-                    for (final int mLine : mLines2) {
-                        lines2 += mLine;
-                    }
+                int[] mLines2 = stmt2.executeBatch();
+                for (final int mLine : mLines2) {
+                    lines2 += mLine;
                 }
                 if (size1 != lines1) {
                     // Ignoring the failed update of a clients login time stamp. This only happens if a concurrent login with the same client took place.
                     boolean onlyLoginsFailed = true;
                     int j = 0;
-                    for (Entry<String, Set<ChangedAttr>> entry : changed.entrySet()) {
+                    for (Entry<String, UserAttribute> entry : changed.entrySet()) {
                         if (!entry.getKey().startsWith("client:") && mLines1[j] != 1) {
                             onlyLoginsFailed = false;
                             break;
@@ -943,7 +867,7 @@ public class RdbUserStorage extends UserStorage {
                     }
                     if (!onlyLoginsFailed) {
                         final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
-                        LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
+                        LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, changed), e);
                         LOG.error("Expected lines: " + size1 + " Updated lines: " + lines1);
                         final Map<Integer, UserImpl> map = createSingleUserMap(userId);
                         loadAttributes(contextId, con, map, false);
@@ -957,7 +881,7 @@ public class RdbUserStorage extends UserStorage {
                     // Ignoring the failed update of a clients login time stamp. This only happens if a concurrent login with the same client took place.
                     boolean onlyLoginsFailed = true;
                     int j = 0;
-                    for (Entry<String, Set<ChangedAttr>> entry : changed.entrySet()) {
+                    for (Entry<String, UserAttribute> entry : changed.entrySet()) {
                         if (!entry.getKey().startsWith("client:") && mLines2[j] != 1) {
                             onlyLoginsFailed = false;
                             break;
@@ -966,7 +890,7 @@ public class RdbUserStorage extends UserStorage {
                     }
                     if (!onlyLoginsFailed) {
                         final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
-                        LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
+                        LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, changed), e);
                         LOG.error("Expected lines: " + size2 + " Updated lines: " + lines2);
                         final Map<Integer, UserImpl> map = createSingleUserMap(userId);
                         loadAttributes(contextId, con, map, false);
@@ -978,7 +902,7 @@ public class RdbUserStorage extends UserStorage {
                 }
             } finally {
                 closeSQLStuff(stmt);
-                closeSQLStuff(stmtWithUuid);
+                closeSQLStuff(stmt2);
             }
         }
     }
@@ -991,25 +915,7 @@ public class RdbUserStorage extends UserStorage {
         return loadMap;
     }
 
-    private static String toString(Map<String, Set<ChangedAttr>> changed) {
-        final StringBuilder sb = new StringBuilder("{");
-        for (final Map.Entry<String, Set<ChangedAttr>> entry : changed.entrySet()) {
-            sb.append(entry.getKey());
-            sb.append("=[");
-            for (final ChangedAttr value : entry.getValue()) {
-                sb.append(value.oldVal);
-                sb.append("=>");
-                sb.append(value.newVal);
-                sb.append(',');
-            }
-            sb.setCharAt(sb.length() - 1, ']');
-            sb.append(',');
-        }
-        sb.setCharAt(sb.length() - 1, '}');
-        return sb.toString();
-    }
-
-    static void calculateDifferences(final Map<String, UserAttribute> oldAttributes, final Map<String, UserAttribute> newAttributes, final Map<String, UserAttribute> added, final Map<String, UserAttribute> removed, final Map<String, Set<ChangedAttr>> changed) {
+    static void calculateDifferences(Map<String, UserAttribute> oldAttributes, Map<String, UserAttribute> newAttributes, Map<String, UserAttribute> added, Map<String, UserAttribute> removed, Map<String, UserAttribute> changed) {
         // Find added keys
         added.putAll(newAttributes);
         for (final String key : oldAttributes.keySet()) { added.remove(key); }
@@ -1024,46 +930,45 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private static void compareValues(final String name, final UserAttribute oldSet, final UserAttribute newSet, final Map<String, UserAttribute> added, final Map<String, UserAttribute> removed, final Map<String, Set<ChangedAttr>> changed) {
-        final Set<String> addedValues = new LinkedHashSet<String>(newSet.getValues());
-        final Set<String> removedValues = new LinkedHashSet<String>(oldSet.getValues());
+    private static void compareValues(String name, UserAttribute oldSet, UserAttribute newSet, Map<String, UserAttribute> added, Map<String, UserAttribute> removed, Map<String, UserAttribute> changed) {
+        // Comparison must be made based only on attribute value because newSet mostly does not contain any UUIDs and hashCode() and
+        // equals() methods would not match the AttributeValue.
+        final Set<String> addedValues = new HashSet<String>(newSet.getStringValues());
+        final Set<String> removedValues = new HashSet<String>(oldSet.getStringValues());
         // Find added values for a key.
-        addedValues.removeAll(oldSet.getValues());
+        addedValues.removeAll(oldSet.getStringValues());
         // Find removed values for a key.
-        removedValues.removeAll(newSet.getValues());
-        // Check sets
-        if (addedValues.isEmpty() && removedValues.isEmpty()) {
-            return;
-        }
-        // Proceed
+        removedValues.removeAll(newSet.getStringValues());
+        // Try to replace as much attribute values as possible instead of deleting old one and inserting new ones causing more deadlocks on
+        // the database.
         final Iterator<String> addedIter = addedValues.iterator();
         final Iterator<String> removedIter = removedValues.iterator();
         while (addedIter.hasNext() && removedIter.hasNext()) {
-            Set<ChangedAttr> values = changed.get(name);
-            if (null == values) {
-                values = new LinkedHashSet<ChangedAttr>();
-                changed.put(name, values);
+            UserAttribute attribute = changed.get(name);
+            if (null == attribute) {
+                attribute = new UserAttribute(name);
+                changed.put(name, attribute);
             }
-            final String oldVal = removedIter.next();
-            values.add(new ChangedAttr(oldVal, addedIter.next(), oldSet.getUuidFor(oldVal)));
+            AttributeValue value = oldSet.getValue(removedIter.next());
+            // Null can not be returned for value because removedIter is based on attributes given through oldSet.
+            attribute.addValue(new AttributeValue(value, addedIter.next()));
         }
         while (addedIter.hasNext()) {
-            final String value = addedIter.next();
-            add(added, name, value, newSet.getUuidFor(value));
+            add(added, name, new AttributeValue(addedIter.next()));
         }
         while (removedIter.hasNext()) {
-            final String value = removedIter.next();
-            add(removed, name, value, oldSet.getUuidFor(value));
+            add(removed, name, oldSet.getValue(removedIter.next()));
+            // Null can not be returned for value because removedIter is based on attributes given through oldSet.
         }
     }
 
-    private static void add(final Map<String, UserAttribute> attributes, final String name, final String value, final UUID uuid) {
+    private static void add(Map<String, UserAttribute> attributes, String name, AttributeValue value) {
         UserAttribute values = attributes.get(name);
         if (null == values) {
             values = new UserAttribute(name);
             attributes.put(name, values);
         }
-        values.addValue(value, uuid);
+        values.addValue(value);
     }
 
     @Override
@@ -1307,8 +1212,7 @@ public class RdbUserStorage extends UserStorage {
                     sia.append(result.getInt(1));
                 } while (result.next());
             } else {
-                throw UserExceptionCode.USER_NOT_FOUND.create(
-                        imapLogin, I(cid));
+                throw UserExceptionCode.USER_NOT_FOUND.create(imapLogin, I(cid));
             }
             users = sia.toArray();
         } catch (final SQLException e) {
@@ -1335,35 +1239,4 @@ public class RdbUserStorage extends UserStorage {
     protected void stopInternal() {
         // Nothing to tear down.
     }
-
-    static final class ChangedAttr {
-        final String oldVal;
-        final String newVal;
-        final UUID uuid;
-
-        ChangedAttr(final String oldVal, final String newVal, final UUID uuid) {
-            super();
-            this.oldVal = oldVal;
-            this.newVal = newVal;
-            this.uuid = uuid;
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder builder = new StringBuilder(64);
-            builder.append("ChangedAttr [");
-            if (oldVal != null) {
-                builder.append("oldVal=").append(oldVal).append(", ");
-            }
-            if (newVal != null) {
-                builder.append("newVal=").append(newVal).append(", ");
-            }
-            if (uuid != null) {
-                builder.append("uuid=").append(uuid);
-            }
-            builder.append("]");
-            return builder.toString();
-        }
-    }
-
 }

@@ -52,12 +52,10 @@ package com.openexchange.groupware.ldap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import junit.framework.AssertionFailedError;
 import org.junit.Test;
-import com.openexchange.groupware.ldap.RdbUserStorage.ChangedAttr;
 
 /**
  * {@link UserAttributeDiffTest}
@@ -76,7 +74,7 @@ public class UserAttributeDiffTest {
         Map<String, UserAttribute> newAttributes = new HashMap<String, UserAttribute>();
         Map<String, UserAttribute> added = new HashMap<String, UserAttribute>();
         Map<String, UserAttribute> removed = new HashMap<String, UserAttribute>();
-        Map<String, Set<ChangedAttr>> changed = new HashMap<String, Set<ChangedAttr>>();
+        Map<String, UserAttribute> changed = new HashMap<String, UserAttribute>();
         RdbUserStorage.calculateDifferences(oldAttributes, newAttributes, added, removed, changed);
         assertTrue(oldAttributes.isEmpty());
         assertTrue(newAttributes.isEmpty());
@@ -91,7 +89,7 @@ public class UserAttributeDiffTest {
         Map<String, UserAttribute> newAttributes = new HashMap<String, UserAttribute>();
         Map<String, UserAttribute> added = new HashMap<String, UserAttribute>();
         Map<String, UserAttribute> removed = new HashMap<String, UserAttribute>();
-        Map<String, Set<ChangedAttr>> changed = new HashMap<String, Set<ChangedAttr>>();
+        Map<String, UserAttribute> changed = new HashMap<String, UserAttribute>();
         oldAttributes.put("alias", V("alias", "marcus.klein@premium", "mk@premium"));
         newAttributes.putAll(oldAttributes);
         newAttributes.put("newKey", V("newKey", "newValue"));
@@ -107,7 +105,7 @@ public class UserAttributeDiffTest {
         Map<String, UserAttribute> newAttributes = new HashMap<String, UserAttribute>();
         Map<String, UserAttribute> added = new HashMap<String, UserAttribute>();
         Map<String, UserAttribute> removed = new HashMap<String, UserAttribute>();
-        Map<String, Set<ChangedAttr>> changed = new HashMap<String, Set<ChangedAttr>>();
+        Map<String, UserAttribute> changed = new HashMap<String, UserAttribute>();
         oldAttributes.put("alias", V("alias", "marcus.klein@premium", "mk@premium"));
         String expectedOldValue = Long.toString(System.currentTimeMillis());
         oldAttributes.put("client:testClient", V("client:testClient", expectedOldValue));
@@ -126,7 +124,7 @@ public class UserAttributeDiffTest {
         Map<String, UserAttribute> newAttributes = new HashMap<String, UserAttribute>();
         Map<String, UserAttribute> added = new HashMap<String, UserAttribute>();
         Map<String, UserAttribute> removed = new HashMap<String, UserAttribute>();
-        Map<String, Set<ChangedAttr>> changed = new HashMap<String, Set<ChangedAttr>>();
+        Map<String, UserAttribute> changed = new HashMap<String, UserAttribute>();
         oldAttributes.put("alias", V("alias","marcus.klein@premium", "mk@premium", "ma@premium"));
         newAttributes.put("alias", V("alias","marcus.klein@premium", "mc@premium", "mr@premium"));
         RdbUserStorage.calculateDifferences(oldAttributes, newAttributes, added, removed, changed);
@@ -135,7 +133,7 @@ public class UserAttributeDiffTest {
         // We don't know in which order the diff algorithm will generate the change of values. So test both ones.
         try {
             assertChanges(changed, N("alias"), MC(S(C("mk@premium", "mc@premium"), C("ma@premium", "mr@premium"))));
-        } catch (AssertionFailedError e) {
+        } catch (AssertionError e) {
             assertChanges(changed, N("alias"), MC(S(C("mk@premium", "mr@premium"), C("ma@premium", "mc@premium"))));
         }
     }
@@ -146,7 +144,7 @@ public class UserAttributeDiffTest {
         Map<String, UserAttribute> newAttributes = new HashMap<String, UserAttribute>();
         Map<String, UserAttribute> added = new HashMap<String, UserAttribute>();
         Map<String, UserAttribute> removed = new HashMap<String, UserAttribute>();
-        Map<String, Set<ChangedAttr>> changed = new HashMap<String, Set<ChangedAttr>>();
+        Map<String, UserAttribute> changed = new HashMap<String, UserAttribute>();
         oldAttributes.put("alias", V("alias","marcus.klein@premium", "mk@premium", "ma@premium"));
         newAttributes.put("alias", V("alias","marcus.klein@premium", "ma@premium", "mr@premium"));
         RdbUserStorage.calculateDifferences(oldAttributes, newAttributes, added, removed, changed);
@@ -163,17 +161,17 @@ public class UserAttributeDiffTest {
         }
     }
 
-    private void assertChanges(Map<String, Set<ChangedAttr>> changed, String[] names, Set<ChangedAttr>[] sets) {
+    private static void assertChanges(Map<String, UserAttribute> changed, String[] names, Set<AttributeValue>[] sets) {
         assertEquals(names.length, changed.size());
         for (int i = 0; i < names.length; i++) {
             assertTrue(changed.containsKey(names[i]));
-            Set<ChangedAttr> actual = changed.get(names[i]);
-            Set<ChangedAttr> expected = sets[i];
+            Set<AttributeValue> actual = changed.get(names[i]).getValues();
+            Set<AttributeValue> expected = sets[i];
             assertEquals(expected.size(), actual.size());
-            for (ChangedAttr expectedChange : expected) {
+            for (AttributeValue expectedChange : expected) {
                 boolean found = false;
-                for (ChangedAttr actualChange : actual) {
-                    if (expectedChange.oldVal.equals(actualChange.oldVal) && expectedChange.newVal.equals(actualChange.newVal)) {
+                for (AttributeValue actualChange : actual) {
+                    if (expectedChange.getValue().equals(actualChange.getValue()) && expectedChange.getNewValue().equals(actualChange.getNewValue())) {
                         found = true;
                     }
                 }
@@ -190,19 +188,19 @@ public class UserAttributeDiffTest {
         return retval;
     }
 
-    private static final ChangedAttr C(String oldValue, String newValue) {
-        return new ChangedAttr(oldValue, newValue, null);
+    private static final AttributeValue C(String oldValue, String newValue) {
+        return new AttributeValue(oldValue, null, newValue);
     }
 
-    private static final Set<ChangedAttr> S(ChangedAttr... changes) {
-        Set<ChangedAttr> retval = new LinkedHashSet<ChangedAttr>();
-        for (ChangedAttr change : changes) {
+    private static final Set<AttributeValue> S(AttributeValue... changes) {
+        Set<AttributeValue> retval = new HashSet<AttributeValue>();
+        for (AttributeValue change : changes) {
             retval.add(change);
         }
         return retval;
     }
 
-    private static final Set<ChangedAttr>[] MC(Set<ChangedAttr>... changeSets) {
+    private static final Set<AttributeValue>[] MC(Set<AttributeValue>... changeSets) {
         return changeSets;
     }
 
