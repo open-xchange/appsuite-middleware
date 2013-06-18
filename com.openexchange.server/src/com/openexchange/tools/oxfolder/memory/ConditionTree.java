@@ -94,6 +94,7 @@ public final class ConditionTree {
     private final TIntSet folderIds;
     private final List<Permission> permissions;
     private final boolean ignoreSharedAddressbook;
+    private final long stamp;
 
     /**
      * Initializes a new {@link ConditionTree}.
@@ -103,6 +104,17 @@ public final class ConditionTree {
         folderIds = new TIntHashSet();
         permissions = new LinkedList<Permission>();
         ignoreSharedAddressbook = OXFolderProperties.isIgnoreSharedAddressbook();
+        stamp = System.currentTimeMillis();
+    }
+
+    /**
+     * Checks if this user-associated condition tree is elapsed according to given time stamp.
+     *
+     * @param stamp The time stamp to compare with
+     * @return <code>true</code> if elapsed; otherwise <code>false</code>
+     */
+    public boolean isElapsed(final long stamp) {
+        return this.stamp < stamp;
     }
 
     /**

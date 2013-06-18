@@ -64,9 +64,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
+import com.javacodegeeks.concurrent.ExpirationPolicy;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -91,16 +93,42 @@ public final class ConditionTreeMap {
 
     private final ConcurrentMap<Integer, ConditionTree> trees;
     private final int contextId;
-    protected final long stamp;
+    private final int time2live;
 
     /**
      * Initializes a new {@link ConditionTreeMap}.
      */
-    public ConditionTreeMap(final int contextId, final long now) {
+    public ConditionTreeMap(final int contextId, final int time2live) {
         super();
-        trees = new ConcurrentHashMap<Integer, ConditionTree>(1024);
+        // Evict user-associated entries after <time2live> milliseconds
+        trees = new ConcurrentLinkedHashMap<Integer, ConditionTree>(1024, 0.75F, 16, Integer.MAX_VALUE, new ExpirationPolicy(time2live, time2live));
         this.contextId = contextId;
-        stamp = now;
+        this.time2live = time2live;
+    }
+
+    /**
+     * Trims this context condition tree map; meaning removes all elapsed entries.
+     */
+    public void trim() {
+        final long stamp = System.currentTimeMillis() - time2live;
+        for (final Iterator<ConditionTree> it = trees.values().iterator(); it.hasNext();) {
+            ConditionTree conditionTree = it.next();
+            if (null != conditionTree && conditionTree.isElapsed(stamp)) {
+                it.remove();
+            }
+        }
+    }
+
+    /**
+     * Trims this context condition tree map; meaning removes all elapsed entries.
+     */
+    public void trim(final long stamp) {
+        for (final Iterator<ConditionTree> it = trees.values().iterator(); it.hasNext();) {
+            ConditionTree conditionTree = it.next();
+            if (conditionTree.isElapsed(stamp)) {
+                it.remove();
+            }
+        }
     }
 
     /**

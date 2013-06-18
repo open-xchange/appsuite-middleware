@@ -138,7 +138,8 @@ public final class ConditionTreeMapManagement {
      */
     private ConditionTreeMapManagement() {
         super();
-        maps = new ConcurrentLinkedHashMap<Integer, Future<ConditionTreeMap>>(8192, 0.75F, 16, Integer.MAX_VALUE, new ExpirationPolicy(TIME2LIVE, TIME2LIVE));
+        // Evict context-associated ConditionTreeMaps after 10 minutes idle time
+        maps = new ConcurrentLinkedHashMap<Integer, Future<ConditionTreeMap>>(8192, 0.75F, 16, Integer.MAX_VALUE, new ExpirationPolicy(Long.MAX_VALUE, 600000));
         final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         enabled = null == service || service.getBoolProperty("com.openexchange.oxfolder.memory.enabled", true);
     }
@@ -172,9 +173,7 @@ public final class ConditionTreeMapManagement {
         final long now = System.currentTimeMillis();
         final Integer key = Integer.valueOf(contextId);
         Future<ConditionTreeMap> f = maps.get(key);
-        boolean checkIfElapsed = true;
         if (null == f) {
-            checkIfElapsed = false;
             final FutureTask<ConditionTreeMap> ft = new FutureTask<ConditionTreeMap>(new InitTreeMapCallable(contextId, now, LOG));
             f = maps.putIfAbsent(key, ft);
             if (null == f) {
@@ -182,22 +181,7 @@ public final class ConditionTreeMapManagement {
                 ft.run();
             }
         }
-        ConditionTreeMap treeMap = getFrom(f);
-        // Check if elapsed
-        if (checkIfElapsed && (treeMap.stamp < (System.currentTimeMillis() - TIME2LIVE))) {
-            maps.remove(key);
-            {
-                f = null;
-                final FutureTask<ConditionTreeMap> ft = new FutureTask<ConditionTreeMap>(new InitTreeMapCallable(contextId, now, LOG));
-                f = maps.putIfAbsent(key, ft);
-                if (null == f) {
-                    f = ft;
-                    ft.run();
-                }
-            }
-            treeMap = getFrom(f);
-        }
-        return treeMap;
+        return getFrom(f);
     }
 
     /**
@@ -256,13 +240,14 @@ public final class ConditionTreeMapManagement {
             final long st = System.currentTimeMillis();
             final long maxStamp = System.currentTimeMillis() - TIME2LIVE;
             for (final Iterator<Future<ConditionTreeMap>> it = maps.values().iterator(); it.hasNext();) {
-                try {
-                    final ConditionTreeMap map = getFrom(it.next());
-                    if (map.stamp < maxStamp) { // Elapsed one
-                        it.remove();
+                final Future<ConditionTreeMap> future = it.next();
+                if (null != future) {
+                    try {
+                        final ConditionTreeMap map = getFrom(future);
+                        map.trim(maxStamp);
+                    } catch (final Exception e) {
+                        // Ignore
                     }
-                } catch (final OXException e) {
-                    // Ignore
                 }
             }
             final long dur = System.currentTimeMillis() - st;
@@ -270,13 +255,14 @@ public final class ConditionTreeMapManagement {
         } else {
             final long maxStamp = System.currentTimeMillis() - TIME2LIVE;
             for (final Iterator<Future<ConditionTreeMap>> it = maps.values().iterator(); it.hasNext();) {
-                try {
-                    final ConditionTreeMap map = getFrom(it.next());
-                    if (map.stamp < maxStamp) { // Elapsed one
-                        it.remove();
+                final Future<ConditionTreeMap> future = it.next();
+                if (null != future) {
+                    try {
+                        final ConditionTreeMap map = getFrom(future);
+                        map.trim(maxStamp);
+                    } catch (final Exception e) {
+                        // Ignore
                     }
-                } catch (final OXException e) {
-                    // Ignore
                 }
             }
         }
@@ -337,7 +323,7 @@ public final class ConditionTreeMapManagement {
         @Override
         public ConditionTreeMap call() {
             try {
-                final ConditionTreeMap newMap = new ConditionTreeMap(contextId, now);
+                final ConditionTreeMap newMap = new ConditionTreeMap(contextId, TIME2LIVE);
                 newMap.init();
                 return newMap;
             } catch (final OXException e) {
