@@ -74,14 +74,14 @@ public class TokenLoginExceptionMessages implements LocalizableStrings {
 
     // No such token: %1$s
     public static final String NO_SUCH_TOKEN_MSG = "No such token: %1$s";
-    
+
     // Token login service is not available.
     public static final String SERVICE_NOT_AVAILABLE_MSG = "Token login service is not available.";
 
     // No such session for token: %1$s
     public static final String NO_SUCH_SESSION_FOR_TOKEN_MSG = "No such session for token: %1$s";
 
-    // Acquiring token denied.
-    public static final String ACQUIRE_TOKEN_DENIED_MSG = "Acquiring token denied.";
+    // Token redeem denied.
+    public static final String TOKEN_REDEEM_DENIED_MSG = "Token redeem denied.";
 
 }

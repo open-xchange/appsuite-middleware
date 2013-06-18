@@ -223,11 +223,7 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     @Override
-    public String acquireToken(final Session session, final String appSecret) throws OXException {
-        final TokenLoginSecret tokenLoginSecret = getTokenLoginSecret(appSecret);
-        if (null == tokenLoginSecret) {
-            throw TokenLoginExceptionCodes.ACQUIRE_TOKEN_DENIED.create();
-        }
+    public String acquireToken(final Session session) throws OXException {
         // Only one token per session
         final String sessionId = session.getSessionID();
         String token = sessionId2token.get(sessionId);
@@ -244,7 +240,11 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     @Override
-    public Session redeemToken(final String token, final String optClientId) throws OXException {
+    public Session redeemToken(final String token, final String appSecret, final String optClientId) throws OXException {
+        final TokenLoginSecret tokenLoginSecret = isEmpty(appSecret) ? null : getTokenLoginSecret(appSecret);
+        if (null == tokenLoginSecret) {
+            throw TokenLoginExceptionCodes.TOKEN_REDEEM_DENIED.create();
+        }
         String sessionId = token2sessionId.remove(token);
         if (null == sessionId) {
             // Look-up in Hazelcast map

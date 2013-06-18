@@ -83,9 +83,9 @@ public enum TokenLoginExceptionCodes implements OXExceptionCode {
      */
     NO_SUCH_SESSION_FOR_TOKEN(TokenLoginExceptionMessages.NO_SUCH_SESSION_FOR_TOKEN_MSG, CATEGORY_ERROR, 5),
     /**
-     * Acquiring token denied.
+     * Token redeem denied.
      */
-    ACQUIRE_TOKEN_DENIED(TokenLoginExceptionMessages.ACQUIRE_TOKEN_DENIED_MSG, CATEGORY_PERMISSION_DENIED, 6),
+    TOKEN_REDEEM_DENIED(TokenLoginExceptionMessages.TOKEN_REDEEM_DENIED_MSG, CATEGORY_PERMISSION_DENIED, 6),
 
     ;
 
