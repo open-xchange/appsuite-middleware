@@ -11657,9 +11657,9 @@ msgstr ""
 msgid "No such session for token: %1$s"
 msgstr ""
 
-#. Acquiring token denied.
+#. Token redeem denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tokenlogin/src/com/openexchange/tokenlogin/TokenLoginExceptionMessages.java:85
-msgid "Acquiring token denied."
+msgid "Token redeem denied."
 msgstr ""
 
 #. The consumer key/consumer secret pair is missing in configuration.
