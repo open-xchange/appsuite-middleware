@@ -646,7 +646,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                         final JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
                         if (null == jpegDirectory)
                             transformationNeeded = true;
-                        else {
+                        else if (transformationNeeded==false) {
                             // check width & height
                             final int width = jpegDirectory.getImageWidth();
                             final int height = jpegDirectory.getImageHeight();
