@@ -55,12 +55,51 @@ for FILE in ${CONFFILES}; do
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
 done
 
-PROTECT="facebookoauth.properties linkedinoauth.properties msnoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
-for FILE in $PROTECT
-do
-    ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
-done
-exit 0
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    PROTECT="facebookoauth.properties linkedinoauth.properties msnoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
+    for FILE in $PROTECT; do
+        ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
+    done
+
+    # SoftwareChange_Request-1494
+    pfile=/opt/open-xchange/etc/msnoauth.properties
+    if ! ox_exists_property com.openexchange.oauth.msn $pfile; then
+       if grep -E '^com.openexchange.*REPLACE_THIS_WITH_VALUE_OBTAINED_FROM' $pfile > /dev/null; then
+           ox_set_property com.openexchange.oauth.msn false $pfile
+       else
+           ox_set_property com.openexchange.oauth.msn true $pfile
+       fi
+    fi
+    pfile=/opt/open-xchange/etc/yahoooauth.properties
+    if ! ox_exists_property com.openexchange.oauth.yahoo $pfile; then
+       if grep -E '^com.openexchange.*REPLACE_THIS_WITH_VALUE_OBTAINED_FROM' $pfile > /dev/null; then
+           ox_set_property com.openexchange.oauth.yahoo false $pfile
+       else
+           ox_set_property com.openexchange.oauth.yahoo true $pfile
+       fi
+    fi
+    pfile=/opt/open-xchange/etc/linkedinoauth.properties
+    if ! ox_exists_property com.openexchange.oauth.linkedin $pfile; then
+       if grep -E '^com.openexchange.*REPLACE_THIS_WITH_THE_KEY_FROM' $pfile > /dev/null; then
+           ox_set_property com.openexchange.oauth.linkedin false $pfile
+       else
+           ox_set_property com.openexchange.oauth.linkedin true $pfile
+       fi
+    fi
+    pfile=/opt/open-xchange/etc/facebookoauth.properties
+    if ! ox_exists_property com.openexchange.oauth.facebook $pfile; then
+       if grep -E '^com.openexchange.*INSERT_YOUR_API_KEY_HERE' $pfile > /dev/null; then
+           ox_set_property com.openexchange.oauth.facebook false $pfile
+       else
+           ox_set_property com.openexchange.oauth.facebook true $pfile
+       fi
+    fi
+fi
 
 %clean
 %{__rm} -rf %{buildroot}
