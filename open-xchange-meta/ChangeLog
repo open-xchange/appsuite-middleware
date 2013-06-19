@@ -1,3 +1,7 @@
+* 2013-06-10 - choeger@open-xchange.com
+
+ - Bugfix #27036 - missing language de-de in open-xchange-meta-oxucs
+
 * 2012-09-11 - choeger@open-xchange.com
 
  - Bugfix #22963 - open-xchange-meta-mobility has wrong dependencies

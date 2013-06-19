@@ -22,6 +22,12 @@ open-xchange-authentication-database (7.2.2-0) UNRELEASED; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 27 May 2013 17:13:53 +0200
 
+open-xchange-authentication-database (7.2.1-5) UNRELEASED; urgency=low
+
+  * Build for patch 2013-06-11
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 10 Jun 2013 15:31:05 +0200
+
 open-xchange-authentication-database (7.2.1-4) UNRELEASED; urgency=low
 
   * Build for patch 2013-06-20

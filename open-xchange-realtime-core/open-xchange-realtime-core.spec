@@ -49,6 +49,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %changelog
 * Mon Jun 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Feature freeze for 7.2.2 release
+* Mon Jun 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-06-11
 * Fri Jun 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-06-20
 * Mon Jun 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
