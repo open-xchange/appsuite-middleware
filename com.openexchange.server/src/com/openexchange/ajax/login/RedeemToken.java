@@ -51,9 +51,20 @@ package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.AJAXServlet.CONTENTTYPE_HTML;
 import java.io.IOException;
+import java.lang.reflect.UndeclaredThrowableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.Login;
+import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tokenlogin.TokenLoginSecret;
@@ -68,6 +79,7 @@ import com.openexchange.tokenlogin.TokenLoginService;
 public class RedeemToken implements LoginRequestHandler {
     
     private final LoginConfiguration conf;
+    private final static Log LOG = LogFactory.getLog(RedeemToken.class);
 
     /**
      * Initializes a new {@link RedeemToken}.
@@ -91,21 +103,53 @@ public class RedeemToken implements LoginRequestHandler {
         }
     }
     
-    private void doRedeemToken(HttpServletRequest req, HttpServletResponse resp) throws OXException {
+    private void doRedeemToken(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
         String authId = LoginTools.parseAuthId(req, true);
         String client = LoginTools.parseClient(req, true, "");
         String userAgent = LoginTools.parseUserAgent(req);
         String hash = HashCalculator.getInstance().getHash(req, userAgent, client);
         String token = LoginTools.parseToken(req);
         String appSecret = LoginTools.parseAppSecret(req);
+        if (null == token || null == appSecret) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
         TokenLoginService service = ServerServiceRegistry.getInstance().getService(TokenLoginService.class);
         Session session = service.redeemToken(token, appSecret, client, authId, hash);
         TokenLoginSecret tokenLoginSecret = service.getTokenLoginSecret(appSecret);
         boolean writePassword = (Boolean) tokenLoginSecret.getParameters().get("accessPassword");
-        if (!writePassword) {
-            
-        }
         
+        try {
+            final Context context = ContextStorage.getInstance().getContext(session.getContextId());
+            final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
+            if (!context.isEnabled() || !user.isMailEnabled()) {
+                LOG.info("Status code 403 (FORBIDDEN): Either context " + context.getContextId() + " or user " + user.getId() + " not enabled");
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
+        } catch (final UndeclaredThrowableException e) {
+            LOG.info("Status code 403 (FORBIDDEN): Unexpected error occurred during login: " + e.getMessage());
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        } catch (final OXException e) {
+            LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: " + session.getContextId() + '/' + session.getUserId());
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        Login.writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName(), conf);
+
+        try {
+            final JSONObject json = new JSONObject();
+            LoginWriter.write(session, json);
+            if (writePassword) {
+                json.put("password", session.getPassword());
+            }
+            json.write(resp.getWriter());
+        } catch (final JSONException e) {
+            LOG.info(e.getMessage(), e);
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
     }
 
 }
