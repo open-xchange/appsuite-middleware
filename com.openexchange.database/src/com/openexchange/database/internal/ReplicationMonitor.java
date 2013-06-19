@@ -153,13 +153,18 @@ public final class ReplicationMonitor {
                     clientTransaction = readTransaction(retval, assign.getContextId());
                 } catch (final OXException e) {
                     LOG.warn(e.getMessage(), e);
-                    try {
-                        retval.close();
-                    } catch (final SQLException e1) {
-                        OXException e2 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-                        LOG.error(e2.getMessage(), e2);
+                    if (10 == tries) {
+                        // Do a fall back to the master.
+                        clientTransaction = -1;
+                    } else {
+                        try {
+                            retval.close();
+                        } catch (final SQLException e1) {
+                            OXException e2 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                            LOG.error(e2.getMessage(), e2);
+                        }
+                        retval = null;
                     }
-                    retval = null;
                 }
             }
         } while (null == retval && tries < 10);
