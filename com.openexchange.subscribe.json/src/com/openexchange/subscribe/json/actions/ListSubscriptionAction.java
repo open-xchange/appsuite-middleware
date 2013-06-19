@@ -113,7 +113,7 @@ public class ListSubscriptionAction extends AbstractSubscribeAction {
 		try {
 			dynamicColumns = getDynamicColumns(parameters);
 			final List<String> dynamicColumnOrder = getDynamicColumnOrder(parameters);
-			Object res = createResponse(subscriptions, basicColumns, dynamicColumns, dynamicColumnOrder);
+			Object res = createResponse(subscriptions, basicColumns, dynamicColumns, dynamicColumnOrder, subscribeRequest.getTimeZone());
 	        if (res instanceof JSONObject) {
                 JSONObject json = (JSONObject) res;
                 return new AJAXRequestResult(json, "json");

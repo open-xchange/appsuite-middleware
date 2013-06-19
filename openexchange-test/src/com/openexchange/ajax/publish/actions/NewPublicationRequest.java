@@ -50,6 +50,7 @@
 package com.openexchange.ajax.publish.actions;
 
 import java.util.LinkedList;
+import java.util.TimeZone;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
@@ -78,7 +79,7 @@ public class NewPublicationRequest extends AbstractPublicationRequest<NewPublica
     @Override
     public Object getBody() throws JSONException {
         try {
-            return new PublicationWriter().write(publication, null);
+            return new PublicationWriter().write(publication, null, TimeZone.getTimeZone("utc"));
         } catch (OXException e) {
             throw new JSONException(e);
         }

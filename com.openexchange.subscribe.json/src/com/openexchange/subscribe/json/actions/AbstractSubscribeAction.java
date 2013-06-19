@@ -58,6 +58,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -161,7 +162,7 @@ public abstract class AbstractSubscribeAction extends
 	}
 
 	protected Object createResponse(final List<Subscription> allSubscriptions, final String[] basicColumns, final Map<String, String[]> dynamicColumns,
-			final List<String> dynamicColumnOrder) throws OXException, JSONException {
+			final List<String> dynamicColumnOrder, TimeZone tz) throws OXException, JSONException {
 			    final JSONArray rows = new JSONArray();
 			    final SubscriptionJSONWriter writer = new SubscriptionJSONWriter();
 			    for (final Subscription subscription : allSubscriptions) {
@@ -170,7 +171,7 @@ public abstract class AbstractSubscribeAction extends
 			            basicColumns,
 			            dynamicColumns,
 			            dynamicColumnOrder,
-			            subscription.getSource().getFormDescription());
+			            subscription.getSource().getFormDescription(), tz);
 			        rows.put(row);
 			    }
 			    return rows;

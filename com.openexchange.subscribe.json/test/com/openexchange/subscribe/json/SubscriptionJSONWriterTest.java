@@ -126,7 +126,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
             subscription,
             basicCols,
             specialCols,
-            Arrays.asList("com.openexchange.subscribe.test1"), form);
+            Arrays.asList("com.openexchange.subscribe.test1"), form, TimeZone.getTimeZone("utc"));
 
         JSONAssertion assertion =
             new JSONAssertion()
@@ -144,7 +144,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
             subscription,
             basicCols,
             specialCols,
-            Arrays.asList("com.openexchange.subscribe.test2"), form);
+            Arrays.asList("com.openexchange.subscribe.test2"), form, TimeZone.getTimeZone("utc"));
 
         JSONAssertion assertion = new JSONAssertion().isArray().withValues(
             2,
@@ -166,7 +166,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
                 subscription,
                 basicCols,
                 specialCols,
-                Arrays.asList("com.openexchange.subscribe.test2"), form);
+                Arrays.asList("com.openexchange.subscribe.test2"), form, TimeZone.getTimeZone("utc"));
             fail("Expected Exception");
         } catch (OXException x) {
 

@@ -111,7 +111,7 @@ public class AllSubscriptionAction extends AbstractSubscribeAction {
 		try {
 			dynamicColumns = getDynamicColumns(parameters);
 			final List<String> dynamicColumnOrder = getDynamicColumnOrder(parameters);
-	        JSONArray jsonArray = (JSONArray) createResponse(allSubscriptions, basicColumns, dynamicColumns, dynamicColumnOrder);
+	        JSONArray jsonArray = (JSONArray) createResponse(allSubscriptions, basicColumns, dynamicColumns, dynamicColumnOrder, subscribeRequest.getTimeZone());
 	        return new AJAXRequestResult(jsonArray, "json");
 		} catch (JSONException e) {
 			throw new OXException(e);

@@ -215,8 +215,15 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         final String[] basicColumns = getBasicColumns(request);
         final Map<String, String[]> dynamicColumns = getDynamicColumns(request);
         final List<String> dynamicColumnOrder = getDynamicColumnOrder(request);
-
-        return createResponse(subscriptions, basicColumns, dynamicColumns, dynamicColumnOrder);
+        String sTimeZone = request.optString("timezone");
+        TimeZone tz;
+        if (sTimeZone != null) {
+            tz = TimeZone.getTimeZone(sTimeZone);
+        } else {
+            tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
+        }
+        
+        return createResponse(subscriptions, basicColumns, dynamicColumns, dynamicColumnOrder, tz);
     }
 
     private Object loadAllSubscriptions(final JSONObject request, final ServerSession session) throws JSONException, OXException {
@@ -235,12 +242,19 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         } else {
             allSubscriptions = getAllSubscriptions(session, secretService.getSecret(session));
         }
-
+        String sTimeZone = request.optString("timezone");
+        TimeZone tz;
+        if (sTimeZone != null) {
+            tz = TimeZone.getTimeZone(sTimeZone);
+        } else {
+            tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
+        }
+        
         final String[] basicColumns = getBasicColumns(request);
         final Map<String, String[]> dynamicColumns = getDynamicColumns(request);
         final List<String> dynamicColumnOrder = getDynamicColumnOrder(request);
 
-        return createResponse(allSubscriptions, basicColumns, dynamicColumns, dynamicColumnOrder);
+        return createResponse(allSubscriptions, basicColumns, dynamicColumns, dynamicColumnOrder, tz);
     }
 
     private List<Subscription> getSubscriptionsInFolder(final ServerSession session, final String folder, final String secret) throws OXException {
@@ -265,7 +279,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         return allSubscriptions;
     }
 
-    private Object createResponse(final List<Subscription> allSubscriptions, final String[] basicColumns, final Map<String, String[]> dynamicColumns, final List<String> dynamicColumnOrder) throws OXException, JSONException {
+    private Object createResponse(final List<Subscription> allSubscriptions, final String[] basicColumns, final Map<String, String[]> dynamicColumns, final List<String> dynamicColumnOrder, TimeZone tz) throws OXException, JSONException {
         final JSONArray rows = new JSONArray();
         final SubscriptionJSONWriter writer = new SubscriptionJSONWriter();
         for (final Subscription subscription : allSubscriptions) {
@@ -274,7 +288,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
                 basicColumns,
                 dynamicColumns,
                 dynamicColumnOrder,
-                subscription.getSource().getFormDescription());
+                subscription.getSource().getFormDescription(), tz);
             rows.put(row);
         }
         return rows;

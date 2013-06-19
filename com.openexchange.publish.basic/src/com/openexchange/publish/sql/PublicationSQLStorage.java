@@ -140,7 +140,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
-            final SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled").FROM(publications).WHERE(
+            final SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled", "created").FROM(publications).WHERE(
                 new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
 
             final List<Object> values = new ArrayList<Object>();
@@ -180,7 +180,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
-            final SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled").FROM(publications).WHERE(
+            final SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled", "created").FROM(publications).WHERE(
                 new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("module", PLACEHOLDER)).AND(new EQUALS("entity", PLACEHOLDER)));
 
         	final List<Object> values = new ArrayList<Object>();
@@ -217,7 +217,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
-            final SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled").FROM(publications).WHERE(
+            final SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled", "created").FROM(publications).WHERE(
                 new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("target_id", PLACEHOLDER)));
 
             final List<Object> values = new ArrayList<Object>();
@@ -263,13 +263,13 @@ public class PublicationSQLStorage implements PublicationStorage {
             SELECT select;
             final List<Object> values = new ArrayList<Object>();
             if (module == null) {
-            	select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled").FROM(publications).WHERE(
+            	select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled", "created").FROM(publications).WHERE(
                         new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)));
 
                 values.add(I(contextId));
                 values.add(I(userId));
             } else {
-            	select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled").FROM(publications).WHERE(
+            	select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled", "created").FROM(publications).WHERE(
                         new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)).AND(new EQUALS("module", PLACEHOLDER)));
 
                 values.add(I(contextId));
@@ -464,7 +464,7 @@ public class PublicationSQLStorage implements PublicationStorage {
 
         final INSERT insert = new INSERT().INTO(publications).SET("id", PLACEHOLDER).SET("cid", PLACEHOLDER).SET("user_id", PLACEHOLDER).SET(
             "entity",
-            PLACEHOLDER).SET("module", PLACEHOLDER).SET("configuration_id", PLACEHOLDER).SET("target_id", PLACEHOLDER).SET("enabled", PLACEHOLDER);
+            PLACEHOLDER).SET("module", PLACEHOLDER).SET("configuration_id", PLACEHOLDER).SET("target_id", PLACEHOLDER).SET("enabled", PLACEHOLDER).SET("created", PLACEHOLDER);
 
         final List<Object> values = new ArrayList<Object>();
         values.add(I(id));
@@ -475,6 +475,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         values.add(I(configId));
         values.add(publication.getTarget().getId());
         values.add(publication.isEnabled());
+        values.add(System.currentTimeMillis());
 
         new StatementBuilder().executeStatement(writeConnection, insert, values);
         return id;
@@ -531,6 +532,7 @@ public class PublicationSQLStorage implements PublicationStorage {
             publication.setModule(resultSet.getString("module"));
             publication.setUserId(resultSet.getInt("user_id"));
             publication.setEnabled(resultSet.getBoolean("enabled"));
+            publication.setCreated(resultSet.getLong("created"));
 
             final Map<String, Object> content = new HashMap<String, Object>();
             storageService.fill(readConnection, ctx, resultSet.getInt("configuration_id"), content);

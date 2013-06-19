@@ -147,7 +147,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
-            final SELECT select = new SELECT("id", "user_id", "configuration_id", "source_id", "folder_id", "last_update", "enabled")
+            final SELECT select = new SELECT("id", "user_id", "configuration_id", "source_id", "folder_id", "last_update", "created", "enabled")
             .FROM(subscriptions)
             .WHERE(
                 new EQUALS("id", PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER)));
@@ -189,7 +189,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         try {
             readConnection = dbProvider.getReadConnection(ctx);
             final SELECT select = new
-                SELECT("id", "user_id", "configuration_id", "source_id", "folder_id", "last_update", "enabled")
+                SELECT("id", "user_id", "configuration_id", "source_id", "folder_id", "last_update", "created", "enabled")
                 .FROM(subscriptions)
                 .WHERE(
                     new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("folder_id", PLACEHOLDER)));
@@ -332,7 +332,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
 
         final INSERT insert = new INSERT().INTO(subscriptions).SET("id", PLACEHOLDER).SET("cid", PLACEHOLDER).SET("user_id", PLACEHOLDER).SET(
             "configuration_id",
-            PLACEHOLDER).SET("source_id", PLACEHOLDER).SET("folder_id", PLACEHOLDER).SET("last_update", PLACEHOLDER).SET("enabled", PLACEHOLDER);
+            PLACEHOLDER).SET("source_id", PLACEHOLDER).SET("folder_id", PLACEHOLDER).SET("last_update", PLACEHOLDER).SET("created", PLACEHOLDER).SET("enabled", PLACEHOLDER);
 
         final List<Object> values = new ArrayList<Object>();
         values.add(I(id));
@@ -342,6 +342,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         values.add(subscription.getSource().getId());
         values.add(subscription.getFolderId());
         values.add(L(subscription.getLastUpdate()));
+        values.add(System.currentTimeMillis());
         values.add(subscription.isEnabled());
 
         new StatementBuilder().executeStatement(writeConnection, insert, values);
@@ -466,6 +467,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             subscription.setFolderId(resultSet.getString("folder_id"));
             subscription.setId(resultSet.getInt("id"));
             subscription.setLastUpdate(resultSet.getLong("last_update"));
+            subscription.setCreated(resultSet.getLong("created"));
             subscription.setUserId(resultSet.getInt("user_id"));
             subscription.setEnabled(resultSet.getBoolean("enabled"));
 
