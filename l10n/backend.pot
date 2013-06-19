@@ -4269,6 +4269,11 @@ msgstr ""
 msgid "No permission to modify resources in context %1$s"
 msgstr ""
 
+#. Cannot change password: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:104
+msgid "Cannot change password: %1$s"
+msgstr ""
+
 #. *
 #. * Invalid locale string: %1$s
 #.

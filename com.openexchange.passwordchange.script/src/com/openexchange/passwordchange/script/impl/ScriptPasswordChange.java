@@ -81,18 +81,19 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		super();
 	}
 
-	private String getShellCommand() throws OXException {
-		final ConfigurationService configservice = SPWServiceRegistry
-				.getServiceRegistry().getService(ConfigurationService.class,
-						true);
-		return configservice
-				.getProperty("com.openexchange.passwordchange.script.shellscript");
-	}
+    private String getShellCommand() throws OXException {
+        return SPWServiceRegistry.getServiceRegistry().getService(ConfigurationService.class, true).getProperty("com.openexchange.passwordchange.script.shellscript");
+    }
 
 	@Override
 	protected void update(final PasswordChangeEvent event) throws OXException {
 
 		String shellscript_to_execute = getShellCommand();
+		if (isEmpty(shellscript_to_execute)) {
+		    final String message = "Shell command is empty. Please check property \"com.openexchange.passwordchange.script.shellscript\" in file change_pwd_script.properties";
+            LOG.error(message);
+		    throw PasswordExceptionCode.PASSWORD_FAILED_WITH_MSG.create(message);
+        }
 		User user = null;
 		{
 			final UserService userService = getServiceRegistry().getService(UserService.class);
@@ -103,10 +104,25 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 
 		}
 		final String usern = user.getLoginInfo();
+		if (null == usern) {
+            final String message = "User name is null.";
+            LOG.error(message);
+            throw PasswordExceptionCode.PASSWORD_FAILED_WITH_MSG.create(message);
+        }
 		final String oldpw = event.getOldPassword();
+		if (null == oldpw) {
+            final String message = "Old password is null.";
+            LOG.error(message);
+            throw PasswordExceptionCode.PASSWORD_FAILED_WITH_MSG.create(message);
+        }
 		final String newpw = event.getNewPassword();
-		final String cid = event.getContext().getContextId()+"";
-		final String userid = user.getId()+"";
+		if (null == newpw) {
+            final String message = "New password is null.";
+            LOG.error(message);
+            throw PasswordExceptionCode.PASSWORD_FAILED_WITH_MSG.create(message);
+        }
+		final String cid = Integer.toString(event.getContext().getContextId());
+		final String userid = Integer.toString(user.getId());
 
 		/*
 		 * Update passwd via executing a shell script
@@ -121,7 +137,7 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		 */
 
 		final String[] cmd = new String[11];
-		cmd[0] = shellscript_to_execute; // the script, after that, the parameter
+		cmd[0] = shellscript_to_execute; // the script, after that, the parameters
 		cmd[1] = "--cid";
 		cmd[2] = cid;
 		cmd[3] = "--username";
@@ -183,5 +199,19 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 
 
 	}
+
+	/** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+    
 
 }
