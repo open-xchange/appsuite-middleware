@@ -89,9 +89,6 @@ public class RedeemToken implements LoginRequestHandler {
         this.conf = conf;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.login.LoginRequestHandler#handleRequest(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-     */
     @Override
     public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
@@ -123,16 +120,16 @@ public class RedeemToken implements LoginRequestHandler {
             final Context context = ContextStorage.getInstance().getContext(session.getContextId());
             final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
             if (!context.isEnabled() || !user.isMailEnabled()) {
-                LOG.info("Status code 403 (FORBIDDEN): Either context " + context.getContextId() + " or user " + user.getId() + " not enabled");
+                LOG.info("Either context " + context.getContextId() + " or user " + user.getId() + " not enabled");
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
         } catch (final UndeclaredThrowableException e) {
-            LOG.info("Status code 403 (FORBIDDEN): Unexpected error occurred during login: " + e.getMessage());
+            LOG.info("Unexpected error occurred during login: " + e.getMessage(), e);
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         } catch (final OXException e) {
-            LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: " + session.getContextId() + '/' + session.getUserId());
+            LOG.info("Couldn't resolve context/user by identifier: " + session.getContextId() + '/' + session.getUserId(), e);
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
