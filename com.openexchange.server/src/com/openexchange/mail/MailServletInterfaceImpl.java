@@ -762,7 +762,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * Check for needed capability
          */
         final MailCapabilities capabilities = mailAccess.getMailConfig().getCapabilities();
-        final boolean retry = !capabilities.hasThreadReferences();
+        if (!capabilities.hasThreadReferences()) {
+            throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+        }
         /*-
          * 1. Send 'all' request with id, folder_id, level, and received_date - you need all that data.
          *
@@ -781,9 +783,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             final int allOrder = OrderDirection.DESC.getOrder();
             searchIterator = getAllThreadedMessages(folder, allSort, allOrder, fields, null);
         } catch (final OXException e) {
-            if (!retry) {
-                throw e;
-            }
             searchIterator = getAllMessages(folder, sortCol, order, fields, null);
         }
         try {
