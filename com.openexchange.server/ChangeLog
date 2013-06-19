@@ -1,3 +1,7 @@
+* 2013-06-19 - marcus.klein@open-xchange.com
+
+ - Fix for bug 27147: Added necessary dependency for update task to have them run in the correct order.
+
 * 2013-06-17 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 27097: Added missing columns to CreateTableServices

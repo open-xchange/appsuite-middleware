@@ -116,10 +116,10 @@ public class AddUUIDColumnTask extends UpdateTaskAdapter {
      */
     @Override
     public String[] getDependencies() {
-        return new String[0];
+        return new String[] { "com.openexchange.realtime.presence.subscribe.database.CreatePresenceSubscriptionDB" };
     }
 
-    private void setUUID(Connection con) throws SQLException {
+    private static void setUUID(Connection con) throws SQLException {
         PreparedStatement stmt = null;
         int oldPos, newPos;
         ResultSet rs = null;
