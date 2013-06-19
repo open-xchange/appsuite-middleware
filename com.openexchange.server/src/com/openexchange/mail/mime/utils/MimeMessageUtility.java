@@ -1261,9 +1261,6 @@ public final class MimeMessageUtility {
         return quotePhrase(personal, true);
     }
 
-    private static final Pattern P_REPL1 = Pattern.compile("\\\\");
-    private static final Pattern P_REPL2 = Pattern.compile("\"");
-
     /**
      * Quotes given phrase if needed.
      *
@@ -1272,6 +1269,21 @@ public final class MimeMessageUtility {
      * @return The quoted phrase
      */
     public static String quotePhrase(final String phrase, final boolean encode) {
+        return quotePhrase(phrase, encode, true);
+    }
+
+    private static final Pattern P_REPL1 = Pattern.compile("\\\\");
+    private static final Pattern P_REPL2 = Pattern.compile("\"");
+
+    /**
+     * Quotes given phrase if needed.
+     *
+     * @param phrase The phrase
+     * @param encode <code>true</code> to encode phrase according to RFC 822 syntax if needed; otherwise <code>false</code>
+     * @param allowNonAscii Whether non-ascci characters need quoting or not
+     * @return The quoted phrase
+     */
+    public static String quotePhrase(final String phrase, final boolean encode, final boolean allowNonAscii) {
         if (null == phrase) {
             return phrase;
         }
@@ -1288,7 +1300,7 @@ public final class MimeMessageUtility {
         boolean needQuoting = false;
         for (int i = 0; !needQuoting && i < len; i++) {
             final char c = phrase.charAt(i);
-            needQuoting = (c == '"' || c == '\\' || (c < 32 && c != '\r' && c != '\n' && c != '\t') || c >= 127 || RFC822.indexOf(c) >= 0);
+            needQuoting = (c == '"' || c == '\\' || (c < 32 && c != '\r' && c != '\n' && c != '\t') || (!allowNonAscii && c >= 127) || RFC822.indexOf(c) >= 0);
         }
         try {
             if (!needQuoting) {
