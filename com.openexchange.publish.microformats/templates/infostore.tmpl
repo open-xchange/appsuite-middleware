@@ -1,129 +1,105 @@
-<#macro render key value title>
-	<#if value != "">
-		<div class="group">
-			<div class="key co_4">
-				<span class="key">
-					${title}:
-				</span>
-			</div>
-			<div class="co_12">
-                <span class="${key} value"><#if key=="ox_comment">${htmlService.htmlFormat(value)}<#else>${value?html}</#if></span>
-			</div>
-		</div>
+<#macro filesize value>
+	<#if (value > (1024*1024*1024))>
+		${(value/1024/1024/1024)?round}&nbsp;GB
+	<#elseif (value > (1024*1024))>
+		${(value/1024/1024)?round}&nbsp;MB
+	<#elseif (value > 1024)>
+		${(value/1024)?round}&nbsp;KB
+	<#else>
+		${value}&#8239;Bytes
 	</#if>
 </#macro>
 
-<#macro render_scalar key value title>
-<div class="group">
-	<div class="key co_4">
-		<span class="key">
-			${title}:
-		</span>
-	</div>
-	<div class="co_12">
-		<span class="${key} value">
-			${value?html}
-		</span>
-	</div>
-</div>
-</#macro>
-
-<#macro fileMicroformatted infoitem>
-	<div class="group">
-		<div class="key co_4">
-			<span class="key"></span>
-		</div>
-		<div class="co_12">
-			<span class="">
-				<a class="ox_file button btn" href="${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, infoitem)}"  >Download</a>
-			</span>
-		</div>
-	</div>
+<#macro download infoitem linktext>
+<a href="${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, infoitem)}" class"ox_title ox_fileName">${linktext}</a>
 </#macro>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" type="text/css" href="https://pubsub.open-xchange.com/_data/css/bootstrap-combined.2.3.1.min.css" />
+	<title>${publication.displayName!publication.target.displayName!"Files"}</title>
+	<style type="text/css">
+		.appsuite-container {
+			margin: 1em auto;
+			max-width: 960px; /* avoid having name, size and date separated too much */
+		}
+		.desc {
+			font-size: 10pt;
+			line-height: 12pt;
+		}
+		.title {
+			width: 60%;
+		}
+		.appsuite-container td.date, .appsuite-container th.date {
+			width: 30%;
+			text-align: right;
+		} 
+		.appsuite-container td.size, .appsuite-container th.size {
+			width: 10%;
+			text-align: right;
+		}
+		#disclaimer * {
+			font-size: 10pt;
+			line-height: 12pt;
+			color: gray;
+		}
+		.oxmf-information {
+			display: none;
+		}
+		@media only screen and (max-device-width: 480px) {
+			.appsuite-container a, .appsuite-container .desc {
+				word-break: break-all;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="appsuite-container">
+		<h1>${publication.displayName!publication.target.displayName!"Files"}</h1>
+		<table id="content" class="table table-hover table-condensed">	
+			<tr>
+				<th class="title">Title</th>
+				<th class="date">Last modified</th>
+				<th class="size">Size</th>
+			</tr>
+			
+			<#list infostore as infoitem>
+			<tr class="" id="">
+				<td class="title">
+					<@download infoitem infoitem.title!"" />
+					<#if infoitem.description?? >
+					<br />
+					<div class="desc ox_comment">
+						${infoitem.description!""}
+					</div>
+					</#if>
+					<div class="oxmf-information ox_infoitem" id="infoitem_${infostore?seq_index_of(infoitem)}">
+		                <span class="ox_title">${infoitem.title!""}</span>
+		                <span class="ox_url">${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, infoitem)}</span>
+		                <span class="ox_version">${infoitem.version!""}</span>
+		                <span class="ox_creationDate">${timeFormat.format(infoitem.creationDate)}</span>
+		                <span class="ox_lastModified">${timeFormat.format(infoitem.lastModified)}</span>
+		                <span class="ox_tags">${infoitem.categories!""}</span>
+		                <span class="ox_comment">${infoitem.description!""}</span>
+		                <span class="ox_fileName">${infoitem.fileName!""}</span>
+		                <span class="ox_fileSize">${infoitem.fileSize!""}</span>
+		                <span class="ox_MIMEType">${infoitem.fileMIMEType!""}</span>
 
-    <link href="https://pubsub.open-xchange.com/_data/css/pubsub.css" rel="stylesheet" type="text/css" />
-    <script type="text/javascript" src="https://pubsub.open-xchange.com/_data/jss/jquery.js"></script>
-    <script type="text/javascript" src="https://pubsub.open-xchange.com/_data/jss/base.js"></script> 
-
-    <title>Social OX - Sharing Documents and Contacts</title>
-  </head>
-  <body>
-    <div id="layout" class="hasJs">
-      <div id="head_area">
-        <div id="bill_board">
-        </div>
-      </div>
-      <div id="content_area">
-        <div class="info_section">
-          <h2 class="header_visual">
-        		Social OX - Sharing Documents and Contacts
-        	</h2>
-        	<div class="group spacer">
-            <p>
-              Is sharing contacts and documents with your business partners and your social network a useful feature for you? Then you should definitely check out Open-Xchange's innovative social features and learn how to benefit from them.
-            </p>
-            <p>            
-              Create your own test account here: <a href="http://ox.io" target="_blank">http://ox.io</a>. You are convinced? Sign up <a href="http://www.open-xchange.com/en/buy/partner" target="_blank">here</a>
-            </p>
-            <p>
-            	This entry was published with Open-Xchange's <a target="_blank" href="http://oxpedia.org/wiki/index.php?title=SocialOX">Social OX Feature</a> extending your reach!
-            </p>
-          </div>
-        </div>
-        <div class="left_section co_5 same_h">
-        	<h2 class="header_visual">
-        		Table of Contents
-        	</h2>
-          <ul id="nav" class="navigation_vertical">
-            <#list infostore as infoitem>
-              <li>
-                <a href="#infoitem_${infostore?seq_index_of(infoitem)}" class="file">
-                  ${infoitem.title}
-                </a>
-              </li>
-            </#list>
-          </ul>
-        </div>
-        <div class="right_section co_11 flex_childs same_h" id="infostore">
-          <h2 class="header_visual">
-        		Downloads
-        	</h2>
-          <#list infostore as infoitem>
-            <div class="ox_infoitem group_visual" id="infoitem_${infostore?seq_index_of(infoitem)}">
-              <div class="an_infoitem">
-                <@render key="ox_title" title="Title" value=infoitem.title!"" />
-                <@render key="ox_url" title="URL" value=infoitem.URL!"" />
-                <@render_scalar key="ox_version" title="Version" value=infoitem.version!"" />
-                <@render key="ox_creationDate" title="Creation Date" value=timeFormat.format(infoitem.creationDate) />
-                <@render key="ox_lastModified" title="Last Modified" value=timeFormat.format(infoitem.lastModified) />
-                <@render key="ox_tags" title="Tags" value=infoitem.categories!"" />
-                <@render key="ox_comment" title="Comment" value=infoitem.description!"" />
-                <#if infoitem.fileName??>
-                  <@render key="ox_fileName" title="File Name" value=infoitem.fileName!"" />
-                  <@render_scalar key="ox_fileSize" title="File Size" value=infoitem.fileSize!"" />
-                  <@render key="ox_MIMEType" title="MIME Type" value=infoitem.fileMIMEType!"" />
-                  <@fileMicroformatted infoitem/>
-                </#if>				
-              </div>
-            </div>
-            <a href="#layout" class="back_to_top"></a>
-          </#list>
-        </div>
-      </div>
-      <div id="footerArea" class="disclaimer_section">
-        <h2 class="header_visual">
-        		Disclaimer
-        	</h2>
-        <div class="group spacer">
-          ${privacy}
-        </div>
-      </div>
-    </div>
-  </body>
+	              	</div>
+				</td>
+				<td class="date">${dateFormat.format(infoitem.lastModified)}</td>
+	            <td class="size"><@filesize infoitem.fileSize/></td>	
+			</tr>
+			</#list>
+		</table>
+	
+		<div id="disclaimer">
+			<h2 class="header_visual">Disclaimer</h2>
+	        <div>${privacy}</div>
+		</div>
+	</div>
+</body>
 </html>
