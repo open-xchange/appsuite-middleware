@@ -1,3 +1,7 @@
+* 2013-06-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27133: Prefer HTML content on &view=text if associated part's plain-text content is empty or absent
+
 * 2013-06-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 26381: Handle possible RuntimeExceptions more gracefully
