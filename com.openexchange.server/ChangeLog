@@ -1,3 +1,7 @@
+* 2013-06-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27154: Made initial insertion of "uuid" column with " DEFAULT NULL" appendix + insert file names with respect to "uuid" column
+
 * 2013-06-19 - marcus.klein@open-xchange.com
 
  - Fix for bug 27147: Added necessary dependency for update task to have them run in the correct order.
