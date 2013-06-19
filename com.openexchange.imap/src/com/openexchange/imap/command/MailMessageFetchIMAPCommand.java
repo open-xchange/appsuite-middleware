@@ -141,6 +141,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      */
     public MailMessageFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final int[] seqNums, final FetchProfile fp) throws MessagingException {
         super(imapFolder);
+        determineAttachmentByHeader = false;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
@@ -175,6 +176,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      */
     public MailMessageFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final long[] uids, final FetchProfile fp) throws MessagingException {
         super(imapFolder);
+        determineAttachmentByHeader = false;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
