@@ -3,6 +3,7 @@
  - Fix for bug 27133: Prefer HTML content on &view=text if associated part's plain-text content is empty or absent
  - Fix for bug 23399: Avoid quotes in non-ascii personal parts
  - Preparation to fix bug 27125: Improved handling of specified range limit
+ - Fix for bug 27142: Fixed possible NPE on map clear() invocation
 
 * 2013-06-18 - thorben.betten@open-xchange.com
 
