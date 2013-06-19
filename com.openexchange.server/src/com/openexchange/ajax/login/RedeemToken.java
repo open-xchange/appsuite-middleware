@@ -57,6 +57,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.exception.OXException;
@@ -69,6 +70,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tokenlogin.TokenLoginSecret;
 import com.openexchange.tokenlogin.TokenLoginService;
+import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
@@ -111,8 +113,16 @@ public class RedeemToken implements LoginRequestHandler {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
+        Tools.disableCaching(resp);
+        resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         TokenLoginService service = ServerServiceRegistry.getInstance().getService(TokenLoginService.class);
-        Session session = service.redeemToken(token, appSecret, client, authId, hash);
+        Session session = null;
+        try {
+            session = service.redeemToken(token, appSecret, client, authId, hash);
+        } catch (OXException e) {
+            Login.logAndSendException(resp, e);
+            return;
+        }
         TokenLoginSecret tokenLoginSecret = service.getTokenLoginSecret(appSecret);
         boolean writePassword = (Boolean) tokenLoginSecret.getParameters().get("accessPassword");
         
