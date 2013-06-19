@@ -51,7 +51,6 @@ package com.openexchange.realtime.atmosphere.impl.stanza.builder;
 
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.atmosphere.AtmosphereExceptionMessage;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.exception.RealtimeException;

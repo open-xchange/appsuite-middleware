@@ -68,10 +68,6 @@ import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.CustomGateAction;
 import com.openexchange.realtime.util.StanzaSequenceGate;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.Task;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.tools.session.ServerSession;
 
 

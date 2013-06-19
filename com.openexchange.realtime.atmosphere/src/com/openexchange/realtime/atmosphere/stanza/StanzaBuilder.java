@@ -50,14 +50,12 @@
 package com.openexchange.realtime.atmosphere.stanza;
 
 import java.util.Iterator;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionMessage;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionMessage;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
@@ -74,8 +72,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public abstract class StanzaBuilder<T extends Stanza> {
-
-    private static Log LOG = com.openexchange.log.Log.loggerFor(StanzaBuilder.class);
 
     private final static String JSON = "json";
 
