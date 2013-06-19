@@ -1,6 +1,7 @@
 * 2013-06-19 - marcus.klein@open-xchange.com
 
  - Fix for bug 27147: Added necessary dependency for update task to have them run in the correct order.
+ - Fix for bug 27065: If reading the replication monitor counter from the slave fails 10 times fall back to master to obtain a connection.
 
 * 2013-06-17 - jan.bauerdick@open-xchange.com
 
