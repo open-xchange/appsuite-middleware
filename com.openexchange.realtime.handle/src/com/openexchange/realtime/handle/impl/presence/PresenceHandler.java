@@ -432,7 +432,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
             MessageDispatcher messageDispatcher = getMessageDispatcher();
             Presence errorPresence = new Presence(presence);
             errorPresence.setTo(presence.getFrom());
-            errorPresence.setError(oxException);
+            errorPresence.setError(RealtimeExceptionCodes.UNEXPECTED_ERROR.create(oxException, new Object[0]));
             if (presence.traceEnabled()) {
                 errorPresence.addLogMessages(presence.getLogEntries());
                 errorPresence.setTracer(presence.getTracer());

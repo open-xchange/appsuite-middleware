@@ -60,7 +60,8 @@ import com.openexchange.i18n.LocalizableStrings;
 public class RealtimeExceptionMessages implements LocalizableStrings {
 
     // XMPP
-    public static final String STANZA_BAD_REQUEST_MSG = "";
+    /** "The client issued a bad request: %1$s" */
+    public static final String STANZA_BAD_REQUEST_MSG = "The client issued a bad request: %1$s";
     public static final String STANZA_CONFILCT_MSG = "";
     public static final String STANZA_FEATURE_NOT_IMPLEMENTED_MSG = "";
     public static final String STANZA_FORBIDDEN_MSG = "";

@@ -52,22 +52,24 @@ package com.openexchange.realtime.atmosphere.impl.stanza.builder;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionMessage;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
+import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IQ;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link IQBuilder} - Parse an atmosphere client's IQ message and build a IQ Stanza from it by adding the recipients ID.
- *
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class IQBuilder extends StanzaBuilder<IQ> {
 
     /**
-     * Create a new IQBuilder
-     * Initializes a new {@link IQBuilder}.
-     *
+     * Create a new IQBuilder Initializes a new {@link IQBuilder}.
+     * 
      * @param from the sender's ID, must not be null
      * @param json the sender's message, must not be null
      * @throws IllegalArgumentException if from or json are null
@@ -83,7 +85,7 @@ public class IQBuilder extends StanzaBuilder<IQ> {
     }
 
     @Override
-    public IQ build() throws OXException {
+    public IQ build() throws RealtimeException {
         basics();
         type();
         return stanza;
@@ -91,17 +93,20 @@ public class IQBuilder extends StanzaBuilder<IQ> {
 
     /**
      * Check for the obligatory type key of IQ Stanzas in the received json and set the value in the Stanza
+     * 
      * @throws OXException if the type key is missing
      */
-    private void type() throws OXException {
+    private void type() throws RealtimeException {
         String type = json.optString("type");
         if (type == null || type.trim().equals("")) {
-            throw AtmosphereExceptionCode.MISSING_KEY.create("type", json);
+            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(String.format(AtmosphereExceptionMessage.MISSING_KEY_MSG, "type"));
         }
         try {
             IQ.Type.valueOf(type.toUpperCase());
         } catch (IllegalArgumentException iae) {
-            throw AtmosphereExceptionCode.ILLEGAL_VALUE.create(type, "type", json);
+            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(String.format(
+                AtmosphereExceptionMessage.IQ_DATA_ELEMENT_MALFORMED_MSG,
+                "type"));
         }
     }
 

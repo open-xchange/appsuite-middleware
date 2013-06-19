@@ -47,60 +47,65 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza.builder;
+package com.openexchange.realtime.atmosphere.payload.converter;
 
+import static org.junit.Assert.*;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionMessage;
-import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
-import com.openexchange.realtime.exception.RealtimeException;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link StanzaBuilderSelector} - Select and instantiate a new StanzaBuilder matching the client's message.
+ * {@link StackTraceElementToJSONConverterTest}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class StanzaBuilderSelector {
+public class StackTraceElementToJSONConverterTest {
 
-    /**
-     * Get a parser that is adequate for he JSONObject that has to be parsed.
-     * Incoming JSONObjects must contain an <code>element</code> key that let's us determine the needed StanzaBuilder.
-     *
-     * <pre>
-     * {
-     *  element: 'presence'
-     *  ...
-     * };
-     * </pre>
-     * @param session 
-     *
-     * @param json the JSONObject that has to be parsed.
-     * @return a Builder adequate for the JSONObject that has to be transformed
-     * @throws IllegalArgumentException if the JSONObject is null
-     * @throws OXException if the JSONObject doesn't contain a <code>element</code> key specifying the Stanza or no adequate
-     *             StanzaBuilder can be found
-     */
-    public static StanzaBuilder<? extends Stanza> getBuilder(ID from, ServerSession session, JSONObject json) throws RealtimeException {
-        if (json == null) {
-            throw new IllegalArgumentException();
-        }
-        String element = json.optString("element");
-        if (element == null) {
-            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(AtmosphereExceptionMessage.MISSING_KEY_MSG);
-        }
-        if (element.equalsIgnoreCase("iq")) {
-            return new IQBuilder(from, json, session);
-        } else if (element.equalsIgnoreCase("message")) {
-            return new MessageBuilder(from, json, session);
-        } else if (element.equalsIgnoreCase("presence")) {
-            return new PresenceBuilder(from, json, session);
-        } else {
-            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(AtmosphereExceptionMessage.MISSING_BUILDER_FOR_ELEMENT_MSG);
-        }
+    private StackTraceElement stackTraceElement=null;
+    private StackTraceElement stackTraceElementMissingFileName=null;
+    private StackTraceElementToJSONConverter converter = new StackTraceElementToJSONConverter();
+    
+    @Before
+    public void setUp() throws Exception {
+        stackTraceElement = new StackTraceElement("org.eclipse.osgi.baseadaptor.bundlefile.ZipBundleFile", "basicOpen", "ZipBundleFile.java", 87);
+        stackTraceElementMissingFileName = new StackTraceElement("org.eclipse.osgi.baseadaptor.bundlefile.ZipBundleFile", "basicOpen", null, 87);
     }
+
+    @Test
+    public void testGetInputFormat() {
+        assertEquals(StackTraceElement.class.getSimpleName(), converter.getInputFormat());
+    }
+
+    @Test
+    public void testConvert() throws OXException, JSONException {
+        Object converted = converter.convert(stackTraceElement, null, null);
+        assertNotNull(converted);
+        assertTrue(converted instanceof JSONObject);
+        JSONObject convertedJSON = (JSONObject) converted;
+        assertEquals("ZipBundleFile.java", convertedJSON.optString("fileName"));
+        assertEquals("org.eclipse.osgi.baseadaptor.bundlefile.ZipBundleFile", convertedJSON.getString("className"));
+        assertEquals("basicOpen",convertedJSON.getString("methodName"));
+        assertEquals(87,convertedJSON.getInt("lineNumber"));
+    }
+
+    @Test
+    public void testConvertMissingFileName() throws OXException, JSONException {
+        Object converted = converter.convert(stackTraceElementMissingFileName, null, null);
+        assertNotNull(converted);
+        assertTrue(converted instanceof JSONObject);
+        JSONObject convertedJSON = (JSONObject) converted;
+        assertNull(convertedJSON.optString("fileName"));
+        assertEquals("org.eclipse.osgi.baseadaptor.bundlefile.ZipBundleFile", convertedJSON.getString("className"));
+        assertEquals("basicOpen",convertedJSON.getString("methodName"));
+        assertEquals(87,convertedJSON.getInt("lineNumber"));
+    }
+
+    @Test
+    public void testGetOutputFormat() {
+        assertEquals("json", converter.getInputFormat());
+    }
+
 }

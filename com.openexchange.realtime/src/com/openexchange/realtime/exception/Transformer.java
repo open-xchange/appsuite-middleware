@@ -49,11 +49,12 @@
 
 package com.openexchange.realtime.exception;
 
-
 /**
- * {@link Transformer}
- *
+ * {@link Transformer} used to map RealtimException codes to codes that can be used for specific {@link Channel} implementations like
+ * Atmosphere or Realtime.
+ * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class Transformer {
 
@@ -61,16 +62,31 @@ public class Transformer {
     private RealtimeExceptionCodes atmosphere;
     private RealtimeExceptionCodes xmpp;
 
+    /**
+     * Initializes a new {@link Transformer}.
+     * 
+     * @param origin The original ExceptionCode
+     * @param atmosphere The code that should be used when transfering this Exception over an Atmosphere channel
+     * @param xmpp The code that should be used when transfering this Exception over an XMPP channel
+     */
     public Transformer(RealtimeExceptionCodes origin, RealtimeExceptionCodes atmosphere, RealtimeExceptionCodes xmpp) {
         this.origin = origin;
         this.atmosphere = atmosphere;
         this.xmpp = xmpp;
     }
     
+    /**
+     * Get the XMPP specific exception code that corresponds to this RealtimeExceptionCode
+     * @return the XMPP specific exception code that corresponds to this RealtimeExceptionCode
+     */
     public RealtimeExceptionCodes getXMPP() {
         return xmpp;
     }
     
+    /**
+     * Get the Atmosphere specific exception code that corresponds to this RealtimeExceptionCode
+     * @return the Atmosphere specific exception code that corresponds to this RealtimeExceptionCode
+     */
     public RealtimeExceptionCodes getAtmosphere() {
         return atmosphere;
     }

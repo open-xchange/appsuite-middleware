@@ -49,28 +49,48 @@
 
 package com.openexchange.realtime.atmosphere.payload.converter;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link OXExceptionToJSONConverter}
- *
+ * {@link ThrowableToJSONConverter}
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class OXExceptionToJSONConverter extends AbstractPOJOConverter {
+public class ThrowableToJSONConverter extends AbstractPOJOConverter {
 
     @Override
     public String getInputFormat() {
-        return OXException.class.getSimpleName();
+        return Throwable.class.getSimpleName();
     }
 
     @Override
     public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        OXException oxe = (OXException) data;
-        String transformed = oxe.getMessage();
-        return transformed;
+        try {
+            Throwable throwable = (Throwable) data;
+            String message = throwable.getMessage();
+            StackTraceElement[] traceElements = throwable.getStackTrace();
+            JSONObject jsonThrowable = new JSONObject();
+            jsonThrowable.put("message", message);
+            JSONArray stackTraceArray = stackTraceToJSON(traceElements, converter);
+            jsonThrowable.put("stackTrace", stackTraceArray);
+            return jsonThrowable;
+        } catch (Exception e) {
+            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(data.toString(), e);
+        }
+    }
+
+    private JSONArray stackTraceToJSON(StackTraceElement[] stackTrace, SimpleConverter converter) throws OXException {
+        JSONArray stackTraceArray = new JSONArray();
+        for (StackTraceElement stackTraceElement : stackTrace) {
+            Object element = converter.convert(StackTraceElement.class.getSimpleName(), "json", stackTraceElement, null);
+            stackTraceArray.put(element);
+        }
+        return stackTraceArray;
     }
 
 }

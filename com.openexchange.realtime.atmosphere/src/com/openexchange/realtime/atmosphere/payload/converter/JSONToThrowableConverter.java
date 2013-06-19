@@ -47,60 +47,55 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl.stanza.builder;
+package com.openexchange.realtime.atmosphere.payload.converter;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONObject;
+import com.openexchange.conversion.DataExceptionCodes;
+import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionMessage;
-import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
-import com.openexchange.realtime.exception.RealtimeException;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link StanzaBuilderSelector} - Select and instantiate a new StanzaBuilder matching the client's message.
+ * {@link JSONToThrowableConverter}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class StanzaBuilderSelector {
+public class JSONToThrowableConverter extends AbstractJSONConverter {
 
-    /**
-     * Get a parser that is adequate for he JSONObject that has to be parsed.
-     * Incoming JSONObjects must contain an <code>element</code> key that let's us determine the needed StanzaBuilder.
-     *
-     * <pre>
-     * {
-     *  element: 'presence'
-     *  ...
-     * };
-     * </pre>
-     * @param session 
-     *
-     * @param json the JSONObject that has to be parsed.
-     * @return a Builder adequate for the JSONObject that has to be transformed
-     * @throws IllegalArgumentException if the JSONObject is null
-     * @throws OXException if the JSONObject doesn't contain a <code>element</code> key specifying the Stanza or no adequate
-     *             StanzaBuilder can be found
-     */
-    public static StanzaBuilder<? extends Stanza> getBuilder(ID from, ServerSession session, JSONObject json) throws RealtimeException {
-        if (json == null) {
-            throw new IllegalArgumentException();
-        }
-        String element = json.optString("element");
-        if (element == null) {
-            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(AtmosphereExceptionMessage.MISSING_KEY_MSG);
-        }
-        if (element.equalsIgnoreCase("iq")) {
-            return new IQBuilder(from, json, session);
-        } else if (element.equalsIgnoreCase("message")) {
-            return new MessageBuilder(from, json, session);
-        } else if (element.equalsIgnoreCase("presence")) {
-            return new PresenceBuilder(from, json, session);
-        } else {
-            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(AtmosphereExceptionMessage.MISSING_BUILDER_FOR_ELEMENT_MSG);
+    @Override
+    public String getOutputFormat() {
+        return Throwable.class.getSimpleName();
+    }
+
+    @Override
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        try {
+            JSONObject throwableJSON = (JSONObject) data;
+            
+            String message = throwableJSON.getString("message");
+            JSONArray traceElements = (JSONArray) throwableJSON.get("stackTrace");
+            Throwable throwable = new Throwable(message);
+            throwable.setStackTrace(jsonToStackTraceElementArray(traceElements, converter));
+            return throwable;
+        } catch (Exception e) {
+            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(data.toString(), e);
         }
     }
+
+    private StackTraceElement[] jsonToStackTraceElementArray(JSONArray stackTrace, SimpleConverter converter) throws OXException {
+        List<StackTraceElement> stacktraceList = new ArrayList<StackTraceElement>();
+        
+        Iterator<Object> iterator = stackTrace.iterator();
+        while(iterator.hasNext()) {
+            Object converted = converter.convert("json", StackTraceElement.class.getSimpleName(), iterator.next(), null);
+            stacktraceList.add(StackTraceElement.class.cast(converted));
+        }
+        return stacktraceList.toArray(new StackTraceElement[stacktraceList.size()]);
+    }
+
 }

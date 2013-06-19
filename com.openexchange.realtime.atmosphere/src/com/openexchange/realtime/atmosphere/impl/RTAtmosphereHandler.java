@@ -65,14 +65,17 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionMessage;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
 import com.openexchange.realtime.atmosphere.protocol.RTProtocol;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
+import com.openexchange.realtime.atmosphere.util.GenericErrorUtil;
 import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.dispatch.StanzaSender;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.handle.StanzaQueueService;
 import com.openexchange.realtime.packet.ID;
@@ -101,7 +104,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
         @Override
         public void handleInternal(Stanza stanza, ID recipient) throws OXException {
-            handleIncoming(stanza);
+                handleIncoming(stanza);
         }
     };
     
@@ -125,24 +128,43 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         response.setCharacterEncoding("UTF-8");
         String method = request.getMethod();
         SessionValidator sessionValidator = new SessionValidator(resource);
+        ServerSession serverSession = null;
+        ID constructedId = null;
+        /*
+         * Two level exception handling needed:
+         * 1. We didn't identify the sender yet so our only way to inform him about the exception is via 
+         *    RTProtocol.handleRealtimeExceptionDirectly
+         * 2. We know the ID of the sender and can inform him RTProtocol.handleRealtimeException
+         */
         try {
-            ServerSession serverSession = sessionValidator.getServerSession();
-            ID constructedId = constructId(resource, serverSession);
+            try {
+                serverSession = sessionValidator.getServerSession();
+                constructedId = constructId(resource, serverSession);
+            } catch (OXException e) {
+                RealtimeException invalidSessionException = RealtimeExceptionCodes.SESSION_INVALID.create();
+                protocol.handleRealtimeExceptionDirectly(invalidSessionException, resource);
+                // no clean up neede, simply return because of invalid session
+                return;
+            }
             if (method.equalsIgnoreCase("GET")) {
 
                 AtmosphereStanzaTransmitter transmitter = new AtmosphereStanzaTransmitter(resource, constructedId, stateManager);
                 stateManager.rememberTransmitter(constructedId, transmitter);
 
                 StateEntry entry = stateManager.retrieveState(constructedId);
-                
+
                 ResourceDirectory resourceDirectory = AtmosphereServiceRegistry.getInstance().getService(ResourceDirectory.class);
-                resourceDirectory.set(constructedId, new DefaultResource());
-                
+                try {
+                    resourceDirectory.set(constructedId, new DefaultResource());
+                } catch (OXException e) {
+                    throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
+                }
+
                 protocol.getReceived(entry.state, entry.transmitter);
 
             } else if (method.equalsIgnoreCase("POST")) {
                 StateEntry entry = stateManager.retrieveState(constructedId);
-                
+
                 String postData = request.getReader().readLine();
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Incoming: " + postData);
@@ -150,22 +172,22 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
                 handlePost(postData, constructedId, serverSession, entry);
             }
-        } catch (OXException e) {
-            protocol.handleOXException(e);
-        } catch (Exception e) {
-            protocol.handleException(e);
+        } catch (RealtimeException e) {
+            protocol.handleRealtimeException(constructedId, e, null);
         }
     }
 
-    protected void handlePost(String postData, ID constructedId, ServerSession serverSession, StateEntry entry) throws Exception {
+    protected void handlePost(String postData, ID constructedId, ServerSession serverSession, StateEntry entry) throws RealtimeException {
         if (postData != null) {
-            List<JSONObject> stanzas = parseJSON(postData);
-
+            List<JSONObject> stanzas;
+            try {
+                stanzas = parseJSON(postData);
+            } catch (JSONException e) {
+                throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(e.getMessage());
+            }
             protocolHandler.handleIncomingMessages(constructedId, serverSession, entry, stanzas, null);
         }
     }
-
-    
 
     /**
      * Handle incoming Stanza. Called by the StanzaSequenceGate to dispatch stanzas.
