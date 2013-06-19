@@ -157,7 +157,7 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
                 if ("true".equalsIgnoreCase(value)) {
                     params.put(param.substring(0, pos).trim(), Boolean.TRUE);
                 } else if ("false".equalsIgnoreCase(value)) {
-                    params.put(param.substring(0, pos).trim(), Boolean.TRUE);
+                    params.put(param.substring(0, pos).trim(), Boolean.FALSE);
                 } else {
                     try {
                         final Integer i = Integer.valueOf(value);
