@@ -90,7 +90,7 @@ public class AddUUIDForUpdateTaskTable extends UpdateTaskAdapter {
             startTransaction(con);
             progress.setTotal(getTotalRows(con));
             if (!Tools.columnExists(con, "updateTask", "uuid")) {
-                Tools.addColumns(con, "updateTask", new Column("uuid", "BINARY(16)"));
+                Tools.addColumns(con, "updateTask", new Column("uuid", "BINARY(16) DEFAULT NULL"));
                 fillUUIDs(con, progress);
             }
             con.commit();

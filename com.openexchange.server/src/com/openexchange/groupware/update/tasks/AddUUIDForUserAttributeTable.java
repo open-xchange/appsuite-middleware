@@ -92,7 +92,7 @@ public class AddUUIDForUserAttributeTable extends UpdateTaskAdapter {
             startTransaction(con);
             progress.setTotal(getTotalRows(con));
             if (!Tools.columnExists(con, "user_attribute", "uuid")) {
-                Tools.addColumns(con, "user_attribute", new Column("uuid", "BINARY(16)"));
+                Tools.addColumns(con, "user_attribute", new Column("uuid", "BINARY(16) DEFAULT NULL"));
                 fillUUIDs(con, progress);
             }
             con.commit();

@@ -53,8 +53,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogFactory;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.exception.OXException;
@@ -74,7 +77,7 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
 
     private static final String LOCK_FOLDER_SQL = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND fuid = ? FOR UPDATE ";
 
-    private static final String RESERVE_NAME_SQL = "INSERT INTO infostoreReservedPaths (cid, folder, name) VALUES (?, ?, ?)";
+    private static final String RESERVE_NAME_SQL = "INSERT INTO infostoreReservedPaths (uuid, cid, folder, name) VALUES (?, ?, ?, ?)";
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SelectForUpdateReservation.class));
 
@@ -172,7 +175,18 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
     }
 
     private void reserveFilename() throws SQLException {
-        exec(RESERVE_NAME_SQL, ctx.getContextId(), folderId, fileName);
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(RESERVE_NAME_SQL);
+            int pos = 1;
+            stmt.setBytes(pos++, UUIDs.toByteArray(UUID.randomUUID()));
+            stmt.setLong(pos++, ctx.getContextId());
+            stmt.setLong(pos++, folderId);
+            stmt.setString(pos, fileName);
+            stmt.executeUpdate();
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
     }
 
     private boolean checkFree() throws OXException, SQLException {

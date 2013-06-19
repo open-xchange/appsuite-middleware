@@ -73,7 +73,7 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * {@link AddUUIDForDListTables}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class AddUUIDForDListTables extends UpdateTaskAdapter {
@@ -94,10 +94,10 @@ public class AddUUIDForDListTables extends UpdateTaskAdapter {
         try {
             startTransaction(con);
             progress.setTotal(getTotalRows(con));
-            Tools.checkAndAddColumns(con, TABLE, new Column("uuid", "BINARY(16)"));
+            Tools.checkAndAddColumns(con, TABLE, new Column("uuid", "BINARY(16) DEFAULT NULL"));
             fillUUIDs(con, TABLE, progress);
 
-            Tools.checkAndAddColumns(con, DEL_TABLE, new Column("uuid", "BINARY(16)"));
+            Tools.checkAndAddColumns(con, DEL_TABLE, new Column("uuid", "BINARY(16) DEFAULT NULL"));
             fillUUIDs(con, DEL_TABLE, progress);
             con.commit();
         } catch (SQLException e) {
@@ -192,7 +192,7 @@ public class AddUUIDForDListTables extends UpdateTaskAdapter {
                     update += EQUALS;
                     values.add(cid);
                 }
-                
+
                 update += " LIMIT 1";
 
                 upd = con.prepareStatement(update);

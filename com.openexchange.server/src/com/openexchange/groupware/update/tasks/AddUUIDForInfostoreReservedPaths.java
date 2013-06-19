@@ -71,7 +71,7 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * {@link AddUUIDForInfostoreReservedPaths}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class AddUUIDForInfostoreReservedPaths extends UpdateTaskAdapter {
@@ -89,7 +89,7 @@ public class AddUUIDForInfostoreReservedPaths extends UpdateTaskAdapter {
             rollback = true;
             progress.setTotal(getTotalRows(con));
             if (!Tools.columnExists(con, TABLE, "uuid")) {
-                Tools.addColumns(con, TABLE, new Column("uuid", "BINARY(16)"));
+                Tools.addColumns(con, TABLE, new Column("uuid", "BINARY(16) DEFAULT NULL"));
                 fillUUIDs(con, TABLE, progress);
             }
             con.commit();
