@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,65 +50,45 @@
 package com.openexchange.ajax.login.osgi;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpService;
-import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.v2.OAuth2ProviderService;
-import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tokenlogin.TokenLoginService;
 
+
 /**
- * {@link LoginActivator}
+ * {@link TokenLoginCustomizer}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class LoginActivator extends HousekeepingActivator {
+public class TokenLoginCustomizer implements ServiceTrackerCustomizer<TokenLoginService, TokenLoginService> {
+    
+    private final BundleContext context;
 
-    public LoginActivator() {
+    /**
+     * Initializes a new {@link TokenLoginCustomizer}.
+     */
+    public TokenLoginCustomizer(BundleContext context) {
         super();
+        this.context = context;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public TokenLoginService addingService(ServiceReference<TokenLoginService> arg0) {
+        TokenLoginService service = context.getService(arg0);
+        ServerServiceRegistry.getInstance().addService(TokenLoginService.class, service);
+        return service;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        final BundleContext context = this.context;
-        class ServerServiceRegistryTracker<S> implements ServiceTrackerCustomizer<S, S> {
-
-            @Override
-            public S addingService(final ServiceReference<S> reference) {
-                final S service = context.getService(reference);
-                ServerServiceRegistry.getInstance().addService(service);
-                return service;
-            }
-
-            @Override
-            public void modifiedService(final ServiceReference<S> reference, final S service) {
-                // Nothing
-            }
-
-            @Override
-            public void removedService(final ServiceReference<S> reference, final S service) {
-                context.ungetService(reference);
-                ServerServiceRegistry.getInstance().removeService(service.getClass());
-            }
-        }
-        track(OAuthProviderService.class, new ServerServiceRegistryTracker<OAuthProviderService>());
-        track(OAuth2ProviderService.class, new ServerServiceRegistryTracker<OAuth2ProviderService>());
-
-        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
-        rememberTracker(new ServiceTracker<Object, Object>(context, filter, new LoginServletRegisterer(context)));
-        track(TokenLoginService.class, new TokenLoginCustomizer(context));
-        openTrackers();
+    public void modifiedService(ServiceReference<TokenLoginService> arg0, TokenLoginService arg1) {
+        // nothing to do
     }
+
+    @Override
+    public void removedService(ServiceReference<TokenLoginService> arg0, TokenLoginService arg1) {
+        ServerServiceRegistry.getInstance().removeService(TokenLoginService.class);
+        context.ungetService(arg0);
+    }
+
 }
