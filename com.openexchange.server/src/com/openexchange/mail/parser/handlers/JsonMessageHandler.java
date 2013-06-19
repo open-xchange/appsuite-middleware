@@ -626,7 +626,12 @@ public final class JsonMessageHandler implements MailMessageHandler {
                                 }
                             }
                         } else {
-                            asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, DisplayMode.DISPLAY.equals(displayMode));
+                            try {
+                                asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, DisplayMode.DISPLAY.equals(displayMode));
+                                getAttachmentsArr().remove(0);
+                            } catch (final JSONException e) {
+                                throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                            }
                         }
                     }
                     /*
