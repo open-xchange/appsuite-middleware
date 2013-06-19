@@ -54,8 +54,10 @@ import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.exception.OXException;
+import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionMessage;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
@@ -96,9 +98,9 @@ public abstract class StanzaBuilder<T extends Stanza> {
     /**
      * Set the obligatory {@link Stanza} elements.
      *
-     * @throws OXException for errors happening while building the Stanza
+     * @throws RealtimeException for errors happening while building the Stanza
      */
-    protected void basics() throws OXException {
+    protected void basics() throws RealtimeException {
         from();
         to();
         id();
@@ -149,7 +151,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
     /**
      * Process the payloads found in the JSONObject representing the Stanza.
      */
-    protected void payloads() throws OXException {
+    protected void payloads() throws RealtimeException {
         if (json.has("payloads")) {
             JSONArray payloads = json.optJSONArray("payloads");
             for (int i = 0; i < payloads.length(); i++) {
@@ -178,16 +180,11 @@ public abstract class StanzaBuilder<T extends Stanza> {
      *
      * @param payload The payload to transform
      * @return A hierarchy of PayloadTreeNodes
-     * @throws OXException if building of the Stanza fails
+     * @throws RealtimeException if building of the Stanza fails
      */
-    private PayloadTree payloadToPayloadTree(JSONObject payload) throws OXException {
+    private PayloadTree payloadToPayloadTree(JSONObject payload) throws RealtimeException {
         PayloadTree payloadTree = new PayloadTree();
-        try {
-            payloadTree.setRoot(payloadToPayloadTreeNode(payload));
-        } catch (JSONException ex) {
-            LOG.error(ex);
-            throw AtmosphereExceptionCode.ERROR_WHILE_BUILDING.create(ex);
-        }
+        payloadTree.setRoot(payloadToPayloadTreeNode(payload));
         return payloadTree;
     }
 
@@ -210,10 +207,10 @@ public abstract class StanzaBuilder<T extends Stanza> {
      *
      * @param payload The payload data
      * @return the PayloadTreeNode with the filled PayloadElement and possible children attached.
-     * @throws OXException For payloads with broken syntax
-     * @throws JSONException For missing or access to mistyped JSONObjects
+     * @throws RealtimeException For payloads with broken syntax
+     * @throws JSONException 
      */
-    private PayloadTreeNode payloadToPayloadTreeNode(JSONObject payload) throws OXException, JSONException {
+    private PayloadTreeNode payloadToPayloadTreeNode(JSONObject payload) throws RealtimeException {
         PayloadTreeNode node = new PayloadTreeNode();
         PayloadElement payloadElement = null;
 
@@ -224,16 +221,18 @@ public abstract class StanzaBuilder<T extends Stanza> {
         try {
             elementName = payload.getString("element");
         } catch (JSONException e) {
-            OXException exception = AtmosphereExceptionCode.MISSING_KEY.create("element");
-            LOG.error(exception);
-            throw exception;
+            RealtimeException realtimeException = RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(String.format(
+                AtmosphereExceptionMessage.MISSING_KEY_MSG,
+                "element"));
+            throw realtimeException;
         }
         try {
             data = payload.get("data");
         } catch (JSONException e) {
-            OXException exception = AtmosphereExceptionCode.MISSING_KEY.create("data");
-            LOG.error(exception);
-            throw exception;
+            RealtimeException realtimeException = RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(String.format(
+                AtmosphereExceptionMessage.MISSING_KEY_MSG,
+                "data"));
+            throw realtimeException;
         }
 
         payloadElement = new PayloadElement(null, JSON, namespace, elementName);
@@ -250,16 +249,20 @@ public abstract class StanzaBuilder<T extends Stanza> {
             // Object to set in the PayloadElement
             JSONObject outputObject = new JSONObject();
             while (keys.hasNext()) {
-                String key = keys.next();
-                Object value = object.get(key);
-                if (value instanceof JSONArray) {
-                    JSONArray array = (JSONArray) value;
-                    addPayloadsFromArray(node, array);
-                } else if (value instanceof JSONObject) {
-                    JSONObject nestedObject = (JSONObject) value;
-                    node.addChild(payloadToPayloadTreeNode(nestedObject));
-                } else {
-                    outputObject.put(key, value);
+                try {
+                    String key = keys.next();
+                    Object value = object.get(key);
+                    if (value instanceof JSONArray) {
+                        JSONArray array = (JSONArray) value;
+                        addPayloadsFromArray(node, array);
+                    } else if (value instanceof JSONObject) {
+                        JSONObject nestedObject = (JSONObject) value;
+                        node.addChild(payloadToPayloadTreeNode(nestedObject));
+                    } else {
+                        outputObject.put(key, value);
+                    }
+                } catch (JSONException e) {
+                    throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(e.getMessage());
                 }
             }
             payloadElement.setData(outputObject, JSON);
@@ -271,12 +274,18 @@ public abstract class StanzaBuilder<T extends Stanza> {
         return node;
     }
 
-    private void addPayloadsFromArray(PayloadTreeNode node, JSONArray array) throws JSONException, OXException {
+    private void addPayloadsFromArray(PayloadTreeNode node, JSONArray array) throws RealtimeException {
         int arrayLength = array.length();
         // attach a new child for every payloadElement in the array
         for (int i = 0; i < arrayLength; i++) {
-            JSONObject jsonObject = array.getJSONObject(i);
-            node.addChild(payloadToPayloadTreeNode(jsonObject));
+            try {
+                JSONObject jsonObject = array.getJSONObject(i);
+                node.addChild(payloadToPayloadTreeNode(jsonObject));
+            } catch (JSONException e) {
+                RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(String.format(
+                    AtmosphereExceptionMessage.ERROR_WHILE_BUILDING_MSG,
+                    "JSONObject expected"));
+            }
         }
     }
 
@@ -284,9 +293,9 @@ public abstract class StanzaBuilder<T extends Stanza> {
      * Build a validated Stanza of type T
      *
      * @return a validated Stanza of type T
-     * @throws OXException if the Stanza couldn't be build due to validation or other errors
+     * @throws RealtimeException if the Stanza couldn't be build due to validation or other errors
      */
-    public abstract T build() throws OXException;
+    public abstract T build() throws RealtimeException;
 
     /**
      * Parses the supplied value into an enumeration constant, ignoring case.

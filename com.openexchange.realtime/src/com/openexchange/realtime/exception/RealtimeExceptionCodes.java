@@ -90,6 +90,7 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
     <unexpected-request/> -- the recipient or server understood the request but was not expecting it at this time (e.g., the request was out of order); the associated error type SHOULD be "wait".
     */
     //--- elements from stanza error namespace http://xmpp.org/rfcs/rfc3920.html#def C.7.
+    /** "The client issued a bad request: %1$s" */
     STANZA_BAD_REQUEST(RealtimeExceptionMessages.STANZA_BAD_REQUEST_MSG, CATEGORY_USER_INPUT, 1),
     STANZA_CONFILCT(RealtimeExceptionMessages.STANZA_CONFILCT_MSG, CATEGORY_SERVICE_DOWN, 2),
     STANZA_FEATURE_NOT_IMPLEMENTED(RealtimeExceptionMessages.STANZA_FEATURE_NOT_IMPLEMENTED_MSG, CATEGORY_SERVICE_DOWN, 3),

@@ -50,7 +50,6 @@
 package com.openexchange.realtime.atmosphere.payload.converter;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.simple.SimpleConverter;
@@ -80,7 +79,7 @@ public class ThrowableToJSONConverter extends AbstractPOJOConverter {
             JSONArray stackTraceArray = stackTraceToJSON(traceElements, converter);
             jsonThrowable.put("stackTrace", stackTraceArray);
             return jsonThrowable;
-        } catch (JSONException e) {
+        } catch (Exception e) {
             throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(data.toString(), e);
         }
     }

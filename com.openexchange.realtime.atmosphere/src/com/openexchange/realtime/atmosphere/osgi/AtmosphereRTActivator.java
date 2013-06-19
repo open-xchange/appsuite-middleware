@@ -62,7 +62,13 @@ import com.openexchange.realtime.atmosphere.http.RealtimeActions;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
 import com.openexchange.realtime.atmosphere.payload.converter.JSONToRealtimeExceptionConverter;
+import com.openexchange.realtime.atmosphere.payload.converter.JSONToRealtimeExceptionConverterTest;
+import com.openexchange.realtime.atmosphere.payload.converter.JSONToStackTraceElementConverter;
+import com.openexchange.realtime.atmosphere.payload.converter.JSONToThrowableConverter;
 import com.openexchange.realtime.atmosphere.payload.converter.RealtimeExceptionToJSONConverter;
+import com.openexchange.realtime.atmosphere.payload.converter.RealtimeExceptionToJSONConverterTest;
+import com.openexchange.realtime.atmosphere.payload.converter.StackTraceElementToJSONConverter;
+import com.openexchange.realtime.atmosphere.payload.converter.ThrowableToJSONConverter;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.ByteToJSONConverter;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.JSONToByteConverter;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.JSONToStringConverter;
@@ -114,6 +120,10 @@ public class AtmosphereRTActivator extends AJAXModuleActivator {
         registerService(SimplePayloadConverter.class, new JSONToStringConverter());
         registerService(SimplePayloadConverter.class, new JSONToPresenceStateConverter());
         registerService(SimplePayloadConverter.class, new PresenceStateToJSONConverter());
+        registerService(SimplePayloadConverter.class, new JSONToStackTraceElementConverter());
+        registerService(SimplePayloadConverter.class, new StackTraceElementToJSONConverter());
+        registerService(SimplePayloadConverter.class, new JSONToThrowableConverter());
+        registerService(SimplePayloadConverter.class, new ThrowableToJSONConverter());
         registerService(SimplePayloadConverter.class, new JSONToRealtimeExceptionConverter());
         registerService(SimplePayloadConverter.class, new RealtimeExceptionToJSONConverter());
 

@@ -51,7 +51,6 @@ package com.openexchange.realtime.atmosphere.protocol;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 
 

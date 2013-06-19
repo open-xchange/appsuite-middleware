@@ -49,14 +49,16 @@
 
 package com.openexchange.realtime.atmosphere.payload.converter;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.payload.converter.sim.SimpleConverterSim;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -82,14 +84,20 @@ public class ThrowableToJSONConverterTest {
     public void testGetInputFormat() {
         assertEquals(Throwable.class.getSimpleName(), converter.getInputFormat());
     }
-
+    
     @Test
-    public void testConvert() throws OXException {
+    public void testConvert() throws OXException, JSONException {
         Object object = converter.convert(throwable, null, simpleConverter);
         assertNotNull(object);
         assertTrue(object instanceof JSONObject);
         JSONObject throwableJSON = JSONObject.class.cast(object);
         assertEquals(throwableJSON.optString("message"), "First throwable");
+        JSONArray jsonArray = throwableJSON.getJSONArray("stackTrace");
+        JSONObject stackTraceElement = JSONObject.class.cast(jsonArray.get(0));
+        assertEquals("ThrowableToJSONConverterTest.java", stackTraceElement.getString("fileName"));
+        assertEquals("80", stackTraceElement.getString("lineNumber"));
+        assertEquals("com.openexchange.realtime.atmosphere.payload.converter.ThrowableToJSONConverterTest", stackTraceElement.getString("className"));
+        assertEquals("setUp", stackTraceElement.getString("methodName"));
     }
 
     @Test

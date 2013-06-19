@@ -52,6 +52,7 @@ package com.openexchange.realtime.atmosphere.impl.stanza.builder;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Message;
 import com.openexchange.tools.session.ServerSession;
@@ -81,7 +82,7 @@ public class MessageBuilder extends StanzaBuilder<Message> {
     }
 
     @Override
-    public Message build() throws OXException {
+    public Message build() throws RealtimeException {
         basics();
         type();
         return this.stanza;

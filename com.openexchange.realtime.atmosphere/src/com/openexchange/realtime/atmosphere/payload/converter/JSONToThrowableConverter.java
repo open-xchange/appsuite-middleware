@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.simple.SimpleConverter;
@@ -83,7 +82,7 @@ public class JSONToThrowableConverter extends AbstractJSONConverter {
             Throwable throwable = new Throwable(message);
             throwable.setStackTrace(jsonToStackTraceElementArray(traceElements, converter));
             return throwable;
-        } catch (JSONException e) {
+        } catch (Exception e) {
             throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(data.toString(), e);
         }
     }

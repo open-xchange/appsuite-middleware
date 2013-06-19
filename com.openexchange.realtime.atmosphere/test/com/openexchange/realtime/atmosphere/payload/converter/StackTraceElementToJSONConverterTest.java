@@ -68,9 +68,6 @@ public class StackTraceElementToJSONConverterTest {
     private StackTraceElement stackTraceElementMissingFileName=null;
     private StackTraceElementToJSONConverter converter = new StackTraceElementToJSONConverter();
     
-    /**
-     * @throws java.lang.Exception
-     */
     @Before
     public void setUp() throws Exception {
         stackTraceElement = new StackTraceElement("org.eclipse.osgi.baseadaptor.bundlefile.ZipBundleFile", "basicOpen", "ZipBundleFile.java", 87);

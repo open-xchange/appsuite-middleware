@@ -56,7 +56,6 @@ import java.util.Map;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.payload.converter.AbstractPOJOConverter;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -80,7 +79,7 @@ public class SimpleConverterSim implements SimpleConverter {
             converters = new ArrayList<ConverterBox>();
             converterMap.put(inputFormat, converters);
         }
-        converters.add(new ConverterBox(payloadConverter.getOutputFormat(), adaptPayloadConverter(payloadConverter)));
+        converters.add(new ConverterBox(payloadConverter.getOutputFormat(), adaptPayloadConverter(payloadConverter, this)));
     }
     
     public Object convert(String from, String to, Object data, ServerSession session) throws OXException {
@@ -94,22 +93,14 @@ public class SimpleConverterSim implements SimpleConverter {
         return converter.convert(from, to, data, session);
     }
     
-    private SimpleConverter adaptPayloadConverter(final SimplePayloadConverter payloadConverter) {
+    private SimpleConverter adaptPayloadConverter(final SimplePayloadConverter payloadConverter, final SimpleConverter simpleConverter) {
         return new SimpleConverter() {
+            
+            SimpleConverter collectingSimpleConverter = simpleConverter;
             
             @Override
             public Object convert(String from, String to, Object data, ServerSession session) throws OXException {
-                return payloadConverter.convert(data, null, this);
-            }
-        };
-    }
-
-    public SimpleConverter adaptPayloadConverterUsingThis(final AbstractPOJOConverter pojoConverter) {
-        return new SimpleConverter() {
-            
-            @Override
-            public Object convert(String from, String to, Object data, ServerSession session) throws OXException {
-                return pojoConverter.convert(data, null, this);
+                return payloadConverter.convert(data, null, collectingSimpleConverter);
             }
         };
     }

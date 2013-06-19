@@ -53,6 +53,7 @@ import org.apache.commons.logging.Log;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
@@ -88,7 +89,7 @@ public class PresenceBuilder extends StanzaBuilder<Presence> {
     }
 
     @Override
-    public Presence build() throws OXException {
+    public Presence build() throws RealtimeException {
         basics();
         type();
         return stanza;

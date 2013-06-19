@@ -47,22 +47,44 @@
  *
  */
 
-package com.openexchange.realtime.packet;
+package com.openexchange.realtime.atmosphere.util;
 
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
+import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.packet.GenericError;
+import com.openexchange.realtime.packet.Stanza;
 
 
 /**
- * {@link PacketError}
+ * {@link GenericErrorUtil}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PacketError extends OXException {
+public class GenericErrorUtil {
     
-    private static final long serialVersionUID = 1937356782240169024L;
-
-    public enum ErrorGroup {
-        
+    /**
+     * Create a JSON representation of a generic error stanza.
+     * @param exception the exception that occured and should be transported to the client
+     * @return the JSON representation of the generic error stanza
+     * @throws OXException if the generic error stanza couldn't be created
+     */
+    public static JSONObject getGenericErrorStanza(RealtimeException exception) throws OXException {
+        GenericError genericError = new GenericError(exception);
+        return writeErrorStanzaToJSON(genericError);
+    }
+    
+    /**
+     * Transform a Stanza into a JSONObject
+     * @param stanza the Stanza to be transformed
+     * @return the transformed Stanza
+     * @throws OXException if the Stanza couldn't be tranformed
+     */
+    public static JSONObject writeErrorStanzaToJSON(Stanza stanza) throws OXException {
+        StanzaWriter stanzaWriter = new StanzaWriter();
+        stanza.transformPayloads("json");
+        return stanzaWriter.write(stanza);
     }
 
 }

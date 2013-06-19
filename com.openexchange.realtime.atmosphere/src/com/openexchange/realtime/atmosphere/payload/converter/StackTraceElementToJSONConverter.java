@@ -49,12 +49,10 @@
 
 package com.openexchange.realtime.atmosphere.payload.converter;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -79,7 +77,7 @@ public class StackTraceElementToJSONConverter extends AbstractPOJOConverter {
             stackTraceObject.put("methodName", stackTraceElement.getMethodName());
             stackTraceObject.put("lineNumber", stackTraceElement.getLineNumber());
             return stackTraceObject;
-        } catch (JSONException e) {
+        } catch (Exception e) {
             throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(data.toString(), e);
         }
     }

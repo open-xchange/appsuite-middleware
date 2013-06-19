@@ -50,9 +50,11 @@
 package com.openexchange.realtime.atmosphere.protocol;
 
 import java.util.List;
-import org.atmosphere.cpr.AtmosphereResponse;
+import org.atmosphere.cpr.AtmosphereResource;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.packet.GenericError;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.StanzaSequenceGate;
@@ -69,17 +71,14 @@ public interface RTProtocol {
      * 
      * @param state - the client state
      * @param transmitter - the client transmitter
-     * @throws OXException
      */
-    public abstract void getReceived(RTClientState state, StanzaTransmitter transmitter) throws OXException;
+    public abstract void getReceived(RTClientState state, StanzaTransmitter transmitter);
 
     /**
      * Called when a Ping is received from the client. If the ping asks for a commit, a Pong message is generated, enqueJSONExceptionued and the buffer
      * is emptied, otherwise only the states timestamp is touched.
-     * 
-     * @throws OXException
      */
-    public abstract void ping(ID from, boolean commit, RTClientState state, StanzaTransmitter transmitter) throws OXException;
+    public abstract void ping(ID from, boolean commit, RTClientState state, StanzaTransmitter transmitter);
 
     /**
      * A 'received' message was received from the client
@@ -91,7 +90,7 @@ public interface RTProtocol {
      * 
      * @throws OXException
      */
-    public abstract void send(Stanza stanza, RTClientState state, StanzaTransmitter transmitter) throws OXException;
+    public abstract void send(Stanza stanza, RTClientState state, StanzaTransmitter transmitter);
 
     /**
      * A message was received from the client
@@ -99,13 +98,13 @@ public interface RTProtocol {
      * @param newState
      * @throws OXException
      */
-    public abstract void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean newState, StanzaTransmitter transmitter) throws OXException;
+    public abstract void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean newState, StanzaTransmitter transmitter);
 
     /**
      * A message was received from the client. Instead of sending acknlowledgements, they will be collected in the passed acknowledgements
      * list.
      */
-    public abstract void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean b, StanzaTransmitter transmitter, List<Long> acknowledgements) throws OXException;
+    public abstract void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean b, StanzaTransmitter transmitter, List<Long> acknowledgements);
 
     /**
      * Empties the buffer, if there are messages to be sent
@@ -113,11 +112,25 @@ public interface RTProtocol {
     public abstract void emptyBuffer(RTClientState state, StanzaTransmitter transmitter);
 
     /**
-     * Handle RealtimeExceptions that occured during protocol processing. 
+     * Handle RealtimeExceptions that occured during protocol processing. This generates an error Stanza and asynchronously sends it via the
+     * MessageDispatcher to the client that should be informed about the error situation. If the causing Stanza is null a
+     * {@link GenericError} Stanza will be sent to the client.
+     * 
      * @param recipient The client that you want to inform about the error. If null the exception will only appear in the server logs.
      * @param exception The exception that occurred
-     * @param stanza The stanza that caused the exception. This helps the client to relate the error to one of his actions. May be null 
+     * @param stanza The stanza that caused the exception. This helps the client to relate the error to one of his actions. May be null
      */
-    public abstract void handleRealtimeException(ID recipient, RealtimeException eexception, Stanza stanza);
+    public abstract void handleRealtimeException(ID recipient, RealtimeException exception, Stanza stanza);
+
+    /**
+     * Handle RealtimeExceptions directly. If an error happens before we can send error Stanzas to a recipient via our
+     * {@link MessageDispatcher} (e.q. the client couldn't authenticate properly) we have to inform the client about the error situation by
+     * sending the error infos directly via the {@link AtmosphereResource} he used when trying to communicate with us. If a StanzaTransmitter
+     * or State was already created you have to manually clean up for this resource.
+     * 
+     * @param exception The exception that occurred
+     * @param resource The resource used for sending the infos to the client
+     */
+    void handleRealtimeExceptionDirectly(RealtimeException exception, AtmosphereResource resource);
 
 }
