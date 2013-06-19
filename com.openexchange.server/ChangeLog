@@ -4,6 +4,7 @@
  - Fix for bug 23399: Avoid quotes in non-ascii personal parts
  - Preparation to fix bug 27125: Improved handling of specified range limit
  - Fix for bug 27142: Fixed possible NPE on map clear() invocation
+ - Fix for bug 27116: Added null guards for passed arguments to "java.lang.Runtime.exec(String[])"
 
 * 2013-06-18 - thorben.betten@open-xchange.com
 
