@@ -103,5 +103,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.quota"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/javax.mail"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.5.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.tokenlogin"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
