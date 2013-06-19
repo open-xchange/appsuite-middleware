@@ -767,6 +767,29 @@ public class JSONArray extends AbstractJSONValue {
     }
 
     /**
+     * Removes the element at the specified position in this JSONArray.
+     * <p>
+     * Shifts any subsequent elements to the left (subtracts one from their indices).
+     *
+     * @param index The index position
+     * @return this.
+     * @throws JSONException  If the index is negative or if the remove operation fails.
+     */
+    public JSONArray remove(final int index) throws JSONException {
+        if (index < 0) {
+            throw new JSONException("JSONArray[" + index + "] not found.");
+        }
+        if (index < length()) {
+            try {
+                this.myArrayList.remove(index);
+            } catch (final RuntimeException e) {
+                throw new JSONException("JSONArray[" + index + "] could not be removed.", e);
+            }
+        }
+        return this;
+    }
+
+    /**
      * Produce a JSONObject by combining a JSONArray of names with the values of this JSONArray.
      *
      * @param names A JSONArray containing a list of key strings. These will be paired with the values.
