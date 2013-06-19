@@ -104,6 +104,12 @@ public final class TokenLoginActivator extends HousekeepingActivator {
         // Get configuration service
         final ConfigurationService configService = getService(ConfigurationService.class);
 
+        // Check if disabled
+        if (!configService.getBoolProperty("com.openexchange.tokenlogin", true)) {
+            LOG.info("Bundle \"com.openexchange.tokenlogin\" per configuration.");
+            return;
+        }
+
         // Max. idle time for a token
         final int maxIdleTime = configService.getIntProperty("com.openexchange.tokenlogin.maxIdleTime", 300000);
 
