@@ -421,6 +421,7 @@ fi
 # SoftwareChange_Request-1245
 # SoftwareChange_Request-1392
 # SoftwareChange_Request-1468
+# SoftwareChange_Request-1498
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/ox-scriptconf.sh
 jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
@@ -446,7 +447,7 @@ for opt in "-XX:+DisableExplicitGC" "-server" "-Djava.awt.headless=true" \
     fi
 done
 # -----------------------------------------------------------------------
-for opt in "-XX:+UnlockExperimentalVMOptions" "-XX:+UseG1GC"; do
+for opt in "-XX:+UnlockExperimentalVMOptions" "-XX:+UseG1GC" "-XX:+CMSClassUnloadingEnabled"; do
     if echo $nopts | grep -- $opt > /dev/null; then
         nopts=$(echo $nopts | sed "s;$opt;;")
     fi
