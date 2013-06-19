@@ -58,11 +58,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.UUID;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
@@ -556,7 +558,7 @@ public class ServerUserSetting {
             {
                 final String start = "INSERT INTO user_setting_server (" + attribute.getColumnName();
                 if (CONTACT_COLLECT_ON_MAIL_ACCESS.equals(attribute)) {
-                    stmt = con.prepareStatement(start + ",contactCollectOnMailTransport,cid,user) VALUES (?,?,?,?)");
+                    stmt = con.prepareStatement(start + ",contactCollectOnMailTransport,cid,user, uuid) VALUES (?,?,?,?,?)");
                     attribute.setAttribute(stmt, value);
                     /*
                      * As configured
@@ -587,7 +589,10 @@ public class ServerUserSetting {
                 }
             }
             stmt.setInt(pos++, cid);
-            stmt.setInt(pos, user);
+            stmt.setInt(pos++, user);
+            UUID uuid = UUID.randomUUID();
+            byte[] uuidBinary = UUIDs.toByteArray(uuid);
+            stmt.setBytes(pos, uuidBinary);
             if (DEBUG) {
                 LOG.debug("INSERTing user settings: " + DBUtils.getStatementString(stmt));
             }

@@ -49,7 +49,9 @@
 
 package com.openexchange.admin.mysql;
 
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.database.AbstractCreateTableImpl;
+import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 
 
 /**
@@ -138,8 +140,24 @@ public class CreateSettingsTables extends AbstractCreateTableImpl {
        + "contactCollectOnMailTransport BOOL DEFAULT TRUE,"
        + "contactCollectOnMailAccess BOOL DEFAULT TRUE,"
        + "folderTree INT4,"
+       + "uuid BINARY(16) DEFAULT NULL,"
        + "FOREIGN KEY(cid, user) REFERENCES user(cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    
+    private static final String createUserSettingServerTablePrimaryKey = "CREATE TABLE user_setting_server ("
+        + "cid INT4 UNSIGNED NOT NULL,"
+        + "user INT4 UNSIGNED NOT NULL,"
+        + "contact_collect_folder INT4 UNSIGNED,"
+        + "contact_collect_enabled BOOL,"
+        + "defaultStatusPrivate INT4 UNSIGNED DEFAULT 0,"
+        + "defaultStatusPublic INT4 UNSIGNED DEFAULT 0,"
+        + "contactCollectOnMailTransport BOOL DEFAULT TRUE,"
+        + "contactCollectOnMailAccess BOOL DEFAULT TRUE,"
+        + "folderTree INT4,"
+        + "uuid BINARY(16) NOT NULL,"
+        + "PRIMARY KEY (uuid)"
+        + "FOREIGN KEY(cid, user) REFERENCES user(cid, id)"
+      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**
      * Initializes a new {@link CreateSettingsTables}.
@@ -170,6 +188,12 @@ public class CreateSettingsTables extends AbstractCreateTableImpl {
      */
     @Override
     protected String[] getCreateStatements() {
+        FullPrimaryKeySupportService fullPrimaryKeySupportService = AdminServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
+        if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
+            return new String[] { createUserConfigurationTable, createUserSettingMailTable, createUserSettingMailSignatureTable,
+                createUserSettingSpellcheckTable, createUserSettingAdminTable, createUserSettingTable,
+                createUserSettingServerTablePrimaryKey };
+        }
         return new String[] { createUserConfigurationTable, createUserSettingMailTable, createUserSettingMailSignatureTable,
             createUserSettingSpellcheckTable, createUserSettingAdminTable, createUserSettingTable, createUserSettingServerTable };
     }

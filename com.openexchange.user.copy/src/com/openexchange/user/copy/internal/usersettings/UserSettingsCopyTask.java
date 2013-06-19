@@ -89,7 +89,7 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
 
     private static final String SELECT_SERVER_SQL = "SELECT contact_collect_folder, contact_collect_enabled, defaultStatusPrivate, defaultStatusPublic, contactCollectOnMailTransport, contactCollectOnMailAccess, folderTree FROM user_setting_server WHERE cid = ? AND user = ?";
 
-    private static final String INSERT_SERVER_SQL = "INSERT INTO user_setting_server (cid, user, contact_collect_folder, contact_collect_enabled, defaultStatusPrivate, defaultStatusPublic, contactCollectOnMailTransport, contactCollectOnMailAccess, folderTree) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_SERVER_SQL = "INSERT INTO user_setting_server (cid, user, contact_collect_folder, contact_collect_enabled, defaultStatusPrivate, defaultStatusPublic, contactCollectOnMailTransport, contactCollectOnMailAccess, folderTree, uuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 
     /**
@@ -192,6 +192,7 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
                 setting.setContactCollectOnMailTransport(getIntOrNegative(i++, rs) == 1 ? true : false);
                 setting.setContactCollectOnMailAccess(getIntOrNegative(i++, rs) == 1 ? true : false);
                 setting.setFolderTree(getIntOrNegative(i++, rs));
+                setting.setUuidBinary(rs.getBytes("uuid"));
             }
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
@@ -216,7 +217,7 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
             stmt.setInt(i++, setting.isContactCollectOnMailTransport() ? 1 : 0);
             stmt.setInt(i++, setting.isContactCollectOnMailAccess() ? 1 : 0);
             setIntOrNull(i++, stmt, setting.getFolderTree());
-
+            stmt.setBytes(i++, setting.getUuidBinary());
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);

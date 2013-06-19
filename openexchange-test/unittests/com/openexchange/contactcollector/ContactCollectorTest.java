@@ -56,6 +56,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import javax.mail.internet.InternetAddress;
 import junit.framework.TestCase;
 import com.openexchange.contact.ContactService;
@@ -71,6 +72,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
@@ -257,10 +259,13 @@ public class ContactCollectorTest extends TestCase {
         int count = stmt.executeUpdate();
         stmt.close();
         if (count == 0) {
-            stmt = con.prepareStatement("INSERT INTO user_setting_server (cid, user, contact_collect_folder) VALUES (?, ?, ?)");
+            stmt = con.prepareStatement("INSERT INTO user_setting_server (cid, user, contact_collect_folder, uuid) VALUES (?, ?, ?, ?)");
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, userId);
             stmt.setNull(3, Types.INTEGER);
+            UUID uuid = UUID.randomUUID();
+            byte[] uuidBinary = UUIDs.toByteArray(uuid);
+            stmt.setBytes(4, uuidBinary);
             stmt.execute();
             stmt.close();
         }
