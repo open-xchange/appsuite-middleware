@@ -122,6 +122,9 @@ public final class CIFSActivator extends HousekeepingActivator {
                     }
 
                     private void handleDroppedSession(final Session session) {
+                        if (session.isTransient()) {
+                            return;
+                        }
                         if (null == getService(SessiondService.class).getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
                             SmbFileMapManagement.getInstance().dropFor(session);
                         }

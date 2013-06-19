@@ -52,9 +52,9 @@ package com.openexchange.messaging.twitter.session;
 import java.text.MessageFormat;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 
@@ -80,7 +80,7 @@ public final class TwitterEventHandler implements EventHandler {
             if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
                 // A single session was removed
                 final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                if (TwitterAccessRegistry.getInstance().removeAccessIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
+                if (!session.isTransient() && TwitterAccessRegistry.getInstance().removeAccessIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
                     LOG.debug(new StringBuilder("Twitter access removed for user ").append(session.getUserId()).append(" in context ").append(
                         session.getContextId()).toString());
                 }
@@ -91,7 +91,7 @@ public final class TwitterEventHandler implements EventHandler {
                 // For each session
                 final TwitterAccessRegistry accessRegistry = TwitterAccessRegistry.getInstance();
                 for (final Session session : sessionContainer.values()) {
-                    if (accessRegistry.removeAccessIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
+                    if (!session.isTransient() && accessRegistry.removeAccessIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
                         LOG.debug(new StringBuilder("Twitter access removed for user ").append(session.getUserId()).append(" in context ").append(
                             session.getContextId()).toString());
                     }

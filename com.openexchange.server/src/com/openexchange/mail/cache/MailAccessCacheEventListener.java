@@ -96,15 +96,20 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
                 return;
             }
             for (final Session session : sessions.values()) {
-                try {
-                    mac.clearUserEntries(session);
-                    // AttachmentTokenRegistry.getInstance().dropFor(session);
-                } catch (final OXException e) {
-                    LOG.error("Unable to clear cached mail access for session: " + session.getSessionID(), e);
+                if (!session.isTransient()) {
+                    try {
+                        mac.clearUserEntries(session);
+                        // AttachmentTokenRegistry.getInstance().dropFor(session);
+                    } catch (final OXException e) {
+                        LOG.error("Unable to clear cached mail access for session: " + session.getSessionID(), e);
+                    }
                 }
             }
         } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
             final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+            if (session.isTransient()) {
+                return;
+            }
             IMailAccessCache mac;
             try {
                 mac = MailAccess.getMailAccessCache();

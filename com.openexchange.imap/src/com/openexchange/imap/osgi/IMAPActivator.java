@@ -176,20 +176,26 @@ public final class IMAPActivator extends HousekeepingActivator {
                                 (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
                             final IMAPNotifierRegistryService notifierRegistry = IMAPNotifierRegistry.getInstance();
                             for (final Session session : container.values()) {
-                                handleSession(session);
-                                notifierRegistry.handleRemovedSession(session);
+                                if (!session.isTransient()) {
+                                    handleSession(session);
+                                    notifierRegistry.handleRemovedSession(session);
+                                }
                             }
                         } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
                             final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                            handleSession(session);
-                            IMAPNotifierRegistry.getInstance().handleRemovedSession(session);
+                            if (!session.isTransient()) {
+                                handleSession(session);
+                                IMAPNotifierRegistry.getInstance().handleRemovedSession(session);
+                            }
                         } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
                             @SuppressWarnings("unchecked") final Map<String, Session> container =
                                 (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
                             final IMAPNotifierRegistryService notifierRegistry = IMAPNotifierRegistry.getInstance();
                             for (final Session session : container.values()) {
-                                handleSession(session);
-                                notifierRegistry.handleRemovedSession(session);
+                                if (!session.isTransient()) {
+                                    handleSession(session);
+                                    notifierRegistry.handleRemovedSession(session);
+                                }
                             }
                         }
                     }

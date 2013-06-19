@@ -141,6 +141,9 @@ public final class MailSessionEventHandler implements EventHandler {
         }
 
         private static void dropSessionCaches(final Session session) {
+            if (null == session || session.isTransient()) {
+                return;
+            }
             /*
              * Session caches
              */
