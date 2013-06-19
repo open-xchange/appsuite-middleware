@@ -17,7 +17,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Realtime channel implementation using Atmosphere and Grizzly
 Requires:      open-xchange-realtime-core >= @OXVERSION@
-Requires:      open-xchange-realtime-atmosphere >= @OXVERSION@
+Requires:      open-xchange-grizzly >= @OXVERSION@
 
 %description
 
