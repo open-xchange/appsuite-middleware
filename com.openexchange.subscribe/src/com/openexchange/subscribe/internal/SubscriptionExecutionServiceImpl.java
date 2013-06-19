@@ -147,6 +147,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
             }
             final Collection<?> data = subscribeService.getContent(subscription);
             storeData(data, subscription);
+            subscribeService.touch(session.getContext(), subscriptionId);
             return data.size();
         } finally {
             unlock(subscriptionId, session);
@@ -221,6 +222,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
             }
             final Collection<?> data = subscribeService.getContent(subscription);
             storeData(data, subscription);
+            subscribeService.touch(session.getContext(), subscriptionId);
             return data.size();
         } finally {
             unlock(subscriptionId, session);
@@ -245,6 +247,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
                         final SubscribeService subscribeService = source.getSubscribeService();
                         final Collection<?> data = subscribeService.getContent(subscription);
                         storeData(data, subscription);
+                        subscribeService.touch(session.getContext(), subscriptionId);
                         sum += data.size();
                     } finally {
                         unlock(subscriptionId, session);

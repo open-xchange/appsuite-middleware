@@ -82,4 +82,6 @@ public interface SubscriptionStorage extends SecretEncryptionStrategy<EncryptedF
     public Map<String, Boolean> hasSubscriptions(Context ctx, List<String> folderIds) throws OXException;
 
     public boolean hasSubscriptions(Context ctx, User user) throws OXException;
+
+    public void touch(Context ctx, int subscriptionId, long currentTimeMillis) throws OXException;
 }

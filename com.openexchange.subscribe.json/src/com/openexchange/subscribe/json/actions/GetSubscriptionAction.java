@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.json.actions;
 
+import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -106,9 +107,9 @@ public class GetSubscriptionAction extends AbstractSubscribeAction {
 				urlPrefix = subscribeRequest.getRequestData().getParameter(
 						"__serverURL");
 			}
-
+			
 			JSONObject json = new SubscriptionJSONWriter().write(subscription,
-					subscription.getSource().getFormDescription(), urlPrefix);
+					subscription.getSource().getFormDescription(), urlPrefix, subscribeRequest.getTimeZone());
 			return new AJAXRequestResult(json, "json");
 		} catch (JSONException e) {
 		    throw SubscriptionJSONErrorMessages.THROWABLE.create(e, e.getMessage());
