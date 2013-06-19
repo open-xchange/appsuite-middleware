@@ -136,6 +136,8 @@ fi
 %changelog
 * Tue Jun 11 2013 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2013-06-13
+* Mon Jun 10 2013 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2013-06-11
 * Fri Jun 07 2013 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2013-06-20
 * Tue May 28 2013 Marc Arens <marc.arens@open-xchange.com>
