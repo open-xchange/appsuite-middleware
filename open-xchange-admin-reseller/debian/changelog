@@ -1,3 +1,9 @@
+open-xchange-admin-reseller (7.2.1-5) UNRELEASED; urgency=low
+
+  * Build for patch 2013-06-11
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Mon, 10 Jun 2013 15:30:57 +0200
+
 open-xchange-admin-reseller (7.2.1-4) UNRELEASED; urgency=low
 
   * Build for patch 2013-06-20
