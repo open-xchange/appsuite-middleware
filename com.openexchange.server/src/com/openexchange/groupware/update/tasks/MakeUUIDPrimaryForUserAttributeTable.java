@@ -94,7 +94,7 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
             AddUUIDForUserAttributeTable.fillUUIDs(con, progress);
 
             Tools.modifyColumns(con, "user_attribute", new Column("uuid", "BINARY(16) NOT NULL"));
-            Tools.createPrimaryKey(con, "user_attribute", new String[] { "uuid" });
+            Tools.createPrimaryKey(con, "user_attribute", new String[] { "uuid", "cid" });
             con.commit();
         } catch (SQLException e) {
             rollback(con);
