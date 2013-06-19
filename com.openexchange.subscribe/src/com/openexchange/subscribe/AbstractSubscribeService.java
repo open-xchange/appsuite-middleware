@@ -191,6 +191,11 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         }
         return false;
     }
+    
+    @Override
+    public void touch(Context ctx, int subscriptionId) throws OXException {
+        STORAGE.get().touch(ctx, subscriptionId, System.currentTimeMillis());
+    }
 
     public static void encrypt(final Session session, final Map<String, Object> map, final String... keys) throws OXException {
         if (ENCRYPTION_FACTORY == null) {

@@ -88,7 +88,7 @@ public class NewSubscriptionAction extends AbstractSubscribeAction {
                 }
             }
             JSONObject jsonTemp =
-                new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription(), urlPrefix);
+                new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription(), urlPrefix, subscribeRequest.getTimeZone());
             return new AJAXRequestResult(Integer.valueOf(jsonTemp.getInt("id")), "json");
         } catch (JSONException e) {
             throw new OXException(e);

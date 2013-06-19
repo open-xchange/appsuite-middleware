@@ -51,6 +51,7 @@ package com.openexchange.subscribe.json;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -84,13 +85,20 @@ public class SubscriptionJSONWriter {
 
     private static final String ENABLED = "enabled";
 
-    public JSONObject write(final Subscription subscription, final DynamicFormDescription form, final String urlPrefix) throws JSONException, OXException {
+    private static final String CREATED = "created";
+
+    private static final String LAST_UPDATED = "lastUpdated";
+
+    public JSONObject write(final Subscription subscription, final DynamicFormDescription form, final String urlPrefix, TimeZone tz) throws JSONException, OXException {
         final JSONObject object = new JSONObject();
         object.put(ID, subscription.getId());
         object.put(FOLDER, subscription.getFolderId());
         object.put(ENABLED, subscription.isEnabled());
         object.put(DISPLAYNAME, subscription.getDisplayName());
         object.put(SOURCE, subscription.getSource().getId());
+        object.put(LAST_UPDATED, subscription.getLastUpdate() + tz.getOffset(subscription.getLastUpdate()));
+        object.put(CREATED, subscription.getCreated() + tz.getOffset(subscription.getCreated()));
+        
         writeConfiguration(object, subscription.getSource().getId(), subscription.getConfiguration(), form, urlPrefix);
         return object;
     }
@@ -100,9 +108,9 @@ public class SubscriptionJSONWriter {
         object.put(id, config);
     }
 
-    public JSONArray writeArray(final Subscription subscription, final String[] basicCols, final Map<String, String[]> specialCols, final List<String> specialsList, final DynamicFormDescription form) throws OXException {
+    public JSONArray writeArray(final Subscription subscription, final String[] basicCols, final Map<String, String[]> specialCols, final List<String> specialsList, final DynamicFormDescription form, TimeZone tz) throws OXException {
         final JSONArray array = new JSONArray();
-        writeBasicCols(array, subscription, basicCols);
+        writeBasicCols(array, subscription, basicCols, tz);
         for (final String identifier : specialsList) {
             writeSpecialCols(array, subscription, specialCols.get(identifier), identifier, form);
         }
@@ -127,7 +135,7 @@ public class SubscriptionJSONWriter {
         }
     }
 
-    private void writeBasicCols(final JSONArray array, final Subscription subscription, final String[] basicCols) throws OXException {
+    private void writeBasicCols(final JSONArray array, final Subscription subscription, final String[] basicCols, TimeZone tz) throws OXException {
         for (final String basicCol : basicCols) {
             if (ID.equals(basicCol)) {
                 array.put(subscription.getId());
@@ -139,6 +147,10 @@ public class SubscriptionJSONWriter {
                 array.put(subscription.getDisplayName());
             } else if (ENABLED.equals(basicCol)) {
                 array.put(subscription.isEnabled());
+            } else if (LAST_UPDATED.equals(basicCol)) {
+                array.put(subscription.getLastUpdate() + tz.getOffset(subscription.getLastUpdate()));
+            } else if (CREATED.equals(basicCol)) {
+                array.put(subscription.getCreated() + tz.getOffset(subscription.getCreated()));
             } else {
                 throw SubscriptionJSONErrorMessages.UNKNOWN_COLUMN.create(basicCol);
             }

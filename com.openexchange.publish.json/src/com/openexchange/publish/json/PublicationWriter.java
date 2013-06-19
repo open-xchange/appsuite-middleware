@@ -55,8 +55,10 @@ import static com.openexchange.publish.json.FieldNames.ENTITY;
 import static com.openexchange.publish.json.FieldNames.ENTITY_MODULE;
 import static com.openexchange.publish.json.FieldNames.ID;
 import static com.openexchange.publish.json.FieldNames.TARGET;
+import static com.openexchange.publish.json.FieldNames.CREATED;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -79,27 +81,29 @@ public class PublicationWriter {
 
     private static final ValueWriterSwitch valueWrite = new ValueWriterSwitch();
 
+
     private final Map<String, EntityType> entityTypes = new EntityMap();
 
     public PublicationWriter() {
     }
 
-    public JSONObject write(Publication publication, String urlPrefix) throws JSONException, OXException {
+    public JSONObject write(Publication publication, String urlPrefix, TimeZone tz) throws JSONException, OXException {
         JSONObject object = new JSONObject();
         object.put(ID, publication.getId());
         object.put(ENTITY, writeEntity(publication));
         object.put(ENTITY_MODULE, publication.getModule());
         object.put(ENABLED, publication.isEnabled());
         object.put(DISPLAYNAME, publication.getDisplayName());
+        object.put(CREATED, publication.getCreated() + tz.getOffset(publication.getCreated()));
         String targetId = publication.getTarget().getId();
         object.put(TARGET, targetId);
         object.put(targetId, FormContentWriter.write(publication.getTarget().getFormDescription(), publication.getConfiguration(), urlPrefix));
         return object;
     }
 
-    public JSONArray writeArray(Publication publication, String[] basicCols, Map<String, String[]> specialCols, List<String> specialsList, DynamicFormDescription form) throws OXException, JSONException {
+    public JSONArray writeArray(Publication publication, String[] basicCols, Map<String, String[]> specialCols, List<String> specialsList, DynamicFormDescription form, TimeZone tz) throws OXException, JSONException {
         JSONArray array = new JSONArray();
-        writeBasicCols(array, publication, basicCols);
+        writeBasicCols(array, publication, basicCols, tz);
         for (String identifier : specialsList) {
             writeSpecialCols(array, publication, specialCols.get(identifier), identifier, form);
         }
@@ -124,7 +128,7 @@ public class PublicationWriter {
         }
     }
 
-    private void writeBasicCols(JSONArray array, Publication publication, String[] basicCols) throws OXException, JSONException {
+    private void writeBasicCols(JSONArray array, Publication publication, String[] basicCols, TimeZone tz) throws OXException, JSONException {
         for (String basicCol : basicCols) {
             if (ID.equals(basicCol)) {
                 array.put(publication.getId());
@@ -138,6 +142,8 @@ public class PublicationWriter {
                 array.put(publication.getDisplayName());
             } else if (ENABLED.equals(basicCol)) {
                 array.put(publication.isEnabled());
+            } else if (CREATED.equals(basicCol)) {
+                array.put(publication.getCreated() + tz.getOffset(publication.getCreated()));
             } else {
                 throw PublicationJSONErrorMessage.UNKNOWN_COLUMN.create(basicCol);
             }
