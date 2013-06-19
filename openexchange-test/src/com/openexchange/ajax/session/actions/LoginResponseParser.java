@@ -132,6 +132,9 @@ public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
             retval.setJvmRoute(jvmRoute);
             retval.setSessionId(json.getString(Login.PARAMETER_SESSION));
             retval.setRandom(json.getString(LoginFields.RANDOM_PARAM));
+            if (json.has(Login.PARAMETER_PASSWORD)) {
+                retval.setPassword(json.getString(Login.PARAMETER_PASSWORD));
+            }
         }
         if (isFailOnError()) {
             assertFalse(response.getErrorMessage(), response.hasError());

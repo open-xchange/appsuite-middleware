@@ -61,8 +61,30 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
     private static final String PARAM_PASSWORD = "password";
 
     private static final String PARAM_NAME = "name";
+    
+    private static final String PARAM_TOKEN = "token";
+    
+    private static final String PARAM_SECRET = "secret";
 
     private final boolean failOnError;
+
+    /**
+     * Constructor for Login with token. Initializes a new {@link LoginRequest}.
+     */
+    public LoginRequest(TokenLoginParameters parameters, boolean failOnError) {
+        super(new Parameter[] {
+            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_REDEEM_TOKEN),
+            new URLParameter(LoginFields.AUTHID_PARAM, parameters.getAuthId()),
+            new URLParameter(LoginFields.CLIENT_PARAM, parameters.getClient()),
+            new URLParameter(LoginFields.VERSION_PARAM, parameters.getVersion()),
+            new FieldParameter(PARAM_TOKEN, parameters.getToken()),
+            new FieldParameter(PARAM_SECRET, parameters.getSecret())});
+        this.failOnError = failOnError;
+    }
+    
+    public LoginRequest(TokenLoginParameters parameters) {
+        this(parameters, true);
+    }
 
     public LoginRequest(String login, String password, String authId, String client, String version) {
         this(login, password, authId, client, version, true);
@@ -86,5 +108,59 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
     @Override
     public LoginResponseParser getParser() {
         return new LoginResponseParser(failOnError);
+    }
+    
+    public static class TokenLoginParameters {
+
+        String token, secret, authId, client, version;
+
+        public TokenLoginParameters(String token, String secret, String authId, String client, String version) {
+            super();
+            this.token = token;
+            this.secret = secret;
+            this.authId = authId;
+            this.client = client;
+            this.version = version;
+        }
+
+        public String getToken() {
+            return token;
+        }
+
+        public void setToken(String token) {
+            this.token = token;
+        }
+
+        public String getSecret() {
+            return secret;
+        }
+
+        public void setSecret(String secret) {
+            this.secret = secret;
+        }
+
+        public String getAuthId() {
+            return authId;
+        }
+
+        public void setAuthId(String authId) {
+            this.authId = authId;
+        }
+
+        public String getClient() {
+            return client;
+        }
+
+        public void setClient(String client) {
+            this.client = client;
+        }
+
+        public String getVersion() {
+            return version;
+        }
+
+        public void setVersion(String version) {
+            this.version = version;
+        }
     }
 }
