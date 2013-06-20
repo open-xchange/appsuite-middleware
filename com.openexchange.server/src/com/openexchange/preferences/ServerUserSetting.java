@@ -567,7 +567,7 @@ public class ServerUserSetting {
                     final boolean b = null == service ? false : service.getBoolProperty("com.openexchange.user.contactCollectOnMailTransport", false);
                     stmt.setBoolean(pos++, b);
                 } else if (CONTACT_COLLECT_ON_MAIL_TRANSPORT.equals(attribute)) {
-                    stmt = con.prepareStatement(start + ",contactCollectOnMailAccess,cid,user) VALUES (?,?,?,?)");
+                    stmt = con.prepareStatement(start + ",contactCollectOnMailAccess,cid,user, uuid) VALUES (?,?,?,?,?)");
                     attribute.setAttribute(stmt, value);
                     /*
                      * As configured
@@ -576,7 +576,7 @@ public class ServerUserSetting {
                     final boolean b = null == service ? false : service.getBoolProperty("com.openexchange.user.contactCollectOnMailAccess", false);
                     stmt.setBoolean(pos++, b);
                 } else {
-                    stmt = con.prepareStatement(start + ",contactCollectOnMailAccess,contactCollectOnMailTransport,cid,user) VALUES (?,?,?,?,?)");
+                    stmt = con.prepareStatement(start + ",contactCollectOnMailAccess,contactCollectOnMailTransport,cid,user, uuid) VALUES (?,?,?,?,?,?)");
                     attribute.setAttribute(stmt, value);
                     /*
                      * As configured
