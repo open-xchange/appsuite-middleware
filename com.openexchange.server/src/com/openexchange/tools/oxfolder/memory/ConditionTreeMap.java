@@ -129,7 +129,7 @@ public final class ConditionTreeMap {
             int count = rs.next() ? rs.getInt(1) : 0;
             DBUtils.closeSQLStuff(rs, stmt);
 
-            stmt = connection.prepareStatement("SELECT COUNT(id) FROM groups WHERE cid=1337");
+            stmt = connection.prepareStatement("SELECT COUNT(id) FROM groups WHERE cid=?");
             stmt.setInt(1, contextId);
             rs = stmt.executeQuery();
             count += (rs.next() ? rs.getInt(1) : 0);
