@@ -149,11 +149,33 @@ public final class Arrays {
         return retval;
     }
 
+    /**
+     * Extracts specified sub-array from given source array starting at given offset.
+     *
+     * @param source The source array to extract from
+     * @param start The start offset
+     * @param length The number of elements to extract
+     * @param clazz The array's type
+     * @return The extracted sub-array
+     */
+    public static <T> T[] extract(T[] source, int start, int length, Class<? extends T> clazz) {
+        final int realLength = determineRealSize(source.length, start, length);
+        @SuppressWarnings("unchecked")
+        final T[] retval = (T[]) Array.newInstance(clazz, realLength);
+        System.arraycopy(source, start, retval, 0, realLength);
+        return retval;
+    }
+
+    /**
+     * Determines the real size
+     *
+     * @param size The size/length of the source array
+     * @param start The start offset
+     * @param length The number of elements to extract
+     * @return The size of the resulting array carrying the extracted elements
+     */
     public static int determineRealSize(int size, int start, int length) {
-        if (start + length > size) {
-            return size - start;
-        }
-        return length;
+        return start + length > size ? size - start : length;
     }
 
     public static Serializable[] toSerializable(Integer[] ids) {

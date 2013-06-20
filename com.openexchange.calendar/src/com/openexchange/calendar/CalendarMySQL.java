@@ -54,6 +54,7 @@ import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
+import static com.openexchange.tools.sql.DBUtils.getIN;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -128,6 +129,8 @@ import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -2128,106 +2131,128 @@ public class CalendarMySQL implements CalendarSqlImp {
     @Override
     public final void getParticipantsSQLIn(final List<CalendarDataObject> list, final Connection readcon, final int cid, final String sqlin) throws SQLException {
 
-        final Statement stmt = readcon.createStatement();
-        ResultSet rs = null;
-        try {
-            final TIntObjectMap<List<CalendarDataObject>> map;
-            {
-                final int size = list.size();
-                map = new TIntObjectHashMap<List<CalendarDataObject>>(size);
-                for (int i = 0; i < size; i++) {
-                    final CalendarDataObject cdo = list.get(i);
-                    List<CalendarDataObject> l = map.get(cdo.getObjectID());
-                    if (null == l) {
-                        l = new LinkedList<CalendarDataObject>();
-                        map.put(cdo.getObjectID(), l);
+        final TIntObjectMap<List<CalendarDataObject>> map;
+        {
+            final int size = list.size();
+            map = new TIntObjectHashMap<List<CalendarDataObject>>(size);
+            for (int i = 0; i < size; i++) {
+                final CalendarDataObject cdo = list.get(i);
+                List<CalendarDataObject> l = map.get(cdo.getObjectID());
+                if (null == l) {
+                    l = new LinkedList<CalendarDataObject>();
+                    map.put(cdo.getObjectID(), l);
+                }
+                l.add(cdo);
+            }
+        }
+
+        final List<PrgDateRight> rights = new LinkedList<PrgDateRight>();
+        {
+            final String[] ids = Strings.splitByComma(Strings.unparenthize(sqlin));
+            final int length = ids.length;
+            final int inLimit = IN_LIMIT;
+            for (int i = 0; i < length; i += inLimit) {
+                PreparedStatement stmt = null;
+                ResultSet result = null;
+                try {
+                    final String[] currentIds = com.openexchange.tools.arrays.Arrays.extract(ids, i, inLimit, String.class);
+                    final com.openexchange.java.StringAllocator query = new com.openexchange.java.StringAllocator(2048);
+                    query.append("SELECT object_id, id, type, dn, ma FROM prg_date_rights WHERE cid = ").append(cid);
+                    query.append(" AND object_id IN (");
+                    stmt = readcon.prepareStatement(getIN(query.toString(), currentIds.length));
+                    int pos = 1;
+                    for (final String id : currentIds) {
+                        stmt.setString(pos++, id);
                     }
-                    l.add(cdo);
+                    result = stmt.executeQuery();
+                    while (result.next()) {
+                        final PrgDateRight right = new PrgDateRight();
+                        pos = 1;
+                        right.objectId = result.getInt(pos++);
+                        right.id = result.getInt(pos++);
+                        right.type = result.getInt(pos++);
+                        right.dn = result.getString(pos++);
+                        if (result.wasNull()) {
+                            right.dn = null;
+                        }
+                        right.ma = result.getString(pos++);
+                        if (result.wasNull()) {
+                            right.ma = null;
+                        }
+                        rights.add(right);
+                    }
+                } finally {
+                    closeSQLStuff(result, stmt);
                 }
             }
+            Collections.sort(rights);
+        }
 
-            final com.openexchange.java.StringAllocator query = new com.openexchange.java.StringAllocator(128);
-            query.append("SELECT object_id, id, type, dn, ma FROM prg_date_rights WHERE cid = ");
-            query.append(cid);
-            query.append(PARTICIPANTS_IDENTIFIER_IN);
-            query.append(sqlin);
-            query.append(" ORDER BY object_id ASC");
-            rs = stmt.executeQuery(query.toString());
+        int last_oid = -1;
+        Participants participants = null;
+        List<CalendarDataObject> cdaos = null;
+        Participant participant = null;
 
-            int last_oid = -1;
-            Participants participants = null;
-            List<CalendarDataObject> cdaos = null;
-            Participant participant = null;
-            while (rs.next()) {
-                final int oid = rs.getInt(1);
-                if (last_oid != oid) {
-                    if (participants != null && cdaos != null) {
-                        for (final CalendarDataObject cdao : cdaos) {
-                            cdao.setParticipants(participants.getList());
-                        }
+        for (final PrgDateRight right : rights) {
+            final int oid = right.objectId;
+            if (last_oid != oid) {
+                if (participants != null && cdaos != null) {
+                    for (final CalendarDataObject cdao : cdaos) {
+                        cdao.setParticipants(participants.getList());
                     }
-                    participants = new Participants();
-                    last_oid = oid;
-                    cdaos = map.get(oid);
                 }
-                final int id = rs.getInt(2);
-                final int type = rs.getInt(3);
-                if (type == Participant.USER) {
-                    participant = new UserParticipant(id);
-                } else if (type == Participant.GROUP) {
-                    participant = new GroupParticipant(id);
-                } else if (type == Participant.RESOURCE) {
-                    participant = new ResourceParticipant(id);
-                    if (null != cdaos) {
-                        for (final CalendarDataObject cdao : cdaos) {
-                            cdao.setContainsResources(true);
-                        }
+                participants = new Participants();
+                last_oid = oid;
+                cdaos = map.get(oid);
+            }
+            final int id = right.id;
+            final int type = right.type;
+            if (type == Participant.USER) {
+                participant = new UserParticipant(id);
+            } else if (type == Participant.GROUP) {
+                participant = new GroupParticipant(id);
+            } else if (type == Participant.RESOURCE) {
+                participant = new ResourceParticipant(id);
+                if (null != cdaos) {
+                    for (final CalendarDataObject cdao : cdaos) {
+                        cdao.setContainsResources(true);
                     }
-                } else if (type == Participant.RESOURCEGROUP) {
-                    participant = new ResourceGroupParticipant(id);
-                } else if (type == Participant.EXTERNAL_USER) {
-                    String temp = rs.getString(4);
-                    if (rs.wasNull()) {
-                        temp = null;
-                    }
-                    final String temp2 = rs.getString(5);
-                    if (rs.wasNull()) {
-                        participant = null;
-                    } else {
-                        participant = new ExternalUserParticipant(temp2);
-                        if (temp != null) {
-                            participant.setDisplayName(temp);
-                        }
-                    }
-                } else if (type == Participant.EXTERNAL_GROUP) {
-                    String temp = rs.getString(4);
-                    if (rs.wasNull()) {
-                        temp = null;
-                    }
-                    final String temp2 = rs.getString(5);
-                    if (rs.wasNull()) {
-                        participant = null;
-                    } else {
-                        participant = new ExternalGroupParticipant(temp2);
-                        if (temp != null) {
-                            participant.setDisplayName(temp);
-                        }
-                    }
+                }
+            } else if (type == Participant.RESOURCEGROUP) {
+                participant = new ResourceGroupParticipant(id);
+            } else if (type == Participant.EXTERNAL_USER) {
+                String temp = right.dn;
+                final String temp2 = right.ma;
+                if (null == temp2) {
+                    participant = null;
                 } else {
-                    LOG.warn("Unknown type detected for Participant :" + type);
+                    participant = new ExternalUserParticipant(temp2);
+                    if (temp != null) {
+                        participant.setDisplayName(temp);
+                    }
                 }
-                if (participant != null && participants != null) {
-                    participants.add(participant);
+            } else if (type == Participant.EXTERNAL_GROUP) {
+                String temp = right.dn;
+                final String temp2 = right.ma;
+                if (null == temp2) {
+                    participant = null;
+                } else {
+                    participant = new ExternalGroupParticipant(temp2);
+                    if (temp != null) {
+                        participant.setDisplayName(temp);
+                    }
                 }
+            } else {
+                LOG.warn("Unknown type detected for Participant :" + type);
             }
-            if (cdaos != null && cdaos.get(0).getObjectID() == last_oid && participants != null) {
-                for (final CalendarDataObject cdao : cdaos) {
-                    cdao.setParticipants(participants.getList());
-                }
+            if (participant != null && participants != null) {
+                participants.add(participant);
             }
-        } finally {
-            COLLECTION.closeResultSet(rs);
-            COLLECTION.closeStatement(stmt);
+        }
+        if (cdaos != null && cdaos.get(0).getObjectID() == last_oid && participants != null) {
+            for (final CalendarDataObject cdao : cdaos) {
+                cdao.setParticipants(participants.getList());
+            }
         }
     }
 
@@ -2295,120 +2320,154 @@ public class CalendarMySQL implements CalendarSqlImp {
         return participants;
     }
 
+    private static final int IN_LIMIT = DBUtils.IN_LIMIT;
+
     @Override
     public final void getUserParticipantsSQLIn(final CalendarFolderObject visibleFolders, final List<CalendarDataObject> list, final Connection readcon, final int cid, final int uid, final String sqlin) throws SQLException, OXException {
-        final Statement stmt = readcon.createStatement();
-        ResultSet rs = null;
-        try {
-            final TIntObjectMap<List<CalendarDataObject>> map;
-            {
-                final int size = list.size();
-                map = new TIntObjectHashMap<List<CalendarDataObject>>(size);
-                for (int i = 0; i < size; i++) {
-                    final CalendarDataObject cdo = list.get(i);
-                    List<CalendarDataObject> l = map.get(cdo.getObjectID());
-                    if (null == l) {
-                        l = new ArrayList<CalendarDataObject>();
-                        map.put(cdo.getObjectID(), l);
+        final TIntObjectMap<List<CalendarDataObject>> map;
+        {
+            final int size = list.size();
+            map = new TIntObjectHashMap<List<CalendarDataObject>>(size);
+            for (int i = 0; i < size; i++) {
+                final CalendarDataObject cdo = list.get(i);
+                List<CalendarDataObject> l = map.get(cdo.getObjectID());
+                if (null == l) {
+                    l = new ArrayList<CalendarDataObject>();
+                    map.put(cdo.getObjectID(), l);
+                }
+                l.add(cdo);
+            }
+        }
+
+        final List<PrgDatesMember> members = new LinkedList<PrgDatesMember>();
+        {
+            final String[] ids = Strings.splitByComma(Strings.unparenthize(sqlin));
+            final int length = ids.length;
+            final int inLimit = IN_LIMIT;
+            for (int i = 0; i < length; i += inLimit) {
+                PreparedStatement stmt = null;
+                ResultSet result = null;
+                try {
+                    final String[] currentIds = com.openexchange.tools.arrays.Arrays.extract(ids, i, inLimit, String.class);
+                    final com.openexchange.java.StringAllocator query = new com.openexchange.java.StringAllocator(2048);
+                    query.append("SELECT object_id, member_uid, confirm, reason, pfid, reminder from prg_dates_members WHERE cid = ").append(cid);
+                    query.append(" AND object_id IN (");
+                    stmt = readcon.prepareStatement(getIN(query.toString(), currentIds.length));
+                    int pos = 1;
+                    for (final String id : currentIds) {
+                        stmt.setString(pos++, id);
                     }
-                    l.add(cdo);
+                    result = stmt.executeQuery();
+                    while (result.next()) {
+                        final PrgDatesMember member = new PrgDatesMember();
+                        pos = 1;
+                        member.objectId = result.getInt(pos++);
+                        member.memberUid = result.getInt(pos++);
+                        member.confirm = result.getInt(pos++);
+                        member.reason = result.getString(pos++);
+                        if (result.wasNull()) {
+                            member.reason = null;
+                        }
+                        member.pfid = result.getInt(pos++);
+                        if (result.wasNull()) {
+                            member.pfid = -1;
+                        }
+                        member.alarm = result.getInt(pos);
+                        if (result.wasNull()) {
+                            member.alarm = -1;
+                        }
+                        members.add(member);
+                    }
+                } finally {
+                    closeSQLStuff(result, stmt);
                 }
             }
+            Collections.sort(members);
+        }
 
-            final com.openexchange.java.StringAllocator query = new com.openexchange.java.StringAllocator(140);
-            query.append("SELECT object_id, member_uid, confirm, reason, pfid, reminder from prg_dates_members WHERE cid = ");
-            query.append(cid);
-            query.append(PARTICIPANTS_IDENTIFIER_IN);
-            query.append(sqlin);
-            query.append(" ORDER BY object_id");
-            rs = stmt.executeQuery(query.toString());
+        String temp = null;
+        int last_oid = -1;
+        UserParticipant up = null;
+        Participants participants = null;
+        List<CalendarDataObject> cdaos = null;
 
-            String temp = null;
-            int last_oid = -1;
-            UserParticipant up = null;
-            Participants participants = null;
-            List<CalendarDataObject> cdaos = null;
-
-            while (rs.next()) {
-                final int oid = rs.getInt(1);
-                if (last_oid != oid) {
-                    if (participants != null) {
-                        participants.add(up);
-                        if (cdaos != null) {
-                            for (final CalendarDataObject cdao : cdaos) {
-                                cdao.setUsers(participants.getUsers());
-                            }
-                        }
-                    }
-                    participants = new Participants();
-                    last_oid = oid;
-                    cdaos = map.get(oid);
-                }
-                final int tuid = rs.getInt(2);
-                up = new UserParticipant(tuid);
-                up.setConfirm(rs.getInt(3));
-                temp = rs.getString(4);
-                if (!rs.wasNull()) {
-                    up.setConfirmMessage(temp);
-                }
-                final int pfid = rs.getInt(5);
-
-                if (!rs.wasNull()) {
-                    if (pfid < 1) {
-                        LOG.error(StringCollection.convertArraytoString(new Object[] { "ERROR: getUserParticipantsSQLIn oid:uid ", Integer.valueOf(uid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(cdaos.get(0).getObjectID()) }));
-                    }
-                    for (final CalendarDataObject cdao : cdaos) {
-                        if (cdao.getFolderType() == FolderObject.PRIVATE) {
-                            if (uid == tuid) {
-                                cdao.setGlobalFolderID(pfid);
-                                cdao.setPrivateFolderID(pfid);
-                            }
-                            up.setPersonalFolderId(pfid);
-                        } else if (cdao.getFolderType() == FolderObject.SHARED) {
-                            if (cdao.getSharedFolderOwner() == 0) {
-                                throw OXCalendarExceptionCodes.NO_SHARED_FOLDER_OWNER.create();
-                            }
-                            if (cdao.getSharedFolderOwner() == tuid) {
-                                cdao.setGlobalFolderID(pfid);
-                                cdao.setPrivateFolderID(pfid);
-                                up.setPersonalFolderId(pfid);
-                            } else {
-                                up.setPersonalFolderId(pfid);
-                            }
-                        } else if (uid == tuid) {
-                            if (!cdao.containsParentFolderID()) {
-                                cdao.setGlobalFolderID(pfid);
-                            }
-                            cdao.setPrivateFolderID(pfid);
-                        } else {
-                            if (visibleFolders == null || visibleFolders.getSharedFolderList().contains(pfid)) {
-                                cdao.setActionFolder(pfid);
-                            }
-                        }
-                    }
-                }
-
-                final int alarm = rs.getInt(6);
-                if (!rs.wasNull()) {
-                    up.setAlarmMinutes(alarm);
-                    if (up.getIdentifier() == uid && up.getAlarmMinutes() >= 0) {
-                        for (final CalendarDataObject cdao : cdaos) {
-                            cdao.setAlarm(up.getAlarmMinutes());
-                        }
-                    }
-                }
+        for (PrgDatesMember member : members) {
+            final int oid = member.objectId;
+            if (last_oid != oid) {
                 if (participants != null) {
                     participants.add(up);
+                    if (cdaos != null) {
+                        for (final CalendarDataObject cdao : cdaos) {
+                            cdao.setUsers(participants.getUsers());
+                        }
+                    }
                 }
+                participants = new Participants();
+                last_oid = oid;
+                cdaos = map.get(oid);
             }
-            if (cdaos != null && cdaos.get(0).getObjectID() == last_oid) {
+            final int tuid = member.memberUid;
+            up = new UserParticipant(tuid);
+            up.setConfirm(member.confirm);
+            temp = member.reason;
+            if (null != temp) {
+                up.setConfirmMessage(temp);
+            }
+            final int pfid = member.pfid;
+
+            if (pfid > 0) {
+                if (pfid < 1) {
+                    LOG.error(StringCollection.convertArraytoString(new Object[] {
+                        "ERROR: getUserParticipantsSQLIn oid:uid ", Integer.valueOf(uid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(cdaos.get(0).getObjectID()) }));
+                }
                 for (final CalendarDataObject cdao : cdaos) {
-                    cdao.setUsers(participants.getUsers());
+                    if (cdao.getFolderType() == FolderObject.PRIVATE) {
+                        if (uid == tuid) {
+                            cdao.setGlobalFolderID(pfid);
+                            cdao.setPrivateFolderID(pfid);
+                        }
+                        up.setPersonalFolderId(pfid);
+                    } else if (cdao.getFolderType() == FolderObject.SHARED) {
+                        if (cdao.getSharedFolderOwner() == 0) {
+                            throw OXCalendarExceptionCodes.NO_SHARED_FOLDER_OWNER.create();
+                        }
+                        if (cdao.getSharedFolderOwner() == tuid) {
+                            cdao.setGlobalFolderID(pfid);
+                            cdao.setPrivateFolderID(pfid);
+                            up.setPersonalFolderId(pfid);
+                        } else {
+                            up.setPersonalFolderId(pfid);
+                        }
+                    } else if (uid == tuid) {
+                        if (!cdao.containsParentFolderID()) {
+                            cdao.setGlobalFolderID(pfid);
+                        }
+                        cdao.setPrivateFolderID(pfid);
+                    } else {
+                        if (visibleFolders == null || visibleFolders.getSharedFolderList().contains(pfid)) {
+                            cdao.setActionFolder(pfid);
+                        }
+                    }
                 }
             }
-        } finally {
-            COLLECTION.closeResultSet(rs);
-            COLLECTION.closeStatement(stmt);
+
+            final int alarm = member.alarm;
+            if (alarm > 0) {
+                up.setAlarmMinutes(alarm);
+                if (up.getIdentifier() == uid && up.getAlarmMinutes() >= 0) {
+                    for (final CalendarDataObject cdao : cdaos) {
+                        cdao.setAlarm(up.getAlarmMinutes());
+                    }
+                }
+            }
+            if (participants != null) {
+                participants.add(up);
+            }
+        }
+        if (cdaos != null && cdaos.get(0).getObjectID() == last_oid) {
+            for (final CalendarDataObject cdao : cdaos) {
+                cdao.setUsers(participants.getUsers());
+            }
         }
     }
 
@@ -5534,5 +5593,73 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     public static void setServiceLookup(ServiceLookup serviceLookup) {
         CalendarMySQL.SERVICES_REF.set(serviceLookup);
+    }
+
+    private static final class PrgDatesMember implements Comparable<PrgDatesMember> {
+
+        int objectId;
+        int memberUid;
+        int confirm;
+        String reason;
+        int pfid;
+        int alarm;
+
+        protected PrgDatesMember() {
+            super();
+        }
+
+        @Override
+        public int compareTo(final PrgDatesMember other) {
+            final int thisOid = this.objectId;
+            final int otherOid = other.objectId;
+            return thisOid < otherOid ? -1 : (thisOid > otherOid ? 1 : 0);
+        }
+
+        @Override
+        public String toString() {
+            final StringAllocator builder = new StringAllocator(48);
+            builder.append("PrgDatesMember [objectId=").append(objectId).append(", memberUid=").append(memberUid).append(", confirm=").append(confirm).append(", ");
+            if (reason != null) {
+                builder.append("reason=").append(reason).append(", ");
+            }
+            builder.append("pfid=").append(pfid).append(", alarm=").append(alarm).append("]");
+            return builder.toString();
+        }
+
+    }
+
+    private static final class PrgDateRight implements Comparable<PrgDateRight> { // SELECT object_id, id, type, dn, ma FROM prg_date_rights WHERE cid
+
+        int objectId;
+        int id;
+        int type;
+        String dn;
+        String ma;
+
+        protected PrgDateRight() {
+            super();
+        }
+
+        @Override
+        public int compareTo(final PrgDateRight o) {
+            final int thisOid = this.objectId;
+            final int otherOid = o.objectId;
+            return thisOid < otherOid ? -1 : (thisOid > otherOid ? 1 : 0);
+        }
+
+        @Override
+        public String toString() {
+            final StringAllocator builder = new StringAllocator(48);
+            builder.append("PrgDatesRight [objectId=").append(objectId).append(", id=").append(id).append(", type=").append(type).append(", ");
+            if (dn != null) {
+                builder.append("dn=").append(dn).append(", ");
+            }
+            if (ma != null) {
+                builder.append("ma=").append(ma);
+            }
+            builder.append("]");
+            return builder.toString();
+        }
+
     }
 }
