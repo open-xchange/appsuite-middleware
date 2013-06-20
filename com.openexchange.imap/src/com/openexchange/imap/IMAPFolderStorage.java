@@ -709,36 +709,18 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
          */
         final List<String> additionalFullNames = new ArrayList<String>(4);
         if (imapConfig.getImapCapabilities().hasNamespace()) {
-            {
-                mergeWithNamespaceFolders(
-                    subfolders,
-                    NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId),
-                    subscribed,
-                    parent,
-                    additionalFullNames);
-            }
-            {
-                mergeWithNamespaceFolders(
-                    subfolders,
-                    NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId),
-                    subscribed,
-                    parent,
-                    additionalFullNames);
-            }
-            {
-                mergeWithNamespaceFolders(
-                    subfolders,
-                    NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accountId),
-                    subscribed,
-                    parent,
-                    additionalFullNames);
-            }
+
+            mergeWithNamespaceFolders(subfolders, NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId), subscribed, parent, additionalFullNames);
+
+            mergeWithNamespaceFolders(subfolders, NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId), subscribed, parent, additionalFullNames);
+
+            mergeWithNamespaceFolders(subfolders, NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accountId), subscribed, parent, additionalFullNames);
+
         }
         /*
          * Convert to MailFolder instances
          */
-        final List<MailFolder> list =
-            new ArrayList<MailFolder>(subfolders.size() + (additionalFullNames.isEmpty() ? 0 : additionalFullNames.size()));
+        final List<MailFolder> list = new ArrayList<MailFolder>(subfolders.size() + (additionalFullNames.isEmpty() ? 0 : additionalFullNames.size()));
         for (final ListLsubEntry current : subfolders) {
             final MailFolder mailFolder = FolderCache.getCachedFolder(current.getFullName(), this);
             if (mailFolder.exists()) {
