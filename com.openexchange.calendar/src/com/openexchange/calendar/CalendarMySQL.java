@@ -2131,13 +2131,6 @@ public class CalendarMySQL implements CalendarSqlImp {
         final Statement stmt = readcon.createStatement();
         ResultSet rs = null;
         try {
-            final com.openexchange.java.StringAllocator query = new com.openexchange.java.StringAllocator(128);
-            query.append("SELECT object_id, id, type, dn, ma FROM prg_date_rights WHERE cid = ");
-            query.append(cid);
-            query.append(PARTICIPANTS_IDENTIFIER_IN);
-            query.append(sqlin);
-            query.append(" ORDER BY object_id ASC");
-            rs = stmt.executeQuery(query.toString());
             final TIntObjectMap<List<CalendarDataObject>> map;
             {
                 final int size = list.size();
@@ -2146,12 +2139,21 @@ public class CalendarMySQL implements CalendarSqlImp {
                     final CalendarDataObject cdo = list.get(i);
                     List<CalendarDataObject> l = map.get(cdo.getObjectID());
                     if (null == l) {
-                        l = new ArrayList<CalendarDataObject>();
+                        l = new LinkedList<CalendarDataObject>();
                         map.put(cdo.getObjectID(), l);
                     }
                     l.add(cdo);
                 }
             }
+            
+            final com.openexchange.java.StringAllocator query = new com.openexchange.java.StringAllocator(128);
+            query.append("SELECT object_id, id, type, dn, ma FROM prg_date_rights WHERE cid = ");
+            query.append(cid);
+            query.append(PARTICIPANTS_IDENTIFIER_IN);
+            query.append(sqlin);
+            query.append(" ORDER BY object_id ASC");
+            rs = stmt.executeQuery(query.toString());
+            
             int last_oid = -1;
             Participants participants = null;
             List<CalendarDataObject> cdaos = null;
@@ -2214,11 +2216,11 @@ public class CalendarMySQL implements CalendarSqlImp {
                 } else {
                     LOG.warn("Unknown type detected for Participant :" + type);
                 }
-                if (participant != null) {
+                if (participant != null && participants != null) {
                     participants.add(participant);
                 }
             }
-            if (cdaos != null && cdaos.get(0).getObjectID() == last_oid) {
+            if (cdaos != null && cdaos.get(0).getObjectID() == last_oid && participants != null) {
                 for (final CalendarDataObject cdao : cdaos) {
                     cdao.setParticipants(participants.getList());
                 }
