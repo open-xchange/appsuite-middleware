@@ -2145,7 +2145,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     l.add(cdo);
                 }
             }
-            
+
             final com.openexchange.java.StringAllocator query = new com.openexchange.java.StringAllocator(128);
             query.append("SELECT object_id, id, type, dn, ma FROM prg_date_rights WHERE cid = ");
             query.append(cid);
@@ -2153,7 +2153,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             query.append(sqlin);
             query.append(" ORDER BY object_id ASC");
             rs = stmt.executeQuery(query.toString());
-            
+
             int last_oid = -1;
             Participants participants = null;
             List<CalendarDataObject> cdaos = null;
@@ -2300,13 +2300,6 @@ public class CalendarMySQL implements CalendarSqlImp {
         final Statement stmt = readcon.createStatement();
         ResultSet rs = null;
         try {
-            final com.openexchange.java.StringAllocator query = new com.openexchange.java.StringAllocator(140);
-            query.append("SELECT object_id, member_uid, confirm, reason, pfid, reminder from prg_dates_members WHERE cid = ");
-            query.append(cid);
-            query.append(PARTICIPANTS_IDENTIFIER_IN);
-            query.append(sqlin);
-            query.append(" ORDER BY object_id");
-            rs = stmt.executeQuery(query.toString());
             final TIntObjectMap<List<CalendarDataObject>> map;
             {
                 final int size = list.size();
@@ -2321,6 +2314,15 @@ public class CalendarMySQL implements CalendarSqlImp {
                     l.add(cdo);
                 }
             }
+
+            final com.openexchange.java.StringAllocator query = new com.openexchange.java.StringAllocator(140);
+            query.append("SELECT object_id, member_uid, confirm, reason, pfid, reminder from prg_dates_members WHERE cid = ");
+            query.append(cid);
+            query.append(PARTICIPANTS_IDENTIFIER_IN);
+            query.append(sqlin);
+            query.append(" ORDER BY object_id");
+            rs = stmt.executeQuery(query.toString());
+
             String temp = null;
             int last_oid = -1;
             UserParticipant up = null;
