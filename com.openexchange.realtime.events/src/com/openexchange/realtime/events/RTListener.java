@@ -47,26 +47,40 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.http;
+package com.openexchange.realtime.events;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.Utils;
-import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import java.util.Map;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.session.Session;
 
 
 /**
- * {@link RTAction}
+ * An {@link RTListener} is registered in an RTEventEmitterService to be notified of events. The default implementation retransmits given events with the RT system.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class RTAction implements AJAXActionService {
+public interface RTListener {
+
+    /**
+     * Call this on a registered RTListener when the event it is registered for occurs.
+     */
+    void handle(RTEvent rtEvent);
+
+    /**
+     * This contains the ID of the subscriber
+     */
+    ID getID();
     
-    protected ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
-        return Utils.constructID(request, session);
-    }
+    /**
+     * This contains the session the subscriber registered with. Note that one session can belong to multiple IDs, for example, when more than one 
+     * browser tab is active.
+     */
+    Session getSession();
+    
+    /**
+     * All parameters given to the registration method. May contain custom arguments if the listener wants to modify e.g. what kind of events
+     * it is listening for. Its up to the {@link RTEventEmitterService} implementation to interpret (if any) parameters.
+     * @return
+     */
+    Map<String, String> getParameters();
 }

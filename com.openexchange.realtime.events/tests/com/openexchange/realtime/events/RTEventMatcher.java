@@ -47,26 +47,78 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.http;
+package com.openexchange.realtime.events;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.Utils;
-import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
+import java.util.Collection;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
 
 
 /**
- * {@link RTAction}
+ * {@link RTEventMatcher}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class RTAction implements AJAXActionService {
+public class RTEventMatcher extends BaseMatcher<Collection<PayloadTree>> {
+
+    private String eventName;
+    private Object payload;
     
-    protected ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
-        return Utils.constructID(request, session);
+    public static RTEventMatcher isRTEvent(String eventName, Object payload) {
+        return new RTEventMatcher(eventName, payload);
     }
+
+    public RTEventMatcher(String eventName, Object payload) {
+        super();
+        this.eventName = eventName;
+        this.payload = payload;
+    }
+
+    @Override
+    public boolean matches(Object arg0) {
+        Collection<PayloadTree> payloads = (Collection<PayloadTree>) arg0;
+        
+        if (payloads.size() != 1) {
+            return false;
+        }
+        
+        PayloadTree payloadTree = payloads.iterator().next();
+        
+        boolean foundName = false;
+        boolean foundData = false;
+        
+        Collection<PayloadTreeNode> children = payloadTree.getRoot().getChildren();
+        for (PayloadTreeNode child : children) {
+            if (child.getNamespace().equals("event") && child.getElementName().equals("name")) {
+                foundName = true;
+                if (!child.getData().equals(eventName)) {
+                    return false;
+                }
+            } else if (child.getNamespace().equals("event") && child.getElementName().equals("data")) {
+                foundData = true;
+                if (payload instanceof Matcher) {
+                    Matcher payloadMatcher = (Matcher) payload;
+                    if (!payloadMatcher.matches(child.getPayloadElement())) {
+                        return false;
+                    }
+                } else {
+                    if (!child.getPayloadElement().getData().equals(payload)) {
+                        return false;
+                    }
+                }
+            }
+            
+        }
+        
+        return foundData && foundName;
+    }
+
+    @Override
+    public void describeTo(Description description) {
+
+    }
+
 }

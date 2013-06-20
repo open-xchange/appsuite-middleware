@@ -47,26 +47,40 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.http;
+package com.openexchange.realtime.events.json.actions;
 
 import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.Utils;
-import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.realtime.events.impl.RTEventManager;
+import com.openexchange.realtime.events.json.EventsRequest;
 
 
 /**
- * {@link RTAction}
+ * {@link OnAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class RTAction implements AJAXActionService {
-    
-    protected ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
-        return Utils.constructID(request, session);
+@Action(method = RequestMethod.GET, name = "on", description = "Subscribe to a given event", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "event", description = "The event to unsubscribe from. If empty, this action unsubscribes the client from all events", optional=true),
+    @Parameter(name = "resource", description = "The resource ID of the client"),
+    @Parameter(name = "selector", description = "The selector to mark event stanzas with"),
+}, responseDescription = "'true' on success, an error in the appropriate fields otherwise")
+public class OnAction extends AbstractEventAction implements AJAXActionService {
+
+    public OnAction(RTEventManager manager) {
+        super(manager);
     }
+
+    @Override
+    protected AJAXRequestResult perform(EventsRequest req) throws OXException {
+        RTEventManager manager = req.getManager();
+        manager.subscribe(req.getEvent(), req.getSelector(), req.getID(), req.getSession(), req.getParameterMap());
+        return new AJAXRequestResult(Boolean.TRUE, "native");
+    }
+
 }

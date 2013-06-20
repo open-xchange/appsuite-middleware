@@ -47,26 +47,34 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.http;
+package com.openexchange.realtime.atmosphere;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.Utils;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link RTAction}
+ * {@link Utils}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class RTAction implements AJAXActionService {
+public class Utils {
     
-    protected ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
-        return Utils.constructID(request, session);
+    public static ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
+        String userLogin = session.getUserlogin();
+        String contextName = session.getContext().getName();
+
+        String resource = request.getParameter("resource");
+
+        if (resource == null) {
+            throw RealtimeExceptionCodes.INVALID_ID.create();
+        }
+        
+        return new ID(RTAtmosphereChannel.PROTOCOL, null, userLogin, contextName, resource);
     }
 }

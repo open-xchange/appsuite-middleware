@@ -4,6 +4,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime.directory"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime.dispatch"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime.events"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime.events.mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime.group"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime.handle"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime.hazelcast"/>

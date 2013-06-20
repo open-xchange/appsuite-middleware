@@ -47,58 +47,45 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.test;
+package com.openexchange.realtime.events.json.actions;
 
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.events.impl.RTEventManager;
+import com.openexchange.realtime.events.json.EventsRequest;
 
 
 /**
- * {@link StanzaMatcher}
+ * {@link OffAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class StanzaMatcher extends BaseMatcher<Stanza> {
+@Action(method = RequestMethod.GET, name = "off", description = "Unsubscribe from a given event", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "event", description = "The event to unsubscribe from. If empty, this action unsubscribes the client from all events", optional=true),
+    @Parameter(name = "resource", description = "The resource ID of the client"),
+}, responseDescription = "'true' on success, an error in the appropriate fields otherwise")
+public class OffAction extends AbstractEventAction implements AJAXActionService {
 
-    private ID from;
-    private ID to;
-    private String namespace;
-    private String name;
-    private Object payload;
-    
-    public static StanzaMatcher isStanza(ID from, ID to, String namespace, String name, Object payload) {
-        return new StanzaMatcher(from, to, namespace, name, payload);
-    }
-    
-    public StanzaMatcher(ID from, ID to, String namespace, String name, Object payload) {
-        this.from = from;
-        this.to = to;
-        this.namespace = namespace;
-        this.name = name;
-        this.payload = payload;
+    public OffAction(RTEventManager manager) {
+        super(manager);
     }
 
     @Override
-    public boolean matches(Object arg0) {
-        if (! (arg0 instanceof Stanza)) {
-            return false;
+    protected AJAXRequestResult perform(EventsRequest req) throws OXException {
+        RTEventManager manager = req.getManager();
+        
+        if (req.hasEvent()) {
+            manager.unsubscribe(req.getEvent(), req.getID());            
+        } else {
+            manager.unsubscribe(req.getID());
         }
         
-        Stanza s = (Stanza) arg0;
-        
-        return s.getFrom().equals(from) &&
-            s.getTo().equals(to) &&
-            s.getPayload().getNamespace().equals(namespace) &&
-            s.getPayload().getElementName().equals(name) &&
-            s.getPayload().getData().equals(payload);
-    }
-
-    @Override
-    public void describeTo(Description arg0) {
-        
+        return new AJAXRequestResult(Boolean.TRUE, "native");
     }
 
 }

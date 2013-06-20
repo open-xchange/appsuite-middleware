@@ -47,26 +47,79 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.http;
+package com.openexchange.realtime.packet;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.Utils;
-import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.realtime.packet.Stanza;
 
 
 /**
- * {@link RTAction}
+ * {@link StanzaMatcher}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class RTAction implements AJAXActionService {
+public class StanzaMatcher extends BaseMatcher<Stanza> {
+
+    private ID from;
+    private ID to;
+    private String namespace;
+    private String name;
+    private Object payload;
+    private String selector;
     
-    protected ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
-        return Utils.constructID(request, session);
+    public static StanzaMatcher isStanza(ID from, ID to, String namespace, String name, Object payload) {
+        return new StanzaMatcher(from, to, namespace, name, null, payload);
     }
+    
+
+    public static StanzaMatcher isStanza(ID from, ID to, String namespace, String name, String selector, Object payload) {
+        return new StanzaMatcher(from, to, namespace, name, selector, payload);
+    }
+    
+    public StanzaMatcher(ID from, ID to, String namespace, String name, String selector, Object payload) {
+        this.from = from;
+        this.to = to;
+        this.namespace = namespace;
+        this.name = name;
+        this.payload = payload;
+        this.selector = selector;
+    }
+
+    @Override
+    public boolean matches(Object arg0) {
+        if (! (arg0 instanceof Stanza)) {
+            return false;
+        }
+        
+        Stanza s = (Stanza) arg0;
+        if (selector != null) {
+            if (!s.getSelector().equals(selector)) {
+                return false;
+            }
+        }
+        if (payload instanceof Matcher) {
+            Matcher payloadMatcher = (Matcher) payload;
+            if (!payloadMatcher.matches(s.getPayloads())) {
+                return false;
+            }
+        } else {
+            if (!payload.equals(s.getPayload())) {
+                return false;
+            }
+        }
+        return s.getFrom().equals(from) &&
+            s.getTo().equals(to) &&
+            s.getPayload().getNamespace().equals(namespace) &&
+            s.getPayload().getElementName().equals(name);
+           
+    }
+
+    @Override
+    public void describeTo(Description arg0) {
+        
+    }
+
 }

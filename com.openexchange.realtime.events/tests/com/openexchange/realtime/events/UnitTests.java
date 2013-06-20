@@ -47,26 +47,23 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.http;
+package com.openexchange.realtime.events;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.Utils;
-import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.realtime.events.impl.RTEventManagerTest;
 
 
 /**
- * {@link RTAction}
+ * {@link UnitTests}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class RTAction implements AJAXActionService {
-    
-    protected ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
-        return Utils.constructID(request, session);
-    }
+@RunWith(Suite.class)
+@SuiteClasses({
+    RTEventManagerTest.class
+})
+public class UnitTests {
+
 }

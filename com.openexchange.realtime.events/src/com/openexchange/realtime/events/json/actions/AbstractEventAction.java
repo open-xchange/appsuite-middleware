@@ -47,26 +47,36 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.http;
+package com.openexchange.realtime.events.json.actions;
 
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.Utils;
-import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.events.impl.RTEventManager;
+import com.openexchange.realtime.events.json.EventsRequest;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link RTAction}
+ * The {@link AbstractEventAction} wraps a request in an {@link EventsRequest} and calls the subclasses
+ * {@link #perform(EventsRequest)} implementations
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class RTAction implements AJAXActionService {
+public abstract class AbstractEventAction implements AJAXActionService {
     
-    protected ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
-        return Utils.constructID(request, session);
+    private RTEventManager manager;
+    
+    public AbstractEventAction(RTEventManager manager) {
+        this.manager = manager;
     }
+    
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        return perform(new EventsRequest(requestData, session, manager));
+    }
+
+    protected abstract AJAXRequestResult perform(EventsRequest eventsAction) throws OXException;
+
 }

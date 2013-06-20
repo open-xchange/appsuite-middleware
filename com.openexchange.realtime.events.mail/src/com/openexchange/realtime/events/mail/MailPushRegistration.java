@@ -47,26 +47,48 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.http;
+package com.openexchange.realtime.events.mail;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.Utils;
-import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import com.openexchange.realtime.events.RTEvent;
+import com.openexchange.realtime.events.RTListener;
+import com.openexchange.session.Session;
 
 
 /**
- * {@link RTAction}
+ * The {@link MailPushRegistration} keeps a list of interested listeners
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class RTAction implements AJAXActionService {
+public class MailPushRegistration {
+    private List<RTListener> listeners;
     
-    protected ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
-        return Utils.constructID(request, session);
+    public MailPushRegistration() {
+        super();
+        this.listeners = new CopyOnWriteArrayList<RTListener>();
     }
+    
+    public void triggerNewMailEvent(String folder) {
+        for(RTListener l: listeners) {
+            Map<String, Object> event = new HashMap<String, Object>();
+            event.put("folder", folder);
+            l.handle(new RTEvent(event, "native"));
+        }
+    }
+
+    public void addListener(RTListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(RTListener listener) {
+        listeners.remove(listener);
+    }
+
+    public boolean hasNoMoreListeners() {
+        return listeners.isEmpty();
+    }
+
 }

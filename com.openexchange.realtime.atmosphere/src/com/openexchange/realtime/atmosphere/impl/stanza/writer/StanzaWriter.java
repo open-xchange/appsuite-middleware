@@ -140,6 +140,7 @@ public class StanzaWriter {
         for (PayloadTree payloadTree : payloadTrees) {
             payloadArray.put(writePayloadTreeNode(payloadTree.getRoot()));
         }
+        System.out.println(payloadArray);
         jsonStanza.putOpt("payloads", payloadArray);
     }
 

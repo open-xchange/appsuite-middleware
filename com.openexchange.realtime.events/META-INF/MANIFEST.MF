@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: PushEvents
+Bundle-SymbolicName: com.openexchange.realtime.events
+Bundle-Version: 7.4.0
+Bundle-Activator: com.openexchange.realtime.events.osgi.EventsActivator
+Bundle-Vendor: Open-Xchange inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.documentation,
+ com.openexchange.documentation.annotations,
+ com.openexchange.exception,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.realtime,
+ com.openexchange.realtime.dispatch,
+ com.openexchange.realtime.packet,
+ com.openexchange.realtime.payload,
+ com.openexchange.realtime.util,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.session,
+ org.apache.commons.logging,
+ org.osgi.framework;version="1.3.0"
+Require-Bundle: com.openexchange.realtime.atmosphere;bundle-version="7.4.0"
+Export-Package: com.openexchange.realtime.events

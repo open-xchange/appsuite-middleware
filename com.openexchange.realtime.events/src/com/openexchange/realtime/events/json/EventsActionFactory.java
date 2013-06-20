@@ -47,26 +47,49 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.http;
+package com.openexchange.realtime.events.json;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.Utils;
-import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.realtime.events.impl.RTEventManager;
+import com.openexchange.realtime.events.json.actions.AllAction;
+import com.openexchange.realtime.events.json.actions.EventsAction;
+import com.openexchange.realtime.events.json.actions.OffAction;
+import com.openexchange.realtime.events.json.actions.OnAction;
 
 
 /**
- * {@link RTAction}
+ * {@link EventsActionFactory}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class RTAction implements AJAXActionService {
+@Module(name = "events", description = "Allows clients to register for events. Events are transmitted via the RT system.")
+public class EventsActionFactory implements AJAXActionServiceFactory {
+
+    private final Map<String, AJAXActionService> ACTIONS = new HashMap<String, AJAXActionService>();
     
-    protected ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
-        return Utils.constructID(request, session);
+    public EventsActionFactory(RTEventManager manager) {
+        ACTIONS.put("on", new OnAction(manager));
+        ACTIONS.put("off", new OffAction(manager));
+        ACTIONS.put("all", new AllAction(manager));
+        ACTIONS.put("events", new EventsAction(manager));
+        
     }
+    
+    @Override
+    public Collection<?> getSupportedServices() {
+        return Arrays.asList("on", "off", "all", "events");
+    }
+
+    @Override
+    public AJAXActionService createActionService(String action) throws OXException {
+        return ACTIONS.get(action);
+    }
+
 }

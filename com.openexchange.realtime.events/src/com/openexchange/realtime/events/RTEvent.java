@@ -47,26 +47,32 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.http;
-
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.Utils;
-import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
+package com.openexchange.realtime.events;
 
 
 /**
- * {@link RTAction}
+ * An RTEvent is sent via the realtime framework to interested clients and can contain an arbitrary payload.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class RTAction implements AJAXActionService {
-    
-    protected ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
-        return Utils.constructID(request, session);
+public class RTEvent {
+
+    private Object payload;
+    private String format;
+
+    public RTEvent(Object payload, String format) {
+        super();
+        this.payload = payload;
+        this.format = format;
     }
+    
+    public Object getPayload() {
+        return payload;
+    }
+    
+    public String getFormat() {
+        return format;
+    }
+    
+
 }

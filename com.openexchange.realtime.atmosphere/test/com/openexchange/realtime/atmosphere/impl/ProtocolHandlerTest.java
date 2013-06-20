@@ -49,7 +49,7 @@
 
 package com.openexchange.realtime.atmosphere.impl;
 
-import static com.openexchange.realtime.atmosphere.test.StanzaMatcher.isStanza;
+import static com.openexchange.realtime.packet.StanzaMatcher.isStanza;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;

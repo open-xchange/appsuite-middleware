@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Mail RT Events
+Bundle-SymbolicName: com.openexchange.realtime.events.mail
+Bundle-Version: 7.4.0
+Bundle-Activator: com.openexchange.realtime.events.mail.osgi.RTMailEventsActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.osgi,
+ com.openexchange.push,
+ com.openexchange.realtime.events,
+ com.openexchange.realtime.packet,
+ com.openexchange.server,
+ com.openexchange.session,
+ org.osgi.framework;version="1.3.0",
+ org.osgi.service.event

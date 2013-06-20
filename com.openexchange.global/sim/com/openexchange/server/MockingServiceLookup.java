@@ -47,26 +47,41 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.http;
+package com.openexchange.server;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.Utils;
-import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
-
+import java.util.HashMap;
+import java.util.Map;
+import org.mockito.Mockito;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link RTAction}
- *
+ * {@link MockingServiceLookup}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class RTAction implements AJAXActionService {
-    
-    protected ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
-        return Utils.constructID(request, session);
+
+public class MockingServiceLookup implements ServiceLookup {
+
+    private Map<Class, Object> services = new HashMap<Class, Object>();
+
+    public <S> S mock(Class<? extends S> clazz) {
+        Object object = services.get(clazz);
+        if (object != null) {
+            return (S) object;
+        }
+        S instance = Mockito.mock(clazz);
+        services.put(clazz, instance);
+        return instance;
     }
+
+    @Override
+    public <S> S getService(Class<? extends S> clazz) {
+        return mock(clazz);
+    }
+
+    @Override
+    public <S> S getOptionalService(Class<? extends S> clazz) {
+        return (S) services.get(clazz);
+    }
+
 }

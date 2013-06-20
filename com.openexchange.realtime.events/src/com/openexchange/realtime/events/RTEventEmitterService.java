@@ -47,26 +47,46 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.http;
+package com.openexchange.realtime.events;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.Utils;
-import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
+import java.util.Set;
 
 
 /**
- * {@link RTAction}
+ * Provide an {@link RTEventEmitterService} via OSGi to contribute event emitters to the framework. Whenever a backend bundle
+ * is supposed to act as an event source, implement this interface.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class RTAction implements AJAXActionService {
+public interface RTEventEmitterService {
     
-    protected ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
-        return Utils.constructID(request, session);
-    }
+    /**
+     * Provide a namespace for the events. Clients can register for events my joining the namespace with a colon and the name of one of the
+     * supported events. E.g. this RTEventEmitter is of the namespace calendar and supports the events 'new', 'updated', 'deleted', then clients can subscribe
+     * to calendar:new, calendar:updated and calendar:deleted events.
+     * @return
+     */
+    String getNamespace();
+
+    /**
+     * Get a list of supported events (without the namespace). E.g. 'new', 'updated' and 'deleted'
+     * @return
+     */
+    Set<String> getSupportedEvents();
+
+    /**
+     * Used to register an event listener for a given (non-namespaced) event
+     * @param eventName e.g. 'new'
+     * @param listener The listener this emitter will trigger when the event occurs
+     */
+    void register(String eventName, RTListener listener);
+    
+    /**
+     * Called to unregister a listener, either because no one is listening or the associated client 
+     * has gone offline.
+     * @param eventName e.g. 'new'
+     * @param listener The listener to unregister
+     */
+    void unregister(String eventName, RTListener listener);
+
 }

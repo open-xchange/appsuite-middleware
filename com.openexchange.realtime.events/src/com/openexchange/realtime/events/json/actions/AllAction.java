@@ -47,26 +47,36 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.http;
+package com.openexchange.realtime.events.json.actions;
 
 import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.Utils;
-import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.realtime.events.impl.RTEventManager;
+import com.openexchange.realtime.events.json.EventsRequest;
 
 
 /**
- * {@link RTAction}
+ * {@link AllAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class RTAction implements AJAXActionService {
-    
-    protected ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
-        return Utils.constructID(request, session);
+@Action(method = RequestMethod.GET, name = "all", description = "List all events the given client is subscribed to", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "resource", description = "The resource id of the RT client")
+}, responseDescription = "A list of all subscribed events")
+public class AllAction extends AbstractEventAction implements AJAXActionService {
+
+    public AllAction(RTEventManager manager) {
+        super(manager);
     }
+
+    @Override
+    protected AJAXRequestResult perform(EventsRequest req) throws OXException {
+        return new AJAXRequestResult(req.getManager().getSubscriptions(req.getID()), "native");
+    }
+
 }
