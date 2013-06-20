@@ -47,47 +47,35 @@
  *
  */
 
-package com.openexchange.authentication.kerberos.osgi;
-
-import static com.openexchange.osgi.Tools.generateServiceFilter;
-import java.util.Stack;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
-import com.openexchange.kerberos.KerberosService;
-import com.openexchange.osgi.Tools;
-import com.openexchange.user.UserService;
+package com.openexchange.authentication.kerberos.impl;
 
 /**
- * Activator for Kerberos authentication bundle.
+ * Enumerates the possible configuration properties for the Kerberos authentication module.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class AuthenticationActivator implements BundleActivator {
+public enum ConfigurationProperty {
 
-    private final Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
+    PROXY_DELIMITER("com.openexchange.kerberos.proxyDelimiter", "+"),
+    /**
+     * Comma separated list of proxy user logins allowed to login as a proxy user for every other user account.
+     */
+    PROXY_USER("com.openexchange.kerberos.proxyUser", "");
 
-    public AuthenticationActivator() {
-        super();
+    private final String propertyName;
+
+    private final String defaultValue;
+
+    private ConfigurationProperty(final String propertyName, final String defaultValue) {
+        this.propertyName = propertyName;
+        this.defaultValue = defaultValue;
     }
 
-    @Override
-    public void start(BundleContext context) throws InvalidSyntaxException {
-        Filter filter = generateServiceFilter(context, KerberosService.class, ContextService.class, UserService.class, ConfigurationService.class);
-        trackers.push(new ServiceTracker<Object, Object>(context, filter, new AuthenticationRegisterer(context)));
-//        filter = generateServiceFilter(context, TimerService.class, KerberosService.class);
-//        trackers.push(new ServiceTracker(context, filter, new RenewalLoginHandlerRegisterer(context)));
-        Tools.open(trackers);
+    public String getName() {
+        return propertyName;
     }
 
-    @Override
-    public void stop(final BundleContext context) {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
-        }
+    public String getDefault() {
+        return defaultValue;
     }
 }

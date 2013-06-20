@@ -23,6 +23,10 @@
  - Fix for bug 25194: Removed auto-check of ports vs. SSL flag, but drop a warning instead
  - Fix for bug 24899: Honor HTML head's <base> tag when processing anchors and images
 
+* 2013-06-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26859: Patched javax.mail implementation to create a Kerberos security context before SASL login takes place.
+
 * 2013-06-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 27083: Throw appropriate error if an inline image cannot be found inside a message
@@ -40,7 +44,11 @@
 
  - Fix for bug 25240: Restore original task status / percentage for specific client updates via CalDAV
  - Fix for bug 24582: Always pass default sender address as value for email1 for internal users  
- 
+
+* 2013-06-11 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26860: Implemented username and password authentication for Kerberos authentication implementation.
+
 * 2013-06-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 27015: Ensure proper Content-Typer header on download of a message's source
