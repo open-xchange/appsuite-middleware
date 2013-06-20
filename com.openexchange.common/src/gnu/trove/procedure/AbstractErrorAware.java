@@ -49,39 +49,60 @@
 
 package gnu.trove.procedure;
 
+
 /**
- * {@link TIntObjectErrorAwareAbstractProcedure} - Provides access to an expected exception via {@link #getException()}.
+ * {@link AbstractErrorAware}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class TIntObjectErrorAwareAbstractProcedure<T, E extends Exception> extends AbstractErrorAware<E> implements TIntObjectProcedure<T> {
+abstract class AbstractErrorAware<E extends Exception> {
 
     /**
-     * Initializes a new {@link TIntObjectErrorAwareAbstractProcedure}.
+     * The exception reference.
      */
-    protected TIntObjectErrorAwareAbstractProcedure() {
+    protected E exception;
+
+    /**
+     * Initializes a new {@link AbstractErrorAware}.
+     */
+    protected AbstractErrorAware() {
         super();
     }
 
-    @Override
-    public final boolean execute(final int key, final T value) {
-        try {
-            return next(key, value);
-        } catch (final Exception e) {
-            this.exception = valueOf(e);
-            return false;
+    /**
+     * Throws the exception if not <code>null</code>
+     *
+     * @throws E The expected exception
+     */
+    public void throwIfNotNull() throws E {
+        final E exception = this.exception;
+        if (null != exception) {
+            throw exception;
         }
     }
 
     /**
-     * Executes this procedure. A false return value indicates that the application executing this procedure should not invoke this
-     * procedure again.
+     * Gets the exception possibly thrown during iteration.
      *
-     * @param a a <code>int</code> value
-     * @param b an <code>Object</code> value
-     * @return true if additional invocations of the procedure are allowed.
-     * @throws E The expected exception
+     * @return The exception or <code>null</code>
      */
-    protected abstract boolean next(int key, T value) throws E;
+    public E getException() {
+        return exception;
+    }
+
+    /**
+     * Gets the expected exception from specified instance.
+     *
+     * @param e The exception instance
+     * @return The expected exception
+     * @throws IllegalStateException If exception is not of expected type
+     */
+    protected E valueOf(final Exception e) {
+        try {
+            return (E) e;
+        } catch (final ClassCastException cce) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
 
 }

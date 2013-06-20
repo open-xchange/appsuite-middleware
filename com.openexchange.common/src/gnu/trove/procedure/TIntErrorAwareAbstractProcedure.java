@@ -50,23 +50,23 @@
 package gnu.trove.procedure;
 
 /**
- * {@link TIntObjectErrorAwareAbstractProcedure} - Provides access to an expected exception via {@link #getException()}.
+ * {@link TIntErrorAwareAbstractProcedure} - Provides access to an expected exception via {@link #getException()}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class TIntObjectErrorAwareAbstractProcedure<T, E extends Exception> extends AbstractErrorAware<E> implements TIntObjectProcedure<T> {
+public abstract class TIntErrorAwareAbstractProcedure<E extends Exception> extends AbstractErrorAware<E> implements TIntProcedure {
 
     /**
-     * Initializes a new {@link TIntObjectErrorAwareAbstractProcedure}.
+     * Initializes a new {@link TIntErrorAwareAbstractProcedure}.
      */
-    protected TIntObjectErrorAwareAbstractProcedure() {
+    protected TIntErrorAwareAbstractProcedure() {
         super();
     }
 
     @Override
-    public final boolean execute(final int key, final T value) {
+    public final boolean execute(final int value) {
         try {
-            return next(key, value);
+            return next(value);
         } catch (final Exception e) {
             this.exception = valueOf(e);
             return false;
@@ -77,11 +77,10 @@ public abstract class TIntObjectErrorAwareAbstractProcedure<T, E extends Excepti
      * Executes this procedure. A false return value indicates that the application executing this procedure should not invoke this
      * procedure again.
      *
-     * @param a a <code>int</code> value
-     * @param b an <code>Object</code> value
+     * @param value a value of type <code>int</code>
      * @return true if additional invocations of the procedure are allowed.
      * @throws E The expected exception
      */
-    protected abstract boolean next(int key, T value) throws E;
+    protected abstract boolean next(int value) throws E;
 
 }
