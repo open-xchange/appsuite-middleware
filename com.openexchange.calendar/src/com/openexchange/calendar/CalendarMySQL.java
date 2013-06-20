@@ -56,8 +56,6 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -80,6 +78,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
+import cern.colt.map.OpenIntObjectHashMap;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.caching.CacheKey;
@@ -2131,13 +2130,13 @@ public class CalendarMySQL implements CalendarSqlImp {
     @Override
     public final void getParticipantsSQLIn(final List<CalendarDataObject> list, final Connection readcon, final int cid, final String sqlin) throws SQLException {
 
-        final TIntObjectMap<List<CalendarDataObject>> map;
+        final OpenIntObjectHashMap map;
         {
             final int size = list.size();
-            map = new TIntObjectHashMap<List<CalendarDataObject>>(size);
+            map = new OpenIntObjectHashMap(size);
             for (int i = 0; i < size; i++) {
                 final CalendarDataObject cdo = list.get(i);
-                List<CalendarDataObject> l = map.get(cdo.getObjectID());
+                List<CalendarDataObject> l = (List<CalendarDataObject>) map.get(cdo.getObjectID());
                 if (null == l) {
                     l = new LinkedList<CalendarDataObject>();
                     map.put(cdo.getObjectID(), l);
@@ -2203,7 +2202,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 }
                 participants = new Participants();
                 last_oid = oid;
-                cdaos = map.get(oid);
+                cdaos = (List<CalendarDataObject>) map.get(oid);
             }
             final int id = right.id;
             final int type = right.type;
@@ -2324,13 +2323,13 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final void getUserParticipantsSQLIn(final CalendarFolderObject visibleFolders, final List<CalendarDataObject> list, final Connection readcon, final int cid, final int uid, final String sqlin) throws SQLException, OXException {
-        final TIntObjectMap<List<CalendarDataObject>> map;
+        final OpenIntObjectHashMap map; // See http://b010.blogspot.de/2009/05/speed-comparison-of-1-javas-built-in.html
         {
             final int size = list.size();
-            map = new TIntObjectHashMap<List<CalendarDataObject>>(size);
+            map = new OpenIntObjectHashMap(size);
             for (int i = 0; i < size; i++) {
                 final CalendarDataObject cdo = list.get(i);
-                List<CalendarDataObject> l = map.get(cdo.getObjectID());
+                List<CalendarDataObject> l = (List<CalendarDataObject>) map.get(cdo.getObjectID());
                 if (null == l) {
                     l = new ArrayList<CalendarDataObject>();
                     map.put(cdo.getObjectID(), l);
@@ -2404,7 +2403,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 }
                 participants = new Participants();
                 last_oid = oid;
-                cdaos = map.get(oid);
+                cdaos = (List<CalendarDataObject>) map.get(oid);
             }
             final int tuid = member.memberUid;
             up = new UserParticipant(tuid);
