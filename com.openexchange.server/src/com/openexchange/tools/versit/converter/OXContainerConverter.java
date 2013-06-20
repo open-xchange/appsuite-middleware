@@ -522,6 +522,9 @@ public class OXContainerConverter {
         // SOURCE is ignored
         // NAME is ignored
         // PROFILE is ignored
+        //YOMIGANA/Furigana phonetic pronounciation helpers
+        StringProperty(contactContainer, object, "X-PHONETIC-FIRST-NAME", Contact.YOMI_FIRST_NAME);
+        StringProperty(contactContainer, object, "X-PHONETIC-LAST-NAME", Contact.YOMI_LAST_NAME);
         // FN
         StringProperty(contactContainer, object, "FN", Contact.DISPLAY_NAME);
         // N
@@ -1787,6 +1790,9 @@ public class OXContainerConverter {
         // PROFILE is ignored
         // FN
         addProperty(object, "FN", contact.getDisplayName());
+        // YOMI/Furigana
+        addProperty(object, "X-PHONETIC-FIRST-NAME", contact.getYomiFirstName());
+        addProperty(object, "X-PHONETIC-LAST-NAME", contact.getYomiLastName());
         // N
         final ArrayList<ArrayList> n = new ArrayList<ArrayList>();
         n.add(makeList(contact.getSurName()));
