@@ -155,7 +155,7 @@ public class CreateSettingsTables extends AbstractCreateTableImpl {
         + "contactCollectOnMailAccess BOOL DEFAULT TRUE,"
         + "folderTree INT4,"
         + "uuid BINARY(16) NOT NULL,"
-        + "PRIMARY KEY (uuid)"
+        + "PRIMARY KEY (cid, user, uuid)"
         + "FOREIGN KEY(cid, user) REFERENCES user(cid, id)"
       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 

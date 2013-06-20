@@ -90,7 +90,7 @@ public class PrgContactsLinkageAddPrimaryKeyUpdateTask extends UpdateTaskAdapter
         try {
             con.setAutoCommit(false);
             Tools.modifyColumns(con, "prg_contacts_linkage", column);
-            Tools.createPrimaryKey(con, "prg_contacts_linkage", new String[] { column.name });
+            Tools.createPrimaryKey(con, "prg_contacts_linkage", new String[] { "cid", column.name });
             setUUID(con);
             con.commit();
         } catch (SQLException e) {

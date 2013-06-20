@@ -93,7 +93,7 @@ public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreate
                 " folder INT4 unsigned NOT NULL, " +
                 " name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, " +
                 " uuid BINARY(16) NOT NULL, " +
-                " PRIMARY KEY (uuid) " +
+                " PRIMARY KEY (cid, uuid) " +
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
         }
         return "CREATE TABLE infostoreReservedPaths (" +

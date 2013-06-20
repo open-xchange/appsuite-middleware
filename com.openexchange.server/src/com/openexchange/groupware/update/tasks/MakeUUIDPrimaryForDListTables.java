@@ -95,9 +95,9 @@ public class MakeUUIDPrimaryForDListTables extends UpdateTaskAdapter {
             AddUUIDForDListTables.fillUUIDs(connection, DEL_TABLE, progress);
 
             Tools.modifyColumns(connection, TABLE, new Column(COLUMN, "BINARY(16) NOT NULL"));
-            Tools.createPrimaryKey(connection, TABLE, new String[] { COLUMN });
+            Tools.createPrimaryKey(connection, TABLE, new String[] { COLUMN, "cid", "intfield01" });
             Tools.modifyColumns(connection, DEL_TABLE, new Column(COLUMN, "BINARY(16) NOT NULL"));
-            Tools.createPrimaryKey(connection, DEL_TABLE, new String[] { COLUMN });
+            Tools.createPrimaryKey(connection, DEL_TABLE, new String[] { COLUMN, "cid", "intfield01" });
             connection.commit();
         } catch (SQLException e) {
             DBUtils.rollback(connection);

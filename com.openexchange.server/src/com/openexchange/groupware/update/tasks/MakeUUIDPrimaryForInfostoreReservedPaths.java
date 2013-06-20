@@ -88,7 +88,7 @@ public class MakeUUIDPrimaryForInfostoreReservedPaths extends UpdateTaskAdapter 
 
             AddUUIDForInfostoreReservedPaths.fillUUIDs(connection, TABLE, progress);
             Tools.modifyColumns(connection, TABLE, new Column(COLUMN, "BINARY(16) NOT NULL"));
-            Tools.createPrimaryKey(connection, TABLE, new String[] { COLUMN });
+            Tools.createPrimaryKey(connection, TABLE, new String[] { "cid", COLUMN });
             connection.commit();
         } catch (SQLException e) {
             DBUtils.rollback(connection);

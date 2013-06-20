@@ -91,7 +91,7 @@ public class MakeUUIDPrimaryForUpdateTaskTable extends UpdateTaskAdapter {
             AddUUIDForUpdateTaskTable.fillUUIDs(con, progress);
 
             Tools.modifyColumns(con, "updateTask", new Column("uuid", "BINARY(16) NOT NULL"));
-            Tools.createPrimaryKey(con, "updateTask", new String[] { "uuid" });
+            Tools.createPrimaryKey(con, "updateTask", new String[] { "cid", "uuid" });
             con.commit();
         } catch (SQLException e) {
             rollback(con);

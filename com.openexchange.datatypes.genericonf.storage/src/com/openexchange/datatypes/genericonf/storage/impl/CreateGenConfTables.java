@@ -95,8 +95,8 @@ public final class CreateGenConfTables extends AbstractCreateTableImpl {
         "CREATE TABLE sequence_genconf (cid INT4 UNSIGNED NOT NULL,id INT4 UNSIGNED NOT NULL,PRIMARY KEY (cid)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
 
     private static final String[] createsPrimaryKey = {
-        "CREATE TABLE genconf_attributes_strings (cid INT4 UNSIGNED NOT NULL,id INT4 UNSIGNED NOT NULL,name VARCHAR(100) DEFAULT NULL,value VARCHAR(256) DEFAULT NULL,uuid BINARY(16) NOT NULL,PRIMARY KEY (uuid),KEY (cid,id,name)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
-        "CREATE TABLE genconf_attributes_bools (cid INT4 UNSIGNED NOT NULL,id INT4 UNSIGNED NOT NULL,name VARCHAR(100) DEFAULT NULL,value BOOL DEFAULT NULL,uuid BINARY(16) NOT NULL,PRIMARY KEY (uuid),KEY (cid,id,name)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
+        "CREATE TABLE genconf_attributes_strings (cid INT4 UNSIGNED NOT NULL,id INT4 UNSIGNED NOT NULL,name VARCHAR(100) DEFAULT NULL,value VARCHAR(256) DEFAULT NULL,uuid BINARY(16) NOT NULL,PRIMARY KEY (cid, id, uuid),KEY (cid,id,name)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
+        "CREATE TABLE genconf_attributes_bools (cid INT4 UNSIGNED NOT NULL,id INT4 UNSIGNED NOT NULL,name VARCHAR(100) DEFAULT NULL,value BOOL DEFAULT NULL,uuid BINARY(16) NOT NULL,PRIMARY KEY (cid, id, uuid),KEY (cid,id,name)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
         "CREATE TABLE sequence_genconf (cid INT4 UNSIGNED NOT NULL,id INT4 UNSIGNED NOT NULL,PRIMARY KEY (cid)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
 
 }

@@ -92,7 +92,7 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
             con.setAutoCommit(false);
             setUUID(con);
             Tools.modifyColumns(con, "user_setting_server", column);
-            Tools.createPrimaryKey(con, "user_setting_server", new String[] { column.name });
+            Tools.createPrimaryKey(con, "user_setting_server", new String[] { "cid", "user", column.name });
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);

@@ -98,7 +98,7 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "field04 VARCHAR(128),"
         + "cid INT4,"
         + "uuid binary(16) DEFAULT NULL,"
-        + "PRIMARY KEY(uuid),"
+        + "PRIMARY KEY(cid, uuid),"
         + "INDEX (intfield01, cid),"
         + "INDEX (intfield01, intfield02, intfield03, cid)"
         + ") ENGINE  = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
@@ -140,7 +140,7 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "field04 VARCHAR(128),"
         + "cid INT4 NOT NULL,"
         + "uuid binary(16) NOT NULL,"
-        + "PRIMARY KEY (uuid),"
+        + "PRIMARY KEY (cid, uuid),"
         + "INDEX (intfield01, cid),"
         + "INDEX (intfield01, intfield02, intfield03, cid)"
         + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
@@ -174,7 +174,7 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "field02 VARCHAR(320),"
         + "cid INT4 NOT NULL,"
         + "uuid binary(16) NOT NULL,"
-        + "PRIMARY KEY (uuid),"
+        + "PRIMARY KEY (cid, uuid),"
         + "INDEX (intfield01, intfield02, cid),"
         + "INDEX (cid)"
         + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
@@ -523,7 +523,7 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
     protected String[] getCreateStatements() {
         FullPrimaryKeySupportService fullPrimaryKeySupportService = AdminServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
         if (fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
-            return new String[] { CREATE_PRG_DLIST_PRIMARY_KEY, CREATE_DEL_DLIST, CREATE_PRG_CONTACTS_LINKAGE_PRIMARY_KEY, CREATE_PRG_CONTACTS_IMAGE,
+            return new String[] { CREATE_PRG_DLIST_PRIMARY_KEY, CREATE_DEL_DLIST_PRIMARY_KEY, CREATE_PRG_CONTACTS_LINKAGE_PRIMARY_KEY, CREATE_PRG_CONTACTS_IMAGE,
                 CREATE_DEL_CONTACTS_IMAGE, CREATE_DEL_CONTACTS, CREATE_PRG_CONTACTS };
         }
         return new String[] {

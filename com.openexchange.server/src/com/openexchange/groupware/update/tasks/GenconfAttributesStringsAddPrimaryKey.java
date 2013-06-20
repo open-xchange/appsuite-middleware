@@ -91,7 +91,7 @@ public class GenconfAttributesStringsAddPrimaryKey extends UpdateTaskAdapter {
             con.setAutoCommit(false);
             setUUID(con);
             Tools.modifyColumns(con, "genconf_attributes_strings", column);
-            Tools.createPrimaryKey(con, "genconf_attributes_strings", new String[] { column.name });
+            Tools.createPrimaryKey(con, "genconf_attributes_strings", new String[] { "cid", "id", column.name });
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);
