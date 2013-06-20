@@ -49,7 +49,49 @@
 
 package com.openexchange.groupware.contact;
 
-import static com.openexchange.groupware.contact.ContactExceptionMessages.*;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.BAD_CHARACTER_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.CONTACT_NOT_FOUND_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.CONTACT_OBJECT_MISSING_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.CONV_OBJ_2_DATE_FAILED_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.DATA_TRUNCATION_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.DATE_CONVERSION_FAILED_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.DISPLAY_NAME_IN_USE_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.FEATURE_DISABLED_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.FIRST_NAME_MANDATORY_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.ID_GENERATION_FAILED_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.ID_PARSING_FAILED_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.IMAGE_BROKEN_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.IMAGE_DOWNSCALE_FAILED_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.IMAGE_SCALE_PROBLEM_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.IMAGE_TOO_LARGE_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.INIT_CONNECTION_FROM_DBPOOL_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.INVALID_EMAIL_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.LAST_NAME_MANDATORY_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.LOAD_OBJECT_FAILED_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.LOAD_OLD_CONTACT_FAILED_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.MARK_PRIVATE_NOT_ALLOWED_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.MIME_TYPE_NOT_DEFINED_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.NEGATIVE_OBJECT_ID_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.NON_CONTACT_FOLDER_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.NOT_IN_FOLDER_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.NOT_VALID_IMAGE_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.NO_ACCESS_PERMISSION_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.NO_CHANGES_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.NO_CHANGE_PERMISSION_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.NO_CREATE_PERMISSION_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.NO_DELETE_PERMISSION_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.NO_PRIMARY_EMAIL_EDIT_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.NO_PRIVATE_MOVE_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.NO_USER_CONTACT_DELETE_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.OBJECT_HAS_CHANGED_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.PFLAG_IN_PUBLIC_FOLDER_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.SQL_PROBLEM_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.TOO_FEW_ATTACHMENTS_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.TOO_FEW_ATTRIBUTES_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.TOO_FEW_SEARCH_CHARS_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.TRIGGERING_EVENT_FAILED_MSG;
+import static com.openexchange.groupware.contact.ContactExceptionMessages.USER_OUTSIDE_GLOBAL_MSG;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.LogLevelAwareOXExceptionCode;
@@ -141,8 +183,7 @@ public enum ContactExceptionCodes implements LogLevelAwareOXExceptionCode {
     INIT_CONNECTION_FROM_DBPOOL(INIT_CONNECTION_FROM_DBPOOL_MSG,
             Category.CATEGORY_SERVICE_DOWN, 151),
     /**
-     * Import failed. Some data entered exceed the database field limit. Please
-     * shorten following entries: %1$s Character Limit: %2$s Sent %3$s
+     * Some data entered exceeded the field limit. Please shorten the value for \"%1$s\" (limit: %2$s, current: %3$s) and try again."
      */
     DATA_TRUNCATION(DATA_TRUNCATION_MSG, Category.CATEGORY_USER_INPUT, 154),
     /**
