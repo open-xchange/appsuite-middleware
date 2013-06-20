@@ -119,7 +119,7 @@ public final class ConditionTreeMapManagement {
     public static void dropFor(final int contextId) {
         final ConditionTreeMapManagement mm = instance;
         if (null != mm) {
-            mm.maps.remove(Integer.valueOf(contextId));
+            mm.context2maps.remove(Integer.valueOf(contextId));
         }
     }
 
@@ -129,7 +129,7 @@ public final class ConditionTreeMapManagement {
 
     private static final int TIME2LIVE = 300000; // 5 minutes time-to-live
 
-    protected final ConcurrentMap<Integer, Future<ConditionTreeMap>> maps;
+    protected final ConcurrentMap<Integer, Future<ConditionTreeMap>> context2maps;
     private final boolean enabled;
     private volatile ScheduledTimerTask timerTask;
 
@@ -139,7 +139,7 @@ public final class ConditionTreeMapManagement {
     private ConditionTreeMapManagement() {
         super();
         // Evict context-associated ConditionTreeMaps after 10 minutes idle time
-        maps = new ConcurrentLinkedHashMap<Integer, Future<ConditionTreeMap>>(8192, 0.75F, 16, Integer.MAX_VALUE, new ExpirationPolicy(Long.MAX_VALUE, 600000));
+        context2maps = new ConcurrentLinkedHashMap<Integer, Future<ConditionTreeMap>>(8192, 0.75F, 16, Integer.MAX_VALUE, new ExpirationPolicy(Long.MAX_VALUE, 600000));
         final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         enabled = null == service || service.getBoolProperty("com.openexchange.oxfolder.memory.enabled", true);
     }
@@ -156,7 +156,7 @@ public final class ConditionTreeMapManagement {
             timerTask.cancel();
             this.timerTask = null;
         }
-        maps.clear();
+        context2maps.clear();
     }
 
     /**
@@ -170,12 +170,11 @@ public final class ConditionTreeMapManagement {
         if (!enabled) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create("Memory tree map disabled as per configuration.");
         }
-        final long now = System.currentTimeMillis();
         final Integer key = Integer.valueOf(contextId);
-        Future<ConditionTreeMap> f = maps.get(key);
+        Future<ConditionTreeMap> f = context2maps.get(key);
         if (null == f) {
-            final FutureTask<ConditionTreeMap> ft = new FutureTask<ConditionTreeMap>(new InitTreeMapCallable(contextId, now, LOG));
-            f = maps.putIfAbsent(key, ft);
+            final FutureTask<ConditionTreeMap> ft = new FutureTask<ConditionTreeMap>(new InitTreeMapCallable(contextId, LOG));
+            f = context2maps.putIfAbsent(key, ft);
             if (null == f) {
                 f = ft;
                 ft.run();
@@ -195,12 +194,12 @@ public final class ConditionTreeMapManagement {
         if (!enabled) {
             return null;
         }
-        final Future<ConditionTreeMap> f = maps.get(Integer.valueOf(contextId));
+        final Future<ConditionTreeMap> f = context2maps.get(Integer.valueOf(contextId));
         if (null == f) {
             /*
              * Submit a task for tree map initialization
              */
-            ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(new LoadTreeMapRunnable(contextId, System.currentTimeMillis(), LOG)));
+            ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(new LoadTreeMapRunnable(contextId, LOG)));
             return null;
         }
         return timedFrom(f, 1000);
@@ -239,7 +238,7 @@ public final class ConditionTreeMapManagement {
         if (DEBUG) {
             final long st = System.currentTimeMillis();
             final long maxStamp = System.currentTimeMillis() - TIME2LIVE;
-            for (final Iterator<Future<ConditionTreeMap>> it = maps.values().iterator(); it.hasNext();) {
+            for (final Iterator<Future<ConditionTreeMap>> it = context2maps.values().iterator(); it.hasNext();) {
                 final Future<ConditionTreeMap> future = it.next();
                 if (null != future) {
                     try {
@@ -254,7 +253,7 @@ public final class ConditionTreeMapManagement {
             LOG.debug("ConditionTreeMapManagement.shrink() took " + dur + "msec.");
         } else {
             final long maxStamp = System.currentTimeMillis() - TIME2LIVE;
-            for (final Iterator<Future<ConditionTreeMap>> it = maps.values().iterator(); it.hasNext();) {
+            for (final Iterator<Future<ConditionTreeMap>> it = context2maps.values().iterator(); it.hasNext();) {
                 final Future<ConditionTreeMap> future = it.next();
                 if (null != future) {
                     try {
@@ -288,19 +287,17 @@ public final class ConditionTreeMapManagement {
 
         private final int contextId;
         private final Log logger;
-        private final long now;
 
-        protected LoadTreeMapRunnable(final int contextId, final long now, final Log logger) {
+        protected LoadTreeMapRunnable(final int contextId, final Log logger) {
             super();
-            this.now = now;
             this.contextId = contextId;
             this.logger = logger;
         }
 
         @Override
         public void run() {
-            final FutureTask<ConditionTreeMap> ft = new FutureTask<ConditionTreeMap>(new InitTreeMapCallable(contextId, now, logger));
-            final Future<ConditionTreeMap> prev = maps.putIfAbsent(Integer.valueOf(contextId), ft);
+            final FutureTask<ConditionTreeMap> ft = new FutureTask<ConditionTreeMap>(new InitTreeMapCallable(contextId, logger));
+            final Future<ConditionTreeMap> prev = context2maps.putIfAbsent(Integer.valueOf(contextId), ft);
             if (null == prev) {
                 ft.run();
             }
@@ -311,11 +308,9 @@ public final class ConditionTreeMapManagement {
 
         private final int contextId;
         private final Log logger;
-        private final long now;
 
-        protected InitTreeMapCallable(final int contextId, final long now, final Log logger) {
+        protected InitTreeMapCallable(final int contextId, final Log logger) {
             super();
-            this.now = now;
             this.contextId = contextId;
             this.logger = logger;
         }
