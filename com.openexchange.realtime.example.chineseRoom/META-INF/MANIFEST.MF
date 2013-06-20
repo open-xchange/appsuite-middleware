@@ -22,3 +22,4 @@ Import-Package: com.openexchange.conversion.simple,
  org.json,
  org.osgi.framework
 Bundle-Activator: com.openexchange.realtime.example.chineseRoom.osgi.ChineseRoomActivator
+Require-Bundle: com.openexchange.realtime
