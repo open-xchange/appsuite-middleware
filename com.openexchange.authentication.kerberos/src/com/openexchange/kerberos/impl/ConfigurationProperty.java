@@ -69,9 +69,15 @@ public enum ConfigurationProperty {
      */
     KRB5_CONF("java.security.krb5.conf", "/opt/open-xchange/etc/krb5.conf"),
     /**
-     * Name of the module in the Java authentication and authorization configuration file.
+     * Name of the module in the Java authentication and authorization configuration file used when a Kerberos forwarding ticket is sent by
+     * the browser.
      */
-    MODULE_NAME("com.openexchange.kerberos.moduleName", "Open-Xchange");
+    MODULE_NAME("com.openexchange.kerberos.moduleName", "Open-Xchange"),
+    /**
+     * Name of the module in the Java authentication and authorization configuration file used for username and password authentication on
+     * the normal frontend login screen.
+     */
+    USER_MODULE_NAME("com.openexchange.kerberos.userModuleName", "Open-Xchange-User-Auth");
 
     private final String propertyName;
 

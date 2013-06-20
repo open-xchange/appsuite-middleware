@@ -47,47 +47,41 @@
  *
  */
 
-package com.openexchange.authentication.kerberos.osgi;
+package com.openexchange.kerberos.impl;
 
-import static com.openexchange.osgi.Tools.generateServiceFilter;
-import java.util.Stack;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
-import com.openexchange.kerberos.KerberosService;
-import com.openexchange.osgi.Tools;
-import com.openexchange.user.UserService;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.PasswordCallback;
+import javax.security.auth.callback.UnsupportedCallbackException;
 
 /**
- * Activator for Kerberos authentication bundle.
+ * {@link KerberosCallbackHandler}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class AuthenticationActivator implements BundleActivator {
+public class KerberosCallbackHandler implements CallbackHandler {
 
-    private final Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
+    private final String username;
+    private final String password;
 
-    public AuthenticationActivator() {
-        super();
+    public KerberosCallbackHandler(String username, String password) {
+        this.username = username;
+        this.password = password;
     }
 
     @Override
-    public void start(BundleContext context) throws InvalidSyntaxException {
-        Filter filter = generateServiceFilter(context, KerberosService.class, ContextService.class, UserService.class, ConfigurationService.class);
-        trackers.push(new ServiceTracker<Object, Object>(context, filter, new AuthenticationRegisterer(context)));
-//        filter = generateServiceFilter(context, TimerService.class, KerberosService.class);
-//        trackers.push(new ServiceTracker(context, filter, new RenewalLoginHandlerRegisterer(context)));
-        Tools.open(trackers);
-    }
-
-    @Override
-    public void stop(final BundleContext context) {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
+    public void handle(Callback[] callbacks) throws UnsupportedCallbackException {
+        for (int i = 0; i < callbacks.length; i++) {
+            if (callbacks[i] instanceof NameCallback) {
+                NameCallback nc = (NameCallback) callbacks[i];
+                nc.setName(username);
+            } else if (callbacks[i] instanceof PasswordCallback) {
+                PasswordCallback pc = (PasswordCallback) callbacks[i];
+                pc.setPassword(password.toCharArray());
+            } else {
+                throw new UnsupportedCallbackException(callbacks[i], "Unrecognised callback");
+            }
         }
     }
 }

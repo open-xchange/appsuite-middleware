@@ -53,6 +53,7 @@ import static com.openexchange.kerberos.impl.ConfigurationProperty.DEBUG;
 import static com.openexchange.kerberos.impl.ConfigurationProperty.JAAS_CONF;
 import static com.openexchange.kerberos.impl.ConfigurationProperty.KRB5_CONF;
 import static com.openexchange.kerberos.impl.ConfigurationProperty.MODULE_NAME;
+import static com.openexchange.kerberos.impl.ConfigurationProperty.USER_MODULE_NAME;
 import java.io.File;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
@@ -70,6 +71,7 @@ public final class KerberosConfiguration {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(KerberosConfiguration.class));
 
     private static String moduleName;
+    private static String userModuleName;
 
     public static boolean configure(ConfigurationService config) {
         boolean configured = true;
@@ -97,6 +99,7 @@ public final class KerberosConfiguration {
 //        System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
 
         moduleName = config.getProperty(MODULE_NAME.getName(), MODULE_NAME.getDefault());
+        userModuleName = config.getProperty(USER_MODULE_NAME.getName(), USER_MODULE_NAME.getDefault());
         configured = configured && readConfiguration(moduleName);
         return configured;
     }
@@ -109,6 +112,10 @@ public final class KerberosConfiguration {
 
     public static String getModuleName() {
         return moduleName;
+    }
+
+    public static String getUserModuleName() {
+        return userModuleName;
     }
 
     private KerberosConfiguration() {

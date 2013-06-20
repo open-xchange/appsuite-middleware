@@ -104,18 +104,21 @@ public class Authed implements Authenticated, SessionEnhancement, ResponseEnhanc
 
     @Override
     public Header[] getHeaders() {
-        return new Header[] {
-            new Header() {
-                @Override
-                public String getValue() {
-                    return "Negotiate " + Base64.encode(principal.getResponseTicket());
+        if (null != principal.getResponseTicket()) {
+            return new Header[] {
+                new Header() {
+                    @Override
+                    public String getValue() {
+                            return "Negotiate " + Base64.encode(principal.getResponseTicket());
+                    }
+                    @Override
+                    public String getName() {
+                            return "WWW-Authenticate";
+                    }
                 }
-                @Override
-                public String getName() {
-                    return "WWW-Authenticate";
-                }
-            }
-        };
+            };
+        }
+        return new Header[0];
     }
 
     @Override
