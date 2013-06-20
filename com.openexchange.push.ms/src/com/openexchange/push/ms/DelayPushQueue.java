@@ -99,7 +99,7 @@ public class DelayPushQueue implements Runnable {
         this.delayDuration = delayDuration;
         this.maxDelayDuration = maxDelayDuration;
         isRunning = new AtomicBoolean(true);
-        pollThread = new Thread(this);
+        pollThread = new Thread(this, "DelayPushQueuePoller");
         pollThread.setName(this.getClass().getName());
         pollThread.start();
     }
@@ -111,13 +111,13 @@ public class DelayPushQueue implements Runnable {
      */
     public void add(final PushMsObject pushMsObject) {
         DelayedPushMsObject delayedPushMsObject = existingPushObjects.get(pushMsObject);
-        if (delayedPushMsObject != null) {
-            // just refresh the delay by touching
-            delayedPushMsObject.touch();
-        } else {
+        if (delayedPushMsObject == null) {
             delayedPushMsObject = new DelayedPushMsObject(pushMsObject, delayDuration, maxDelayDuration);
             existingPushObjects.put(pushMsObject, delayedPushMsObject);
             delayQueue.add(delayedPushMsObject);
+        } else {
+            // just refresh the delay by touching
+            delayedPushMsObject.touch();
         }
     }
 

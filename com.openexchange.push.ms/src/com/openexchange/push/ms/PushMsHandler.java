@@ -79,11 +79,11 @@ import com.openexchange.ms.Topic;
 public class PushMsHandler implements EventHandler {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMsHandler.class));
-    
+
     private final DelayPushQueue delayPushQueue;
-    
+
     private final Topic<Map<String, Object>> publisher;
-    
+
     /**
      * Initializes a new {@link PushMsHandler}.
      * @param publisher
@@ -136,8 +136,11 @@ public class PushMsHandler implements EventHandler {
         }
         switch (module) {
         case Types.APPOINTMENT:
+            // fall-through
         case Types.TASK:
+            // fall-through
         case Types.CONTACT:
+            // fall-through
         case Types.FOLDER:
             for (final Entry<Integer, Set<Integer>> entry : transform(event.getAffectedUsersWithFolder()).entrySet()) {
                 publishDelayed(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp((DataObject) event.getActionObj()), e);
@@ -172,7 +175,7 @@ public class PushMsHandler implements EventHandler {
             LOG.error(ex.getMessage(), ex);
         }
     }
-    
+
     private void publishDelayed(final int folderId, final int[] users, final int module, final Context ctx, final long timestamp, final Event e) {
         if (users == null) {
             return;
