@@ -417,4 +417,30 @@ public class Strings {
         return "..." + str.substring(str.length() - (maxWidth - 3));
     }
 
+    /**
+     * Removes single or double quotes from a string if its quoted.
+     *
+     * @param s The value to be unquoted
+     * @return The unquoted value or <code>null</code>
+     */
+    public static String unquote(final String s) {
+        if (!isEmpty(s) && ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")))) {
+            return s.substring(1, s.length() - 1);
+        }
+        return s;
+    }
+
+    /**
+     * Removes parenthesis from a string if parenthized.
+     *
+     * @param s The value to be un-parenthized
+     * @return The un-parenthized value or <code>null</code>
+     */
+    public static String unparenthize(final String s) {
+        if (!isEmpty(s) && (s.startsWith("(") && s.endsWith(")"))) {
+            return s.substring(1, s.length() - 1);
+        }
+        return s;
+    }
+
 }

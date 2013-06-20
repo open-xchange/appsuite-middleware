@@ -66,6 +66,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -291,20 +292,39 @@ public final class DBUtils {
     /**
      * Extends a SQL statement with enough ? characters in the last IN argument.
      *
-     * @param sql SQL statement ending with "IN (";
+     * @param sql SQL statement ending with "IN ("
      * @param length number of entries.
+     * @param appendix An optional appendix
      * @return the ready to use SQL statement.
      */
     public static String getIN(final String sql, final int length) {
+        return getIN(sql, length, null);
+    }
+
+    /**
+     * Extends a SQL statement with enough ? characters in the last IN argument.
+     *
+     * @param sql SQL statement ending with "IN ("
+     * @param length number of entries.
+     * @param appendix An optional appendix
+     * @return the ready to use SQL statement.
+     */
+    public static String getIN(final String sql, final int length, final String appendix) {
         if (length <= 0) {
             return sql;
         }
-        final StringBuilder retval = new StringBuilder(sql);
+        final StringAllocator retval = new StringAllocator(sql);
         retval.append('?');
         for (int i = 1; i < length; i++) {
             retval.append(",?");
         }
         retval.append(')');
+        if (null != appendix) {
+            if (!appendix.startsWith(" ")) {
+                retval.append(" ");
+            }
+            retval.append(appendix);
+        }
         return retval.toString();
     }
 
