@@ -110,9 +110,38 @@ public final class ConditionTreeMap {
     public ConditionTreeMap(final int contextId, final int time2live) {
         super();
         // Evict user-associated entries after <time2live> milliseconds
-        entity2tree = new ConcurrentLinkedHashMap<Integer, Future<ConditionTree>>(1024, 0.75F, 16, Integer.MAX_VALUE, new AgePolicy(time2live));
+        entity2tree = new ConcurrentLinkedHashMap<Integer, Future<ConditionTree>>(countEntities(contextId), 0.75F, 16, Integer.MAX_VALUE, new AgePolicy(time2live));
         this.contextId = contextId;
         this.time2live = time2live;
+    }
+
+    private static int countEntities(final int contextId) {
+        final DatabaseService service = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            connection = service.getReadOnly(contextId);
+
+            stmt = connection.prepareStatement("SELECT COUNT(id) FROM user WHERE cid=?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            int count = rs.next() ? rs.getInt(1) : 0;
+            DBUtils.closeSQLStuff(rs, stmt);
+
+            stmt = connection.prepareStatement("SELECT COUNT(id) FROM groups WHERE cid=1337");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            count += (rs.next() ? rs.getInt(1) : 0);
+            return count;
+        } catch (final Exception e) {
+            return 1024;
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            if (null != connection) {
+                service.backReadOnly(contextId, connection);
+            }
+        }
     }
 
     /**
