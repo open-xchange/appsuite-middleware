@@ -63,4 +63,6 @@ public interface KerberosService {
 
     ClientPrincipal renewDelegateTicket(Subject subject) throws OXException;
 
+    ClientPrincipal authenticate(String username, String password) throws OXException;
+
 }

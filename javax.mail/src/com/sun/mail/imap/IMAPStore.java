@@ -770,7 +770,7 @@ public class IMAPStore extends Store
         }
     }
 
-    private void login(IMAPProtocol p, String u, String pw) 
+    protected void login(IMAPProtocol p, String u, String pw) 
 		throws ProtocolException {
     checkFailedAuths(u, pw);
 	// turn on TLS if it's been enabled or required and is supported

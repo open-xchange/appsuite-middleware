@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 * 2013-06-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 27154: Made initial insertion of "uuid" column with " DEFAULT NULL" appendix + insert file names with respect to "uuid" column
@@ -16,10 +17,18 @@
 
  - Fix for bug 27098: Added missing imports to MANIFEST.MF file
 
+* 2013-06-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26859: Patched javax.mail implementation to create a Kerberos security context before SASL login takes place.
+
 * 2013-06-13 - choeger@open-xchange.com
 
  - Fix for bug 25205: Restarting the groupware process leads to a 'Port already
    in use: 9999' error
+
+* 2013-06-11 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26860: Implemented username and password authentication for Kerberos authentication implementation.
 
 * 2013-06-04 - thorben.betten@open-xchange.com
 
@@ -51,6 +60,8 @@
 * 2013-05-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 26760: Fixed possible ArrayIndexOutOfBoundsException
+=======
+>>>>>>> hotfix-1475
 
 * 2013-05-22 - marc.arens@open-xchange.com
 

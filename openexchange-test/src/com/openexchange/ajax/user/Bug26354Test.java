@@ -116,7 +116,7 @@ public final class Bug26354Test extends AbstractAJAXSession {
             assertNull("Expected no Throwable, but there is one: " + throwable, throwable);
         }
         client.execute(new SetRequest(Tree.Beta, B(origValue)));
-        assertTrue("Deleting the test attribute failed.", client.execute(new SetAttributeRequest(userId, ATTRIBUTE_NAME, null, false)).isSuccess());
+//        assertTrue("Deleting the test attribute failed.", client.execute(new SetAttributeRequest(userId, ATTRIBUTE_NAME, null, false)).isSuccess());
         super.tearDown();
     }
 
