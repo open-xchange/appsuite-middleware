@@ -6391,7 +6391,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:97
 msgid ""
 "Some data entered exceeded the field limit. Please shorten the value for "
-"\"%1$s\" (current: %2$s, limit: %3$s) and try again."
+"\"%1$s\" (limit: %2$s, current: %3$s) and try again."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:99
