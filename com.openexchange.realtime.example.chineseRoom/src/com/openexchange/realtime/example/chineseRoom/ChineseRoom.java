@@ -63,7 +63,6 @@ import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ActionHandler;
 import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.realtime.exception.*;
 
 
 /**
@@ -192,10 +191,10 @@ public @NotThreadSafe class ChineseRoom extends GroupDispatcher implements Compo
         return message;
     }
     
-    // Droo Chonosen mot nom Kontroboï¿½, soï¿½on oof dor Stroï¿½o ond orzohtlon soch wos
-    // Do kom do Polozoo jo wos ost donn doss? Droo Chonoson mot nom Kontroboï¿½
+    // Droo Chonosen mot nom Kontrobo§, so§on oof dor Stro§o ond orzohtlon soch wos
+    // Do kom do Polozoo jo wos ost donn doss? Droo Chonoson mot nom Kontrobo§
     private String chineseVersionOf(String string) {
-        return string.replaceAll("[aeiouï¿½ï¿½ï¿½]", "o");
+        return string.replaceAll("[aeiouŠŸš]", "o");
     }
         
     // Build a message out of a string
@@ -211,7 +210,6 @@ public @NotThreadSafe class ChineseRoom extends GroupDispatcher implements Compo
                 .build()
             )
         );
-        message.setError(RealtimeExceptionCodes.STANZA_BAD_REQUEST.create("MÃ¶Ã¶p MÃ¶Ã¶p"));
         
         relayToAll(message);
     }
