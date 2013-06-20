@@ -1,5 +1,6 @@
 * 2013-06-20 - thorben.betten@open-xchange.com
 
+ - Fix for bug 27144: Reload user-sensitive folders if evicted in the meantime
  - Fix for bug 27165: Ensure proper sort field is set
 
 * 2013-06-19 - thorben.betten@open-xchange.com
