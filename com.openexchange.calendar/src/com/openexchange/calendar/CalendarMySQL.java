@@ -2323,7 +2323,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final void getUserParticipantsSQLIn(final CalendarFolderObject visibleFolders, final List<CalendarDataObject> list, final Connection readcon, final int cid, final int uid, final String sqlin) throws SQLException, OXException {
-        final OpenIntObjectHashMap map;
+        final OpenIntObjectHashMap map; // See http://b010.blogspot.de/2009/05/speed-comparison-of-1-javas-built-in.html
         {
             final int size = list.size();
             map = new OpenIntObjectHashMap(size);
