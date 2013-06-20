@@ -139,7 +139,7 @@ public class DelayPushQueue implements Runnable {
         final List<DelayedPushMsObject> objects = new ArrayList<DelayedPushMsObject>(16);
         while (isRunning.get()) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Awating push objects from DelayQueue with current size: " + delayQueue.size());
+                LOG.debug("Awaiting push objects from DelayQueue with current size: " + delayQueue.size());
             }
             try {
                 objects.clear();
@@ -154,8 +154,11 @@ public class DelayPushQueue implements Runnable {
                     objects.add(object);
                 }
                 delayQueue.drainTo(objects);
-                final boolean quit = objects.remove(POISON);
                 for (final DelayedPushMsObject delayedPushMsObject : objects) {
+                    if (POISON == delayedPushMsObject) {
+                        // Reached poison element
+                        return;
+                    }
                     if (delayedPushMsObject != null) {
                         final PushMsObject pushObject = delayedPushMsObject.getPushObject();
                         // remove from mapping
@@ -166,9 +169,6 @@ public class DelayPushQueue implements Runnable {
                             LOG.debug("Published delayed PushMsObject: " + delayedPushMsObject.getPushObject());
                         }
                     }
-                }
-                if (quit) {
-                    return;
                 }
             } catch (final Exception exc) {
                 LOG.error(exc.getMessage(), exc);
