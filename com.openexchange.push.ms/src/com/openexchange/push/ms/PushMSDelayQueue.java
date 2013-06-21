@@ -133,7 +133,7 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
                 DelayedPushMsObject prev = null;
                 for (final Iterator<DelayedPushMsObject> it = q.iterator(); null == prev && it.hasNext();) {
                     final DelayedPushMsObject next = it.next();
-                    if (e.equals(next)) {
+                    if (e.getPushObject().equals(next.getPushObject())) {
                         prev = next;
                         it.remove();
                     }
