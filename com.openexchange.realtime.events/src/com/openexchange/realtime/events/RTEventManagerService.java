@@ -61,17 +61,6 @@ import com.openexchange.session.Session;
  */
 public interface RTEventManagerService {
 
-    /**
-     * Register an emitter. Usually no one calls this directly, instead export {@link RTEventEmitterService} instances via OSGi.
-     * @param factory
-     */
-    public abstract void addEmitter(RTEventEmitterService factory);
-
-    /**
-     * Takes an emitter down, again usually only called when an {@link RTEventEmitterService} disappears from the OSGi system.
-     * @param service
-     */
-    public abstract void removeEmitter(RTEventEmitterService service);
 
     /**
      * Gets the sum total of all supported events. These events are namespaced per known emitter.

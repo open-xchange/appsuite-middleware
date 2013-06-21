@@ -88,18 +88,10 @@ public class RTEventManager implements RTEventManagerService {
         this.services = services;
     }
     
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.events.impl.RTEventManagerService#addEmitter(com.openexchange.realtime.events.RTEventEmitterService)
-     */
-    @Override
     public void addEmitter(RTEventEmitterService factory) {
         emitterFactories.put(factory.getNamespace(), factory);
     }
     
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.events.impl.RTEventManagerService#removeEmitter(com.openexchange.realtime.events.RTEventEmitterService)
-     */
-    @Override
     public void removeEmitter(RTEventEmitterService service) {
         emitterFactories.remove(service.getNamespace());
     }
