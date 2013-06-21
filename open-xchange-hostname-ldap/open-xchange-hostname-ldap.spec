@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -46,6 +46,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Fri Jun 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second feature freeze for 7.2.2 release
 * Mon Jun 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Feature freeze for 7.2.2 release
 * Tue Jun 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
