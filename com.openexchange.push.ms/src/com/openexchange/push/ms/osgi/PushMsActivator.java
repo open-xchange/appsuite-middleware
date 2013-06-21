@@ -122,7 +122,7 @@ public class PushMsActivator extends HousekeepingActivator {
             final String[] topics = new String[] { EventConstants.EVENT_TOPIC, "com/openexchange/*" };
             final Hashtable<String, Object> ht = new Hashtable<String, Object>(1);
             ht.put(EventConstants.EVENT_TOPIC, topics);
-            registerService(EventHandler.class, new PushMsHandler(init.getPublisher(), init.getDelayPushQueue()), ht);
+            registerService(EventHandler.class, new PushMsHandler(init.getPublishTopic(), init.getDelayPushQueue()), ht);
             INIT_REF.set(init);
             /*
              * Service trackers
