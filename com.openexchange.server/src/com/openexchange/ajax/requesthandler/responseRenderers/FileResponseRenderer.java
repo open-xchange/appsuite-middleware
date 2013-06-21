@@ -214,6 +214,14 @@ public class FileResponseRenderer implements ResponseRenderer {
                 contentTypeByParameter = true;
             }
             contentType = unquote(contentType);
+            // Delivery is set to "view", but Content-Type is indicated as application/octet-stream
+            if (VIEW.equalsIgnoreCase(delivery) && (null != contentType && contentType.startsWith(SAVE_AS_TYPE))) {
+                contentType = getContentTypeByFileName(fileName);
+                if (null == contentType) {
+                    // Not known
+                    contentType = SAVE_AS_TYPE;
+                }
+            }
             String contentDisposition = AJAXServlet.encodeUrl(req.getParameter(PARAMETER_CONTENT_DISPOSITION));
             if (null == contentDisposition) {
                 if (VIEW.equalsIgnoreCase(delivery)) {
@@ -250,7 +258,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 return;
             }
             final String userAgent = AJAXServlet.sanitizeParam(req.getHeader("user-agent"));
-            if (SAVE_AS_TYPE.equals(contentType) || DOWNLOAD.equalsIgnoreCase(delivery)) {
+            if (DOWNLOAD.equalsIgnoreCase(delivery) || (SAVE_AS_TYPE.equals(contentType) && !VIEW.equalsIgnoreCase(delivery))) {
                 // Write as a common file download: application/octet-stream
                 final StringAllocator sb = new StringAllocator(32);
                 sb.append(isEmpty(contentDisposition) ? "attachment" : checkedContentDisposition(contentDisposition.trim(), file));
@@ -260,17 +268,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 length = file.getLength();
             } else {
                 // Determine what Content-Type is indicated by file name
-                String contentTypeByFileName;
-                if (null == fileName) {
-                    // Not known
-                    contentTypeByFileName = null;
-                } else {
-                    contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
-                    if (SAVE_AS_TYPE.equals(contentTypeByFileName)) {
-                        // Not known
-                        contentTypeByFileName = null;
-                    }
-                }
+                String contentTypeByFileName = getContentTypeByFileName(fileName);
                 // Generate checked download
                 final CheckedDownload checkedDownload;
                 {
@@ -587,6 +585,19 @@ public class FileResponseRenderer implements ResponseRenderer {
             close(file, documentData);
             close(closeables);
         }
+    }
+
+    private String getContentTypeByFileName(final String fileName) {
+        if (null == fileName) {
+            // Not known
+            return null;
+        }
+        final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
+        if (SAVE_AS_TYPE.equals(contentTypeByFileName)) {
+            // Not known
+            return null;
+        }
+        return contentTypeByFileName;
     }
 
     private void sendErrorSafe(int sc, String msg, final HttpServletResponse resp) {

@@ -72,7 +72,7 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.ms.Topic;
 
 /**
- * {@link PushMsHandler}
+ * {@link PushMsHandler} - Listens for locally distributed OSGi events notifying about changes.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -82,16 +82,17 @@ public class PushMsHandler implements EventHandler {
 
     private final DelayPushQueue delayPushQueue;
 
-    private final Topic<Map<String, Object>> publisher;
+    private final Topic<Map<String, Object>> publishTopic;
 
     /**
      * Initializes a new {@link PushMsHandler}.
-     * @param publisher
-     * @param delayPushQueue the delayQueue that is used for pushin PIM objects except E-Mails
+     *
+     * @param publishTopic
+     * @param delayPushQueue the delayQueue that is used for pushing PIM objects except E-Mails
      */
-    public PushMsHandler(final Topic<Map<String, Object>> publisher, DelayPushQueue delayPushQueue) {
+    public PushMsHandler(final Topic<Map<String, Object>> publishTopic, DelayPushQueue delayPushQueue) {
         super();
-        this.publisher = publisher;
+        this.publishTopic = publishTopic;
         this.delayPushQueue = delayPushQueue;
     }
 
@@ -151,13 +152,7 @@ public class PushMsHandler implements EventHandler {
             break;
         case Types.INFOSTORE:
             for (final Entry<Integer, Set<Integer>> entry : transform(event.getAffectedUsersWithFolder()).entrySet()) {
-                publish(
-                    i(entry.getKey()),
-                    I2i(entry.getValue()),
-                    module,
-                    ctx,
-                    getTimestamp(((DocumentMetadata) event.getActionObj()).getLastModified()),
-                    e);
+                publish(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp(((DocumentMetadata) event.getActionObj()).getLastModified()), e);
             }
             break;
         default:
@@ -170,7 +165,7 @@ public class PushMsHandler implements EventHandler {
             return;
         }
         try {
-            publisher.publish(new PushMsObject(folderId, module, ctx.getContextId(), users, false, timestamp, e.getTopic()).writePojo());
+            publishTopic.publish(newPushMsObject(folderId, users, module, ctx, timestamp, e).writePojo());
         } catch (final RuntimeException ex) {
             LOG.error(ex.getMessage(), ex);
         }
@@ -180,7 +175,11 @@ public class PushMsHandler implements EventHandler {
         if (users == null) {
             return;
         }
-        delayPushQueue.add(new PushMsObject(folderId, module, ctx.getContextId(), users, false, timestamp, e.getTopic()));
+        delayPushQueue.add(newPushMsObject(folderId, users, module, ctx, timestamp, e));
+    }
+
+    private PushMsObject newPushMsObject(final int folderId, final int[] users, final int module, final Context ctx, final long timestamp, final Event e) {
+        return new PushMsObject(folderId, module, ctx.getContextId(), users, false, timestamp, e.getTopic());
     }
 
     private static long getTimestamp(final Date lastModified) {
