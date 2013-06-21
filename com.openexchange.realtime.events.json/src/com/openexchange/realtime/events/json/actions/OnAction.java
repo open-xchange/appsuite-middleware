@@ -50,33 +50,38 @@
 package com.openexchange.realtime.events.json.actions;
 
 import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.impl.RTEventManager;
+import com.openexchange.realtime.events.RTEventManagerService;
 import com.openexchange.realtime.events.json.EventsRequest;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * The {@link AbstractEventAction} wraps a request in an {@link EventsRequest} and calls the subclasses
- * {@link #perform(EventsRequest)} implementations
+ * {@link OnAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class AbstractEventAction implements AJAXActionService {
-    
-    private RTEventManager manager;
-    
-    public AbstractEventAction(RTEventManager manager) {
-        this.manager = manager;
-    }
-    
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        return perform(new EventsRequest(requestData, session, manager));
+@Action(method = RequestMethod.GET, name = "on", description = "Subscribe to a given event", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "event", description = "The event to unsubscribe from. If empty, this action unsubscribes the client from all events", optional=true),
+    @Parameter(name = "resource", description = "The resource ID of the client"),
+    @Parameter(name = "selector", description = "The selector to mark event stanzas with"),
+}, responseDescription = "'true' on success, an error in the appropriate fields otherwise")
+public class OnAction extends AbstractEventAction implements AJAXActionService {
+
+    public OnAction(ServiceLookup services) {
+        super(services);
     }
 
-    protected abstract AJAXRequestResult perform(EventsRequest eventsAction) throws OXException;
+    @Override
+    protected AJAXRequestResult perform(EventsRequest req) throws OXException {
+        RTEventManagerService manager = req.getManager();
+        manager.subscribe(req.getEvent(), req.getSelector(), req.getID(), req.getSession(), req.getParameterMap());
+        return new AJAXRequestResult(Boolean.TRUE, "native");
+    }
 
 }

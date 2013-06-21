@@ -55,32 +55,28 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.impl.RTEventManager;
 import com.openexchange.realtime.events.json.EventsRequest;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link OnAction}
+ * {@link AllAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Action(method = RequestMethod.GET, name = "on", description = "Subscribe to a given event", parameters = {
+@Action(method = RequestMethod.GET, name = "all", description = "List all events the given client is subscribed to", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "event", description = "The event to unsubscribe from. If empty, this action unsubscribes the client from all events", optional=true),
-    @Parameter(name = "resource", description = "The resource ID of the client"),
-    @Parameter(name = "selector", description = "The selector to mark event stanzas with"),
-}, responseDescription = "'true' on success, an error in the appropriate fields otherwise")
-public class OnAction extends AbstractEventAction implements AJAXActionService {
+    @Parameter(name = "resource", description = "The resource id of the RT client")
+}, responseDescription = "A list of all subscribed events")
+public class AllAction extends AbstractEventAction implements AJAXActionService {
 
-    public OnAction(RTEventManager manager) {
-        super(manager);
+    public AllAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
     protected AJAXRequestResult perform(EventsRequest req) throws OXException {
-        RTEventManager manager = req.getManager();
-        manager.subscribe(req.getEvent(), req.getSelector(), req.getID(), req.getSession(), req.getParameterMap());
-        return new AJAXRequestResult(Boolean.TRUE, "native");
+        return new AJAXRequestResult(req.getManager().getSubscriptions(req.getID()), "native");
     }
 
 }

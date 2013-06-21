@@ -55,28 +55,30 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.impl.RTEventManager;
+import com.openexchange.realtime.events.RTEventManagerService;
 import com.openexchange.realtime.events.json.EventsRequest;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link AllAction}
+ * {@link EventsAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Action(method = RequestMethod.GET, name = "all", description = "List all events the given client is subscribed to", parameters = {
+@Action(method = RequestMethod.GET, name = "events", description = "List all supported events of this server", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "resource", description = "The resource id of the RT client")
-}, responseDescription = "A list of all subscribed events")
-public class AllAction extends AbstractEventAction implements AJAXActionService {
+}, responseDescription = "A list of all events clients can subscribe to")
+public class EventsAction extends AbstractEventAction implements AJAXActionService {
 
-    public AllAction(RTEventManager manager) {
-        super(manager);
+    public EventsAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
     protected AJAXRequestResult perform(EventsRequest req) throws OXException {
-        return new AJAXRequestResult(req.getManager().getSubscriptions(req.getID()), "native");
+        RTEventManagerService manager = req.getManager();
+       
+        return new AJAXRequestResult(manager.getSupportedEvents(), "native");
     }
 
 }

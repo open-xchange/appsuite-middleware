@@ -55,29 +55,38 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.impl.RTEventManager;
+import com.openexchange.realtime.events.RTEventManagerService;
 import com.openexchange.realtime.events.json.EventsRequest;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link EventsAction}
+ * {@link OffAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Action(method = RequestMethod.GET, name = "events", description = "List all supported events of this server", parameters = {
+@Action(method = RequestMethod.GET, name = "off", description = "Unsubscribe from a given event", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-}, responseDescription = "A list of all events clients can subscribe to")
-public class EventsAction extends AbstractEventAction implements AJAXActionService {
+    @Parameter(name = "event", description = "The event to unsubscribe from. If empty, this action unsubscribes the client from all events", optional=true),
+    @Parameter(name = "resource", description = "The resource ID of the client"),
+}, responseDescription = "'true' on success, an error in the appropriate fields otherwise")
+public class OffAction extends AbstractEventAction implements AJAXActionService {
 
-    public EventsAction(RTEventManager manager) {
-        super(manager);
+    public OffAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
     protected AJAXRequestResult perform(EventsRequest req) throws OXException {
-        RTEventManager manager = req.getManager();
-       
-        return new AJAXRequestResult(manager.getSupportedEvents(), "native");
+        RTEventManagerService manager = req.getManager();
+        
+        if (req.hasEvent()) {
+            manager.unsubscribe(req.getEvent(), req.getID());            
+        } else {
+            manager.unsubscribe(req.getID());
+        }
+        
+        return new AJAXRequestResult(Boolean.TRUE, "native");
     }
 
 }

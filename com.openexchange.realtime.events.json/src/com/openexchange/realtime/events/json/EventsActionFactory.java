@@ -57,11 +57,11 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.impl.RTEventManager;
 import com.openexchange.realtime.events.json.actions.AllAction;
 import com.openexchange.realtime.events.json.actions.EventsAction;
 import com.openexchange.realtime.events.json.actions.OffAction;
 import com.openexchange.realtime.events.json.actions.OnAction;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
@@ -74,11 +74,11 @@ public class EventsActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AJAXActionService> ACTIONS = new HashMap<String, AJAXActionService>();
     
-    public EventsActionFactory(RTEventManager manager) {
-        ACTIONS.put("on", new OnAction(manager));
-        ACTIONS.put("off", new OffAction(manager));
-        ACTIONS.put("all", new AllAction(manager));
-        ACTIONS.put("events", new EventsAction(manager));
+    public EventsActionFactory(ServiceLookup services) {
+        ACTIONS.put("on", new OnAction(services));
+        ACTIONS.put("off", new OffAction(services));
+        ACTIONS.put("all", new AllAction(services));
+        ACTIONS.put("events", new EventsAction(services));
         
     }
     

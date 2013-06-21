@@ -58,6 +58,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.realtime.events.RTEventEmitterService;
+import com.openexchange.realtime.events.RTEventManagerService;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.server.ServiceLookup;
@@ -70,7 +71,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class RTEventManager {
+public class RTEventManager implements RTEventManagerService {
     
     private ConcurrentHashMap<String, RTEventEmitterService> emitterFactories = new ConcurrentHashMap<String, RTEventEmitterService>(); 
 
@@ -87,26 +88,27 @@ public class RTEventManager {
         this.services = services;
     }
     
-    /**
-     * Register an emitter. Usually no one calls this directly, instead export {@link RTEventEmitterService} instances via OSGi.
-     * @param factory
+    /* (non-Javadoc)
+     * @see com.openexchange.realtime.events.impl.RTEventManagerService#addEmitter(com.openexchange.realtime.events.RTEventEmitterService)
      */
+    @Override
     public void addEmitter(RTEventEmitterService factory) {
         emitterFactories.put(factory.getNamespace(), factory);
     }
     
-    /**
-     * Takes an emitter down, again usually only called when an {@link RTEventEmitterService} disappears from the OSGi system.
-     * @param service
+    /* (non-Javadoc)
+     * @see com.openexchange.realtime.events.impl.RTEventManagerService#removeEmitter(com.openexchange.realtime.events.RTEventEmitterService)
      */
+    @Override
     public void removeEmitter(RTEventEmitterService service) {
         emitterFactories.remove(service.getNamespace());
     }
 
     
-    /**
-     * Gets the sum total of all supported events. These events are namespaced per known emitter.
+    /* (non-Javadoc)
+     * @see com.openexchange.realtime.events.impl.RTEventManagerService#getSupportedEvents()
      */
+    @Override
     public Set<String> getSupportedEvents() {
         HashSet<String> supportedEvents = new HashSet<String>();
         
@@ -119,14 +121,10 @@ public class RTEventManager {
         return supportedEvents;
     }
     
-    /**
-     * Subscribe to a namespaced event
-     * @param event The name of the event, complete with the namespace eg. calendar:new
-     * @param selector An arbitrary string that will be sent along with all event stanzas as their selector
-     * @param id The ID of the client that wants to be notified of events
-     * @param session The session of the client
-     * @param parameters Arbitrary parameters that may or may not mean something to the {@link RTEventEmitterService} instance associated with the namespace
+    /* (non-Javadoc)
+     * @see com.openexchange.realtime.events.impl.RTEventManagerService#subscribe(java.lang.String, java.lang.String, com.openexchange.realtime.packet.ID, com.openexchange.session.Session, java.util.Map)
      */
+    @Override
     public void subscribe(String event, String selector, ID id, Session session, Map<String, String> parameters) {
         String[] parsedEvent = parse(event);
         if (parsedEvent.length != 2) {
@@ -161,9 +159,10 @@ public class RTEventManager {
         return event.split(":");
     }
     
-    /**
-     * Retrieve all namespaced event names a given ID is subscribed to
+    /* (non-Javadoc)
+     * @see com.openexchange.realtime.events.impl.RTEventManagerService#getSubscriptions(com.openexchange.realtime.packet.ID)
      */
+    @Override
     public Set<String> getSubscriptions(ID id) {
         List<RTEventSubscription> list = getSubscriptions(id, false);
         if (list == null) {
@@ -197,9 +196,10 @@ public class RTEventManager {
         return list;
     }
     
-    /**
-     * Unsubscribe from all events this ID subscribed to.
+    /* (non-Javadoc)
+     * @see com.openexchange.realtime.events.impl.RTEventManagerService#unsubscribe(com.openexchange.realtime.packet.ID)
      */
+    @Override
     public void unsubscribe(ID id) {
         List<RTEventSubscription> list = subscriptions.remove(id);
         if (list == null) {
@@ -218,9 +218,10 @@ public class RTEventManager {
         
     }
     
-    /**
-     * Unsubscribe from a specific event this ID subscribed to
+    /* (non-Javadoc)
+     * @see com.openexchange.realtime.events.impl.RTEventManagerService#unsubscribe(java.lang.String, com.openexchange.realtime.packet.ID)
      */
+    @Override
     public void unsubscribe(String event, ID id) {
         String[] parsedEvent = parse(event);
         if (parsedEvent.length != 2) {

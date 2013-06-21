@@ -6,11 +6,7 @@ Bundle-Version: 7.4.0
 Bundle-Activator: com.openexchange.realtime.events.osgi.EventsActivator
 Bundle-Vendor: Open-Xchange inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.ajax.requesthandler,
- com.openexchange.ajax.requesthandler.osgiservice,
- com.openexchange.documentation,
- com.openexchange.documentation.annotations,
- com.openexchange.exception,
+Import-Package: com.openexchange.exception,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.realtime,

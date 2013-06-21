@@ -50,42 +50,34 @@
 package com.openexchange.realtime.events.json.actions;
 
 import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.impl.RTEventManager;
+import com.openexchange.realtime.events.RTEventManagerService;
 import com.openexchange.realtime.events.json.EventsRequest;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link OffAction}
+ * The {@link AbstractEventAction} wraps a request in an {@link EventsRequest} and calls the subclasses
+ * {@link #perform(EventsRequest)} implementations
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Action(method = RequestMethod.GET, name = "off", description = "Unsubscribe from a given event", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "event", description = "The event to unsubscribe from. If empty, this action unsubscribes the client from all events", optional=true),
-    @Parameter(name = "resource", description = "The resource ID of the client"),
-}, responseDescription = "'true' on success, an error in the appropriate fields otherwise")
-public class OffAction extends AbstractEventAction implements AJAXActionService {
-
-    public OffAction(RTEventManager manager) {
-        super(manager);
+public abstract class AbstractEventAction implements AJAXActionService {
+    
+    private ServiceLookup services;
+    
+    public AbstractEventAction(ServiceLookup services) {
+        this.services = services;
     }
-
+    
     @Override
-    protected AJAXRequestResult perform(EventsRequest req) throws OXException {
-        RTEventManager manager = req.getManager();
-        
-        if (req.hasEvent()) {
-            manager.unsubscribe(req.getEvent(), req.getID());            
-        } else {
-            manager.unsubscribe(req.getID());
-        }
-        
-        return new AJAXRequestResult(Boolean.TRUE, "native");
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        return perform(new EventsRequest(requestData, session, services.getService(RTEventManagerService.class)));
     }
+
+    protected abstract AJAXRequestResult perform(EventsRequest eventsAction) throws OXException;
 
 }

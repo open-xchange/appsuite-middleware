@@ -1,12 +1,12 @@
 package com.openexchange.realtime.events.osgi;
 
 import org.osgi.framework.ServiceReference;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.events.RTEventEmitterService;
+import com.openexchange.realtime.events.RTEventManagerService;
 import com.openexchange.realtime.events.impl.RTEventManager;
-import com.openexchange.realtime.events.json.EventsActionFactory;
 /**
  * 
  * The {@link EventsActivator} collects {@link RTEventEmitterService} instances from the OSGi system and exposes
@@ -14,7 +14,7 @@ import com.openexchange.realtime.events.json.EventsActionFactory;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class EventsActivator extends AJAXModuleActivator {
+public class EventsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -39,7 +39,7 @@ public class EventsActivator extends AJAXModuleActivator {
         });
         openTrackers();
         
-        registerModule(new EventsActionFactory(manager), "events");
+        registerService(RTEventManagerService.class, manager);
     }
 
 

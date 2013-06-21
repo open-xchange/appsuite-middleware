@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: RT Evens JSON Interface
+Bundle-SymbolicName: com.openexchange.realtime.events.json
+Bundle-Version: 7.4.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.documentation,
+ com.openexchange.documentation.annotations,
+ com.openexchange.exception,
+ com.openexchange.osgi,
+ com.openexchange.realtime.atmosphere,
+ com.openexchange.realtime.events,
+ com.openexchange.realtime.packet,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.session,
+ org.osgi.framework
+Bundle-Activator: com.openexchange.realtime.events.json.osgi.RTEventJSONActivator
