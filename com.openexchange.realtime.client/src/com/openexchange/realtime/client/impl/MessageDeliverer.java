@@ -51,12 +51,10 @@ package com.openexchange.realtime.client.impl;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
 
 
@@ -69,7 +67,7 @@ import com.openexchange.realtime.client.RTMessageHandler;
 public class MessageDeliverer implements Runnable {
 
     private final static Logger LOG = LoggerFactory.getLogger(MessageDeliverer.class);
-    
+
     private final ConcurrentHashMap<String, RTMessageHandler> messageHandlers;
 
     private final SequenceGate gate;
@@ -79,10 +77,10 @@ public class MessageDeliverer implements Runnable {
      * @param messageHandler
      * @param gate
      */
-    public MessageDeliverer(ConcurrentHashMap<String, RTMessageHandler> messageHandlers, SequenceGate gate) {
+    public MessageDeliverer(ConcurrentHashMap<String, RTMessageHandler> messageHandlers) {
         super();
         this.messageHandlers = messageHandlers;
-        this.gate = gate;
+        gate = new SequenceGate();
     }
 
     /* (non-Javadoc)
@@ -118,6 +116,13 @@ public class MessageDeliverer implements Runnable {
     }
 
     /**
+     * @return The sequence gate
+     */
+    public SequenceGate getSequenceGate() {
+        return gate;
+    }
+
+    /**
      * Get the proper handler for the selector found in the message.
      * @param message The message to be delivered to a @{link RTMessageHandler}
      * @return the @{link RTMessageHandler} associated with the selector found in the message or null
@@ -130,6 +135,5 @@ public class MessageDeliverer implements Runnable {
         }
         return associatedHandler;
     }
-
 
 }

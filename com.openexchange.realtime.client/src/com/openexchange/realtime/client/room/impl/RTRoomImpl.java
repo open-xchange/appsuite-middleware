@@ -180,10 +180,11 @@ public class RTRoomImpl implements RTRoom {
             "Connection properties cannot be null! Use the default constructor com.openexchange.realtime.client.room.impl.RTRoomImpl.RTRoomImpl(RTUser, RTConnectionProperties) for setting the member!");
         Validate.notNull(this.rtMessageHandler, "A RTMessageHandler must be configured to receive messages.");
 
-        this.rtConnection = RTConnectionFactory.newConnection(rtConnectionProperties);
+        this.rtConnection = RTConnectionFactory.getInstance().newConnection(rtConnectionProperties);
         Validate.notNull(rtConnection, "Not logged in!");
 
-        this.rtUserState = rtConnection.connect(this.roomName, this.rtMessageHandler);
+        rtConnection.registerHandler(this.roomName, this.rtMessageHandler);
+        this.rtUserState = rtConnection.connect();
         Validate.notNull(rtUserState, "User state cannot be null!");
     }
 
@@ -235,7 +236,7 @@ public class RTRoomImpl implements RTRoom {
             JSONValue leave = this.createLeaveObject();
             this.send(leave);
 
-            this.rtConnection.removeHandler(this.roomName);
+            this.rtConnection.unregisterHandler(this.roomName);
         } catch (Exception exception) {
             throw new RTException(exception);
         }

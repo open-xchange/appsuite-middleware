@@ -47,51 +47,20 @@
  *
  */
 
-package com.openexchange.realtime.client;
+package com.openexchange.realtime.client.impl;
 
-import java.util.EnumMap;
-import org.apache.commons.lang.Validate;
-import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
-import com.openexchange.realtime.client.impl.RTConnectionProvider;
-import com.openexchange.realtime.client.impl.mixedmode.MixedModeProvider;
+import com.openexchange.realtime.client.RTConnection;
+import com.openexchange.realtime.client.RTConnectionProperties;
+import com.openexchange.realtime.client.RTException;
+
 
 /**
- * A {@link RTConnectionFactory} is responsible for instantiating {@link RTConnection}s.
- * 
+ * {@link RTConnectionProvider}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class RTConnectionFactory {
+public interface RTConnectionProvider {
 
-    private static final RTConnectionFactory INSTANCE = new RTConnectionFactory();
-
-    protected final EnumMap<RTConnectionType, RTConnectionProvider> generators = new EnumMap<RTConnectionType, RTConnectionProvider>(
-        RTConnectionType.class);
-
-    protected RTConnectionFactory() {
-        super();
-        generators.put(RTConnectionType.LONG_POLLING, new MixedModeProvider());
-    }
-
-    public static RTConnectionFactory getInstance() {
-        return INSTANCE;
-    }
-
-    /**
-     * Create a new connection based on the given properties.
-     * 
-     * @param properties The properties.
-     * @return The connection.
-     * @throws RTException
-     */
-    public RTConnection newConnection(RTConnectionProperties properties) throws RTException {
-        RTConnectionType type = properties.getConnectionType();
-        Validate.notNull(type, "ConnectionType must be set in RTConnectionProperties.");
-        RTConnectionProvider provider = generators.get(type);
-        if (provider == null) {
-            throw new RTException("No provider exists for ConnectionType " + type.toString());
-        }
-
-        return provider.create(properties);
-    }
+    RTConnection create(RTConnectionProperties properties) throws RTException;
 
 }

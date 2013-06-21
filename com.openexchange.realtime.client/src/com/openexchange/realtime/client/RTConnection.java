@@ -58,36 +58,44 @@ import org.json.JSONValue;
  */
 public interface RTConnection {
 
+    /**
+     * Establishes a connection to the OX RT component. This includes creating a valid user session. If you want to register
+     * a {@link RTMessageHandler} for messages that are sent to the default selector, see {@link #connect(RTMessageHandler)}. 
+     *
+     * @return The @{link RTUserState} created during login
+     * @throws RTException if connecting failed
+     */
+    RTUserState connect() throws RTException;
 
     /**
      * Establishes a connection to the OX RT component. This includes creating a valid user session. The messageHandler will be registered
-     * for the selector "default". See {@link RTConnection#connect(String, RTMessageHandler)} if you want to add message handlers for
+     * for the selector "default". See {@link RTConnection#registerHandler(String, RTMessageHandler)} if you want to add message handlers for
      * selectors besides the default selector.
-     * 
-     * @param messageHandler The message handler that is registered for the selector "default". If <code>null</code>, incoming messages will
-     *            be discarded immediately.
+     *
+     * @param messageHandler The message handler that is registered for the selector "default". If <code>null</code>, incoming messages for
+     *                       the default selector will be discarded immediately.
      * @return The @{link RTUserState} created during login
-     * @throws RTException if connecting failed or would overwrite an aleady existing MessageHandler for the selector "default".
+     * @throws RTException if connecting failed or would overwrite an already existing MessageHandler for the selector "default".
      */
      RTUserState connect(RTMessageHandler messageHandler) throws RTException;
-     
+
     /**
-     * Establishes a connection to the OX RT component. This includes creating a valid user session.
-     * 
-     * @param selector a to associate with the messageHandler so that incoming messages can be allotted to the correct consumer
-     * @param messageHandler The message handler that is called on received messages that contain the associated selector. If
-     *            <code>null</code>, incoming messages will be discarded immediately.
-     * @return The @{link RTUserState} created during login
-     * @throws RTException if connecting would overwrite an aleady existing MessageHandler for the given selector
+     * Registers a new {@link RTMessageHandler} for the given selector. To ensure that no message gets lost, it's best practice to
+     * register message handlers before calling {@link #connect(RTMessageHandler)}.
+     *
+     * @param selector The selector
+     * @param messageHandler The message handler
+     * @throws RTException if it would overwrite an already existing MessageHandler for the given selector.
      */
-    RTUserState connect(String selector, RTMessageHandler messageHandler) throws RTException;
-     
+    void registerHandler(String selector, RTMessageHandler messageHandler) throws RTException;
+
     /**
-     * Remove the message handler that is associated with the given selector from the connection to let it know that we aren't interestes in
+     * Remove the message handler that is associated with the given selector from the connection to let it know that we aren't interested in
      * further messages.
-     * @param selector The selecotr
+     *
+     * @param selector The selector
      */
-    void removeHandler(String selector);
+    void unregisterHandler(String selector);
 
     /**
      * Sends a message to the server.

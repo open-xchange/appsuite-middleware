@@ -50,10 +50,10 @@
 package com.openexchange.realtime.client.impl;
 
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.realtime.client.RTConnection;
@@ -66,19 +66,19 @@ import com.openexchange.realtime.client.RTException;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class RTProtocol {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(RTProtocol.class);
 
     private static final long PING_TIME = 60000L;
 
     private final RTProtocolCallback callback;
 
-    private final SequenceGate gate;
+    private final AtomicReference<SequenceGate> gateRef;
 
     private final PingPongTimer pingPongTimer;
 
     private final Thread pingPongTimerThread;
-    
+
     private final SequenceGenerator sequenceGenerator;
 
     /**
@@ -90,14 +90,25 @@ public class RTProtocol {
      * messages like ACKs and PINGs.
      * @param gate The sequence gate to ensure the order of incoming messages.
      */
-    public RTProtocol(RTProtocolCallback callback, SequenceGate gate) {
+    public RTProtocol(RTProtocolCallback callback) {
         super();
         this.callback = callback;
-        this.gate = gate;
+        gateRef = new AtomicReference<SequenceGate>();
         pingPongTimer = new PingPongTimer(callback, PING_TIME, true);
         pingPongTimerThread = new Thread(pingPongTimer);
         pingPongTimerThread.start();
         sequenceGenerator = new SequenceGenerator();
+    }
+
+    /**
+     * Sets the sequence gate.
+     * @param gate The sequence gate
+     * @throws RTException if a sequence gate was already set.
+     */
+    public void setSequenceGate(SequenceGate gate) throws RTException {
+        if (!gateRef.compareAndSet(null, gate)) {
+            throw new RTException("A sequence gate was already set!");
+        }
     }
 
     /**
@@ -110,20 +121,8 @@ public class RTProtocol {
      * messages without sequence number. If the message was enqueued in the sequence gate <code>false</code>
      * will be returned.
      */
-    public boolean handleIncoming(JSONValue jsonValue) throws RTException {
+    public boolean handleIncoming(JSONObject element) throws RTException {
         long seq = -1;
-        JSONObject element;
-        if (jsonValue.isArray()) {
-            JSONArray arr = jsonValue.toArray();
-            try {
-                element = arr.getJSONObject(0);
-            } catch (JSONException e) {
-                throw new RTException("The received JSONArray did not contain a valid JSONObject", e);
-            }
-        } else {
-            element = jsonValue.toObject();
-        }
-
         try {
             if (element.hasAndNotNull("seq")) {
                 seq = element.getLong("seq");
@@ -131,22 +130,25 @@ public class RTProtocol {
         } catch (JSONException e) {
             throw new RTException("The contained sequence number '" + element.opt("seq") + "' is not a valid long.", e);
         }
-        //TODO: Can jsonValue contain several Stanzas with sequencenumbers?
+
         try {
-            if (parseElement(jsonValue.toObject())) {
+            if (parseElement(element)) {
                 if (seq < 0) {
                     return true;
-                } else if (gate != null) {
-                    if (gate.enqueue(jsonValue, seq)) {
-                        /*
-                         * {"type":"ack","seq":["0"]}
-                         */
-                        JSONArray seqNums = new JSONArray();
-                        seqNums.put(seq);
-                        JSONObject ack = new JSONObject();
-                        ack.put("type", "ack");
-                        ack.put("seq", seqNums);
-                        callback.sendACK(ack);
+                } else {
+                    SequenceGate gate = gateRef.get();
+                    if (gate != null) {
+                        if (gate.enqueue(element, seq)) {
+                            /*
+                             * {"type":"ack","seq":["0"]}
+                             */
+                            JSONArray seqNums = new JSONArray();
+                            seqNums.put(seq);
+                            JSONObject ack = new JSONObject();
+                            ack.put("type", "ack");
+                            ack.put("seq", seqNums);
+                            callback.sendACK(ack);
+                        }
                     }
                 }
             }

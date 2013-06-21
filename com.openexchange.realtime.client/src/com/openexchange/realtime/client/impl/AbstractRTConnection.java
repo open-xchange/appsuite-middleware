@@ -52,6 +52,7 @@ package com.openexchange.realtime.client.impl;
 import java.io.StringReader;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang.Validate;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -77,51 +78,40 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     protected final RTConnectionProperties connectionProperties;
 
-    protected RTProtocol protocol;
+    protected final AtomicReference<Thread> delivererRef;
 
-    protected SequenceGate gate;
+    protected final ConcurrentHashMap<String, RTMessageHandler> messageHandlers;
 
-    protected RTMessageHandler messageHandler;
+    protected final RTProtocol protocol;
 
     protected RTUserState userState;
 
-    //did we successfully login to the b ackend to receive a serversession?
+    //did we successfully login to the backend to receive a serversession?
     protected boolean loggedIn = false;
 
     //did we establish a "duplex" connection to the backend?
     protected  boolean isConnected = false;
-
-    private Thread deliverer;
-
-    protected ConcurrentHashMap<String, RTMessageHandler> messageHandlers;
 
 
     protected AbstractRTConnection(RTConnectionProperties connectionProperties) {
         super();
         Validate.notNull(connectionProperties, "ConnectionProperties are needed to create a new Connection");
         this.connectionProperties = connectionProperties;
+        delivererRef = new AtomicReference<Thread>();
         messageHandlers = new ConcurrentHashMap<String, RTMessageHandler>();
+        protocol = new RTProtocol(this);
+    }
+
+    @Override
+    public RTUserState connect() throws RTException {
+        return connect(null);
     }
 
     @Override
     public RTUserState connect(RTMessageHandler messageHandler) throws RTException {
-        return connect(ConfigurationProvider.getInstance().getDefaultSelector(), messageHandler);
-    }
-
-    @Override
-    public RTUserState connect(String selector, RTMessageHandler messageHandler) throws RTException {
-        Validate.notEmpty(selector, "The obligatory parameter selector is missing");
-        RTMessageHandler previousHandler = messageHandlers.putIfAbsent(selector, messageHandler);
-        if(previousHandler != null) {
-            throw new RTException("There is already a mapping selector <-> messageHandler for the selector: " + selector);
-        }
         if (messageHandler != null) {
-            gate = new SequenceGate();
-            deliverer = new Thread(new MessageDeliverer(messageHandlers, gate));
-            deliverer.start();
+            registerHandler0(ConfigurationProvider.getInstance().getDefaultSelector(), messageHandler);
         }
-
-        protocol = new RTProtocol(this, gate);
 
         if (!loggedIn) {
             userState = Login.doLogin(
@@ -139,12 +129,22 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
     }
 
     @Override
+    public void registerHandler(String selector, RTMessageHandler messageHandler) throws RTException {
+        registerHandler0(selector, messageHandler);
+    }
+
+    @Override
+    public void unregisterHandler(String selector) {
+        messageHandlers.remove(selector);
+    }
+
+    @Override
     public void close() throws RTException {
         protocol.release();
-
+        Thread deliverer = delivererRef.get();
         if (deliverer != null) {
             deliverer.interrupt();
-            deliverer = null;
+            delivererRef.compareAndSet(deliverer, null);
         }
     }
 
@@ -170,36 +170,46 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
                     }
                     JSONObject stanza = (JSONObject) next;
                     RTMessageHandler handlerForSelector = getHandlerForSelector(stanza);
-                    if (protocol.handleIncoming(json) && handlerForSelector != null) {
-                        messageHandler.onMessage(json);
+                    if (protocol.handleIncoming(stanza) && handlerForSelector != null) {
+                        handlerForSelector.onMessage(stanza);
                     }
                 }
             } else if(json.isObject()){
                 JSONObject stanza = (JSONObject)json;
                 RTMessageHandler handlerForSelector = getHandlerForSelector(stanza);
-                if (protocol.handleIncoming(json) && handlerForSelector != null) {
-                    messageHandler.onMessage(json);
+                if (protocol.handleIncoming(stanza) && handlerForSelector != null) {
+                    handlerForSelector.onMessage(stanza);
                 }
             } else {
                 throw new RTException("Messages must consist of a single JSONObject or an JSONArray of JSONObjects");
             }
-            
+
         } catch (JSONException e) {
             throw new RTException("The given string was not a valid JSON message.", e);
         }
     }
 
-    @Override
-    public void removeHandler(String selector) {
-        messageHandlers.remove(selector);
+    protected void registerHandler0(String selector, RTMessageHandler messageHandler) throws RTException {
+        if (messageHandlers.putIfAbsent(selector, messageHandler) != null) {
+            throw new RTException("There is already a mapping selector <-> messageHandler for the selector: " + selector);
+        }
+
+        if (delivererRef.get() == null) {
+            MessageDeliverer deliverer = new MessageDeliverer(messageHandlers);
+            Thread delivererThread = new Thread(deliverer);
+            if (delivererRef.compareAndSet(null, delivererThread)) {
+                delivererThread.start();
+                protocol.setSequenceGate(deliverer.getSequenceGate());
+            }
+        }
     }
-    
+
     /**
      * Get the proper handler for the selector found in the message.
      * @param message The message to be delivered to a @{link RTMessageHandler}
      * @return the @{link RTMessageHandler} associated with the selector found in the message or null
      */
-    private RTMessageHandler getHandlerForSelector(JSONObject message) {
+    protected RTMessageHandler getHandlerForSelector(JSONObject message) {
         RTMessageHandler associatedHandler = null;
         String selector = message.optString("selector");
         if(selector != null) {

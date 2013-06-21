@@ -52,12 +52,16 @@ package com.openexchange.realtime.client.impl;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.json.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A {@link SequenceGate} assures an ordered delivery of incoming messages.
@@ -66,11 +70,13 @@ import org.json.JSONValue;
  */
 public class SequenceGate {
 
+    private static final Logger LOG = LoggerFactory.getLogger(SequenceGate.class);
+
     static final int BUFFER_SIZE = 20;
 
     private final BlockingQueue<EnqueuedMessage> toTake;
 
-    private final List<EnqueuedMessage> buffer;
+    private final SortedSet<EnqueuedMessage> buffer;
 
     private final Lock lock;
 
@@ -84,7 +90,7 @@ public class SequenceGate {
     public SequenceGate() {
         super();
         toTake = new PriorityBlockingQueue<EnqueuedMessage>();
-        buffer = new ArrayList<EnqueuedMessage>();
+        buffer = new TreeSet<EnqueuedMessage>();
         lock = new ReentrantLock();
         queueNonEmpty = lock.newCondition();
         threshold = 0L;
@@ -136,7 +142,7 @@ public class SequenceGate {
                 }
             }
         } catch (InterruptedException e) {
-            // TODO: log
+            LOG.warn("Thread was interrupted while enqueueing message.", e);
             return false;
         } finally {
             lock.unlock();

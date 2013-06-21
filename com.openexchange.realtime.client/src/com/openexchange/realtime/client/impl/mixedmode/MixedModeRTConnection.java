@@ -47,13 +47,9 @@
  *
  */
 
-package com.openexchange.realtime.client.impl;
+package com.openexchange.realtime.client.impl.mixedmode;
 
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import org.apache.commons.lang.Validate;
 import org.atmosphere.wasync.impl.AtmosphereClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -68,10 +64,9 @@ import com.ning.http.client.Response;
 import com.openexchange.realtime.client.Constants;
 import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
-import com.openexchange.realtime.client.RTMessageHandler;
-import com.openexchange.realtime.client.RTUserState;
-import com.openexchange.realtime.client.RTUserStateChangeListener;
-import com.openexchange.realtime.client.user.RTUser;
+import com.openexchange.realtime.client.impl.AbstractRTConnection;
+import com.openexchange.realtime.client.impl.RTRequestBuilderHelper;
+import com.openexchange.realtime.client.impl.SequenceGenerator;
 
 /**
  * {@link MixedModeRTConnection} This Connection class is needed to communicate with the realtime interfaces of our backend after the
@@ -191,14 +186,6 @@ public class MixedModeRTConnection extends AbstractRTConnection {
         super(connectionProperties);
         asyncHttpClient = new AsyncHttpClient();
         atmosphereClient = new AtmosphereClient();
-    }
-    
-    @Override
-    public RTUserState connect( String selector, RTMessageHandler messageHandler) throws RTException {
-        RTUserState rtUserState = super.connect(selector, messageHandler);
-        //connect to atmosphere
-        
-        return rtUserState;
     }
 
     /* atmosphere ping pong
@@ -385,10 +372,4 @@ public class MixedModeRTConnection extends AbstractRTConnection {
     private void fireAtmosphereRequest(JSONValue jsonValue) {
         
     }
-
-    @Override
-    public void removeHandler(String selector) {
-        messageHandlers.remove("selector");
-    }
-
 }
