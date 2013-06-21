@@ -106,7 +106,7 @@ public class DelayPushQueue implements Runnable {
      * @param pushMsObject the pushMsObject to add
      */
     public void add(final PushMsObject pushMsObject) {
-        delayQueue.add(new DelayedPushMsObject(pushMsObject, delayDuration, maxDelayDuration));
+        delayQueue.offerIfAbsentElseReschedule(new DelayedPushMsObject(pushMsObject, delayDuration, maxDelayDuration));
     }
 
     /**
@@ -130,16 +130,23 @@ public class DelayPushQueue implements Runnable {
             }
             try {
                 objects.clear();
-                if (delayQueue.isEmpty()) {
-                    /*
-                     * Blocking wait for at least 1 DelayedPushMsObject to arrive.
-                     */
+                // Poll first expired
+                final DelayedPushMsObject firstPolled = delayQueue.poll();
+                if (null == firstPolled) {
+                    // None with expired delay
+                    // Blocking wait for at least 1 DelayedPushMsObject to expire.
                     final DelayedPushMsObject object = delayQueue.take();
                     if (POISON == object) {
                         return;
                     }
                     objects.add(object);
+                } else {
+                    if (POISON == firstPolled) {
+                        return;
+                    }
+                    objects.add(firstPolled);
                 }
+                // Drain more if available
                 delayQueue.drainTo(objects);
                 for (final DelayedPushMsObject delayedPushMsObject : objects) {
                     if (POISON == delayedPushMsObject) {
