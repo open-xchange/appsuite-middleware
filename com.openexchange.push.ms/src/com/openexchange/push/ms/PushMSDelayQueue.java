@@ -74,8 +74,6 @@ public final class PushMSDelayQueue extends AbstractQueue<DelayedPushMsObject> i
 
     /**
      * Initializes a new {@link PushMSDelayQueue}.
-     *
-     * @param hzTopic The associated topic
      */
     public PushMSDelayQueue() {
         super();
