@@ -1,11 +1,19 @@
 * 2013-06-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 27121: Show appropriate error if CSV import fails
+ 
+* 2013-06-20 - marc.arens@open-xchange.com
+
+ - Fix for bug 27127: Add open-xchange-grizzly as requirement in rpm spec
 
 * 2013-06-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 27144: Reload user-sensitive folders if evicted in the meantime
  - Fix for bug 27165: Ensure proper sort field is set
+
+* 2013-06-19 - marc.arens@open-xchange.com
+
+ - Fix for bug 27011: RealtimeExceptions can now be transfered as error payload of Stanzas and thus inform the client about the error state
 
 * 2013-06-19 - marcus.klein@open-xchange.com
 
