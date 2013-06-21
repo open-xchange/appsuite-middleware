@@ -1,3 +1,7 @@
+* 2013-06-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27121: Show appropriate error if CSV import fails
+
 * 2013-06-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 27144: Reload user-sensitive folders if evicted in the meantime
