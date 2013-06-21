@@ -1,3 +1,9 @@
+open-xchange-manage-group-resource (7.2.2-4) UNRELEASED; urgency=low
+
+  * Second feature freeze for 7.2.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 21 Jun 2013 16:15:21 +0200
+
 open-xchange-manage-group-resource (7.2.2-3) UNRELEASED; urgency=low
 
   * Feature freeze for 7.2.2 release
