@@ -52,8 +52,6 @@ package com.openexchange.push.ms;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.DelayQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
@@ -77,8 +75,7 @@ public class DelayPushQueue implements Runnable {
 
     private final int delayDuration;
     private final int maxDelayDuration;
-    private final ConcurrentHashMap<PushMsObject,DelayedPushMsObject> existingPushObjects;
-    private final DelayQueue<DelayedPushMsObject> delayQueue;
+    private final PushMSDelayQueue delayQueue;
     private final Thread pollThread;
     private final AtomicBoolean isRunning;
     private final Topic<Map<String, Object>> publishTopic;
@@ -93,8 +90,7 @@ public class DelayPushQueue implements Runnable {
      */
     public DelayPushQueue(final Topic<Map<String, Object>> publishTopic, final int delayDuration, final int maxDelayDuration) {
         super();
-        existingPushObjects = new ConcurrentHashMap<PushMsObject, DelayedPushMsObject>();
-        delayQueue = new DelayQueue<DelayedPushMsObject>();
+        delayQueue = new PushMSDelayQueue();
         this.publishTopic = publishTopic;
         this.delayDuration = delayDuration;
         this.maxDelayDuration = maxDelayDuration;
@@ -110,15 +106,7 @@ public class DelayPushQueue implements Runnable {
      * @param pushMsObject the pushMsObject to add
      */
     public void add(final PushMsObject pushMsObject) {
-        DelayedPushMsObject delayedPushMsObject = existingPushObjects.get(pushMsObject);
-        if (delayedPushMsObject == null) {
-            delayedPushMsObject = new DelayedPushMsObject(pushMsObject, delayDuration, maxDelayDuration);
-            existingPushObjects.put(pushMsObject, delayedPushMsObject);
-            delayQueue.add(delayedPushMsObject);
-        } else {
-            // just refresh the delay by touching
-            delayedPushMsObject.touch();
-        }
+        delayQueue.add(new DelayedPushMsObject(pushMsObject, delayDuration, maxDelayDuration));
     }
 
     /**
@@ -129,13 +117,12 @@ public class DelayPushQueue implements Runnable {
         // Feed poison element to enforce quit
         delayQueue.put(POISON);
         // Clear rest
-        existingPushObjects.clear();
         delayQueue.clear();
     }
 
     @Override
     public void run() {
-        final DelayQueue<DelayedPushMsObject> delayQueue = this.delayQueue;
+        final PushMSDelayQueue delayQueue = this.delayQueue;
         final List<DelayedPushMsObject> objects = new ArrayList<DelayedPushMsObject>(16);
         while (isRunning.get()) {
             if (LOG.isDebugEnabled()) {
@@ -160,10 +147,7 @@ public class DelayPushQueue implements Runnable {
                         return;
                     }
                     if (delayedPushMsObject != null) {
-                        final PushMsObject pushObject = delayedPushMsObject.getPushObject();
-                        // remove from mapping
-                        existingPushObjects.remove(pushObject);
-                        // and publish
+                        // Publish
                         publishTopic.publish(delayedPushMsObject.getPushObject().writePojo());
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Published delayed PushMsObject: " + delayedPushMsObject.getPushObject());
