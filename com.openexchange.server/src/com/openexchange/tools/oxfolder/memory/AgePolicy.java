@@ -93,12 +93,13 @@ public final class AgePolicy implements EvictionPolicy {
 
     @Override
     public Entry<?, ?> recordAccess(final Entry<?, ?> head, final Entry<?, ?> accessedEntry) {
-        if (ageThresholdMillis <= 0) {
+        long ageThresholdMillis2 = ageThresholdMillis;
+        if (ageThresholdMillis2 <= 0) {
             return head;
         }
 
         final long accessedEntryAge = (System.currentTimeMillis() - accessedEntry.getCreationTime());
-        if (accessedEntryAge < ageThresholdMillis) {
+        if (accessedEntryAge < ageThresholdMillis2) {
             return head;
         }
         return accessedEntry.getAfter();
