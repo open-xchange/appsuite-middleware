@@ -52,6 +52,7 @@ package com.openexchange.admin.contextrestore.osgi;
 import java.rmi.Remote;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleContext;
 import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -71,11 +72,22 @@ public class Activator extends HousekeepingActivator {
     private static final AtomicReference<OXContextInterface> OXContextInterfaceReference = new AtomicReference<OXContextInterface>();
 
     @Override
-    public void startBundle() throws Exception {
+    protected void startBundle() throws Exception {
         final Log log = LogFactory.getLog(Activator.class);
         try {
+            final BundleContext context = this.context;
             AdminCache.compareAndSetBundleContext(null, context);
             final ConfigurationService service = getService(ConfigurationService.class);
+            // Parse ConfigDB name from "writeUrl" property in file configdb.properties
+            {
+                final String jdbcUrl = service.getProperty("writeUrl", "jdbc:mysql://localhost/configdb");
+                int pos = jdbcUrl.indexOf("://");
+                pos = jdbcUrl.indexOf('/', pos > 0 ? pos + 3 : 0);
+                if (pos > 0) {
+                    OXContextRestore.setConfigDbName(jdbcUrl.substring(pos + 1));
+                }
+            }
+            // Continue
             AdminCache.compareAndSetConfigurationService(null, service);
             OXContextInterfaceReference.set(new OXContext(context));
             // Register service
@@ -88,7 +100,7 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    protected void stopBundle() throws Exception {
         super.stopBundle();
         OXContextInterfaceReference.set(null);
     }
