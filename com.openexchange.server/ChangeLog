@@ -1,3 +1,7 @@
+* 2013-06-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27203: Offer optional for ConfigDB's schema name or parse it from JDBC URL
+
 * 2013-06-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 27121: Show appropriate error if CSV import fails
