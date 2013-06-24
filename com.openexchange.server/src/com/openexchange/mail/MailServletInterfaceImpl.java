@@ -68,13 +68,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
@@ -109,6 +110,8 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -116,7 +119,6 @@ import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.ISimplifiedThreadStructure;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailProperties;
@@ -144,6 +146,9 @@ import com.openexchange.mail.search.HeaderTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.SearchUtility;
 import com.openexchange.mail.search.service.SearchTermMapper;
+import com.openexchange.mail.threader.Conversation;
+import com.openexchange.mail.threader.Conversations;
+import com.openexchange.mail.threader.ThreadableMapping;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
@@ -160,6 +165,8 @@ import com.openexchange.push.PushEventConstants;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
+import com.openexchange.threadpool.AbstractTrackableTask;
+import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
@@ -173,7 +180,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link MailServletInterfaceImpl} - The mail servlet interface implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class MailServletInterfaceImpl extends MailServletInterface {
@@ -227,9 +234,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private final ArrayList<MailImportResult> mailImportResults;
 
+    private MailAccount mailAccount;
+
     /**
      * Initializes a new {@link MailServletInterfaceImpl}.
-     * 
+     *
      * @throws OXException If user has no mail access or properties cannot be successfully loaded
      */
     MailServletInterfaceImpl(final Session session) throws OXException {
@@ -276,6 +285,18 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         }
         return locale;
+    }
+
+    private MailAccount getMailAccount() throws OXException {
+        if (mailAccount == null) {
+            try {
+                final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
+            } catch (final RuntimeException e) {
+                throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
+        return mailAccount;
     }
 
     @Override
@@ -720,7 +741,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return getMessages(folder, fromToIndices, sortCol, order, null, null, false, fields);
     }
 
-    private static final MailMessageComparator COMPARATOR = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
+    private static final MailMessageComparator COMPARATOR_DESC = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
 
     @Override
     public List<List<MailMessage>> getAllSimpleThreadStructuredMessages(final String folder, final boolean includeSent, final boolean cache, final int sortCol, final int order, final int[] fields, final int[] fromToIndices, final long max) throws OXException {
@@ -729,13 +750,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         initConnection(accountId);
         final String fullName = argument.getFullname();
         final boolean mergeWithSent = includeSent && !mailAccess.getFolderStorage().getSentFolder().equals(fullName);
+        final MailFields mailFields = new MailFields(MailField.getFields(fields));
+        mailFields.add(MailField.toField(MailListField.getField(sortCol)));
         // Check message storage
         final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
         if (messageStorage instanceof ISimplifiedThreadStructure) {
             final ISimplifiedThreadStructure simplifiedThreadStructure = (ISimplifiedThreadStructure) messageStorage;
             // Effective fields
-            final MailFields mailFields = new MailFields(MailField.getFields(fields));
-            mailFields.add(MailField.toField(MailListField.getField(sortCol)));
             // Perform operation
             try {
                 return simplifiedThreadStructure.getThreadSortedMessages(
@@ -755,101 +776,143 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         }
         /*
-         * Check for needed capability
+         * Sort by references
          */
-        final MailCapabilities capabilities = mailAccess.getMailConfig().getCapabilities();
-        final boolean retry = !capabilities.hasThreadReferences();
-        /*-
-         * 1. Send 'all' request with id, folder_id, level, and received_date - you need all that data.
-         *
-         * 2. Whenever level equals 0, a new thread starts (new array)
-         *
-         * 3. Add all objects (id, folder_id, received_date) to that list until level !== 0.
-         *
-         * 4. Order by received_date (ignore the internal level structure), so that the newest mails show up first.
-         *
-         * 5. Generate the real list of all threads. This must be again ordered by received_date, so that the most recent threads show up
-         *    first. id and folder_id refer to the most recent mail.
-         */
-        SearchIterator<MailMessage> searchIterator;
-        try {
-            final int allSort = MailSortField.RECEIVED_DATE.getField();
-            final int allOrder = OrderDirection.DESC.getOrder();
-            searchIterator = getAllThreadedMessages(folder, allSort, allOrder, fields, null);
-        } catch (final OXException e) {
-            if (!retry) {
-                throw e;
-            }
-            searchIterator = getAllMessages(folder, sortCol, order, fields, null);
+        final String sentFolder = mailAccess.getFolderStorage().getSentFolder();
+        final Future<ThreadableMapping> submittedTask = mergeWithSent ? getThreadableMapping(sentFolder, (int) max, mailFields, messageStorage) : null;
+        final List<Conversation> conversations = Conversations.conversationsFor(fullName, (int) max, mailFields, messageStorage);
+        Conversations.fold(conversations);
+        // Comparator
+        final MailMessageComparator threadComparator = COMPARATOR_DESC;
+        // Sort
+        List<List<MailMessage>> list = new ArrayList<List<MailMessage>>(conversations.size());
+        for (final Conversation conversation : conversations) {
+            list.add(conversation.getMessages(threadComparator));
         }
-        try {
-            List<List<MailMessage>> list = new LinkedList<List<MailMessage>>();
-            List<MailMessage> current = new LinkedList<MailMessage>();
-            // Here we go
-            final int size = searchIterator.size();
-            for (int i = 0; i < size; i++) {
-                final MailMessage mail = searchIterator.next();
-                final int threadLevel = mail.getThreadLevel();
-                if (0 == threadLevel) {
-                    list.add(current);
-                    current = new LinkedList<MailMessage>();
-                }
-                current.add(mail);
-            }
-            list.add(current);
-            /*
-             * Sort empty ones
-             */
-            for (final Iterator<List<MailMessage>> iterator = list.iterator(); iterator.hasNext();) {
-                final List<MailMessage> mails = iterator.next();
-                if (null == mails || mails.isEmpty()) {
-                    iterator.remove();
-                } else {
-                    Collections.sort(mails, COMPARATOR);
-                }
-            }
-            /*
-             * Sort root elements
-             */
-            final boolean descending = OrderDirection.DESC.equals(OrderDirection.getOrderDirection(order));
-            MailSortField effectiveSortField = sortCol <= 0 ? MailSortField.RECEIVED_DATE : MailSortField.getField(sortCol);
-            if (null == effectiveSortField) {
-                effectiveSortField = MailSortField.RECEIVED_DATE;
-            }
-            final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
-            final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
-
-                @Override
-                public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
-                    return comparator.compare(o1.get(0), o2.get(0));
-                }
-            };
+        // Sort root elements
+        {
+            final MailSortField sortField = MailSortField.getField(sortCol);
+            final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
+            final Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, OrderDirection.getOrderDirection(order), getUserLocale());
             Collections.sort(list, listComparator);
-            if (null != fromToIndices) {
-                final int fromIndex = fromToIndices[0];
-                int toIndex = fromToIndices[1];
-                final int lsize = list.size();
-                if ((fromIndex) > lsize) {
-                    /*
-                     * Return empty iterator if start is out of range
-                     */
-                    return Collections.emptyList();
-                }
-                /*
-                 * Reset end index if out of range
-                 */
-                if (toIndex >= lsize) {
-                    toIndex = lsize;
-                }
-                list = list.subList(fromIndex, toIndex);
-            }
-            /*
-             * Finally return
-             */
-            return list;
-        } finally {
-            searchIterator.close();
         }
+        // Check for available mapping indicating that sent folder results have to be merged
+        if (null != submittedTask) {
+            final ThreadableMapping threadableMapping = getFrom(submittedTask);
+            for (final List<MailMessage> thread : list) {
+                if (threadableMapping.checkFor(new ArrayList<MailMessage>(thread), thread)) { // Iterate over copy
+                    // Re-Sort thread
+                    Collections.sort(thread, threadComparator);
+                }
+            }
+        }
+        IndexRange indexRange = null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]);
+        if (null != indexRange) {
+            final int fromIndex = indexRange.start;
+            int toIndex = indexRange.end;
+            final int size = list.size();
+            if ((fromIndex) > size) {
+                // Return empty iterator if start is out of range
+                return Collections.emptyList();
+            }
+            // Reset end index if out of range
+            if (toIndex >= size) {
+                toIndex = size;
+            }
+            list = list.subList(fromIndex, toIndex);
+        }
+        /*
+         * Apply account identifier
+         */
+        setAccountInfo2(list);
+        // Return list
+        return list;
+    }
+
+    private static Future<ThreadableMapping> getThreadableMapping(final String sentFolder, final int limit, final MailFields mailFields, final IMailMessageStorage messageStorage) {
+        final Props props = LogProperties.optLogProperties(Thread.currentThread());
+        final Task<ThreadableMapping> task = new AbstractTrackableTask<ThreadableMapping>() {
+
+            @Override
+            public ThreadableMapping call() throws Exception {
+                final List<MailMessage> mails = Conversations.messagesFor(sentFolder, limit, mailFields, messageStorage);
+                return new ThreadableMapping(64).initWith(mails);
+            }
+
+            @Override
+            public Props optLogProperties() {
+                return props;
+            }
+
+        };
+        return ThreadPools.getThreadPool().submit(task, CallerRunsBehavior.<ThreadableMapping> getInstance());
+    }
+
+    private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, final Locale locale) {
+        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale);
+        final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
+
+            @Override
+            public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
+                int result = comparator.compare(o1.get(0), o2.get(0));
+                if ((0 != result) || (MailSortField.RECEIVED_DATE != sortField)) {
+                    return result;
+                }
+                // Zero as comparison result AND primarily sorted by received-date
+                final MailMessage msg1 = o1.get(0);
+                final MailMessage msg2 = o2.get(0);
+                final String inReplyTo1 = msg1.getInReplyTo();
+                final String inReplyTo2 = msg2.getInReplyTo();
+                if (null == inReplyTo1) {
+                    result = null == inReplyTo2 ? 0 : -1;
+                } else {
+                    result = null == inReplyTo2 ? 1 : 0;
+                }
+                return 0 == result ? new MailMessageComparator(MailSortField.SENT_DATE, OrderDirection.DESC.equals(order), null).compare(msg1, msg2) : result;
+            }
+        };
+        return listComparator;
+    }
+
+    private static <T> T getFrom(final Future<T> f) throws OXException {
+        if (null == f) {
+            return null;
+        }
+        try {
+            return f.get();
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt(); // Keep interrupted state
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
+        } catch (final ExecutionException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof MessagingException) {
+                throw MimeMailException.handleMessagingException((MessagingException) cause);
+            }
+            throw ThreadPools.launderThrowable(e, OXException.class);
+        }
+
+    }
+
+    /**
+     * Sets account ID and name in given instances of {@link MailMessage}.
+     *
+     * @param mailMessages The {@link MailMessage} instances
+     * @return The given instances of {@link MailMessage} each with account ID and name set
+     * @throws OXException If mail account cannot be obtained
+     */
+    private <C extends Collection<MailMessage>, W extends Collection<C>> W setAccountInfo2(final W col) throws OXException {
+        final MailAccount account = getMailAccount();
+        final String name = account.getName();
+        final int id = account.getId();
+        for (final C mailMessages : col) {
+            for (final MailMessage mailMessage : mailMessages) {
+                if (null != mailMessage) {
+                    mailMessage.setAccountId(id);
+                    mailMessage.setAccountName(name);
+                }
+            }
+        }
+        return col;
     }
 
     @Override
@@ -1809,7 +1872,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     /**
      * Checks if specified fields only consist of mail ID and folder ID
-     * 
+     *
      * @param fields The fields to check
      * @return <code>true</code> if specified fields only consist of mail ID and folder ID; otherwise <code>false</code>
      */
