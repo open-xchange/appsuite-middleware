@@ -338,6 +338,7 @@ public final class MimeForward {
                 final boolean isHtml = contentType.startsWith(TEXT_HTM);
                 if (null == firstSeenText) {
                     firstSeenText = "";
+                    contentType.setPrimaryType("text").setSubType("plain");
                 } else if (isHtml) {
                     contentIds = MimeMessageUtility.getContentIDs(firstSeenText);
                     contentType.setCharsetParameter("UTF-8");
