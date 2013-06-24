@@ -63,10 +63,10 @@ public final class OXExceptionStrings implements LocalizableStrings {
     public static final String DEFAULT_MESSAGE = "[Not available]";
 
     // The default message displayed to user.
-    public static final String MESSAGE = "A severe error occurred.";
+    public static final String MESSAGE = "An error occurred inside the Open-Xchange server which prevented it from fulfilling the request.";
 
-    // The default message displayed to user.
-    public static final String MESSAGE_RETRY = "An error occurred. Please try again later.";
+    // The default message displayed to user when a re-try is recommended
+    public static final String MESSAGE_RETRY = "A temporary error occurred inside the Open-Xchange server which prevented it from fulfilling the request.. Please try again later.";
 
     // The general message for a conflicting update operation.
     public static final String MESSAGE_CONFLICT = "The object has been changed in the meantime.";
