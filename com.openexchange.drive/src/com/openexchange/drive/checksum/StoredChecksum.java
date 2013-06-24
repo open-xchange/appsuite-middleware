@@ -50,6 +50,7 @@
 package com.openexchange.drive.checksum;
 
 
+
 /**
  * {@link StoredChecksum}
  *
@@ -59,7 +60,6 @@ public abstract class StoredChecksum {
 
     protected String uuid;
     protected String checksum;
-    protected String folderID;
     protected long sequenceNumber;
 
     /**
@@ -85,24 +85,6 @@ public abstract class StoredChecksum {
      */
     public void setChecksum(String checksum) {
         this.checksum = checksum;
-    }
-
-    /**
-     * Gets the folderID
-     *
-     * @return The folderID
-     */
-    public String getFolderID() {
-        return folderID;
-    }
-
-    /**
-     * Sets the folderID
-     *
-     * @param folderID The folderID to set
-     */
-    public void setFolderID(String folderID) {
-        this.folderID = folderID;
     }
 
     /**

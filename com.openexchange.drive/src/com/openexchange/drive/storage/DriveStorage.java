@@ -72,17 +72,16 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.composition.IDBasedFolderAccess;
+import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedSequenceNumberProvider;
-import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -100,8 +99,7 @@ public class DriveStorage {
     private final FolderCache knownFolders;
 
     private IDBasedFileAccess fileAccess;
-    private FileStorageFolderAccess folderAccess;
-    private FileStorageAccountAccess accountAccess;
+    private IDBasedFolderAccess folderAccess;
 
     /**
      * Initializes a new {@link DriveStorage}.
@@ -239,6 +237,12 @@ public class DriveStorage {
             }
         }
         if (null != targetPath) {
+            String targetFolderID = getFolderID(targetPath, true);
+            if (false == file.getFolderId().equals(targetFolderID)) {
+                movedFile.setFolderId(targetFolderID);
+                updatedFields.add(Field.FOLDER_ID);
+            }
+
             FileStorageFolder targetFolder = getFolder(targetPath, true);
             if (false == file.getFolderId().equals(targetFolder.getId())) {
                 movedFile.setFolderId(targetFolder.getId());
@@ -530,7 +534,7 @@ public class DriveStorage {
     private FileStorageFolder getRootFolder() throws OXException {
         FileStorageFolder rootFolder = knownFolders.getFolder(ROOT_PATH);
         if (null == rootFolder) {
-            rootFolder = getFolderAccess().getFolder(rootFolderID.getFolderId());
+            rootFolder = getFolderAccess().getFolder(rootFolderID.toUniqueID());
             knownFolders.remember(ROOT_PATH, rootFolder);
         }
         return rootFolder;
@@ -577,29 +581,10 @@ public class DriveStorage {
         }
     }
 
-    public FileStorageAccountAccess getAccountAccess() throws OXException {
-        if (null == accountAccess) {
-            accountAccess = DriveServiceLookup.getService(FileStorageServiceRegistry.class)
-                .getFileStorageService(rootFolderID.getService()).getAccountAccess(rootFolderID.getAccountId(), session.getServerSession());
-
-//            FileStorageFileAccess fileAccess1 = DriveServiceLookup.getService(FileStorageServiceRegistry.class)
-//                .getFileStorageService(rootFolderID.getService()).getAccountAccess(rootFolderID.getAccountId(), session.getServerSession()).getFileAccess();
-//            FileStorageFileAccess fileAccess2 = DriveServiceLookup.getService(FileStorageServiceRegistry.class)
-//                .getFileStorageService(rootFolderID.getService()).getAccountManager().getAccount(rootFolderID.getAccountId(), session.getServerSession())
-//                .getFileStorageService().getAccountAccess(rootFolderID.getAccountId(), session.getServerSession()).getFileAccess();
-//
-//            FileStorageAccountManager accountManager = DriveServiceLookup.getService(FileStorageServiceRegistry.class)
-//                .getFileStorageService(rootFolderID.getService()).getAccountManager();
-//            FileStorageAccount account = accountManager.getAccount(rootFolderID.getAccountId(), session.getServerSession());
-//            FileStorageService service = account.getFileStorageService();
-//            accountAccess = service.getAccountAccess(rootFolderID.getAccountId(), session.getServerSession());
-        }
-        return accountAccess;
-    }
-
-    public FileStorageFolderAccess getFolderAccess() throws OXException {
+    public IDBasedFolderAccess getFolderAccess() throws OXException {
         if (null == folderAccess) {
-            folderAccess = getAccountAccess().getFolderAccess();
+            IDBasedFolderAccessFactory factory = DriveServiceLookup.getService(IDBasedFolderAccessFactory.class, true);
+            folderAccess = factory.createAccess(session.getServerSession());
         }
         return folderAccess;
     }

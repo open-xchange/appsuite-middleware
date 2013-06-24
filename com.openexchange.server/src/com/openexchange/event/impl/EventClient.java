@@ -579,7 +579,7 @@ public class EventClient {
 
         final Event event = new Event("com/openexchange/groupware/folder/delete", ht);
         triggerEvent(event);
-        triggerEvent(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(folder)));
+        triggerEvent(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(folder, parentFolder)));
 
         final EventObject eventObject = new EventObject(folder, DELETED, session);
         EventQueue.add(eventObject);
@@ -689,6 +689,16 @@ public class EventClient {
         Dictionary<String, Object> properties = new Hashtable<String, Object>(5);
         properties.put(FileStorageEventConstants.SESSION, session);
         properties.put(FileStorageEventConstants.FOLDER_ID, String.valueOf(folder.getObjectID()));
+        properties.put(FileStorageEventConstants.ACCOUNT_ID, "infostore");
+        properties.put(FileStorageEventConstants.SERVICE, "com.openexchange.infostore");
+        return properties;
+    }
+
+    private Dictionary<String, Object> getEventProperties(FolderObject folder, FolderObject parentFolder) {
+        Dictionary<String, Object> properties = new Hashtable<String, Object>(5);
+        properties.put(FileStorageEventConstants.SESSION, session);
+        properties.put(FileStorageEventConstants.FOLDER_ID, String.valueOf(folder.getObjectID()));
+        properties.put(FileStorageEventConstants.PARENT_FOLDER_ID, String.valueOf(parentFolder.getObjectID()));
         properties.put(FileStorageEventConstants.ACCOUNT_ID, "infostore");
         properties.put(FileStorageEventConstants.SERVICE, "com.openexchange.infostore");
         return properties;

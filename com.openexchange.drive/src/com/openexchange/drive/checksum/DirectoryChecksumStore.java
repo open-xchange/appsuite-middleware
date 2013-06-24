@@ -51,6 +51,7 @@ package com.openexchange.drive.checksum;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.FolderID;
 
 /**
  * {@link DirectoryChecksumStore}
@@ -59,7 +60,7 @@ import com.openexchange.exception.OXException;
  */
 public interface DirectoryChecksumStore {
 
-    DirectoryChecksum insertDirectoryChecksum(String folderID, long sequenceNumber, String checksum) throws OXException;
+    DirectoryChecksum insertDirectoryChecksum(FolderID folderID, long sequenceNumber, String checksum) throws OXException;
 
     List<DirectoryChecksum> insertDirectoryChecksums(List<DirectoryChecksum> directoryChecksums) throws OXException;
 
@@ -70,14 +71,14 @@ public interface DirectoryChecksumStore {
 
     List<DirectoryChecksum> updateDirectoryChecksums(List<DirectoryChecksum> directoryChecksums) throws OXException;
 
-    boolean updateDirectoryChecksumFolder(String folderID, String newFolderID) throws OXException;
+    boolean updateDirectoryChecksumFolder(FolderID folderID, FolderID newFolderID) throws OXException;
 
-    boolean removeDirectoryChecksum(String folderID) throws OXException;
+    boolean removeDirectoryChecksum(FolderID folderID) throws OXException;
 
 
-    DirectoryChecksum getDirectoryChecksum(String folderID) throws OXException;
+    DirectoryChecksum getDirectoryChecksum(FolderID folderID) throws OXException;
 
-    List<DirectoryChecksum> getDirectoryChecksums(List<String> folderIDs) throws OXException;
+    List<DirectoryChecksum> getDirectoryChecksums(List<FolderID> folderIDs) throws OXException;
 
 }
 

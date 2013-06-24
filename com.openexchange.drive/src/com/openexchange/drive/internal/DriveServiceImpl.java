@@ -78,6 +78,8 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.session.ServerSession;
 
@@ -204,8 +206,14 @@ public class DriveServiceImpl implements DriveService {
             /*
              * store checksum
              */
-            FileChecksum fileChecksum = driveSession.getChecksumStore().insertFileChecksum(createdFile.getFolderId(),
-                createdFile.getId(), createdFile.getVersion(), createdFile.getSequenceNumber(), newVersion.getChecksum());
+            FileID fileID = new FileID(createdFile.getId());
+            FolderID folderID = new FolderID(createdFile.getFolderId());
+            if (null == fileID.getFolderId()) {
+                // TODO: check
+                fileID.setFolderId(folderID.getFolderId());
+            }
+            FileChecksum fileChecksum = driveSession.getChecksumStore().insertFileChecksum(
+                fileID, createdFile.getVersion(), createdFile.getSequenceNumber(), newVersion.getChecksum());
             /*
              * check if created file still equals uploaded one
              */
@@ -278,8 +286,8 @@ public class DriveServiceImpl implements DriveService {
              * update stored checksums if needed
              */
             if (false == folderID.equals(newFolderID)) {
-                session.getChecksumStore().updateFileChecksumFolders(folderID, newFolderID);
-                session.getChecksumStore().updateDirectoryChecksumFolder(folderID, newFolderID);
+                session.getChecksumStore().updateFileChecksumFolders(new FolderID(folderID), new FolderID(newFolderID));
+                session.getChecksumStore().updateDirectoryChecksumFolder(new FolderID(folderID), new FolderID(newFolderID));
             }
             break;
         case REMOVE:
@@ -300,7 +308,7 @@ public class DriveServiceImpl implements DriveService {
             }
             // delete empty directory
             folderID = session.getStorage().deleteFolder(action.getVersion().getPath());
-            session.getChecksumStore().removeDirectoryChecksum(folderID);
+            session.getChecksumStore().removeDirectoryChecksum(new FolderID(folderID));
             break;
         default:
             throw new IllegalStateException("Can't perform action " + action + " on server");
@@ -319,8 +327,13 @@ public class DriveServiceImpl implements DriveService {
                 versionToRemove.getFile(), versionToRemove.getChecksum(), DriveConstants.TEMP_PATH);
             if (versionToRemove.getChecksum().equals(removedFile.getFileName())) {
                 // moved successfully, update checksum
-                fileChecksum.setFolderID(removedFile.getFolderId());
-                fileChecksum.setFileID(removedFile.getId());
+                FileID fileID = new FileID(removedFile.getId());
+                FolderID folderID = new FolderID(removedFile.getFolderId());
+                if (null == fileID.getFolderId()) {
+                    // TODO: check
+                    fileID.setFolderId(folderID.getFolderId());
+                }
+                fileChecksum.setFileID(fileID);
                 fileChecksum.setVersion(removedFile.getVersion());
                 fileChecksum.setSequenceNumber(removedFile.getSequenceNumber());
                 session.getChecksumStore().updateFileChecksum(fileChecksum);
@@ -348,8 +361,14 @@ public class DriveServiceImpl implements DriveService {
              * invalidate target file checksum
              */
             if (null != targetFile) {
+                FileID fileID = new FileID(targetFile.getId());
+                FolderID folderID = new FolderID(targetFile.getFolderId());
+                if (null == fileID.getFolderId()) {
+                    // TODO: check
+                    fileID.setFolderId(folderID.getFolderId());
+                }
                 session.getChecksumStore().removeFileChecksum(
-                    targetFile.getFolderId(), targetFile.getId(), targetFile.getVersion(), targetFile.getSequenceNumber());
+                    fileID, targetFile.getVersion(), targetFile.getSequenceNumber());
             }
             if (isFromTemp) {
                 /*
@@ -358,8 +377,14 @@ public class DriveServiceImpl implements DriveService {
                 File movedFile = null != targetFile ? session.getStorage().moveFile(sourceFile, targetFile) :
                     session.getStorage().moveFile(sourceFile, action.getNewVersion().getName(), path);
                 fileChecksum = sourceVersion.getFileChecksum();
-                fileChecksum.setFolderID(movedFile.getFolderId());
-                fileChecksum.setFileID(movedFile.getId());
+                FileID fileID = new FileID(movedFile.getId());
+                FolderID folderID = new FolderID(movedFile.getFolderId());
+                if (null == fileID.getFolderId()) {
+                    // TODO: check
+                    fileID.setFolderId(folderID.getFolderId());
+                }
+
+                fileChecksum.setFileID(fileID);
                 fileChecksum.setVersion(movedFile.getVersion());
                 fileChecksum.setSequenceNumber(movedFile.getSequenceNumber());
                 session.getChecksumStore().updateFileChecksum(fileChecksum);
@@ -369,7 +394,13 @@ public class DriveServiceImpl implements DriveService {
                  */
                 File copiedFile = null != targetFile ? session.getStorage().copyFile(sourceFile, targetFile) :
                     session.getStorage().copyFile(sourceFile, action.getNewVersion().getName(), path);
-                session.getChecksumStore().insertFileChecksum(copiedFile.getFolderId(), copiedFile.getId(), copiedFile.getVersion(),
+                FileID fileID = new FileID(copiedFile.getId());
+                FolderID folderID = new FolderID(copiedFile.getFolderId());
+                if (null == fileID.getFolderId()) {
+                    // TODO: check
+                    fileID.setFolderId(folderID.getFolderId());
+                }
+                session.getChecksumStore().insertFileChecksum(fileID, copiedFile.getVersion(),
                     copiedFile.getSequenceNumber(), sourceVersion.getChecksum());
             }
             break;
@@ -388,8 +419,13 @@ public class DriveServiceImpl implements DriveService {
             } else {
                 renamedFile = session.getStorage().renameFile(originalVersion.getFile(), action.getNewVersion().getName());
             }
-            fileChecksum.setFolderID(renamedFile.getFolderId());
-            fileChecksum.setFileID(renamedFile.getId());
+            FileID fileID = new FileID(renamedFile.getId());
+            FolderID folderID = new FolderID(renamedFile.getFolderId());
+            if (null == fileID.getFolderId()) {
+                // TODO: check
+                fileID.setFolderId(folderID.getFolderId());
+            }
+            fileChecksum.setFileID(fileID);
             fileChecksum.setVersion(renamedFile.getVersion());
             fileChecksum.setSequenceNumber(renamedFile.getSequenceNumber());
             session.getChecksumStore().updateFileChecksum(fileChecksum);

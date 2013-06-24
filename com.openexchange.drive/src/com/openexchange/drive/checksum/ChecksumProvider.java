@@ -64,6 +64,8 @@ import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -86,8 +88,13 @@ public class ChecksumProvider {
      * @throws OXException
      */
     public static FileChecksum getChecksum(DriveSession session, File file) throws OXException {
-        FileChecksum fileChecksum = session.getChecksumStore().getFileChecksum(
-            file.getFolderId(), file.getId(), file.getVersion(), file.getSequenceNumber());
+        FileID fileID = new FileID(file.getId());
+        FolderID folderID = new FolderID(file.getFolderId());
+        if (null == fileID.getFolderId()) {
+            // TODO: check
+            fileID.setFolderId(folderID.getFolderId());
+        }
+        FileChecksum fileChecksum = session.getChecksumStore().getFileChecksum(fileID, file.getVersion(), file.getSequenceNumber());
         if (null == fileChecksum) {
             fileChecksum = session.getChecksumStore().insertFileChecksum(calculateFileChecksum(session, file));
         }
@@ -107,7 +114,7 @@ public class ChecksumProvider {
      */
     public static List<FileChecksum> getChecksums(DriveSession session, String folderID, List<File> files) throws OXException {
         List<FileChecksum> checksums = new ArrayList<FileChecksum>(files.size());
-        List<FileChecksum> storedChecksums = session.getChecksumStore().getFileChecksums(folderID);
+        List<FileChecksum> storedChecksums = session.getChecksumStore().getFileChecksums(new FolderID(folderID));
         List<FileChecksum> newChecksums = new ArrayList<FileChecksum>();
         for (File file : files) {
             if (false == folderID.equals(file.getFolderId())) {
@@ -137,17 +144,21 @@ public class ChecksumProvider {
      * @throws OXException
      */
     public static List<DirectoryChecksum> getChecksums(DriveSession session, List<String> folderIDs) throws OXException {
+        List<FolderID> fids = new ArrayList<FolderID>(folderIDs.size());
+        for (String folderID : folderIDs) {
+            fids.add(new FolderID(folderID));
+        }
         if (false == session.getStorage().supportsFolderSequenceNumbers()) {
-            return calculateDirectoryChecksums(session, folderIDs);
+            return calculateDirectoryChecksums(session, fids);
         }
         List<DirectoryChecksum> checksums = new ArrayList<DirectoryChecksum>(folderIDs.size());
-        List<DirectoryChecksum> storedChecksums = session.getChecksumStore().getDirectoryChecksums(folderIDs);
+        List<DirectoryChecksum> storedChecksums = session.getChecksumStore().getDirectoryChecksums(fids);
         List<DirectoryChecksum> updatedChecksums = new ArrayList<DirectoryChecksum>();
         List<DirectoryChecksum> newChecksums = new ArrayList<DirectoryChecksum>();
         Map<String, Long> sequenceNumbers = session.getStorage().getSequenceNumbers(folderIDs);
-        for (String folderID : folderIDs) {
+        for (FolderID folderID : fids) {
             DirectoryChecksum directoryChecksum = find(storedChecksums, folderID);
-            Long value = sequenceNumbers.get(folderID);
+            Long value = sequenceNumbers.get(folderID.toUniqueID());
             long sequenceNumber = null != value ? value.longValue() : 0;
             if (null != directoryChecksum) {
                 if (sequenceNumber != directoryChecksum.getSequenceNumber()) {
@@ -157,7 +168,9 @@ public class ChecksumProvider {
                 }
             } else {
                 directoryChecksum = new DirectoryChecksum(folderID, sequenceNumber, calculateMD5(session, folderID));
-                newChecksums.add(directoryChecksum);
+                if (0 < sequenceNumber) {
+                    newChecksums.add(directoryChecksum);
+                }
             }
             checksums.add(directoryChecksum);
         }
@@ -168,36 +181,6 @@ public class ChecksumProvider {
             session.getChecksumStore().insertDirectoryChecksums(newChecksums);
         }
         return checksums;
-
-
-//        List<DirectoryChecksum> checksums = new ArrayList<DirectoryChecksum>(folderIDs.size());
-//        List<DirectoryChecksum> storedChecksums = session.getChecksumStore().getDirectoryChecksums(folderIDs);
-//        List<DirectoryChecksum> updatedChecksums = new ArrayList<DirectoryChecksum>();
-//        List<DirectoryChecksum> newChecksums = new ArrayList<DirectoryChecksum>();
-//        for (String folderID : folderIDs) {
-//            DirectoryChecksum directoryChecksum = find(storedChecksums, folderID);
-//            if (null != directoryChecksum) {
-//                long sequenceNumber = session.getStorage().getSequenceNumber(
-//                    session.getStorage().getPath(folderID), directoryChecksum.getSequenceNumber());
-//                if (sequenceNumber != directoryChecksum.getSequenceNumber()) {
-//                    directoryChecksum.setChecksum(calculateMD5(session, folderID));
-//                    directoryChecksum.setSequenceNumber(sequenceNumber);
-//                    updatedChecksums.add(directoryChecksum);
-//                }
-//            } else {
-//                long sequenceNumber = session.getStorage().getSequenceNumber(session.getStorage().getPath(folderID), 0);
-//                directoryChecksum = new DirectoryChecksum(folderID, sequenceNumber, calculateMD5(session, folderID));
-//                newChecksums.add(directoryChecksum);
-//            }
-//            checksums.add(directoryChecksum);
-//        }
-//        if (0 < updatedChecksums.size()) {
-//            session.getChecksumStore().updateDirectoryChecksums(updatedChecksums);
-//        }
-//        if (0 < newChecksums.size()) {
-//            session.getChecksumStore().insertDirectoryChecksums(newChecksums);
-//        }
-//        return checksums;
     }
 
     /**
@@ -213,16 +196,16 @@ public class ChecksumProvider {
         return checksum.equals(getChecksum(session, file).getChecksum());
     }
 
-    private static List<DirectoryChecksum> calculateDirectoryChecksums(DriveSession session, List<String> folderIDs) throws OXException {
+    private static List<DirectoryChecksum> calculateDirectoryChecksums(DriveSession session, List<FolderID> folderIDs) throws OXException {
         List<DirectoryChecksum> checksums = new ArrayList<DirectoryChecksum>(folderIDs.size());
-        for (String folderID : folderIDs) {
+        for (FolderID folderID : folderIDs) {
             checksums.add(new DirectoryChecksum(folderID, -1, calculateMD5(session, folderID)));
         }
         return checksums;
     }
 
-    private static String calculateMD5(DriveSession session, String folderID) throws OXException {
-        List<File> files = session.getStorage().getFilesInFolder(folderID);
+    private static String calculateMD5(DriveSession session, FolderID folderID) throws OXException {
+        List<File> files = session.getStorage().getFilesInFolder(folderID.toUniqueID());
         if (null == files || 0 == files.size()) {
             return DriveConstants.EMPTY_MD5;
         } else if (0 < files.size()) {
@@ -251,11 +234,16 @@ public class ChecksumProvider {
         if (null == md5) {
             throw DriveExceptionCodes.NO_CHECKSUM_FOR_FILE.create(file);
         }
+        FileID fileID = new FileID(file.getId());
+        FolderID folderID = new FolderID(file.getFolderId());
+        if (null == fileID.getFolderId()) {
+            // TODO: check
+            fileID.setFolderId(folderID.getFolderId());
+        }
         FileChecksum fileChecksum = new FileChecksum();
-        fileChecksum.setFileID(file.getId());
-        fileChecksum.setFolderID(file.getFolderId());
-        fileChecksum.setVersion(file.getVersion());
+        fileChecksum.setFileID(fileID);
         fileChecksum.setSequenceNumber(file.getSequenceNumber());
+        fileChecksum.setVersion(file.getVersion());
         fileChecksum.setChecksum(md5);
         return fileChecksum;
     }
@@ -291,14 +279,16 @@ public class ChecksumProvider {
 
     private static FileChecksum find(Collection<? extends FileChecksum> checksums, File file) {
         for (FileChecksum checksum : checksums) {
-            if (checksum.matches(file)) {
+            if (checksum.getFileID().equals(new FileID(file.getId())) &&
+                (null == checksum.getVersion() ? null == file.getVersion() : checksum.getVersion().equals(file.getVersion())) &&
+                checksum.getSequenceNumber() == file.getSequenceNumber()) {
                 return checksum;
             }
         }
         return null;
     }
 
-    private static DirectoryChecksum find(Collection<? extends DirectoryChecksum> checksums, String folderID) {
+    private static DirectoryChecksum find(Collection<? extends DirectoryChecksum> checksums, FolderID folderID) {
         for (DirectoryChecksum checksum : checksums) {
             if (checksum.getFolderID().equals(folderID)) {
                 return checksum;

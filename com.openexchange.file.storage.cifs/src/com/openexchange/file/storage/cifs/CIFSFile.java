@@ -129,7 +129,7 @@ public final class CIFSFile extends DefaultFile {
                     setCreated(new Date(smbFile.createTime()));
                 }
                 if (set.contains(Field.LAST_MODIFIED) || set.contains(Field.LAST_MODIFIED_UTC)) {
-                    setLastModified(new Date(smbFile.getIfModifiedSince()));
+                    setLastModified(new Date(smbFile.getLastModified()));
                 }
                 final String name = smbFile.getName();
                 setTitle(name);

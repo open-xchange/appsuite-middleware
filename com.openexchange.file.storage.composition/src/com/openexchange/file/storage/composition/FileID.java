@@ -131,6 +131,60 @@ public class FileID {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((accountId == null) ? 0 : accountId.hashCode());
+        result = prime * result + ((fileId == null) ? 0 : fileId.hashCode());
+        result = prime * result + ((folderId == null) ? 0 : folderId.hashCode());
+        result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof FileID)) {
+            return false;
+        }
+        FileID other = (FileID) obj;
+        if (accountId == null) {
+            if (other.accountId != null) {
+                return false;
+            }
+        } else if (!accountId.equals(other.accountId)) {
+            return false;
+        }
+        if (fileId == null) {
+            if (other.fileId != null) {
+                return false;
+            }
+        } else if (!fileId.equals(other.fileId)) {
+            return false;
+        }
+        if (folderId == null) {
+            if (other.folderId != null) {
+                return false;
+            }
+        } else if (!folderId.equals(other.folderId)) {
+            return false;
+        }
+        if (serviceId == null) {
+            if (other.serviceId != null) {
+                return false;
+            }
+        } else if (!serviceId.equals(other.serviceId)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public String toString() {
         return toUniqueID();
     }

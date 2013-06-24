@@ -49,7 +49,7 @@
 
 package com.openexchange.drive.checksum;
 
-import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.composition.FileID;
 
 
 /**
@@ -59,7 +59,7 @@ import com.openexchange.file.storage.File;
  */
 public class FileChecksum extends StoredChecksum {
 
-    private String fileID;
+    private FileID fileID;
     private String version;
 
     /**
@@ -74,7 +74,7 @@ public class FileChecksum extends StoredChecksum {
      *
      * @return The fileID
      */
-    public String getFileID() {
+    public FileID getFileID() {
         return fileID;
     }
 
@@ -83,7 +83,7 @@ public class FileChecksum extends StoredChecksum {
      *
      * @param fileID The fileID to set
      */
-    public void setFileID(String fileID) {
+    public void setFileID(FileID fileID) {
         this.fileID = fileID;
     }
 
@@ -105,25 +105,9 @@ public class FileChecksum extends StoredChecksum {
         this.version = version;
     }
 
-    /**
-     * Gets a value indicating whether this stored checksum matches the supplied file.
-     *
-     * @param file The file to check
-     * @return <code>true</code> if the file matches, i.e. the file's ID, folder ID, version and sequence number equals the stored
-     *         checksum's equivalents, <code>false</code>, otherwise
-     */
-    public boolean matches(File file) {
-        return null != file &&
-            null == this.fileID ? null == file.getId() : this.fileID.equals(file.getId()) &&
-            null == this.folderID ? null == file.getFolderId() : this.folderID.equals(file.getFolderId()) &&
-            null == this.version ? null == file.getVersion() : this.version.equals(file.getVersion()) &&
-            this.sequenceNumber == file.getSequenceNumber()
-        ;
-    }
-
     @Override
     public String toString() {
-        return getFolderID() + " | " + getFileID() + " | " + getVersion() + " | " + getChecksum() + " | " + getSequenceNumber();
+        return fileID.getFolderId() + " | " + fileID.getFileId() + " | " + getVersion() + " | " + getChecksum() + " | " + getSequenceNumber();
     }
 
 }

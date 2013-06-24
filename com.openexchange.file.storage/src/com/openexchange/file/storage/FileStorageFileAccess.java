@@ -206,7 +206,7 @@ public interface FileStorageFileAccess extends TransactionAware {
             return null;
         }
 
-        public Comparator<File> comparatorBy(final File.Field by, final Comparator comparator) {
+        public Comparator<File> comparatorBy(final File.Field by, final Comparator<File> comparator) {
             final FileComparator fileComparator = new FileComparator(by, comparator);
             switch (this) {
             case ASC:
@@ -221,7 +221,7 @@ public interface FileStorageFileAccess extends TransactionAware {
             Collections.sort(collection, comparatorBy(by));
         }
 
-        public void sort(final List<File> collection, final File.Field by, final Comparator comparator) {
+        public void sort(final List<File> collection, final File.Field by, final Comparator<File> comparator) {
             Collections.sort(collection, comparatorBy(by, comparator));
         }
 
@@ -308,7 +308,22 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @return The new folderId and id
      * @throws OXException If operation fails
      */
-    IDTuple copy(IDTuple source, String destFolder, File update, InputStream newFil, List<File.Field> modifiedFields) throws OXException;
+    IDTuple copy(IDTuple source, String destFolder, File update, InputStream newFile, List<File.Field> modifiedFields) throws OXException;
+
+    /**
+     * Move a file from a given source to a given destination. Changes to the metadata can be applied and a new file attachment
+     * may be uploaded as well.
+     *
+     * @param source The file to move
+     * @param dest Where to move the file to. This is a folder id.
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or
+     *                       DISTANT_FUTURE to circumvent the check
+     * @param update Which other changes to apply to the copy. May be null, if no changes are to be applied.
+     * @param The fields to use from the update. May be null if the update is null.
+     * @return The new folderId and id
+     * @throws OXException If operation fails
+     */
+    IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<File.Field> modifiedFields) throws OXException;
 
     /**
      * Load the file content

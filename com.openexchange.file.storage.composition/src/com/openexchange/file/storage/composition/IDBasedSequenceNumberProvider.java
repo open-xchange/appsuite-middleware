@@ -65,9 +65,18 @@ public interface IDBasedSequenceNumberProvider {
      * sequence number in a folder indicates a change, for example a new, modified or deleted file.
      *
      * @param folderIds A list of folder IDs to get the sequence numbers for
-     * @return A map holding the resulting sequence numbers to each requested folder ID
+     * @return A map holding the resulting sequence numbers mapped to the corresponding folder ID. Not all folders may be present in
+     *         the result.
      * @throws OXException
      */
     Map<String, Long> getSequenceNumbers(List<String> folderIds) throws OXException;
 
+    /**
+     * Gets a value indicating whether sequence numbers are supported by the given folder.
+     *
+     * @param folderId The folder to check
+     * @return <code>true</code> if sequence numbers are supported, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    boolean supportsSequenceNumbers(String folderId) throws OXException;
 }

@@ -60,7 +60,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.internal.WrappedFileStorageService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 
 /**
@@ -144,7 +143,7 @@ public class OSGIFileStorageServiceRegistry implements FileStorageServiceRegistr
         public FileStorageService addingService(final ServiceReference<FileStorageService> reference) {
             final FileStorageService service = context.getService(reference);
             if (service != null) {
-                final FileStorageService addMe = new WrappedFileStorageService(service);
+                final FileStorageService addMe = service;
                 if (null == map.putIfAbsent(addMe.getId(), addMe)) {
                     return service;
                 }

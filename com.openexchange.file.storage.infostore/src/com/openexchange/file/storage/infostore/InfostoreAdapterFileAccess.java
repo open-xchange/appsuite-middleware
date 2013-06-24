@@ -495,6 +495,17 @@ public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFi
         return new IDTuple(destFolder, orig.getId());
     }
 
+    @Override
+    public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<Field> modifiedFields) throws OXException {
+        /*
+         * use saveFileMetadata method with adjusted folder; the file ID is sufficient to identify the source
+         */
+        update.setFolderId(destFolder);
+        update.setId(source.getId());
+        this.saveFileMetadata(update, sequenceNumber, modifiedFields);
+        return new IDTuple(update.getFolderId(), update.getId());
+    }
+
     public InfostoreFacade getInfostore(final String folderId) {
         if (folderId != null && VIRTUAL_FOLDERS.contains(Long.valueOf(folderId))) {
             return VIRTUAL_INFOSTORE;

@@ -81,6 +81,8 @@ public class FileStorageEventConstants {
 
     public static final String FOLDER_ID = "folderId";
 
+    public static final String PARENT_FOLDER_ID = "parentFolderId";
+
     public static final String FOLDER_PATH = "folderPath";
 
     public static final String OBJECT_ID = "objectId";

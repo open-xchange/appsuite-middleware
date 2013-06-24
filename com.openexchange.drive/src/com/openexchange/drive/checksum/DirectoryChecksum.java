@@ -49,6 +49,8 @@
 
 package com.openexchange.drive.checksum;
 
+import com.openexchange.file.storage.composition.FolderID;
+
 
 /**
  * {@link DirectoryChecksum}
@@ -57,6 +59,8 @@ package com.openexchange.drive.checksum;
  */
 public class DirectoryChecksum extends StoredChecksum {
 
+    protected FolderID folderID;
+
     /**
      * Initializes a new {@link DirectoryChecksum}.
      */
@@ -64,11 +68,29 @@ public class DirectoryChecksum extends StoredChecksum {
         super();
     }
 
-    public DirectoryChecksum(String folderID, long sequenceNumber, String checksum) {
+    public DirectoryChecksum(FolderID folderID, long sequenceNumber, String checksum) {
         super();
         this.folderID = folderID;
         this.sequenceNumber = sequenceNumber;
         this.checksum = checksum;
+    }
+
+    /**
+     * Gets the folderID
+     *
+     * @return The folderID
+     */
+    public FolderID getFolderID() {
+        return folderID;
+    }
+
+    /**
+     * Sets the folderID
+     *
+     * @param folderID The folderID to set
+     */
+    public void setFolderID(FolderID folderID) {
+        this.folderID = folderID;
     }
 
     @Override

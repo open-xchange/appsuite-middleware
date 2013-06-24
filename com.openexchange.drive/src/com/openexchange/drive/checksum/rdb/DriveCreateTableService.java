@@ -75,7 +75,7 @@ public class DriveCreateTableService extends AbstractCreateTableImpl {
     }
 
     /**
-     * Gets the CREATE-TABLE statements.
+     * Gets the CREATE TABLE statements.
      *
      * @return The CREATE statements
      */

@@ -69,6 +69,7 @@ import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.sync.SyncResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.composition.FolderID;
 
 
 /**
@@ -217,9 +218,11 @@ public class FileCopyOptimizer extends FileActionOptimizer {
             for (FileChecksum fileChecksum : fileChecksums) {
                 File storageFile = null;
                 boolean folderNotFound = false;
+                FolderID folderID = new FolderID(fileChecksum.getFileID().getService(), fileChecksum.getFileID().getAccountId(),
+                    fileChecksum.getFileID().getFolderId());
                 try {
-                    String path = session.getStorage().getPath(fileChecksum.getFolderID());
-                    storageFile = session.getStorage().getFile(path, fileChecksum.getFileID(), fileChecksum.getVersion());
+                    String path = session.getStorage().getPath(folderID.toUniqueID());
+                    storageFile = session.getStorage().getFile(path, fileChecksum.getFileID().toUniqueID(), fileChecksum.getVersion());
                 } catch (OXException e) {
                     LOG.debug("Error accessing file referenced by checksum store: " + e.getMessage());
                     if ("FLD-0008".equals(e.getErrorCode())) {
@@ -228,8 +231,8 @@ public class FileCopyOptimizer extends FileActionOptimizer {
                 }
                 if (null == storageFile || storageFile.getSequenceNumber() != fileChecksum.getSequenceNumber()) {
                     if (folderNotFound) {
-                        LOG.debug("Invalidating stored file checksums for folder: " + fileChecksum.getFolderID());
-                        session.getChecksumStore().removeFileChecksumsInFolder(fileChecksum.getFolderID());
+                        LOG.debug("Invalidating stored file checksums for folder: " + folderID);
+                        session.getChecksumStore().removeFileChecksumsInFolder(folderID);
                     } else {
                         LOG.debug("Invalidating stored file checksum: " + fileChecksum);
                         session.getChecksumStore().removeFileChecksum(fileChecksum);
@@ -251,9 +254,11 @@ public class FileCopyOptimizer extends FileActionOptimizer {
     private static ServerFileVersion getStorageVersion(DriveSession session, FileChecksum fileChecksum) throws OXException {
         File storageFile = null;
         boolean folderNotFound = false;
+        FolderID folderID = new FolderID(fileChecksum.getFileID().getService(), fileChecksum.getFileID().getAccountId(),
+            fileChecksum.getFileID().getFolderId());
         try {
-            String path = session.getStorage().getPath(fileChecksum.getFolderID());
-            storageFile = session.getStorage().getFile(path, fileChecksum.getFileID(), fileChecksum.getVersion());
+            String path = session.getStorage().getPath(folderID.toUniqueID());
+            storageFile = session.getStorage().getFile(path, fileChecksum.getFileID().getFileId(), fileChecksum.getVersion());
         } catch (OXException e) {
             LOG.debug("Error accessing file referenced by checksum store: " + e.getMessage());
             if ("FLD-0008".equals(e.getErrorCode())) {
@@ -262,8 +267,8 @@ public class FileCopyOptimizer extends FileActionOptimizer {
         }
         if (null == storageFile || storageFile.getSequenceNumber() != fileChecksum.getSequenceNumber()) {
             if (folderNotFound) {
-                LOG.debug("Invalidating stored file checksums for folder: " + fileChecksum.getFolderID());
-                session.getChecksumStore().removeFileChecksumsInFolder(fileChecksum.getFolderID());
+                LOG.debug("Invalidating stored file checksums for folder: " + folderID);
+                session.getChecksumStore().removeFileChecksumsInFolder(folderID);
             } else {
                 LOG.debug("Invalidating stored file checksum: " + fileChecksum);
                 session.getChecksumStore().removeFileChecksum(fileChecksum);

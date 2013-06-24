@@ -59,6 +59,7 @@ import com.openexchange.drive.checksum.rdb.DriveDeleteListener;
 import com.openexchange.drive.internal.DriveServiceImpl;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -85,7 +86,7 @@ public class DriveActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { IDBasedFileAccessFactory.class, ManagedFileManagement.class, FileStorageServiceRegistry.class,
-            DatabaseService.class };
+            DatabaseService.class, IDBasedFolderAccessFactory.class };
     }
 
     @Override

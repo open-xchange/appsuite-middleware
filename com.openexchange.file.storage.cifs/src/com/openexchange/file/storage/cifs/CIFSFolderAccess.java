@@ -493,7 +493,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
             /*
              * Create folder
              */
-            final String fid = pid + '/' + toCreate.getName() + '/';
+            final String fid = pid + toCreate.getName() + '/';
             final SmbFile newDir = getSmbFile(fid);
             newDir.mkdir();
             /*

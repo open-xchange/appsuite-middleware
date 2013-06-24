@@ -193,7 +193,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             return Collections.emptyMap();
         }
         /*
-         * determine the file access for queried folders
+         * determine the file accesses for queried folders
          */
         Map<FileStorageFileAccess, List<String>> foldersPerFileAccess = new HashMap<FileStorageFileAccess, List<String>>();
         for (String folderId : folderIds) {
@@ -207,28 +207,33 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             folders.add(folderID.getFolderId());
         }
         /*
-         * get folder sequence numbers from file access
+         * get folder sequence numbers from file accesses
          */
         Map<String, Long> sequenceNumbers = new HashMap<String, Long>(folderIds.size());
         for (Entry<FileStorageFileAccess, List<String>> entry : foldersPerFileAccess.entrySet()) {
             FileStorageFileAccess fileAccess = entry.getKey();
+            String accountID = fileAccess.getAccountAccess().getAccountId();
+            String serviceID = fileAccess.getAccountAccess().getService().getId();
             if (FileStorageSequenceNumberProvider.class.isInstance(fileAccess)) {
                 /*
                  * use optimized sequence number access
                  */
-                sequenceNumbers.putAll(((FileStorageSequenceNumberProvider)fileAccess).getSequenceNumbers(entry.getValue()));
-            } else {
-                /*
-                 * determine sequence numbers via delta as fallback
-                 */
-                List<Field> fields = Arrays.asList(new Field[] { Field.SEQUENCE_NUMBER });
-                for (String folderId : entry.getValue()) {
-                    Delta<File> delta = fileAccess.getDelta(folderId, 0, fields, Field.SEQUENCE_NUMBER, SortDirection.DESC, false);
-                    sequenceNumbers.put(folderId, Long.valueOf(delta.sequenceNumber()));
+                Map<String, Long> fsSequenceNumbers = ((FileStorageSequenceNumberProvider)fileAccess).getSequenceNumbers(entry.getValue());
+                if (null != fsSequenceNumbers) {
+                    for (Entry<String, Long> fssn : fsSequenceNumbers.entrySet()) {
+                        sequenceNumbers.put(new FolderID(serviceID, accountID, fssn.getKey()).toUniqueID(), fssn.getValue());
+                    }
                 }
             }
         }
         return sequenceNumbers;
+    }
+
+    @Override
+    public boolean supportsSequenceNumbers(String folderId) throws OXException {
+        FolderID folderID = new FolderID(folderId);
+        FileStorageFileAccess fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
+        return FileStorageSequenceNumberProvider.class.isInstance(fileAccess);
     }
 
     @Override
@@ -458,47 +463,68 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     }
 
     protected void save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final FileAccessDelegation delegation) throws OXException {
-        String id = document.getId();
-        FolderID folderID = null;
-        if(document.getFolderId() != null) {
-            folderID = new FolderID(document.getFolderId());
-        }
-
-        Event event = null;
-        if (id != FileStorageFileAccess.NEW) {
-            FileID fileID = new FileID(id);
-            if(folderID == null) {
-                folderID = new FolderID(fileID.getService(), fileID.getAccountId(), fileID.getFolderId());
+        if (FileStorageFileAccess.NEW == document.getId()) {
+            /*
+             * create new file
+             */
+            FolderID targetFolderID = new FolderID(document.getFolderId());
+            document.setFolderId(targetFolderID.getFolderId());
+            delegation.call(getFileAccess(targetFolderID.getService(), targetFolderID.getAccountId()));
+            FileID newID = new FileID(
+                targetFolderID.getService(), targetFolderID.getAccountId(), targetFolderID.getFolderId(), document.getId());
+            document.setId(newID.toUniqueID());
+            document.setFolderId(targetFolderID.toUniqueID());
+            postEvent(FileStorageEventHelper.buildCreateEvent(
+                session, newID.getService(), newID.getAccountId(), targetFolderID.toUniqueID(), newID.getFileId()));
+        } else {
+            /*
+             * update existing file
+             */
+            FileID sourceFileID = new FileID(document.getId());
+            FolderID targetFolderID;
+            if (null == document.getFolderId()) {
+                targetFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceFileID.getFolderId());
+            } else {
+                targetFolderID = new FolderID(document.getFolderId());
+                if (false == sourceFileID.getService().equals(targetFolderID.getService()) ||
+                    false == sourceFileID.getAccountId().equals(targetFolderID.getAccountId())) {
+                    /*
+                     * special handling for move between storages
+                     */
+                    move(document, data, sequenceNumber, modifiedColumns);
+                    return;
+                }
             }
-            if(!(fileID.getService().equals(folderID.getService())) || !(fileID.getAccountId().equals(folderID.getAccountId()))) {
-                move(document, data, sequenceNumber, modifiedColumns);
-                return;
+            if (null != sourceFileID.getFolderId() && false == sourceFileID.getFolderId().equals(targetFolderID.getFolderId())) {
+                /*
+                 * special handling for move to different folder
+                 */
+                FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceFileID.getFolderId());
+                IDTuple sourceID = new IDTuple(sourceFileID.getFolderId(), sourceFileID.getFileId());
+                document.setFolderId(sourceID.getFolder());
+                document.setId(sourceID.getId());
+                IDTuple newID = getFileAccess(sourceFileID.getService(), sourceFileID.getAccountId())
+                    .move(sourceID, targetFolderID.getFolderId(), sequenceNumber, document, modifiedColumns);
+                FileID newFileID = new FileID(sourceFileID.getService(), sourceFileID.getAccountId(), newID.getFolder(), newID.getId());
+                postEvent(FileStorageEventHelper.buildDeleteEvent(session, sourceFileID.getService(), sourceFileID.getAccountId(),
+                    sourceFolderID.toUniqueID(), sourceFileID.toUniqueID(), null));
+                postEvent(FileStorageEventHelper.buildCreateEvent(session, newFileID.getService(), newFileID.getAccountId(),
+                    targetFolderID.toUniqueID(), newFileID.toUniqueID()));
+            } else {
+                /*
+                 * update without move
+                 */
+                document.setFolderId(targetFolderID.getFolderId());
+                document.setId(sourceFileID.getFileId());
+                delegation.call(getFileAccess(targetFolderID.getService(), targetFolderID.getAccountId()));
+                FileID newID = new FileID(
+                    targetFolderID.getService(), targetFolderID.getAccountId(), targetFolderID.getFolderId(), document.getId());
+                document.setId(newID.toUniqueID());
+                document.setFolderId(targetFolderID.toUniqueID());
+                postEvent(FileStorageEventHelper.buildUpdateEvent(
+                    session, newID.getService(), newID.getAccountId(), targetFolderID.toUniqueID(), newID.getFileId()));
             }
-
-            document.setId(fileID.getFileId());
-            event = FileStorageEventHelper.buildUpdateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID());
         }
-
-        document.setFolderId(folderID.getFolderId());
-        FileStorageFileAccess fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
-        FolderID srcFolder = null;
-        if (id != null) {
-            File fileMetadata = fileAccess.getFileMetadata(folderID.getFolderId(), new FileID(id).getFileId(), FileStorageFileAccess.CURRENT_VERSION);
-            srcFolder = new FolderID(folderID.getService(), folderID.getAccountId(), fileMetadata.getFolderId());
-        }
-        delegation.call(fileAccess);
-
-        FileID fileID = new FileID(folderID.getService(), folderID.getAccountId(), document.getFolderId(), document.getId());
-        document.setId(fileID.toUniqueID());
-        document.setFolderId(new FolderID(folderID.getService(), folderID.getAccountId(), document.getFolderId()).toUniqueID());
-        if (event == null) {
-            event = FileStorageEventHelper.buildCreateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID());
-        } else if (modifiedColumns != null && modifiedColumns.contains(Field.FOLDER_ID) && !folderID.equals(srcFolder)) {
-            event = FileStorageEventHelper.buildCreateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID());
-            postEvent(FileStorageEventHelper.buildDeleteEvent(session, fileID.getService(), fileID.getAccountId(), srcFolder.toUniqueID(), fileID.toUniqueID(), null));
-        }
-
-        postEvent(event);
     }
 
     protected void move(final File document, InputStream data, final long sequenceNumber, final List<Field> modifiedColumns) throws OXException {
@@ -662,7 +688,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         final List<Field> cols = addIDColumns(columns);
         if (FileStorageFileAccess.ALL_FOLDERS != folderId) {
             final FolderID id = new FolderID(folderId);
-            return getFileAccess(id.getService(), id.getAccountId()).search(query, cols, id.getFolderId(), sort, order, start, end);
+            SearchIterator<File> iterator = getFileAccess(id.getService(), id.getAccountId()).search(query, cols, id.getFolderId(), sort, order, start, end);
+            return fixIDs(iterator, id.getService(), id.getAccountId());
         }
         /*
          * Search in all available folders

@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -71,7 +70,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
  * {@link InMemoryFileStorageFileAccess}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
@@ -181,7 +180,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
             }
             int version = versionContainer.addVersion(holder);
             file.setVersion(Integer.toString(version));
-            
+
         }
     }
 
@@ -287,6 +286,17 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
     }
 
     @Override
+    public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<File.Field> modifiedFields) throws OXException {
+        final File orig = getFileMetadata(source.getFolder(), source.getId(), CURRENT_VERSION);
+        if (update != null) {
+            orig.copyFrom(update, modifiedFields.toArray(new File.Field[modifiedFields.size()]));
+        }
+        orig.setFolderId(destFolder);
+        saveFileMetadata(orig, sequenceNumber, modifiedFields);
+        return new IDTuple(destFolder, orig.getId());
+    }
+
+    @Override
     public void unlock(String folderId, String id) throws OXException {
         // Nothing to do
 
@@ -344,7 +354,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
 
     @Override
     public TimedResult<File> getDocuments(final List<IDTuple> ids, List<Field> fields) throws OXException {
-       
+
         return new TimedResult<File>() {
 
             @Override
@@ -353,7 +363,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
                 for (IDTuple idTuple : ids) {
                     files.add(getVersionContainer(idTuple.getFolder(), idTuple.getId()).getCurrentVersion().getFile());
                 }
-                
+
                 return new SearchIteratorAdapter<File>(files.iterator(), files.size());
             }
 
@@ -506,9 +516,9 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
 
     private final class InMemoryTimedResult implements TimedResult<File> {
 
-        private Map<String, VersionContainer> files;
+        private final Map<String, VersionContainer> files;
 
-        private long sequenceNumber;
+        private final long sequenceNumber;
 
         private Field sort;
 
@@ -548,18 +558,18 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
 
     /**
      * {@link AllVersionsTimedResult}
-     * 
+     *
      * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
      */
     public class AllVersionsTimedResult implements TimedResult<File> {
 
-        private VersionContainer versionContainer;
+        private final VersionContainer versionContainer;
 
         private Field sort;
 
         private SortDirection order;
 
-        private long sequenceNumber = System.currentTimeMillis();
+        private final long sequenceNumber = System.currentTimeMillis();
 
         public AllVersionsTimedResult(VersionContainer versionContainer) {
             super();

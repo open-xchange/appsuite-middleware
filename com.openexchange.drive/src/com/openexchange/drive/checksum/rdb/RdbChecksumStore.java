@@ -49,6 +49,10 @@
 
 package com.openexchange.drive.checksum.rdb;
 
+import static com.openexchange.drive.checksum.rdb.SQL.escapeFile;
+import static com.openexchange.drive.checksum.rdb.SQL.escapeFolder;
+import static com.openexchange.drive.checksum.rdb.SQL.unescapeFile;
+import static com.openexchange.drive.checksum.rdb.SQL.unescapeFolder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -67,6 +71,8 @@ import com.openexchange.drive.checksum.DirectoryChecksum;
 import com.openexchange.drive.checksum.FileChecksum;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -80,30 +86,23 @@ public class RdbChecksumStore implements ChecksumStore {
     private static final int DELETE_CHUNK_SIZE = 50;
 
     private final int contextID;
-    private final String serviceID;
-    private final String accountID;
     private final DatabaseService databaseService;
 
     /**
      * Initializes a new {@link RdbChecksumStore}.
      *
      * @param contextID The context ID
-     * @param serviceID The service ID
-     * @param accountID The account ID
      * @throws OXException
      */
-    public RdbChecksumStore(int contextID, String serviceID, String accountID) throws OXException {
+    public RdbChecksumStore(int contextID) throws OXException {
         super();
         this.contextID = contextID;
-        this.serviceID = serviceID;
-        this.accountID = accountID;
         this.databaseService = DriveServiceLookup.getService(DatabaseService.class, true);
     }
 
     @Override
-    public FileChecksum insertFileChecksum(String folderID, String fileID, String version, long sequenceNumber, String checksum) throws OXException {
+    public FileChecksum insertFileChecksum(FileID fileID, String version, long sequenceNumber, String checksum) throws OXException {
         FileChecksum fileChecksum = new FileChecksum();
-        fileChecksum.setFolderID(folderID);
         fileChecksum.setFileID(fileID);
         fileChecksum.setVersion(version);
         fileChecksum.setSequenceNumber(sequenceNumber);
@@ -125,7 +124,7 @@ public class RdbChecksumStore implements ChecksumStore {
                     throw new IllegalArgumentException("New file checksums must not contain an UUID");
                 }
                 fileChecksum.setUuid(newUid());
-                if (0 == insertFileChecksum(connection, contextID, serviceID, accountID, fileChecksum)) {
+                if (0 == insertFileChecksum(connection, contextID, fileChecksum)) {
                     throw DriveExceptionCodes.DB_ERROR.create("File checksum not added: " + fileChecksum);
                 }
             }
@@ -150,7 +149,7 @@ public class RdbChecksumStore implements ChecksumStore {
                 if (null == fileChecksum.getUuid()) {
                     throw new IllegalArgumentException("Updating file checksums requires an existing UUID");
                 }
-                updateFileChecksum(connection, fileChecksum);
+                updateFileChecksum(connection, contextID, fileChecksum);
             }
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
@@ -161,10 +160,10 @@ public class RdbChecksumStore implements ChecksumStore {
     }
 
     @Override
-    public int updateFileChecksumFolders(String folderID, String newFolderID) throws OXException {
+    public int updateFileChecksumFolders(FolderID folderID, FolderID newFolderID) throws OXException {
         Connection connection = databaseService.getWritable(contextID);
         try {
-            return updateFileChecksumFolders(connection, contextID, serviceID, accountID, folderID, newFolderID);
+            return updateFileChecksumFolders(connection, contextID, folderID, newFolderID);
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -198,7 +197,7 @@ public class RdbChecksumStore implements ChecksumStore {
                 /*
                  * delete chunk
                  */
-                deleted += deleteFileChecksums(connection, uuids);
+                deleted += deleteFileChecksums(connection, contextID, uuids);
             }
             return deleted;
         } catch (SQLException e) {
@@ -209,10 +208,10 @@ public class RdbChecksumStore implements ChecksumStore {
     }
 
     @Override
-    public int removeFileChecksumsInFolder(String folderID) throws OXException {
+    public int removeFileChecksumsInFolder(FolderID folderID) throws OXException {
         Connection connection = databaseService.getWritable(contextID);
         try {
-            return deleteFileChecksumsInFolder(connection, contextID, serviceID, accountID, folderID);
+            return deleteFileChecksumsInFolder(connection, contextID, folderID);
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -221,10 +220,10 @@ public class RdbChecksumStore implements ChecksumStore {
     }
 
     @Override
-    public boolean removeFileChecksum(String folderID, String fileID, String version, long sequenceNumber) throws OXException {
+    public boolean removeFileChecksum(FileID fileID, String version, long sequenceNumber) throws OXException {
         Connection connection = databaseService.getWritable(contextID);
         try {
-            return 0 < deleteFileChecksum(connection, contextID, serviceID, accountID, folderID, fileID, version, sequenceNumber);
+            return 0 < deleteFileChecksum(connection, contextID, fileID, version, sequenceNumber);
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -233,10 +232,10 @@ public class RdbChecksumStore implements ChecksumStore {
     }
 
     @Override
-    public FileChecksum getFileChecksum(String folderID, String fileID, String version, long sequenceNumber) throws OXException {
+    public FileChecksum getFileChecksum(FileID fileID, String version, long sequenceNumber) throws OXException {
         Connection connection = databaseService.getReadOnly(contextID);
         try {
-            return selectFileChecksum(connection, contextID, serviceID, accountID, folderID, fileID, version, sequenceNumber);
+            return selectFileChecksum(connection, contextID, fileID, version, sequenceNumber);
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -245,10 +244,10 @@ public class RdbChecksumStore implements ChecksumStore {
     }
 
     @Override
-    public List<FileChecksum> getFileChecksums(String folderID) throws OXException {
+    public List<FileChecksum> getFileChecksums(FolderID folderID) throws OXException {
         Connection connection = databaseService.getReadOnly(contextID);
         try {
-            return selectFileChecksumsInFolder(connection, contextID, serviceID, accountID, folderID);
+            return selectFileChecksumsInFolder(connection, contextID, folderID);
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -260,7 +259,7 @@ public class RdbChecksumStore implements ChecksumStore {
     public List<FileChecksum> getMatchingFileChecksums(String checksum) throws OXException {
         Connection connection = databaseService.getReadOnly(contextID);
         try {
-            return selectMatchingFileChecksums(connection, contextID, serviceID, accountID, checksum);
+            return selectMatchingFileChecksums(connection, contextID, checksum);
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -268,13 +267,14 @@ public class RdbChecksumStore implements ChecksumStore {
         }
     }
 
+    @Override
     public Map<String, List<FileChecksum>> getMatchingFileChecksums(List<String> checksums) throws OXException {
         if (null == checksums) {
             return Collections.emptyMap();
         }
         Connection connection = databaseService.getReadOnly(contextID);
         try {
-            return selectMatchingFileChecksums(connection, contextID, serviceID, accountID, checksums);
+            return selectMatchingFileChecksums(connection, contextID, checksums);
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -288,7 +288,7 @@ public class RdbChecksumStore implements ChecksumStore {
     }
 
     @Override
-    public DirectoryChecksum insertDirectoryChecksum(String folderID, long sequenceNumber, String checksum) throws OXException {
+    public DirectoryChecksum insertDirectoryChecksum(FolderID folderID, long sequenceNumber, String checksum) throws OXException {
         return insertDirectoryChecksum(new DirectoryChecksum(folderID, sequenceNumber, checksum));
     }
 
@@ -301,7 +301,7 @@ public class RdbChecksumStore implements ChecksumStore {
                     throw new IllegalArgumentException("New directory checksums must not contain an UUID");
                 }
                 directoryChecksum.setUuid(newUid());
-                if (0 == insertDirectoryChecksum(connection, contextID, serviceID, accountID, directoryChecksum)) {
+                if (0 == insertDirectoryChecksum(connection, contextID, directoryChecksum)) {
                     throw DriveExceptionCodes.DB_ERROR.create("File checksum not added: " + directoryChecksum);
                 }
             }
@@ -321,7 +321,7 @@ public class RdbChecksumStore implements ChecksumStore {
                 if (null == directoryChecksum.getUuid()) {
                     throw new IllegalArgumentException("Updating directory checksums requires an existing UUID");
                 }
-                updateDirectoryChecksum(connection, directoryChecksum);
+                updateDirectoryChecksum(connection, contextID, directoryChecksum);
             }
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
@@ -337,10 +337,10 @@ public class RdbChecksumStore implements ChecksumStore {
     }
 
     @Override
-    public boolean updateDirectoryChecksumFolder(String folderID, String newFolderID) throws OXException {
+    public boolean updateDirectoryChecksumFolder(FolderID folderID, FolderID newFolderID) throws OXException {
         Connection connection = databaseService.getWritable(contextID);
         try {
-            return 0 < updateDirectoryChecksumFolder(connection, contextID, serviceID, accountID, folderID, newFolderID);
+            return 0 < updateDirectoryChecksumFolder(connection, contextID, folderID, newFolderID);
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -349,10 +349,10 @@ public class RdbChecksumStore implements ChecksumStore {
     }
 
     @Override
-    public boolean removeDirectoryChecksum(String folderID) throws OXException {
+    public boolean removeDirectoryChecksum(FolderID folderID) throws OXException {
         Connection connection = databaseService.getWritable(contextID);
         try {
-            return 0 < deleteDirectoryChecksum(connection, contextID, serviceID, accountID, folderID);
+            return 0 < deleteDirectoryChecksum(connection, contextID, folderID);
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -361,16 +361,16 @@ public class RdbChecksumStore implements ChecksumStore {
     }
 
     @Override
-    public DirectoryChecksum getDirectoryChecksum(String folderID) throws OXException {
-        List<DirectoryChecksum> directoryChecksums = getDirectoryChecksums(Arrays.asList(new String[] { folderID }));
+    public DirectoryChecksum getDirectoryChecksum(FolderID folderID) throws OXException {
+        List<DirectoryChecksum> directoryChecksums = getDirectoryChecksums(Arrays.asList(new FolderID[] { folderID }));
         return 1 == directoryChecksums.size() ? directoryChecksums.get(0) : null;
     }
 
     @Override
-    public List<DirectoryChecksum> getDirectoryChecksums(List<String> folderIDs) throws OXException {
+    public List<DirectoryChecksum> getDirectoryChecksums(List<FolderID> folderIDs) throws OXException {
         Connection connection = databaseService.getReadOnly(contextID);
         try {
-            return selectDirectoryChecksums(connection, contextID, serviceID, accountID, folderIDs.toArray(new String[folderIDs.size()]));
+            return selectDirectoryChecksums(connection, contextID, folderIDs.toArray(new FolderID[folderIDs.size()]));
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -382,112 +382,103 @@ public class RdbChecksumStore implements ChecksumStore {
         return UUIDs.getUnformattedString(UUID.randomUUID());
     }
 
-    private static int insertFileChecksum(Connection connection, int cid, String service, String account, FileChecksum fileChecksum) throws SQLException {
+    private static int insertFileChecksum(Connection connection, int cid, FileChecksum fileChecksum) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SQL.INSERT_FILE_CHECKSUM_STMT);
             stmt.setString(1, fileChecksum.getUuid());
             stmt.setInt(2, cid);
-            stmt.setString(3, service);
-            stmt.setString(4, account);
-            stmt.setString(5, fileChecksum.getFolderID());
-            stmt.setString(6, fileChecksum.getFileID());
-            stmt.setString(7, fileChecksum.getVersion());
-            stmt.setLong(8, fileChecksum.getSequenceNumber());
-            stmt.setString(9, fileChecksum.getChecksum());
+            stmt.setString(3, escapeFolder(fileChecksum.getFileID()));
+            stmt.setString(4, escapeFile(fileChecksum.getFileID()));
+            stmt.setString(5, fileChecksum.getVersion());
+            stmt.setLong(6, fileChecksum.getSequenceNumber());
+            stmt.setString(7, fileChecksum.getChecksum());
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
     }
 
-    private static int updateFileChecksum(Connection connection, FileChecksum fileChecksum) throws SQLException {
+    private static int updateFileChecksum(Connection connection, int cid, FileChecksum fileChecksum) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SQL.UPDATE_FILE_CHECKSUM_STMT);
-            stmt.setString(1, fileChecksum.getFolderID());
-            stmt.setString(2, fileChecksum.getFileID());
+            stmt.setString(1, escapeFolder(fileChecksum.getFileID()));
+            stmt.setString(2, escapeFile(fileChecksum.getFileID()));
             stmt.setString(3, fileChecksum.getVersion());
             stmt.setLong(4, fileChecksum.getSequenceNumber());
             stmt.setString(5, fileChecksum.getChecksum());
             stmt.setString(6, fileChecksum.getUuid());
+            stmt.setInt(7, cid);
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
     }
 
-    private static int updateFileChecksumFolders(Connection connection, int cid, String service, String account, String folder, String newFolder) throws SQLException {
+    private static int updateFileChecksumFolders(Connection connection, int cid, FolderID folder, FolderID newFolder) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SQL.UPDATE_FILE_CHECKSUM_FOLDERS_STMT);
-            stmt.setString(1, newFolder);
+            stmt.setString(1, escapeFolder(newFolder));
             stmt.setInt(2, cid);
-            stmt.setString(3, service);
-            stmt.setString(4, account);
-            stmt.setString(5, folder);
+            stmt.setString(3, escapeFolder(folder));
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
     }
 
-    private static int deleteFileChecksums(Connection connection, String[] uuids) throws SQLException {
+    private static int deleteFileChecksums(Connection connection, int cid, String[] uuids) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SQL.DELETE_FILE_CHECKSUMS_STMT(uuids));
+            stmt.setInt(1, cid);
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
     }
 
-    private static int deleteFileChecksumsInFolder(Connection connection, int cid, String service, String account, String folder) throws SQLException {
+    private static int deleteFileChecksumsInFolder(Connection connection, int cid, FolderID folder) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SQL.DELETE_FILE_CHECKSUMS_IN_FOLDER_STMT);
             stmt.setInt(1, cid);
-            stmt.setString(2, service);
-            stmt.setString(3, account);
-            stmt.setString(4, folder);
+            stmt.setString(2, escapeFolder(folder));
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
     }
 
-    private static int deleteFileChecksum(Connection connection, int cid, String service, String account, String folder, String file, String version, long sequence) throws SQLException {
+    private static int deleteFileChecksum(Connection connection, int cid, FileID file, String version, long sequence) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SQL.DELETE_FILE_CHECKSUM_STMT);
             stmt.setInt(1, cid);
-            stmt.setString(2, service);
-            stmt.setString(3, account);
-            stmt.setString(4, folder);
-            stmt.setString(5, file);
-            stmt.setString(6, version);
-            stmt.setLong(7, sequence);
+            stmt.setString(2, escapeFolder(file));
+            stmt.setString(3, escapeFile(file));
+            stmt.setString(4, version);
+            stmt.setLong(5, sequence);
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
     }
 
-    private static FileChecksum selectFileChecksum(Connection connection, int cid, String service, String account, String folder, String file, String version, long sequence) throws SQLException {
+    private static FileChecksum selectFileChecksum(Connection connection, int cid, FileID file, String version, long sequence) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SQL.SELECT_FILE_CHECKSUM_STMT);
             stmt.setInt(1, cid);
-            stmt.setString(2, service);
-            stmt.setString(3, account);
-            stmt.setString(4, folder);
-            stmt.setString(5, file);
-            stmt.setString(6, version);
-            stmt.setLong(7, sequence);
+            stmt.setString(2, escapeFolder(file));
+            stmt.setString(3, escapeFile(file));
+            stmt.setString(4, version);
+            stmt.setLong(5, sequence);
             ResultSet resultSet = SQL.logExecuteQuery(stmt);
             if (resultSet.next()) {
                 FileChecksum fileChecksum = new FileChecksum();
-                fileChecksum.setFolderID(folder);
                 fileChecksum.setFileID(file);
                 fileChecksum.setVersion(version);
                 fileChecksum.setSequenceNumber(sequence);
@@ -502,21 +493,18 @@ public class RdbChecksumStore implements ChecksumStore {
         }
     }
 
-    private static List<FileChecksum> selectFileChecksumsInFolder(Connection connection, int cid, String service, String account, String folder) throws SQLException {
+    private static List<FileChecksum> selectFileChecksumsInFolder(Connection connection, int cid, FolderID folder) throws SQLException, OXException {
         List<FileChecksum> fileChecksums = new ArrayList<FileChecksum>();
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SQL.SELECT_FILE_CHECKSUMS_IN_FOLDER_STMT);
             stmt.setInt(1, cid);
-            stmt.setString(2, service);
-            stmt.setString(3, account);
-            stmt.setString(4, folder);
+            stmt.setString(2, escapeFolder(folder));
             ResultSet resultSet = SQL.logExecuteQuery(stmt);
             while (resultSet.next()) {
                 FileChecksum fileChecksum = new FileChecksum();
-                fileChecksum.setFolderID(folder);
                 fileChecksum.setUuid(resultSet.getString(1));
-                fileChecksum.setFileID(resultSet.getString(2));
+                fileChecksum.setFileID(unescapeFile(folder, resultSet.getString(2)));
                 fileChecksum.setVersion(resultSet.getString(3));
                 fileChecksum.setSequenceNumber(resultSet.getLong(4));
                 fileChecksum.setChecksum(resultSet.getString(5));
@@ -528,21 +516,19 @@ public class RdbChecksumStore implements ChecksumStore {
         return fileChecksums;
     }
 
-    private static List<FileChecksum> selectMatchingFileChecksums(Connection connection, int cid, String service, String account, String checksum) throws SQLException {
+    private static List<FileChecksum> selectMatchingFileChecksums(Connection connection, int cid, String checksum) throws SQLException, OXException {
         List<FileChecksum> fileChecksums = new ArrayList<FileChecksum>();
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SQL.SELECT_MATCHING_FILE_CHECKSUMS_STMT);
             stmt.setInt(1, cid);
-            stmt.setString(2, service);
-            stmt.setString(3, account);
-            stmt.setString(4, checksum);
+            stmt.setString(2, checksum);
             ResultSet resultSet = SQL.logExecuteQuery(stmt);
             while (resultSet.next()) {
                 FileChecksum fileChecksum = new FileChecksum();
                 fileChecksum.setUuid(resultSet.getString(1));
-                fileChecksum.setFolderID(resultSet.getString(2));
-                fileChecksum.setFileID(resultSet.getString(3));
+                FolderID folderID = unescapeFolder(resultSet.getString(2));
+                fileChecksum.setFileID(unescapeFile(folderID, resultSet.getString(3)));
                 fileChecksum.setVersion(resultSet.getString(4));
                 fileChecksum.setSequenceNumber(resultSet.getLong(5));
                 fileChecksum.setChecksum(checksum);
@@ -554,20 +540,18 @@ public class RdbChecksumStore implements ChecksumStore {
         return fileChecksums;
     }
 
-    private static Map<String, List<FileChecksum>> selectMatchingFileChecksums(Connection connection, int cid, String service, String account, List<String> checksums) throws SQLException {
+    private static Map<String, List<FileChecksum>> selectMatchingFileChecksums(Connection connection, int cid, List<String> checksums) throws SQLException, OXException {
         Map<String, List<FileChecksum>> fileChecksums = new HashMap<String, List<FileChecksum>>();
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SQL.SELECT_MATCHING_FILE_CHECKSUMS_STMT(checksums.toArray(new String[checksums.size()])));
             stmt.setInt(1, cid);
-            stmt.setString(2, service);
-            stmt.setString(3, account);
             ResultSet resultSet = SQL.logExecuteQuery(stmt);
             while (resultSet.next()) {
                 FileChecksum fileChecksum = new FileChecksum();
                 fileChecksum.setUuid(resultSet.getString(1));
-                fileChecksum.setFolderID(resultSet.getString(2));
-                fileChecksum.setFileID(resultSet.getString(3));
+                FolderID folderID = unescapeFolder(resultSet.getString(2));
+                fileChecksum.setFileID(unescapeFile(folderID, resultSet.getString(3)));
                 fileChecksum.setVersion(resultSet.getString(4));
                 fileChecksum.setSequenceNumber(resultSet.getLong(5));
                 String checksum = resultSet.getString(6);
@@ -585,79 +569,72 @@ public class RdbChecksumStore implements ChecksumStore {
         return fileChecksums;
     }
 
-    private static int insertDirectoryChecksum(Connection connection, int cid, String service, String account, DirectoryChecksum directoryChecksum) throws SQLException {
+    private static int insertDirectoryChecksum(Connection connection, int cid, DirectoryChecksum directoryChecksum) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SQL.INSERT_DIRECTORY_CHECKSUM_STMT);
             stmt.setString(1, directoryChecksum.getUuid());
             stmt.setInt(2, cid);
-            stmt.setString(3, service);
-            stmt.setString(4, account);
-            stmt.setString(5, directoryChecksum.getFolderID());
-            stmt.setLong(6, directoryChecksum.getSequenceNumber());
-            stmt.setString(7, directoryChecksum.getChecksum());
+            stmt.setString(3, escapeFolder(directoryChecksum.getFolderID()));
+            stmt.setLong(4, directoryChecksum.getSequenceNumber());
+            stmt.setString(5, directoryChecksum.getChecksum());
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
     }
 
-    private static int updateDirectoryChecksum(Connection connection, DirectoryChecksum directoryChecksum) throws SQLException {
+    private static int updateDirectoryChecksum(Connection connection, int cid, DirectoryChecksum directoryChecksum) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SQL.UPDATE_DIRECTORY_CHECKSUM_STMT);
-            stmt.setString(1, directoryChecksum.getFolderID());
+            stmt.setString(1, escapeFolder(directoryChecksum.getFolderID()));
             stmt.setLong(2, directoryChecksum.getSequenceNumber());
             stmt.setString(3, directoryChecksum.getChecksum());
-            stmt.setString(4, directoryChecksum.getUuid());
+            stmt.setInt(4, cid);
+            stmt.setString(5, directoryChecksum.getUuid());
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
     }
 
-    private static int updateDirectoryChecksumFolder(Connection connection, int cid, String service, String account, String folder, String newFolder) throws SQLException {
+    private static int updateDirectoryChecksumFolder(Connection connection, int cid, FolderID folder, FolderID newFolder) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SQL.UPDATE_DIRECTORY_CHECKSUM_FOLDER_STMT);
-            stmt.setString(1, newFolder);
+            stmt.setString(1, escapeFolder(newFolder));
             stmt.setInt(2, cid);
-            stmt.setString(3, service);
-            stmt.setString(4, account);
-            stmt.setString(5, folder);
+            stmt.setString(3, escapeFolder(folder));
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
     }
 
-    private static int deleteDirectoryChecksum(Connection connection, int cid, String service, String account, String folder) throws SQLException {
+    private static int deleteDirectoryChecksum(Connection connection, int cid, FolderID folder) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SQL.DELETE_DIRECTORY_CHECKSUM_STMT);
             stmt.setInt(1, cid);
-            stmt.setString(2, service);
-            stmt.setString(3, account);
-            stmt.setString(4, folder);
+            stmt.setString(2, escapeFolder(folder));
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
     }
 
-    private static List<DirectoryChecksum> selectDirectoryChecksums(Connection connection, int cid, String service, String account, String[] folderIDs) throws SQLException {
+    private static List<DirectoryChecksum> selectDirectoryChecksums(Connection connection, int cid, FolderID[] folderIDs) throws SQLException, OXException {
         List<DirectoryChecksum> directoryChecksums = new ArrayList<DirectoryChecksum>();
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement(SQL.SELECT_DIRECTORY_CHECKSUMS_STMT(folderIDs));
             stmt.setInt(1, cid);
-            stmt.setString(2, service);
-            stmt.setString(3, account);
             ResultSet resultSet = SQL.logExecuteQuery(stmt);
             while (resultSet.next()) {
                 DirectoryChecksum directoryChecksum = new DirectoryChecksum();
                 directoryChecksum.setUuid(resultSet.getString(1));
-                directoryChecksum.setFolderID(resultSet.getString(2));
+                directoryChecksum.setFolderID(unescapeFolder(resultSet.getString(2)));
                 directoryChecksum.setSequenceNumber(resultSet.getLong(3));
                 directoryChecksum.setChecksum(resultSet.getString(4));
                 directoryChecksums.add(directoryChecksum);

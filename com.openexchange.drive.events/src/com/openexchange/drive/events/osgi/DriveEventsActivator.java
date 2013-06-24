@@ -54,14 +54,12 @@ import java.util.Hashtable;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.drive.events.internal.DriveEventServiceImpl;
 import com.openexchange.drive.events.internal.DriveEventServiceLookup;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -82,8 +80,7 @@ public class DriveEventsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { IDBasedFileAccessFactory.class, ManagedFileManagement.class, FileStorageServiceRegistry.class,
-            DatabaseService.class };
+        return new Class<?>[] { IDBasedFileAccessFactory.class, IDBasedFolderAccessFactory.class };
     }
 
     @Override

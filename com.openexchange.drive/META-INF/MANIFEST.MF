@@ -29,10 +29,12 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.server,
  com.openexchange.server.impl,
  com.openexchange.session,
+ com.openexchange.tools.codec,
  com.openexchange.tools.iterator,
  com.openexchange.tools.session,
  com.openexchange.tools.sql,
  com.openexchange.tx,
+ javax.mail,
  org.apache.commons.logging,
  org.osgi.framework
 Export-Package: com.openexchange.drive

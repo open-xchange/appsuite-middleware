@@ -47,80 +47,24 @@
  *
  */
 
-package com.openexchange.file.storage.internal;
+package com.openexchange.file.storage.composition;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStorageFolderAccess;
-import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.session.Session;
 
+
 /**
- * {@link WrappedFileStorageAccountAccess}
+ * {@link IDBasedFolderAccessFactory}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class WrappedFileStorageAccountAccess implements FileStorageAccountAccess {
+public interface IDBasedFolderAccessFactory {
 
-    private final FileStorageAccountAccess delegate;
-    private final Session session;
-
-    public WrappedFileStorageAccountAccess(FileStorageAccountAccess delegate, Session session) {
-        super();
-        this.delegate = delegate;
-        this.session = session;
-    }
-
-    @Override
-    public void connect() throws OXException {
-        delegate.connect();
-    }
-
-    @Override
-    public boolean isConnected() {
-        return delegate.isConnected();
-    }
-
-    @Override
-    public void close() {
-        delegate.close();
-    }
-
-    @Override
-    public boolean ping() throws OXException {
-        return delegate.ping();
-    }
-
-    @Override
-    public boolean cacheable() {
-        return delegate.cacheable();
-    }
-
-    @Override
-    public String getAccountId() {
-        return delegate.getAccountId();
-    }
-
-    @Override
-    public FileStorageFileAccess getFileAccess() throws OXException {
-        return delegate.getFileAccess();
-    }
-
-    @Override
-    public FileStorageFolderAccess getFolderAccess() throws OXException {
-        return new WrappedFileStorageFolderAccess(delegate.getFolderAccess(), this, session);
-    }
-
-    @Override
-    public FileStorageFolder getRootFolder() throws OXException {
-        return delegate.getRootFolder();
-    }
-
-    @Override
-    public FileStorageService getService() {
-        return delegate.getService();
-    }
+    /**
+     * Creates a new {@link IDBasedFolderAccess} for the supplied session.
+     *
+     * @param session The session
+     * @return The folder access
+     */
+    IDBasedFolderAccess createAccess(Session session);
 
 }

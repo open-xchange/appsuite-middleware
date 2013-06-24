@@ -202,6 +202,28 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
     }
 
     @Override
+    public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<File.Field> modifiedFields) throws OXException {
+        final String id = source.getId();
+        try {
+            final String name = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ?
+                update.getFileName() : id.substring(id.lastIndexOf('/') + 1);
+            final String destPath = toPath(destFolder);
+            final int pos = destPath.lastIndexOf('/');
+            final Entry entry = dropboxAPI.move(id, pos > 0 ? new StringAllocator(destPath).append('/').append(name).toString() : name);
+            return new IDTuple(entry.parentPath(), entry.path);
+        } catch (final DropboxServerException e) {
+            if (404 == e.error) {
+                throw DropboxExceptionCodes.NOT_FOUND.create(e, id);
+            }
+            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+        } catch (final DropboxException e) {
+            throw DropboxExceptionCodes.DROPBOX_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw DropboxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
     public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
         try {
             return dropboxAPI.getFileStream(id, version);

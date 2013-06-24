@@ -60,7 +60,9 @@ import com.openexchange.file.storage.composition.FileStreamHandlerRegistry;
 import com.openexchange.file.storage.composition.FolderAware;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.composition.internal.AbstractCompositingIDBasedFileAccess;
+import com.openexchange.file.storage.composition.internal.AbstractCompositingIDBasedFolderAccess;
 import com.openexchange.file.storage.composition.internal.FileStreamHandlerRegistryImpl;
 import com.openexchange.file.storage.composition.internal.Services;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
@@ -121,6 +123,28 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
         }
     }
 
+    private final class CompositingIDBasedFolderAccessImpl extends AbstractCompositingIDBasedFolderAccess {
+
+        protected CompositingIDBasedFolderAccessImpl(Session session) {
+            super(session);
+        }
+
+        @Override
+        protected FileStorageService getFileStorageService(String serviceId) throws OXException {
+            return getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
+        }
+
+        protected List<FileStorageService> getAllFileStorageServices() throws OXException {
+            return getService(FileStorageServiceRegistry.class).getAllServices();
+        }
+
+        @Override
+        protected EventAdmin getEventAdmin() {
+            return getService(EventAdmin.class);
+        }
+
+    }
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[]{ FileStorageServiceRegistry.class, EventAdmin.class, ThreadPoolService.class };
@@ -134,6 +158,14 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
             @Override
             public IDBasedFileAccess createAccess(final Session session) {
                 return new CompositingIDBasedFileAccessImpl(session);
+            }
+
+        });
+        registerService(IDBasedFolderAccessFactory.class, new IDBasedFolderAccessFactory() {
+
+            @Override
+            public CompositingIDBasedFolderAccessImpl createAccess(Session session) {
+                return new CompositingIDBasedFolderAccessImpl(session);
             }
 
         });

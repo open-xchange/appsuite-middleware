@@ -111,15 +111,7 @@ public class DriveSession {
      */
     public ChecksumStore getChecksumStore() throws OXException {
         if (null == checksumStore) {
-            checksumStore = new RdbChecksumStore(getServerSession().getContextId(),
-                getStorage().getAccountAccess().getService().getId(), getStorage().getAccountAccess().getAccountId());
-
-
-
-//            RdbChecksumStore delegate = new RdbChecksumStore(getServerSession(),
-//                getStorage().getAccountAccess().getService().getId(), getStorage().getAccountAccess().getAccountId());
-//            checksumStore = new OnDemandCalculatingChecksumStore(delegate, getStorage());
-//            checksumStore = new SimChecksumStore();
+            checksumStore = new RdbChecksumStore(getServerSession().getContextId());
         }
         return checksumStore;
     }

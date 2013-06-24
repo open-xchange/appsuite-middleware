@@ -52,6 +52,8 @@ package com.openexchange.drive.checksum;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderID;
 
 /**
  * {@link FileChecksumStore}
@@ -61,7 +63,7 @@ import com.openexchange.exception.OXException;
 public interface FileChecksumStore {
 
 
-    FileChecksum insertFileChecksum(String folderID, String fileID, String version, long sequenceNumber, String checksum) throws OXException;
+    FileChecksum insertFileChecksum(FileID fileID, String version, long sequenceNumber, String checksum) throws OXException;
 
     FileChecksum insertFileChecksum(FileChecksum fileChecksum) throws OXException;
 
@@ -72,21 +74,21 @@ public interface FileChecksumStore {
 
     List<FileChecksum> updateFileChecksums(List<FileChecksum> fileChecksums) throws OXException;
 
-    int updateFileChecksumFolders(String folderID, String newFolderID) throws OXException;
+    int updateFileChecksumFolders(FolderID folderID, FolderID newFolderID) throws OXException;
 
 
     boolean removeFileChecksum(FileChecksum fileChecksum) throws OXException;
 
-    boolean removeFileChecksum(String folderID, String fileID, String version, long sequenceNumber) throws OXException;
+    boolean removeFileChecksum(FileID fileID, String version, long sequenceNumber) throws OXException;
 
     int removeFileChecksums(List<FileChecksum> fileChecksums) throws OXException;
 
-    int removeFileChecksumsInFolder(String folderID) throws OXException;
+    int removeFileChecksumsInFolder(FolderID folderID) throws OXException;
 
 
-    FileChecksum getFileChecksum(String folderID, String fileID, String version, long sequenceNumber) throws OXException;
+    FileChecksum getFileChecksum(FileID fileID, String version, long sequenceNumber) throws OXException;
 
-    List<FileChecksum> getFileChecksums(String folderID) throws OXException;
+    List<FileChecksum> getFileChecksums(FolderID folderID) throws OXException;
 
     List<FileChecksum> getMatchingFileChecksums(String checksum) throws OXException;
 

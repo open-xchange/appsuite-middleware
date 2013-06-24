@@ -65,6 +65,7 @@ import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
@@ -167,6 +168,7 @@ public class UploadHelper {
              */
             checksum = appendViaTemporaryFile(uploadFile, uploadStream);
         }
+        uploadFile = fileAccess.getFileMetadata(uploadFile.getId(), uploadFile.getVersion()); //TODO: always necessary?
         return new AbstractMap.SimpleEntry<File, String>(uploadFile, checksum);
     }
 
@@ -227,7 +229,8 @@ public class UploadHelper {
              */
             uploadFile = session.getStorage().createFile(TEMP_PATH, uploadFileName);
         }
-        return uploadFile;
+//        return uploadFile;
+        return null == uploadFile ? null : new DefaultFile(uploadFile);//TODO: necessary due to ID interchanging when passing to file accesses
     }
 
     private static String getUploadFilename(String checksum) {

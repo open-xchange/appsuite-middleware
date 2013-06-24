@@ -63,6 +63,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Document;
+import org.apache.chemistry.opencmis.client.api.FileableCmisObject;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ObjectId;
 import org.apache.chemistry.opencmis.client.api.ObjectType;
@@ -407,6 +408,66 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(stream);
+        }
+    }
+
+    @Override
+    public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<File.Field> modifiedFields) throws OXException {
+        try {
+            CmisObject object;
+            /*
+             * Source folder
+             */
+            final ObjectId sourceObjectId;
+            if (FileStorageFolder.ROOT_FULLNAME.equals(source.getFolder())) {
+                object = cmisSession.getRootFolder();
+                sourceObjectId = cmisSession.createObjectId(object.getId());
+            } else {
+                sourceObjectId = cmisSession.createObjectId(source.getFolder());
+                object = cmisSession.getObject(sourceObjectId);
+            }
+            if (null == object) {
+                throw CMISExceptionCodes.NOT_FOUND.create(source.getFolder());
+            }
+            if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType().getId())) {
+                throw CMISExceptionCodes.NOT_A_FOLDER.create(source.getFolder());
+            }
+            /*
+             * Destination folder
+             */
+            final ObjectId destObjectId;
+            if (FileStorageFolder.ROOT_FULLNAME.equals(source.getFolder()) || rootUrl.equals(source.getFolder())) {
+                object = cmisSession.getRootFolder();
+                destObjectId = cmisSession.createObjectId(object.getId());
+            } else {
+                destObjectId = cmisSession.createObjectId(source.getFolder());
+                object = cmisSession.getObject(destObjectId);
+            }
+            if (null == object) {
+                throw CMISExceptionCodes.NOT_FOUND.create(source.getFolder());
+            }
+            if (!ObjectType.FOLDER_BASETYPE_ID.equals(object.getType().getId())) {
+                throw CMISExceptionCodes.NOT_A_FOLDER.create(source.getFolder());
+            }
+            final Folder destinationFolder = (Folder) object;
+            /*
+             * Document
+             */
+            final ObjectId documentId = cmisSession.createObjectId(source.getId());
+            final Document document = (Document) cmisSession.getObject(documentId);
+            /*
+             * Move document
+             */
+            FileableCmisObject movedDoc = document.move(cmisSession.createObjectId(source.getFolder()), destinationFolder);
+            //TODO: rename if needed?
+            /*
+             * Return
+             */
+            return new IDTuple(destFolder, movedDoc.getId());
+        } catch (final CmisBaseException e) {
+            throw handleCmisException(e);
+        } catch (final RuntimeException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
