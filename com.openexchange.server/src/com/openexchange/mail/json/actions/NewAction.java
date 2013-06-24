@@ -204,8 +204,11 @@ public final class NewAction extends AbstractMailAction {
                 final String protocol = request.isSecure() ? "https://" : "http://";
                 final ComposedMailMessage[] composedMails = MessageParser.parse4Transport(jMail, uploadEvent, session, accountId, protocol, request.getHostname(), warnings);
                 ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
-                if (ComposeType.DRAFT.equals(sendType) && AJAXRequestDataTools.parseBoolParameter("deleteDraftOnTransport", request)) {
-                    sendType = ComposeType.DRAFT_DELETE_ON_TRANSPORT;
+                if (ComposeType.DRAFT.equals(sendType)) {
+                    final boolean deleteDraftOnTransport = jMail.optBoolean("deleteDraftOnTransport", false);
+                    if (deleteDraftOnTransport || AJAXRequestDataTools.parseBoolParameter("deleteDraftOnTransport", request)) {
+                        sendType = ComposeType.DRAFT_DELETE_ON_TRANSPORT;
+                    }
                 }
                 for (final ComposedMailMessage cm : composedMails) {
                     if (null != cm) {
