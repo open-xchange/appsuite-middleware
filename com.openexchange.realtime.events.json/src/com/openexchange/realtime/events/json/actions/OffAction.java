@@ -59,17 +59,15 @@ import com.openexchange.realtime.events.RTEventManagerService;
 import com.openexchange.realtime.events.json.EventsRequest;
 import com.openexchange.server.ServiceLookup;
 
-
 /**
  * {@link OffAction}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 @Action(method = RequestMethod.GET, name = "off", description = "Unsubscribe from a given event", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "event", description = "The event to unsubscribe from. If empty, this action unsubscribes the client from all events", optional=true),
-    @Parameter(name = "resource", description = "The resource ID of the client"),
-}, responseDescription = "'true' on success, an error in the appropriate fields otherwise")
+    @Parameter(name = "event", description = "The event to unsubscribe from. If empty, this action unsubscribes the client from all events", optional = true),
+    @Parameter(name = "resource", description = "The resource ID of the client") }, responseDescription = "'true' on success, an error in the appropriate fields otherwise")
 public class OffAction extends AbstractEventAction implements AJAXActionService {
 
     public OffAction(ServiceLookup services) {
@@ -79,13 +77,13 @@ public class OffAction extends AbstractEventAction implements AJAXActionService 
     @Override
     protected AJAXRequestResult perform(EventsRequest req) throws OXException {
         RTEventManagerService manager = req.getManager();
-        
+
         if (req.hasEvent()) {
-            manager.unsubscribe(req.getEvent(), req.getID());            
+            manager.unsubscribe(req.getEvent(), req.getID());
         } else {
             manager.unsubscribe(req.getID());
         }
-        
+
         return new AJAXRequestResult(Boolean.TRUE, "native");
     }
 

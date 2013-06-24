@@ -59,15 +59,12 @@ import com.openexchange.realtime.events.RTEventManagerService;
 import com.openexchange.realtime.events.json.EventsRequest;
 import com.openexchange.server.ServiceLookup;
 
-
 /**
  * {@link EventsAction}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Action(method = RequestMethod.GET, name = "events", description = "List all supported events of this server", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-}, responseDescription = "A list of all events clients can subscribe to")
+@Action(method = RequestMethod.GET, name = "events", description = "List all supported events of this server", parameters = { @Parameter(name = "session", description = "A session ID previously obtained from the login module.") }, responseDescription = "A list of all events clients can subscribe to")
 public class EventsAction extends AbstractEventAction implements AJAXActionService {
 
     public EventsAction(ServiceLookup services) {
@@ -77,7 +74,7 @@ public class EventsAction extends AbstractEventAction implements AJAXActionServi
     @Override
     protected AJAXRequestResult perform(EventsRequest req) throws OXException {
         RTEventManagerService manager = req.getManager();
-       
+
         return new AJAXRequestResult(manager.getSupportedEvents(), "native");
     }
 
