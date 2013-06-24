@@ -2,6 +2,7 @@
 
  - Fix for bug 27178: Improved default message displayed to user when a severe runtime error occurs in Open-Xchange server
  - Fix for bug 25653: Fixed token-based mail attachment download for Hybrid App
+ - Fix for bug 27208: Don't replace URL-encoded '+' characters in links
 
 * 2013-06-23 - thorben.betten@open-xchange.com
 
