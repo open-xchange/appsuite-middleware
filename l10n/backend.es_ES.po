@@ -2,6 +2,7 @@
 # translation of server.po to Spanish
 # #-#-#-#-#  errors.es_ES.po (errors)  #-#-#-#-#
 # translation of errors.po to Spanish
+#. XMPP
 #. *
 #. * Mail(s) could not be found in folder
 #. * <p>
@@ -9,30 +10,30 @@
 #. * <code>isExpunged()</code> and <code>getMessageNumber()</code>.
 #. * </p>
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:74
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:75
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:76
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:78
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:79
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:80
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:81
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:82
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:83
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:84
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:85
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:86
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:87
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:88
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:89
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:90
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:91
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:92
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:93
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:94
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:95
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:96
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:128
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:64
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:65
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:81
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:83
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:85
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:129
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:82
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:84
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:86
@@ -46,7 +47,7 @@ msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-08-04 14:10+0100\n"
-"PO-Revision-Date: 2013-05-01 18:48+0200\n"
+"PO-Revision-Date: 2013-06-23 17:16+0200\n"
 "Last-Translator: Andres Herrera <andres@bureau-cornavin.com>\n"
 "Language-Team: Spanish <es@bureau-cornavin.com>\n"
 "Language: es\n"
@@ -252,6 +253,7 @@ msgstr "Falta el fichero de configuración de caché en la ubicación: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rdiff/src/com/openexchange/rdiff/RdiffExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.secret/src/com/openexchange/secret/SecretExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/configuration/ConfigurationExceptionMessage.java:94
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:118
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:66
@@ -1143,6 +1145,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push/src/com/openexchange/push/PushExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rdiff/src/com/openexchange/rdiff/RdiffExceptionMessages.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.secret/src/com/openexchange/secret/SecretExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:124
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/delete/DeleteFailedExceptionMessage.java:76
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/downgrade/DowngradeFailedExceptionMessage.java:73
@@ -3311,8 +3314,8 @@ msgstr "El servidor grizzly no se pudo iniciar"
 
 #. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:94
 msgid "The following needed service is missing: \"%1$s\""
 msgstr "Falta el siguiente servicio necesario: \"%1$s\""
 
@@ -4451,6 +4454,11 @@ msgstr "Por favor, proporcione un nombre para mostrar."
 msgid "The associated OAuth provider denied the request: %1$s."
 msgstr "El proveedor de OAuth asociado denegó la solicitud: %1$s."
 
+#. The OAuth authentication process has been canceled.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:150
+msgid "The OAuth authentication process has been canceled."
+msgstr "El proceso de autenticación OAuth ha sido cancelado."
+
 #. *
 #. * Cannot change password for any reason.
 #.
@@ -4540,7 +4548,7 @@ msgstr "Acción %1$s no admitida mediante solicitud %2$s"
 #.
 #. No connection available to access mailbox
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:463
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:466
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:100
 msgid "No connection available to access mailbox"
 msgstr "No hay disponible una conexión para acceder a la carpeta de correo"
@@ -5016,7 +5024,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
 msgid "Error message from server: %5$s"
-msgstr "Mensaje de error del servidor: %5$s"
+msgstr "Mensaje de error del servidor: %1$s"
 
 #. *
 #. * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
@@ -5484,9 +5492,8 @@ msgstr "Canal desconocido %1$s"
 #. * Unexpected error: %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:151
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:120
@@ -5507,9 +5514,11 @@ msgid "Invalid context ID. Couldn't find context for: %1$s"
 msgstr "ID de contexto no válido. No se pudo encontrar el contexto para: %1$s"
 
 #. * No appropriate channel found for recipient %1$s with payload namespace %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:63
+#. Atmosphere
+#. Generic (start with code 1000)
+#. * No appropriate channel found for recipient %1$s with payload namespace %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:91
 msgid ""
 "No appropriate channel found for recipient %1$s with payload namespace %2$s"
 msgstr ""
@@ -5517,21 +5526,20 @@ msgstr ""
 "espacio de nombres de datos útiles %2$s"
 
 #. * Invalid ID. Resource identifier is missing.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:100
 msgid "Invalid ID. Resource identifier is missing."
 msgstr "ID no válido. Falta el identificador del recurso."
 
 #. * Resource not available.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:103
 msgid "Resource not available."
 msgstr "Recurso no disponible."
 
-#. * The following needed service is missing: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStanzaExceptionMessages.java:66
-msgid "The following needed service is missing: %1$s"
-msgstr "Falta el siguiente servicio necesario: %1$s"
+#. * You session is invlaid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:106
+msgid "Your session is invalid."
+msgstr "Su sesión no es válida."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rmi/src/com/openexchange/rmi/exceptions/OXRMIExceptionMessage.java:62
 msgid "Start of RMI service failed."
@@ -5540,6 +5548,15 @@ msgstr "El inicio del servicio RMI ha fallado."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rmi/src/com/openexchange/rmi/exceptions/OXRMIExceptionMessage.java:64
 msgid "Could not create RMI registry."
 msgstr "No se ha podido crear el registro RMI."
+
+#. Secret is empty. Please check configuration and set a valid secret source in file 'secret.properties'.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.secret/src/com/openexchange/secret/SecretExceptionMessages.java:69
+msgid ""
+"Secret is empty. Please check configuration and set a valid secret source in "
+"file 'secret.properties'."
+msgstr ""
+"Secret está vacío. Por favor, compruebe la configuración y establezca una "
+"fuente secreta válida en el fichero 'secret.properties'."
 
 #. Access to bundle %1$s is not permitted
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.security/src/com/openexchange/security/BundleAccessExceptionMessage.java:70
@@ -6597,7 +6614,7 @@ msgstr "No se permite mover una cita recurrente a otra carpeta."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:341
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:147
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:211
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:433
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:436
 msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
 msgstr "Son necesarios %1$d o más caracteres para poder realizar la búsqueda."
@@ -6803,14 +6820,11 @@ msgstr "No se pudo escoger una conexión del DBPool"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:97
 msgid ""
-"Import failed. Some data entered exceed the database field limit. Please "
-"shorten the following entries: %1$s character limit: %2$s sent %3$s Please "
-"add a comment for the variables"
+"Some data entered exceeded the field limit. Please shorten the value for "
+"\"%1$s\" (current: %2$s, limit: %3$s) and try again."
 msgstr ""
-"Ha fallado la importación. Algunos datos introducidos exceden el límite de "
-"tamaño de campo de la base de datos. Por favor, acorte los siguientes "
-"elementos: %1$s límite de caracteres: %2$s enviados: %3$s. Por favor, añada "
-"un comentario para las variables"
+"Algunos datos introducidos exceden el límite del campo. Por favor, acorte el "
+"valor para \"%1$s\" (actual: %2$s, límite: %3$s) e inténtelo de nuevo."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:99
 msgid ""
@@ -8528,8 +8542,8 @@ msgid ""
 "Could not determine number of versions for info item %1$s in context %s. "
 "Invalid query: %2$s"
 msgstr ""
-"No se pudo determinar el número de versiones para el elemento de información %"
-"1$s en el contexto %s. Solicitud no válida: %2$s"
+"No se pudo determinar el número de versiones para el elemento de información "
+"%1$s en el contexto %s. Solicitud no válida: %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:105
 msgid ""
@@ -8546,8 +8560,8 @@ msgid ""
 "Folder %1$s has two subfolders named %2$s. The database for context %3$s is "
 "not consistent."
 msgstr ""
-"La carpeta %1$s tiene dos subcarpetas denominadas %2$s. La base de datos para "
-"el contexto %3$s no es consistente."
+"La carpeta %1$s tiene dos subcarpetas denominadas %2$s. La base de datos "
+"para el contexto %3$s no es consistente."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:111
 msgid ""
@@ -8805,6 +8819,16 @@ msgstr "$s no es una localización válida."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:182
 msgid "%s is not a valid timezone."
 msgstr "%s no es una zona horaria válida."
+
+#. This is an internal exception to detect coding problems. A user will never see this exception.
+#. %1$d is replaced with the number of users that attributes should be locked in the database for updating them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:186
+msgid ""
+"Locking attributes of multiple users is not allowed. You tried to lock %1$d "
+"user's attributes."
+msgstr ""
+"No se permite bloquear atributos de múltiples usuarios. Ha intentado bloquear "
+"%1$d atributos de usuarios."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/links/LinkExceptionMessages.java:61
 msgid ""
@@ -9653,7 +9677,7 @@ msgstr "Valor de tipo de contenido no válido: %1$s"
 #. * Messaging error: %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:183
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:255
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:256
 msgid "Messaging error: %1$s"
 msgstr "Error de mensajería: %1$s"
 
@@ -9988,7 +10012,7 @@ msgstr ""
 #. * Invalid folder name: "%1$s"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:388
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:513
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:516
 msgid "Invalid folder name: \"%1$s\""
 msgstr "Nombre de directorio no válido: \"%1$s\""
 
@@ -10042,10 +10066,15 @@ msgstr "La cuenta de correo %1$s con ID %2$s no admite transporte de correo."
 msgid "Mail folder could not be found: %1$s."
 msgstr "No se ha podido encontrar la carpeta de correo: %1$s."
 
+#. Mail folder could not be found.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:426
+msgid "Mail folder could not be found."
+msgstr "No se ha podido encontrar la carpeta de correo."
+
 #. *
 #. * Referenced mail %1$s could not be found in folder %2$s. Therefore reply/forward operation cannot be performed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:428
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:431
 msgid ""
 "Referenced mail %1$s could not be found in folder %2$s. Therefore reply/"
 "forward operation cannot be performed."
@@ -10056,42 +10085,42 @@ msgstr ""
 #. *
 #. * Mail folder must not be deleted: %1$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:438
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:441
 msgid "Mail folder must not be deleted: %1$s."
 msgstr "No se debe eliminar la carpeta de correo: %1$s."
 
 #. *
 #. * No delete access on mail folder: %1$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:443
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:446
 msgid "No delete access on mail folder: %1$s."
 msgstr "No se puede acceder para eliminar datos en la carpeta de correo: %1$s."
 
 #. *
 #. * Mail folder must not be moved: %1$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:448
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:451
 msgid "Mail folder must not be moved: %1$s."
 msgstr "No se debe mover la carpeta de correo: %1$s."
 
 #. *
 #. * Mail folder must not be updated: %1$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:453
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:456
 msgid "Mail folder must not be updated: %1$s."
 msgstr "No se debe actualizar la carpeta de correo: %1$s."
 
 #. *
 #. * No write access on mail folder: %1$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:458
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:461
 msgid "No write access on mail folder: %1$s."
 msgstr "No se puede acceder para escribir datos en la carpeta de correo: %1$s."
 
 #. *
 #. * Mail could not be found in folder %1$s for Message-Id: %2$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:468
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:471
 msgid "Mail could not be found in folder %1$s for message identifier: %2$s"
 msgstr ""
 "No se ha podido encontrar correo en la carpeta %1$s para el identificador de "
@@ -10100,7 +10129,7 @@ msgstr ""
 #. *
 #. * Sent quota exceeded, you are only allowed to sent 1 mail in %1$s seconds.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:473
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:476
 msgid ""
 "Sent quota exceeded. You are only allowed to send 1 E-Mail in %1$s seconds."
 msgstr ""
@@ -10110,7 +10139,7 @@ msgstr ""
 #. *
 #. * Sent quota exceeded, you are only allowed to sent 1 mail in %1$s seconds.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:478
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:481
 msgid ""
 "Please limit your recipients to %1$s  (including To/Cc/Bcc), and click "
 "'Send' again."
@@ -10123,7 +10152,7 @@ msgstr ""
 #.
 #. Is thrown if the URI to the mail server can not be understood.
 #. %1$s is replaced with the not understandable mail server URI.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:483
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:486
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:117
 msgid "Unable to parse mail server URI \"%1$s\"."
 msgstr "No se ha podido tratar la URI del servidor de correo \"%1$s\"."
@@ -10131,14 +10160,14 @@ msgstr "No se ha podido tratar la URI del servidor de correo \"%1$s\"."
 #. *
 #. * Mail attachment expired or absent.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:488
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:491
 msgid "Mail attachment expired or absent."
 msgstr "Adjunto de correo ausente o caducado."
 
 #. *
 #. * Account has been checked successfully but with a non-secure connection.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:493
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:496
 msgid "Account has been checked successfully but with a non-secure connection."
 msgstr ""
 "La cuenta ha sido comprobada con éxito, pero con una conexión no segura."
@@ -10146,7 +10175,7 @@ msgstr ""
 #. *
 #. * Cannot forward more than %1$s messages at once. Please divide the messages to forward in chunks of appropriate size.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:498
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:501
 msgid ""
 "Cannot forward more than %1$s messages at once. Please divide the messages "
 "to forward in chunks of appropriate size."
@@ -10157,14 +10186,14 @@ msgstr ""
 #. *
 #. * Your account has been created but will not use a secure connection.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:503
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:506
 msgid "Your account has been created but will not use a secure connection."
 msgstr "Su cuenta se ha creado pero no usará una conexión segura."
 
 #. *
 #. * Your E-Mail has been successfully sent, but the original E-Mail could not be flagged as "replied" and/or "forwarded".
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:508
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:511
 msgid ""
 "Your E-Mail has been successfully sent, but the original E-Mail could not be "
 "flagged as \"replied\" and/or \"forwarded\"."
@@ -10175,7 +10204,7 @@ msgstr ""
 #. *
 #. * Mail folder cannot be created/renamed. Folder name exceeds max length of %1$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:518
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:521
 msgid ""
 "Mail folder cannot be created/renamed. Folder name exceeds max length of "
 "%1$s."
@@ -10187,7 +10216,7 @@ msgstr ""
 #. * The attachments to this mail exceeded the size limit for attachments. Instead of sending the attachment in the email, the attachment
 #. * was published and the link added to your email. Whoever receives the email can then download the attachment.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:524
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:527
 msgid ""
 "The attachments to this E-Mail exceeded the size limit for attachments. "
 "Instead of sending the attachment with the E-Mail, the attachment was "
@@ -10200,12 +10229,12 @@ msgstr ""
 "puede descargar el adjunto."
 
 #. Draft message could not be saved
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:527
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:530
 msgid "Draft message could not be saved"
 msgstr "No se ha podido guardar el borrador"
 
 #. There was a problem processing the request. Please (refresh view and) try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:530
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:533
 msgid ""
 "There was a problem processing the request. Please (refresh view and) try "
 "again."
@@ -10214,15 +10243,28 @@ msgstr ""
 "la vista e) inténtelo de nuevo."
 
 #. Invoked method is not supported.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:533
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:536
 msgid "Invoked method is not supported."
 msgstr "El método invocado no está admitido."
+
+#. Maximum message size is exceeded. Max. is %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:539
+msgid "Maximum message size is exceeded. Max. is %1$s."
+msgstr "El tamaño máximo del mensaje se ha superado. El máximo es %1$s."
+
+#. Re-sending message denied because message is not located in %1$s folder.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:542
+msgid ""
+"Re-sending message denied because message is not located in %1$s folder."
+msgstr ""
+"Se ha denegado el reenvío del mensaje porque no está ubicado en la carpeta %"
+"1$s."
 
 #. *
 #. * There was an issue in authenticating your E-Mail password. This may be because of a recent password change. To continue please logout
 #. * now and then log back in with your most current password. (server=%1$s | user=%2$s)
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:75
 msgid ""
 "There was an issue in authenticating your E-Mail password. This may be due "
 "to a recent password change. To continue please log out now and then log "
@@ -10236,7 +10278,7 @@ msgstr ""
 #. *
 #. * Wrong or missing login data to access mail server %1$s. Error message from mail server: %2$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:80
 msgid ""
 "Wrong or missing login data to access mail server %1$s. Error message from "
 "mail server: %2$s"
@@ -10248,7 +10290,7 @@ msgstr ""
 #. * Wrong or missing login data to access mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail server:
 #. * %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:85
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:86
 msgid ""
 "Wrong or missing login data to access mail server %1$s with login %2$s (user="
 "%3$s, context=%4$s). Error message from mail server: %5$s"
@@ -10260,14 +10302,14 @@ msgstr ""
 #. *
 #. * Mail folder "%1$s" could not be found.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:90
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:91
 msgid "Mail folder \"%1$s\" could not be found."
 msgstr "No se ha podido encontrar la carpeta de correo \"%1$s\"."
 
 #. *
 #. * Mail folder "%1$s" could not be found on mail server %2$s with login %3$s (user=%4$s, context=%5$s).
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:95
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:96
 msgid ""
 "Mail folder \"%1$s\" could not be found on mail server %2$s with login %3$s "
 "(user=%4$s, context=%5$s)."
@@ -10283,12 +10325,12 @@ msgstr ""
 #. * reason. Following the exception, the Folder is reset to the "closed" state.
 #. * </p>
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:105
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:106
 msgid "Folder \"%1$s\" has been closed."
 msgstr "La carpeta \"%1$s\" se ha cerrado."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:105
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:111
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:106
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:112
 msgid "Probably your request took too long."
 msgstr "Es probable que su petición tardase demasiado."
 
@@ -10296,7 +10338,7 @@ msgstr "Es probable que su petición tardase demasiado."
 #. * Folder "%1$s" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
 #. * Probably your request took too long.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:111
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:112
 msgid ""
 "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
 "%4$s, context=%5$s) ."
@@ -10310,7 +10352,7 @@ msgstr ""
 #. * The exception thrown when a write is attempted on a read-only attribute of any Messaging object.
 #. * </p>
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:119
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:120
 msgid "Illegal write attempt: %1$s"
 msgstr "Intento ilegal de escritura: %1$s"
 
@@ -10320,21 +10362,21 @@ msgstr "Intento ilegal de escritura: %1$s"
 #. * The exception thrown when a method is not supported by the implementation
 #. * </p>
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:136
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:137
 msgid "Method not supported: %1$s"
 msgstr "Método no admitido: %1$s"
 
 #. *
 #. * Session attempts to instantiate a provider that doesn't exist: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:141
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:142
 msgid "Session attempts to instantiate a provider that does not exist: %1$s"
 msgstr "La sesión intenta instanciar un proveedor que no existe: %1$s"
 
 #. *
 #. * Invalid email address %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:146
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:147
 msgid "Invalid E-Mail address %1$s"
 msgstr "Dirección de E-Mail %1$s no válida"
 
@@ -10344,14 +10386,14 @@ msgstr "Dirección de E-Mail %1$s no válida"
 #. * The exception thrown due to an error in parsing RFC822 or MIME headers
 #. * </p>
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:154
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
 msgid "Wrong message header: %1$s"
 msgstr "Cabecera de mensaje errónea: %1$s"
 
 #. *
 #. * An attempt was made to open a read-only folder with read-write "%1$s"
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:159
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
 msgid "An attempt was made to open a read-only folder with read-write \"%1$s\""
 msgstr ""
 "Se ha hecho un intento de abrir una carpeta de sólo lectura con \"%1$s\" de "
@@ -10361,7 +10403,7 @@ msgstr ""
 #. *
 #. * An attempt was made to open a read-only folder with read-write "%1$s" on mail server %2$s with login %3$s (user=%4$s, context=%5$s)
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:164
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:165
 msgid ""
 "An attempt was made to open a read-only folder with read-write \"%1$s\" on "
 "mail server %2$s with login %3$s (user=%4$s, context=%5$s)"
@@ -10373,14 +10415,14 @@ msgstr ""
 #. *
 #. * Invalid search expression: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:169
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
 msgid "Invalid search expression: %1$s"
 msgstr "Expresión de búsqueda no válida: %1$s"
 
 #. *
 #. * Message could not be sent because it is too large
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:174
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
 msgid "Message could not be sent because it is too large"
 msgstr "No se ha podido enviar el mensaje porque es demasiado grande"
 
@@ -10391,14 +10433,14 @@ msgstr "No se ha podido enviar el mensaje porque es demasiado grande"
 #. * sent and valid addresses to which the message was not sent.
 #. * </p>
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:183
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:184
 msgid "Message could not be sent to the following recipients: %1$s"
 msgstr "No se ha podido enviar el mensaje a los siguientes destinatarios: %1$s"
 
 #. *
 #. * Message could not be sent to following recipients: %1$s %2$s (arbitrary server information)
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:188
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:189
 msgid "Message could not be sent to the following recipients: %1$s %2$s"
 msgstr ""
 "No se ha podido enviar el mensaje a los siguientes destinatarios: %1$s %2$s"
@@ -10406,14 +10448,14 @@ msgstr ""
 #. *
 #. * Lost connection to mail server.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:193
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:194
 msgid "Lost connection to mail server."
 msgstr "Conexión perdida con el servidor de correo."
 
 #. *
 #. * Connection closed to mail server %1$s with login %2$s (user=%3$s, context=%4$s).
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:198
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:199
 msgid ""
 "Connection closed to mail server %1$s with login %2$s (user=%3$s, context="
 "%4$s)."
@@ -10428,7 +10470,7 @@ msgstr ""
 #. * requested local address could not be assigned.
 #. * </p>
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:207
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:208
 msgid "Could not bind connection to local port %1$s"
 msgstr "No se pudo asociar una conexión al puerto local %1$s"
 
@@ -10440,7 +10482,7 @@ msgstr "No se pudo asociar una conexión al puerto local %1$s"
 #. * is listening on the remote address/port).
 #. * </p>
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:216
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:217
 msgid ""
 "Connection was refused or timed out while attempting to connect to remote "
 "server %1$s for user %2$s."
@@ -10451,7 +10493,7 @@ msgstr ""
 #. *
 #. * Connection was reset
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:221
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:222
 msgid "Connection was reset. Please try again."
 msgstr "La conexión fue interrumpida. Por favor, inténtelo de nuevo."
 
@@ -10462,21 +10504,21 @@ msgstr "La conexión fue interrumpida. Por favor, inténtelo de nuevo."
 #. * because of an intervening firewall, or if an intermediate router is down.
 #. * </p>
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:230
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:231
 msgid "No route to host: server (%1$s) cannot be reached"
 msgstr "No hay ruta al servidor: no se puede acceder al servidor (%1$s)"
 
 #. *
 #. * Port %1$s was unreachable on remote mail server
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:235
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:236
 msgid "Port %1$s was unreachable on remote server"
 msgstr "El puerto %1$s del servidor remoto resultó inalcanzable"
 
 #. *
 #. * Connection is broken due to a socket exception on remote mail server: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:240
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:241
 msgid "Connection is broken due to a socket exception on remote server: %1$s"
 msgstr ""
 "La conexión está interrumpida debido a una excepción de socket en el "
@@ -10485,39 +10527,40 @@ msgstr ""
 #. *
 #. * A socket error occurred: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:245
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:246
 msgid "A socket error occurred: %1$s"
 msgstr "Se ha producido un error de socket: %1$s"
 
 #. *
 #. * The IP address of host "%1$s" could not be determined
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:250
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:251
 msgid "The IP address of host \"%1$s\" could not be determined"
 msgstr "No se pudo determinar la dirección IP del equipo \"%1$s\""
 
 #. *
-#. * The quota on mail server exceeded.
+#. * The quota on mail server exceeded. Error message: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:260
-msgid "The quota on mail server exceeded."
-msgstr "Se ha excedido la cuota en el servidor de correo."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:261
+msgid "The quota on mail server exceeded. Error message: %1$s"
+msgstr ""
+"Se ha excedido la cuota en el servidor de correo. Mensaje de error: %1$s"
 
 #. *
-#. * The quota on mail server "%1$s" exceeded with login %2$s (user=%3$s, context=%4$s).
+#. * The quota on mail server "%1$s" exceeded with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:265
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:266
 msgid ""
 "The quota on mail server \"%1$s\" exceeded with login %2$s (user=%3$s, "
-"context=%4$s)."
+"context=%4$s). Error message: %5$s"
 msgstr ""
 "Se ha excedido la cuota en el servidor de correo \"%1$s\" para la conexión "
-"%2$s (usuario:%3$s, contexto=%4$s)."
+"%2$s (usuario=%3$s, contexto=%4$s). Mensaje de error: %5$s"
 
 #. *
 #. * A command to mail server failed. Server response: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:270
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:271
 msgid "A command to mail server failed. Server response: %1$s."
 msgstr ""
 "Ha fallado una orden al servidor de correo. Respuesta del servidor: %1$s."
@@ -10525,7 +10568,7 @@ msgstr ""
 #. *
 #. * A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:275
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:276
 msgid ""
 "A command failed on mail server %1$s with login %2$s (user=%3$s, context="
 "%4$s). Server response: %5$s"
@@ -10537,7 +10580,7 @@ msgstr ""
 #. *
 #. * Mail server indicates a bad command. Server response: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:280
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:281
 msgid "Mail server indicates a bad command. Server response: %1$s"
 msgstr ""
 "El servidor de correo reporta un comando erróneo. Respuesta del servidor: "
@@ -10546,7 +10589,7 @@ msgstr ""
 #. *
 #. * Bad command indicated by mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:285
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:286
 msgid ""
 "Bad command indicated by mail server %1$s with login %2$s (user=%3$s, "
 "context=%4$s). Server response: %5$s"
@@ -10557,14 +10600,14 @@ msgstr ""
 #. *
 #. * Error in mail server protocol. Error message: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:290
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:291
 msgid "Error in mail server protocol. Error message: %1$s"
 msgstr "Error en el protocolo del servidor de correo. Mensaje de error: %1$s"
 
 #. *
 #. * An error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:295
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:296
 msgid ""
 "Error in protocol to mail server %1$s with login %2$s (user=%3$s, context="
 "%4$s). Error message: %5$s"
@@ -10575,28 +10618,28 @@ msgstr ""
 #. *
 #. * Message could not be sent: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:300
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:301
 msgid "Message could not be sent: %1$s"
 msgstr "No se ha podido enviar el mensaje: %1$s"
 
 #. *
 #. * Message could not be sent: %1$s %2$s (arbitrary server information)
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:305
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:306
 msgid "Message could not be sent: %1$s %2$s"
 msgstr "No se ha podido enviar el mensaje: %1$s %2$s"
 
 #. *
 #. * Message cannot be displayed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:310
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:311
 msgid "Message cannot be displayed."
 msgstr "No es posible mostrar el mensaje."
 
 #. *
 #. * Wrong or missing login data to access mail transport server %1$s. Error message from mail transport server: %2$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:315
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:316
 msgid ""
 "Wrong or missing login data to access mail transport server %1$s. Error "
 "message from mail transport server: %2$s"
@@ -10609,7 +10652,7 @@ msgstr ""
 #. * Wrong or missing login data to access mail transport server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail
 #. * transport server: %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:321
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:322
 msgid ""
 "Wrong or missing login data to access mail transport server %1$s with login "
 "%2$s (user=%3$s, context=%4$s). Error message from mail transport server: "
@@ -10622,7 +10665,7 @@ msgstr ""
 #. *
 #. * Error processing mail server response. The administrator has been informed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:326
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:327
 msgid ""
 "Error processing mail server response. The administrator has been informed."
 msgstr ""
@@ -10632,7 +10675,7 @@ msgstr ""
 #. *
 #. * Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:331
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:332
 msgid ""
 "Error processing %1$s mail server response for login %2$s (user=%3$s, "
 "context=%4$s). The administrator has been informed."
@@ -10643,7 +10686,7 @@ msgstr ""
 #. *
 #. * I/O error "%1$s" occurred in communication with "%2$s" mail server for login %3$s (user=%4$s, context=%5$s).
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:341
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:342
 msgid ""
 "I/O error \"%1$s\" occurred in communication with \"%2$s\" mail server for "
 "login %3$s (user=%4$s, context=%5$s)."
@@ -10654,7 +10697,7 @@ msgstr ""
 #. *
 #. * Error processing mail server response. The administrator has been informed. Error message: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:346
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:347
 msgid ""
 "Error processing mail server response. The administrator has been informed. "
 "Error message: %1$s"
@@ -10666,7 +10709,7 @@ msgstr ""
 #. * Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed. Error
 #. * message: %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:352
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:353
 msgid ""
 "Error processing %1$s mail server response for login %2$s (user=%3$s, "
 "context=%4$s). The administrator has been informed. Error message: %5$s"
@@ -10674,6 +10717,30 @@ msgstr ""
 "Error al procesar la respuesta del servidor de correo %1$s para la conexión "
 "%2$s (usuario=%3$s, contexto=%4$s). Se ha informado al administrador. "
 "Mensaje de error:  %5$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:355
+msgid ""
+"That mailbox is already in use by another process. Please try again later."
+msgstr ""
+"Ese buzón de correo ya está en uso por otro proceso. Por favor inténtelo de "
+"nuevo más tarde."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:355
+msgid "Error message: %1$s"
+msgstr "Mensaje de error: %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:357
+msgid ""
+"That mailbox is already in use by another process on %1$s mail server for "
+"login %2$s (user=%3$s, context=%4$s). Please try again later."
+msgstr ""
+"Ese buzón de correo ya está en uso por otro proceso en el servidor de correo "
+"%1$s para la conexión %2$s (usuario=%3$s, contexto=%4$s). Por favor "
+"inténtelo de nuevo más tarde."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:357
+msgid "Error message: %5$s"
+msgstr "Mensaje de error: %5$s"
 
 #. Unexpected error: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
@@ -10806,6 +10873,44 @@ msgid "Could not connect to transport server \"%1$s\" for login %2$s"
 msgstr ""
 "No se ha podido conectar con el servidor de transporte \"%1$s\" para el "
 "inicio de sesión %2$s"
+
+#. Default port specified for mail protocol "%1$s", but SSL is enabled. Please review if appropriate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:129
+msgid ""
+"Default port specified for mail protocol \"%1$s\", but SSL is enabled. "
+"Please review if appropriate."
+msgstr ""
+"Se ha especificado el puerto predeterminado para el protocolo de correo \"%"
+"1$s\", pero SSL está habilitado."
+"Por favor compruebe si es correcto."
+
+#. Secure port specified for mail protocol "%1$s", but SSL is not enabled. Please review if appropriate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:132
+msgid ""
+"Secure port specified for mail protocol \"%1$s\", but SSL is not enabled. "
+"Please review if appropriate."
+msgstr ""
+"Se ha especificado el puerto seguro para el protocolo de correo \"%1$s\", "
+"pero SSL no está habilitado. Por favor compruebe si es correcto."
+
+#. Default port specified for transport protocol "%1$s", but SSL is enabled. Please review if appropriate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:135
+msgid ""
+"Default port specified for transport protocol \"%1$s\", but SSL is enabled. "
+"Please review if appropriate."
+msgstr ""
+"Se ha especificado el puerto predeterminado para el protocolo de transporte "
+"\"%1$s\", pero SSL está habilitado."
+"Por favor compruebe si es correcto."
+
+#. Secure port specified for transport protocol "%1$s", but SSL is not enabled. Please review if appropriate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:138
+msgid ""
+"Secure port specified for transport protocol \"%1$s\", but SSL is not "
+"enabled. Please review if appropriate."
+msgstr ""
+"Se ha especificado el puerto seguro para el protocolo de transporte \"%1$s\", "
+"pero SSL no está habilitado. Por favor compruebe si es correcto."
 
 #. *
 #. * SQL Problem: "%1$s".
@@ -11994,6 +12099,11 @@ msgstr "Se ha producido un error HTTP. Estado %1$s. Mensaje %2$s."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:143
 msgid "Unsupported format: %1$s"
 msgstr "Formato no admitido: %1$s"
+
+#. Missing cookie: %s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:146
+msgid "Missing cookie: %s"
+msgstr "Falta la cookie: %s"
 
 #. *
 #. * Exception while writing JSON.
@@ -15199,6 +15309,9 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulú"
+
+#~ msgid "The following needed service is missing: %1$s"
+#~ msgstr "Falta el siguiente servicio necesario: %1$s"
 
 #~ msgid ""
 #~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
