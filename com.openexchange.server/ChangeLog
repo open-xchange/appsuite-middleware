@@ -1,6 +1,7 @@
 * 2013-06-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 27178: Improved default message displayed to user when a severe runtime error occurs in Open-Xchange server
+ - Fix for bug 25653: Fixed token-based mail attachment download for Hybrid App
 
 * 2013-06-23 - thorben.betten@open-xchange.com
 
