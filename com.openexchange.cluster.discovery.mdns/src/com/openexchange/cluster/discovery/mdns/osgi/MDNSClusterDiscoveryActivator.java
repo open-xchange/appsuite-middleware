@@ -59,6 +59,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
+import com.openexchange.cluster.discovery.ClusterMember;
 import com.openexchange.cluster.discovery.mdns.MDNSClusterDiscoveryService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mdns.MDNSService;
@@ -95,7 +96,7 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
                  */
                 for (final ClusterListener listener : service.getListeners()) {
                     for (final InetAddress inetAddress : entry.getAddresses()) {
-                        listener.removed(inetAddress);
+                        listener.removed(ClusterMember.valueOf(inetAddress, entry.getPort()));
                         LOG.info("Notified ClusterListener '" + listener.getClass().getName() + "' about disappeared Open-Xchange node: " + inetAddress);
                     }
                 }
@@ -111,7 +112,7 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
                  */
                 for (final ClusterListener listener : service.getListeners()) {
                     for (final InetAddress inetAddress : entry.getAddresses()) {
-                        listener.added(inetAddress);
+                        listener.added(ClusterMember.valueOf(inetAddress, entry.getPort()));
                         LOG.info("Notified ClusterListener '" + listener.getClass().getName() + "' about appeared Open-Xchange node: " + inetAddress);
                     }
                 }

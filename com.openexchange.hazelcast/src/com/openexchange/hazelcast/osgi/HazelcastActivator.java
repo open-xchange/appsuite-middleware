@@ -69,6 +69,7 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
+import com.openexchange.cluster.discovery.ClusterMember;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.init.HazelcastInitializer;
@@ -215,7 +216,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                  * Do start-up
                  */
                 final long st = System.currentTimeMillis();
-                final List<InetAddress> nodes = discovery.getNodes();
+                final List<ClusterMember> nodes = discovery.getNodes();
                 if (infoEnabled) {
                     final long et = System.currentTimeMillis();
                     logger.info("\nHazelcast\n\tAvailable cluster nodes received in " + (et - st) + "msec from " +
@@ -328,7 +329,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                 return;
             }
             try {
-                initializer.init(Collections.singletonList(InetAddress.getByName(ip)), false, System.currentTimeMillis(), LOG);
+                initializer.init(Collections.singletonList(ClusterMember.valueOf(InetAddress.getByName(ip))), false, System.currentTimeMillis(), LOG);
                 commandInterpreter.println("Added node to Hazelcast cluster: " + ip);
             } catch (final UnknownHostException e) {
                 LOG.error("Could not register node.", e);

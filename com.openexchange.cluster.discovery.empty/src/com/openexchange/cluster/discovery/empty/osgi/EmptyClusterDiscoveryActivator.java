@@ -49,10 +49,10 @@
 
 package com.openexchange.cluster.discovery.empty.osgi;
 
-import java.net.InetAddress;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
+import com.openexchange.cluster.discovery.ClusterMember;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -72,7 +72,7 @@ public class EmptyClusterDiscoveryActivator extends HousekeepingActivator {
         registerService(ClusterDiscoveryService.class, new ClusterDiscoveryService() {
 
             @Override
-            public List<InetAddress> getNodes() {
+            public List<ClusterMember> getNodes() {
                 return Collections.emptyList();
             }
         });

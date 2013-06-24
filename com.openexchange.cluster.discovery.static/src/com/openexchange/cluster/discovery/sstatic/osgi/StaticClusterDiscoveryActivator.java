@@ -57,6 +57,7 @@ import java.util.Hashtable;
 import java.util.List;
 import org.osgi.framework.Constants;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
+import com.openexchange.cluster.discovery.ClusterMember;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -76,14 +77,27 @@ public class StaticClusterDiscoveryActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final String snodes = getService(ConfigurationService.class).getProperty("com.openexchange.cluster.discovery.static.nodes", "");
-        final List<InetAddress> nodes;
+        final List<ClusterMember> nodes;
         if (isEmpty(snodes)) {
             nodes = Collections.emptyList();
         } else {
             final String[] strings = Strings.splitByComma(snodes);
-            final List<InetAddress> list = new ArrayList<InetAddress>(strings.length);
-            for (final String snode : strings) {
-                list.add(InetAddress.getByName(snode));
+            final List<ClusterMember> list = new ArrayList<ClusterMember>(strings.length);
+            int pos;
+            for (String snode : strings) {
+                snode = Strings.unquote(snode).trim();
+                pos = snode.indexOf(':');
+                if (pos > 0) {
+                    int port;
+                    try {
+                        port = Integer.parseInt(snode.substring(pos + 1));
+                    } catch (final NumberFormatException nfe) {
+                        port = -1;
+                    }
+                    list.add(ClusterMember.valueOf(InetAddress.getByName(snode.substring(0, port).trim()), port));
+                } else {
+                    list.add(ClusterMember.valueOf(InetAddress.getByName(snode)));
+                }
             }
             nodes = Collections.unmodifiableList(list);
         }
@@ -92,7 +106,7 @@ public class StaticClusterDiscoveryActivator extends HousekeepingActivator {
         registerService(ClusterDiscoveryService.class, new ClusterDiscoveryService() {
 
             @Override
-            public List<InetAddress> getNodes() {
+            public List<ClusterMember> getNodes() {
                 return nodes;
             }
         }, props);

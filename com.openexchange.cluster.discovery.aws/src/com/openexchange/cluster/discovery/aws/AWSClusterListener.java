@@ -49,9 +49,9 @@
 
 package com.openexchange.cluster.discovery.aws;
 
-import java.net.InetAddress;
 import org.apache.commons.logging.Log;
 import com.openexchange.cluster.discovery.ClusterListener;
+import com.openexchange.cluster.discovery.ClusterMember;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -70,22 +70,14 @@ public class AWSClusterListener implements ClusterListener {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.cluster.discovery.ClusterListener#added(java.net.InetAddress)
-     */
     @Override
-    public void added(InetAddress address) {
-        LOG.info("AWS instance added to cluster: " + address.getHostAddress());
+    public void added(ClusterMember clusterMember) {
+        LOG.info("AWS instance added to cluster: " + clusterMember.getInetAddress().getHostAddress());
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.cluster.discovery.ClusterListener#removed(java.net.InetAddress)
-     */
     @Override
-    public void removed(InetAddress address) {
-        LOG.info("AWS instance removed from cluster: " + address.getHostAddress());
+    public void removed(ClusterMember clusterMember) {
+        LOG.info("AWS instance removed from cluster: " + clusterMember.getInetAddress().getHostAddress());
     }
 
 }

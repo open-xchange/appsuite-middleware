@@ -49,7 +49,6 @@
 
 package com.openexchange.cluster.discovery;
 
-import java.net.InetAddress;
 import java.util.List;
 
 /**
@@ -64,6 +63,6 @@ public interface ClusterDiscoveryService {
      *
      * @return A list of currently known nodes.
      */
-    List<InetAddress> getNodes();
+    List<ClusterMember> getNodes();
 
 }

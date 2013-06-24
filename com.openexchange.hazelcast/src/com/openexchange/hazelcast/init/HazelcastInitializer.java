@@ -71,6 +71,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.LifecycleEvent;
 import com.hazelcast.core.LifecycleEvent.LifecycleState;
 import com.hazelcast.core.LifecycleListener;
+import com.openexchange.cluster.discovery.ClusterMember;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.Hazelcasts;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
@@ -121,7 +122,7 @@ public final class HazelcastInitializer {
      * @return {@link InitMode#RE_INITIALIZED} if <tt>HazelcastInstance</tt> has been re-initialized by this call; otherwise
      *         {@link InitMode.NONE} if no configuration changes were necessary
      */
-    public InitMode remove(final List<InetAddress> nodes, final boolean force, final Log logger) {
+    public InitMode remove(final List<ClusterMember> nodes, final boolean force, final Log logger) {
         if (null == nodes || nodes.isEmpty()) {
             return InitMode.NONE;
         }
@@ -173,7 +174,7 @@ public final class HazelcastInitializer {
      * @return {@link InitMode#RE_INITIALIZED} if <tt>HazelcastInstance</tt> has been (re-)initialized by this call; otherwise
      *         {@link InitMode.NONE} if no configuration changes were necessary
      */
-    public InitMode init(final List<InetAddress> nodes, final boolean force, final long stamp, final Log logger) {
+    public InitMode init(final List<ClusterMember> nodes, final boolean force, final long stamp, final Log logger) {
         synchronized (this) {
             final HazelcastInstance prevHazelcastInstance = REF_HAZELCAST_INSTANCE.get();
             final boolean infoEnabled = logger.isInfoEnabled();
@@ -255,7 +256,7 @@ public final class HazelcastInitializer {
         }
     }
 
-    private InitMode configureNetworkJoin(final List<InetAddress> nodes, final boolean append, final Config config, final Log logger) {
+    private InitMode configureNetworkJoin(final List<ClusterMember> nodes, final boolean append, final Config config, final Log logger) {
         /*
          * Get reference to network join
          */
@@ -312,15 +313,18 @@ public final class HazelcastInitializer {
 
     private static final Pattern SPLIT = Pattern.compile("\\%");
 
-    private static Set<String> resolve2Members(final List<InetAddress> nodes, Collection<String> excludedHosts) {
+    private static Set<String> resolve2Members(final List<ClusterMember> nodes, Collection<String> excludedHosts) {
         Set<String> excluded = new HashSet<String>(excludedHosts);
         excluded.addAll(getLocalHost());
         final Set<String> members = new LinkedHashSet<String>(nodes.size());
-        for (final InetAddress inetAddress : nodes) {
-            final String[] addressArgs = SPLIT.split(inetAddress.getHostAddress(), 0);
+        final StringBuilder sb = new StringBuilder(32);
+        for (final ClusterMember clusterMember : nodes) {
+            final int port = clusterMember.getPort();
+            final String[] addressArgs = SPLIT.split(clusterMember.getInetAddress().getHostAddress(), 0);
             for (final String address : addressArgs) {
                 if (false == excluded.contains(address)) {
-                    members.add(address);
+                    sb.setLength(0);
+                    members.add(port > 0 ? sb.append(address).append(':').append(port).toString() : address);
                 }
             }
         }

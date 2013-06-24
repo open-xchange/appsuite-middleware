@@ -57,6 +57,7 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.Address;
 import com.amazonaws.services.ec2.model.DescribeAddressesResult;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
+import com.openexchange.cluster.discovery.ClusterMember;
 
 /**
  * {@link AWSClusterDiscoveryService}
@@ -76,13 +77,13 @@ public class AWSClusterDiscoveryService implements ClusterDiscoveryService {
     }
 
     @Override
-    public List<InetAddress> getNodes() {
-        List<InetAddress> retval = new ArrayList<InetAddress>();
+    public List<ClusterMember> getNodes() {
+        List<ClusterMember> retval = new ArrayList<ClusterMember>();
         DescribeAddressesResult result = amazonEC2.describeAddresses();
         List<Address> addresses = result.getAddresses();
         for (Address a : addresses) {
             try {
-                retval.add(InetAddress.getByName(a.getPublicIp()));
+                retval.add(ClusterMember.valueOf(InetAddress.getByName(a.getPublicIp())));
             } catch (UnknownHostException e) {
                 // ignore
             }

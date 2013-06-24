@@ -49,7 +49,6 @@
 
 package com.openexchange.cluster.discovery;
 
-import java.net.InetAddress;
 
 /**
  * A {@link ClusterListener} is informed by the {@link ClusterDiscoveryService} about changes to the known cluster list.
@@ -61,15 +60,15 @@ public interface ClusterListener {
     /**
      * Called when a new node joined the cluster.
      *
-     * @param address The address of the new node
+     * @param clusterMember The new member
      */
-    void added(InetAddress address);
+    void added(ClusterMember clusterMember);
 
     /**
      * Called when a node leaves the cluster.
      *
-     * @param address The address of the disappearing node
+     * @param clusterMember The disappearing member
      */
-    void removed(InetAddress address);
+    void removed(ClusterMember clusterMember);
 
 }
