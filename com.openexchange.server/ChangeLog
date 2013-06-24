@@ -1,3 +1,7 @@
+* 2013-06-24 - marcus.klein@open-xchange.com
+
+ - Fix for bug 25642: Removing old configuration files for mobile web interface.
+
 * 2013-06-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 27178: Improved default message displayed to user when a severe runtime error occurs in Open-Xchange server
@@ -11,7 +15,7 @@
 * 2013-06-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 27121: Show appropriate error if CSV import fails
- 
+
 * 2013-06-20 - marc.arens@open-xchange.com
 
  - Fix for bug 27127: Add open-xchange-grizzly as requirement in rpm spec
