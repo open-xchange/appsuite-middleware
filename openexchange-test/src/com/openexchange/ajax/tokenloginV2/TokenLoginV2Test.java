@@ -150,6 +150,14 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         assertTrue("Error expected.", loginResponse.hasError());
         assertEquals("Wrong error.", TokenLoginExceptionCodes.NO_SUCH_TOKEN.getNumber(), loginResponse.getException().getCode());
     }
+    
+    public void testBadToken() throws Exception {
+        LoginRequest login = new LoginRequest(new TokenLoginParameters("phantasyToken", SECRET_1, generateAuthId(), TokenLoginV2Test.class.getName(), "7.4.0"), false);
+        AJAXClient client = new AJAXClient();
+        LoginResponse loginResponse = client.execute(login);
+
+        assertTrue("Error expected.", loginResponse.hasError());
+    }
 
     @Override
     public void tearDown() throws Exception {

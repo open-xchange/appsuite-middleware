@@ -124,8 +124,10 @@ public class RedeemToken implements LoginRequestHandler {
             return;
         }
         TokenLoginSecret tokenLoginSecret = service.getTokenLoginSecret(appSecret);
-        boolean writePassword = (Boolean) tokenLoginSecret.getParameters().get("accessPassword");
-        
+        Boolean writePassword = (Boolean) tokenLoginSecret.getParameters().get("accessPassword");
+        if (writePassword == null) {
+            writePassword = false;
+        }
         try {
             final Context context = ContextStorage.getInstance().getContext(session.getContextId());
             final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
