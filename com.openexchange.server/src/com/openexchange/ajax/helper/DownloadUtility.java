@@ -451,7 +451,7 @@ public final class DownloadUtility {
             // myfile.dat => myfile.DAT
             final int pos = foo.lastIndexOf('.');
             if (pos >= 0) {
-                foo = foo.substring(0, pos) + toUpperCase(foo.substring(pos));
+                foo = foo.substring(0, pos).replaceAll("\\s+", "_") + toUpperCase(foo.substring(pos));
             }
         } else {
             appendTo.append("; filename*=UTF-8''").append(URLCoder.encode(fn));
