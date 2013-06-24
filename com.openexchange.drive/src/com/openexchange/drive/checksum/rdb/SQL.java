@@ -134,6 +134,10 @@ public class SQL {
         "DELETE FROM fileChecksums " +
         "WHERE cid=? AND folder=REVERSE(?) AND file=REVERSE(?) AND version=? AND sequence=?;";
 
+    public static final String DELETE_FILE_CHECKSUMS_STMT =
+        "DELETE FROM fileChecksums " +
+        "WHERE cid=? AND folder=REVERSE(?) AND file=REVERSE(?);";
+
     public static final String SELECT_FILE_CHECKSUM_STMT =
         "SELECT LOWER(HEX(uuid)),LOWER(HEX(checksum)) FROM fileChecksums " +
         "WHERE cid=? AND folder=REVERSE(?) AND file=REVERSE(?) AND version=? AND sequence=?;";

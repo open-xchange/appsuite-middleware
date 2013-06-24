@@ -55,7 +55,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.FileVersion;
@@ -67,9 +66,9 @@ import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.sync.SyncResult;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.composition.FolderID;
 
 
 /**
@@ -87,10 +86,10 @@ public class FileCopyOptimizer extends FileActionOptimizer {
     public SyncResult<FileVersion> optimize(DriveSession session, SyncResult<FileVersion> result) {
         List<AbstractAction<FileVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<FileVersion>>(result.getActionsForClient());
         List<AbstractAction<FileVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<FileVersion>>(result.getActionsForServer());
-        List<AbstractAction<FileVersion>> uploadActions = new ArrayList<AbstractAction<FileVersion>>();
         /*
          * for client UPLOADs, check if file already known on server
          */
+        List<AbstractAction<FileVersion>> uploadActions = new ArrayList<AbstractAction<FileVersion>>();
         List<String> checksums = new ArrayList<String>();
         for (AbstractAction<FileVersion> clientAction : result.getActionsForClient()) {
             if (Action.UPLOAD == clientAction.getAction()) {
@@ -100,47 +99,25 @@ public class FileCopyOptimizer extends FileActionOptimizer {
         }
         if (0 < uploadActions.size()) {
             Map<String, ServerFileVersion> knownFileVersions = findByChecksum(session, checksums);
-            for (AbstractAction<FileVersion> uploadAction : uploadActions) {
-                ServerFileVersion knownFileVersion = knownFileVersions.get(uploadAction.getNewVersion().getChecksum());
-                if (null != knownFileVersion) {
-                    /*
-                     * no need to upload, just copy file on server and let client update it's metadata
-                     */
-                    String path = (String)uploadAction.getParameters().get(DriveAction.PARAMETER_PATH);
-                    optimizedActionsForClient.remove(uploadAction);
-                    DownloadFileAction copyAction = new DownloadFileAction(
-                        uploadAction.getVersion(), uploadAction.getNewVersion(), null, path, -1, null);
-                    copyAction.getParameters().put("sourceVersion", knownFileVersion);
-                    optimizedActionsForServer.add(copyAction);
-                    optimizedActionsForClient.add(
-                        new AcknowledgeFileAction(uploadAction.getVersion(), uploadAction.getNewVersion(), null, path));
+            if (0 < knownFileVersions.size()) {
+                for (AbstractAction<FileVersion> uploadAction : uploadActions) {
+                    ServerFileVersion knownFileVersion = knownFileVersions.get(uploadAction.getNewVersion().getChecksum());
+                    if (null != knownFileVersion) {
+                        /*
+                         * no need to upload, just copy file on server and let client update it's metadata
+                         */
+                        String path = (String)uploadAction.getParameters().get(DriveAction.PARAMETER_PATH);
+                        optimizedActionsForClient.remove(uploadAction);
+                        DownloadFileAction copyAction = new DownloadFileAction(
+                            uploadAction.getVersion(), uploadAction.getNewVersion(), null, path, -1, null);
+                        copyAction.getParameters().put("sourceVersion", knownFileVersion);
+                        optimizedActionsForServer.add(copyAction);
+                        optimizedActionsForClient.add(
+                            new AcknowledgeFileAction(uploadAction.getVersion(), uploadAction.getNewVersion(), null, path));
+                    }
                 }
             }
         }
-
-
-//
-//        for (AbstractAction<FileVersion> clientAction : result.getActionsForClient()) {
-//            /*
-//             * for client UPLOADs, check if file already known on server
-//             */
-//            if (Action.UPLOAD == clientAction.getAction()) {
-//                ServerFileVersion knownFile = findByChecksum(session, clientAction.getNewVersion().getChecksum());
-//                if (null != knownFile) {
-//                    /*
-//                     * no need to upload, just copy file on server and let client update it's metadata
-//                     */
-//                    String path = (String)clientAction.getParameters().get(DriveAction.PARAMETER_PATH);
-//                    optimizedActionsForClient.remove(clientAction);
-//                    DownloadFileAction copyAction = new DownloadFileAction(
-//                        clientAction.getVersion(), clientAction.getNewVersion(), null, path, -1, null);
-//                    copyAction.getParameters().put("sourceVersion", knownFile);
-//                    optimizedActionsForServer.add(copyAction);
-//                    optimizedActionsForClient.add(new AcknowledgeFileAction(clientAction.getVersion(), clientAction.getNewVersion(), null,
-//                        (String)clientAction.getParameters().get(DriveAction.PARAMETER_PATH)));
-//                }
-//            }
-//        }
         /*
          * return new sync result
          */
@@ -181,16 +158,7 @@ public class FileCopyOptimizer extends FileActionOptimizer {
          */
         if (0 < checksumsToQuery.size()) {
             try {
-                Map<String, List<FileChecksum>> matchingFileChecksums = session.getChecksumStore().getMatchingFileChecksums(checksumsToQuery);
-                for (Entry<String, List<FileChecksum>> entry : matchingFileChecksums.entrySet()) {
-                    for (FileChecksum fileChecksum : entry.getValue()) {
-                        ServerFileVersion storageVersion = getStorageVersion(session, fileChecksum);
-                        if (null != storageVersion) {
-                            matchingFileVersions.put(entry.getKey(), storageVersion);
-                            break;
-                        }
-                    }
-                }
+                matchingFileVersions.putAll(getMatchingFileVersions(session, checksumsToQuery));
             } catch (OXException e) {
                 LOG.warn("unexpected error during file lookup by checksum", e);
             }
@@ -198,89 +166,38 @@ public class FileCopyOptimizer extends FileActionOptimizer {
         return matchingFileVersions;
     }
 
-    private ServerFileVersion findByChecksum(DriveSession session, String checksum) {
-        /*
-         * check server file versions known by mapper
-         */
-        Collection<? extends FileVersion> versions = mapper.getServerVersions();
-        if (null != versions && 0 < versions.size()) {
-            for (FileVersion version : versions) {
-                if (checksum.equals(version.getChecksum()) && ServerFileVersion.class.isInstance(version)) {
-                    return (ServerFileVersion) version;
-                }
-            }
+    private static boolean indicatesInvalidation(OXException e) {
+        if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
+            return false;
         }
-        /*
-         * check files known by checksum store
-         */
-        try {
-            List<FileChecksum> fileChecksums = session.getChecksumStore().getMatchingFileChecksums(checksum);
-            for (FileChecksum fileChecksum : fileChecksums) {
-                File storageFile = null;
-                boolean folderNotFound = false;
-                FolderID folderID = new FolderID(fileChecksum.getFileID().getService(), fileChecksum.getFileID().getAccountId(),
-                    fileChecksum.getFileID().getFolderId());
-                try {
-                    String path = session.getStorage().getPath(folderID.toUniqueID());
-                    storageFile = session.getStorage().getFile(path, fileChecksum.getFileID().toUniqueID(), fileChecksum.getVersion());
-                } catch (OXException e) {
-                    LOG.debug("Error accessing file referenced by checksum store: " + e.getMessage());
-                    if ("FLD-0008".equals(e.getErrorCode())) {
-                        folderNotFound = true;
-                    }
-                }
-                if (null == storageFile || storageFile.getSequenceNumber() != fileChecksum.getSequenceNumber()) {
-                    if (folderNotFound) {
-                        LOG.debug("Invalidating stored file checksums for folder: " + folderID);
-                        session.getChecksumStore().removeFileChecksumsInFolder(folderID);
-                    } else {
-                        LOG.debug("Invalidating stored file checksum: " + fileChecksum);
-                        session.getChecksumStore().removeFileChecksum(fileChecksum);
-                    }
-                } else {
-                    LOG.debug("Found matching file in storage for stored checksum: " + storageFile);
-                    return new ServerFileVersion(storageFile, fileChecksum);
-                }
-            }
-        } catch (OXException e) {
-            LOG.warn("unexpected error during file lookup by checksum", e);
-        }
-        /*
-         * not found
-         */
-        return null;
+        return true;
     }
 
-    private static ServerFileVersion getStorageVersion(DriveSession session, FileChecksum fileChecksum) throws OXException {
-        File storageFile = null;
-        boolean folderNotFound = false;
-        FolderID folderID = new FolderID(fileChecksum.getFileID().getService(), fileChecksum.getFileID().getAccountId(),
-            fileChecksum.getFileID().getFolderId());
-        try {
-            String path = session.getStorage().getPath(folderID.toUniqueID());
-            storageFile = session.getStorage().getFile(path, fileChecksum.getFileID().getFileId(), fileChecksum.getVersion());
-        } catch (OXException e) {
-            LOG.debug("Error accessing file referenced by checksum store: " + e.getMessage());
-            if ("FLD-0008".equals(e.getErrorCode())) {
-                folderNotFound = true;
+    private static Map<String, ServerFileVersion> getMatchingFileVersions(DriveSession session, List<String> checksums) throws OXException {
+        Map<String, ServerFileVersion> matchingFileVersions = new HashMap<String, ServerFileVersion>();
+        List<FileChecksum> checksumsToInvalidate = new ArrayList<FileChecksum>();
+        Map<String, List<FileChecksum>> matchingFileChecksums = session.getChecksumStore().getMatchingFileChecksums(checksums);
+        for (List<FileChecksum> matchingChecksums : matchingFileChecksums.values()) {
+            File matchingFile = null;
+            for (FileChecksum matchingChecksum : matchingChecksums) {
+                try {
+                    matchingFile = session.getStorage().getFile(matchingChecksum.getFileID().toUniqueID());
+                } catch (OXException e) {
+                    LOG.debug("Error accessing file referenced by checksum store: " + e.getMessage());
+                    if (indicatesInvalidation(e)) {
+                        checksumsToInvalidate.add(matchingChecksum);
+                    }
+                }
+                if (null != matchingFile) {
+                    matchingFileVersions.put(matchingChecksum.getChecksum(), new ServerFileVersion(matchingFile, matchingChecksum));
+                    break;
+                }
             }
         }
-        if (null == storageFile || storageFile.getSequenceNumber() != fileChecksum.getSequenceNumber()) {
-            if (folderNotFound) {
-                LOG.debug("Invalidating stored file checksums for folder: " + folderID);
-                session.getChecksumStore().removeFileChecksumsInFolder(folderID);
-            } else {
-                LOG.debug("Invalidating stored file checksum: " + fileChecksum);
-                session.getChecksumStore().removeFileChecksum(fileChecksum);
-            }
-        } else {
-            LOG.debug("Found matching file in storage for stored checksum: " + storageFile);
-            return new ServerFileVersion(storageFile, fileChecksum);
+        if (0 < checksumsToInvalidate.size()) {
+            session.getChecksumStore().removeFileChecksums(checksumsToInvalidate);
         }
-        /*
-         * not found
-         */
-        return null;
+        return matchingFileVersions;
     }
 
 }

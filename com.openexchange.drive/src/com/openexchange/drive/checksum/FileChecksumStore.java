@@ -85,6 +85,7 @@ public interface FileChecksumStore {
 
     int removeFileChecksumsInFolder(FolderID folderID) throws OXException;
 
+    int removeFileChecksums(FileID fileID) throws OXException;
 
     FileChecksum getFileChecksum(FileID fileID, String version, long sequenceNumber) throws OXException;
 

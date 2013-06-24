@@ -391,20 +391,26 @@ public class DriveStorage {
         return getFileAccess().getDocument(file.getId(), file.getVersion());
     }
 
-    private SearchIterator<File> getFilesIterator(String folderID, String pattern) throws OXException {
-        if (null != pattern) {
-            return getFileAccess().search(pattern, DriveConstants.FILE_FIELDS, folderID, null, SortDirection.DEFAULT,
-                FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
-        } else {
-            return getFileAccess().getDocuments(folderID, DriveConstants.FILE_FIELDS, null, SortDirection.DEFAULT).results();
-        }
+    /**
+     * Gets file metadata for the supplied file ID.
+     *
+     * @param id The (unique) identifier of the file
+     * @return The file metadata
+     * @throws OXException
+     */
+    public File getFile(String id) throws OXException {
+        return getFile(id, FileStorageFileAccess.CURRENT_VERSION);
     }
 
-    public File getFile(String path, String id) throws OXException {
-        return getFile(path, id, FileStorageFileAccess.CURRENT_VERSION);
-    }
-
-    public File getFile(String path, String id, String version) throws OXException {
+    /**
+     * Gets file metadata for the supplied file ID with the specified version.
+     *
+     * @param id The (unique) identifier of the file
+     * @param version The file version to get
+     * @return The file metadata
+     * @throws OXException
+     */
+    public File getFile(String id, String version) throws OXException {
         return getFileAccess().getFileMetadata(id, version);
     }
 
@@ -466,6 +472,15 @@ public class DriveStorage {
         folders.put(ROOT_PATH, rootFolder);
         addSubfolders(folders, rootFolder, ROOT_PATH);
         return folders;
+    }
+
+    private SearchIterator<File> getFilesIterator(String folderID, String pattern) throws OXException {
+        if (null != pattern) {
+            return getFileAccess().search(pattern, DriveConstants.FILE_FIELDS, folderID, null, SortDirection.DEFAULT,
+                FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+        } else {
+            return getFileAccess().getDocuments(folderID, DriveConstants.FILE_FIELDS, null, SortDirection.DEFAULT).results();
+        }
     }
 
     private FileStorageFolder resolveToLeaf(String path, boolean createIfNeeded) throws OXException {
