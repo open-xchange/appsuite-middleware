@@ -49,15 +49,10 @@
 
 package com.openexchange.realtime.client;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.json.JSONValue;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
 import com.openexchange.realtime.client.room.impl.ChineseRoom;
-import com.openexchange.realtime.client.room.impl.RTRoomImpl;
 import com.openexchange.realtime.client.user.RTUser;
 
 
@@ -67,7 +62,7 @@ import com.openexchange.realtime.client.user.RTUser;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class MixedModeConnectionTest {
-    
+
     @Test
     public void testWasyncConnection() throws RTException {
         RTConnectionProperties connectionProperties = RTConnectionProperties.newBuilder("marc.arens", "secret", "chineseRoom")
@@ -75,9 +70,9 @@ public class MixedModeConnectionTest {
             .setConnectionType(RTConnectionType.LONG_POLLING)
             .setSecure(true)
             .build();
-        RTConnection newConnection = RTConnectionFactory.newConnection(connectionProperties);
+        RTConnectionFactory.getInstance().newConnection(connectionProperties);
     }
-    
+
     @Test
     public void testRoom() throws Exception {
         RTUser user = new RTUser("marc.arens@premium", "secret", "desktop1");
@@ -88,7 +83,7 @@ public class MixedModeConnectionTest {
             .build();
         ChineseRoom chineseRoom = new ChineseRoom(user, connectionProperties);
         chineseRoom.join("chineseRoomSelector", "synthetic.china://room1", new RTMessageHandler() {
-            
+
             @Override
             public void onMessage(JSONValue message) {
                 System.out.println(message.toString());
