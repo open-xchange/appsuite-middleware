@@ -64,13 +64,10 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
-import com.openexchange.groupware.update.tasks.UserSettingServerAddUuidUpdateTask;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.tools.update.Tools;
 
 /**
  * Interface for accessing configuration settings.
@@ -557,18 +554,11 @@ public class ServerUserSetting {
     private <T> void insertAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
-            final boolean hasUuid = Tools.columnExists(con, "user_setting_server", "uuid");
-
-            if (!hasUuid) {
-                final String sep = System.getProperty("line.separator");
-                LOG.warn(sep + "    Column \"uuid\" is missing for table \"user_setting_server\"." + sep + "    Please ensure following update task has been performed: " + UserSettingServerAddUuidUpdateTask.class.getName());
-            }
-
             int pos = 2;
             {
-                final StringAllocator sb = new StringAllocator("INSERT INTO user_setting_server (").append(attribute.getColumnName());
+                final String start = "INSERT INTO user_setting_server (" + attribute.getColumnName();
                 if (CONTACT_COLLECT_ON_MAIL_ACCESS.equals(attribute)) {
-                    stmt = con.prepareStatement(sb.append(",contactCollectOnMailTransport,cid,user").append(hasUuid ? ", uuid" : "").append(") VALUES (?,?,?,?,?)").toString());
+                    stmt = con.prepareStatement(start + ",contactCollectOnMailTransport,cid,user, uuid) VALUES (?,?,?,?,?)");
                     attribute.setAttribute(stmt, value);
                     /*
                      * As configured
@@ -577,7 +567,7 @@ public class ServerUserSetting {
                     final boolean b = null == service ? false : service.getBoolProperty("com.openexchange.user.contactCollectOnMailTransport", false);
                     stmt.setBoolean(pos++, b);
                 } else if (CONTACT_COLLECT_ON_MAIL_TRANSPORT.equals(attribute)) {
-                    stmt = con.prepareStatement(sb.append(",contactCollectOnMailAccess,cid,user").append(hasUuid ? ", uuid" : "").append(") VALUES (?,?,?,?,?)").toString());
+                    stmt = con.prepareStatement(start + ",contactCollectOnMailAccess,cid,user, uuid) VALUES (?,?,?,?,?)");
                     attribute.setAttribute(stmt, value);
                     /*
                      * As configured
@@ -586,7 +576,7 @@ public class ServerUserSetting {
                     final boolean b = null == service ? false : service.getBoolProperty("com.openexchange.user.contactCollectOnMailAccess", false);
                     stmt.setBoolean(pos++, b);
                 } else {
-                    stmt = con.prepareStatement(sb.append(",contactCollectOnMailAccess,contactCollectOnMailTransport,cid,user").append(hasUuid ? ", uuid" : "").append(") VALUES (?,?,?,?,?,?)").toString());
+                    stmt = con.prepareStatement(start + ",contactCollectOnMailAccess,contactCollectOnMailTransport,cid,user, uuid) VALUES (?,?,?,?,?,?)");
                     attribute.setAttribute(stmt, value);
                     /*
                      * As configured
@@ -600,9 +590,9 @@ public class ServerUserSetting {
             }
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
-            if (hasUuid) {
-                stmt.setBytes(pos, UUIDs.toByteArray(UUID.randomUUID()));
-            }
+            UUID uuid = UUID.randomUUID();
+            byte[] uuidBinary = UUIDs.toByteArray(uuid);
+            stmt.setBytes(pos, uuidBinary);
             if (DEBUG) {
                 LOG.debug("INSERTing user settings: " + DBUtils.getStatementString(stmt));
             }
