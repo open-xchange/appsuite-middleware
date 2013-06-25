@@ -57,6 +57,8 @@ import com.openexchange.java.ConcurrentList;
 
 /**
  * {@link NearRegistryServiceTracker} - A near-registry service tracker.
+ * <p>
+ * Occurrences of specified service type are collected and available via {@link #getServiceList()}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
