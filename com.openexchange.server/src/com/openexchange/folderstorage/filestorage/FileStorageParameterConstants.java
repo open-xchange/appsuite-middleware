@@ -66,6 +66,6 @@ public final class FileStorageParameterConstants {
     /**
      * The parameter name for file storage access.
      */
-    public static final String PARAM_FILE_STORAGE_ACCESS = "file.Access";
+    public static final String PARAM_ID_BASED_FILE_STORAGE_ACCESS = "file.Access";
 
 }

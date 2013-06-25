@@ -51,13 +51,17 @@ package com.openexchange.file.storage.composition.internal;
 
 import static com.openexchange.file.storage.composition.internal.IDManglingFolder.withRelativeID;
 import static com.openexchange.file.storage.composition.internal.IDManglingFolder.withUniqueID;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
@@ -280,7 +284,8 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
 
     @Override
     public FileStorageFolder getPersonalFolder() throws OXException {
-        for (FileStorageAccountAccess accountAccess : getAllAccountAccesses()) {
+        for (AccessWrapper accessWrapper : getAllAccountAccesses()) {
+            FileStorageAccountAccess accountAccess = accessWrapper.accountAccess;
             FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
             FileStorageFolder personalFolder = folderAccess.getPersonalFolder();
             if (null != personalFolder) {
@@ -292,8 +297,10 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
 
     @Override
     public FileStorageFolder[] getPublicFolders() throws OXException {
-        List<FileStorageFolder> folders = new ArrayList<FileStorageFolder>();
-        for (FileStorageAccountAccess accountAccess : getAllAccountAccesses()) {
+        List<AccessWrapper> accessWrappers = getAllAccountAccesses();
+        List<FileStorageFolder> folders = new ArrayList<FileStorageFolder>(accessWrappers.size());
+        for (AccessWrapper accessWrapper : accessWrappers) {
+            FileStorageAccountAccess accountAccess = accessWrapper.accountAccess;
             FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
             FileStorageFolder[] publicFolders = folderAccess.getPublicFolders();
             if (null != publicFolders && 0 < publicFolders.length) {
@@ -305,13 +312,25 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
     }
 
     @Override
-    public FileStorageFolder getRootFolder() throws OXException {
-        return getFolder(FileStorageFolder.ROOT_FULLNAME);
+    public FileStorageFolder[] getRootFolders(final Locale locale) throws OXException {
+        final List<AccessWrapper> accessWrappers = getAllAccountAccesses();
+        List<FileStorageFolder> folders = new ArrayList<FileStorageFolder>(accessWrappers.size());
+        // Sort according to account name
+        Collections.sort(accessWrappers, new AccessWrapperComparator(locale == null ? Locale.US : locale));
+        for (AccessWrapper accessWrapper : accessWrappers) {
+            FileStorageAccountAccess accountAccess = accessWrapper.accountAccess;
+            FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
+            FileStorageFolder rootFolder = folderAccess.getRootFolder();
+            if (null != rootFolder) {
+                folders.add(IDManglingFolder.withUniqueID(rootFolder, accountAccess.getService().getId(), accountAccess.getAccountId()));
+            }
+        }
+        return folders.toArray(new FileStorageFolder[folders.size()]);
     }
 
-    protected List<FileStorageAccountAccess> getAllAccountAccesses() throws OXException {
+    protected List<AccessWrapper> getAllAccountAccesses() throws OXException {
         List<FileStorageService> allFileStorageServices = getAllFileStorageServices();
-        List<FileStorageAccountAccess> accountAccesses = new ArrayList<FileStorageAccountAccess>(allFileStorageServices.size());
+        List<AccessWrapper> accountAccesses = new ArrayList<AccessWrapper>(allFileStorageServices.size());
         for (FileStorageService fsService : allFileStorageServices) {
             List<FileStorageAccount> accounts = null;
             if (fsService instanceof AccountAware) {
@@ -323,7 +342,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
             for (FileStorageAccount fileStorageAccount : accounts) {
                 FileStorageAccountAccess accountAccess = fsService.getAccountAccess(fileStorageAccount.getId(), session);
                 connect(accountAccess);
-                accountAccesses.add(accountAccess);
+                accountAccesses.add(new AccessWrapper(accountAccess, fileStorageAccount.getDisplayName()));
             }
         }
         return accountAccesses;
@@ -437,5 +456,36 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
         }
         return null;
     }
+
+    private static final class AccessWrapper {
+
+        final FileStorageAccountAccess accountAccess;
+        final String displayName;
+
+        AccessWrapper(FileStorageAccountAccess accountAccess, String displayName) {
+            super();
+            this.accountAccess = accountAccess;
+            this.displayName = displayName;
+        }
+
+
+    }
+
+    private static final class AccessWrapperComparator implements Comparator<AccessWrapper> {
+
+        private final Collator collator;
+
+        AccessWrapperComparator(final Locale locale) {
+            super();
+            collator = Collator.getInstance(locale);
+            collator.setStrength(Collator.SECONDARY);
+        }
+
+        @Override
+        public int compare(final AccessWrapper o1, final AccessWrapper o2) {
+            return collator.compare(o1.displayName, o2.displayName);
+        }
+
+    } // End of FileStorageAccountComparator
 
 }

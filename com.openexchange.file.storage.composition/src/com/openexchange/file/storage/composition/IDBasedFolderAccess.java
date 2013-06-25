@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.composition;
 
+import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -117,14 +118,15 @@ public interface IDBasedFolderAccess extends TransactionAware {
     FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException;
 
     /**
-     * Gets the account's root folder.
+     * Gets the accounts' root folders.
      * <p>
-     * A convenience method for {@link #getFolder(String)} invoked with {@link FileStorageFolder#ROOT_FULLNAME}.
+     * Collects all root folders of available file storage accounts.
      *
-     * @return The account's root folder
+     * @param locale The locale needed for sorting
+     * @return The accounts' root folders
      * @throws OXException If account's default folder cannot be delivered
      */
-    FileStorageFolder getRootFolder() throws OXException;
+    FileStorageFolder[] getRootFolders(Locale locale) throws OXException;
 
     /**
      * Checks user's default folder as defined in user's file storage settings and creates them if any is missing.
