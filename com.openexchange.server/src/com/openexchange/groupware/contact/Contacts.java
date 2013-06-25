@@ -104,6 +104,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.impl.DBPool;
@@ -1592,6 +1593,7 @@ public final class Contacts {
             for (int i = 0; i < dleos.length; i++) {
                 dleo = dleos[i];
                 ps.setInt(1, id);
+                ps.setBytes(10, UUIDs.toByteArray(UUID.randomUUID()));
 
                 if (dleo.containsEntryID() && (dleo.getEntryID() > 0)) {
                     ps.setInt(2, dleo.getEntryID());

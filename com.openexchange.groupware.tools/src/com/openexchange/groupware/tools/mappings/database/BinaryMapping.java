@@ -47,54 +47,26 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.fields;
+package com.openexchange.groupware.tools.mappings.database;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
- * {@link DistListMemberField} -
- *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * {@link BinaryMapping}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public enum DistListMemberField {
-    /**
-	 * ID of corresponding entry in prg_contacts table
-	 */
-	PARENT_CONTACT_ID,
-	/**
-	 * Object ID of the member's contact if the member is an existing contact
-	 */
-	CONTACT_ID,
-	/**
-	 * Which email field of an existing contact (if any) is used for the mail field. 0 independent contact 1 default email field (email1) 2 second email field (email2) 3 third email field (email3)
-	 */
-	MAIL_FIELD,
-	/**
-	 * Folder ID of the member's contact if the member is an existing contact
-	 */
-	CONTACT_FOLDER_ID,
-	/**
-	 * Display name
-	 */
-	DISPLAY_NAME,
-	/**
-	 * Last name
-	 */
-	LAST_NAME,
-	/**
-	 * First name
-	 */
-	FIRST_NAME,
-	/**
-	 * Mail address
-	 */
-	MAIL,
-	/**
-	 * Context id
-	 */
-	CONTEXT_ID,
-	/**
-	 * UUID
-	 */
-	UUID,
-	;
+public abstract class BinaryMapping<O> extends DefaultDbMapping<byte[], O> {
+
+    public BinaryMapping(String columnName, String readableName) {
+        super(columnName, readableName, Types.BINARY);
+    }
+
+    @Override
+    public byte[] get(ResultSet resultSet) throws SQLException {
+        return resultSet.getBytes(this.getColumnLabel());
+    }
+
 }
