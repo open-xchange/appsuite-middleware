@@ -96,8 +96,8 @@ public class SubscriptionJSONWriter {
         object.put(ENABLED, subscription.isEnabled());
         object.put(DISPLAYNAME, subscription.getDisplayName());
         object.put(SOURCE, subscription.getSource().getId());
-        object.put(LAST_UPDATED, subscription.getLastUpdate() + tz.getOffset(subscription.getLastUpdate()));
-        object.put(CREATED, subscription.getCreated() + tz.getOffset(subscription.getCreated()));
+        object.put(LAST_UPDATED, subscription.getLastUpdate() + (tz != null ? tz.getOffset(subscription.getLastUpdate()) : 0L));
+        object.put(CREATED, subscription.getCreated() + (tz != null ? tz.getOffset(subscription.getCreated()) : 0L));
         
         writeConfiguration(object, subscription.getSource().getId(), subscription.getConfiguration(), form, urlPrefix);
         return object;
