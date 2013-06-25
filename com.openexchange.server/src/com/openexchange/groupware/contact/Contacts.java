@@ -104,6 +104,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.impl.DBPool;
@@ -1900,6 +1901,9 @@ public final class Contacts {
                 ps.setString(3, leo.getContactDisplayname());
                 ps.setString(4, leo.getLinkDisplayname());
                 ps.setInt(5, cid);
+                UUID uuid = UUID.randomUUID();
+                byte[] uuidBinary = UUIDs.toByteArray(uuid);
+                ps.setBytes(6, uuidBinary);
                 if (DEBUG) {
                     LOG.debug(new StringBuilder("INSERT LINKAGE ").append(getStatementString(ps)));
                 }
