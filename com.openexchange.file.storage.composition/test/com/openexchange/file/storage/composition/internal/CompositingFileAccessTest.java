@@ -493,7 +493,6 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
 
-        fileAccess.expectCall("getFileMetadata", folderId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(file);
         fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
 
         saveDocument(file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
@@ -510,7 +509,6 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
 
-        fileAccess.expectCall("getFileMetadata", folderId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(file);
         fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
 
         saveDocument(file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
@@ -527,7 +525,6 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
 
-        fileAccess.expectCall("getFileMetadata", folderId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(file);
         fileAccess.expectCall("saveFileMetadata", file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
 
         saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
@@ -544,7 +541,6 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
 
-        fileAccess.expectCall("getFileMetadata", folderId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(file);
         fileAccess.expectCall("saveFileMetadata", file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
 
         saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));

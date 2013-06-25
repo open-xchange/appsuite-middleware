@@ -475,7 +475,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             document.setId(newID.toUniqueID());
             document.setFolderId(targetFolderID.toUniqueID());
             postEvent(FileStorageEventHelper.buildCreateEvent(
-                session, newID.getService(), newID.getAccountId(), targetFolderID.toUniqueID(), newID.getFileId()));
+                session, newID.getService(), newID.getAccountId(), targetFolderID.toUniqueID(), newID.toUniqueID()));
         } else {
             /*
              * update existing file
@@ -522,7 +522,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 document.setId(newID.toUniqueID());
                 document.setFolderId(targetFolderID.toUniqueID());
                 postEvent(FileStorageEventHelper.buildUpdateEvent(
-                    session, newID.getService(), newID.getAccountId(), targetFolderID.toUniqueID(), newID.getFileId()));
+                    session, newID.getService(), newID.getAccountId(), targetFolderID.toUniqueID(), newID.toUniqueID()));
             }
         }
     }
