@@ -59,6 +59,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
@@ -709,7 +710,7 @@ public final class QuotedInternetAddress extends InternetAddress {
          */
 
         if (c != '@') {
-            if (validate) {
+            if (validate && !MsisdnCheck.checkMsisdn(addr)) {
                 throw new AddressException("Missing final '@domain'", addr.toString());
             }
             return;
