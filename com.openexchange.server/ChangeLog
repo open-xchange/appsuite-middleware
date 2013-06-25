@@ -3,6 +3,7 @@
  - Fix for bug 27230: Don't validate non-rfc822 addresses
  - Fix for bug 27225: Drop superfluous warning on OSGi shutdown
  - Fix for bug 27236: Safely establish multipart part
+ - Fix for bug 27237: Added null guard on setting remove attempt
 
 * 2013-06-25 - tobias.friedrich@open-xchange.com
 
