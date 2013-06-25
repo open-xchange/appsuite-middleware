@@ -50,6 +50,7 @@
 package com.openexchange.appsuite.osgi;
 
 import java.io.File;
+import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleException;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.Dispatcher;
@@ -84,5 +85,8 @@ public class Activator extends HousekeepingActivator {
         File zoneinfo = new File(config.getProperty("com.openexchange.apps.tzdata", "/usr/share/zoneinfo/"));
         HttpService service = getService(HttpService.class);
         service.registerServlet(prefix + "apps/load", new AppsLoadServlet(apps, zoneinfo), null, null);
+
+        final Log logger = com.openexchange.log.Log.loggerFor(Activator.class);
+        logger.info("Servlet path \"apps/load\" successfully registered with \"apps\"=" + apps.getPath() + " and \"zoneinfo\"=" + zoneinfo.getPath());
     }
 }
