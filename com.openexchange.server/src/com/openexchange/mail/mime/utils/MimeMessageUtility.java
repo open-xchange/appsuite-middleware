@@ -577,6 +577,55 @@ public final class MimeMessageUtility {
      * @throws OXException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
+    public static boolean hasAttachments(final MailPart mp, final String subtype) throws MessagingException, OXException, IOException {
+        if (null == mp) {
+            return false;
+        }
+        if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(subtype)) {
+            if (mp.getEnclosedCount() > 2) {
+                return true;
+            }
+            return hasAttachments0(mp);
+        }
+        // TODO: Think about special check for multipart/signed
+        /*
+         * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) { if (mp.getCount() > 2) { return true; } return hasAttachments0(mp); }
+         */
+        if (mp.getEnclosedCount() > 1) {
+            return true;
+        }
+        return hasAttachments0(mp);
+    }
+
+    private static boolean hasAttachments0(final MailPart mp) throws MessagingException, OXException, IOException {
+        boolean found = false;
+        final int count = mp.getEnclosedCount();
+        final ContentType ct = new ContentType();
+        for (int i = 0; i < count && !found; i++) {
+            final MailPart part = mp.getEnclosedMailPart(i);
+            final String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+            if (tmp != null && tmp.length > 0) {
+                ct.setContentType(MimeMessageUtility.unfold(tmp[0]));
+            } else {
+                ct.setContentType(MimeTypes.MIME_DEFAULT);
+            }
+            if (ct.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
+                found |= hasAttachments((Multipart) part.getContent(), ct.getSubType());
+            }
+        }
+        return found;
+    }
+
+    /**
+     * Checks if given multipart contains (file) attachments
+     *
+     * @param mp The multipart to examine
+     * @param subtype The multipart's subtype
+     * @return <code>true</code> if given multipart contains (file) attachments; otherwise <code>false</code>
+     * @throws MessagingException If a messaging error occurs
+     * @throws OXException If a mail error occurs
+     * @throws IOException If an I/O error occurs
+     */
     public static boolean hasAttachments(final Multipart mp, final String subtype) throws MessagingException, OXException, IOException {
         if (null == mp) {
             return false;
