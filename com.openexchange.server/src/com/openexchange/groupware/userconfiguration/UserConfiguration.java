@@ -260,7 +260,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
         /**
          * Gets the permissions associated with given bits.
-         * 
+         *
          * @param bits - The bits to check for permissions
          * @param useChecker - Indicates if the service checker should be used for checking the available permissions
          * @return The associated permissions
@@ -1370,7 +1370,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
                 final String property = PERMISSION_PROPERTY;
                 for (final String scope : configViews.getSearchPath()) {
                     final String permissions = view.property(property, String.class).precedence(scope).get();
-                    if (permissions != null) {
+                    if (permissions != null && permissions.length() > 0) {
                         for (final String permissionModifier : P_SPLIT.split(permissions)) {
                             if (!isEmpty(permissionModifier)) {
                                 final char firstChar = permissionModifier.charAt(0);
