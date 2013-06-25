@@ -47,22 +47,33 @@
  *
  */
 
-package com.openexchange.realtime.client;
+package com.openexchange.server.ajax.ping;
+
+import java.util.Arrays;
+import java.util.Collection;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link Constants} - Gathers constants used throughout the project.
- * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * {@link PingAJAXActionFactory}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Constants {
+public class PingAJAXActionFactory implements AJAXActionServiceFactory {
+    
+    private static final Collection<String> SUPPORTED_SERVICES = Arrays.asList("ping");
+    private static final PingAction ACTION = new PingAction();
+    
+    @Override
+    public Collection<?> getSupportedServices() {
+        return SUPPORTED_SERVICES;
+    }
 
-    //Cookies
-    public static final String JSESSIONID_NAME = "JSESSIONID";
+    @Override
+    public AJAXActionService createActionService(String action) throws OXException {
+        return ACTION;
+    }
 
-    //Request
-    public static final long REQUEST_TIMEOUT = 100;
-
-    // Client
-    public static final String USER_AGENT_NAME = "rt/1.0";
 }

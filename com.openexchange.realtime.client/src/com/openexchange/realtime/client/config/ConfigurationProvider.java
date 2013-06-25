@@ -121,6 +121,11 @@ public class ConfigurationProvider {
      */
     private String sendPath = apiPath + "/rt";
 
+    /**
+     * Path for atmosphere calls
+     */
+    private String atmospherePath = "/realtime/atmosphere/rt";
+
     // actions
     /**
      * Parameter used for login action
@@ -254,6 +259,7 @@ public class ConfigurationProvider {
         result.append(" createPath: " + this.getCreatePath() + newLine);
         result.append(" queryPath: " + this.getQueryPath() + newLine);
         result.append(" sendPath: " + this.getSendPath() + newLine);
+        result.append(" atmospherePath: " + this.getAtmospherePath() + newLine);
         result.append(" loginAction: " + this.getLoginAction() + newLine);
         result.append(" queryAction: " + this.getQueryAction() + newLine);
         result.append(" sendAction: " + this.getSendAction() + newLine);
@@ -394,6 +400,15 @@ public class ConfigurationProvider {
     }
 
     /**
+     * Gets the atmospherePath
+     * 
+     * @return The atmospherePath
+     */
+    public String getAtmospherePath() {
+        return atmospherePath;
+    }
+
+    /**
      * Gets the initializedWithPropertiesFile
      * 
      * @return The initializedWithPropertiesFile
@@ -466,6 +481,16 @@ public class ConfigurationProvider {
          */
         public Builder setCreatePath(String createPath) {
             configurationProvider.createPath = createPath;
+            return this;
+        }
+
+        /**
+         * Sets the atmospherePath.
+         * 
+         * @param atmospherePath - the atmospherePath.
+         */
+        public Builder setAtmospherePath(String atmospherePath) {
+            configurationProvider.atmospherePath = atmospherePath;
             return this;
         }
 

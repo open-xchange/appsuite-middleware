@@ -49,6 +49,8 @@
 
 package com.openexchange.realtime.client.impl;
 
+import org.atmosphere.wasync.impl.AtmosphereClient;
+import org.atmosphere.wasync.impl.AtmosphereRequest.AtmosphereRequestBuilder;
 import com.ning.http.client.FluentStringsMap;
 import com.ning.http.client.RequestBuilder;
 import com.openexchange.realtime.client.Constants;
@@ -61,7 +63,7 @@ import com.openexchange.realtime.client.config.ConfigurationProvider;
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class RTRequestBuilderHelper extends RequestBuilder {
+public class RTRequestBuilderHelper {
 
     /**
      * Create a new RequestBuilder for realtime "send" requests. Host, Path, Method, Content-Type- and Cookie-header are already set based
@@ -72,7 +74,8 @@ public class RTRequestBuilderHelper extends RequestBuilder {
     public static RequestBuilder newSendRequest(final RTConnectionProperties connectionProperties, final RTUserState state) {
         RequestBuilder builder = new RequestBuilder("PUT");
         builder.setUrl(buildUrl(ConfigurationProvider.getInstance().getSendPath(), connectionProperties));
-        builder.setHeader("Content-Type", "Content-Type:text/javascript; charset=UTF-8");
+        builder.setHeader("Content-Type", "text/javascript; charset=UTF-8");
+        builder.setHeader("User-Agent", Constants.USER_AGENT_NAME);
         builder.setHeader("Cookie", cookieHeaderFromUserState(state));
         builder.setQueryParameters(getSendParameters(connectionProperties.getResource(), state));
         return builder;
@@ -87,7 +90,8 @@ public class RTRequestBuilderHelper extends RequestBuilder {
     public static RequestBuilder newQueryRequest(final RTConnectionProperties connectionProperties, final RTUserState state) {
         RequestBuilder builder = new RequestBuilder("PUT");
         builder.setUrl(buildUrl(ConfigurationProvider.getInstance().getQueryPath(), connectionProperties));
-        builder.setHeader("Content-Type", "Content-Type:text/javascript; charset=UTF-8");
+        builder.setHeader("Content-Type", "text/javascript; charset=UTF-8");
+        builder.setHeader("User-Agent", Constants.USER_AGENT_NAME);
         builder.setHeader("Cookie", cookieHeaderFromUserState(state));
         builder.setQueryParameters(getQueryParameters(connectionProperties.getResource(), state));
         return builder;
@@ -141,6 +145,32 @@ public class RTRequestBuilderHelper extends RequestBuilder {
         sb.append(queryPath);
 
         return sb.toString();
+    }
+
+    /**
+     * Creates a new {@link RequestBuilder}
+     * 
+     * @param atmosphereClient - {@link AtmosphereClient} for that a {@link RequestBuilder} should be created for.
+     * @param connectionProperties - {@link RTConnectionProperties} with the connection information to route the request.
+     * @param userState - {@link RTUserState} with the user information to use the existing connection
+     * @return {@link RequestBuilder} to build an atmosphere request
+     */
+    public static org.atmosphere.wasync.RequestBuilder newAtmosphereRequestBuilder(AtmosphereClient atmosphereClient, RTConnectionProperties connectionProperties, RTUserState userState) {
+        final org.atmosphere.wasync.RequestBuilder<AtmosphereRequestBuilder> requestBuilder = atmosphereClient.newRequestBuilder(AtmosphereRequestBuilder.class);
+        requestBuilder.method(org.atmosphere.wasync.Request.METHOD.GET);
+        requestBuilder.uri(buildUrl(ConfigurationProvider.getInstance().getAtmospherePath(), connectionProperties));
+        requestBuilder.transport(org.atmosphere.wasync.Request.TRANSPORT.LONG_POLLING);
+        requestBuilder.header(
+            "Cookie",
+            "JSESSIONID=" + userState.getjSessionID() + "; " + userState.getSecretSessionKey() + "=" + userState.getSecretSessionValue() + "; " + "open-xchange-public-session=" + userState.getSession());
+        requestBuilder.header("X-Atmosphere-Transport", "long-polling");
+        requestBuilder.header("User-Agent", Constants.USER_AGENT_NAME);
+        // IMPORTANT: send the session included in the query string
+        requestBuilder.queryString("session", userState.getSession());
+        // IMPORTANT: set 'resource' to the string to allow a client have more than one atmosphere resource assigned
+        requestBuilder.queryString("resource", connectionProperties.getResource());
+
+        return requestBuilder;
     }
 
 }

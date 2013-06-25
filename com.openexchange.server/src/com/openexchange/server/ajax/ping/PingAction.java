@@ -47,22 +47,27 @@
  *
  */
 
-package com.openexchange.realtime.client;
+package com.openexchange.server.ajax.ping;
+
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link Constants} - Gathers constants used throughout the project.
- * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * {@link PingAction}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Constants {
+@DispatcherNotes(noSession = true)
+public class PingAction implements AJAXActionService {
 
-    //Cookies
-    public static final String JSESSIONID_NAME = "JSESSIONID";
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        return new AJAXRequestResult(Boolean.TRUE, "json");
+    }
 
-    //Request
-    public static final long REQUEST_TIMEOUT = 100;
-
-    // Client
-    public static final String USER_AGENT_NAME = "rt/1.0";
 }

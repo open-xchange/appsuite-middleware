@@ -71,17 +71,17 @@ import com.openexchange.realtime.util.ElementPath;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ResponseChannel implements Channel{
-    
+
     private ConcurrentHashMap<ID, Stanza> responses = new ConcurrentHashMap<ID, Stanza>();
     private ConcurrentHashMap<ID, Condition> condition = new ConcurrentHashMap<ID, Condition>();
     private ConcurrentHashMap<ID, Lock> locks = new ConcurrentHashMap<ID, Lock>();
-    
+
     private ResourceDirectory directory;
-    
+
     public ResponseChannel(ResourceDirectory directory) {
         this.directory = directory;
     }
-    
+
     public void setUp(String uuid, Stanza stanza) throws OXException {
         ID id = getId(uuid);
         ReentrantLock lock = new ReentrantLock();
@@ -91,7 +91,7 @@ public class ResponseChannel implements Channel{
         directory.set(id, res);
         stanza.setFrom(id);
     }
-    
+
     public Stanza waitFor(String uuid, long timeout, TimeUnit unit) throws OXException {
         ID id = getId(uuid);
         try {
@@ -105,17 +105,17 @@ public class ResponseChannel implements Channel{
             if (stanza == null) {
                 throw new OXException();
             }
-            
+
             return stanza;
         } catch (InterruptedException e) {
-            throw new OXException();
+            throw new OXException(e);
         } finally {
             directory.remove(id);
             condition.remove(id);
-            responses.remove(id);        
+            responses.remove(id);
             locks.remove(id).unlock();
         }
-        
+
     }
 
 

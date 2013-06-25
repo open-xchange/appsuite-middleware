@@ -69,7 +69,7 @@ public class RTProtocol {
 
     private static final Logger LOG = LoggerFactory.getLogger(RTProtocol.class);
 
-    private static final long PING_TIME = 60000L;
+    private static final long PING_TIME = 30000L;
 
     private final RTProtocolCallback callback;
 
@@ -117,7 +117,7 @@ public class RTProtocol {
      * it will be enqueued in the given {@link SequenceGate}.
      *
      * @param jsonValue The JSON message.
-     * @return <code>true</code> if the message can be delivered directly. That may be the case for 
+     * @return <code>true</code> if the message can be delivered directly. That may be the case for
      * messages without sequence number. If the message was enqueued in the sequence gate <code>false</code>
      * will be returned.
      */
@@ -135,20 +135,19 @@ public class RTProtocol {
             if (parseElement(element)) {
                 if (seq < 0) {
                     return true;
-                } else {
-                    SequenceGate gate = gateRef.get();
-                    if (gate != null) {
-                        if (gate.enqueue(element, seq)) {
-                            /*
-                             * {"type":"ack","seq":["0"]}
-                             */
-                            JSONArray seqNums = new JSONArray();
-                            seqNums.put(seq);
-                            JSONObject ack = new JSONObject();
-                            ack.put("type", "ack");
-                            ack.put("seq", seqNums);
-                            callback.sendACK(ack);
-                        }
+                }
+                SequenceGate gate = gateRef.get();
+                if (gate != null) {
+                    if (gate.enqueue(element, seq)) {
+                        /*
+                         * {"type":"ack","seq":["0"]}
+                         */
+                        JSONArray seqNums = new JSONArray();
+                        seqNums.put(seq);
+                        JSONObject ack = new JSONObject();
+                        ack.put("type", "ack");
+                        ack.put("seq", seqNums);
+                        callback.sendACK(ack);
                     }
                 }
             }
@@ -166,14 +165,14 @@ public class RTProtocol {
     public void resetPingTimeout() {
         resetPingTimer();
     }
-    
+
     /**
      * To reliably send messages to the server we have to make use of numeric sequences in every message that gets sent from the client to
      * the server. The Server uses these sequences to ensure the sequence of incoming messages. The client waits for acknowledges for every
      * sequence number to ensure successful delivery of messages. This method takes a JSONArray of messages and adds a sequence number to
      * every single one of them.
      * 
-     * @param messages The array containing the messages that need to be enhanced with sequence numbers 
+     * @param messages The array containing the messages that need to be enhanced with sequence numbers
      * @return An array containing the messages that are enhanced with sequence numbers
      * @throws RTException if the messages array doesn't consist of JSONObjects
      */
@@ -190,14 +189,14 @@ public class RTProtocol {
         }
         return sequencedMessages;
     }
-    
+
     /**
      * To reliably send messages to the server we have to make use of numeric sequences in every message that gets sent from the client to
      * the server. The Server uses these sequences to ensure the sequence of incoming messages. The client waits for acknowledges for every
      * sequence number to ensure successful delivery of messages. This method takes a message as JSONObject and adds a sequence number to
      * it.
      * 
-     * @param message The messages that needs to be enhanced with a sequence number 
+     * @param message The messages that needs to be enhanced with a sequence number
      * @return The messages that is enhanced with a sequence number
      */
     public JSONObject addSequence(JSONObject message) {
@@ -262,7 +261,7 @@ public class RTProtocol {
         return
             payload.hasAndNotNull("namespace")
             && payload.get("namespace").equals("atmosphere")
-            && payload.hasAndNotNull("element") 
+            && payload.hasAndNotNull("element")
             && payload.get("element").equals("pong");
     }
 

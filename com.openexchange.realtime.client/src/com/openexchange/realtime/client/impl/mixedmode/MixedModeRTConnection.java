@@ -49,9 +49,15 @@
 
 package com.openexchange.realtime.client.impl.mixedmode;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import org.atmosphere.wasync.Decoder;
+import org.atmosphere.wasync.Encoder;
+import org.atmosphere.wasync.Event;
+import org.atmosphere.wasync.Socket;
 import org.atmosphere.wasync.impl.AtmosphereClient;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.slf4j.Logger;
@@ -65,6 +71,7 @@ import com.openexchange.realtime.client.Constants;
 import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.impl.AbstractRTConnection;
+import com.openexchange.realtime.client.impl.RTProtocol;
 import com.openexchange.realtime.client.impl.RTRequestBuilderHelper;
 import com.openexchange.realtime.client.impl.SequenceGenerator;
 
@@ -175,13 +182,15 @@ import com.openexchange.realtime.client.impl.SequenceGenerator;
 public class MixedModeRTConnection extends AbstractRTConnection {
 
     private static final Logger LOG = LoggerFactory.getLogger(MixedModeRTConnection.class);
-    
-    //Data received by these clients has to be handled by super.onReceive(). Post reliable may not return before 
+
+    //Data received by these clients has to be handled by super.onReceive(). Post reliable may not return before
     private AsyncHttpClient asyncHttpClient;
+
+    // Data received by this client should delegate the data to RTProtocol.handleIncoming(JSONObject)
     private AtmosphereClient atmosphereClient;
-    
+
     SequenceGenerator sequenceGenerator = new SequenceGenerator();
-    
+
     public MixedModeRTConnection(RTConnectionProperties connectionProperties) {
         super(connectionProperties);
         asyncHttpClient = new AsyncHttpClient();
@@ -214,7 +223,7 @@ public class MixedModeRTConnection extends AbstractRTConnection {
         doPost(sequencedPayload);
         protocol.resetPingTimeout();
     }
-    
+
     private void doPost(JSONValue message) throws RTException {
         if(isQueryAction(message)) {
             fireQueryRequest(message);
@@ -224,7 +233,7 @@ public class MixedModeRTConnection extends AbstractRTConnection {
             throw new RTException("Couldn't determine the type of message to send");
         }
     }
-    
+
     @Override
     public void sendACK(JSONObject ack) throws RTException {
         fireSendRequest(ack);
@@ -234,7 +243,7 @@ public class MixedModeRTConnection extends AbstractRTConnection {
     public void sendPing(JSONObject ping) throws RTException {
         fireAtmosphereRequest(ping);
     }
-    
+
 
     private boolean isQueryAction(JSONValue json) {
         // query actions consist of a single json object
@@ -255,7 +264,7 @@ public class MixedModeRTConnection extends AbstractRTConnection {
         }
         return false;
     }
-    
+
 
     private boolean isSendAction(JSONValue json) {
         if (json.isObject()) {
@@ -269,57 +278,55 @@ public class MixedModeRTConnection extends AbstractRTConnection {
                 return true;
             }
             return false;
-        } else {
-            if (json.isArray()) {
-                JSONArray jsonArray = json.toArray();
-                if (jsonArray.length() == 1) {
-                    // group ping?
-                    Object stanzaObject = jsonArray.opt(0);
-                    if (!(stanzaObject instanceof JSONObject)) {
-                        return false;
-                    }
-                    JSONObject stanza = (JSONObject) stanzaObject;
-                    if (!"message".equalsIgnoreCase(stanza.optString("element"))) {
-                        return false;
-                    }
-                    Object payloadsObject = stanza.opt("payloads");
-                    if (!(payloadsObject instanceof JSONArray)) {
-                        return false;
-                    }
-                    JSONArray payloadsArray = (JSONArray) payloadsObject;
-                    if (payloadsArray.length() != 1) {
-                        return false;
-                    }
-                    Object payloadObject = payloadsArray.opt(0);
-                    if (!(payloadObject instanceof JSONObject)) {
-                        return false;
-                    }
-                    JSONObject payload = (JSONObject) payloadObject;
-                    String element = payload.optString("element");
-                    String namespace = payload.optString("namespace");
-                    if ("ping".equalsIgnoreCase(element) && "group".equalsIgnoreCase(namespace)) {
-                        return true;
-                    }
-                    return false;
-                } else if (jsonArray.length() > 1) {
-                    // message?
-                    Object stanzaObject = jsonArray.opt(0);
-                    if (!(stanzaObject instanceof JSONObject)) {
-                        return false;
-                    }
-                    JSONObject stanza = (JSONObject) stanzaObject;
-                    if ("message".equalsIgnoreCase(stanza.optString("element"))) {
-                        return true;
-                    }
+        }
+        if (json.isArray()) {
+            JSONArray jsonArray = json.toArray();
+            if (jsonArray.length() == 1) {
+                // group ping?
+                Object stanzaObject = jsonArray.opt(0);
+                if (!(stanzaObject instanceof JSONObject)) {
                     return false;
                 }
+                JSONObject stanza = (JSONObject) stanzaObject;
+                if (!"message".equalsIgnoreCase(stanza.optString("element"))) {
+                    return false;
+                }
+                Object payloadsObject = stanza.opt("payloads");
+                if (!(payloadsObject instanceof JSONArray)) {
+                    return false;
+                }
+                JSONArray payloadsArray = (JSONArray) payloadsObject;
+                if (payloadsArray.length() != 1) {
+                    return false;
+                }
+                Object payloadObject = payloadsArray.opt(0);
+                if (!(payloadObject instanceof JSONObject)) {
+                    return false;
+                }
+                JSONObject payload = (JSONObject) payloadObject;
+                String element = payload.optString("element");
+                String namespace = payload.optString("namespace");
+                if ("ping".equalsIgnoreCase(element) && "group".equalsIgnoreCase(namespace)) {
+                    return true;
+                }
                 return false;
-            } else {
+            } else if (jsonArray.length() > 1) {
+                // message?
+                Object stanzaObject = jsonArray.opt(0);
+                if (!(stanzaObject instanceof JSONObject)) {
+                    return false;
+                }
+                JSONObject stanza = (JSONObject) stanzaObject;
+                if ("message".equalsIgnoreCase(stanza.optString("element"))) {
+                    return true;
+                }
                 return false;
             }
+            return false;
         }
+        return false;
     }
-    
+
     /*
      * atmosphere ping: {"type": "ping", "commit": true }
      */
@@ -331,10 +338,8 @@ public class MixedModeRTConnection extends AbstractRTConnection {
             if ("ping".equalsIgnoreCase(type)) {
                 return true;
             }
-            return false;
-        } else {
-            return false;
         }
+        return false;
     }
 
     private void fireQueryRequest(JSONValue jsonValue) throws RTException {
@@ -369,7 +374,76 @@ public class MixedModeRTConnection extends AbstractRTConnection {
         }
     }
 
+    /**
+     * Send asynchronous messages to the server.
+     * 
+     * @param jsonValue - JSONValue with the JSON which should be sent to the server
+     */
     private void fireAtmosphereRequest(JSONValue jsonValue) {
-        
+        org.atmosphere.wasync.Request request = this.createAtmosphereRequest();
+        org.atmosphere.wasync.Socket socket = this.createSocket();
+
+        try {
+            socket.open(request);
+            socket.fire(jsonValue);
+        } catch (IOException ioException) {
+            LOG.info("Unable to fire ping request. Try again with the next iteration");
+        }
+    }
+
+    /**
+     * Creates a {@link Request} to send a message. It also delegates all received messages to the {@link RTProtocol}.
+     * 
+     * @return {@link Request}
+     */
+    private org.atmosphere.wasync.Request createAtmosphereRequest() {
+        org.atmosphere.wasync.RequestBuilder requestBuilder = RTRequestBuilderHelper.newAtmosphereRequestBuilder(this.atmosphereClient, connectionProperties, userState);
+        requestBuilder.encoder(new Encoder<JSONObject, String>() {
+            @Override
+            public String encode(final JSONObject jsonObject) {
+                return jsonObject.toString();
+            }
+        });
+        requestBuilder.decoder(new Decoder<String, JSONObject>() {
+
+            @Override
+            public JSONObject decode(final Event event, String received) {
+
+                if (event.equals(Event.MESSAGE)) {
+                    LOG.info("Received message in atmosphere channel: " + received);
+
+                    try {
+                        JSONObject jsonObject = null;
+                        if (received.startsWith("[")) {
+                            JSONArray jsonArray = new JSONArray(received);
+                            jsonObject = jsonArray.getJSONObject(0);
+                        } else {
+                            jsonObject = new JSONObject(received);
+                        }
+
+                        if ((protocol != null) && (jsonObject != null)) {
+                            protocol.handleIncoming(jsonObject);
+                        }
+                    } catch (JSONException jsonException) {
+                        LOG.error("Error in dealing with received objects.", jsonException);
+                    } catch (RTException rtException) {
+                        LOG.error("Error in handling the incoming object.", rtException);
+                    }
+                }
+
+                return new JSONObject();
+            }
+        });
+        return requestBuilder.build();
+    }
+
+    /**
+     * Creates the socket required for the connection.
+     * 
+     * @return {@link Socket} the socket for the new connections
+     */
+    private Socket createSocket() {
+        final Socket lSocket = atmosphereClient.create();
+        return lSocket;
     }
 }

@@ -47,22 +47,29 @@
  *
  */
 
-package com.openexchange.realtime.client;
+package com.openexchange.server.osgi;
+
+import org.osgi.framework.BundleActivator;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.server.ajax.ping.PingAJAXActionFactory;
 
 
 /**
- * {@link Constants} - Gathers constants used throughout the project.
- * 
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * {@link PingActivator}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Constants {
+public class PingActivator extends AJAXModuleActivator implements BundleActivator {
 
-    //Cookies
-    public static final String JSESSIONID_NAME = "JSESSIONID";
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return null;
+    }
 
-    //Request
-    public static final long REQUEST_TIMEOUT = 100;
+    @Override
+    protected void startBundle() throws Exception {
+        registerModule(new PingAJAXActionFactory(), "system");
+    }
 
-    // Client
-    public static final String USER_AGENT_NAME = "rt/1.0";
 }
