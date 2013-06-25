@@ -723,7 +723,7 @@ public class ContactMySql implements ContactSql {
 
     @Override
     public String iFwriteDistributionListArrayInsert() {
-        return "INSERT INTO prg_dlist (intfield01, intfield02, intfield03, field01, field02, field03, field04, cid, intfield04) VALUES (?,?,?,?,?,?,?,?,?)";
+        return "INSERT INTO prg_dlist (intfield01, intfield02, intfield03, field01, field02, field03, field04, cid, intfield04, uuid) VALUES (?,?,?,?,?,?,?,?,?,?)";
     }
 
     @Override
