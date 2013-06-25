@@ -146,42 +146,42 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
     /**
      * The delegate {@link Part} object.
      */
-    private transient Part part;
+    private transient volatile Part part;
 
     /**
      * Cached instance of multipart.
      */
-    private transient MultipartWrapper multipart;
+    private transient volatile MultipartWrapper multipart;
 
     /**
      * Whether this part's content is of MIME type <code>multipart/*</code>.
      */
-    private boolean isMulti;
+    private volatile boolean isMulti;
 
     /**
      * Indicates whether content has been loaded via {@link #loadContent()} or not.
      */
-    private boolean contentLoaded;
+    private volatile boolean contentLoaded;
 
     /**
      * Remembers serialize type on serialization.
      */
-    private int serializeType;
+    private volatile int serializeType;
 
     /**
      * Remembers delegate {@link Part} object's serialized content.
      */
-    private byte[] serializedContent;
+    private volatile byte[] serializedContent;
 
     /**
      * Remembers delegate {@link Part} object's content type.
      */
-    private String serializedContentType;
+    private volatile String serializedContentType;
 
     /**
      * Whether to handle "Missing start boundary" <code>javax.mail.MessagingException</code>.
      */
-    private boolean handleMissingStartBoundary;
+    private volatile boolean handleMissingStartBoundary;
 
     /**
      * Constructor.
@@ -283,6 +283,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     @Override
     public void cleanUp() {
+        final Part part = this.part;
         if (part instanceof ManagedMimeMessage) {
             try {
                 ((ManagedMimeMessage) part).cleanUp();
@@ -294,6 +295,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     @Override
     public Object getContent() throws OXException {
+        final Part part = this.part;
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
         }
@@ -325,6 +327,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     @Override
     public DataHandler getDataHandler() throws OXException {
+        final Part part = this.part;
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
         }
@@ -340,6 +343,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     @Override
     public InputStream getRawInputStream() throws OXException {
+        final Part part = this.part;
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
         }
@@ -360,6 +364,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     @Override
     public InputStream getInputStream() throws OXException {
+        final Part part = this.part;
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
         }
@@ -391,6 +396,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                         ". Trying to read from part's raw input stream instead").toString(),
                     e);
             }
+            final Part part = this.part;
             if (part instanceof MimeBodyPart) {
                 return ((MimeBodyPart) part).getRawInputStream();
             } else if (part instanceof MimeMessage) {
@@ -409,6 +415,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     @Override
     public MailPart getEnclosedMailPart(final int index) throws OXException {
+        final Part part = this.part;
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
         }
@@ -420,6 +427,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     @Override
     public int getEnclosedCount() throws OXException {
+        final Part part = this.part;
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
         }
@@ -450,8 +458,10 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
              * Retry with other non-stream-based MultipartWrapper implementation
              */
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192);
+            final Part part = this.part;
             part.writeTo(out);
-            multipart = new MIMEMultipartWrapper(new MIMEMultipartMailPart(getContentType(), part.getDataHandler().getDataSource()));
+            final MultipartWrapper multipart = new MIMEMultipartWrapper(new MIMEMultipartMailPart(getContentType(), part.getDataHandler().getDataSource()));
+            this.multipart = multipart;
             return multipart.getCount();
         } catch (final IOException e1) {
             LOG.error(e1.getMessage(), e1);
@@ -470,6 +480,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     @Override
     public void writeTo(final OutputStream out) throws OXException {
+        final Part part = this.part;
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
         }
@@ -496,6 +507,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
     }
 
     private void saneContentType() throws MessagingException {
+        final Part part = this.part;
         final String[] header = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
         if (null != header && header.length > 0) {
             try {
@@ -512,13 +524,14 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
          * Release references
          */
         if (!contentLoaded) {
-            multipart = null;
-            part = null;
+            this.multipart = null;
+            this.part = null;
         }
     }
 
     @Override
     public void loadContent() throws OXException {
+        Part part = this.part;
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
         }
@@ -543,21 +556,21 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                     /*
                      * Compose a new body part with message/rfc822 data
                      */
-                    part = createBodyMessage(getStreamFromPart((Message) part.getContent()));
+                    this.part = part = createBodyMessage(getStreamFromPart((Message) part.getContent()));
                     contentLoaded = true;
                 } else if (contentType.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
                     /*
                      * Compose a new body part with multipart/ data
                      */
-                    part = createBodyMultipart(getStreamFromMultipart((Multipart) part.getContent()), contentType.toString());
-                    multipart = null;
+                    this.part = part = createBodyMultipart(getStreamFromMultipart((Multipart) part.getContent()), contentType.toString());
+                    this.multipart = null;
                     contentLoaded = true;
                 } else {
-                    part = createBodyPart(getStreamFromPart(part));
+                    this.part = part = createBodyPart(getStreamFromPart(part));
                     contentLoaded = true;
                 }
             } else if (part instanceof MimeMessage) {
-                part = createMessage(getStreamFromPart(part));
+                this.part = part = createMessage(getStreamFromPart(part));
                 contentLoaded = true;
             }
         } catch (final MessagingException e) {
@@ -585,7 +598,8 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @throws IOException If an I/O error occurs
      */
     private void writeObject(final java.io.ObjectOutputStream out) throws IOException {
-        multipart = null;
+        this.multipart = null;
+        final Part part = this.part;
         if (part == null) {
             serializeType = 0;
             serializedContent = null;
@@ -661,29 +675,31 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
          * Restore common fields
          */
         in.defaultReadObject();
+        final int serializeType = this.serializeType;
         if (serializeType > 0) {
             try {
                 /*
                  * Restore part
                  */
+                final byte[] serializedContent = this.serializedContent;
                 if (STYPE_MIME_BODY_MSG == serializeType) {
                     /*
                      * Compose a new body part with message/rfc822 data
                      */
-                    part = createBodyMessage(Streams.newByteArrayInputStream(serializedContent));
+                    this.part = createBodyMessage(Streams.newByteArrayInputStream(serializedContent));
                     contentLoaded = true;
                 } else if (STYPE_MIME_BODY_MULTI == serializeType) {
                     /*
                      * Compose a new body part with multipart/ data
                      */
-                    part = createBodyMultipart(Streams.newByteArrayInputStream(serializedContent), serializedContentType);
-                    multipart = null;
+                    this.part = createBodyMultipart(Streams.newByteArrayInputStream(serializedContent), serializedContentType);
+                    this.multipart = null;
                     contentLoaded = true;
                 } else if (STYPE_MIME_BODY == serializeType) {
-                    part = createBodyPart(Streams.newByteArrayInputStream(serializedContent));
+                    this.part = createBodyPart(Streams.newByteArrayInputStream(serializedContent));
                     contentLoaded = true;
                 } else if (STYPE_MIME_MSG == serializeType) {
-                    part = createMessage(Streams.newByteArrayInputStream(serializedContent));
+                    this.part = createMessage(Streams.newByteArrayInputStream(serializedContent));
                     contentLoaded = true;
                 }
             } catch (final MessagingException e) {
@@ -694,9 +710,9 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 /*
                  * Discard content created for serialization
                  */
-                serializeType = 0;
-                serializedContent = null;
-                serializedContentType = null;
+                this.serializeType = 0;
+                this.serializedContent = null;
+                this.serializedContentType = null;
             }
         }
     }
@@ -873,62 +889,73 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
     }
 
     private MultipartWrapper getMultipartWrapper() throws OXException {
+        MultipartWrapper multipart = this.multipart;
         if (null == multipart) {
-            try {
-                final int size;
-                if (useMimeMultipartMailPart() && ((size = part.getSize()) > 0) && (size <= MAX_INMEMORY_SIZE)) {
-                    /*
-                     * If size is less than or equal to 1MB, use the in-memory implementation
-                     */
-                    final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size);
-                    part.writeTo(out);
-                    multipart = new MIMEMultipartWrapper(new MIMEMultipartMailPart(getContentType(), out.toByteArray()));
-                } else {
-                    /*
-                     * If size is unknown or exceeds 1MB, use the stream-based implementation
-                     */
-                    final Object content = part.getContent();
-                    if (content instanceof Multipart) {
-                        multipart = new JavaMailMultipartWrapper((Multipart) content);
-                    } else {
-                        /*-
-                         * Content object is not a Multipart. Then data is kept in memory regardless of MultipartWrapper implementation.
-                         *
-                         * Since MIMEMultipartMailPart was introduced to provide a faster multipart/* parsing, use the MIMEMultipartWrapper
-                         * implementation to take benefit of improved parsing.
-                         */
-                        if (content instanceof InputStream) {
+            synchronized (this) {
+                multipart = this.multipart;
+                if (null == multipart) {
+                    try {
+                        Part part = this.part;
+                        final int size;
+                        if (useMimeMultipartMailPart() && ((size = part.getSize()) > 0) && (size <= MAX_INMEMORY_SIZE)) {
                             /*
-                             * Close in case of InputStream
+                             * If size is less than or equal to 1MB, use the in-memory implementation
                              */
-                            closeQuitely((InputStream) content);
+                            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size);
+                            part.writeTo(out);
+                            multipart = new MIMEMultipartWrapper(new MIMEMultipartMailPart(getContentType(), out.toByteArray()));
+                            this.multipart = multipart;
+                        } else {
+                            /*
+                             * If size is unknown or exceeds 1MB, use the stream-based implementation
+                             */
+                            final Object content = part.getContent();
+                            if (content instanceof Multipart) {
+                                multipart = new JavaMailMultipartWrapper((Multipart) content);
+                                this.multipart = multipart;
+                            } else {
+                                /*-
+                                 * Content object is not a Multipart. Then data is kept in memory regardless of MultipartWrapper implementation.
+                                 *
+                                 * Since MIMEMultipartMailPart was introduced to provide a faster multipart/* parsing, use the MIMEMultipartWrapper
+                                 * implementation to take benefit of improved parsing.
+                                 */
+                                if (content instanceof InputStream) {
+                                    /*
+                                     * Close in case of InputStream
+                                     */
+                                    closeQuitely((InputStream) content);
+                                }
+                                loadContent();
+                                part = this.part;
+                                final String headerName = "Content-Type";
+                                final String[] header = part.getHeader(headerName);
+                                if (null != header) {
+                                    part.setHeader(headerName, new ContentType(header[0]).toString());
+                                }
+                                multipart = new JavaMailMultipartWrapper(MimeMessageConverter.multipartFor(part.getContent(), getContentType()));
+                                this.multipart = multipart;
+                            }
                         }
-                        loadContent();
-                        final String headerName = "Content-Type";
-                        final String[] header = part.getHeader(headerName);
-                        if (null != header) {
-                            part.setHeader(headerName, new ContentType(header[0]).toString());
+                    } catch (final MessagingException e) {
+                        throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
+                    } catch (final UnsupportedEncodingException e) {
+                        LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
+                        mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+                        throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
+                    } catch (final IOException e) {
+                        if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                         }
-                        multipart = new JavaMailMultipartWrapper(MimeMessageConverter.multipartFor(part.getContent(), getContentType()));
+                        throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                    } catch (final ClassCastException e) {
+                        // Cast to javax.mail.Multipart failed
+                        LOG.warn(new com.openexchange.java.StringAllocator(256).append(
+                            "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
+                            e.getMessage()).toString());
+                        throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
                     }
                 }
-            } catch (final MessagingException e) {
-                throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
-            } catch (final UnsupportedEncodingException e) {
-                LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
-                mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-                throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
-            } catch (final IOException e) {
-                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-                }
-                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-            } catch (final ClassCastException e) {
-                // Cast to javax.mail.Multipart failed
-                LOG.warn(new com.openexchange.java.StringAllocator(256).append(
-                    "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
-                    e.getMessage()).toString());
-                throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
             }
         }
         return multipart;
