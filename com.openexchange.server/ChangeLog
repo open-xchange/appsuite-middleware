@@ -1,3 +1,8 @@
+* 2013-06-25 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26789: Removed duplicate XML pull parser. Added writing of HTML content to temporary files if HTML parsing fails and debug
+   logging is enabled.
+
 * 2013-06-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 27230: Don't validate non-rfc822 addresses

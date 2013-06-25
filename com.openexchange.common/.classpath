@@ -20,7 +20,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/httpcore-nio-4.2.1.jar" sourcepath="source/httpcore-nio-4.2.1-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/httpmime-4.2.1.jar" sourcepath="source/httpmime-4.2.1-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/nekohtml-1.9.17.jar" sourcepath="source/nekohtml-1.9.17-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/kxml2-2.3.0.jar" sourcepath="source/kxml2-src-2.3.0.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/jericho-html-3.3.jar" sourcepath="lib/jericho-html-3.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/cssparser-0.9.7.jar" sourcepath="source/cssparser-0.9.7-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/backport-util-concurrent-3.1.jar" sourcepath="lib/backport-util-concurrent-3.1.jar"/>
