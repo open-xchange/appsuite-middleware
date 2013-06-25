@@ -49,9 +49,9 @@
 
 package com.openexchange.apps.manifests.json.osgi;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.Reader;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.logging.Log;
@@ -65,7 +65,6 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.NearRegistryServiceTracker;
 
@@ -110,7 +109,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 	}
 
     private JSONArray readManifests() {
-        ConfigurationService conf = getService(ConfigurationService.class);
+        final ConfigurationService conf = getService(ConfigurationService.class);
         String property = conf.getProperty("com.openexchange.apps.manifestPath");
         if (null == property) {
             property = conf.getProperty("com.openexchange.apps.path");
@@ -120,11 +119,12 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
             property += "/manifests";
         }
 
-        JSONArray array = new JSONArray();
-        for(String path: property.split(":")) {
-            File file = new File(path);
+        final String[] paths = property.split(":");
+        final JSONArray array = new JSONArray(paths.length << 1);
+        for(final String path: paths) {
+            final File file = new File(path);
             if (file.exists()) {
-                for (File f : file.listFiles()) {
+                for (final File f : file.listFiles()) {
                     read(f, array);
                 }
             }
@@ -132,20 +132,14 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
         return array;
     }
 
-    private void read(File f, JSONArray array) {
-        BufferedReader r = null;
-        StringAllocator b = new StringAllocator();
+    private void read(final File f, final JSONArray array) {
+        Reader r = null;
         try {
-            r = new BufferedReader(new FileReader(f));
-            int c = -1;
-            while ((c = r.read()) != -1) {
-                b.append((char) c);
-            }
-            JSONArray fileContent = new JSONArray(b.toString());
+            final JSONArray fileContent = new JSONArray((r = new FileReader(f)));
             for (int i = 0, size = fileContent.length(); i < size; i++) {
                 array.put(fileContent.get(i));
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         } finally {
             Streams.close(r);
