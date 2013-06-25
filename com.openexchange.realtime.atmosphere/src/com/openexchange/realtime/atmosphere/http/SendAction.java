@@ -70,6 +70,54 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SendAction}
+ * <li> Send action examples:
+ *   <ol>
+ *     <li> Send an acknowledgement
+ *       <pre>
+ *       {
+ *         "seq": [
+ *           "0"
+ *         ],
+ *         "type": "ack"
+ *       }
+ *       </pre>
+ *     <li> Send a ping into a room to verify that you didn't leve the room without a proper leave message
+ *       <pre>
+ *       [
+ *         {
+ *           "payloads": [
+ *             {
+ *               "data": 1,
+ *               "namespace": "group",
+ *               "element": "ping"
+ *             }
+ *           ],
+ *           "to": "synthetic.china://room1",
+ *           "element": "message"
+ *         }
+ *       ]
+ *       </pre>
+ *     <li> Generally send messages to the server, e.g. say something into a room
+ *     <pre>
+ *     {
+ *       "payloads": [
+ *         {
+ *           "data": "say",
+ *           "element": "action"
+ *         },
+ *         {
+ *           "namespace": "china",
+ *           "data": "Hello World",
+ *           "element": "message"
+ *         }
+ *       ],
+ *       "seq": 0,
+ *       "element": "message",
+ *       "to": "synthetic.china://room1"
+ *     }
+ *     </pre>
+ *   </ol>
+ * </li>
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

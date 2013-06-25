@@ -90,12 +90,13 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
     <unexpected-request/> -- the recipient or server understood the request but was not expecting it at this time (e.g., the request was out of order); the associated error type SHOULD be "wait".
     */
     //--- elements from stanza error namespace http://xmpp.org/rfcs/rfc3920.html#def C.7.
-    /** "The client issued a bad request: %1$s" */
+    /** "The client has sent a message that is malformed or cannot be processed: %1$s" */
     STANZA_BAD_REQUEST(RealtimeExceptionMessages.STANZA_BAD_REQUEST_MSG, CATEGORY_USER_INPUT, 1),
     STANZA_CONFILCT(RealtimeExceptionMessages.STANZA_CONFILCT_MSG, CATEGORY_SERVICE_DOWN, 2),
     STANZA_FEATURE_NOT_IMPLEMENTED(RealtimeExceptionMessages.STANZA_FEATURE_NOT_IMPLEMENTED_MSG, CATEGORY_SERVICE_DOWN, 3),
     STANZA_FORBIDDEN(RealtimeExceptionMessages.STANZA_FORBIDDEN_MSG, CATEGORY_SERVICE_DOWN, 4),
     STANZA_GONE(RealtimeExceptionMessages.STANZA_GONE_MSG, CATEGORY_SERVICE_DOWN, 5),
+    /** The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error: %1$s */
     STANZA_INTERNAL_SERVER_ERROR(RealtimeExceptionMessages.STANZA_INTERNAL_SERVER_ERROR_MSG, CATEGORY_SERVICE_DOWN, 6),
     STANZA_ITEM_NOT_FOUND(RealtimeExceptionMessages.STANZA_ITEM_NOT_FOUND_MSG, CATEGORY_SERVICE_DOWN, 7),
     STANZA_JID_MALFORMED(RealtimeExceptionMessages.STANZA_JID_MALFORMED_MSG, CATEGORY_SERVICE_DOWN, 8),
@@ -130,6 +131,8 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
     RESOURCE_NOT_AVAILABLE(RealtimeExceptionMessages.RESOURCE_NOT_AVAILABLE_MSG, CATEGORY_ERROR, 1004, STANZA_INTERNAL_SERVER_ERROR, STANZA_INTERNAL_SERVER_ERROR),
     /** Your session is invalid */
     SESSION_INVALID(RealtimeExceptionMessages.SESSION_INVALID_MSG, CATEGORY_ERROR, 1005, STANZA_NOT_ACCEPTABLE, STANZA_NOT_ACCEPTABLE),
+    /** Invalid sequence detected.*/
+    SEQUENCE_INVALID(RealtimeExceptionMessages.SEQUENCE_INVALID_MSG, CATEGORY_ERROR, 1006, STANZA_BAD_REQUEST, STANZA_BAD_REQUEST),
     ;
     
     private int number;

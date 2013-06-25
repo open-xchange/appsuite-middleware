@@ -147,7 +147,9 @@ public class SessionValidator {
                 this.sessionId = getSessionId(getSessionFromParameters(request));
             } catch (OXException oxe) {
                 RealtimeException realtimeException = RealtimeExceptionFactory.getInstance().create(RealtimeExceptionCodes.SESSION_INVALID);
-                LOG.error("Couldn't find session id.", realtimeException);
+                if(LOG.isDebugEnabled()) {
+                    LOG.error("Couldn't find session id.", realtimeException);
+                }
                 throw realtimeException;
             }
         }
@@ -166,7 +168,9 @@ public class SessionValidator {
                 this.serverSession = getValidatedServerSession();
             } catch (OXException e) {
                 RealtimeException realtimeException = RealtimeExceptionFactory.getInstance().create(RealtimeExceptionCodes.SESSION_INVALID);
-                LOG.error("Couldn't get ServerSession.", realtimeException);
+                if(LOG.isDebugEnabled()) {
+                    LOG.error("Couldn't get ServerSession.", realtimeException);
+                }
                 throw realtimeException;
             }
         }
@@ -220,7 +224,9 @@ public class SessionValidator {
              * If we got a SessionException during validation properly handle the server side consequences
              */
             if (SessionExceptionCodes.getErrorPrefix().equals(oxe.getPrefix())) {
-                LOG.debug(oxe.getMessage(), oxe);
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug(oxe.getMessage(), oxe);
+                }
                 handleSessiondException(oxe, request, response, serverSession);
             }
             /* and rethrow the exception so the ChannelHandler can properly hand the Exception to the client*/

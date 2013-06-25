@@ -56,6 +56,7 @@ import org.atmosphere.cpr.AtmosphereResource;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
+import com.openexchange.realtime.atmosphere.protocol.NextSequence;
 import com.openexchange.realtime.atmosphere.protocol.RTClientState;
 import com.openexchange.realtime.atmosphere.protocol.RTProtocol;
 import com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter;
@@ -162,11 +163,8 @@ public class RTProtocolImpl implements RTProtocol {
                 if (enqueued) {
                     emptyBuffer(state, transmitter);
                 }
-            } catch (OXException e) {
-                handleRealtimeException(
-                    stanza.getFrom(),
-                    RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(e.getMessage()),
-                    stanza);
+            } catch (RealtimeException re) {
+                handleRealtimeException(stanza.getFrom(), re, stanza);
             }
         } finally {
             state.unlock();
@@ -192,11 +190,8 @@ public class RTProtocolImpl implements RTProtocol {
                     stanza.trace("Adding receipt for client message " + stanza.getSequenceNumber() + " to acknowledgement list");
                     acknowledgements.add(stanza.getSequenceNumber());
                 }
-            } catch (OXException e) {
-                handleRealtimeException(
-                    stanza.getFrom(),
-                    RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(e.getMessage()),
-                    stanza);
+            } catch (RealtimeException re) {
+                handleRealtimeException(stanza.getFrom(), re, stanza);
             }
         } finally {
             state.unlock();
@@ -250,15 +245,8 @@ public class RTProtocolImpl implements RTProtocol {
     }
     
     protected void enqueueNextSequence(ID to, RTClientState state, StanzaTransmitter transmitter) {
-        Stanza s = new Message();
-        s.setFrom(to);
-        s.setTo(to);
-        s.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
-            0,
-            "json",
-            "atmosphere",
-            "nextSequence").build()));
-        state.enqueue(s);
+        NextSequence nextSequence = new NextSequence(to, to, 0);
+        state.enqueue(nextSequence);
     }
 
     protected void enqueueAcknowledgement(ID to, long sequenceNumber, RTClientState state, StanzaTransmitter transmitter) {

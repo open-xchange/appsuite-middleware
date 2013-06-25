@@ -58,6 +58,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
+import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Stanza;
@@ -88,22 +90,50 @@ public abstract class StanzaSequenceGate {
         this.name = name;
     }
 
-    public boolean handle(Stanza stanza, ID recipient) throws OXException {
+    /**
+     * Ensures a correct order of sequence numbers of incoming Stanzas. <li>Stanzas that don't carry a sequence number are directly handed
+     * over to handleInternal of the components that makes use of this StanzaSequenceGate and have to adapt the logic of the Stanza handling
+     * of the received Stanzas.</li> <li>Stanzas that carry a sequence number are enqueued until a correct sequence is established. Stanza
+     * that already passed this gate are discarded. If the buffer for creating a valid sequence is full Stanzas are discarded.</li> </p>
+     * 
+     * @param stanza the incoming stanza
+     * @param recipient the recipient of the incoming Stanza
+     * @return If <code>false</code> is returned the handled stanza did either not expect an ACK or was not stored because of a full message
+     *         buffer for the sequence principal.
+     * @throws RealtimeException with code 1006 if an invalid sequence number was detected. The component using this gate has to ensure this
+     *             exception reaches the client.
+     */
+    public boolean handle(Stanza stanza, ID recipient) throws RealtimeException {
         return handle(stanza, recipient, null);
     }
 
     /**
-     * Returns whether the caller is expected to return an ACK for the handled stanza. If <code>false</code> is returned the handled stanza
-     * did either not expect an ACK or was not stored because of a full message buffer for the sequence principal.
+     * Ensures a correct order of sequence numbers of incoming Stanzas. <li>Stanzas that don't carry a sequence number are directly handed
+     * over to handleInternal of the components that makes use of this StanzaSequenceGate and have to adapt the logic of the Stanza handling
+     * of the received Stanzas.</li> <li>Stanzas that carry a sequence number are enqueued until a correct sequence is established. Stanza
+     * that already passed this gate are discarded. If the buffer for creating a valid sequence is full Stanzas are discarded.</li> </p>
+     * 
+     * @param stanza the incoming stanza
+     * @param recipient the recipient of the incoming Stanza
+     * @param customAction a custom action that (if not null) should be used instead of the using component's handleInternal.
+     * @return If <code>false</code> is returned the handled stanza did either not expect an ACK or was not stored because of a full message
+     *         buffer for the sequence principal.
+     * @throws RealtimeException with code 1006 if an invalid sequence number was detected. The component using this gate has to ensure this
+     *             exception reaches the client.
      */
-    public boolean handle(Stanza stanza, ID recipient, CustomGateAction customAction) throws OXException {
+    public boolean handle(Stanza stanza, ID recipient, CustomGateAction customAction) throws RealtimeException {
         /* Stanza didn't carry a valid Sequencenumber, just handle it without pestering the gate and return */
         if (stanza.getSequenceNumber() == -1) {
             stanza.trace("Stanza Gate: (" + name + ") : No sequence number, so let it pass");
             if (customAction != null) {
                 customAction.handle(stanza, recipient);
             } else {
-                handleInternal(stanza, recipient);
+                //TODO: for 7.4 this shouldn't throw Exceptions at all. The class implementing the method has to handle it
+                try {
+                    handleInternal(stanza, recipient);
+                } catch (Exception ex) {
+                    throw RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(ex, ex.getMessage());
+                }
             }
             return false;
         }
@@ -111,7 +141,7 @@ public abstract class StanzaSequenceGate {
         try {
             stanza.getSequencePrincipal().lock("gate");
             AtomicLong threshold = sequenceNumbers.get(stanza.getSequencePrincipal());
-            /* We haven't recorded a threshold for this principal, yet */
+            /* We haven't recorded a threshold (upper bound of last known sequence number) for this principal, yet so we'll add one */
             if (threshold == null) {
                 threshold = new AtomicLong(0);
                 AtomicLong meantime = sequenceNumbers.putIfAbsent(stanza.getSequencePrincipal(), threshold);
@@ -142,7 +172,12 @@ public abstract class StanzaSequenceGate {
                 if (customAction != null) {
                     customAction.handle(stanza, recipient);
                 } else {
-                    handleInternal(stanza, recipient);
+                    //TODO: for 7.4 this shouldn't throw Exceptions at all. The class implementing the method has to handle it
+                    try {
+                        handleInternal(stanza, recipient);
+                    } catch (Exception ex) {
+                        throw RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(ex, ex.getMessage());
+                    }
                 }
 
                 /* Drain Stanzas accumulated while waiting for the missing SequenceNumber */
@@ -186,6 +221,11 @@ public abstract class StanzaSequenceGate {
                 }
 
                 if (inbox.size() < BUFFER_SIZE) {
+                    if(threshold.get() == 0 && stanza.getSequenceNumber() > 10) {
+                        stanza.trace("Threshold == 0 and stanza not in sequence, instructing client to reset sequence.");
+                        // Abort by throwing exception
+                        throw RealtimeExceptionCodes.SEQUENCE_INVALID.create();
+                    }
                     stanza.trace("Not in sequence, enqueing");
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Stanzas not in sequence, Threshold: " + threshold.get() + " SequenceNumber: " + stanza.getSequenceNumber());

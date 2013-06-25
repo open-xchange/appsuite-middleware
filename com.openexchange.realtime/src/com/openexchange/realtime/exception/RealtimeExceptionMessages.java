@@ -60,13 +60,15 @@ import com.openexchange.i18n.LocalizableStrings;
 public class RealtimeExceptionMessages implements LocalizableStrings {
 
     // XMPP
-    /** "The client issued a bad request: %1$s" */
-    public static final String STANZA_BAD_REQUEST_MSG = "The client issued a bad request: %1$s";
+
+    /** The client has sent a message that is malformed or cannot be processed: %1$s */
+    public static final String STANZA_BAD_REQUEST_MSG = "The client has sent a message that is malformed or cannot be processed: %1$s";
     public static final String STANZA_CONFILCT_MSG = "";
     public static final String STANZA_FEATURE_NOT_IMPLEMENTED_MSG = "";
     public static final String STANZA_FORBIDDEN_MSG = "";
     public static final String STANZA_GONE_MSG = "";
-    public static final String STANZA_INTERNAL_SERVER_ERROR_MSG = "";
+    /** The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error: %1$s */
+    public static final String STANZA_INTERNAL_SERVER_ERROR_MSG = "The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error: %1$s";
     public static final String STANZA_ITEM_NOT_FOUND_MSG = "";
     public static final String STANZA_JID_MALFORMED_MSG = "";
     public static final String STANZA_NOT_ACCEPTABLE_MSG = "";
@@ -103,8 +105,11 @@ public class RealtimeExceptionMessages implements LocalizableStrings {
     /** Resource not available. */
     public static final String RESOURCE_NOT_AVAILABLE_MSG = "Resource not available.";
     
-    /** You session is invlaid.*/
+    /** Your session is invalid.*/
     public static final String SESSION_INVALID_MSG = "Your session is invalid.";
+    
+    /** The sent sequence is invalid.*/
+    public static final String SEQUENCE_INVALID_MSG = "The sent sequence is invalid.";
     
 
 }
