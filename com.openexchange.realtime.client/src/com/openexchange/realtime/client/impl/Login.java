@@ -64,6 +64,7 @@ import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Cookie;
 import com.ning.http.client.Response;
 import com.ning.http.client.generators.InputStreamBodyGenerator;
+import com.openexchange.realtime.client.Constants;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTUserState;
 import com.openexchange.realtime.client.config.ConfigurationProvider;
@@ -97,6 +98,7 @@ public class Login {
             AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
             Future<Response> f = asyncHttpClient.preparePost(loginUrl)
                 .setHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                .setHeader("User-Agent", Constants.USER_AGENT_NAME)
                 .setBody(new InputStreamBodyGenerator(new ByteArrayInputStream(loginBody.getBytes("UTF-8"))))
                 .execute();
             Response response = f.get();

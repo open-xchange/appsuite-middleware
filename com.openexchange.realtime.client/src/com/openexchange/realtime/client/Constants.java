@@ -56,11 +56,13 @@ package com.openexchange.realtime.client;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class Constants {
-    
+
     //Cookies
     public static final String JSESSIONID_NAME = "JSESSIONID";
 
     //Request
     public static final long REQUEST_TIMEOUT = 100;
 
+    // Client
+    public static final String USER_AGENT_NAME = "rt/1.0";
 }
