@@ -57,7 +57,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -78,6 +77,7 @@ import com.openexchange.groupware.update.internal.DynamicList;
 import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
 import com.openexchange.groupware.update.internal.UpdateExecutor;
 import com.openexchange.groupware.update.internal.UpdateProcess;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -130,9 +130,7 @@ public final class UpdateTaskToolkit {
      * @throws OXException If update task cannot be performed
      */
     private static void forceUpdateTask0(final UpdateTask task, final int contextId) throws OXException {
-        final List<UpdateTask> taskList = new ArrayList<UpdateTask>(1);
-        taskList.add(task);
-        new UpdateExecutor(getSchema(contextId), contextId, taskList).execute();
+        new UpdateExecutor(getSchema(contextId), contextId, Collections.singletonList(task)).execute();
     }
 
     /**
