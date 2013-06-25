@@ -820,8 +820,8 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
     private MultipartWrapper getMultipartWrapper() throws OXException {
         if (null == multipart) {
             try {
-                final int size = part.getSize();
-                if (useMimeMultipartMailPart() && (size > 0) && (size <= MAX_INMEMORY_SIZE)) {
+                final int size;
+                if (useMimeMultipartMailPart() && ((size = part.getSize()) > 0) && (size <= MAX_INMEMORY_SIZE)) {
                     /*
                      * If size is less than or equal to 1MB, use the in-memory implementation
                      */
@@ -855,7 +855,17 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                         } else {
                             part = new MimeBodyPart(Streams.asInputStream(out));
                         }
-                        multipart = new JavaMailMultipartWrapper(MimeMessageConverter.multipartFor(part.getContent(), getContentType()));
+                        try {
+                            multipart = new JavaMailMultipartWrapper(MimeMessageConverter.multipartFor(part.getContent(), getContentType()));
+                        } catch (final javax.mail.internet.ParseException parseException) {
+                            // Likely caused by unparseable Content-Type header
+                            loadContent();
+                            final String[] header = part.getHeader("Content-Type");
+                            if (null != header) {
+                                part.setHeader("Content-Type", new ContentType(header[0]).toString());
+                            }
+                            multipart = new JavaMailMultipartWrapper(MimeMessageConverter.multipartFor(part.getContent(), getContentType()));
+                        }
                     }
                 }
             } catch (final MessagingException e) {

@@ -1792,6 +1792,8 @@ public final class MimeMessageConverter {
 
     private static final String MULTI_SUBTYPE_MIXED = "MIXED";
 
+    private static final String MULTI_SUBTYPE_ALTERNATIVE = "ALTERNATIVE";
+
     /**
      * Creates a message data object from given MIME message.
      *
@@ -1880,6 +1882,9 @@ public final class MimeMessageConverter {
                     if (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType())) {
                         // For convenience consider multipart/mixed to hold file attachments
                         mail.setHasAttachment(true);
+                    } else if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(ct.getSubType())) {
+                        // For convenience consider multipart/mixed to hold file attachments
+                        mail.setHasAttachment(mail.getEnclosedCount() > 2);
                     } else {
                         // Examine Multipart object
                         Object content = null;
@@ -1893,7 +1898,7 @@ public final class MimeMessageConverter {
                             mail.setHasAttachment(false);
                         } else {
                             try {
-                                mail.setHasAttachment(hasAttachments(multipartFor(content, ct), ct.getSubType()));
+                                mail.setHasAttachment(hasAttachments(mail, ct.getSubType()));
                             } catch (final OXException e) {
                                 if (!MailExceptionCode.MESSAGING_ERROR.equals(e)) {
                                     throw e;
@@ -1902,7 +1907,7 @@ public final class MimeMessageConverter {
                                 LOG.warn(new com.openexchange.java.StringAllocator(256).append(
                                     "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
                                     e.getMessage()).append(
-                                    ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
+                                    ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString(), e);
                                 mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                             } catch (final ClassCastException e) {
                                 // Cast to javax.mail.Multipart failed

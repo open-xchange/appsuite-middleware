@@ -145,7 +145,7 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      * The exception thrown due to an error in parsing RFC822 or MIME headers
      * </p>
      */
-    PARSE_ERROR(MimeMailExceptionMessage.PARSE_ERROR_MSG, CATEGORY_USER_INPUT, 1009),
+    PARSE_ERROR(MimeMailExceptionMessage.PARSE_ERROR_MSG, CATEGORY_USER_INPUT, 1009, LogLevel.ERROR),
     /**
      * An attempt was made to open a read-only folder with read-write "%1$s"
      */
