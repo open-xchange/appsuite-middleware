@@ -50,6 +50,7 @@
 package com.openexchange.tokenlogin.json.actions;
 
 import org.apache.commons.logging.Log;
+import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -58,6 +59,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tokenlogin.TokenLoginService;
 import com.openexchange.tokenlogin.json.TokenLoginRequest;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -67,9 +69,9 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public abstract class TokenLoginAction implements AJAXActionService {
-    
+
     protected static final Log LOG = com.openexchange.log.Log.loggerFor(TokenLoginAction.class);
-    
+
     private final ServiceLookup lookup;
 
     /**
@@ -80,14 +82,15 @@ public abstract class TokenLoginAction implements AJAXActionService {
         this.lookup = lookup;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        return perform(new TokenLoginRequest(requestData, session));
+        try {
+            return perform(new TokenLoginRequest(requestData, session));
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e);
+        }
     }
-    
+
     protected TokenLoginService getTokenLoginService() throws OXException {
         try {
             return lookup.getService(TokenLoginService.class);
@@ -95,7 +98,7 @@ public abstract class TokenLoginAction implements AJAXActionService {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create();
         }
     }
-    
-    protected abstract AJAXRequestResult perform(TokenLoginRequest request) throws OXException;
+
+    protected abstract AJAXRequestResult perform(TokenLoginRequest request) throws OXException, JSONException;
 
 }

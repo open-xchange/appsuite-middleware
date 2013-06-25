@@ -60,7 +60,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tokenlogin.TokenLoginService;
 import com.openexchange.tokenlogin.json.TokenLoginRequest;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -83,18 +82,13 @@ public class AcquireTokenAction extends TokenLoginAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(TokenLoginRequest request) throws OXException {
+    protected AJAXRequestResult perform(TokenLoginRequest request) throws OXException, JSONException {
         TokenLoginService service = getTokenLoginService();
         ServerSession session = request.getSession();
         String token = service.acquireToken(session);
-        
-        final JSONObject response = new JSONObject();
-        try {
-            response.put("token", token);
-        } catch (JSONException e) {
-            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-        }
 
+        final JSONObject response = new JSONObject(2);
+        response.put("token", token);
         return new AJAXRequestResult(response, new Date(), "json");
     }
 
