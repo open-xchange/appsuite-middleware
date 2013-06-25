@@ -1,3 +1,7 @@
+* 2013-06-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 27224: Always consider iCal TRANSPARENCY for appointments without organizer 
+ 
 * 2013-06-24 - marcus.klein@open-xchange.com
 
  - Fix for bug 25642: Removing old configuration files for mobile web interface.
