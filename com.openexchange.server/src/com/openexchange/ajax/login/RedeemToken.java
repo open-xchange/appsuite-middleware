@@ -51,7 +51,6 @@ package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.AJAXServlet.CONTENTTYPE_HTML;
 import java.io.IOException;
-import java.lang.reflect.UndeclaredThrowableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -65,7 +64,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tokenlogin.TokenLoginSecret;
@@ -79,9 +77,10 @@ import com.openexchange.tools.servlet.http.Tools;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class RedeemToken implements LoginRequestHandler {
-    
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(RedeemToken.class);
+
     private final LoginConfiguration conf;
-    private final static Log LOG = LogFactory.getLog(RedeemToken.class);
 
     /**
      * Initializes a new {@link RedeemToken}.
@@ -101,12 +100,9 @@ public class RedeemToken implements LoginRequestHandler {
             resp.getWriter().write(errorPage);
         }
     }
-    
+
     private void doRedeemToken(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
-        String authId = LoginTools.parseAuthId(req, true);
-        String client = LoginTools.parseClient(req, true, "");
-        String userAgent = LoginTools.parseUserAgent(req);
-        String hash = HashCalculator.getInstance().getHash(req, userAgent, client);
+        // Parse token and app-secret
         String token = LoginTools.parseToken(req);
         String appSecret = LoginTools.parseAppSecret(req);
         if (null == token || null == appSecret) {
@@ -116,8 +112,13 @@ public class RedeemToken implements LoginRequestHandler {
         Tools.disableCaching(resp);
         resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         TokenLoginService service = ServerServiceRegistry.getInstance().getService(TokenLoginService.class);
-        Session session = null;
+        // Parse more request information
+        String client = LoginTools.parseClient(req, true, "");
+        String hash = HashCalculator.getInstance().getHash(req, LoginTools.parseUserAgent(req), client);
+        // Redeem token for a session
+        Session session;
         try {
+            String authId = LoginTools.parseAuthId(req, true);
             session = service.redeemToken(token, appSecret, client, authId, hash);
         } catch (OXException e) {
             Login.logAndSendException(resp, e);
@@ -125,9 +126,6 @@ public class RedeemToken implements LoginRequestHandler {
         }
         TokenLoginSecret tokenLoginSecret = service.getTokenLoginSecret(appSecret);
         Boolean writePassword = (Boolean) tokenLoginSecret.getParameters().get("accessPassword");
-        if (writePassword == null) {
-            writePassword = false;
-        }
         try {
             final Context context = ContextStorage.getInstance().getContext(session.getContextId());
             final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
@@ -136,7 +134,7 @@ public class RedeemToken implements LoginRequestHandler {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
-        } catch (final UndeclaredThrowableException e) {
+        } catch (final java.lang.RuntimeException e) {
             LOG.info("Unexpected error occurred during login: " + e.getMessage(), e);
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
@@ -145,14 +143,15 @@ public class RedeemToken implements LoginRequestHandler {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
-
+        // Write cookie accordingly
         Login.writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName(), conf);
-
+        // Generate JSON response
         try {
-            final JSONObject json = new JSONObject();
+            final JSONObject json = new JSONObject(12);
             LoginWriter.write(session, json);
-            if (writePassword) {
-                json.put("password", session.getPassword());
+            if (null != writePassword && writePassword.booleanValue()) {
+                final String password = session.getPassword();
+                json.put("password", null == password ? JSONObject.NULL : password);
             }
             json.write(resp.getWriter());
         } catch (final JSONException e) {
