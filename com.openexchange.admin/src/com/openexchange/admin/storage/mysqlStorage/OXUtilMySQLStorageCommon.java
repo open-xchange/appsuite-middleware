@@ -62,9 +62,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.CreateTableRegistry;
@@ -74,6 +72,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.Updater;
+import com.openexchange.log.LogFactory;
 
 public class OXUtilMySQLStorageCommon {
 
@@ -82,13 +81,6 @@ public class OXUtilMySQLStorageCommon {
     private static AdminCache cache = ClientAdminThread.cache;
 
     public void createDatabase(final Database db) throws StorageException {
-        final List<String> createTableStatements;
-        try {
-            createTableStatements = cache.getOXDBInitialQueries();
-        } catch (final OXGenericException e) {
-            LOG.error("Error reading DB init Queries!", e);
-            throw new StorageException(e);
-        }
         final Connection con;
         String sql_pass = "";
         if (db.getPassword() != null) {
@@ -114,7 +106,6 @@ public class OXUtilMySQLStorageCommon {
             // See bug 18788.
             created = true;
             con.setCatalog(db.getScheme());
-            pumpData2DatabaseOld(con, createTableStatements);
             pumpData2DatabaseNew(con, CreateTableRegistry.getInstance().getList());
             initUpdateTaskTable(con, db.getId().intValue(), db.getScheme());
             con.commit();
@@ -160,56 +151,6 @@ public class OXUtilMySQLStorageCommon {
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e.getMessage(), e);
-        } finally {
-            closeSQLStuff(stmt);
-        }
-    }
-
-    private void pumpData2DatabaseOld(final Connection con, final List<String> db_queries) throws StorageException {
-        Statement stmt = null;
-        try {
-            try {
-                stmt = con.createStatement();
-            } catch (final SQLException e) {
-                throw new StorageException(e.getMessage(), e);
-            }
-            for (final String sqlCreate : db_queries) {
-                stmt.addBatch(sqlCreate);
-            }
-            stmt.executeBatch();
-        } catch (final SQLException e) {
-            if (e.getMessage().indexOf("already exists") < 0) { // MySQL error: "PROCEDURE get_mail_service_id already exists"
-                throw new StorageException(e.getMessage(), e);
-            }
-            closeSQLStuff(stmt);
-            stmt = null;
-            if (LOG.isDebugEnabled()) {
-                LOG.info("Batch table creation failed.", e);
-            } else {
-                LOG.info("Batch table creation failed.");
-            }
-            /*
-             * Execute them one-by-one...
-             */
-            try {
-                for (final String sqlCreate : db_queries) {
-                    stmt = con.createStatement();
-                    try {
-                        stmt.executeUpdate(sqlCreate);
-                    } catch (final SQLException sqlException) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.warn("Following SQL CREATE statement failed with \"" + sqlException.getMessage() + "\": "  + sqlCreate, sqlException);
-                        } else {
-                            LOG.warn("Following SQL CREATE statement failed with \"" + sqlException.getMessage() + "\": "  + sqlCreate);
-                        }
-                    } finally {
-                        closeSQLStuff(stmt);
-                        stmt = null;
-                    }
-                }
-            } catch (final SQLException abort) {
-                throw new StorageException(abort.getMessage(), abort);
-            }
         } finally {
             closeSQLStuff(stmt);
         }
