@@ -66,3 +66,6 @@ Import-Package: com.google.common.annotations,
  org.slf4j,
  org.slf4j.helpers,
  org.slf4j.spi
+Export-Package: com.openexchange.realtime.client,
+ com.openexchange.realtime.client.room.impl,
+ com.openexchange.realtime.client.user
