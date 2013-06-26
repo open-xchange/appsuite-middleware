@@ -58,6 +58,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -72,6 +73,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.Updater;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 
 public class OXUtilMySQLStorageCommon {
@@ -160,20 +162,19 @@ public class OXUtilMySQLStorageCommon {
         final Set<String> existingTables = new HashSet<String>();
         final List<CreateTableService> toCreate = new ArrayList<CreateTableService>(createTables.size());
         toCreate.addAll(createTables);
-        CreateTableService next;
-        try {
-            while ((next = findNext(toCreate, existingTables)) != null) {
+        for (CreateTableService next; (next = findNext(toCreate, existingTables)) != null;) {
+            try {
                 next.perform(con);
                 for (final String createdTable : next.tablesToCreate()) {
                     existingTables.add(createdTable);
                 }
                 toCreate.remove(next);
+            } catch (final OXException e) {
+                throw new StorageException("Failed to create tables " + Arrays.toString(next.tablesToCreate()) + ": " + e.getMessage(), e);
             }
-        } catch (final OXException e) {
-            throw new StorageException(e.getMessage(), e);
         }
         if (!toCreate.isEmpty()) {
-            final StringBuilder sb = new StringBuilder();
+            final StringAllocator sb = new StringAllocator(2048);
             sb.append("Unable to determine next CreateTableService to execute.\n");
             sb.append("Existing tables: ");
             for (final String existingTable : existingTables) {
@@ -190,7 +191,7 @@ public class OXUtilMySQLStorageCommon {
                 }
                 sb.setCharAt(sb.length() - 1, '\n');
             }
-            sb.setLength(sb.length() - 1);
+            sb.deleteCharAt(sb.length() - 1);
             throw new StorageException(sb.toString());
         }
     }
