@@ -90,12 +90,17 @@ public class JSONProtocolHandler {
      * @param entry The stateEntry
      * @param stanzas the Stanzas
      * @param acknowledgements
+     * @throws RealtimeException 
      */
-    public void handleIncomingMessages(ID constructedId, ServerSession serverSession, StateEntry entry, List<JSONObject> stanzas, List<Long> acknowledgements) {
+    public void handleIncomingMessages(ID constructedId, ServerSession serverSession, StateEntry entry, List<JSONObject> stanzas, List<Long> acknowledgements) throws RealtimeException {
         for (JSONObject json : stanzas) {
             if (json.has("type")) {
                 String type = json.optString("type");
-        
+                
+                if (type.equals("nextSequence")) {
+                    protocol.nextSequence(constructedId, json.optInt("seq"), gate);
+                    return;
+                }
                 
                 if (type.equals("ping")) {
                     // PING received
@@ -119,22 +124,17 @@ public class JSONProtocolHandler {
                 }
             }
             // Handle regular message
-            StanzaBuilder<? extends Stanza> stanzaBuilder;
-            try {
-                stanzaBuilder = StanzaBuilderSelector.getBuilder(constructedId, serverSession, json);
-                Stanza stanza = stanzaBuilder.build();
+            StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(constructedId, serverSession, json);
+            Stanza stanza = stanzaBuilder.build();
 
-                if (stanza.traceEnabled()) {
-                    stanza.trace("received in backend");
-                }
+            if (stanza.traceEnabled()) {
+                stanza.trace("received in backend");
+            }
 
-                if (acknowledgements == null) {
-                    protocol.receivedMessage(stanza, gate, entry.state, entry.created, entry.transmitter);
-                } else {
-                    protocol.receivedMessage(stanza, gate, entry.state, entry.created, entry.transmitter, acknowledgements);
-                }
-            } catch (RealtimeException e) {
-                protocol.handleRealtimeException(constructedId, e, null);
+            if (acknowledgements == null) {
+                protocol.receivedMessage(stanza, gate, entry.state, entry.created, entry.transmitter);
+            } else {
+                protocol.receivedMessage(stanza, gate, entry.state, entry.created, entry.transmitter, acknowledgements);
             }
 
         }

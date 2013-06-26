@@ -96,15 +96,17 @@ public interface RTProtocol {
      * A message was received from the client
      * 
      * @param newState
+     * @throws RealtimeException 
      * @throws OXException
      */
-    public abstract void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean newState, StanzaTransmitter transmitter);
+    public abstract void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean newState, StanzaTransmitter transmitter) throws RealtimeException;
 
     /**
      * A message was received from the client. Instead of sending acknlowledgements, they will be collected in the passed acknowledgements
      * list.
+     * @throws RealtimeException 
      */
-    public abstract void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean b, StanzaTransmitter transmitter, List<Long> acknowledgements);
+    public abstract void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean b, StanzaTransmitter transmitter, List<Long> acknowledgements) throws RealtimeException;
 
     /**
      * Empties the buffer, if there are messages to be sent
@@ -132,5 +134,10 @@ public interface RTProtocol {
      * @param resource The resource used for sending the infos to the client
      */
     void handleRealtimeExceptionDirectly(RealtimeException exception, AtmosphereResource resource);
+
+    /**
+     * The client wishes to reset its sequence numbering
+     */
+    void nextSequence(ID constructedId, int newSequence, StanzaSequenceGate gate);
 
 }

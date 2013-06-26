@@ -80,6 +80,7 @@ public class RealtimeException extends OXException {
     public RealtimeException(OXException origin, Transformer transformer) {
         this.delegate = origin;
         this.transformer = transformer;
+        super.copyFrom(origin);
     }
 
     public RealtimeException toXMPPException() {

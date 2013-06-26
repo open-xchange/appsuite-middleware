@@ -141,7 +141,7 @@ public class RTProtocolImpl implements RTProtocol {
      * @see com.openexchange.realtime.atmosphere.protocol.RTProtocol#receivedMessage(com.openexchange.realtime.packet.Stanza, com.openexchange.realtime.util.StanzaSequenceGate, com.openexchange.realtime.atmosphere.protocol.RTClientState, boolean, com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter)
      */
     @Override
-    public void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean newState, StanzaTransmitter transmitter) {
+    public void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean newState, StanzaTransmitter transmitter) throws RealtimeException {
         try {
             state.lock();
             state.touch();
@@ -153,29 +153,30 @@ public class RTProtocolImpl implements RTProtocol {
                 enqueued = true;
             }
 
-            try {
-                if (gate.handle(stanza, stanza.getTo())) {
-                    stanza.trace("Sending receipt for client message " + stanza.getSequenceNumber());
-                    enqueueAcknowledgement(stanza.getFrom(), stanza.getSequenceNumber(), state, transmitter);
-                    enqueued = true;
-                }
+            if (gate.handle(stanza, stanza.getTo())) {
+                stanza.trace("Sending receipt for client message " + stanza.getSequenceNumber());
+                enqueueAcknowledgement(stanza.getFrom(), stanza.getSequenceNumber(), state, transmitter);
+                enqueued = true;
+            }
 
-                if (enqueued) {
-                    emptyBuffer(state, transmitter);
-                }
-            } catch (RealtimeException re) {
-                handleRealtimeException(stanza.getFrom(), re, stanza);
+            if (enqueued) {
+                emptyBuffer(state, transmitter);
             }
         } finally {
             state.unlock();
         }
     }
     
+    @Override
+    public void nextSequence(ID constructedId, int newSequence, StanzaSequenceGate gate) {
+        gate.setThresshold(constructedId, newSequence);
+    }
+    
     /* (non-Javadoc)
      * @see com.openexchange.realtime.atmosphere.protocol.RTProtocol#receivedMessage(com.openexchange.realtime.packet.Stanza, com.openexchange.realtime.util.StanzaSequenceGate, com.openexchange.realtime.atmosphere.protocol.RTClientState, boolean, com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter)
      */
     @Override
-    public void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean newState, StanzaTransmitter transmitter, List<Long> acknowledgements) {
+    public void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean newState, StanzaTransmitter transmitter, List<Long> acknowledgements) throws RealtimeException {
         try {
             state.lock();
             state.touch();
@@ -185,13 +186,9 @@ public class RTProtocolImpl implements RTProtocol {
                 enqueueNextSequence(stanza.getFrom(), state, transmitter);
             }
 
-            try {
-                if (gate.handle(stanza, stanza.getTo())) {
-                    stanza.trace("Adding receipt for client message " + stanza.getSequenceNumber() + " to acknowledgement list");
-                    acknowledgements.add(stanza.getSequenceNumber());
-                }
-            } catch (RealtimeException re) {
-                handleRealtimeException(stanza.getFrom(), re, stanza);
+            if (gate.handle(stanza, stanza.getTo())) {
+                stanza.trace("Adding receipt for client message " + stanza.getSequenceNumber() + " to acknowledgement list");
+                acknowledgements.add(stanza.getSequenceNumber());
             }
         } finally {
             state.unlock();

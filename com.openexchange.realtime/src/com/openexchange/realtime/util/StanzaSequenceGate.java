@@ -162,6 +162,9 @@ public abstract class StanzaSequenceGate {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Stanza Gate (" + name + ") : " + stanza.getSequencePrincipal() + ":" + stanza.getSequenceNumber() + ":" + threshold);
             }
+            if (stanza.getSequenceNumber() == -1) {
+                threshold.set(-1);
+            }
             if (threshold.compareAndSet(stanza.getSequenceNumber(), stanza.getSequenceNumber() + 1)) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Best case, Threshold: " + threshold.get());
@@ -220,7 +223,7 @@ public abstract class StanzaSequenceGate {
 
                 if (inbox.size() < BUFFER_SIZE) {
                     //We haven't seen this client yet but he starts with a sequence number higher than our buffer size -> reset the sequence
-                    if(threshold.get() == 0 && stanza.getSequenceNumber() > BUFFER_SIZE) {
+                    if(stanza.getSequenceNumber() > BUFFER_SIZE) {
                         stanza.trace("Threshold == 0 and stanza not in sequence, instructing client to reset sequence.");
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Threshold == 0 and stanza not in sequence, instructing client to reset sequence.");
@@ -249,6 +252,14 @@ public abstract class StanzaSequenceGate {
         }
 
     }
+    
+    /**
+     * Resets the thresshold for the given id to  the value. Used when clients want to restart the sequence numbering.
+     */
+    public void setThresshold(ID constructedId, long newSequence) {
+        sequenceNumbers.put(constructedId, new AtomicLong(newSequence));
+    }
+
 
     public void freeRessourcesFor(ID sequencePrincipal) {
         sequenceNumbers.remove(sequencePrincipal);

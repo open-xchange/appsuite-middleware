@@ -186,16 +186,12 @@ public class QueryAction extends RTAction {
         //gate.handle e.g. nextSequence
         } catch (RealtimeException e) {
             LOG.error(e);
-            stanza.setError(e);
-            JSONObject jsonObject = new StanzaWriter().write(stanza);
-            return new AJAXRequestResult(jsonObject, "json");
-        //Condition.await
+            throw e;
+            //Condition.await
         } catch (InterruptedException e) {
             LOG.error(e);
             RealtimeException re = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(e, e.getMessage());
-            stanza.setError(re);
-            JSONObject jsonObject = new StanzaWriter().write(stanza);
-            return new AJAXRequestResult(jsonObject, "json");
+            throw re;
         } finally {
             sendLock.unlock();
         }

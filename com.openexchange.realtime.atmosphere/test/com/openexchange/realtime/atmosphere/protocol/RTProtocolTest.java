@@ -69,6 +69,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.impl.RTProtocolImpl;
 import com.openexchange.realtime.atmosphere.protocol.RTClientState;
 import com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
@@ -82,6 +83,7 @@ public class RTProtocolTest {
     
     boolean bufferEmptied = false;
     Stanza sequenceGateStanza = null;
+    long nextSequence = -1;
     
     RTProtocol protocol = new RTProtocolImpl() {
         public void emptyBuffer(RTClientState state, StanzaTransmitter transmitter) {
@@ -105,6 +107,11 @@ public class RTProtocolTest {
             @Override
             public void handleInternal(Stanza stanza, ID recipient) throws OXException {
                 sequenceGateStanza = stanza;
+            }
+            
+            @Override
+            public void setThresshold(ID constructedId, long newSequence) {
+                nextSequence = newSequence;
             }
         };
     }
@@ -202,7 +209,7 @@ public class RTProtocolTest {
         
         protocol.receivedMessage(message, gate, state, true, transmitter);
         
-        verify(state).enqueue(argThat(isStanza(from, from, "atmosphere", "nextSequence", 0)));
+        verify(state).enqueue(argThat(isStanza(from, from, "atmosphere", "nextSequence", 0l)));
         assertTrue(bufferEmptied);
     }
     
@@ -240,7 +247,7 @@ public class RTProtocolTest {
     }
     
     @Test
-    public void anIncomingMessageThatIsDiscardedByTheSequenceGateIsNotAcknowledged() throws OXException {
+    public void anIncomingMessageThatIsDiscardedByTheSequenceGateResultsInAnException() throws OXException {
         int i = 1;
         Stanza s = new Message();
         s.setSequenceNumber(i);
@@ -248,16 +255,24 @@ public class RTProtocolTest {
         ID from = new ID("test@1");
         s.setFrom(from);
         
-        while(gate.handle(s, null)) {
+        while(i < 21) {
             i++;
             s = new Message();
             s.setSequenceNumber(i);
             s.setFrom(from);
         }
         
-        protocol.receivedMessage(s, gate, state, false, transmitter);
+        boolean caught = false;
+        try {
+            protocol.receivedMessage(s, gate, state, false, transmitter);
+        } catch (RealtimeException x) {
+            caught = x.getCode() == 1006;
+            if (!caught) {
+                throw x;
+            }
+        }
+        assertTrue(caught);
         
-        verify(state, never()).enqueue(argThat(isStanza(from, from, "atmosphere", "received", i)));
     }
     
     @Test
@@ -294,5 +309,13 @@ public class RTProtocolTest {
         assertTrue(bufferEmptied);
     }
     
+    /**
+     * Resetting sequence numbers
+     */
+    @Test
+    public void clientsCanResetTheirSequenceNumbering() {
+        protocol.nextSequence(new ID("test://user1@1") , 12, gate);
+        assertEquals(12, nextSequence);
+    }
     
 }
