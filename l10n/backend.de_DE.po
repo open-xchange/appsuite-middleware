@@ -11,7 +11,6 @@
 # This file is distributed under the same license as the PACKAGE package.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 #
-#. XMPP
 #. *
 #. * Mail(s) could not be found in folder
 #. * <p>
@@ -19,15 +18,10 @@
 #. * <code>isExpunged()</code> and <code>getMessageNumber()</code>.
 #. * </p>
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:65
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:68
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:70
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:71
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:74
@@ -42,6 +36,9 @@
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:83
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:84
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:85
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:87
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:88
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:129
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:82
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:84
@@ -57,7 +54,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2013-06-17 12:55+0200\n"
+"PO-Revision-Date: 2013-06-26 10:49+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -3027,13 +3024,23 @@ msgstr "[Nicht verfügbar]"
 
 #. The default message displayed to user.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:66
-msgid "A severe error occurred."
-msgstr "Es trat ein schwerer Fehler auf."
+msgid ""
+"An error occurred inside the Open-Xchange server which prevented it from "
+"fulfilling the request."
+msgstr ""
+"Auf dem Open-Xchange Server trat ein vorübergehender Fehler auf. Die Anfrage "
+"konnte "
+"nicht verarbeitet werden. "
 
-#. The default message displayed to user.
+#. The default message displayed to user when a re-try is recommended
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:69
-msgid "An error occurred. Please try again later."
-msgstr "Es trat ein Fehler auf. Bitte später erneut versuchen."
+msgid ""
+"A temporary error occurred inside the Open-Xchange server which prevented it "
+"from fulfilling the request.. Please try again later."
+msgstr ""
+"Auf dem Open-Xchange Server trat ein vorübergehender Fehler auf. Die Anfrage "
+"konnte "
+"nicht verarbeitet werden. Bitte versuchen Sie es später erneut."
 
 #. The general message for a conflicting update operation.
 #. The object has been changed in the meantime.
@@ -3316,7 +3323,7 @@ msgstr "Der grizzly-Server konnte nicht gestartet werden"
 #. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
 msgstr "Folgender Dienst wird benötigt, fehlt jedoch: \"%1$s\""
 
@@ -3658,6 +3665,11 @@ msgid "Something went wrong reading from specified file. Please try again."
 msgstr ""
 "Beim Lesen der angegebenen Datei trat ein Fehler auf. Bitte versuchen Sie es "
 "erneut."
+
+#. Could not create: %s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:161
+msgid "Could not create: %s"
+msgstr "Erstellung fehlgeschlagen: %s"
 
 #. No IndexAccess implementation was found for module %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index.solr/src/com/openexchange/index/solr/SolrIndexExceptionMessages.java:70
@@ -4531,6 +4543,11 @@ msgstr "Verbindung zur Datenbank kann nicht hergestellt werden."
 msgid "No permission to modify resources in context %1$s"
 msgstr "Keine Berechtigung zum Ändern der Ressource im Kontext %1$s"
 
+#. Cannot change password: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:104
+msgid "Cannot change password: %1$s"
+msgstr "Passwort kann nicht geändert werden: %1$s"
+
 #. *
 #. * Invalid locale string: %1$s
 #.
@@ -5401,10 +5418,10 @@ msgstr ""
 msgid "The session information didn't match any ServerSession"
 msgstr "Die Sitzungsinformation passt zu keiner ServerSession"
 
-#. * Missing key \"%1$s\" in: \"%2$s\"
+#. * "Obligatory key \"%1$s\" is missing from the Stanza"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:64
-msgid "Missing key \"%1$s\" in: \"%2$s\""
-msgstr "Fehlender Key \"%1$s\" in: \"%2$s\""
+msgid "Obligatory key \"%1$s\" is missing from the Stanza"
+msgstr "Erforderlicher Key \"%1$s\" nicht im Stanza vorhanden"
 
 #. * Could not find a builder for the specified element: . \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:66
@@ -5446,18 +5463,38 @@ msgstr "Folgendes obligatorisches Element fehlt: \"%1$s\""
 msgid "Malformed Presence Data"
 msgstr "Presence-Daten sind nicht wohlgeformt"
 
-#. * Malformed Presence Element: \"%1$s\"
+#. * Malformed Message Data
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:82
+msgid "Malformed Message Data"
+msgstr "Fehlerhafte Nachrichten-Daten"
+
+#. * Malformed Iq Data
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:84
+msgid "Malformed Iq Data"
+msgstr "Fehlerhafte Iq-Daten "
+
+#. * Malformed Presence Element: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:86
 msgid "Malformed Presence Element: \"%1$s\""
 msgstr "Presence-Element ist nicht wohlgeformt: \"%1$s\""
 
+#. * Malformed Message Element: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:88
+msgid "Malformed Message Element: \"%1$s\""
+msgstr "Fehlerhaftes Nachrichten-Element:  \"%1$s\""
+
+#. * Malformed IQ Element: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:90
+msgid "Malformed IQ Element: \"%1$s\""
+msgstr "Fehlerhaftes IQ-Element: \"%1$s\""
+
 #. * Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:92
 msgid "Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\""
 msgstr "Ungültiger Wert \"%1$s\" für den Schlüssel \"%1$s\" in: %3$s"
 
 #. * Malformed POST Data"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:94
 msgid "Malformed POST Data"
 msgstr "POST-Daten sind nicht wohlgeformt"
 
@@ -5488,7 +5525,7 @@ msgstr "Unbekannter Kanal: %1$s."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:100
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:151
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:120
@@ -5514,7 +5551,7 @@ msgstr "Ungültige Kontext-ID. Kontext konnte nicht gefunden werden für: %1$s"
 #. Generic (start with code 1000)
 #. * No appropriate channel found for recipient %1$s with payload namespace %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:94
 msgid ""
 "No appropriate channel found for recipient %1$s with payload namespace %2$s"
 msgstr ""
@@ -5523,19 +5560,43 @@ msgstr ""
 
 #. * Invalid ID. Resource identifier is missing.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:103
 msgid "Invalid ID. Resource identifier is missing."
 msgstr "Ungültige ID. Ressourcen-ID fehlt."
 
+#. XMPP
+#. * The client has sent a message that is malformed or cannot be processed: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:65
+msgid ""
+"The client has sent a message that is malformed or cannot be processed: %1$s"
+msgstr ""
+"Der Client hat eine Nachricht gesendet, die fehlerhaft ist bzw. nicht "
+"verarbeitet werden kann: %1$s"
+
+#. * The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:71
+msgid ""
+"The server could not process the stanza because of a misconfiguration or an "
+"otherwise-undefined internal server error: %1$s"
+msgstr ""
+"Stanza konnte vom Server wegen einer fehlerhaften Konfiguration oder einem "
+"internen, "
+"nicht näher bestimmtem Server-Fehler nicht verarbeitet werden: %1$s"
+
 #. * Resource not available.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:103
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:106
 msgid "Resource not available."
 msgstr "Die Ressource ist nicht verfügbar."
 
-#. * You session is invlaid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:106
+#. * Your session is invalid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:109
 msgid "Your session is invalid."
 msgstr "Ihre Sitzung ist ungültig."
+
+#. * The sent sequence is invalid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:112
+msgid "The sent sequence is invalid."
+msgstr "Die gesendete Sequenz ist ungültig."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rmi/src/com/openexchange/rmi/exceptions/OXRMIExceptionMessage.java:62
 msgid "Start of RMI service failed."
@@ -6824,10 +6885,10 @@ msgstr "Auschecken einer Verbindung vom DB-Pool fehlgeschlagen"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:97
 msgid ""
 "Some data entered exceeded the field limit. Please shorten the value for "
-"\"%1$s\" (current: %2$s, limit: %3$s) and try again."
+"\"%1$s\" (limit: %2$s, current: %3$s) and try again."
 msgstr ""
-"Einige der eingegebenen Daten übersteigen das Datenbank-Feldlimit. Bitte "
-"kürzen Sie den Eintrag für \"%1$s\" (aktuell: %2$s, Limit: %3$s) und "
+"Einige der eingegebenen Daten übersteigen das Feldlimit. Bitte "
+"kürzen Sie den Eintrag für \"%1$s\" (Limit: %2$s, aktuell: %3$s) und "
 "versuchen Sie es erneut."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:99
@@ -10878,8 +10939,8 @@ msgid ""
 "Default port specified for mail protocol \"%1$s\", but SSL is enabled. "
 "Please review if appropriate."
 msgstr ""
-"Für das Mail-Protokoll \"%1$s\" wurde ein Standard-Port angegeben, "
-"jedoch ist SSL aktiviert. Bitte überprüfen."
+"Für das Mail-Protokoll \"%1$s\" wurde ein Standard-Port angegeben, jedoch "
+"ist SSL aktiviert. Bitte überprüfen."
 
 #. Secure port specified for mail protocol "%1$s", but SSL is not enabled. Please review if appropriate.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:132
@@ -10887,8 +10948,8 @@ msgid ""
 "Secure port specified for mail protocol \"%1$s\", but SSL is not enabled. "
 "Please review if appropriate."
 msgstr ""
-"Für das Mail-Protokoll \"%1$s\" wurde ein sicherer Port angegeben, "
-"jedoch ist SSL nicht aktiviert. Bitte überprüfen."
+"Für das Mail-Protokoll \"%1$s\" wurde ein sicherer Port angegeben, jedoch "
+"ist SSL nicht aktiviert. Bitte überprüfen."
 
 #. Default port specified for transport protocol "%1$s", but SSL is enabled. Please review if appropriate.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:135
@@ -15286,6 +15347,15 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "A severe error occurred."
+#~ msgstr "Es trat ein schwerer Fehler auf."
+
+#~ msgid "An error occurred. Please try again later."
+#~ msgstr "Es trat ein Fehler auf. Bitte später erneut versuchen."
+
+#~ msgid "Missing key \"%1$s\" in: \"%2$s\""
+#~ msgstr "Fehlender Key \"%1$s\" in: \"%2$s\""
 
 #~ msgid "The following needed service is missing: %1$s"
 #~ msgstr "Folgender Dienst wird benötigt, fehlt jedoch: %1$s"
