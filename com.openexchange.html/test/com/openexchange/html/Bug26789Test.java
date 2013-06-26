@@ -139,7 +139,7 @@ public class Bug26789Test {
         + "       \n"
         + "      \n"
         + "     \n"
-        + "   <table style=\"border-collapse: separate; width: 600px;¸\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" align=\"center\"><tbody><tr><td style=\"font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 10px 0 10px 0;\" valign=\"middle\"> \n"
+        + "   <table style=\"border-collapse: separate; width: 600px;\u00b8\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" align=\"center\"><tbody><tr><td style=\"font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 10px 0 10px 0;\" valign=\"middle\"> \n"
         + "        \n"
         + "         \n"
         + "          \n"
