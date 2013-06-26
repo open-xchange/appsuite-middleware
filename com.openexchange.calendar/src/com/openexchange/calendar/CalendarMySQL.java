@@ -49,14 +49,17 @@
 
 package com.openexchange.calendar;
 
+import static com.openexchange.calendar.Tools.getSqlInString;
 import static com.openexchange.sql.grammar.Constant.ASTERISK;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -633,8 +636,8 @@ public class CalendarMySQL implements CalendarSqlImp {
     @Override
     public PreparedStatement getSharedAppointmentFolderQuery(final Context c, final CalendarFolderObject cfo, final Connection readcon) throws SQLException {
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator("SELECT object_id, pfid, member_uid FROM prg_dates_members WHERE cid = ? AND pfid IN (");
-        for(final Object o : cfo.getSharedFolderList()) {
-            sb.append(o).append(',');
+        for (final TIntIterator iter = cfo.getSharedFolderList().iterator(); iter.hasNext();) {
+            sb.append(iter.next()).append(',');
         }
         sb.setCharAt(sb.length()-1, ')');
         final PreparedStatement stmt = readcon.prepareStatement(sb.toString());
@@ -1380,7 +1383,8 @@ public class CalendarMySQL implements CalendarSqlImp {
 
             // Look into the users private folders
             boolean first = true;
-            for (final int folder : cfo.getPrivateFolders()) {
+            for (final TIntIterator iter = cfo.getPrivateFolders().iterator(); iter.hasNext();) {
+                final int folder = iter.next();
                 if (first) {
                     sb.append("(pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + uid + ")");
                     first = false;
@@ -1391,7 +1395,8 @@ public class CalendarMySQL implements CalendarSqlImp {
 
             // Look into folders that are shared to the user
             // where he can read all objects
-            for (final int folder : cfo.getSharedReadableAll()) {
+            for (final TIntIterator iter = cfo.getSharedReadableAll().iterator(); iter.hasNext();) {
+                final int folder = iter.next();
                 final int owner = folderAccess.getFolderOwner(folder);
                 if (first) {
                     sb.append("(NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + ")");
@@ -1402,7 +1407,8 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
 
             // where he can read own objects
-            for (final int folder : cfo.getSharedReadableOwn()) {
+            for (final TIntIterator iter = cfo.getSharedReadableOwn().iterator(); iter.hasNext();) {
+                final int folder = iter.next();
                 final int owner = folderAccess.getFolderOwner(folder);
                 if (first) {
                     sb.append("(NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + " AND pd.created_from = " + uid + ")");
@@ -1414,7 +1420,8 @@ public class CalendarMySQL implements CalendarSqlImp {
 
             // Look into public folders
             // where the user can read all objects
-            for (final int folder : cfo.getPublicReadableAll()) {
+            for (final TIntIterator iter = cfo.getPublicReadableAll().iterator(); iter.hasNext();) {
+                final int folder = iter.next();
                 if (first) {
                     sb.append("(pd.fid = " + folder + ")");
                     first = false;
@@ -1424,7 +1431,8 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
 
             // where the user can read own objects
-            for (final int folder : cfo.getPublicReadableOwn()) {
+            for (final TIntIterator iter = cfo.getPublicReadableOwn().iterator(); iter.hasNext();) {
+                final int folder = iter.next();
                 if (first) {
                     sb.append("(pd.fid = " + folder + " AND pd.created_from = " + uid + ")");
                     first = false;
@@ -1505,23 +1513,20 @@ public class CalendarMySQL implements CalendarSqlImp {
             sb.append(uid);
 
             if (cfo != null) {
-                final Set<Integer> private_read_all = cfo.getPrivateReadableAll();
-                final Set<Integer> private_read_own = cfo.getPrivateReadableOwn();
-                final Set<Integer> public_read_all = cfo.getPublicReadableAll();
-                final Set<Integer> public_read_own = cfo.getPublicReadableOwn();
-
                 boolean private_query = false;
                 boolean public_query = false;
                 boolean started = false;
 
+                final TIntSet private_read_all = cfo.getPrivateReadableAll();
                 if (!private_read_all.isEmpty()) {
                     sb.append(" AND (");
                     started = true;
                     sb.append("pdm.pfid IN ");
-                    sb.append(StringCollection.getSqlInString(private_read_all));
+                    sb.append(getSqlInString(private_read_all));
                     private_query = true;
                 }
 
+                final TIntSet private_read_own = cfo.getPrivateReadableOwn();
                 if (!private_read_own.isEmpty()) {
                     if (!started) {
                         sb.append(" AND (");
@@ -1534,10 +1539,11 @@ public class CalendarMySQL implements CalendarSqlImp {
                     }
                     sb.append(uid);
                     sb.append(" AND pdm.pfid IN ");
-                    sb.append(StringCollection.getSqlInString(private_read_own));
+                    sb.append(getSqlInString(private_read_own));
                     private_query = true;
                 }
 
+                final TIntSet public_read_all = cfo.getPublicReadableAll();
                 if (!public_read_all.isEmpty()) {
                     if (!started) {
                         sb.append(" AND (");
@@ -1545,15 +1551,16 @@ public class CalendarMySQL implements CalendarSqlImp {
                     }
                     if (private_query) {
                         sb.append(" OR pd.fid IN ");
-                        sb.append(StringCollection.getSqlInString(public_read_all));
+                        sb.append(getSqlInString(public_read_all));
                         public_query = true;
                     } else {
                         sb.append(" AND pd.fid IN ");
-                        sb.append(StringCollection.getSqlInString(public_read_all));
+                        sb.append(getSqlInString(public_read_all));
                         public_query = true;
                     }
                 }
 
+                final TIntSet public_read_own = cfo.getPublicReadableOwn();
                 if (!public_read_own.isEmpty()) {
                     if (!started) {
                         sb.append(" AND (");
@@ -1561,12 +1568,12 @@ public class CalendarMySQL implements CalendarSqlImp {
                     }
                     if (private_query || public_query) {
                         sb.append(" OR pd.fid IN ");
-                        sb.append(StringCollection.getSqlInString(public_read_own));
+                        sb.append(getSqlInString(public_read_own));
                         sb.append(PD_CREATED_FROM_IS);
                         sb.append(uid);
                     } else {
                         sb.append(" AND pd.fid IN ");
-                        sb.append(StringCollection.getSqlInString(public_read_own));
+                        sb.append(getSqlInString(public_read_own));
                         sb.append(PD_CREATED_FROM_IS);
                         sb.append(uid);
                     }
@@ -5531,4 +5538,5 @@ public class CalendarMySQL implements CalendarSqlImp {
     public static void setServiceLookup(ServiceLookup serviceLookup) {
         CalendarMySQL.SERVICES_REF.set(serviceLookup);
     }
+
 }

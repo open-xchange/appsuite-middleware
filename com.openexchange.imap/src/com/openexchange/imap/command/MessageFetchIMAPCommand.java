@@ -52,9 +52,7 @@ package com.openexchange.imap.command;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
 import javax.mail.Header;
@@ -65,7 +63,6 @@ import javax.mail.UIDFolder;
 import javax.mail.internet.InternetHeaders;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
-import com.openexchange.mail.MailListField;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -506,26 +503,6 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             retval[pos] = msg;
         }
         return true;
-    }
-
-    private static final Set<Integer> ENV_FIELDS;
-
-    static {
-        ENV_FIELDS = new HashSet<Integer>(6);
-        /*
-         * The Envelope is an aggregation of the common attributes of a Message: From, To, Cc, Bcc, ReplyTo, Subject and Date.
-         */
-        ENV_FIELDS.add(Integer.valueOf(MailListField.FROM.getField()));
-        ENV_FIELDS.add(Integer.valueOf(MailListField.TO.getField()));
-        ENV_FIELDS.add(Integer.valueOf(MailListField.CC.getField()));
-        ENV_FIELDS.add(Integer.valueOf(MailListField.BCC.getField()));
-        ENV_FIELDS.add(Integer.valueOf(MailListField.SUBJECT.getField()));
-        ENV_FIELDS.add(Integer.valueOf(MailListField.SENT_DATE.getField()));
-        /*-
-         * Discard the two extra fetch profile items contained in JavaMail's ENVELOPE constant: RFC822.SIZE and INTERNALDATE
-         * ENV_FIELDS.add(Integer.valueOf(MailListField.RECEIVED_DATE.getField()));
-         * ENV_FIELDS.add(Integer.valueOf(MailListField.SIZE.getField()));
-         */
     }
 
     /*-

@@ -52,11 +52,13 @@ package com.openexchange.api2;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2String;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getFolderName;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -120,12 +122,12 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
      *
      * @return A new {@link Set set} containing the modules.
      */
-    private static final Set<Integer> newNonTreeVisibleModules() {
-        final Set<Integer> retval = new HashSet<Integer>();
-        retval.add(Integer.valueOf(FolderObject.CALENDAR));
-        retval.add(Integer.valueOf(FolderObject.TASK));
-        retval.add(Integer.valueOf(FolderObject.CONTACT));
-        retval.add(Integer.valueOf(FolderObject.INFOSTORE));
+    private static final TIntSet newNonTreeVisibleModules() {
+        final TIntSet retval = new TIntHashSet(4);
+        retval.add(FolderObject.CALENDAR);
+        retval.add(FolderObject.TASK);
+        retval.add(FolderObject.CONTACT);
+        retval.add(FolderObject.INFOSTORE);
         return retval;
     }
 
@@ -449,7 +451,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersNotSeenInTreeView(userId, groups, userConfiguration, ctx)).asQueue();
         final int size = q.size();
         final Iterator<FolderObject> iter = q.iterator();
-        final Set<Integer> stdModules = newNonTreeVisibleModules();
+        final TIntSet stdModules = newNonTreeVisibleModules();
         /*
          * Iterate result queue
          */
@@ -460,17 +462,17 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
             if (prevModule != f.getModule()) {
                 FolderQueryCacheManager.getInstance().putFolderQuery(getNonTreeVisibleNum(prevModule), cacheQueue, session, false);
                 prevModule = f.getModule();
-                stdModules.remove(Integer.valueOf(prevModule));
+                stdModules.remove(prevModule);
                 cacheQueue.clear();
             }
             cacheQueue.add(Integer.valueOf(f.getObjectID()));
         }
         FolderQueryCacheManager.getInstance().putFolderQuery(getNonTreeVisibleNum(prevModule), cacheQueue, session, false);
         final int setSize = stdModules.size();
-        final Iterator<Integer> iter2 = stdModules.iterator();
-        for (int i = 0; i < setSize; i++) {
+        final TIntIterator iter2 = stdModules.iterator();
+        for (int i = setSize; i-- > 0;) {
             FolderQueryCacheManager.getInstance().putFolderQuery(
-                getNonTreeVisibleNum(iter2.next().intValue()),
+                getNonTreeVisibleNum(iter2.next()),
                 new LinkedList<Integer>(),
                 session,
                 false);

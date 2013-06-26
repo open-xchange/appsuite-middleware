@@ -49,7 +49,8 @@
 
 package com.openexchange.html.internal.css;
 
-import java.util.HashSet;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -200,11 +201,11 @@ public final class CSSMatcher {
         /*
          * Ensure to check against pattern first
          */
-        final Set<Integer> patIndices = new HashSet<Integer>(2);
+        final TIntSet patIndices = new TIntHashSet(2);
         for (int i = 0; i < size; i++) {
             final String allowedValue = allowedValues[i];
             if (PATTERN_IS_PATTERN.matcher(allowedValue).matches()) {
-                patIndices.add(Integer.valueOf(i));
+                patIndices.add(i);
                 if (allowedValue.indexOf('d') >= 0) {
                     return false;
                 }
@@ -224,7 +225,7 @@ public final class CSSMatcher {
          */
         boolean retval = false;
         for (int i = 0; i < size && !retval; i++) {
-            if (!patIndices.contains(Integer.valueOf(i))) {
+            if (!patIndices.contains(i)) {
                 /*
                  * Check against non-pattern allowed value
                  */

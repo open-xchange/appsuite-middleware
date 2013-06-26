@@ -49,12 +49,12 @@
 
 package com.openexchange.tools.arrays;
 
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Contains convenience methods for dealing with arrays.
@@ -89,22 +89,17 @@ public final class Arrays {
     }
 
     public static int[] addUniquely(final int[] toExtend, final int... other) {
-        if (other == null) {
+        if (toExtend == null || other == null) {
             return toExtend;
         }
-        final Set<Integer> tmp = new HashSet<Integer>();
+        final TIntSet tmp = new TIntHashSet(toExtend.length + other.length);
         for (final int i : toExtend) {
-            tmp.add(new Integer(i));
+            tmp.add(i);
         }
         for (final int i : other) {
-            tmp.add(new Integer(i));
+            tmp.add(i);
         }
-        final int[] retval = new int[tmp.size()];
-        int pos = 0;
-        for (final Integer i : tmp) {
-            retval[pos++] = i.intValue();
-        }
-        return retval;
+        return tmp.toArray();
     }
 
     public static <T> T[] remove(T[] removeFrom, T... toRemove) {

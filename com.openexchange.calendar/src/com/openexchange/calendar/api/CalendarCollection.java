@@ -50,7 +50,9 @@
 
 package com.openexchange.calendar.api;
 
+import static com.openexchange.calendar.Tools.getSqlInString;
 import static com.openexchange.java.Autoboxing.I;
+import gnu.trove.set.TIntSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -2547,10 +2549,10 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         if (cfo == null) {
             throw OXCalendarExceptionCodes.CFO_NOT_INITIALIZIED.create();
         }
-        final  Set<Integer> private_read_all = cfo.getPrivateReadableAll();
-        final Set<Integer> private_read_own = cfo.getPrivateReadableOwn();
-        final Set<Integer> public_read_all = cfo.getPublicReadableAll();
-        final Set<Integer> public_read_own = cfo.getPublicReadableOwn();
+        final TIntSet private_read_all = cfo.getPrivateReadableAll();
+        final TIntSet private_read_own = cfo.getPrivateReadableOwn();
+        final TIntSet public_read_all = cfo.getPublicReadableAll();
+        final TIntSet public_read_own = cfo.getPublicReadableOwn();
 
         boolean private_query = false;
         boolean public_query = false;
@@ -2558,7 +2560,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         if (!private_read_all.isEmpty()) {
             sb.append(" AND (pdm.pfid IN ");
             brack++;
-            sb.append(StringCollection.getSqlInString(private_read_all));
+            sb.append(getSqlInString(private_read_all));
             private_query = true;
         }
 
@@ -2570,7 +2572,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             }
             sb.append(Integer.toString(uid));
             sb.append(" AND (pdm.pfid IN ");
-            sb.append(StringCollection.getSqlInString(private_read_own));
+            sb.append(getSqlInString(private_read_own));
             sb.append("))");
             private_query = true;
         }
@@ -2579,11 +2581,11 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         if (!public_read_all.isEmpty()) {
             if (private_query) {
                 sb.append(" OR pd.fid IN ");
-                sb.append(StringCollection.getSqlInString(public_read_all));
+                sb.append(getSqlInString(public_read_all));
                 public_query = true;
             } else {
                 sb.append(" AND pd.fid IN ");
-                sb.append(StringCollection.getSqlInString(public_read_all));
+                sb.append(getSqlInString(public_read_all));
                 public_query = true;
             }
         }
@@ -2591,13 +2593,13 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         if (!public_read_own.isEmpty()) {
             if (private_query || public_query) {
                 sb.append(" OR (pd.fid IN ");
-                sb.append(StringCollection.getSqlInString(public_read_own));
+                sb.append(getSqlInString(public_read_own));
                 sb.append(" AND (pd.created_from = ");
                 sb.append(uid);
                 sb.append("))");
             } else {
                 sb.append(" AND (pd.fid IN ");
-                sb.append(StringCollection.getSqlInString(public_read_own));
+                sb.append(getSqlInString(public_read_own));
                 sb.append(" AND (pd.created_from = ");
                 sb.append(uid);
                 sb.append("))");
