@@ -1,3 +1,7 @@
+* 2013-06-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27235: Check fall-back URL if first retrieval attempt fails
+
 * 2013-06-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 27154: Made initial insertion of "uuid" column with " DEFAULT NULL" appendix + insert file names with respect to "uuid" column
