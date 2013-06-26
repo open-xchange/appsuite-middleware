@@ -1,6 +1,7 @@
 * 2013-07-26 - martin.herfurth@open-xchange.com
 
  - Fix for bug 26954: Already deleted Exceptions within invitation mails.
+ - Fix for bug 27257: Broken Create Table Statement.
 
 * 2013-06-26 - thorben.betten@open-xchange.com
 
