@@ -109,7 +109,7 @@ public class StanzaDispatcher implements Callable<Map<ID, OXException>>, Seriali
         LocalMessageDispatcher dispatcher = Services.getService(LocalMessageDispatcher.class);
         Map<ID, OXException> exceptions = dispatcher.send(stanza, targets);
         if (Utils.shouldResend(exceptions, stanza)) {
-            ResourceDirectory directory = Services.getService(ResourceDirectory.class);
+            ResourceDirectory directory = Services.optService(ResourceDirectory.class);
             directory.remove(stanza.getTo());
             Services.getService(MessageDispatcher.class).send(stanza);
         }

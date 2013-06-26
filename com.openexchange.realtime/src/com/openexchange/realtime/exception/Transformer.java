@@ -49,6 +49,8 @@
 
 package com.openexchange.realtime.exception;
 
+import java.io.Serializable;
+
 /**
  * {@link Transformer} used to map RealtimException codes to codes that can be used for specific {@link Channel} implementations like
  * Atmosphere or Realtime.
@@ -56,7 +58,7 @@ package com.openexchange.realtime.exception;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class Transformer {
+public class Transformer implements Serializable {
 
     private RealtimeExceptionCodes origin;
     private RealtimeExceptionCodes atmosphere;
