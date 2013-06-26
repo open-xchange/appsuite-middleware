@@ -224,4 +224,13 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
         return pos;
     }
 
+    /**
+     * Gets this <tt>ByteArrayInputStream</tt>'s count.
+     *
+     * @return The count
+     */
+    public int getCount() {
+        return count;
+    }
+
 }

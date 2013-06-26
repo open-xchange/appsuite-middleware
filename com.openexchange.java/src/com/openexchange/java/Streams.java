@@ -164,6 +164,15 @@ public class Streams {
         if (null == is) {
             return new byte[0];
         }
+        if (is instanceof UnsynchronizedByteArrayInputStream) {
+            final UnsynchronizedByteArrayInputStream ubais = (UnsynchronizedByteArrayInputStream) is;
+            final byte[] buf = ubais.getBuf();
+            final int pos = ubais.getPosition();
+            final int len = ubais.getCount() - pos;
+            final byte[] newbuf = new byte[len];
+            System.arraycopy(buf, pos, newbuf, 0, len);
+            return newbuf;
+        }
         try {
             final ByteArrayOutputStream bos = newByteArrayOutputStream(4096);
             final int buflen = 2048;
