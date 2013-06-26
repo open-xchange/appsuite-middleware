@@ -88,17 +88,18 @@ public class ConfigServer extends AbstractConfigSource {
         client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
         client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
 
-        // Name-value-pairs
-        final List<NameValuePair> pairs = new ArrayList<NameValuePair>(4);
-        {
-            final NameValuePair pair = new NameValuePair("emailaddress", new StringAllocator(emailLocalPart).append('@').append(emailDomain).toString());
-            pairs.add(pair);
-        }
-
         // GET method
         final GetMethod getMethod = new GetMethod(new StringAllocator("http://autoconfig.").append(emailDomain).append("/mail/config-v1.1.xml").toString());
         try {
+            // Name-value-pairs
+            final List<NameValuePair> pairs = new ArrayList<NameValuePair>(4);
+            {
+                final NameValuePair pair = new NameValuePair("emailaddress", new StringAllocator(emailLocalPart).append('@').append(emailDomain).toString());
+                pairs.add(pair);
+            }
             getMethod.setQueryString(pairs.toArray(new NameValuePair[0]));
+
+            // Execute GET request
             int statusCode = client.executeMethod(getMethod);
             if (statusCode != 200) {
                 LOG.info("Could not retrieve config XML from autoconfig server. Return code was: " + statusCode);
