@@ -5,6 +5,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,open-xchange-chat"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,open-xchange-file-storage-cmis"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,open-xchange-freebusy-ews"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,open-xchange-indexing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,open-xchange-preview"/>
 </provider>
 </psf>
