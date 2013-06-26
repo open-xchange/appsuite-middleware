@@ -50,14 +50,20 @@
 package com.openexchange.realtime.hazelcast.channel;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.directory.Resource;
+import com.openexchange.realtime.directory.ResourceDirectory;
+import com.openexchange.realtime.dispatch.DispatchExceptionCode;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.hazelcast.Services;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.IDMap;
 
 /**
  * {@link StanzaDispatcher}
@@ -97,7 +103,24 @@ public class StanzaDispatcher implements Callable<Map<ID, OXException>>, Seriali
     public Map<ID, OXException> call() throws Exception {
         stanza.trace("Received remove delivery. Dispatching locally");
         LocalMessageDispatcher dispatcher = Services.getService(LocalMessageDispatcher.class);
-        return dispatcher.send(stanza, targets);
+        try {
+            return dispatcher.send(stanza, targets);
+        } catch (OXException e ) {
+            if (DispatchExceptionCode.RESOURCE_OFFLINE.equals(e)) {
+                ResourceDirectory resourceDirectory = Services.optService(ResourceDirectory.class);
+                IDMap<Resource> idMap = resourceDirectory.get(stanza.getTo());
+                if(idMap.isEmpty()) {
+                    throw e;
+                } else {
+                    MessageDispatcher messageDispatcher = Services.optService(MessageDispatcher.class);
+                    return messageDispatcher.send(stanza);
+                }
+            } else {
+                HashMap<ID, OXException> exception = new HashMap<ID, OXException>();
+                exception.put(stanza.getTo(), e);
+                return exception;
+            }
+        }
     }
 
 }
