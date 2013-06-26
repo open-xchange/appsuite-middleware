@@ -52,6 +52,8 @@ package com.openexchange.unifiedinbox.utility;
 import static com.openexchange.mail.MailPath.SEPERATOR;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -99,18 +101,16 @@ public final class UnifiedInboxUtility {
      * @return A map grouping referenced accounts and referenced fullnames and IDs.
      * @throws OXException If parsing mail IDs fails
      */
-    public static Map<Integer, Map<String, List<String>>> parseMailIDs(final String[] mailIDs) throws OXException {
-        final Map<Integer, Map<String, List<String>>> map = new HashMap<Integer, Map<String, List<String>>>(mailIDs.length);
+    public static TIntObjectMap<Map<String, List<String>>> parseMailIDs(final String[] mailIDs) throws OXException {
+        final TIntObjectMap<Map<String, List<String>>> map = new TIntObjectHashMap<Map<String,List<String>>>(mailIDs.length);
         // Start parsing
         final UnifiedInboxUID uidl = new UnifiedInboxUID();
         for (final String mailID : mailIDs) {
             uidl.setUIDString(mailID);
-
-            final Integer key = Integer.valueOf(uidl.getAccountId());
-            Map<String, List<String>> folderUIDMap = map.get(key);
+            Map<String, List<String>> folderUIDMap = map.get(uidl.getAccountId());
             if (null == folderUIDMap) {
                 folderUIDMap = new HashMap<String, List<String>>(mailIDs.length / 2);
-                map.put(key, folderUIDMap);
+                map.put(uidl.getAccountId(), folderUIDMap);
             }
             final String folder = uidl.getFullName();
             List<String> uids = folderUIDMap.get(folder);

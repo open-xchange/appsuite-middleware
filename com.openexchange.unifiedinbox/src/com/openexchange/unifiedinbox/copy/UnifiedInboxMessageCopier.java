@@ -49,9 +49,9 @@
 
 package com.openexchange.unifiedinbox.copy;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
@@ -132,11 +132,11 @@ public final class UnifiedInboxMessageCopier {
         // The array to fill
         final String[] retval = new String[mailIds.length];
         // A map remembering callables
-        final Map<Integer, KF2KFCallable> callableMap = new HashMap<Integer, KF2KFCallable>(mailIds.length);
+        final TIntObjectMap<KF2KFCallable> callableMap = new TIntObjectHashMap<KF2KFCallable>(mailIds.length);
         // Iterate mail IDs
         for (int i = 0; i < mailIds.length; i++) {
             tmp.setUIDString(mailIds[i]);
-            final Integer accountId = Integer.valueOf(tmp.getAccountId());
+            final int accountId = tmp.getAccountId();
             // Look-up callable by account ID
             KF2KFCallable callable = callableMap.get(accountId);
             if (null == callable) {
@@ -147,7 +147,7 @@ public final class UnifiedInboxMessageCopier {
         }
         // Perform callables
         final ThreadPoolService threadPoolService = ThreadPools.getThreadPool();
-        performCallables(callableMap.values(), threadPoolService);
+        performCallables(callableMap.valueCollection(), threadPoolService);
         // Delete messages on move
         if (move) {
             access.getMessageStorage().deleteMessages(sourceFolder, mailIds, true);
@@ -177,12 +177,12 @@ public final class UnifiedInboxMessageCopier {
         // Proceed
         final String[] retval = new String[mailIds.length];
         // A map remembering callables
-        final Map<Integer, KF2AFEqualCallable> callableMap = new HashMap<Integer, KF2AFEqualCallable>(mailIds.length);
-        final Map<Integer, KF2AFDifferCallable> otherCallableMap = new HashMap<Integer, KF2AFDifferCallable>(mailIds.length);
+        final TIntObjectMap<KF2AFEqualCallable> callableMap = new TIntObjectHashMap<KF2AFEqualCallable>(mailIds.length);
+        final TIntObjectMap<KF2AFDifferCallable> otherCallableMap = new TIntObjectHashMap<KF2AFDifferCallable>(mailIds.length);
         // Iterate mail IDs
         for (int i = 0; i < mailIds.length; i++) {
             tmp.setUIDString(mailIds[i]);
-            final Integer accountId = Integer.valueOf(tmp.getAccountId());
+            final int accountId = tmp.getAccountId();
             // Check if accounts are equal...
             if (tmp.getAccountId() == destAccountId) {
                 KF2AFEqualCallable callable = callableMap.get(accountId);
@@ -203,8 +203,8 @@ public final class UnifiedInboxMessageCopier {
         }
         // Perform callables
         final ThreadPoolService threadPoolService = ThreadPools.getThreadPool();
-        performCallables(callableMap.values(), threadPoolService);
-        performCallables(otherCallableMap.values(), threadPoolService);
+        performCallables(callableMap.valueCollection(), threadPoolService);
+        performCallables(otherCallableMap.valueCollection(), threadPoolService);
         return retval;
     }
 
