@@ -50,6 +50,7 @@
 package com.openexchange.calendar.itip.analyzers;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -112,7 +113,7 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer{
             return analysis;
         }
         analysis.setUid(appointment.getUid());
-        Appointment toDelete = util.resolveUid(appointment.getUid(), session);
+        Appointment toDelete = getToDelete(session, appointment);
         if (toDelete == null) {
             analysis.addAnnotation(new ITipAnnotation(Messages.CANCEL_UNKNOWN_APPOINTMENT, locale));
             analysis.recommendAction(ITipAction.IGNORE);
@@ -142,6 +143,18 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer{
         analysis.recommendAction(ITipAction.DELETE);
 
         return analysis;
+    }
+
+    private CalendarDataObject getToDelete(final Session session, CalendarDataObject appointment) throws OXException {
+        CalendarDataObject toDelete = util.resolveUid(appointment.getUid(), session);
+        if (appointment.containsRecurrenceDatePosition() && toDelete.containsDeleteExceptions()) {
+            for (Date deleteException : toDelete.getDeleteException()) {
+                if (deleteException.equals(appointment.getRecurrenceDatePosition())) {
+                    return null;
+                }
+            }
+        }
+        return toDelete;
     }
 
 

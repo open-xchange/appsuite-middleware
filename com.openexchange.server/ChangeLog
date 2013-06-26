@@ -1,3 +1,7 @@
+* 2013-07-26 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 26954: Already deleted Exceptions within invitation mails.
+
 * 2013-06-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 27235: Check fall-back URL if first retrieval attempt fails
