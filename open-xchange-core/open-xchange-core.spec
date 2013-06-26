@@ -602,8 +602,8 @@ if ! ox_exists_property com.openexchange.import.mapper.path $pfile; then
     ox_set_property com.openexchange.import.mapper.path /opt/open-xchange/importCSV $pfile
 fi
 pfile=/opt/open-xchange/etc/mail.properties
-if ox_exists_property com.openexchange.mail.JavaMailProperties $pfile; then
-    ox_remove_property com.openexchange.mail.JavaMailProperties $pfile
+if ! ox_exists_property com.openexchange.mail.JavaMailProperties $pfile || grep -E '^com.openexchange.mail.JavaMailProperties.*/' $pfile >/dev/null; then
+    ox_set_property com.openexchange.mail.JavaMailProperties javamail.properties $pfile
 fi
 pfile=/opt/open-xchange/etc/sessiond.properties
 if ox_exists_property com.openexchange.sessiond.sessionCacheConfig $pfile; then
