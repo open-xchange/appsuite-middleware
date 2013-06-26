@@ -5,4 +5,5 @@ Bundle-SymbolicName: org.xmlpull
 Bundle-Version: 1.0.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.kxml2.io,
+ org.kxml2.wap,
  org.xmlpull.v1

@@ -1,6 +1,7 @@
 * 2013-06-26 - marcus.klein@open-xchange.com
 
  - Fix for bug 25996: Adding property com.openexchange.mail.JavaMailProperties in postinst scripts to mail.properties configuration file.
+ - Fix for bug 27265: Added necessary export org.kxml2.wap to org.xmlpull bundle which is needed by EAS implementation.
 
 * 2013-06-26 - thorben.betten@open-xchange.com
 
