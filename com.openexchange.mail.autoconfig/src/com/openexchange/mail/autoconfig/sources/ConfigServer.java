@@ -50,18 +50,20 @@
 package com.openexchange.mail.autoconfig.sources;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
 import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
@@ -76,57 +78,60 @@ public class ConfigServer extends AbstractConfigSource {
     static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(ConfigServer.class);
 
     @Override
-    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException {
-        String url = "http://autoconfig." + emailDomain + "/mail/config-v1.1.xml";
-
-        HttpClient client = new HttpClient();
-        int timeout = 3000;
+    public Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context) throws OXException {
+        // New HTTP client
+        final HttpClient client = new HttpClient();
+        final int timeout = 3000;
         client.getParams().setSoTimeout(timeout);
         client.getParams().setIntParameter("http.connection.timeout", timeout);
         client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
         client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
         client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
 
-        GetMethod getMethod = new GetMethod(url);
-
-        Map<String, String> values = new HashMap<String, String>();
-        values.put("emailaddress", emailLocalPart + "@" + emailDomain);
-
-        NameValuePair[] nameValuePairs = new NameValuePair[values.size()];
-        int i = 0;
-        for (Map.Entry<String, String> entry : values.entrySet()) {
-            NameValuePair pair = new NameValuePair(entry.getKey(), entry.getValue());
-            nameValuePairs[i++] = pair;
+        // Name-value-pairs
+        final List<NameValuePair> pairs = new ArrayList<NameValuePair>(4);
+        {
+            final NameValuePair pair = new NameValuePair("emailaddress", new StringAllocator(emailLocalPart).append('@').append(emailDomain).toString());
+            pairs.add(pair);
         }
 
-        getMethod.setQueryString(nameValuePairs);
-
+        // GET method
+        final GetMethod getMethod = new GetMethod(new StringAllocator("http://autoconfig.").append(emailDomain).append("/mail/config-v1.1.xml").toString());
         try {
-
-            int httpCode = client.executeMethod(getMethod);
-
-            if (httpCode != 200) {
-                LOG.info("Could not retrieve config XML. Return code was: " + httpCode);
-                return null;
+            getMethod.setQueryString(pairs.toArray(new NameValuePair[0]));
+            int statusCode = client.executeMethod(getMethod);
+            if (statusCode != 200) {
+                LOG.info("Could not retrieve config XML from autoconfig server. Return code was: " + statusCode);
+                // Try 2nd URL
+                getMethod.setURI(new URI(new StringAllocator(64).append("http://").append(emailDomain).append("/.well-known/autoconfig/mail/config-v1.1.xml").toString(), false));
+                statusCode = client.executeMethod(getMethod);
+                if (statusCode != 200) {
+                    LOG.info("Could not retrieve config XML from main domain. Return code was: " + statusCode);
+                    return null;
+                }
             }
-            AutoconfigParser parser = new AutoconfigParser(getMethod.getResponseBodyAsStream());
-            ClientConfig clientConfig = parser.getConfig();
-
-            Autoconfig autoconfig = getBestConfiguration(clientConfig, emailDomain);
-            replaceUsername(autoconfig, emailLocalPart, emailDomain);
-            return autoconfig;
-
-        } catch (HttpException e) {
+        } catch (final HttpException e) {
             LOG.warn("Could not retrieve config XML.", e);
-            return null;
-        } catch (java.net.UnknownHostException e) {
+        } catch (final java.net.UnknownHostException e) {
             // Obviously that host does not exist
-            LOG.debug("Could not retrieve config XML, because of an unknown host for URL: " + url, e);
-            return null;
-        } catch (IOException e) {
+            LOG.debug("Could not retrieve config XML, because of an unknown host for URL: " + ("http://autoconfig." + emailDomain + "/mail/config-v1.1.xml"), e);
+        } catch (final IOException e) {
             LOG.warn("Could not retrieve config XML.", e);
-            return null;
+        }
+
+        // Parse response
+        try {
+        	final AutoconfigParser parser = new AutoconfigParser(getMethod.getResponseBodyAsStream());
+        	final ClientConfig clientConfig = parser.getConfig();
+
+        	final Autoconfig autoconfig = getBestConfiguration(clientConfig, emailDomain);
+        	replaceUsername(autoconfig, emailLocalPart, emailDomain);
+        	return autoconfig;
+
+        } catch (final IOException e) {
+        	LOG.warn("Could not retrieve config XML.", e);
+        	return null;
         }
     }
-
 }
+
