@@ -8,7 +8,7 @@ BuildRequires: open-xchange-soap-cxf
 BuildRequires: open-xchange-admin-user-copy
 BuildRequires: java-devel >= 1.6.0
 Version:	@OXVERSION@
-%define		ox_release 4
+%define		ox_release 5
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -51,6 +51,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Wed Jun 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Release candidate for 7.2.2 release
 * Fri Jun 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second feature freeze for 7.2.2 release
 * Mon Jun 17 2013 Marcus Klein <marcus.klein@open-xchange.com>

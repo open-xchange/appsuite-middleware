@@ -8,7 +8,7 @@ BuildRequires:  java-devel >= 1.6.0
 BuildRequires:  open-xchange-core
 BuildRequires:  open-xchange-admin
 Version:        @OXVERSION@
-%define         ox_release 4
+%define         ox_release 5
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -58,6 +58,8 @@ ox_update_permissions "/opt/open-xchange/etc/upsell.properties" root:open-xchang
 %doc com.openexchange.upsell.multiple/ChangeLog
 
 %changelog
+* Wed Jun 26 2013 Carsten Hoeger <choeger@open-xchange.com>
+Release candidate for 7.2.2 release
 * Fri Jun 21 2013 Carsten Hoeger <choeger@open-xchange.com>
 Second feature freeze for 7.2.2 release
 * Mon Jun 17 2013 Carsten Hoeger <choeger@open-xchange.com>
@@ -224,3 +226,5 @@ prepare for next EDP drop
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Carsten Hoeger <choeger@open-xchange.com>
 prepare for 6.22.0
+* Wed Jul 18 2012 Carsten Hoeger <choeger@open-xchange.com>
+Initial release

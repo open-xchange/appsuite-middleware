@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-freebusy
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -81,6 +81,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Wed Jun 26 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Release candidate for 7.2.2 release
 * Fri Jun 21 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Second feature freeze for 7.2.2 release
 * Mon Jun 17 2013 Steffen Templin <marcus.klein@open-xchange.com>
