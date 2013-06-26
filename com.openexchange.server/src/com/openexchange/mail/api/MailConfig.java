@@ -49,21 +49,26 @@
 
 package com.openexchange.mail.api;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
-import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.net.InetSocketAddress;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Locale;
-import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.idn.IDNA;
+import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
+import com.javacodegeeks.concurrent.LRUPolicy;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -77,6 +82,7 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link MailConfig} - The user-specific mail properties; e.g. containing user's login data.
@@ -391,6 +397,63 @@ public abstract class MailConfig {
         return PartModifier.getInstance();
     }
 
+    private static final class UserID {
+
+        private final int contextId;
+        private final String pattern;
+        private final String server;
+        private final int hash;
+
+        protected UserID(final String pattern, final String server, final int contextId) {
+            super();
+            this.pattern = pattern;
+            this.server = server;
+            this.contextId = contextId;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + contextId;
+            result = prime * result + ((pattern == null) ? 0 : pattern.hashCode());
+            result = prime * result + ((server == null) ? 0 : server.hashCode());
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof UserID)) {
+                return false;
+            }
+            final UserID other = (UserID) obj;
+            if (contextId != other.contextId) {
+                return false;
+            }
+            if (pattern == null) {
+                if (other.pattern != null) {
+                    return false;
+                }
+            } else if (!pattern.equals(other.pattern)) {
+                return false;
+            }
+            if (server == null) {
+                if (other.server != null) {
+                    return false;
+                }
+            } else if (!server.equals(other.server)) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    private static final ConcurrentMap<UserID, Future<int[]>> USER_ID_CACHE = new ConcurrentLinkedHashMap<UserID, Future<int[]>>(8192, 0.75F, 16, 65536 << 1, new LRUPolicy());
+
     /**
      * Resolves the user IDs by specified pattern dependent on configuration's setting for mail login source.
      *
@@ -401,65 +464,38 @@ public abstract class MailConfig {
      * @throws OXException If resolving user by specified pattern fails
      */
     public static int[] getUserIDsByMailLogin(final String pattern, final boolean isDefaultAccount, final InetSocketAddress server, final Context ctx) throws OXException {
-        final MailAccountStorageService storageService =
-            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         if (isDefaultAccount) {
-            switch (MailProperties.getInstance().getLoginSource()) {
-            case USER_IMAPLOGIN:
-            case PRIMARY_EMAIL:
-                final MailAccount[] accounts;
-                switch (MailProperties.getInstance().getLoginSource()) {
-                case USER_IMAPLOGIN:
-                    accounts = storageService.resolveLogin(pattern, ctx.getContextId());
-                    break;
-                case PRIMARY_EMAIL:
-                    accounts = storageService.resolvePrimaryAddr(pattern, ctx.getContextId());
-                    break;
-                default:
-                    throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create("Unimplemented mail login source.");
-                }
-                final Set<Integer> userIds = new HashSet<Integer>();
-                if (accounts.length == 1) {
-                    // On ASE some accounts are configured to connect to localhost, some to the full qualified local host name. The socket
-                    // would then not match. If we only find one then, use it.
-                    userIds.add(I(accounts[0].getUserId()));
-                } else {
-                    for (final MailAccount candidate : accounts) {
-                        final InetSocketAddress shouldMatch;
-                        switch (MailProperties.getInstance().getMailServerSource()) {
-                        case USER:
-                            shouldMatch = toSocketAddr(candidate.generateMailServerURL(), 143);
-                            break;
-                        case GLOBAL:
-                            shouldMatch = toSocketAddr(MailProperties.getInstance().getMailServer(), 143);
-                            break;
-                        default:
-                            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create("Unimplemented mail server source.");
-                        }
-                        if (server.equals(shouldMatch)) {
-                            userIds.add(I(candidate.getUserId()));
-                        }
+            final UserID userID = new UserID(pattern, server.getHostName() + ':' + Integer.toString(server.getPort()), ctx.getContextId());
+            Future<int[]> f = USER_ID_CACHE.get(userID);
+            if (null == f) {
+                final FutureTask<int[]> ft = new FutureTask<int[]>(new Callable<int[]>() {
+
+                    @Override
+                    public int[] call() throws OXException {
+                        return forDefaultAccount(pattern, server, ctx, storageService);
                     }
+                });
+                f = USER_ID_CACHE.putIfAbsent(userID, ft);
+                if (null == f) {
+                    f = ft;
+                    ft.run();
                 }
-                // Prefer the default mail account.
-                final Set<Integer> notDefaultAccount = new HashSet<Integer>();
-                if (userIds.size() > 1) {
-                    final Iterator<Integer> iter = userIds.iterator();
-                    while (iter.hasNext()) {
-                        final int userId = i(iter.next());
-                        for (final MailAccount candidate : accounts) {
-                            if (candidate.getUserId() == userId && !candidate.isDefaultAccount()) {
-                                notDefaultAccount.add(I(userId));
-                            }
-                        }
-                    }
+            }
+            boolean remove = true;
+            try {
+                final int[] retval = f.get();
+                remove = false;
+                return retval;
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
+            } catch (final ExecutionException e) {
+                ThreadPools.launderThrowable(e, OXException.class);
+            } finally {
+                if (remove) {
+                    USER_ID_CACHE.remove(userID);
                 }
-                if (notDefaultAccount.size() < userIds.size()) {
-                    userIds.removeAll(notDefaultAccount);
-                }
-                return I2i(userIds);
-            case USER_NAME:
-                return new int[] { UserStorage.getInstance().getUserId(pattern, ctx) };
             }
         }
         // Find user name by user's imap login
@@ -469,6 +505,74 @@ public abstract class MailConfig {
             retval[i] = accounts[i].getUserId();
         }
         return retval;
+    }
+
+    /**
+     * Resolves the user IDs by specified pattern dependent on configuration's setting for mail login source for default account
+     */
+    protected static int[] forDefaultAccount(final String pattern, final InetSocketAddress server, final Context ctx, final MailAccountStorageService storageService) throws OXException {
+        switch (MailProperties.getInstance().getLoginSource()) {
+        case USER_IMAPLOGIN:
+        case PRIMARY_EMAIL:
+            final MailAccount[] accounts;
+            switch (MailProperties.getInstance().getLoginSource()) {
+            case USER_IMAPLOGIN:
+                accounts = storageService.resolveLogin(pattern, ctx.getContextId());
+                break;
+            case PRIMARY_EMAIL:
+                accounts = storageService.resolvePrimaryAddr(pattern, ctx.getContextId());
+                break;
+            default:
+                throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create("Unimplemented mail login source.");
+            }
+            final TIntSet userIds;
+            if (accounts.length == 1) {
+                // On ASE some accounts are configured to connect to localhost, some to the full qualified local host name. The socket
+                // would then not match. If we only find one then, use it.
+                userIds = new TIntHashSet(1);
+                userIds.add(accounts[0].getUserId());
+            } else {
+                userIds = new TIntHashSet(accounts.length);
+                for (final MailAccount candidate : accounts) {
+                    final InetSocketAddress shouldMatch;
+                    switch (MailProperties.getInstance().getMailServerSource()) {
+                    case USER:
+                        shouldMatch = toSocketAddr(candidate.generateMailServerURL(), 143);
+                        break;
+                    case GLOBAL:
+                        shouldMatch = toSocketAddr(MailProperties.getInstance().getMailServer(), 143);
+                        break;
+                    default:
+                        throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create("Unimplemented mail server source.");
+                    }
+                    if (server.equals(shouldMatch)) {
+                        userIds.add(candidate.getUserId());
+                    }
+                }
+            }
+            // Prefer the default mail account.
+            final int size = userIds.size();
+            final TIntSet notDefaultAccount = new TIntHashSet(size);
+            if (size > 0) {
+                final TIntIterator iter = userIds.iterator();
+                for (int i = size; i-- > 0;) {
+                    final int userId = iter.next();
+                    for (final MailAccount candidate : accounts) {
+                        if (candidate.getUserId() == userId && !candidate.isDefaultAccount()) {
+                            notDefaultAccount.add(userId);
+                        }
+                    }
+                }
+            }
+            if (notDefaultAccount.size() < size) {
+                userIds.removeAll(notDefaultAccount);
+            }
+            return userIds.toArray();
+        case USER_NAME:
+            return new int[] { UserStorage.getInstance().getUserId(pattern, ctx) };
+        default:
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create("Unimplemented mail login source.");
+        }
     }
 
     /**
@@ -859,7 +963,7 @@ public abstract class MailConfig {
      * @return <code>true</code> if custom parsing has been performed; otherwise <code>false</code>
      * @throws OXException If custom parsing fails
      */
-    protected boolean doCustomParsing(MailAccount account, Session session) throws OXException {
+    protected boolean doCustomParsing(final MailAccount account, final Session session) throws OXException {
         return false;
     }
 
