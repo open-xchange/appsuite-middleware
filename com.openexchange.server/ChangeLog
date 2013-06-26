@@ -1,3 +1,7 @@
+* 2013-06-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27245: Orderly retrieve nested message's source bytes from referenced part
+
 * 2013-06-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 27230: Don't validate non-rfc822 addresses
