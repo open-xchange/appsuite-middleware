@@ -129,6 +129,7 @@ public abstract class StanzaSequenceGate {
                 //TODO: for 7.4 this shouldn't throw Exceptions at all. The class implementing the method has to handle it
                 try {
                     handleInternal(stanza, recipient);
+                    
                 } catch (Exception ex) {
                     throw RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(ex, ex.getMessage());
                 }
@@ -176,6 +177,8 @@ public abstract class StanzaSequenceGate {
                     //TODO: for 7.4 this shouldn't throw Exceptions at all. The class implementing the method has to handle it
                     try {
                         handleInternal(stanza, recipient);
+                    } catch (RealtimeException x) {
+                        throw x;
                     } catch (Exception ex) {
                         throw RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(ex, ex.getMessage());
                     }
