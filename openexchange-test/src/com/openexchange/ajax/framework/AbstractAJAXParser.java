@@ -94,7 +94,7 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends
                 if (null != trace) {
                     final String lineSeparator = System.getProperty("line.separator");
                     sb.append(lineSeparator);
-                    appendStackTrace(trace, lineSeparator, sb);                    
+                    appendStackTrace(trace, lineSeparator, sb);
                 }
                 assertTrue(sb.toString(), Category.CATEGORY_WARNING.getType().equals(exception.getCategory().getType()));
             }
@@ -103,7 +103,7 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends
     }
 
     public String checkResponse(final HttpResponse resp) throws ParseException, IOException {
-        assertEquals("Response code is not okay.", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
+        assertEquals("Response code is not okay. (" + resp.getStatusLine().getReasonPhrase() + ")", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
         return EntityUtils.toString(resp.getEntity());
     }
 
