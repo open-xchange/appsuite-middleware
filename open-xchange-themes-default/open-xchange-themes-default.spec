@@ -6,7 +6,7 @@ BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  java-devel >= 1.6.0
 Version:	@OXVERSION@
-%define		ox_release 5
+%define		ox_release 6
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -50,6 +50,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Thu Jun 27 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.2.2 release
 * Wed Jun 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Release candidate for 7.2.2 release
 * Fri Jun 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
