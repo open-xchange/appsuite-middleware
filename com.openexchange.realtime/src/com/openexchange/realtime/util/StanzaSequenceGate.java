@@ -98,9 +98,8 @@ public abstract class StanzaSequenceGate {
      * 
      * @param stanza the incoming stanza
      * @param recipient the recipient of the incoming Stanza
-     * @return If <code>false</code> is returned the handled stanza did not expect an ACK
-     * @throws RealtimeException with code 1006 if an invalid sequence number was detected. The component using this gate has to ensure this
-     *             exception reaches the client.
+     * @return If <code>false</code> an ACK shouldn't be sent to the client as the Stanza wasn't handled properly
+     * @throws RealtimeException if the user of this gate couldn't handle the stanza internally
      */
     public boolean handle(Stanza stanza, ID recipient) throws RealtimeException {
         return handle(stanza, recipient, null);
@@ -115,9 +114,8 @@ public abstract class StanzaSequenceGate {
      * @param stanza the incoming stanza
      * @param recipient the recipient of the incoming Stanza
      * @param customAction a custom action that (if not null) should be used instead of the using component's handleInternal.
-     * @return If <code>false</code> is returned the handled stanza did not expect an ACK
-     * @throws RealtimeException with code 1006 if an invalid sequence number was detected. The component using this gate has to ensure this
-     *             exception reaches the client.
+     * @return If <code>false</code> an ACK shouldn't be sent to the client as the Stanza wasn't handled properly
+     * @throws RealtimeException if the user of this gate couldn't handle the stanza internally
      */
     public boolean handle(Stanza stanza, ID recipient, CustomGateAction customAction) throws RealtimeException {
         /* Stanza didn't carry a valid Sequencenumber, just handle it without pestering the gate and return */
@@ -225,14 +223,6 @@ public abstract class StanzaSequenceGate {
                 }
 
                 if (inbox.size() < BUFFER_SIZE) {
-                    //We haven't seen this client yet but he starts with a sequence number higher than our buffer size -> reset the sequence
-                    if(stanza.getSequenceNumber() > BUFFER_SIZE) {
-                        stanza.trace("Threshold == 0 and stanza not in sequence, instructing client to reset sequence.");
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Threshold == 0 and stanza not in sequence, instructing client to reset sequence.");
-                        }
-                        throw RealtimeExceptionCodes.SEQUENCE_INVALID.create();
-                    }
                     //Try to buffer up a valid sequence of Stanzas
                     stanza.trace("Not in sequence, enqueing");
                     if (LOG.isDebugEnabled()) {
@@ -241,14 +231,13 @@ public abstract class StanzaSequenceGate {
 
                     inbox.add(new StanzaWithCustomAction(stanza, customAction));
                     return true;
-                } else {
-                    stanza.trace("Buffer full, instructing client to reset sequence");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Instructing client to reset sequence because stanza's not in sequence, but buffer is full. Threshold: "
-                            + threshold.get() + " SequenceNumber: " + stanza.getSequenceNumber());
-                    }
-                    throw RealtimeExceptionCodes.SEQUENCE_INVALID.create();
                 }
+                //Don't send acks by returning false
+                stanza.trace("Buffer full, discarding");
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Discarding. Stanzas not in sequence, but buffer is full. Threshold: " + threshold.get() + " SequenceNumber: " + stanza.getSequenceNumber());
+                }
+                return false;
             }
         } finally {
             stanza.getSequencePrincipal().unlock("gate");
@@ -257,10 +246,21 @@ public abstract class StanzaSequenceGate {
     }
     
     /**
-     * Resets the thresshold for the given id to  the value. Used when clients want to restart the sequence numbering.
+     * Resets the current threshold for the given ID and empties the buffer of Stanzas with now incorrect sequence numbers
+     * @param constructedId The ID for that we want to reset the threshold
+     * @param newSequence the new sequence number to use
      */
-    public void setThresshold(ID constructedId, long newSequence) {
-        sequenceNumbers.put(constructedId, new AtomicLong(newSequence));
+    public void resetThreshold(ID constructedId, long newSequence) {
+        constructedId.lock("gate");
+        try {
+            List<StanzaWithCustomAction> list = inboxes.get(constructedId);
+            if (list != null) {
+                list.clear();
+            }
+            sequenceNumbers.put(constructedId, new AtomicLong(newSequence));
+        } finally {
+            constructedId.unlock("gate");
+        }
     }
 
 

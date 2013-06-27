@@ -110,7 +110,7 @@ public class RTProtocolTest {
             }
             
             @Override
-            public void setThresshold(ID constructedId, long newSequence) {
+            public void resetThreshold(ID constructedId, long newSequence) {
                 nextSequence = newSequence;
             }
         };

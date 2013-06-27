@@ -169,7 +169,7 @@ public class RTProtocolImpl implements RTProtocol {
     
     @Override
     public void nextSequence(ID constructedId, int newSequence, StanzaSequenceGate gate) {
-        gate.setThresshold(constructedId, newSequence);
+        gate.resetThreshold(constructedId, newSequence);
     }
     
     /* (non-Javadoc)
