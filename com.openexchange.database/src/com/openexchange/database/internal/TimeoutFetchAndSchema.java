@@ -80,8 +80,22 @@ final class TimeoutFetchAndSchema implements FetchAndSchema {
         } else {
             poolId = assign.getReadPoolId();
         }
-        final ConnectionPool pool = pools.getPool(poolId);
-        final Connection retval = pool.get();
+        ConnectionPool pool = pools.getPool(poolId);
+        Connection retval = null;
+        do {
+            try {
+                // Pools cleaner may stop a pool just after it is fetched in the above line. See bug 27126. This is a race condition. Fixing
+                // this with a lock in the Pools class around fetching the correct ConnectionPool and a connection from it will result in
+                // too much threads waiting on that lock if creating the connection once becomes slow.
+                retval = pool.get();
+            } catch (PoolingException e) {
+                // So we will try to catch up here with the pool that has been stopped unexpectedly.
+                if (!pool.isStopped()) {
+                    throw e;
+                }
+                pool = pools.getPool(poolId);
+            }
+        } while (null == retval);
         try {
             final String schema = assign.getSchema();
             if (null != schema && !retval.getCatalog().equals(schema)) {

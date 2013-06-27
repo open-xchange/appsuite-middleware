@@ -54,6 +54,7 @@
 * 2013-06-19 - marcus.klein@open-xchange.com
 
  - Fix for bug 27065: If reading the replication monitor counter from the slave fails 10 times fall back to master to obtain a connection.
+ - Fix for bug 27126: Trying to fetch a connection from the newly created pool if the pool has been stopped in the meantime.
 
 * 2013-06-19 - thorben.betten@open-xchange.com
 

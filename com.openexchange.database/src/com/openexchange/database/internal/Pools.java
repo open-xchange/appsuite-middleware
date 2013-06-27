@@ -96,6 +96,7 @@ public final class Pools implements Runnable {
     }
 
     /**
+     * @return the {@link ConnectionPool} and never <code>null</code>.
      * @throws OXException if creating the pool fails.
      */
     ConnectionPool getPool(final int poolId) throws OXException {
