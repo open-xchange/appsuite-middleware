@@ -68,6 +68,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
@@ -466,7 +467,7 @@ public abstract class MailConfig {
     public static int[] getUserIDsByMailLogin(final String pattern, final boolean isDefaultAccount, final InetSocketAddress server, final Context ctx) throws OXException {
         final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         if (isDefaultAccount) {
-            final UserID userID = new UserID(pattern, server.getHostName() + ':' + Integer.toString(server.getPort()), ctx.getContextId());
+            final UserID userID = new UserID(pattern, new StringAllocator(server.getHostName()).append(':').append(server.getPort()).toString(), ctx.getContextId());
             Future<int[]> f = USER_ID_CACHE.get(userID);
             if (null == f) {
                 final FutureTask<int[]> ft = new FutureTask<int[]>(new Callable<int[]>() {
