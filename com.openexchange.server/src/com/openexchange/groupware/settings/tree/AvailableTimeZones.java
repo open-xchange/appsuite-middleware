@@ -117,39 +117,10 @@ public class AvailableTimeZones implements PreferencesItemService {
                         }
                         i++;
                     }
-                    Arrays.sort(timezones, 0, timezones.length, new Comparator<Object[]>() {
-
-                        @Override
-                        public int compare(Object[] arg0, Object[] arg1) {
-                            if (arg0 == arg1) {
-                                return 0;
-                            }
-                            if (arg0 == null) {
-                                return 1;
-                            }
-                            if (arg1 == null) {
-                                return -1;
-                            }
-                            if (arg0[0] == null) {
-                                arg0[0] = Integer.MIN_VALUE;
-                                arg0[1] = "";
-                            }
-                            if (arg1[0] == null) {
-                                arg1[0] = Integer.MIN_VALUE;
-                                arg1[1] = "";
-                            }
-                            int diff = (Integer)arg0[0] - (Integer)arg1[0];
-                            if (diff == 0) {
-                                return ((String)arg0[1]).compareTo((String)arg1[1]);
-                            } else {
-                                return diff;
-                            }
-                        }
-                        
-                    });
+                    
                     for(i = 0; i < timezones.length; i++) {
                         Object[] entry = timezones[i];
-                        if (entry == null) {
+                        if (entry == null || entry[1] == null || entry[2] == null) {
                             continue;
                         }
                         json.put((String) entry[1], (String) entry[2]);
