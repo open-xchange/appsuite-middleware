@@ -530,7 +530,9 @@ public class EventClient {
 
         final Event event = new Event("com/openexchange/groupware/folder/insert", ht);
         triggerEvent(event);
-        triggerEvent(new Event(FileStorageEventConstants.CREATE_FOLDER_TOPIC, getEventProperties(folder)));
+        if (null != folder && FolderObject.INFOSTORE == folder.getModule()) {
+            triggerEvent(new Event(FileStorageEventConstants.CREATE_FOLDER_TOPIC, getEventProperties(folder)));
+        }
 
         final EventObject eventObject = new EventObject(folder, CREATED, session);
         EventQueue.add(eventObject);
@@ -545,8 +547,10 @@ public class EventClient {
 
         final Event event = new Event("com/openexchange/groupware/folder/update", ht);
         triggerEvent(event);
-        triggerEvent(new Event(FileStorageEventConstants.UPDATE_FOLDER_TOPIC, getEventProperties(newFolder)));
-
+        if (null != newFolder && FolderObject.INFOSTORE == newFolder.getModule()) {
+            triggerEvent(new Event(FileStorageEventConstants.UPDATE_FOLDER_TOPIC, getEventProperties(newFolder)));
+        }
+        
         final EventObject eventObject = new EventObject(newFolder, CHANGED, session);
         EventQueue.add(eventObject);
     }
@@ -579,7 +583,9 @@ public class EventClient {
 
         final Event event = new Event("com/openexchange/groupware/folder/delete", ht);
         triggerEvent(event);
-        triggerEvent(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(folder, parentFolder)));
+        if (null != parentFolder && FolderObject.INFOSTORE == parentFolder.getModule()) {
+            triggerEvent(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(folder, parentFolder)));
+        }
 
         final EventObject eventObject = new EventObject(folder, DELETED, session);
         EventQueue.add(eventObject);
