@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -60,7 +61,6 @@ import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link InfostoreRequest}
@@ -71,7 +71,7 @@ public interface InfostoreRequest {
 
     /**
      * Gets the value mapped to given parameter name.
-     * 
+     *
      * @param name The parameter name
      * @return The value mapped to given parameter name or <code>null</code> if not present
      * @throws NullPointerException If name is <code>null</code>
@@ -80,14 +80,21 @@ public interface InfostoreRequest {
 
     /**
      * Gets the boolean value mapped to given parameter name.
-     * 
+     *
      * @param name The parameter name
      * @return The boolean value mapped to given parameter name or <code>false</code> if not present
      * @throws NullPointerException If name is <code>null</code>
      */
     public boolean getBoolParameter(final String name);
 
-    InfostoreRequest require(AbstractFileAction.Param...params) throws OXException ;
+    /**
+     * Gets the request data if available.
+     *
+     * @return The request data or <code>null</code>
+     */
+    AJAXRequestData getRequestData();
+
+    InfostoreRequest require(AbstractFileAction.Param... params) throws OXException;
 
     InfostoreRequest requireBody() throws OXException;
 
@@ -116,6 +123,14 @@ public interface InfostoreRequest {
     Set<String> getIgnore() throws OXException;
 
     List<String> getIds() throws OXException;
+
+    /**
+     * Gets the pairs of identifier and version.
+     *
+     * @return The pairs of identifier and version
+     * @throws OXException If parse attempt fails
+     */
+    List<IdVersionPair> getIdVersionPairs() throws OXException;
 
     String getFolderForID(String id) throws OXException;
 
@@ -159,7 +174,7 @@ public interface InfostoreRequest {
 
     List<String> getFolders();
 
-	boolean isForSpecificVersion();
+    boolean isForSpecificVersion();
 
     boolean extendedResponse() throws OXException;
 }

@@ -100,6 +100,7 @@ public class FileActionFactory implements AJAXActionServiceFactory {
         actions.put("saveAs", new SaveAsAction());
 
         actions.put("document", new DocumentAction());
+        actions.put("zipdocuments", new ZipDocumentsAction());
 
         actions.put("documentdelta", new DocumentDeltaAction());
         actions.put("documentsig", new DocumentSigAction());
