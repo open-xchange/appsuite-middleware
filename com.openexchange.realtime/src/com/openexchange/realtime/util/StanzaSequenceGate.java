@@ -100,6 +100,8 @@ public abstract class StanzaSequenceGate {
      * @param recipient the recipient of the incoming Stanza
      * @return If <code>false</code> an ACK shouldn't be sent to the client as the Stanza wasn't handled properly
      * @throws RealtimeException if the user of this gate couldn't handle the stanza internally
+     * @throws RealtimeException with code 1006 if an invalid sequence number was detected. The component using this gate has to ensure this
+     *             exception reaches the client
      */
     public boolean handle(Stanza stanza, ID recipient) throws RealtimeException {
         return handle(stanza, recipient, null);
@@ -116,6 +118,8 @@ public abstract class StanzaSequenceGate {
      * @param customAction a custom action that (if not null) should be used instead of the using component's handleInternal.
      * @return If <code>false</code> an ACK shouldn't be sent to the client as the Stanza wasn't handled properly
      * @throws RealtimeException if the user of this gate couldn't handle the stanza internally
+     * @throws RealtimeException with code 1006 if an invalid sequence number was detected. The component using this gate has to ensure this
+     *             exception reaches the client
      */
     public boolean handle(Stanza stanza, ID recipient, CustomGateAction customAction) throws RealtimeException {
         /* Stanza didn't carry a valid Sequencenumber, just handle it without pestering the gate and return */
@@ -223,6 +227,14 @@ public abstract class StanzaSequenceGate {
                 }
 
                 if (inbox.size() < BUFFER_SIZE) {
+                    //We see no reason to buffer if the gap in the sequence numbers is too big. instruct the client to reset the sequence
+                    if(stanza.getSequenceNumber() > threshold.get() + BUFFER_SIZE) {
+                        stanza.trace("Threshold == 0 and stanza not in sequence, instructing client to reset sequence.");
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Threshold == 0 and stanza not in sequence, instructing client to reset sequence.");
+                        }
+                        throw RealtimeExceptionCodes.SEQUENCE_INVALID.create();
+                    }
                     //Try to buffer up a valid sequence of Stanzas
                     stanza.trace("Not in sequence, enqueing");
                     if (LOG.isDebugEnabled()) {
@@ -231,13 +243,14 @@ public abstract class StanzaSequenceGate {
 
                     inbox.add(new StanzaWithCustomAction(stanza, customAction));
                     return true;
+                } else {
+                    stanza.trace("Buffer full, instructing client to reset sequence");
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Instructing client to reset sequence because stanza's not in sequence, but buffer is full. Threshold: "
+                            + threshold.get() + " SequenceNumber: " + stanza.getSequenceNumber());
+                    }
+                    throw RealtimeExceptionCodes.SEQUENCE_INVALID.create();
                 }
-                //Don't send acks by returning false
-                stanza.trace("Buffer full, discarding");
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Discarding. Stanzas not in sequence, but buffer is full. Threshold: " + threshold.get() + " SequenceNumber: " + stanza.getSequenceNumber());
-                }
-                return false;
             }
         } finally {
             stanza.getSequencePrincipal().unlock("gate");
