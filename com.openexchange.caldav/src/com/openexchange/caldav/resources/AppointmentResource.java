@@ -534,8 +534,10 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 (Appointment.ABSENT == oldAppointment.getShownAs() || Appointment.TEMPORARY == oldAppointment.getShownAs())) {
                 // don't change "shown as", since iCal maps absent/temporary to reserved
                 updatedAppointment.removeShownAs();
-            } else if (updatedAppointment.containsOrganizerId() && factory.getSession().getUserId() != updatedAppointment.getOrganizerId()
-                && isConfirmationChange(oldAppointment, updatedAppointment)) {
+            } else if ((updatedAppointment.containsOrganizerId() && factory.getSession().getUserId() != updatedAppointment.getOrganizerId() ||
+                updatedAppointment.containsOrganizer() && null != updatedAppointment.getOrganizer() &&
+                false == updatedAppointment.getOrganizer().equals(factory.getUser().getMail())) &&
+                isConfirmationChange(oldAppointment, updatedAppointment)) {
                 // don't change "shown as", since iCal clients tend to change the transparency on accept/decline actions of participants
                 updatedAppointment.removeShownAs();
             }
