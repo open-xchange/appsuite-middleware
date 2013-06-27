@@ -49,6 +49,9 @@
 
 package com.openexchange.realtime.client.groupchat;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.UUID;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -65,13 +68,14 @@ import com.openexchange.realtime.client.RTMessageHandler;
 import com.openexchange.realtime.client.room.impl.ChineseRoom;
 import com.openexchange.realtime.client.user.RTUser;
 
-
 /**
  * {@link RealtimeGroupChatClientCLT}
- *
+ * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class RealtimeGroupChatClientCLT {
+
+    public static ChineseRoom room;
 
     /**
      * Initializes a new {@link RealtimeGroupChatClientCLT}.
@@ -79,13 +83,11 @@ public class RealtimeGroupChatClientCLT {
     public RealtimeGroupChatClientCLT() {
         super();
     }
-    
+
     public static void main(final String[] args) {
         final CommandLineParser parser = new PosixParser();
         String user = "";
-        String password = "";
         String hostname = "";
-        String message = "";
         try {
             final CommandLine cmd = parser.parse(toolkitOptions, args);
             if (cmd.hasOption('h')) {
@@ -98,44 +100,30 @@ public class RealtimeGroupChatClientCLT {
                 printOptionError("user");
                 System.exit(1);
             }
-            if (cmd.hasOption('p')) {
-                password = cmd.getOptionValue('p');
-            } else {
-                printOptionError("password");
-                System.exit(1);
-            }
             if (cmd.hasOption('f')) {
                 hostname = cmd.getOptionValue('f');
             } else {
                 printOptionError("hostname");
                 System.exit(1);
             }
-            if (cmd.hasOption('m')) {
-                message = cmd.getOptionValue('m');
-            } else {
-                printOptionError("message");
-                System.exit(1);
-            }
-            
+
             UUID uuid = UUID.randomUUID();
+            System.out.print("Password: ");
+            String password = new BufferedReader(new InputStreamReader(System.in)).readLine();
             RTUser rtuser = new RTUser(user, password, "GroupChatClient-" + uuid.toString());
-            RTConnectionProperties con = RTConnectionProperties.newBuilder(rtuser)
-                .setConnectionType(RTConnectionType.LONG_POLLING)
-                .setHost(hostname)
-                .setSecure(false)
-                .build();
-            final ChineseRoom room = new ChineseRoom(rtuser, con);
+            RTConnectionProperties con = RTConnectionProperties.newBuilder(rtuser).setConnectionType(RTConnectionType.LONG_POLLING).setHost(
+                hostname).setSecure(false).build();
+            room = new ChineseRoom(rtuser, con);
             room.join("chineseRoomSelector", "synthetic.china://room1", new RTMessageHandler() {
-                
+
                 @Override
                 public void onMessage(JSONValue message) {
                     System.out.println(message);
                 }
             });
-            Thread.sleep(100000);
-            room.say(message);
-            Thread.sleep(120000);
-            room.leave();
+            Thread chat = new Thread(new Chat());
+            chat.start();
+            chat.join();
 
         } catch (ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
@@ -145,13 +133,15 @@ public class RealtimeGroupChatClientCLT {
             System.err.println("RTException:");
             e.printStackTrace();
             System.exit(3);
-        } catch (JSONException e) {
-            System.err.println("JSONException: " + e.getMessage());
-            System.exit(4);
         } catch (InterruptedException e) { //
+        } catch (IOException e) {
+            System.err.println("IOException:");
+            e.printStackTrace();
+            System.exit(4);
         }
+        System.exit(0);
     }
-    
+
     private static final Options toolkitOptions;
 
     static {
@@ -159,18 +149,44 @@ public class RealtimeGroupChatClientCLT {
         toolkitOptions.addOption("h", "help", false, "Prints a help text");
 
         toolkitOptions.addOption("u", "user", true, "Username");
-        toolkitOptions.addOption("p", "password", true, "Password");
         toolkitOptions.addOption("f", "hostname", true, "Host on which ox realtime is running");
-        toolkitOptions.addOption("m", "message", true, "Message to post");
     }
 
     private static void printHelp() {
         final HelpFormatter helpFormatter = new HelpFormatter();
         helpFormatter.printHelp("groupchat", toolkitOptions);
     }
-    
+
     private static void printOptionError(String option) {
         System.err.println("Option " + option + " must be set.");
+    }
+
+    static class Chat implements Runnable {
+        
+        private boolean run = true;
+
+        @Override
+        public void run() {
+            try {
+                while (run) {
+                    BufferedReader rd = new BufferedReader(new InputStreamReader(System.in));
+                    String message = rd.readLine();
+                    if ("/leave".equals(message)) {
+                        run = false;
+                    } else {
+                        room.say(message);
+                    }
+                }
+                room.leave();
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+            } catch (JSONException e) {
+                System.err.println(e.getMessage());
+            } catch (RTException e) {
+                System.err.println(e.getMessage());
+            }
+        }
+
     }
 
 }
