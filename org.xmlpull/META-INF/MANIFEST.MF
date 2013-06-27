@@ -7,3 +7,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.kxml2.io,
  org.kxml2.wap,
  org.xmlpull.v1
+Bundle-ClassPath: lib/kxml2-2.3.0.jar
