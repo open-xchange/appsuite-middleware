@@ -70,6 +70,8 @@ import com.ning.http.client.Response;
 import com.openexchange.realtime.client.Constants;
 import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
+import com.openexchange.realtime.client.RTMessageHandler;
+import com.openexchange.realtime.client.RTUserState;
 import com.openexchange.realtime.client.impl.AbstractRTConnection;
 import com.openexchange.realtime.client.impl.RTProtocol;
 import com.openexchange.realtime.client.impl.RTRequestBuilderHelper;
@@ -183,6 +185,10 @@ public class MixedModeRTConnection extends AbstractRTConnection {
 
     private static final Logger LOG = LoggerFactory.getLogger(MixedModeRTConnection.class);
 
+    private org.atmosphere.wasync.Request request;
+
+    private org.atmosphere.wasync.Socket socket;
+
     //Data received by these clients has to be handled by super.onReceive(). Post reliable may not return before
     private AsyncHttpClient asyncHttpClient;
 
@@ -195,6 +201,25 @@ public class MixedModeRTConnection extends AbstractRTConnection {
         super(connectionProperties);
         asyncHttpClient = new AsyncHttpClient();
         atmosphereClient = new AtmosphereClient();
+    }
+
+    @Override
+    public RTUserState connect() throws RTException {
+        return connect(null);
+    }
+
+    @Override
+    public RTUserState connect(RTMessageHandler messageHandler) throws RTException {
+        RTUserState state = super.connect(messageHandler);
+        request = this.createAtmosphereRequest();
+        socket = this.createSocket();
+        try {
+            socket.open(request);
+        } catch (IOException e) {
+            throw new RTException("Could not open return channel.", e);
+        }
+
+        return state;
     }
 
     /* atmosphere ping pong
@@ -380,11 +405,7 @@ public class MixedModeRTConnection extends AbstractRTConnection {
      * @param jsonValue - JSONValue with the JSON which should be sent to the server
      */
     private void fireAtmosphereRequest(JSONValue jsonValue) {
-        org.atmosphere.wasync.Request request = this.createAtmosphereRequest();
-        org.atmosphere.wasync.Socket socket = this.createSocket();
-
         try {
-            socket.open(request);
             socket.fire(jsonValue);
         } catch (IOException ioException) {
             LOG.info("Unable to fire ping request. Try again with the next iteration");
