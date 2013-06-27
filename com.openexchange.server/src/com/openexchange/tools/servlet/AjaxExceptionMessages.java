@@ -142,7 +142,10 @@ public final class AjaxExceptionMessages implements LocalizableStrings {
     // Unsupported format: %1$s
     public static final String UNSUPPORTED_FORMAT_MSG = "Unsupported format: %1$s";
 
-    // Missing cookie: %s
-    public static final String MISSING_COOKIE_MSG = "Missing cookie: %s";
+    // Missing cookie: %1$s
+    public static final String MISSING_COOKIE_MSG = "Missing cookie: %1$s";
+
+    // Cookie "%1$s" cannot be found because requests does not have any cookies.
+    public static final String MISSING_COOKIES_MSG = "Cookie \"%1$s\" cannot be found because requests does not have any cookies.";
 
 }

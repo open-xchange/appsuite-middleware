@@ -426,7 +426,12 @@ public class DispatcherServlet extends SessionServlet {
         ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));
         if (session == null) {
             if (!dispatcher.mayOmitSession(module, action)) {
-                throw dispatcher.mayUseFallbackSession(module, action) ? AjaxExceptionCodes.MISSING_COOKIE.create(Login.PUBLIC_SESSION_NAME) : AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+                if (dispatcher.mayUseFallbackSession(module, action)) {
+                    // "open-xchange-public-session" allowed, but missing for associated action
+                    throw httpRequest.getCookies() == null ? AjaxExceptionCodes.MISSING_COOKIES.create(Login.PUBLIC_SESSION_NAME) : AjaxExceptionCodes.MISSING_COOKIE.create(Login.PUBLIC_SESSION_NAME);
+                }
+                // "open-xchange-public-session" NOT allowed for associated action, therefore complain about missing "session" parameter
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
             }
             session = fakeSession();
         }
