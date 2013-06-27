@@ -164,6 +164,10 @@ public enum AjaxExceptionCodes implements OXExceptionCode {
      * Missing cookie: %s
      */
     MISSING_COOKIE(AjaxExceptionMessages.MISSING_COOKIE_MSG, Category.CATEGORY_ERROR, 2), // Yapp, the same error code
+    /**
+     * Cookie "%1$s" cannot be found because requests does not have any cookies.
+     */
+    MISSING_COOKIES(AjaxExceptionMessages.MISSING_COOKIES_MSG, Category.CATEGORY_ERROR, 2), // Yapp, the same error code
 
     ;
 
