@@ -54,6 +54,7 @@ import gnu.trove.map.hash.TLongIntHashMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -593,6 +594,8 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             }
         };
 
+        private final Set<String> headerFields = new HashSet<String>(Arrays.asList("content-type", "from", "to", "cc", "bcc", "disposition-notification-to", "subject"));
+
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, OXException {
             final InternetHeaders h;
@@ -619,9 +622,11 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                     h.load(headerStream);
                 }
             }
+            final Set<String> headerFields = new HashSet<String>(this.headerFields);
             for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
                 final Header hdr = (Header) e.nextElement();
                 final String name = hdr.getName();
+                headerFields.remove(toLowerCase(name));
                 {
                     final HeaderHandler headerHandler = hh.get(name);
                     if (null != headerHandler) {
@@ -644,6 +649,9 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                     hdrHandler.handleHeader(hdr.getValue(), msg);
                 }
                  */
+            }
+            if (headerFields.contains("disposition-notification-to")) {
+                msg.setDispositionNotification(null);
             }
         }
 
