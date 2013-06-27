@@ -115,6 +115,27 @@ public class DriveStorage {
     }
 
     /**
+     * Performs the passed storage operation inside a transaction.
+     *
+     * @param storageOperation The storage operation to execute
+     * @return The result of the operation
+     * @throws OXException
+     */
+    public <T> T wrapInTransaction(StorageOperation<T> storageOperation) throws OXException {
+        try {
+            getFileAccess().startTransaction();
+            T t = storageOperation.call();
+            getFileAccess().commit();
+            return t;
+        } catch (OXException e) {
+            getFileAccess().rollback();
+            throw e;
+        } finally {
+            getFileAccess().finish();
+        }
+    }
+
+    /**
      * Copies an existing file the supplied locations.
      *
      * @param sourceFile The source file to copy
@@ -616,4 +637,5 @@ public class DriveStorage {
     public String toString() {
         return session.getServerSession().getLogin() + ':' + rootFolderID.toUniqueID() + "# ";
     }
+
 }

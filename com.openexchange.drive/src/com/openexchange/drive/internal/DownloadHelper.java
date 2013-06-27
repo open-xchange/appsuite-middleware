@@ -56,6 +56,7 @@ import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.checksum.ChecksumProvider;
+import com.openexchange.drive.storage.StorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -90,23 +91,30 @@ public class DownloadHelper {
      * @return A file holder hosting the stream
      * @throws OXException
      */
-    public IFileHolder perform(String path, FileVersion fileVersion, long offset, long length) throws OXException {
-        /*
-         * get the file's input stream
-         */
-        File file = session.getStorage().findFileByName(path, fileVersion.getName());
-        if (null == file || false == ChecksumProvider.matches(session, file, fileVersion.getChecksum())) {
-            throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(fileVersion.getName(), fileVersion.getChecksum(), path);
-        }
-        InputStream inputStream = getInputStream(file, offset, length);
-        /*
-         * wrap stream into file holder and return
-         */
-        if (null == inputStream) {
-            throw DriveExceptionCodes.FILE_NOT_FOUND.create(fileVersion.getName(), path);
-        }
-        String contentType = null != file.getFileMIMEType() ? file.getFileMIMEType() : "application/octet-stream";
-        return new FileHolder(inputStream, -1, contentType, fileVersion.getName());
+    public IFileHolder perform(final String path, final FileVersion fileVersion, final long offset, final long length) throws OXException {
+
+        return session.getStorage().wrapInTransaction(new StorageOperation<FileHolder>() {
+
+            @Override
+            public FileHolder call() throws OXException {
+                /*
+                 * get the file's input stream
+                 */
+                File file = session.getStorage().findFileByName(path, fileVersion.getName());
+                if (null == file || false == ChecksumProvider.matches(session, file, fileVersion.getChecksum())) {
+                    throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(fileVersion.getName(), fileVersion.getChecksum(), path);
+                }
+                InputStream inputStream = getInputStream(file, offset, length);
+                /*
+                 * wrap stream into file holder and return
+                 */
+                if (null == inputStream) {
+                    throw DriveExceptionCodes.FILE_NOT_FOUND.create(fileVersion.getName(), path);
+                }
+                String contentType = null != file.getFileMIMEType() ? file.getFileMIMEType() : "application/octet-stream";
+                return new FileHolder(inputStream, -1, contentType, fileVersion.getName());
+            }
+        });
     }
 
     private InputStream getInputStream(File file, long offset, long length) throws OXException {

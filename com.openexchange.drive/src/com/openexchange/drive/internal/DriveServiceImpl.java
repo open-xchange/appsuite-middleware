@@ -70,6 +70,7 @@ import com.openexchange.drive.comparison.FileVersionMapper;
 import com.openexchange.drive.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.storage.DriveConstants;
+import com.openexchange.drive.storage.StorageOperation;
 import com.openexchange.drive.sync.SyncResult;
 import com.openexchange.drive.sync.Synchronizer;
 import com.openexchange.drive.sync.optimize.OptimizingDirectorySynchronizer;
@@ -109,15 +110,23 @@ public class DriveServiceImpl implements DriveService {
             /*
              * sync
              */
-            DriveSession driveSession = createSession(session, rootFolderID);
+            final DriveSession driveSession = createSession(session, rootFolderID);
             SyncResult<DirectoryVersion> syncResult = syncDirectories(
                 driveSession, originalVersions, clientVersions, getServerDirectories(driveSession));
             try {
                 /*
                  * execute actions on server
                  */
-                for (DriveAction<DirectoryVersion> action : syncResult.getActionsForServer()) {
-                    execute(driveSession, action);
+                for (final DriveAction<DirectoryVersion> action : syncResult.getActionsForServer()) {
+
+                    driveSession.getStorage().wrapInTransaction(new StorageOperation<Void>() {
+
+                        @Override
+                        public Void call() throws OXException {
+                            execute(driveSession, action);
+                            return null;
+                        }
+                    });
                 }
             } catch (OXException e) {
                 if (tryAgain(e) && retryCount <= DriveConstants.MAX_RETRIES) {
@@ -141,7 +150,7 @@ public class DriveServiceImpl implements DriveService {
     }
 
     @Override
-    public List<DriveAction<FileVersion>> syncFiles(ServerSession session, String rootFolderID, String path,
+    public List<DriveAction<FileVersion>> syncFiles(ServerSession session, String rootFolderID, final String path,
         List<FileVersion> originalVersions, List<FileVersion> clientVersions) throws OXException {
         long start = System.currentTimeMillis();
         int retryCount = 0;
@@ -149,7 +158,7 @@ public class DriveServiceImpl implements DriveService {
             /*
              * sync
              */
-            DriveSession driveSession = createSession(session, rootFolderID);
+            final DriveSession driveSession = createSession(session, rootFolderID);
             driveSession.getStorage().createFolder(path);
             SyncResult<FileVersion> syncResult = syncFiles(
                 driveSession, path, originalVersions, clientVersions, getServerFiles(driveSession, path));
@@ -157,8 +166,16 @@ public class DriveServiceImpl implements DriveService {
                 /*
                  * execute actions on server
                  */
-                for (DriveAction<FileVersion> action : syncResult.getActionsForServer()) {
-                    execute(driveSession, path, action);
+                for (final DriveAction<FileVersion> action : syncResult.getActionsForServer()) {
+
+                    driveSession.getStorage().wrapInTransaction(new StorageOperation<Void>() {
+
+                        @Override
+                        public Void call() throws OXException {
+                            execute(driveSession, path, action);
+                            return null;
+                        }
+                    });
                 }
             } catch (OXException e) {
                 if (tryAgain(e) && retryCount <= DriveConstants.MAX_RETRIES) {

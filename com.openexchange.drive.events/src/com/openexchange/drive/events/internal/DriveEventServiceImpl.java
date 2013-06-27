@@ -49,6 +49,12 @@
 
 package com.openexchange.drive.events.internal;
 
+import static com.openexchange.file.storage.FileStorageEventConstants.ACCOUNT_ID;
+import static com.openexchange.file.storage.FileStorageEventConstants.FOLDER_ID;
+import static com.openexchange.file.storage.FileStorageEventConstants.FOLDER_PATH;
+import static com.openexchange.file.storage.FileStorageEventConstants.PARENT_FOLDER_ID;
+import static com.openexchange.file.storage.FileStorageEventConstants.SERVICE;
+import static com.openexchange.file.storage.FileStorageEventConstants.SESSION;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -63,7 +69,7 @@ import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.events.DriveEventListener;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageEventConstants;
+import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
@@ -88,10 +94,10 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
 
     private static boolean check(Event event) {
         if (null != event &&
-            event.containsProperty(FileStorageEventConstants.SESSION) &&
-            event.containsProperty(FileStorageEventConstants.SERVICE) &&
-            event.containsProperty(FileStorageEventConstants.ACCOUNT_ID) &&
-            (event.containsProperty(FileStorageEventConstants.FOLDER_ID) || event.containsProperty(FileStorageEventConstants.PARENT_FOLDER_ID))) {
+            event.containsProperty(SESSION) &&
+            event.containsProperty(SERVICE) &&
+            event.containsProperty(ACCOUNT_ID) &&
+            (event.containsProperty(FOLDER_ID) || event.containsProperty(PARENT_FOLDER_ID))) {
             return true;
         }
         return false;
@@ -100,7 +106,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
     @Override
     public void handleEvent(Event event) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Got event: " + event);
+            LOG.debug(FileStorageEventHelper.createDebugMessage("event", event));
         }
         if (false == check(event)) {
             if (LOG.isDebugEnabled()) {
@@ -108,25 +114,31 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
             }
             return;
         }
-        Session session = (Session)event.getProperty(FileStorageEventConstants.SESSION);
-        String service = (String)event.getProperty(FileStorageEventConstants.SERVICE);
-        String accountID = (String)event.getProperty(FileStorageEventConstants.ACCOUNT_ID);
+        Session session = (Session)event.getProperty(SESSION);
+        String service = (String)event.getProperty(SERVICE);
+        String accountID = (String)event.getProperty(ACCOUNT_ID);
         Set<FolderID> folderIDs = new HashSet<FolderID>();
-        if (event.containsProperty(FileStorageEventConstants.FOLDER_PATH)) {
-            String[] path = (String[])event.getProperty(FileStorageEventConstants.FOLDER_PATH);
-            for (String id : path) {
-                folderIDs.add(new FolderID(service, accountID, id));
+        if (event.containsProperty(FOLDER_PATH)) {
+            /*
+             * prefer folder path if available from event
+             */
+            String[] path = (String[])event.getProperty(FOLDER_PATH);
+            for (String uniqueID : path) {
+                folderIDs.add(new FolderID(uniqueID));
             }
-        }
-
-        if (event.containsProperty(FileStorageEventConstants.PARENT_FOLDER_ID)) {
-            FolderID parentFolderID = new FolderID(service, accountID, (String)event.getProperty(FileStorageEventConstants.PARENT_FOLDER_ID));
-            folderIDs.add(parentFolderID);
-            folderIDs.addAll(resolveToRoot(parentFolderID, session));
-        } else if (event.containsProperty(FileStorageEventConstants.FOLDER_ID)) {
-            FolderID folderID = new FolderID(service, accountID, (String)event.getProperty(FileStorageEventConstants.FOLDER_ID));
-            folderIDs.add(folderID);
-            folderIDs.addAll(resolveToRoot(folderID, session));
+        } else {
+            /*
+             * determine folder path manually starting with parent/or folder itself
+             */
+            if (event.containsProperty(PARENT_FOLDER_ID)) {
+                FolderID parentFolderID = new FolderID(service, accountID, (String)event.getProperty(PARENT_FOLDER_ID));
+                folderIDs.add(parentFolderID);
+                folderIDs.addAll(resolveToRoot(parentFolderID, session));
+            } else if (event.containsProperty(FOLDER_ID)) {
+                FolderID folderID = new FolderID(service, accountID, (String)event.getProperty(FOLDER_ID));
+                folderIDs.add(folderID);
+                folderIDs.addAll(resolveToRoot(folderID, session));
+            }
         }
         if (0 < folderIDs.size()) {
             for (FolderID folderID : folderIDs) {
@@ -141,7 +153,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
             IDBasedFolderAccess folderAccess = DriveEventServiceLookup.getService(IDBasedFolderAccessFactory.class).createAccess(session);
             FileStorageFolder[] path2DefaultFolder = folderAccess.getPath2DefaultFolder(folderID.toUniqueID());
             for (FileStorageFolder folder : path2DefaultFolder) {
-                folderIDs.add(new FolderID(folderID.getService(), folderID.getAccountId(), folder.getId()));
+                folderIDs.add(new FolderID(folder.getId()));
             }
         } catch (OXException e) {
             if (LOG.isDebugEnabled()) {

@@ -49,6 +49,10 @@
 
 package com.openexchange.drive.checksum.events;
 
+import static com.openexchange.file.storage.FileStorageEventConstants.DELETE_FOLDER_TOPIC;
+import static com.openexchange.file.storage.FileStorageEventConstants.DELETE_TOPIC;
+import static com.openexchange.file.storage.FileStorageEventConstants.UPDATE_FOLDER_TOPIC;
+import static com.openexchange.file.storage.FileStorageEventConstants.UPDATE_TOPIC;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.logging.Log;
@@ -56,12 +60,10 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.session.Session;
-
 
 /**
  * {@link ChecksumEventListener}
@@ -71,10 +73,7 @@ import com.openexchange.session.Session;
 public class ChecksumEventListener implements EventHandler {
 
     public static String[] getHandledTopics() {
-        return new String[] {
-            FileStorageEventConstants.DELETE_TOPIC, FileStorageEventConstants.UPDATE_TOPIC,
-            FileStorageEventConstants.DELETE_FOLDER_TOPIC, FileStorageEventConstants.UPDATE_FOLDER_TOPIC,
-        };
+        return new String[] { DELETE_TOPIC, UPDATE_TOPIC, DELETE_FOLDER_TOPIC, UPDATE_FOLDER_TOPIC };
     }
 
     private static final List<String> DRIVE_CLIENTS = Arrays.asList(new String[] {
@@ -97,14 +96,13 @@ public class ChecksumEventListener implements EventHandler {
     public void handleEvent(Event event) {
         try {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Got event: " + event);
+                LOG.debug(FileStorageEventHelper.createDebugMessage("event", event));
             }
             String topic = event.getTopic();
             Session session = FileStorageEventHelper.extractSession(event);
             if (null == session || isDriveSession(session)) {
                 // skip
-            } else if (FileStorageEventConstants.DELETE_TOPIC.equals(topic) ||
-                FileStorageEventConstants.UPDATE_TOPIC.equals(topic)) {
+            } else if (DELETE_TOPIC.equals(topic) || UPDATE_TOPIC.equals(topic)) {
                 FileID fileID = new FileID(
                     FileStorageEventHelper.extractService(event),
                     FileStorageEventHelper.extractAccountId(event),
@@ -112,8 +110,7 @@ public class ChecksumEventListener implements EventHandler {
                     FileStorageEventHelper.extractObjectId(event)
                 );
                 invalidateFile(session, fileID);
-            } else if (FileStorageEventConstants.DELETE_FOLDER_TOPIC.equals(topic) ||
-                FileStorageEventConstants.UPDATE_FOLDER_TOPIC.equals(topic)) {
+            } else if (DELETE_FOLDER_TOPIC.equals(topic) || UPDATE_FOLDER_TOPIC.equals(topic)) {
                 FolderID folderID = new FolderID(
                     FileStorageEventHelper.extractService(event),
                     FileStorageEventHelper.extractAccountId(event),

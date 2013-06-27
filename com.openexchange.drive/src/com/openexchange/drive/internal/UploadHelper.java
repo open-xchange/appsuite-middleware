@@ -64,6 +64,7 @@ import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.storage.DriveConstants;
+import com.openexchange.drive.storage.StorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
@@ -94,14 +95,20 @@ public class UploadHelper {
         this.session = session;
     }
 
-    public File perform(String path, FileVersion originalVersion, FileVersion newVersion, InputStream uploadStream, String contentType,
-        long offset, long totalLength) throws OXException {
+    public File perform(final String path, final FileVersion originalVersion, final FileVersion newVersion, final InputStream uploadStream,
+        final String contentType, final long offset, long totalLength) throws OXException {
         /*
          * save data
          */
-        Entry<File, String> uploadEntry = upload(newVersion, uploadStream, contentType, offset);
+        Entry<File, String> uploadEntry = session.getStorage().wrapInTransaction(new StorageOperation<Entry<File, String>>() {
+
+            @Override
+            public Entry<File, String> call() throws OXException {
+                return upload(newVersion, uploadStream, contentType, offset);
+            }
+        });
         String checksum = uploadEntry.getValue();
-        File uploadFile = uploadEntry.getKey();
+        final File uploadFile = uploadEntry.getKey();
         /*
          * check if upload is completed
          */
@@ -115,16 +122,19 @@ public class UploadHelper {
             /*
              * save document at target path/name
              */
-            if (null != originalVersion) {
-                File originalFile = session.getStorage().findFileByName(path, originalVersion.getName());
-                if (null != originalFile && ChecksumProvider.matches(session, originalFile, originalVersion.getChecksum())) {
-                    //TODO: single operation
-                    File copiedFile = session.getStorage().copyFile(uploadFile, originalFile);
-                    session.getStorage().deleteFile(uploadFile);
-                    return copiedFile;
+            return session.getStorage().wrapInTransaction(new StorageOperation<File>() {
+
+                @Override
+                public File call() throws OXException {
+                    if (null != originalVersion) {
+                        File originalFile = session.getStorage().findFileByName(path, originalVersion.getName());
+                        if (null != originalFile && ChecksumProvider.matches(session, originalFile, originalVersion.getChecksum())) {
+                            return session.getStorage().moveFile(uploadFile, originalFile);
+                        }
+                    }
+                    return session.getStorage().moveFile(uploadFile, newVersion.getName(), path);
                 }
-            }
-            return session.getStorage().moveFile(uploadFile, newVersion.getName(), path);
+            });
         } else {
             /*
              * no new version yet
