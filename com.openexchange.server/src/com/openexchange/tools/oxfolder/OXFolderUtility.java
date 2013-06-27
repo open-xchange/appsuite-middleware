@@ -51,15 +51,16 @@ package com.openexchange.tools.oxfolder;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
@@ -171,11 +172,11 @@ public final class OXFolderUtility {
         if (permissions.length == 0) {
             return;
         }
-        final Set<Integer> set = new HashSet<Integer>(permissions.length);
-        set.add(Integer.valueOf(permissions[0].getEntity()));
+        final TIntSet set = new TIntHashSet(permissions.length);
+        set.add(permissions[0].getEntity());
         for (int i = 1; i < permissions.length; i++) {
             final OCLPermission permission = permissions[i];
-            final Integer key = Integer.valueOf(permission.getEntity());
+            final int key = permission.getEntity();
             if (set.contains(key)) {
                 if (permission.isGroupPermission()) {
                     throw OXFolderExceptionCode.DUPLICATE_GROUP_PERMISSION.create(getGroupName(
@@ -191,14 +192,14 @@ public final class OXFolderUtility {
     /**
      * Checks for similar named shared folder
      *
-     * @param userIds The user IDs
+     * @param diff The user IDs
      * @param allSharedFolders The shared folders
      * @param folderName The folder name of the folder that shall be shared
      * @param ctx The context
      * @throws OXException If a similar named shared folder is already shared to a user
      */
-    public static void checkSimilarNamedSharedFolder(final Set<Integer> userIds, final FolderObject[] allSharedFolders, final String folderName, final Context ctx) throws OXException {
-        final List<Integer> affectedUsers = new ArrayList<Integer>();
+    public static void checkSimilarNamedSharedFolder(final TIntSet diff, final FolderObject[] allSharedFolders, final String folderName, final Context ctx) throws OXException {
+        final TIntList affectedUsers = new TIntLinkedList();
         for (final FolderObject f : allSharedFolders) {
             if (null == f) {
                 continue;
@@ -212,8 +213,8 @@ public final class OXFolderUtility {
                     try {
                         final int[] members = GroupStorage.getInstance().getGroup(permission.getEntity(), ctx).getMember();
                         for (int j = 0; j < members.length; j++) {
-                            final Integer cur = Integer.valueOf(members[j]);
-                            if (userIds.contains(cur) && f.getFolderName().equals(folderName)) {
+                            final int cur = members[j];
+                            if (diff.contains(cur) && f.getFolderName().equals(folderName)) {
                                 affectedUsers.add(cur);
                                 // TODO: Throw exception if bug #9111 says
                                 // so
@@ -226,8 +227,8 @@ public final class OXFolderUtility {
                     /*
                      * Check against entity itself
                      */
-                    final Integer cur = Integer.valueOf(permission.getEntity());
-                    if (userIds.contains(cur) && f.getFolderName().equals(folderName)) {
+                    final int cur = permission.getEntity();
+                    if (diff.contains(cur) && f.getFolderName().equals(folderName)) {
                         affectedUsers.add(cur);
                         // TODO: Throw exception if bug #9111 says so
                     }
@@ -468,7 +469,7 @@ public final class OXFolderUtility {
      */
     public static OCLPermission[] getPermissionsWithoutFolderAccess(final OCLPermission[] newPerms, final OCLPermission[] storagePerms) {
         final List<OCLPermission> removed = new ArrayList<OCLPermission>(4);
-        final Set<Integer> entities = new HashSet<Integer>(4);
+        final TIntSet entities = new TIntHashSet(4);
         for (final OCLPermission storagePerm : storagePerms) {
             boolean found = false;
             for (int i = 0; i < newPerms.length && !found; i++) {
@@ -481,7 +482,7 @@ public final class OXFolderUtility {
             }
             if (!found) {
                 removed.add(storagePerm);
-                entities.add(Integer.valueOf(storagePerm.getEntity()));
+                entities.add(storagePerm.getEntity());
             }
         }
         for (final OCLPermission newPerm : newPerms) {
@@ -491,7 +492,7 @@ public final class OXFolderUtility {
                     found = true;
                 }
             }
-            if (!found && newPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS && !entities.contains(Integer.valueOf(newPerm.getEntity()))) {
+            if (!found && newPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS && !entities.contains(newPerm.getEntity())) {
                 /*
                  * A newly added permission which grants no folder-read access
                  */
@@ -797,8 +798,8 @@ public final class OXFolderUtility {
      * @param user The user ID
      * @return A set of <code>int</code> containing share user IDs.
      */
-    public static Set<Integer> getShareUsers(final List<OCLPermission> storageList, final List<OCLPermission> updateList, final int user, final Context ctx) {
-        final Set<Integer> retval = new HashSet<Integer>();
+    public static TIntSet getShareUsers(final List<OCLPermission> storageList, final List<OCLPermission> updateList, final int user, final Context ctx) {
+        final TIntSet retval = new TIntHashSet();
         if (null == storageList) {
             for (final OCLPermission update : updateList) {
                 addPermissionUsers(update, retval, ctx);
@@ -825,7 +826,7 @@ public final class OXFolderUtility {
         /*
          * Remove user ID...
          */
-        retval.remove(Integer.valueOf(user));
+        retval.remove(user);
         /*
          * ... and return set
          */
@@ -837,10 +838,10 @@ public final class OXFolderUtility {
      * group permission.
      *
      * @param permission The permission
-     * @param users The set of user IDs
+     * @param retval The set of user IDs
      * @param ctx The context (possibly needed to resolve group)
      */
-    private static void addPermissionUsers(final OCLPermission permission, final Set<Integer> users, final Context ctx) {
+    private static void addPermissionUsers(final OCLPermission permission, final TIntSet retval, final Context ctx) {
         if (permission.isGroupPermission()) {
             /*
              * Resolve group
@@ -848,13 +849,13 @@ public final class OXFolderUtility {
             try {
                 final int[] members = GroupStorage.getInstance().getGroup(permission.getEntity(), ctx).getMember();
                 for (int j = 0; j < members.length; j++) {
-                    users.add(Integer.valueOf(members[j]));
+                    retval.add(members[j]);
                 }
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
         } else {
-            users.add(Integer.valueOf(permission.getEntity()));
+            retval.add(permission.getEntity());
         }
     }
 

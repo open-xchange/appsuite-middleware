@@ -50,18 +50,19 @@
 package com.openexchange.tools.oxfolder.downgrade.sql;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import gnu.trove.TIntCollection;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.tools.Collections.SmartIntArray;
 
 /**
  * {@link OXFolderDowngradeSQL} - Provides several SQL commands in order to
@@ -261,7 +262,7 @@ public final class OXFolderDowngradeSQL {
 	 * @throws SQLException
 	 *             If a SQL error occurs
 	 */
-	public static int[] getModulePrivateFolders(final int module, final int owner, final int cid,
+	public static TIntCollection getModulePrivateFolders(final int module, final int owner, final int cid,
 			final String folderTable, final Connection readCon) throws SQLException {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -272,11 +273,11 @@ public final class OXFolderDowngradeSQL {
 			stmt.setInt(3, owner);
 			stmt.setInt(4, module);
 			rs = stmt.executeQuery();
-			final SmartIntArray sia = new SmartIntArray(128);
+			final TIntList list = new TIntArrayList(128);
 			while (rs.next()) {
-				sia.append(rs.getInt(1));
+				list.add(rs.getInt(1));
 			}
-			return sia.toArray();
+			return list;
 		} finally {
 			closeSQLStuff(rs, stmt);
 		}
@@ -299,17 +300,18 @@ public final class OXFolderDowngradeSQL {
 	 * @throws SQLException
 	 *             If a SQL error occurs
 	 */
-	public static void deleteFolderPermissions(final int[] fuids, final int cid, final String permTable,
-			final Connection writeCon) throws SQLException {
-		if (0 == fuids.length) {
+	public static void deleteFolderPermissions(final TIntCollection fuids, final int cid, final String permTable, final Connection writeCon) throws SQLException {
+		final int size = fuids.size();
+	    if (0 == size) {
 			return;
 		}
 		PreparedStatement stmt = null;
 		try {
 			stmt = writeCon.prepareStatement(SQL_DEL_FLD_PERMS.replaceFirst(RPL_PERM, permTable));
-			for (final int fuid : fuids) {
+			final TIntIterator iter = fuids.iterator();
+			for (int i = size; i-- > 0;) {
 				stmt.setInt(1, cid);
-				stmt.setInt(2, fuid);
+				stmt.setInt(2, iter.next());
 				stmt.addBatch();
 			}
 			stmt.executeBatch();
@@ -334,17 +336,18 @@ public final class OXFolderDowngradeSQL {
 	 * @throws SQLException
 	 *             If a SQL error occurs
 	 */
-	public static void deleteFolders(final int[] fuids, final int cid, final String folderTable,
-			final Connection writeCon) throws SQLException {
-		if (0 == fuids.length) {
-			return;
-		}
+	public static void deleteFolders(final TIntCollection fuids, final int cid, final String folderTable, final Connection writeCon) throws SQLException {
+	    final int size = fuids.size();
+        if (0 == size) {
+            return;
+        }
 		PreparedStatement stmt = null;
 		try {
 			stmt = writeCon.prepareStatement(SQL_DEL_FLDS.replaceFirst(RPL_FOLDER, folderTable));
-			for (final int fuid : fuids) {
+			final TIntIterator iter = fuids.iterator();
+            for (int i = size; i-- > 0;) {
 				stmt.setInt(1, cid);
-				stmt.setInt(2, fuid);
+				stmt.setInt(2, iter.next());
 				stmt.addBatch();
 			}
 			stmt.executeBatch();
@@ -384,7 +387,7 @@ public final class OXFolderDowngradeSQL {
 	 * @throws SQLException
 	 *             If a SQL error occurs
 	 */
-	public static int[] getAffectedPublicFolders(final int entity, final int module, final int cid,
+	public static TIntCollection getAffectedPublicFolders(final int entity, final int module, final int cid,
 			final String folderTable, final String permTable, final Connection readCon, final boolean all)
 			throws SQLException {
 		PreparedStatement stmt = null;
@@ -398,11 +401,11 @@ public final class OXFolderDowngradeSQL {
 			stmt.setInt(4, entity);
 			stmt.setInt(5, FolderObject.PUBLIC);
 			rs = stmt.executeQuery();
-			final SmartIntArray sia = new SmartIntArray(128);
+			final TIntList list = new TIntArrayList(128);
 			while (rs.next()) {
-				sia.append(rs.getInt(1));
+				list.add(rs.getInt(1));
 			}
-			return sia.toArray();
+			return list;
 		} finally {
 			closeSQLStuff(rs, stmt);
 		}
@@ -645,82 +648,71 @@ public final class OXFolderDowngradeSQL {
 			+ " AS ot" + " WHERE op.fuid = ot.fuid AND op.cid = ? AND ot.cid = ? AND ot.created_from <> ?"
 			+ " AND ot.type = ? AND op.permission_id = ?";
 
-	/**
-	 * Removes all shared permissions bound to given entity's private folders
-	 * and all shared permissions assigned to given entity by private folders
-	 *
-	 * @param entity
-	 *            The entity ID
-	 * @param cid
-	 *            The context ID
-	 * @param folderTable
-	 *            The folder table identifier
-	 * @param permTable
-	 *            The permission table identifier
-	 * @param writeCon
-	 *            A writable connection
-	 * @return A set containing the affected IDs
-	 * @throws SQLException
-	 *             If a SQL error occurs
-	 */
-	public static Set<Integer> removeShareAccess(final int entity, final int cid, final String folderTable,
-			final String permTable, final Connection writeCon) throws SQLException {
-		final Set<Integer> ids = new HashSet<Integer>();
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		try {
-			stmt = writeCon.prepareStatement(SQL_SEL_SHARED_PERMS.replaceFirst(RPL_FOLDER, folderTable).replaceFirst(
-					RPL_PERM, permTable));
-			stmt.setInt(1, cid);
-			stmt.setInt(2, entity);
-			stmt.setInt(3, FolderObject.PRIVATE);
-			stmt.setInt(4, entity);
-			rs = stmt.executeQuery();
-			while (rs.next()) {
-				ids.add(Integer.valueOf(rs.getInt(1)));
-			}
-			rs.close();
-			rs = null;
-			stmt.close();
-			stmt = writeCon.prepareStatement(SQL_DEL_SHARED_PERMS.replaceAll(RPL_PERM, permTable).replaceFirst(
-					RPL_FOLDER, folderTable));
-			stmt.setInt(1, cid);
-			stmt.setInt(2, cid);
-			stmt.setInt(3, entity);
-			stmt.setInt(4, FolderObject.PRIVATE);
-			stmt.setInt(5, entity);
-			stmt.executeUpdate();
-		} finally {
-			closeSQLStuff(rs, stmt);
-			stmt = null;
-		}
-		try {
-			stmt = writeCon.prepareStatement(SQL_SEL_SHARED_PERMS_FOREIGN.replaceFirst(RPL_FOLDER, folderTable)
-					.replaceFirst(RPL_PERM, permTable));
-			stmt.setInt(1, cid);
-			stmt.setInt(2, entity);
-			stmt.setInt(3, FolderObject.PRIVATE);
-			stmt.setInt(4, entity);
-			rs = stmt.executeQuery();
-			while (rs.next()) {
-				ids.add(Integer.valueOf(rs.getInt(1)));
-			}
-			rs.close();
-			rs = null;
-			stmt.close();
-			stmt = writeCon.prepareStatement(SQL_DEL_SHARED_PERMS_FOREIGN.replaceAll(RPL_PERM, permTable).replaceFirst(
-					RPL_FOLDER, folderTable));
-			stmt.setInt(1, cid);
-			stmt.setInt(2, cid);
-			stmt.setInt(3, entity);
-			stmt.setInt(4, FolderObject.PRIVATE);
-			stmt.setInt(5, entity);
-			stmt.executeUpdate();
-		} finally {
-			closeSQLStuff(rs, stmt);
-		}
-		return Collections.unmodifiableSet(ids);
-	}
+    /**
+     * Removes all shared permissions bound to given entity's private folders and all shared permissions assigned to given entity by private
+     * folders
+     *
+     * @param entity The entity ID
+     * @param cid The context ID
+     * @param folderTable The folder table identifier
+     * @param permTable The permission table identifier
+     * @param writeCon A writable connection
+     * @return A set containing the affected IDs
+     * @throws SQLException If a SQL error occurs
+     */
+    public static TIntSet removeShareAccess(final int entity, final int cid, final String folderTable, final String permTable, final Connection writeCon) throws SQLException {
+        final TIntSet ids = new TIntHashSet();
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = writeCon.prepareStatement(SQL_SEL_SHARED_PERMS.replaceFirst(RPL_FOLDER, folderTable).replaceFirst(RPL_PERM, permTable));
+            stmt.setInt(1, cid);
+            stmt.setInt(2, entity);
+            stmt.setInt(3, FolderObject.PRIVATE);
+            stmt.setInt(4, entity);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                ids.add(rs.getInt(1));
+            }
+            rs.close();
+            rs = null;
+            stmt.close();
+            stmt = writeCon.prepareStatement(SQL_DEL_SHARED_PERMS.replaceAll(RPL_PERM, permTable).replaceFirst(RPL_FOLDER, folderTable));
+            stmt.setInt(1, cid);
+            stmt.setInt(2, cid);
+            stmt.setInt(3, entity);
+            stmt.setInt(4, FolderObject.PRIVATE);
+            stmt.setInt(5, entity);
+            stmt.executeUpdate();
+        } finally {
+            closeSQLStuff(rs, stmt);
+            stmt = null;
+        }
+        try {
+            stmt = writeCon.prepareStatement(SQL_SEL_SHARED_PERMS_FOREIGN.replaceFirst(RPL_FOLDER, folderTable).replaceFirst(RPL_PERM, permTable));
+            stmt.setInt(1, cid);
+            stmt.setInt(2, entity);
+            stmt.setInt(3, FolderObject.PRIVATE);
+            stmt.setInt(4, entity);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                ids.add(rs.getInt(1));
+            }
+            rs.close();
+            rs = null;
+            stmt.close();
+            stmt = writeCon.prepareStatement(SQL_DEL_SHARED_PERMS_FOREIGN.replaceAll(RPL_PERM, permTable).replaceFirst(RPL_FOLDER, folderTable));
+            stmt.setInt(1, cid);
+            stmt.setInt(2, cid);
+            stmt.setInt(3, entity);
+            stmt.setInt(4, FolderObject.PRIVATE);
+            stmt.setInt(5, entity);
+            stmt.executeUpdate();
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
+        return ids;
+    }
 
 	private static final String SQL_SEL_SUB_INFO_FLD = "SELECT ot.fuid FROM " + RPL_FOLDER
 			+ " AS ot WHERE ot.cid = ? AND ot.module = ? AND ot.parent IN (" + "SELECT ot2.fuid FROM " + RPL_FOLDER
@@ -746,14 +738,14 @@ public final class OXFolderDowngradeSQL {
 	 * @throws SQLException
 	 *             If a SQL error occurs
 	 */
-	public static int[] gatherSubInfostoreFolders(final int entity, final int cid, final String folderTable,
+	public static TIntSet gatherSubInfostoreFolders(final int entity, final int cid, final String folderTable,
 			final String permTable, final Connection writeCon) throws SQLException {
 		/*
 		 * Remove all subfolders below default infostore folder
 		 */
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
-		final int[] fuids;
+		final TIntList fuids;
 		try {
 			stmt = writeCon.prepareStatement(SQL_SEL_SUB_INFO_FLD.replaceAll(RPL_FOLDER, folderTable));
 			stmt.setInt(1, cid);
@@ -762,55 +754,47 @@ public final class OXFolderDowngradeSQL {
             stmt.setInt(4, FolderObject.INFOSTORE);
             stmt.setInt(5, entity);
 			rs = stmt.executeQuery();
-			final SmartIntArray sia = new SmartIntArray(128);
+			fuids = new TIntArrayList(128);
 			while (rs.next()) {
-				sia.append(rs.getInt(1));
+			    fuids.add(rs.getInt(1));
 			}
-			fuids = sia.toArray();
 		} finally {
 			closeSQLStuff(rs, stmt);
 			rs = null;
 			stmt = null;
 		}
-		final Set<Integer> ids = new HashSet<Integer>(64);
-		for (final int fuid : fuids) {
-			gatherSubfolderIDs(fuid, cid, folderTable, permTable, ids, writeCon);
+		final int size = fuids.size();
+		final TIntSet ids = new TIntHashSet(size);
+		final TIntIterator iter = fuids.iterator();
+		for (int i = size; i-- > 0;) {
+			gatherSubfolderIDs(iter.next(), cid, folderTable, permTable, ids, writeCon);
 		}
-		final int[] retval = new int[ids.size()];
-		if (retval.length > 0) {
-			final Iterator<Integer> iter = ids.iterator();
-			for (int i = 0; i < retval.length; i++) {
-				retval[i] = iter.next().intValue();
-			}
-		}
-		return retval;
+		return ids;
 	}
 
 	private static void gatherSubfolderIDs(final int fuid, final int cid, final String folderTable,
-			final String permTable, final Set<Integer> ids, final Connection writeCon) throws SQLException {
+			final String permTable, final TIntSet ids, final Connection writeCon) throws SQLException {
+	    final TIntList list;
 		PreparedStatement stmt = null;
-		{
-			ResultSet rs = null;
-			final int[] subFuids;
-			try {
-				stmt = writeCon.prepareStatement(SQL_SEL_SUB2_INFO_FLD.replaceFirst(RPL_FOLDER, folderTable));
-				stmt.setInt(1, cid);
-				stmt.setInt(2, fuid);
-				rs = stmt.executeQuery();
-				final SmartIntArray sia = new SmartIntArray(128);
-				while (rs.next()) {
-					sia.append(rs.getInt(1));
-				}
-				subFuids = sia.toArray();
-			} finally {
-				closeSQLStuff(rs, stmt);
-				stmt = null;
+		ResultSet rs = null;
+		try {
+			stmt = writeCon.prepareStatement(SQL_SEL_SUB2_INFO_FLD.replaceFirst(RPL_FOLDER, folderTable));
+			stmt.setInt(1, cid);
+			stmt.setInt(2, fuid);
+			rs = stmt.executeQuery();
+			list = new TIntArrayList(128);
+			while (rs.next()) {
+				list.add(rs.getInt(1));
 			}
-			for (final int subFuid : subFuids) {
-				gatherSubfolderIDs(subFuid, cid, folderTable, permTable, ids, writeCon);
-			}
+		} finally {
+			closeSQLStuff(rs, stmt);
+			stmt = null;
 		}
-		ids.add(Integer.valueOf(fuid));
+		final TIntIterator iter = list.iterator();
+        for (int i = list.size(); i-- > 0;) {
+            gatherSubfolderIDs(iter.next(), cid, folderTable, permTable, ids, writeCon);
+        }
+		ids.add(fuid);
 	}
 
 }

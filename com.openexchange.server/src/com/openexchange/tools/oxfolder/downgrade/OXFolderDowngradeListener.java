@@ -49,14 +49,14 @@
 
 package com.openexchange.tools.oxfolder.downgrade;
 
+import gnu.trove.TIntCollection;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.Dictionary;
-import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.api2.AppointmentSQLInterface;
@@ -242,7 +242,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
             /*
              * Remove subfolders below default folder
              */
-            final int[] fuids = OXFolderDowngradeSQL.gatherSubInfostoreFolders(
+            final TIntSet fuids = OXFolderDowngradeSQL.gatherSubInfostoreFolders(
                 entity,
                 cid,
                 TABLE_FOLDER_WORKING,
@@ -276,11 +276,11 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
      * @throws OXException If deleting module's folder data fails
      */
     private static void deleteModuleFolderData(final int entity, final int module, final DowngradeEvent event, final boolean checkPrivate, final boolean allPublic) throws OXException {
-        final Set<Integer> ids = new HashSet<Integer>(128);
+        final TIntSet ids = new TIntHashSet(128);
         final int cid = event.getContext().getContextId();
         final Connection writeCon = event.getWriteCon();
         try {
-            int[] fuids = null;
+            TIntCollection fuids = null;
             if (checkPrivate) {
                 /*
                  * Clear all non-default private folders of specified module
@@ -289,9 +289,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 deleteFoldersContent(fuids, event);
                 OXFolderDowngradeSQL.deleteFolderPermissions(fuids, cid, TABLE_PERMISSIONS_WORKING, writeCon);
                 OXFolderDowngradeSQL.deleteFolders(fuids, cid, TABLE_FOLDER_WORKING, writeCon);
-                for (final int id : fuids) {
-                    ids.add(Integer.valueOf(id));
-                }
+                ids.addAll(fuids);
                 fuids = null;
                 /*
                  * Remove default folder's shared permissions
@@ -304,7 +302,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                     TABLE_PERMISSIONS_WORKING,
                     writeCon);
                 if (fuid != -1) {
-                    ids.add(Integer.valueOf(fuid));
+                    ids.add(fuid);
                 }
             }
             /*
@@ -322,9 +320,11 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
                 TABLE_PERMISSIONS_WORKING,
                 writeCon,
                 allPublic);
-            for (final int fuid : fuids) {
+            final TIntIterator iter = fuids.iterator();
+            for (int i = fuids.size(); i-- > 0;) {
+                final int fuid = iter.next();
                 OXFolderDowngradeSQL.handleAffectedPublicFolder(entity, fuid, cid, TABLE_PERMISSIONS_WORKING, writeCon);
-                ids.add(Integer.valueOf(fuid));
+                ids.add(fuid);
             }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -342,25 +342,27 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
      * @param event The downgrade event
      * @throws OXException If deleting contents fails
      */
-    private static void deleteFoldersContent(final int[] fuids, final DowngradeEvent event) throws OXException {
+    private static void deleteFoldersContent(final TIntCollection fuids, final DowngradeEvent event) throws OXException {
         final OXFolderAccess access = new OXFolderAccess(event.getWriteCon(), event.getContext());
-        for (int i = 0; i < fuids.length; i++) {
+        final TIntIterator iter = fuids.iterator();
+        for (int i = fuids.size(); i-- > 0;) {
             // Delete folder content
-            final int imodule = access.getFolderModule(fuids[i]);
+            final int fuid = iter.next();
+            final int imodule = access.getFolderModule(fuid);
             switch (imodule) {
             case FolderObject.CALENDAR:
-                deleteContainedAppointments(fuids[i], event);
+                deleteContainedAppointments(fuid, event);
                 break;
             case FolderObject.TASK:
-                deleteContainedTasks(fuids[i], event);
+                deleteContainedTasks(fuid, event);
                 break;
             case FolderObject.CONTACT:
-                deleteContainedContacts(fuids[i], event);
+                deleteContainedContacts(fuid, event);
                 break;
             case FolderObject.UNBOUND:
                 break;
             case FolderObject.INFOSTORE:
-                deleteContainedDocuments(fuids[i], event);
+                deleteContainedDocuments(fuid, event);
                 break;
             case FolderObject.PROJECT:
                 break;
@@ -449,9 +451,9 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
      */
     private static void deleteSharedFolderData(final int entity, final DowngradeEvent event) throws OXException {
         final int cid = event.getContext().getContextId();
-        final Set<Integer> set = new HashSet<Integer>();
+        final TIntSet set = new TIntHashSet();
         try {
-            final Set<Integer> tmp = OXFolderDowngradeSQL.removeShareAccess(
+            final TIntSet tmp = OXFolderDowngradeSQL.removeShareAccess(
                 entity,
                 cid,
                 TABLE_FOLDER_WORKING,
@@ -467,13 +469,8 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
         removeFromFolderCache(set, entity, event.getContext());
     }
 
-    private static void removeFromFolderCache(final Collection<Integer> collection, final int userId, final Context ctx) {
-        final int[] ints = new int[collection.size()];
-        final Iterator<Integer> iter = collection.iterator();
-        for (int i = 0; i < ints.length; i++) {
-            ints[i] = iter.next().intValue();
-        }
-        removeFromFolderCache(ints, userId, ctx);
+    private static void removeFromFolderCache(final TIntCollection col, final int userId, final Context ctx) {
+        removeFromFolderCache(col.toArray(), userId, ctx);
     }
 
     private static void removeFromFolderCache(final int[] folderIDs, final int userId, final Context ctx) {

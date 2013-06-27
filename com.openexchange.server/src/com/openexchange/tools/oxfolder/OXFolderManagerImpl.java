@@ -49,12 +49,15 @@
 
 package com.openexchange.tools.oxfolder;
 
+import gnu.trove.TIntCollection;
+import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.TIntSet;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -66,7 +69,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.AppointmentSQLInterface;
@@ -384,17 +386,19 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
          * This folder shall be shared to other users
          */
         if (folderObj.getType() == FolderObject.PRIVATE && folderObj.getPermissions().size() > 1) {
-            final Set<Integer> diff = OXFolderUtility.getShareUsers(null, folderObj.getPermissions(), user.getId(), ctx);
+            final TIntSet diff = OXFolderUtility.getShareUsers(null, folderObj.getPermissions(), user.getId(), ctx);
             if (!diff.isEmpty()) {
                 final FolderObject[] allSharedFolders;
                 try {
                     /*
                      * Check duplicate folder names
                      */
-                    final int[] fuids = OXFolderSQL.getSharedFoldersOf(user.getId(), readCon, ctx);
-                    allSharedFolders = new FolderObject[fuids.length];
-                    for (int i = 0; i < fuids.length; i++) {
-                        allSharedFolders[i] = getOXFolderAccess().getFolderObject(fuids[i]);
+                    final TIntCollection fuids = OXFolderSQL.getSharedFoldersOf(user.getId(), readCon, ctx);
+                    final int length = fuids.size();
+                    allSharedFolders = new FolderObject[length];
+                    final TIntIterator iter = fuids.iterator();
+                    for (int i = 0; i < length; i++) {
+                        allSharedFolders[i] = getOXFolderAccess().getFolderObject(iter.next());
                     }
                 } catch (final DataTruncation e) {
                     throw parseTruncated(e, folderObj, TABLE_OXFOLDER_TREE);
@@ -770,7 +774,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
          * This folder shall be shared to other users
          */
         if (fo.getType() == FolderObject.PRIVATE && fo.getPermissions().size() > 1) {
-            final Set<Integer> diff = OXFolderUtility.getShareUsers(
+            final TIntSet diff = OXFolderUtility.getShareUsers(
                 rename ? null : storageObj.getPermissions(),
                 fo.getPermissions(),
                 user.getId(),
@@ -781,14 +785,17 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     /*
                      * Check duplicate folder names
                      */
-                    final int[] fuids = OXFolderSQL.getSharedFoldersOf(user.getId(), readCon, ctx);
-                    allSharedFolders = new FolderObject[fuids.length];
-                    for (int i = 0; i < fuids.length; i++) {
+                    final TIntCollection fuids = OXFolderSQL.getSharedFoldersOf(user.getId(), readCon, ctx);
+                    final int size = fuids.size();
+                    allSharedFolders = new FolderObject[size];
+                    final TIntIterator iter = fuids.iterator();
+                    for (int i = 0; i < size; i++) {
                         /*
                          * Remove currently updated folder
                          */
-                        if (fuids[i] != fo.getObjectID()) {
-                            allSharedFolders[i] = getOXFolderAccess().getFolderObject(fuids[i]);
+                        final int fuid = iter.next();
+                        if (fuid != fo.getObjectID()) {
+                            allSharedFolders[i] = getOXFolderAccess().getFolderObject(fuid);
                         }
                     }
                 } catch (final DataTruncation e) {
@@ -1009,21 +1016,24 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
          * This folder shall be shared to other users
          */
         if (storageObj.getType() == FolderObject.PRIVATE && storageObj.getPermissions().size() > 1) {
-            final Set<Integer> diff = OXFolderUtility.getShareUsers(null, storageObj.getPermissions(), user.getId(), ctx);
+            final TIntSet diff = OXFolderUtility.getShareUsers(null, storageObj.getPermissions(), user.getId(), ctx);
             if (!diff.isEmpty()) {
                 final FolderObject[] allSharedFolders;
                 try {
                     /*
                      * Check duplicate folder names
                      */
-                    final int[] fuids = OXFolderSQL.getSharedFoldersOf(user.getId(), readCon, ctx);
-                    allSharedFolders = new FolderObject[fuids.length];
-                    for (int i = 0; i < fuids.length; i++) {
+                    final TIntCollection fuids = OXFolderSQL.getSharedFoldersOf(user.getId(), readCon, ctx);
+                    final int size = fuids.size();
+                    allSharedFolders = new FolderObject[size];
+                    final TIntIterator iter = fuids.iterator();
+                    for (int i = 0; i < size; i++) {
                         /*
                          * Remove currently renamed folder
                          */
-                        if (fuids[i] != folderObj.getObjectID()) {
-                            allSharedFolders[i] = getOXFolderAccess().getFolderObject(fuids[i]);
+                        final int fuid = iter.next();
+                        if (fuid != folderObj.getObjectID()) {
+                            allSharedFolders[i] = getOXFolderAccess().getFolderObject(fuid);
                         }
                     }
                 } catch (final DataTruncation e) {

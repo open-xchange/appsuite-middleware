@@ -67,12 +67,10 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
@@ -410,7 +408,7 @@ public final class OXFolderIteratorSQL {
         final List<String> whereClauses = new ArrayList<String>(3);
         /*-
          * Optional:
-         * 
+         *
          * WHERE ot.cid = ? AND (ot.permission_flag = 1 AND ot.created_from = ?)
          *
          * 1. cid
@@ -1625,9 +1623,9 @@ public final class OXFolderIteratorSQL {
                 stmt.setInt(pos, module.intValue());
             }
             rs = executeQuery(stmt);
-            final Set<Integer> nonVisibleSet = new HashSet<Integer>(1024);
+            final TIntSet nonVisibleSet = new TIntHashSet(1024);
             while (rs.next()) {
-                nonVisibleSet.add(Integer.valueOf(rs.getInt(1)));
+                nonVisibleSet.add(rs.getInt(1));
             }
             rs.close();
             rs = null;
@@ -1638,7 +1636,7 @@ public final class OXFolderIteratorSQL {
              * 3.) Filter all visible public folders with a non-visible parent
              */
             for (final Iterator<FolderObject> iter = q.iterator(); iter.hasNext();) {
-                if (!nonVisibleSet.contains(Integer.valueOf(iter.next().getParentFolderID()))) {
+                if (!nonVisibleSet.contains(iter.next().getParentFolderID())) {
                     iter.remove();
                 }
             }
@@ -1652,11 +1650,11 @@ public final class OXFolderIteratorSQL {
         }
     }
 
-    private static Set<Integer> queue2IDSet(final Queue<FolderObject> q, final int size) {
-        final Set<Integer> retval = new HashSet<Integer>(size);
+    private static TIntSet queue2IDSet(final Queue<FolderObject> q, final int size) {
+        final TIntSet retval = new TIntHashSet(size);
         final Iterator<FolderObject> iter = q.iterator();
-        for (int i = 0; i < size; i++) {
-            retval.add(Integer.valueOf(iter.next().getObjectID()));
+        for (int i = size; i-- > 0;) {
+            retval.add(iter.next().getObjectID());
         }
         return retval;
     }
