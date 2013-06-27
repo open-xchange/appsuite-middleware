@@ -75,13 +75,15 @@ public class Transparency extends AbstractVerifyingAttributeConverter<VEvent, Ap
     @Override
     public void emit(final Mode mode, final int index, final Appointment appointment, final VEvent event, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         switch(appointment.getShownAs()) {
-            case Appointment.RESERVED :
-                event.getProperties().add(new Transp("OPAQUE"));
-                break;
-            case Appointment.FREE :
-                event.getProperties().add(new Transp("TRANSPARENT"));
-                break;
-            default:
+        case Appointment.RESERVED:
+        case Appointment.ABSENT:
+        case Appointment.TEMPORARY:
+            event.getProperties().add(new Transp("OPAQUE"));
+            break;
+        case Appointment.FREE:
+            event.getProperties().add(new Transp("TRANSPARENT"));
+            break;
+        default:
         }
     }
 

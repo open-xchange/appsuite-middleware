@@ -52,39 +52,27 @@ package com.openexchange.dav.caldav.bugs;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
-import com.openexchange.dav.caldav.ical.SimpleICal.Property;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.ExternalUserParticipant;
-import com.openexchange.groupware.container.UserParticipant;
 
 /**
- * {@link Bug23610Test}
+ * {@link Bug27224Test}
  *
- * "Shown as" status changed when confirming/declining appointment in Apple iCal client as participant
+ * "Shown as" status-change is lost after updating appointment in iCal client
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class Bug23610Test extends CalDAVTest {
+public class Bug27224Test extends CalDAVTest {
 
-	public Bug23610Test(String name) {
+	public Bug27224Test(String name) {
 		super(name);
 	}
 
-    public void testConfirmAppointment() throws Exception {
-        for (int shownAs : new int[] { Appointment.FREE, Appointment.TEMPORARY, Appointment.RESERVED, Appointment.ABSENT }) {
-            for (int confirmation : new int[] { Appointment.ACCEPT, Appointment.DECLINE, Appointment.TENTATIVE }) {
-                this.confirmAppointment(shownAs, confirmation);
-            }
-        }
-    }
-
-	private void confirmAppointment(int appointmentShownAs, int confirmationStatus) throws Exception {
+    public void testChangetransparency() throws Exception {
         /*
          * fetch sync token for later synchronization
          */
@@ -93,17 +81,12 @@ public class Bug23610Test extends CalDAVTest {
          * create appointment on server
          */
         String uid = randomUID();
-        String summary = "Bug23610Test-" + appointmentShownAs + "-" + confirmationStatus;
-        String location = "test";
-        Date start = TimeTools.D("next saturday at 10:00");
-        Date end = TimeTools.D("next saturday at 11:00");
+        String summary = "Bug27224Test";
+        String location = "da";
+        Date start = TimeTools.D("next friday at 02:00");
+        Date end = TimeTools.D("next friday at 04:00");
         Appointment appointment = generateAppointment(start, end, uid, summary, location);
-        appointment.setOrganizer("otto@example.com");
-        appointment.addParticipant(new UserParticipant(super.getAJAXClient().getValues().getUserId()));
-        ExternalUserParticipant participant = new ExternalUserParticipant("otto@example.com");
-        participant.setConfirm(Appointment.ACCEPT);
-        appointment.addParticipant(participant);
-        appointment.setShownAs(appointmentShownAs);
+        appointment.setShownAs(Appointment.RESERVED);
         super.rememberForCleanUp(super.create(appointment));
         /*
          * verify appointment on client
@@ -116,64 +99,26 @@ public class Bug23610Test extends CalDAVTest {
         assertEquals("SUMMARY wrong", summary, iCalResource.getVEvent().getSummary());
         assertEquals("LOCATION wrong", location, iCalResource.getVEvent().getLocation());
         if (null != iCalResource.getVEvent().getTransp()) {
-            assertEquals("TRANSP wrong", Appointment.FREE == appointmentShownAs ? "TRANSPARENT" : "OPAQUE",
-                iCalResource.getVEvent().getTransp());
+            assertEquals("TRANSP wrong", "OPAQUE", iCalResource.getVEvent().getTransp());
         }
         /*
-         * confirm appointment on client
+         * change TRANSP on client to "free"
          */
-        String partstat = Appointment.TENTATIVE == confirmationStatus ? "TENTATIVE" :
-            Appointment.DECLINE == confirmationStatus ? "DECLINED" : "ACCEPTED";
-        List<Property> attendees = iCalResource.getVEvent().getProperties("ATTENDEE");
-        for (Property property : attendees) {
-            if (property.getValue().contains(super.getAJAXClient().getValues().getDefaultAddress())) {
-                for (Entry<String, String> attribute : property.getAttributes().entrySet()) {
-                    if (attribute.getKey().equals("PARTSTAT")) {
-                        attribute.setValue(partstat);
-                    }
-                }
-                break;
-            }
-        }
-        iCalResource.getVEvent().setTransp(Appointment.DECLINE == confirmationStatus ? "TRANSPARENT" : "OPAQUE");
+        iCalResource.getVEvent().setTransp("TRANSPARENT");
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICalUpdate(iCalResource));
         /*
          * verify appointment on server
          */
         appointment = super.getAppointment(uid);
         assertNotNull("appointment not found on server", appointment);
-        UserParticipant[] users = appointment.getUsers();
-        assertNotNull("appointment has no users", users);
-        UserParticipant partipant = null;
-        for (UserParticipant user : users) {
-            if (getAJAXClient().getValues().getUserId() == user.getIdentifier()) {
-                partipant = user;
-                break;
-            }
-        }
-        assertNotNull("confirming participant not found", partipant);
-        assertEquals("confirmation status wrong", confirmationStatus, partipant.getConfirm());
-        assertEquals("shown as wrong", appointmentShownAs, appointment.getShownAs());
+        assertEquals("shown as wrong", Appointment.FREE, appointment.getShownAs());
         /*
          * verify appointment on client
          */
         iCalResource = super.get(uid, iCalResource.getETag());
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
-        Property attendee = null;
-        attendees = iCalResource.getVEvent().getProperties("ATTENDEE");
-        for (Property property : attendees) {
-            if (property.getValue().contains(super.getAJAXClient().getValues().getDefaultAddress())) {
-                attendee = property;
-                break;
-            }
-        }
-        assertNotNull("confirming attendee not found", attendee);
-        assertEquals("partstat status wrong", partstat, attendee.getAttribute("PARTSTAT"));
-        if (null != iCalResource.getVEvent().getTransp()) {
-            assertEquals("TRANSP wrong", Appointment.FREE == appointmentShownAs ? "TRANSPARENT" : "OPAQUE",
-                iCalResource.getVEvent().getTransp());
-        }
-	}
+        assertEquals("TRANSP wrong", "TRANSPARENT", iCalResource.getVEvent().getTransp());
+    }
 
 }
