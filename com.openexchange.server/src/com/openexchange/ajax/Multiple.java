@@ -294,7 +294,7 @@ public class Multiple extends SessionServlet {
         }
     }
 
-    private static final void writeMailRequest(final HttpServletRequest req) throws JSONException {
+    private static final void writeMailRequest(final HttpServletRequest req) throws OXException {
         final MailRequest mailReq = (MailRequest) req.getAttribute(ATTRIBUTE_MAIL_REQUEST);
         if (mailReq != null) {
             try {
@@ -393,7 +393,13 @@ public class Multiple extends SessionServlet {
             }
             final MultipleHandler multipleHandler = lookUpMultipleHandler(module);
             if (null != multipleHandler) {
-                writeMailRequest(req);
+                try {
+                    writeMailRequest(req);
+                } catch (final OXException e) {
+                    jsonWriter.object();
+                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session));
+                    jsonWriter.endObject();
+                }
                 jsonWriter.object();
                 try {
                     final Object tmp = multipleHandler.performRequest(action, jsonObj, session, Tools.considerSecure(req));
@@ -441,7 +447,13 @@ public class Multiple extends SessionServlet {
                     jsonWriter.endObject();
                 } */
             } else if (MODULE_FOLDER.equals(module) || MODULE_FOLDERS.equals(module)) {
-                writeMailRequest(req);
+                try {
+                    writeMailRequest(req);
+                } catch (final OXException e) {
+                    jsonWriter.object();
+                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session));
+                    jsonWriter.endObject();
+                }
                 final FolderRequest folderequest = new FolderRequest(session, jsonWriter);
                 try {
                     folderequest.action(action, jsonObj);
