@@ -1,3 +1,7 @@
+* 2013-06-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27284: Don't null'ify default folders' full names if located on root level
+
 * 2013-07-26 - martin.herfurth@open-xchange.com
 
  - Fix for bug 26954: Already deleted Exceptions within invitation mails.

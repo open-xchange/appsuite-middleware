@@ -335,10 +335,18 @@ public class IMAPDefaultFolderChecker {
             }
         }
         if (MailAccount.DEFAULT_ID == accountId) {
-            /*
-             * No full names for primary account
+            /*-
+             * Check full names for primary account:
+             *
+             * Null'ify full name if not on root level OR not equal to name; meaning not intended to create default folders next to INBOX
+             * In that case create them with respect determined prefix
              */
-            Arrays.fill(fullNames, null);
+            for (int i = 0; i < fullNames.length; i++) {
+                final String fullName = fullNames[i];
+                if (null != fullName && (fullName.indexOf(sep) > 0 || !fullName.equals(names[i]))) {
+                    fullNames[i] = null;
+                }
+            }
         }
         /*
          * Sequentially check folders
