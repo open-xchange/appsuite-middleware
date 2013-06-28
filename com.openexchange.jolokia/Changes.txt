@@ -1,0 +1,5 @@
+Changes done inside org.jolokia
+
+org.jolokia.osgi.servlet.JolokiaServlet.java
+	- not using LogHandler provided by Jolokia
+	

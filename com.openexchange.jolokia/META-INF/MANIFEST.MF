@@ -1,0 +1,32 @@
+Bundle-Activator: com.openexchange.jolokia.osgi.CustomJolokiaBundleActivator
+Bundle-ClassPath: .,
+ lib/json-simple-1.1.jar
+Bundle-Description: Jolokia agent exposing JMX via HTTP/JSON
+Bundle-ManifestVersion: 2
+Bundle-Name: Jolokia Agent custom
+Bundle-SymbolicName: com.openexchange.jolokia
+Bundle-Version: 1.1.1
+Import-Package: com.openexchange.config,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.configuration,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ javax.management,
+ javax.management.openmbean,
+ javax.management.relation,
+ javax.management.remote,
+ javax.naming,
+ javax.servlet,
+ javax.servlet.http,
+ javax.xml.datatype,
+ javax.xml.parsers,
+ org.apache.commons.logging,
+ org.apache.log4j,
+ org.osgi.framework;version="[1.0.0,2.0.0)",
+ org.osgi.service.http,
+ org.osgi.util.tracker;version="[1.0.0,2.0.0)",
+ org.w3c.dom,
+ org.xml.sax
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: com.openexchange.global
