@@ -66,6 +66,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public final class JSONUtil {
 
+    private static final String DATA = ResponseFields.DATA;
+
     /**
      * Initializes a new {@link JSONUtil}.
      */
@@ -175,11 +177,11 @@ public final class JSONUtil {
             @SuppressWarnings("unchecked")
             final T value = (T) jsonObject.opt(name);
             if (null == value) {
-                throw ResponseFields.DATA.equals(name) ? AjaxExceptionCodes.MISSING_REQUEST_BODY.create() : AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+                throw DATA.equals(name) ? AjaxExceptionCodes.MISSING_REQUEST_BODY.create() : AjaxExceptionCodes.MISSING_PARAMETER.create(name);
             }
             return value;
         } catch (final RuntimeException e) {
-            throw ResponseFields.DATA.equals(name) ? AjaxExceptionCodes.MISSING_REQUEST_BODY.create() : AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+            throw DATA.equals(name) ? AjaxExceptionCodes.MISSING_REQUEST_BODY.create() : AjaxExceptionCodes.MISSING_PARAMETER.create(name);
         }
     }
 
