@@ -55,6 +55,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link JSONUtil} - Provides JSON utility methods.
@@ -165,6 +168,19 @@ public final class JSONUtil {
             return null;
         }
         return new JSONTokener(value).nextValue();
+    }
+
+    public static <T> T require(final String name, final JSONObject jsonObject) throws OXException {
+        try {
+            @SuppressWarnings("unchecked")
+            final T value = (T) jsonObject.opt(name);
+            if (null == value) {
+                throw ResponseFields.DATA.equals(name) ? AjaxExceptionCodes.MISSING_REQUEST_BODY.create() : AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+            }
+            return value;
+        } catch (final RuntimeException e) {
+            throw ResponseFields.DATA.equals(name) ? AjaxExceptionCodes.MISSING_REQUEST_BODY.create() : AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+        }
     }
 
 }

@@ -59,6 +59,7 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.ajax.tools.JSONUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.json.OXJSONWriter;
@@ -340,7 +341,7 @@ public final class MailRequest {
          * @throws OXException If a JSON error occurs
          */
         public final void addCollectable(final JSONObject jsonObject) throws  OXException {
-            mailIDs.add(MailRequest.<String> require(PARAMETER_ID, jsonObject));
+            mailIDs.add(JSONUtil.<String> require(PARAMETER_ID, jsonObject));
         }
 
         /**
@@ -353,19 +354,6 @@ public final class MailRequest {
         }
     }
 
-    static <T> T require(final String name, final JSONObject jsonObject) throws OXException {
-        try {
-            @SuppressWarnings("unchecked")
-            final T value = (T) jsonObject.opt(name);
-            if (null == value) {
-                throw DATA.equals(name) ? AjaxExceptionCodes.MISSING_REQUEST_BODY.create() : AjaxExceptionCodes.MISSING_PARAMETER.create(name);
-            }
-            return value;
-        } catch (final RuntimeException e) {
-            throw DATA.equals(name) ? AjaxExceptionCodes.MISSING_REQUEST_BODY.create() : AjaxExceptionCodes.MISSING_PARAMETER.create(name);
-        }
-    }
-
     private static final class MoveCollectObject extends CollectObject {
 
         private final String srcFld;
@@ -373,13 +361,13 @@ public final class MailRequest {
 
         public MoveCollectObject(final JSONObject dataObject, final Mail mailServlet) throws OXException {
             super(mailServlet);
-            this.srcFld = MailRequest.<String> require(PARAMETER_FOLDERID, dataObject);
-            this.destFld = MailRequest.<String> require(FolderChildFields.FOLDER_ID, MailRequest.<JSONObject> require(DATA, dataObject));
+            this.srcFld = JSONUtil.<String> require(PARAMETER_FOLDERID, dataObject);
+            this.destFld = JSONUtil.<String> require(FolderChildFields.FOLDER_ID, JSONUtil.<JSONObject> require(DATA, dataObject));
         }
 
         @Override
         public boolean collectable(final JSONObject dataObject, final CollectableOperation op) throws OXException {
-            return (CollectableOperation.MOVE.equals(op) && this.srcFld.equals(MailRequest.<String> require(PARAMETER_FOLDERID, dataObject)) && this.destFld.equals(MailRequest.<String> require(FolderChildFields.FOLDER_ID, MailRequest.<JSONObject> require(DATA, dataObject))));
+            return (CollectableOperation.MOVE.equals(op) && this.srcFld.equals(JSONUtil.<String> require(PARAMETER_FOLDERID, dataObject)) && this.destFld.equals(JSONUtil.<String> require(FolderChildFields.FOLDER_ID, JSONUtil.<JSONObject> require(DATA, dataObject))));
         }
 
         @Override
@@ -401,13 +389,13 @@ public final class MailRequest {
 
         public CopyCollectObject(final JSONObject dataObject, final Mail mailServlet) throws OXException {
             super(mailServlet);
-            this.srcFld = MailRequest.<String> require(PARAMETER_FOLDERID, dataObject);
-            this.destFld = MailRequest.<String> require(FolderChildFields.FOLDER_ID, MailRequest.<JSONObject> require(DATA, dataObject));
+            this.srcFld = JSONUtil.<String> require(PARAMETER_FOLDERID, dataObject);
+            this.destFld = JSONUtil.<String> require(FolderChildFields.FOLDER_ID, JSONUtil.<JSONObject> require(DATA, dataObject));
         }
 
         @Override
         public boolean collectable(final JSONObject dataObject, final CollectableOperation op) throws OXException {
-            return (CollectableOperation.COPY.equals(op) && this.srcFld.equals(MailRequest.<String> require(PARAMETER_FOLDERID, dataObject)) && this.destFld.equals(MailRequest.<String> require(FolderChildFields.FOLDER_ID, MailRequest.<JSONObject> require(DATA, dataObject))));
+            return (CollectableOperation.COPY.equals(op) && this.srcFld.equals(JSONUtil.<String> require(PARAMETER_FOLDERID, dataObject)) && this.destFld.equals(JSONUtil.<String> require(FolderChildFields.FOLDER_ID, JSONUtil.<JSONObject> require(DATA, dataObject))));
         }
 
         @Override
@@ -430,16 +418,16 @@ public final class MailRequest {
 
         public FlagsCollectObject(final JSONObject dataObject, final Mail mailServlet) throws OXException {
             super(mailServlet);
-            this.srcFld = MailRequest.<String> require(PARAMETER_FOLDERID, dataObject);
-            final JSONObject bodyObj = MailRequest.<JSONObject> require(DATA, dataObject);
-            flagInt = (MailRequest.<Integer> require(MailJSONField.FLAGS.getKey(), bodyObj)).intValue();
-            flagValue = (MailRequest.<Boolean> require(MailJSONField.VALUE.getKey(), bodyObj)).booleanValue();
+            this.srcFld = JSONUtil.<String> require(PARAMETER_FOLDERID, dataObject);
+            final JSONObject bodyObj = JSONUtil.<JSONObject> require(DATA, dataObject);
+            flagInt = (JSONUtil.<Integer> require(MailJSONField.FLAGS.getKey(), bodyObj)).intValue();
+            flagValue = (JSONUtil.<Boolean> require(MailJSONField.VALUE.getKey(), bodyObj)).booleanValue();
         }
 
         @Override
         public boolean collectable(final JSONObject dataObject, final CollectableOperation op) throws OXException {
-            final JSONObject bodyObj = MailRequest.<JSONObject> require(DATA, dataObject);
-            return (CollectableOperation.STORE_FLAG.equals(op) && this.srcFld.equals(MailRequest.<String> require(PARAMETER_FOLDERID, dataObject)) && flagInt == (MailRequest.<Integer> require(MailJSONField.FLAGS.getKey(), bodyObj)).intValue() && flagValue == (MailRequest.<Boolean> require(MailJSONField.VALUE.getKey(), bodyObj)).booleanValue());
+            final JSONObject bodyObj = JSONUtil.<JSONObject> require(DATA, dataObject);
+            return (CollectableOperation.STORE_FLAG.equals(op) && this.srcFld.equals(JSONUtil.<String> require(PARAMETER_FOLDERID, dataObject)) && flagInt == (JSONUtil.<Integer> require(MailJSONField.FLAGS.getKey(), bodyObj)).intValue() && flagValue == (JSONUtil.<Boolean> require(MailJSONField.VALUE.getKey(), bodyObj)).booleanValue());
         }
 
         @Override
@@ -460,13 +448,13 @@ public final class MailRequest {
 
         public ColorCollectObject(final JSONObject dataObject, final Mail mailServlet) throws OXException {
             super(mailServlet);
-            this.srcFld = MailRequest.<String> require(PARAMETER_FOLDERID, dataObject);
-            flagInt = (MailRequest.<Integer> require(MailJSONField.FLAGS.getKey(), MailRequest.<JSONObject>require(DATA, dataObject))).intValue();
+            this.srcFld = JSONUtil.<String> require(PARAMETER_FOLDERID, dataObject);
+            flagInt = (JSONUtil.<Integer> require(MailJSONField.FLAGS.getKey(), JSONUtil.<JSONObject>require(DATA, dataObject))).intValue();
         }
 
         @Override
         public boolean collectable(final JSONObject dataObject, final CollectableOperation op) throws OXException {
-            return (CollectableOperation.COLOR_LABEL.equals(op) && srcFld.equals(MailRequest.<String> require(PARAMETER_FOLDERID, dataObject)) && flagInt == (MailRequest.<Integer> require(MailJSONField.FLAGS.getKey(), MailRequest.<JSONObject>require(DATA, dataObject))).intValue());
+            return (CollectableOperation.COLOR_LABEL.equals(op) && srcFld.equals(JSONUtil.<String> require(PARAMETER_FOLDERID, dataObject)) && flagInt == (JSONUtil.<Integer> require(MailJSONField.FLAGS.getKey(), JSONUtil.<JSONObject>require(DATA, dataObject))).intValue());
         }
 
         @Override
