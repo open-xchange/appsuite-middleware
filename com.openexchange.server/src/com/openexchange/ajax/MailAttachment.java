@@ -177,8 +177,7 @@ public class MailAttachment extends AJAXServlet {
                      * Apply filter
                      */
                     final ContentType contentType = mailPart.getContentType();
-                    final String cs =
-                        contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
+                    final String cs = contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
                     String htmlContent = MessageUtility.readMailPart(mailPart, cs);
                     htmlContent = MessageUtility.simpleHtmlDuplicateRemoval(htmlContent);
                     final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
@@ -187,6 +186,9 @@ public class MailAttachment extends AJAXServlet {
                     attachmentInputStream = new UnsynchronizedByteArrayInputStream(bytes);
                 } else {
                     attachmentInputStream = mailPart.getInputStream();
+                    /*-
+                     * Unfortunately, size indicated by mail part is not exact, therefore skip it.
+                     *
                     length = mailPart.getSize();
                     if (length <= 0) {
                         tfh = new ThresholdFileHolder();
@@ -195,6 +197,8 @@ public class MailAttachment extends AJAXServlet {
                         attachmentInputStream = tfh.getStream();
                         length = tfh.getLength();
                     }
+                     *
+                     */
                 }
                 /*
                  * Content-Length
@@ -218,7 +222,13 @@ public class MailAttachment extends AJAXServlet {
                     sb.append("attachment");
                     DownloadUtility.appendFilenameParameter(fileName, null, userAgent, sb);
                     resp.setHeader("Content-Disposition", sb.toString());
-                    contentType = "application/octet-stream";
+                    if (mailPart.containsContentType()) {
+                        final ContentType ct = mailPart.getContentType();
+                        ct.removeParameter("name");
+                        contentType = ct.toString();
+                    } else {
+                        contentType = "application/octet-stream";
+                    }
                     resp.setContentType(contentType);
                 } else {
                     final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(attachmentInputStream, fileName, mailPart.getContentType().toString(), userAgent);
