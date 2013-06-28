@@ -292,11 +292,24 @@ public final class DBUtils {
     /**
      * Extends a SQL statement with enough ? characters in the last IN argument.
      *
-     * @param sql SQL statement ending with "IN (";
+     * @param sql SQL statement ending with "IN ("
      * @param length number of entries.
+     * @param appendix An optional appendix
      * @return the ready to use SQL statement.
      */
     public static String getIN(final String sql, final int length) {
+        return getIN(sql, length, null);
+    }
+
+    /**
+     * Extends a SQL statement with enough ? characters in the last IN argument.
+     *
+     * @param sql SQL statement ending with "IN ("
+     * @param length number of entries.
+     * @param appendix An optional appendix
+     * @return the ready to use SQL statement.
+     */
+    public static String getIN(final String sql, final int length, final String appendix) {
         if (length <= 0) {
             return sql;
         }
@@ -306,6 +319,12 @@ public final class DBUtils {
             retval.append(",?");
         }
         retval.append(')');
+        if (null != appendix) {
+            if (!appendix.startsWith(" ")) {
+                retval.append(" ");
+            }
+            retval.append(appendix);
+        }
         return retval.toString();
     }
 
