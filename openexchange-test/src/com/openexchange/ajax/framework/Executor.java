@@ -52,6 +52,8 @@ package com.openexchange.ajax.framework;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Comparator;
@@ -82,7 +84,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie2;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
+import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -90,6 +94,7 @@ import com.meterware.httpunit.cookies.CookieJar;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AJAXRequest.FieldParameter;
 import com.openexchange.ajax.framework.AJAXRequest.FileParameter;
+import com.openexchange.ajax.framework.AJAXRequest.Method;
 import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
@@ -278,7 +283,7 @@ public class Executor extends Assert {
     }
 
     public static WebResponse execute4Download(final AJAXSession session, final AJAXRequest<?> request,
-        final String protocol, final String hostname) throws OXException, IOException, JSONException {
+        final String protocol, final String hostname) throws OXException, IOException, JSONException, SAXException {
         final String urlString = protocol + "://" + hostname + request.getServletPath();
         final WebRequest req;
         switch (request.getMethod()) {
@@ -287,6 +292,10 @@ public class Executor extends Assert {
             req = get;
             addURLParameter(get, session, request);
             break;
+        case PUT:
+            final PutMethodWebRequest put = new PutMethodWebRequest(addURLParameter(urlString, session, request), new ByteArrayInputStream(request.getBody().toString().getBytes("US-ASCII")), "text/javascript; charset=us-ascii");
+            req = put;
+            break;
         default:
             throw AjaxExceptionCodes.IMVALID_PARAMETER.create(request.getMethod().name());
         }
@@ -294,12 +303,37 @@ public class Executor extends Assert {
         final WebResponse resp;
         // The upload returns a web page that should not be interpreted.
         // final long startRequest = System.currentTimeMillis();
-        resp = conv.getResource(req);
+        resp = Method.GET == request.getMethod() ? conv.getResource(req) : conv.getResponse(req);
         //final long requestDuration = System.currentTimeMillis() - startRequest;
         return resp;
     }
 
-    private static void addURLParameter(final GetMethodWebRequest req, final AJAXSession session, final AJAXRequest<?> request) throws IOException, JSONException {
+    private static String addURLParameter(final String urlString, final AJAXSession session, final AJAXRequest<?> request) throws IOException, JSONException {
+        final StringBuilder sb = new StringBuilder(urlString);
+        boolean first = true;
+        if (null != session.getId()) {
+            sb.append('?').append(AJAXServlet.PARAMETER_SESSION).append('=').append(session.getId());
+            first = false;
+        }
+        for (final Parameter param : request.getParameters()) {
+            if (!(param instanceof FileParameter)) {
+                if (first) {
+                    sb.append('?');
+                    first = false;
+                } else {
+                    sb.append('&');
+                }
+                sb.append(encode(param.getName())).append('=').append(encode(param.getValue()));
+            }
+        }
+        return sb.toString();
+    }
+
+    private static String encode(final String s) throws UnsupportedEncodingException {
+        return URLEncoder.encode(s, "ISO-8859-1");
+    }
+
+    private static void addURLParameter(final WebRequest req, final AJAXSession session, final AJAXRequest<?> request) throws IOException, JSONException {
         if (null != session.getId()) {
             req.setParameter(AJAXServlet.PARAMETER_SESSION, session.getId());
         }
