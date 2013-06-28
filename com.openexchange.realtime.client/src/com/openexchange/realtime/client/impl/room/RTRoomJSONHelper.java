@@ -104,7 +104,6 @@ public class RTRoomJSONHelper {
         objectToSend.put("element", "message");
         objectToSend.put("to", to);
         objectToSend.put("payloads", payloads);
-        objectToSend.put("tracer", UUID.randomUUID().toString());
 
         return objectToSend;
     }

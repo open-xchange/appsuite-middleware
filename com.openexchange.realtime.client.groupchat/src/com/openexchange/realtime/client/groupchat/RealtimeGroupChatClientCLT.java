@@ -115,33 +115,41 @@ public class RealtimeGroupChatClientCLT {
             UUID uuid = UUID.randomUUID();
             System.out.print("Password: ");
             String password = new BufferedReader(new InputStreamReader(System.in)).readLine();
-            RTConnectionProperties properties = RTConnectionProperties.newBuilder(user, password, "GroupChatClient-" + uuid.toString())
-                .setConnectionType(RTConnectionType.LONG_POLLING)
-                .setHost(hostname)
-                .setSecure(false)
-                .build();
-            RTConnection connection = RTConnectionFactory.getInstance().newConnection(properties);
-            connection.connect();
-            RTRoomFacory roomFactory = new ChineseRoomFactory();
-            room = roomFactory.newRoom(connection);
-            room.join(new ID("synthetic.china://room1"), new RTMessageHandler() {
-                @Override
-                public void onMessage(JSONValue message) {
-                    JSONObject array = message.toObject();
-                    try {
-                        String from = array.getString("from");
-                        JSONObject payloads = array.getJSONArray("payloads").getJSONObject(0);
-                        String data = payloads.getString("data");
-                        System.out.println(from.substring(5, from.length()).split("/")[0] + ": " + data);
-                    } catch (JSONException e) {
-                        System.err.println("JSONException: " + e.getMessage());
-                    }
-                }
-            });
-            Thread chat = new Thread(new Chat());
-            chat.start();
-            chat.join();
 
+            RTConnection connection = null;
+            try {
+                RTConnectionProperties properties = RTConnectionProperties.newBuilder(user, password, "GroupChatClient-" + uuid.toString())
+                    .setConnectionType(RTConnectionType.LONG_POLLING)
+                    .setHost(hostname)
+                    .setSecure(false)
+                    .build();
+                connection = RTConnectionFactory.getInstance().newConnection(properties);
+                RTRoomFacory roomFactory = new ChineseRoomFactory();
+                room = roomFactory.newRoom(connection);
+                room.join(new ID("synthetic.china://room1"), new RTMessageHandler() {
+                    @Override
+                    public void onMessage(JSONValue message) {
+                        JSONObject array = message.toObject();
+                        try {
+                            String from = array.getString("from");
+                            JSONObject payloads = array.getJSONArray("payloads").getJSONObject(0);
+                            String data = payloads.getString("data");
+                            System.out.println(from.substring(5, from.length()).split("/")[0] + ": " + data);
+                        } catch (JSONException e) {
+                            System.err.println("JSONException: " + e.getMessage());
+                        }
+                    }
+                });
+                Thread chat = new Thread(new Chat());
+                chat.start();
+                chat.join();
+            } catch (RTException e) {
+                throw e;
+            } finally {
+                if (connection != null) {
+                    connection.close();
+                }
+            }
         } catch (ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp();

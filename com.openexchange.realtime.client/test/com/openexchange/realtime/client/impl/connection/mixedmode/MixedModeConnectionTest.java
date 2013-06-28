@@ -55,11 +55,9 @@ import com.openexchange.realtime.client.ID;
 import com.openexchange.realtime.client.RTConnection;
 import com.openexchange.realtime.client.RTConnectionFactory;
 import com.openexchange.realtime.client.RTConnectionProperties;
+import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
-import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
-import com.openexchange.realtime.client.RTUserState;
-import com.openexchange.realtime.client.impl.room.chinese.ChineseRoom;
 import com.openexchange.realtime.client.room.RTRoom;
 import com.openexchange.realtime.client.room.RTRoomFacory;
 import com.openexchange.realtime.client.room.chinese.ChineseRoomFactory;
@@ -90,7 +88,6 @@ public class MixedModeConnectionTest {
             .setSecure(true)
             .build();
         RTConnection connection = RTConnectionFactory.getInstance().newConnection(connectionProperties);
-        RTUserState state = connection.connect();
         RTRoomFacory roomFactory = new ChineseRoomFactory();
         RTRoom chineseRoom = roomFactory.newRoom(connection);
         chineseRoom.join(new ID("synthetic.china://room1"), new RTMessageHandler() {

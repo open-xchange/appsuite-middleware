@@ -50,6 +50,7 @@
 package com.openexchange.realtime.client.room;
 
 import com.openexchange.realtime.client.ID;
+import com.openexchange.realtime.client.RTConnection;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
 
@@ -62,8 +63,8 @@ import com.openexchange.realtime.client.RTMessageHandler;
 public interface RTRoom {
 
     /**
-     * Use this to join a room. One user is able to join many different rooms. For each room an own {@link RTMessageHandler} implementation
-     * is required which means, that you should avoid joining a room twice and using {@link RTMessageHandler} implementation twice.
+     * Joins the addressed room. Internally the given {@link RTMessageHandler} will be registered at the used
+     * {@link RTConnection}. The selector for incoming messages will be generated automatically.
      *
      * @param room - defines the room to join to.
      * @param messageHandler - {@link RTMessageHandler} to deal with messages
@@ -80,7 +81,6 @@ public interface RTRoom {
 
     /**
      * Use this to leave the room joined with com.openexchange.realtime.client.room.RTRoom.join(String, String, RTMessageHandler) before.
-     * After leaving the room you are allowed to use the instance of {@link RTMessageHandler} again.
      */
     public void leave() throws RTException;
 

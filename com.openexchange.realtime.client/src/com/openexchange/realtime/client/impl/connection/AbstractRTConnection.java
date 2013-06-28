@@ -64,7 +64,7 @@ import com.openexchange.realtime.client.RTConnection;
 import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
-import com.openexchange.realtime.client.RTUserState;
+import com.openexchange.realtime.client.RTSession;
 import com.openexchange.realtime.client.impl.config.ConfigurationProvider;
 
 /**
@@ -84,7 +84,7 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     protected final RTProtocol protocol;
 
-    protected RTUserState userState;
+    protected RTSession session;
 
     //did we successfully login to the backend to receive a serversession?
     protected boolean loggedIn = false;
@@ -103,32 +103,6 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
     }
 
     @Override
-    public RTUserState connect() throws RTException {
-        return connect(null);
-    }
-
-    @Override
-    public RTUserState connect(RTMessageHandler messageHandler) throws RTException {
-        if (messageHandler != null) {
-            registerHandler0(ConfigurationProvider.getInstance().getDefaultSelector(), messageHandler);
-        }
-
-        if (!loggedIn) {
-            userState = Login.doLogin(
-                connectionProperties.getSecure(),
-                connectionProperties.getHost(),
-                connectionProperties.getPort(),
-                connectionProperties.getUser(),
-                connectionProperties.getPassword());
-            loggedIn = true;
-        } else {
-            LOG.info("User is already logged in. Returning existing user state.");
-        }
-
-        return userState;
-    }
-
-    @Override
     public void registerHandler(String selector, RTMessageHandler messageHandler) throws RTException {
         registerHandler0(selector, messageHandler);
     }
@@ -139,12 +113,65 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
     }
 
     @Override
+    public RTSession getOXSession() {
+        if (session == null || !loggedIn) {
+            throw new IllegalStateException();
+        }
+
+        return session;
+    }
+
+    @Override
     public void close() throws RTException {
         protocol.release();
         Thread deliverer = delivererRef.get();
         if (deliverer != null) {
             deliverer.interrupt();
             delivererRef.compareAndSet(deliverer, null);
+        }
+
+        logout();
+    }
+
+    /**
+     * A convenience method for creating a valid OX session and registering a message handler
+     * for the default selector.
+     *
+     * @param messageHandler A handler for messages that address the selector 'default'.
+     * @return The newly created session.
+     * @throws RTException
+     */
+    protected void login(RTMessageHandler messageHandler) throws RTException {
+        if (messageHandler != null) {
+            registerHandler0(ConfigurationProvider.getInstance().getDefaultSelector(), messageHandler);
+        }
+
+        if (!loggedIn) {
+            session = Login.doLogin(
+                connectionProperties.getSecure(),
+                connectionProperties.getHost(),
+                connectionProperties.getPort(),
+                connectionProperties.getUser(),
+                connectionProperties.getPassword());
+            loggedIn = true;
+        } else {
+            LOG.info("User is already logged in. Returning existing user state.");
+        }
+    }
+
+    /**
+     * Destroys the active user session and performs a logout on the server.
+     */
+    protected void logout() {
+        if (loggedIn && session != null) {
+            try {
+                Login.doLogout(session, connectionProperties.getSecure(), connectionProperties.getHost(), connectionProperties.getPort());
+            } catch (RTException e) {
+                LOG.warn("Error during logout request.", e);
+            }
+
+            loggedIn = false;
+            session = null;
         }
     }
 

@@ -52,11 +52,11 @@ package com.openexchange.realtime.client;
 import org.apache.commons.lang.Validate;
 
 /**
- * Keep track of the user state like session and cookies
+ * Keeps track of the session information like session id and cookies.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class RTUserState {
+public class RTSession {
 
     /**
      * ConextID of the current client/user
@@ -105,11 +105,11 @@ public class RTUserState {
     private final String user;
 
     /**
-     * Initializes a new {@link RTUserState}.
+     * Initializes a new {@link RTSession}.
      * 
      * @param contextID - contextID of the user
      * @param sessionID - sessionID of the user
-     * @param locale - locae of the user
+     * @param locale - locale of the user
      * @param random - current random
      * @param userID - numeric userID
      * @param secretSessionKey - currently assigned secret session key
@@ -117,7 +117,7 @@ public class RTUserState {
      * @param jSessionID - currently assigned jSessionID
      * @param user - name of the user
      */
-    public RTUserState(final long contextID, final String sessionID, final String locale, final String random, final long userID, final String user, final String secretSessionKey, final String secretSessionValue, final String jSessionID) {
+    public RTSession(final long contextID, final String sessionID, final String locale, final String random, final long userID, final String user, final String secretSessionKey, final String secretSessionValue, final String jSessionID) {
         Validate.isTrue(contextID != 0, "ERROR: contextID is missing!");
         Validate.notEmpty(sessionID, "ERROR: SessionID is missing!");
         Validate.notEmpty(locale, "ERROR: Locale is missing!");
@@ -137,15 +137,6 @@ public class RTUserState {
         this.secretSessionValue = secretSessionValue;
         this.jSessionID = jSessionID;
         this.user = user;
-    }
-
-    /**
-     * Gets the session
-     * 
-     * @return The session
-     */
-    public String getSession() {
-        return this.sessionID;
     }
 
     /**

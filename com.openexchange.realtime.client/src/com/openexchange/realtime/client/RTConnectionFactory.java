@@ -77,13 +77,34 @@ public class RTConnectionFactory {
     }
 
     /**
-     * Create a new connection based on the given properties.
-     * 
+     * Establishes a connection to the OX RT component. This includes creating a valid OX session.
+     * The session can be obtained from the connection object via {@link RTConnection#getOXSession()}.
+     * It may be used for arbitrary requests and stays active during the connections life time.
+     * If a message handler is given,it will be registered to receive messages for selector 'default'.
+     * <br>
+     * A connection should always be closed after the intended work is done. The following usage
+     * pattern is considered as best practice:
+     *
+     * <pre>
+     * RTConnection connection = null;
+     * try {
+     *     connection = RTConnectionFactory.getInstance().newConnection(properties);
+     *     // do whatever you want here ...
+     * } catch (RTException e) {
+     *     // handle exception
+     * } finally {
+     *     if (connection != null) {
+     *         connection.close();
+     *     }
+     * }
+     * </pre>
+     *
      * @param properties The properties.
-     * @return The connection.
+     * @param messageHandler The message handler for default messages. May be <code>null</code>.
+     * @return The established connection.
      * @throws RTException
      */
-    public RTConnection newConnection(RTConnectionProperties properties) throws RTException {
+    public RTConnection newConnection(RTConnectionProperties properties, RTMessageHandler messageHandler) throws RTException {
         RTConnectionType type = properties.getConnectionType();
         Validate.notNull(type, "ConnectionType must be set in RTConnectionProperties.");
         ConnectionProvider provider = generators.get(type);
@@ -91,7 +112,19 @@ public class RTConnectionFactory {
             throw new RTException("No provider exists for ConnectionType " + type.toString());
         }
 
-        return provider.create(properties);
+        return provider.create(properties, messageHandler);
+    }
+
+    /**
+     * Convenience method to establish a connection without a message handler for default messages.
+     * See {@link #newConnection(RTConnectionProperties, RTMessageHandler)} for details.
+     *
+     * @param properties The properties.
+     * @return The established connection.
+     * @throws RTException
+     */
+    public RTConnection newConnection(RTConnectionProperties properties) throws RTException {
+        return newConnection(properties, null);
     }
 
 }

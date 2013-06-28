@@ -71,10 +71,10 @@ import com.ning.http.client.Response;
 import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
-import com.openexchange.realtime.client.RTUserState;
 import com.openexchange.realtime.client.impl.connection.AbstractRTConnection;
 import com.openexchange.realtime.client.impl.connection.Constants;
 import com.openexchange.realtime.client.impl.connection.RTProtocol;
+import com.openexchange.realtime.client.impl.connection.RequestBuilderHelper;
 import com.openexchange.realtime.client.impl.connection.SequenceGenerator;
 
 /**
@@ -129,7 +129,7 @@ import com.openexchange.realtime.client.impl.connection.SequenceGenerator;
  *             "type": "ack"
  *           }
  *           </pre>
- *         <li> Send a ping into a room to verify that you didn't leve the room without a proper leave message
+ *         <li> Send a ping into a room to verify that you didn't leave the room without a proper leave message
  *           <pre>
  *           [
  *             {
@@ -197,20 +197,12 @@ public class MixedModeRTConnection extends AbstractRTConnection {
 
     SequenceGenerator sequenceGenerator = new SequenceGenerator();
 
-    public MixedModeRTConnection(RTConnectionProperties connectionProperties) {
+    public MixedModeRTConnection(RTConnectionProperties connectionProperties, RTMessageHandler messageHandler) throws RTException {
         super(connectionProperties);
         asyncHttpClient = new AsyncHttpClient();
         atmosphereClient = new AtmosphereClient();
-    }
 
-    @Override
-    public RTUserState connect() throws RTException {
-        return connect(null);
-    }
-
-    @Override
-    public RTUserState connect(RTMessageHandler messageHandler) throws RTException {
-        RTUserState state = super.connect(messageHandler);
+        login(messageHandler);
         request = this.createAtmosphereRequest();
         socket = this.createSocket();
         try {
@@ -218,8 +210,6 @@ public class MixedModeRTConnection extends AbstractRTConnection {
         } catch (IOException e) {
             throw new RTException("Could not open return channel.", e);
         }
-
-        return state;
     }
 
     /* atmosphere ping pong
@@ -236,7 +226,7 @@ public class MixedModeRTConnection extends AbstractRTConnection {
     }
 
     @Override
-    public void postReliable(JSONValue jsonValue) throws RTException {
+    public void send(JSONValue jsonValue) throws RTException {
         JSONValue sequencedPayload = null;
         if(jsonValue.isArray()) {
             sequencedPayload = protocol.addSequence(jsonValue.toArray());
@@ -353,14 +343,14 @@ public class MixedModeRTConnection extends AbstractRTConnection {
     }
 
     private void fireQueryRequest(JSONValue jsonValue) throws RTException {
-        RequestBuilder queryRequestBuilder = RTRequestBuilderHelper.newQueryRequest(connectionProperties, userState);
+        RequestBuilder queryRequestBuilder = RequestBuilderHelper.newQueryRequest(connectionProperties, session);
         queryRequestBuilder.setBody(jsonValue.toString());
         Request request = queryRequestBuilder.build();
         fireSynchronousRequest(request);
     }
 
     private void fireSendRequest(JSONValue jsonValue) throws RTException {
-        RequestBuilder builder = RTRequestBuilderHelper.newSendRequest(connectionProperties, userState);
+        RequestBuilder builder = RequestBuilderHelper.newSendRequest(connectionProperties, session);
         builder.setBody(jsonValue.toString());
         Request request = builder.build();
         fireSynchronousRequest(request);
@@ -403,7 +393,7 @@ public class MixedModeRTConnection extends AbstractRTConnection {
      * @return {@link Request}
      */
     private org.atmosphere.wasync.Request createAtmosphereRequest() {
-        org.atmosphere.wasync.RequestBuilder<AtmosphereRequestBuilder> requestBuilder = RTRequestBuilderHelper.newAtmosphereRequestBuilder(this.atmosphereClient, connectionProperties, userState);
+        org.atmosphere.wasync.RequestBuilder<AtmosphereRequestBuilder> requestBuilder = RequestBuilderHelper.newAtmosphereRequestBuilder(this.atmosphereClient, connectionProperties, session);
         requestBuilder.encoder(new Encoder<JSONObject, String>() {
             @Override
             public String encode(final JSONObject jsonObject) {

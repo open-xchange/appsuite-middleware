@@ -59,29 +59,14 @@ import org.json.JSONValue;
 public interface RTConnection {
 
     /**
-     * Establishes a connection to the OX RT component. This includes creating a valid user session. If you want to register
-     * a {@link RTMessageHandler} for messages that are sent to the default selector, see {@link #connect(RTMessageHandler)}. 
-     *
-     * @return The @{link RTUserState} created during login
-     * @throws RTException if connecting failed
+     * Returns the OX session owned by this connection instance. If the connection is already closed or could not be established
+     * an {@link IllegalStateException} will be thrown.
      */
-    RTUserState connect() throws RTException;
-
-    /**
-     * Establishes a connection to the OX RT component. This includes creating a valid user session. The messageHandler will be registered
-     * for the selector "default". See {@link RTConnection#registerHandler(String, RTMessageHandler)} if you want to add message handlers for
-     * selectors besides the default selector.
-     *
-     * @param messageHandler The message handler that is registered for the selector "default". If <code>null</code>, incoming messages for
-     *                       the default selector will be discarded immediately.
-     * @return The @{link RTUserState} created during login
-     * @throws RTException if connecting failed or would overwrite an already existing MessageHandler for the selector "default".
-     */
-     RTUserState connect(RTMessageHandler messageHandler) throws RTException;
+    RTSession getOXSession();
 
     /**
      * Registers a new {@link RTMessageHandler} for the given selector. To ensure that no message gets lost, it's best practice to
-     * register message handlers before calling {@link #connect(RTMessageHandler)}.
+     * register message handlers before calling {@link #login(RTMessageHandler)}.
      *
      * @param selector The selector
      * @param messageHandler The message handler
@@ -113,7 +98,7 @@ public interface RTConnection {
      * @param message The message.
      * @throws RTException
      */
-    void postReliable(JSONValue message) throws RTException;
+    void send(JSONValue message) throws RTException;
 
     /**
      * Closes the connection and frees all resources. The underlying user session will also be closed.

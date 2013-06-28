@@ -52,6 +52,7 @@ package com.openexchange.realtime.client.impl.connection.mixedmode;
 import com.openexchange.realtime.client.RTConnection;
 import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
+import com.openexchange.realtime.client.RTMessageHandler;
 import com.openexchange.realtime.client.impl.connection.ConnectionProvider;
 
 
@@ -63,8 +64,8 @@ import com.openexchange.realtime.client.impl.connection.ConnectionProvider;
 public class MixedModeProvider implements ConnectionProvider {
 
     @Override
-    public RTConnection create(RTConnectionProperties properties) throws RTException {
-        return new MixedModeRTConnection(properties);
+    public RTConnection create(RTConnectionProperties properties, RTMessageHandler messageHandler) throws RTException {
+        return new MixedModeRTConnection(properties, messageHandler);
     }
 
 }

@@ -61,9 +61,7 @@ import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
-import com.openexchange.realtime.client.RTUserState;
 import com.openexchange.realtime.client.impl.config.ConfigurationProvider;
-import com.openexchange.realtime.client.impl.connection.AbstractRTConnection;
 
 /**
  * {@link RTConnectionTest}
@@ -103,7 +101,6 @@ public class RTConnectionTest extends AbstractRTConnection implements RTMessageH
     @Test
     public void testRTChat() throws Throwable {
         registerHandler(SELECTOR, this);
-        connect();
 
         // We joined the room. Now we expect:
         String joinResp =
@@ -146,14 +143,12 @@ public class RTConnectionTest extends AbstractRTConnection implements RTMessageH
             lastException = t;
         }
     }
-    
+
     @Override
-    public RTUserState connect(RTMessageHandler messageHandler) throws RTException {
+    public void login(RTMessageHandler messageHandler) throws RTException {
         if (messageHandler != null) {
             registerHandler0(ConfigurationProvider.getInstance().getDefaultSelector(), messageHandler);
         }
-
-        return null;
     }
 
     @Override
@@ -175,6 +170,6 @@ public class RTConnectionTest extends AbstractRTConnection implements RTMessageH
     public void post(JSONValue message) throws RTException {}
 
     @Override
-    public void postReliable(JSONValue message) throws RTException {}
+    public void send(JSONValue message) throws RTException {}
 
 }

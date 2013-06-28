@@ -65,7 +65,7 @@ import com.ning.http.client.Cookie;
 import com.ning.http.client.Response;
 import com.ning.http.client.generators.InputStreamBodyGenerator;
 import com.openexchange.realtime.client.RTException;
-import com.openexchange.realtime.client.RTUserState;
+import com.openexchange.realtime.client.RTSession;
 import com.openexchange.realtime.client.impl.config.ConfigurationProvider;
 
 /**
@@ -85,10 +85,9 @@ public class Login {
 
     private static final String SECRET_VALUE = "open-xchange-secret-value";
 
-    public static RTUserState doLogin(final boolean secure, String host, int port, String username, String password) throws RTException {
+    public static RTSession doLogin(final boolean secure, String host, int port, String username, String password) throws RTException {
         String loginUrl = buildLoginUrl(secure, host, port);
-        String loginBody = buildLoginBody(
-            ConfigurationProvider.getInstance().getLoginAction(),
+        String loginBody = buildLoginAction(
             username,
             password,
             ConfigurationProvider.getInstance().getClientId());
@@ -107,7 +106,7 @@ public class Login {
                 throw new RTException("Login failed, expected HTTP 200 status instead of " + statusCode);
             }
 
-            return createUserState(response);
+            return createSession(response);
         } catch (UnsupportedEncodingException e) {
             throw new RTException("Login failed.", e);
         } catch (IOException e) {
@@ -121,24 +120,48 @@ public class Login {
         }
     }
 
+    public static void doLogout(RTSession session, boolean secure, String host, int port) throws RTException {
+        String logoutUrl = buildLoginUrl(secure, host, port);
+        AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
+        try {
+            Future<Response> f = asyncHttpClient.prepareGet(logoutUrl + "?action=logout&session=" + session.getSessionID())
+                .setHeader("User-Agent", Constants.USER_AGENT_NAME)
+                .setHeader("Cookie", RequestBuilderHelper.cookieHeaderFromSession(session))
+                .execute();
+            Response response = f.get();
+            int statusCode = response.getStatusCode();
+
+            if(statusCode != 200) {
+                throw new RTException("Logout failed, expected HTTP 200 status instead of " + statusCode);
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw new RTException("Logout failed.", e);
+        } catch (IOException e) {
+            throw new RTException("Logout failed.", e);
+        } catch (InterruptedException e) {
+            throw new RTException("Logout failed.", e);
+        } catch (ExecutionException e) {
+            throw new RTException("Logout failed.", e);
+        } finally {
+            asyncHttpClient.close();
+        }
+    }
+
     /**
      * Build the request Body used for the login request.
-     * 
-     * @param action the login action to execute
+     *
      * @param username the username to user for the login request
      * @param password the password to use for the login request
      * @param clientID the clientID to use for the login request. This is used for cookie hash calculations
      * @return the built login body
      */
-    private static String buildLoginBody(String action, String username, String password, String clientID) {
-        Validate.notEmpty(action);
+    private static String buildLoginAction(String username, String password, String clientID) {
         Validate.notEmpty(username);
         Validate.notEmpty(password);
         Validate.notEmpty(clientID);
 
         StringBuilder sb = new StringBuilder();
-
-        sb.append("action=").append(action);
+        sb.append("action=login");
         sb.append("&");
         sb.append("name=").append(username);
         sb.append("&");
@@ -177,19 +200,19 @@ public class Login {
             sb.append(":").append(port);
         }
 
-        sb.append(ConfigurationProvider.getInstance().getLoginPath());
+        sb.append(ConfigurationProvider.getInstance().getApiPath() + "/login");
 
         return sb.toString();
     }
 
     /**
-     * Create a UserState that collects infos returned via the login response
+     * Create a session object that collects infos returned via the login response
      * 
      * @param the response the reveived server response
-     * @return the RTUserState based on the values parsed from the server response
+     * @return the RTSession based on the values parsed from the server response
      * @Throws RTException if the server response couldn't be parsed
      */
-    private static RTUserState createUserState(Response response) throws RTException {
+    private static RTSession createSession(Response response) throws RTException {
         Validate.notNull(response, "Response must not be null");
 
         try {
@@ -203,7 +226,7 @@ public class Login {
             long userID = responseBody.getLong("user_id");
             String user = responseBody.getString("user");
 
-            return new RTUserState(contextID, sessionID, locale, random, userID, user, cookieMap.get(SECRET_KEY), cookieMap.get(SECRET_VALUE), cookieMap.get(JSESSIONID));
+            return new RTSession(contextID, sessionID, locale, random, userID, user, cookieMap.get(SECRET_KEY), cookieMap.get(SECRET_VALUE), cookieMap.get(JSESSIONID));
         } catch (JSONException e) {
             throw new RTException(e);
         } catch (IOException e) {

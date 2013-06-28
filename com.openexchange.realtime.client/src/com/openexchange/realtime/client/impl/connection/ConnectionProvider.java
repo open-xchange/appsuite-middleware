@@ -52,15 +52,26 @@ package com.openexchange.realtime.client.impl.connection;
 import com.openexchange.realtime.client.RTConnection;
 import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
+import com.openexchange.realtime.client.RTMessageHandler;
 
 
 /**
- * {@link ConnectionProvider}
+ * A {@link ConnectionProvider} is an internal provider for creating RTConnection instances.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public interface ConnectionProvider {
 
-    RTConnection create(RTConnectionProperties properties) throws RTException;
+    /**
+     * Creates a new RTConnection instance based on the given properties. A returned
+     * connection must always be in an established state. If a message handler is given,
+     * it will be registered to receive messages for selector 'default'.
+     *
+     * @param properties The properties.
+     * @param messageHandler The message handler for default messages. May be <code>null</code>.
+     * @return The established connection.
+     * @throws RTException If the connection could not be established.
+     */
+    RTConnection create(RTConnectionProperties properties, RTMessageHandler messageHandler) throws RTException;
 
 }

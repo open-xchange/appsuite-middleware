@@ -74,7 +74,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
     /**
      * Instance used for communication (beside 'create')
      */
-    private RTConnection rtConnection = null;
+    private RTConnection connection = null;
 
     /**
      * String to address the messages
@@ -110,7 +110,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
      */
     public AbstractRoomImpl(RTConnection connection) {
         Validate.notNull(connection);
-        this.rtConnection = connection;
+        this.connection = connection;
     }
 
     /**
@@ -124,7 +124,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
         this.roomName = UUID.randomUUID().toString();
         this.toAddress = room.toString();
         this.rtMessageHandler = messageHandler;
-        rtConnection.registerHandler(this.roomName, this.rtMessageHandler);
+        connection.registerHandler(this.roomName, this.rtMessageHandler);
         setupTimer();
 
         try {
@@ -139,11 +139,11 @@ public abstract class AbstractRoomImpl implements RTRoom {
      * Sets up the ping timer to run and give a heart beat to the server
      */
     protected void setupTimer() {
-        Validate.notNull(this.rtConnection);
+        Validate.notNull(this.connection);
         Validate.notNull(this.toAddress);
 
         this.pingTimer = new Timer("Ping");
-        this.pingTimerTask = new RTRoomPingTimerTask(rtConnection, this.toAddress);
+        this.pingTimerTask = new RTRoomPingTimerTask(connection, this.toAddress);
         this.pingTimer.scheduleAtFixedRate(this.pingTimerTask, 30000, 30000);
     }
 
@@ -162,7 +162,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
      */
     @Override
     public void say(String message) throws RTException {
-        Validate.notNull(rtConnection, "Not logged in!");
+        Validate.notNull(connection, "Not logged in!");
         Validate.notNull(message, "Message cannot be null!");
 
         try {
@@ -191,13 +191,13 @@ public abstract class AbstractRoomImpl implements RTRoom {
      */
     @Override
     public void leave() throws RTException {
-        Validate.notNull(rtConnection, "Not logged in!");
+        Validate.notNull(connection, "Not logged in!");
 
         try {
             JSONValue leave = this.createLeaveObject();
             this.send(leave);
 
-            this.rtConnection.unregisterHandler(this.roomName);
+            this.connection.unregisterHandler(this.roomName);
         } catch (Exception exception) {
             throw new RTException(exception);
         }
@@ -221,7 +221,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
      */
     protected void send(JSONValue objectToSend) throws RTException {
         try {
-            this.rtConnection.postReliable(objectToSend);
+            this.connection.send(objectToSend);
         } catch (Exception exception) {
             throw new RTException(exception);
         }
@@ -245,7 +245,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
      * @return The rtConnection
      */
     protected RTConnection getRtConnection() {
-        return rtConnection;
+        return connection;
     }
 
     /**
@@ -254,7 +254,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
      * @param rtConnection The rtConnection to set
      */
     protected void setRtConnection(RTConnection rtConnection) {
-        this.rtConnection = rtConnection;
+        this.connection = rtConnection;
     }
 
     /**

@@ -102,11 +102,6 @@ public class ConfigurationProvider {
     private String apiPath = "/appsuite/api";
 
     /**
-     * Path for login calls
-     */
-    private String loginPath = "/ajax/login";
-
-    /**
      * Path for creation calls
      */
     private String createPath = apiPath + "/oxodocumentfilter";
@@ -125,12 +120,6 @@ public class ConfigurationProvider {
      * Path for atmosphere calls
      */
     private String atmospherePath = "/realtime/atmosphere/rt";
-
-    // actions
-    /**
-     * Parameter used for login action
-     */
-    private String loginAction = "login";
 
     /**
      * Parameter used for query actions
@@ -255,15 +244,12 @@ public class ConfigurationProvider {
         result.append(" clientId: " + this.getClientId() + newLine);
         result.append(" defaultSelector: " + this.getDefaultSelector() + newLine);
         result.append(" apiPath: " + this.getApiPath() + newLine);
-        result.append(" loginPath: " + this.getLoginPath() + newLine);
         result.append(" createPath: " + this.getCreatePath() + newLine);
         result.append(" queryPath: " + this.getQueryPath() + newLine);
         result.append(" sendPath: " + this.getSendPath() + newLine);
         result.append(" atmospherePath: " + this.getAtmospherePath() + newLine);
-        result.append(" loginAction: " + this.getLoginAction() + newLine);
         result.append(" queryAction: " + this.getQueryAction() + newLine);
         result.append(" sendAction: " + this.getSendAction() + newLine);
-        result.append(" loginAction: " + this.getLoginAction() + newLine);
         result.append(" connectionType: " + this.getConnectionType() + newLine);
         result.append(" host: " + this.getHost() + newLine);
         result.append(" port: " + this.getPort() + newLine);
@@ -301,15 +287,6 @@ public class ConfigurationProvider {
     }
 
     /**
-     * Gets the loginPath
-     * 
-     * @return The loginPath
-     */
-    public String getLoginPath() {
-        return loginPath;
-    }
-
-    /**
      * Gets the createPath
      * 
      * @return The createPath
@@ -334,15 +311,6 @@ public class ConfigurationProvider {
      */
     public String getSendPath() {
         return sendPath;
-    }
-
-    /**
-     * Gets the loginAction
-     * 
-     * @return The loginAction
-     */
-    public String getLoginAction() {
-        return loginAction;
     }
 
     /**
@@ -511,26 +479,6 @@ public class ConfigurationProvider {
          */
         public Builder setHost(String host) {
             configurationProvider.host = host;
-            return this;
-        }
-
-        /**
-         * Sets the loginAction.
-         * 
-         * @param loginAction - the loginAction.
-         */
-        public Builder setLoginAction(String loginAction) {
-            configurationProvider.loginAction = loginAction;
-            return this;
-        }
-
-        /**
-         * Sets the loginPath.
-         * 
-         * @param loginPath - the loginPath.
-         */
-        public Builder setLoginPath(String loginPath) {
-            configurationProvider.loginPath = loginPath;
             return this;
         }
 
