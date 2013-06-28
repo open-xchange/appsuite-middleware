@@ -406,7 +406,7 @@ public class MixedModeRTConnection extends AbstractRTConnection {
             public JSONObject decode(final Event event, String received) {
 
                 if (event.equals(Event.MESSAGE)) {
-                    LOG.info("Received message in atmosphere channel: " + received);
+                    LOG.debug("Received message in atmosphere channel: " + received);
 
                     try {
                         JSONObject jsonObject = null;
