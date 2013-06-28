@@ -70,6 +70,11 @@ public final class DriveExceptionMessages implements LocalizableStrings {
     public static final String NO_CHECKSUM_FOR_FILE_MSG = "No checksum for file \"%1$s\" available";
     public static final String UPLOADED_FILE_CHECKSUM_ERROR_MSG = "Checksum \"%1$s\" for uploaded file \"%2$s\" different from \"%3$s\"";
     public static final String DIRECTORYVERSION_NOT_FOUND_MSG = "The directory \"%1$s\" with checksum \"%2$s\"";
+    public static final String NO_DELETE_FILE_PERMISSION_MSG = "You are not allowed to delete the file \"%1$s\" at \"%2$s\"";
+    public static final String NO_CREATE_FILE_PERMISSION_MSG = "You are not allowed to create files at \"%1$s\"";
+    public static final String NO_MODIFY_FILE_PERMISSION_MSG = "You are not allowed to modify the file \"%1$s\" at \"%2$s\"";
+    public static final String NO_DELETE_DIRECTORY_PERMISSION_MSG = "You are not allowed to delete the directory \"%1$s\"";
+    public static final String NO_CREATE_DIRECTORY_PERMISSION_MSG = "You are not allowed to create directories at \"%1$s\"";
 
     /**
      * Prevent instantiation.

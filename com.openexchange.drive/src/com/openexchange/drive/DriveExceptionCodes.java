@@ -85,11 +85,26 @@ public enum DriveExceptionCodes implements OXExceptionCode {
     /** No checksum for file \"%1$s\" available */
     NO_CHECKSUM_FOR_FILE(DriveExceptionMessages.NO_CHECKSUM_FOR_FILE_MSG, Category.CATEGORY_ERROR, 8),
 
-    /** "Checksum \"%1$s\" for uploaded file \"%2$s\" different from \"%3$s\"" */
+    /** Checksum \"%1$s\" for uploaded file \"%2$s\" different from \"%3$s\" */
     UPLOADED_FILE_CHECKSUM_ERROR(DriveExceptionMessages.UPLOADED_FILE_CHECKSUM_ERROR_MSG, Category.CATEGORY_ERROR, 9),
 
     /** The directory \"%1$s\" with checksum \"%2$s\" was not found" */
     DIRECTORYVERSION_NOT_FOUND(DriveExceptionMessages.DIRECTORYVERSION_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 10),
+
+    /** You are not allowed to delete the file \"%1$s\" at \"%2$s\" */
+    NO_DELETE_FILE_PERMISSION(DriveExceptionMessages.NO_DELETE_FILE_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 11),
+
+    /** You are not allowed to create files at \"%1$s\" */
+    NO_CREATE_FILE_PERMISSION(DriveExceptionMessages.NO_CREATE_FILE_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 12),
+
+    /** You are not allowed to modify the file \"%1$s\" at \"%2$s\" */
+    NO_MODIFY_FILE_PERMISSION(DriveExceptionMessages.NO_MODIFY_FILE_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 13),
+
+    /** You are not allowed to delete the directory \"%1$s\" */
+    NO_DELETE_DIRECTORY_PERMISSION(DriveExceptionMessages.NO_DELETE_DIRECTORY_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 14),
+
+    /** You are not allowed to create directories at \"%1$s\" */
+    NO_CREATE_DIRECTORY_PERMISSION(DriveExceptionMessages.NO_CREATE_DIRECTORY_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 15),
 
     ;
 

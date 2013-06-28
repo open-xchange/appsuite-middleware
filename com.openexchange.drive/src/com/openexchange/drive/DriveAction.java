@@ -66,9 +66,11 @@ public interface DriveAction<T extends DriveVersion> extends Comparable<DriveAct
     static final String PARAMETER_TOTAL_LENGTH = "totalLength";
     static final String PARAMETER_OFFSET = "offset";
     static final String PARAMETER_CONTENT_TYPE = "contentType";
+    static final String PARAMETER_ERROR = "error";
+    static final String PARAMETER_QUARANTINE = "quarantine";
 
     static final Set<String> PARAMETER_NAMES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(new String[]
-        { PARAMETER_PATH, PARAMETER_TOTAL_LENGTH, PARAMETER_OFFSET, PARAMETER_CONTENT_TYPE }
+        { PARAMETER_PATH, PARAMETER_TOTAL_LENGTH, PARAMETER_OFFSET, PARAMETER_CONTENT_TYPE, PARAMETER_ERROR, PARAMETER_QUARANTINE }
     )));
 
     /**

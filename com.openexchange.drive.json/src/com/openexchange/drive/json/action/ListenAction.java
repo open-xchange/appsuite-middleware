@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.ConfigurationService;
@@ -75,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ListenAction implements AJAXActionService {
+public class ListenAction extends AbstractDriveAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, final ServerSession session) throws OXException {
@@ -116,7 +115,7 @@ public class ListenAction implements AJAXActionService {
         List<DriveAction<? extends DriveVersion>> actions = null != event ? event.getActions() :
             new ArrayList<DriveAction<? extends DriveVersion>>(0);
         try {
-            return new AJAXRequestResult(JsonDriveAction.serialize(actions), "json");
+            return new AJAXRequestResult(JsonDriveAction.serialize(actions, getLocale(session)), "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

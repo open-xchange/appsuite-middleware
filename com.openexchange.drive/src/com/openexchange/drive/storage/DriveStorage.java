@@ -114,6 +114,10 @@ public class DriveStorage {
         this.knownFolders = new FolderCache();
     }
 
+    public FileStoragePermission getOwnPermission(String path) throws OXException {
+        return getFolder(path).getOwnPermission();
+    }
+
     /**
      * Performs the passed storage operation inside a transaction.
      *
@@ -591,7 +595,7 @@ public class DriveStorage {
         return getFolderAccess().getFolder(newFolderID);
     }
 
-    private static LinkedList<String> split(String path) throws OXException {
+    public static LinkedList<String> split(String path) throws OXException {
         if (null == path || false == path.startsWith(ROOT_PATH)) {
             throw DriveExceptionCodes.INVALID_PATH.create(path);
         }
@@ -605,7 +609,7 @@ public class DriveStorage {
         return names;
     }
 
-    private static String combine(String path1, String path2) {
+    public static String combine(String path1, String path2) {
         if (Strings.isEmpty(path1)) {
             return path2;
         } else if (Strings.isEmpty(path2)) {

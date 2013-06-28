@@ -52,7 +52,6 @@ package com.openexchange.drive.json.action;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveAction;
@@ -72,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SyncFilesAction implements AJAXActionService {
+public class SyncFilesAction extends AbstractDriveAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
@@ -112,7 +111,7 @@ public class SyncFilesAction implements AJAXActionService {
          * return json result
          */
         try {
-            return new AJAXRequestResult(JsonFileAction.serialize(actions), "json");
+            return new AJAXRequestResult(JsonFileAction.serialize(actions, getLocale(session)), "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

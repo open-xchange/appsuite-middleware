@@ -50,15 +50,18 @@
 package com.openexchange.drive.json.json;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -81,7 +84,7 @@ public abstract class JsonDriveAction<T extends DriveVersion> implements DriveAc
         this.parameters = parameters;
     }
 
-    public static JSONObject serialize(DriveAction<? extends DriveVersion> action) throws JSONException {
+    public static JSONObject serialize(DriveAction<? extends DriveVersion> action, Locale locale) throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.putOpt("action", action.getAction().toString().toLowerCase());
         if (null != action.getVersion()) {
@@ -105,21 +108,26 @@ public abstract class JsonDriveAction<T extends DriveVersion> implements DriveAc
         if (null != action.getParameters()) {
             for (Map.Entry<String, Object> entry : action.getParameters().entrySet()) {
                 if (DriveAction.PARAMETER_NAMES.contains(entry.getKey())) {
-                    jsonObject.put(entry.getKey(), entry.getValue());
+                    if (DriveAction.PARAMETER_ERROR.equals(entry.getKey()) && OXException.class.isInstance(entry.getValue())) {
+                        JSONObject errorObject = new JSONObject();
+                        ResponseWriter.addException(errorObject, (OXException)entry.getValue(), locale, false);
+                        jsonObject.put("error", errorObject);
+                    } else {
+                        jsonObject.put(entry.getKey(), entry.getValue());
+                    }
                 }
             }
         }
         return jsonObject;
     }
 
-    public static JSONArray serialize(List<DriveAction<? extends DriveVersion>> actions) throws JSONException {
+    public static JSONArray serialize(List<DriveAction<? extends DriveVersion>> actions, Locale locale) throws JSONException {
         JSONArray jsonArray = new JSONArray();
         for (DriveAction<? extends DriveVersion> action : actions) {
-            jsonArray.put(serialize(action));
+            jsonArray.put(serialize(action, locale));
         }
         return jsonArray;
     }
-
 
     @Override
     public T getVersion() {

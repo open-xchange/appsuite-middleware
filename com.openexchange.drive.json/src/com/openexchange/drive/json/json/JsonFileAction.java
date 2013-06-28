@@ -52,6 +52,7 @@ package com.openexchange.drive.json.json;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -73,32 +74,10 @@ public class JsonFileAction extends JsonDriveAction<FileVersion> {
         super(action, version, newVersion, parameters);
     }
 
-    @Override
-    public String toString() {
-        try {
-            return serialize(this).toString();
-        } catch (JSONException e) {
-            return super.toString();
-        }
-    }
-
-    public static JSONObject serialize(DriveAction<FileVersion> action) throws JSONException {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.putOpt("action", action.getAction().toString().toLowerCase());
-        jsonObject.putOpt("version", JsonFileVersion.serialize(action.getVersion()));
-        jsonObject.putOpt("newVersion", JsonFileVersion.serialize(action.getNewVersion()));
-        for (Map.Entry<String, Object> entry : action.getParameters().entrySet()) {
-            if (DriveAction.PARAMETER_NAMES.contains(entry.getKey())) {
-                jsonObject.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return jsonObject;
-    }
-
-    public static JSONArray serialize(List<DriveAction<FileVersion>> actions) throws JSONException {
+    public static JSONArray serialize(List<DriveAction<FileVersion>> actions, Locale locale) throws JSONException {
         JSONArray jsonArray = new JSONArray();
         for (DriveAction<FileVersion> action : actions) {
-            jsonArray.put(serialize(action));
+            jsonArray.put(serialize(action, locale));
         }
         return jsonArray;
     }

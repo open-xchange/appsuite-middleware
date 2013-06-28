@@ -53,10 +53,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
 import com.openexchange.drive.actions.DownloadFileAction;
 import com.openexchange.drive.actions.EditFileAction;
+import com.openexchange.drive.actions.ErrorFileAction;
 import com.openexchange.drive.actions.RemoveFileAction;
 import com.openexchange.drive.actions.UploadFileAction;
 import com.openexchange.drive.comparison.Change;
@@ -67,6 +69,7 @@ import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.internal.UploadHelper;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStoragePermission;
 
 
 /**
@@ -78,6 +81,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
 
     private Set<String> usedFilenames;
     private final String path;
+    private FileStoragePermission folderPermission;
 
     public FileSynchronizer(DriveSession session, VersionMapper<FileVersion> mapper, String path) throws OXException {
         super(session, mapper);
@@ -117,19 +121,81 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     protected void processClientChange(SyncResult<FileVersion> result, ThreeWayComparison<FileVersion> comparison) throws OXException {
         switch (comparison.getClientChange()) {
         case DELETED:
-            /*
-             * deleted on client, delete on server, too, let client remove it's metadata
-             */
-            result.addActionForServer(new RemoveFileAction(comparison.getServerVersion(), comparison, path));
-            result.addActionForClient(new AcknowledgeFileAction(comparison.getOriginalVersion(), null, comparison, path));
+            if (mayDelete(comparison.getServerVersion())) {
+                /*
+                 * delete on server, too, let client remove it's metadata
+                 */
+                result.addActionForServer(new RemoveFileAction(comparison.getServerVersion(), comparison, path));
+                result.addActionForClient(new AcknowledgeFileAction(comparison.getOriginalVersion(), null, comparison, path));
+            } else {
+                /*
+                 * not allowed, let client re-download the file, indicate as error without quarantine flag
+                 */
+                File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
+                result.addActionForClient(new DownloadFileAction(comparison.getClientVersion(), comparison.getServerVersion(),
+                    comparison, path, serverFile.getFileSize(), serverFile.getFileMIMEType()));
+                result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), comparison.getServerVersion(), comparison,
+                    path, DriveExceptionCodes.NO_DELETE_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path), false));
+            }
             break;
         case MODIFIED:
+            if (mayModify(comparison.getServerVersion())) {
+                /*
+                 * let client upload the modified file
+                 */
+                result.addActionForClient(new UploadFileAction(comparison.getServerVersion(), comparison.getClientVersion(), comparison,
+                    path, getUploadOffset(path, comparison.getClientVersion())));
+            } else if (mayCreate()) {
+                /*
+                 * not allowed, keep both client- and server versions, let client first rename it's file...
+                 */
+                FileVersion renamedVersion = getRenamedVersion(comparison.getClientVersion(), usedFilenames);
+                result.addActionForClient(new EditFileAction(comparison.getClientVersion(), renamedVersion, comparison, path));
+                /*
+                 * ... then mark that file as error (without quarantine)...
+                 */
+                result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), comparison.getServerVersion(), comparison,
+                    path, DriveExceptionCodes.NO_MODIFY_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path), false));
+                /*
+                 * ... then upload it, and download the server version afterwards
+                 */
+                result.addActionForClient(new UploadFileAction(null, renamedVersion, comparison, path, getUploadOffset(path, renamedVersion)));
+                File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
+                result.addActionForClient(new DownloadFileAction(null, comparison.getServerVersion(), comparison, path,
+                    serverFile.getFileSize(), serverFile.getFileMIMEType()));
+            } else {
+                /*
+                 * not allowed, let client first rename it's file and mark as error with quarantine flag...
+                 */
+                FileVersion renamedVersion = getRenamedVersion(comparison.getClientVersion(), usedFilenames);
+                result.addActionForClient(new EditFileAction(comparison.getClientVersion(), renamedVersion, comparison, path));
+                result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), renamedVersion, comparison,
+                    path, DriveExceptionCodes.NO_MODIFY_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path), true));
+                /*
+                 * ... then download the server version afterwards
+                 */
+                File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
+                result.addActionForClient(new DownloadFileAction(null, comparison.getServerVersion(), comparison, path,
+                    serverFile.getFileSize(), serverFile.getFileMIMEType()));
+            }
+            break;
         case NEW:
             /*
-             * new/modified on client, let client upload the file
+             * new on client
              */
-            result.addActionForClient(new UploadFileAction(
-                comparison.getServerVersion(), comparison.getClientVersion(), comparison, path, getUploadOffset(path, comparison.getClientVersion())));
+            if (mayCreate()) {
+                /*
+                 * let client upload the file
+                 */
+                result.addActionForClient(new UploadFileAction(comparison.getServerVersion(), comparison.getClientVersion(), comparison,
+                    path, getUploadOffset(path, comparison.getClientVersion())));
+            } else {
+                /*
+                 * not allowed, indicate as error with quarantine flag
+                 */
+                result.addActionForClient(new ErrorFileAction(null, comparison.getClientVersion(), comparison, path,
+                    DriveExceptionCodes.NO_CREATE_FILE_PERMISSION.create(path), true));
+            }
             break;
         default:
             break;
@@ -160,9 +226,17 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 FileVersion renamedVersion = getRenamedVersion(comparison.getClientVersion(), usedFilenames);
                 result.addActionForClient(new EditFileAction(comparison.getClientVersion(), renamedVersion, comparison, path));
                 /*
-                 * ... then upload it, and download the server version afterwards
+                 * ... then upload it if possible...
                  */
-                result.addActionForClient(new UploadFileAction(null, renamedVersion, comparison, path, getUploadOffset(path, renamedVersion)));
+                if (mayCreate()) {
+                    result.addActionForClient(new UploadFileAction(null, renamedVersion, comparison, path, getUploadOffset(path, renamedVersion)));
+                } else {
+                    result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), renamedVersion, comparison, path,
+                        DriveExceptionCodes.NO_CREATE_FILE_PERMISSION.create(path), true));
+                }
+                /*
+                 * ... and download the server version aftwerwards
+                 */
                 File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
                 result.addActionForClient(new DownloadFileAction(null, comparison.getServerVersion(), comparison, path, serverFile.getFileSize(), serverFile.getFileMIMEType()));
             }
@@ -176,11 +250,60 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
             /*
              * edit-delete conflict, let client upload it's file
              */
-            result.addActionForClient(new UploadFileAction(
-                null, comparison.getClientVersion(), comparison, path, getUploadOffset(path, comparison.getClientVersion())));
+            if (mayCreate()) {
+                result.addActionForClient(new UploadFileAction(
+                    null, comparison.getClientVersion(), comparison, path, getUploadOffset(path, comparison.getClientVersion())));
+            } else {
+                /*
+                 * not allowed, indicate as error with quarantine flag
+                 */
+                result.addActionForClient(new ErrorFileAction(null, comparison.getClientVersion(), comparison, path,
+                    DriveExceptionCodes.NO_CREATE_FILE_PERMISSION.create(path), true));
+            }
         } else {
             throw new UnsupportedOperationException("Not implemented: Server: " + comparison.getServerChange() + ", Client: " + comparison.getClientChange());
         }
+    }
+
+    private boolean mayDelete(FileVersion version) throws OXException {
+        int deletePermission = getPermission().getDeletePermission();
+        if (FileStoragePermission.DELETE_ALL_OBJECTS <= deletePermission) {
+            return true;
+        } else if (FileStoragePermission.DELETE_OWN_OBJECTS > deletePermission) {
+            return false;
+        } else if (FileStoragePermission.DELETE_OWN_OBJECTS == deletePermission) {
+            ServerFileVersion serverFileVersion = ServerFileVersion.valueOf(version, path, session);
+            return serverFileVersion.getFile().getCreatedBy() == session.getServerSession().getUserId();
+        } else {
+            throw new UnsupportedOperationException("unknown permission: " + deletePermission);
+        }
+    }
+
+    private boolean mayCreate() throws OXException {
+        FileStoragePermission permission = getPermission();
+        return FileStoragePermission.CREATE_OBJECTS_IN_FOLDER <= permission.getFolderPermission() &&
+            FileStoragePermission.WRITE_OWN_OBJECTS <= permission.getWritePermission();
+    }
+
+    private boolean mayModify(FileVersion version) throws OXException {
+        int writePermission = getPermission().getWritePermission();
+        if (FileStoragePermission.WRITE_ALL_OBJECTS <= writePermission) {
+            return true;
+        } else if (FileStoragePermission.WRITE_OWN_OBJECTS > writePermission) {
+            return false;
+        } else if (FileStoragePermission.WRITE_OWN_OBJECTS == writePermission) {
+            ServerFileVersion serverFileVersion = ServerFileVersion.valueOf(version, path, session);
+            return serverFileVersion.getFile().getCreatedBy() == session.getServerSession().getUserId();
+        } else {
+            throw new UnsupportedOperationException("unknown permission: " + writePermission);
+        }
+    }
+
+    private FileStoragePermission getPermission() throws OXException {
+        if (null == folderPermission) {
+            folderPermission = session.getStorage().getOwnPermission(path);
+        }
+        return folderPermission;
     }
 
     private static FileVersion getRenamedVersion(final FileVersion conflictingVersion, Set<String> usedFilenames) {
@@ -198,6 +321,10 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 return conflictingVersion.getChecksum();
             }
         };
+    }
+
+    private long getUploadOffset(String path, FileVersion fileVersion) throws OXException {
+        return new UploadHelper(session).getUploadOffset(fileVersion);
     }
 
     public static String findAlternativeName(String conflictingName, Set<String> usedFilenames) {
@@ -234,10 +361,6 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
             alternativeName = fileName + fileExtension;
         } while (usedFilenames.contains(alternativeName));
         return alternativeName;
-    }
-
-    private long getUploadOffset(String path, FileVersion fileVersion) throws OXException {
-        return new UploadHelper(session).getUploadOffset(fileVersion);
     }
 
 }

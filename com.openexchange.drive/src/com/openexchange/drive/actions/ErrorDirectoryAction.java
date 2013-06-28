@@ -47,51 +47,29 @@
  *
  */
 
-package com.openexchange.drive;
+package com.openexchange.drive.actions;
+
+import com.openexchange.drive.Action;
+import com.openexchange.drive.DirectoryVersion;
+import com.openexchange.drive.comparison.ThreeWayComparison;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link Action}
- *
- * Defines executable actions.
+ * {@link ErrorDirectoryAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public enum Action {
+public class ErrorDirectoryAction extends AbstractAction<DirectoryVersion> {
 
-    /**
-     * Edits a file's metadata.
-     */
-    EDIT,
+    public ErrorDirectoryAction(DirectoryVersion version, DirectoryVersion newVersion, ThreeWayComparison<DirectoryVersion> comparison, OXException error, boolean quarantine) {
+        super(version, newVersion, comparison);
+        parameters.put(PARAMETER_ERROR, error);
+        parameters.put(PARAMETER_QUARANTINE, Boolean.valueOf(quarantine));
+    }
 
-    /**
-     * Stores a file.
-     */
-    DOWNLOAD,
-
-    /**
-     * Uploads a file to the server.
-     */
-    UPLOAD,
-
-    /**
-     * Removes a file.
-     */
-    REMOVE,
-
-    /**
-     * Acknowledges a file creation, deletion or modification.
-     */
-    ACKNOWLEDGE,
-
-    /**
-     * Synchronizes the files in a directory.
-     */
-    SYNC,
-
-    /**
-     * Signals an erroneous version.
-     */
-    ERROR
+    @Override
+    public Action getAction() {
+        return Action.ERROR;
+    }
 
 }
-

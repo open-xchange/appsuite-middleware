@@ -51,7 +51,6 @@ package com.openexchange.drive.json.action;
 
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.container.IFileHolder;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
@@ -71,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @DispatcherNotes(defaultFormat = "file")
-public class DownloadAction implements AJAXActionService {
+public class DownloadAction extends AbstractDriveAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,51 +47,30 @@
  *
  */
 
-package com.openexchange.drive;
+package com.openexchange.drive.json.action;
+
+import java.util.Locale;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link Action}
- *
- * Defines executable actions.
+ * {@link AbstractDriveAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public enum Action {
+public abstract class AbstractDriveAction implements AJAXActionService {
 
-    /**
-     * Edits a file's metadata.
-     */
-    EDIT,
-
-    /**
-     * Stores a file.
-     */
-    DOWNLOAD,
-
-    /**
-     * Uploads a file to the server.
-     */
-    UPLOAD,
-
-    /**
-     * Removes a file.
-     */
-    REMOVE,
-
-    /**
-     * Acknowledges a file creation, deletion or modification.
-     */
-    ACKNOWLEDGE,
-
-    /**
-     * Synchronizes the files in a directory.
-     */
-    SYNC,
-
-    /**
-     * Signals an erroneous version.
-     */
-    ERROR
+    protected Locale getLocale(ServerSession session) {
+        Locale locale = null;
+        if (null != session) {
+            User user = session.getUser();
+            if (null != user) {
+                locale = user.getLocale();
+            }
+        }
+        return null != locale ? locale : Locale.US;
+    }
 
 }
-

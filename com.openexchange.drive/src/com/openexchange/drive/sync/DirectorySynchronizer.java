@@ -49,15 +49,20 @@
 
 package com.openexchange.drive.sync;
 
+import java.util.Collection;
 import com.openexchange.drive.DirectoryVersion;
+import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.actions.AcknowledgeDirectoryAction;
+import com.openexchange.drive.actions.ErrorDirectoryAction;
 import com.openexchange.drive.actions.RemoveDirectoryAction;
 import com.openexchange.drive.actions.SyncDirectoryAction;
 import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.ThreeWayComparison;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
+import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStoragePermission;
 
 
 /**
@@ -96,16 +101,39 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion>{
     protected void processClientChange(SyncResult<DirectoryVersion> result, ThreeWayComparison<DirectoryVersion> comparison) throws OXException {
         switch (comparison.getClientChange()) {
         case DELETED:
-            /*
-             * deleted on client, delete on server, too, let client remove it's metadata
-             */
-            result.addActionForServer(new RemoveDirectoryAction(comparison.getServerVersion(), comparison));
-            result.addActionForClient(new AcknowledgeDirectoryAction(comparison.getOriginalVersion(), null, comparison));
+            if (mayDelete(comparison.getServerVersion())) {
+                /*
+                 * deleted on client, delete on server, too, let client remove it's metadata
+                 */
+                result.addActionForServer(new RemoveDirectoryAction(comparison.getServerVersion(), comparison));
+                result.addActionForClient(new AcknowledgeDirectoryAction(comparison.getOriginalVersion(), null, comparison));
+            } else {
+                /*
+                 * not allowed, let client synchronize the directory again, indicate as error without quarantine flag
+                 */
+                result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison));
+                result.addActionForClient(new ErrorDirectoryAction(comparison.getClientVersion(), comparison.getServerVersion(), comparison,
+                    DriveExceptionCodes.NO_DELETE_DIRECTORY_PERMISSION.create(comparison.getServerVersion().getPath()), false));
+            }
             break;
         case NEW:
+            String parentPath = getLastExistingParentPath(comparison.getClientVersion().getPath());
+            if (mayCreate(parentPath)) {
+                /*
+                 * new on client, let client synchronize the directory
+                 */
+                result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
+            } else {
+                /*
+                 * not allowed, indicate as error with quarantine flag
+                 */
+                result.addActionForClient(new ErrorDirectoryAction(null, comparison.getClientVersion(), comparison,
+                    DriveExceptionCodes.NO_CREATE_DIRECTORY_PERMISSION.create(parentPath), true));
+            }
+            break;
         case MODIFIED:
             /*
-             * new/modified on client, let client synchronize the directory
+             * modified on client, let client synchronize the directory
              */
             result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
             break;
@@ -146,10 +174,45 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion>{
             /*
              * edit-delete conflict, create on server, let client synchronize the directory
              */
-            result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
+            String parentPath = getLastExistingParentPath(comparison.getClientVersion().getPath());
+            if (mayCreate(parentPath)) {
+                result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
+            } else {
+                result.addActionForClient(new ErrorDirectoryAction(null, comparison.getClientVersion(), comparison,
+                    DriveExceptionCodes.NO_CREATE_DIRECTORY_PERMISSION.create(parentPath), true));
+            }
         } else {
             throw new UnsupportedOperationException("Not implemented: Server: " + comparison.getServerChange() + ", Client: " + comparison.getClientChange());
         }
+    }
+
+    private boolean mayDelete(DirectoryVersion version) throws OXException {
+        if (DriveConstants.ROOT_PATH.equals(version.getPath())) {
+            return false;
+        }
+        return session.getStorage().getOwnPermission(version.getPath()).isAdmin();
+    }
+
+    private boolean mayCreate(String parentPath) throws OXException {
+        return FileStoragePermission.CREATE_SUB_FOLDERS <= session.getStorage().getOwnPermission(parentPath).getFolderPermission();
+    }
+
+    private String getLastExistingParentPath(String path) {
+        Collection<? extends DirectoryVersion> serverVersions = mapper.getServerVersions();
+        String currentPath = path;
+        int idx;
+        do {
+            idx = currentPath.lastIndexOf(DriveConstants.PATH_SEPARATOR);
+            if (0 < idx) {
+                currentPath = currentPath.substring(0, idx);
+                for (DirectoryVersion serverVersion : serverVersions) {
+                    if (serverVersion.getPath().equals(currentPath)) {
+                        return currentPath;
+                    }
+                }
+            }
+        } while (0 < idx);
+        return DriveConstants.ROOT_PATH;
     }
 
 }
