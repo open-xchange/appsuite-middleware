@@ -113,7 +113,7 @@ public class ZipDocumentsAction extends AbstractFileAction {
                         idVersionPairs.add(pair);
                     }
                 } catch (final JSONException e) {
-                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "body", value);
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "body", e.getMessage());
                 }
             }
         }
