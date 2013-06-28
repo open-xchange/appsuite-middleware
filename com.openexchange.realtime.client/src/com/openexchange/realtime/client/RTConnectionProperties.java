@@ -49,8 +49,6 @@
 
 package com.openexchange.realtime.client;
 
-import com.openexchange.realtime.client.user.RTUser;
-
 /**
  * {@link RTConnectionProperties} are used to configure a {@link RTConnection}.
  * 
@@ -65,7 +63,7 @@ public class RTConnectionProperties {
     private String user;
 
     private String password;
-    
+
     private String resource;
 
     private RTConnectionType type;
@@ -106,7 +104,7 @@ public class RTConnectionProperties {
     public String getResource() {
         return resource;
     }
-    
+
     /**
      * Gets the type
      * 
@@ -163,16 +161,7 @@ public class RTConnectionProperties {
     public static Builder newBuilder(String username, String password, String resource) {
         return new Builder(username, password, resource);
     }
-    
-    /**
-     * Factory method for creating a new {@link Builder}.
-     * @param user the user
-     * @return a RTConnectionProperties builder
-     */
-    public static Builder newBuilder(RTUser user) {
-        return new Builder(user.getName(), user.getPassword(), user.getResource());
-    }
-    
+
     public static class Builder {
 
         private final RTConnectionProperties properties;
@@ -236,7 +225,7 @@ public class RTConnectionProperties {
             if (properties.password == null) {
                 throw new IllegalStateException("A password must be set!");
             }
-            
+
             if (properties.resource == null) {
                 throw new IllegalStateException("A password must be set!");
             }

@@ -47,41 +47,42 @@
  *
  */
 
-package com.openexchange.realtime.client.room;
+package com.openexchange.realtime.client.impl.connection;
 
-import com.openexchange.realtime.client.ID;
+import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.realtime.client.RTException;
-import com.openexchange.realtime.client.RTMessageHandler;
 
 /**
- * Interface that should be implemented when it is desired to use the chat functionality of the realtime framework.
+ * {@link SequenceGenerator} Generates sequentially raising numbers and can be reset to be reused again.
  * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface RTRoom {
+public class SequenceGenerator {
+
+    private AtomicLong sequence;
+
+    public SequenceGenerator() {
+        sequence = new AtomicLong();
+    }
 
     /**
-     * Use this to join a room. One user is able to join many different rooms. For each room an own {@link RTMessageHandler} implementation
-     * is required which means, that you should avoid joining a room twice and using {@link RTMessageHandler} implementation twice.
-     *
-     * @param room - defines the room to join to.
-     * @param messageHandler - {@link RTMessageHandler} to deal with messages
-     */
-    public void join(ID room, RTMessageHandler messageHandler) throws RTException;
-
-    /**
-     * Use this method to say something into a room. Based on settings made with com.openexchange.realtime.client.room.RTRoom.join(String,
-     * String, RTMessageHandler) your message will be transferred to all users joined the room.
+     * Generate the next sequence number
      * 
-     * @param message - the message to send.
+     * @return the next sequence number
+     * @throws RTException if incrementing would cause a number overflow to give the user a chance to reset the counter via
+     *             {@link SequenceGenerator#reset()}
      */
-    public void say(String message) throws RTException;
+    public long nextSequence() throws RTException {
+        if (sequence.get() == Long.MAX_VALUE) {
+            throw new RTException("Sequence overflow, reset counter to continue");
+        }
+        return sequence.getAndIncrement();
+    }
 
     /**
-     * Use this to leave the room joined with com.openexchange.realtime.client.room.RTRoom.join(String, String, RTMessageHandler) before.
-     * After leaving the room you are allowed to use the instance of {@link RTMessageHandler} again.
+     * Reset the counter to 0.
      */
-    public void leave() throws RTException;
-
+    public void reset() {
+        sequence.set(0);
+    }
 }

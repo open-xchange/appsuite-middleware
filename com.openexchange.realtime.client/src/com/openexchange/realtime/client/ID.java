@@ -190,13 +190,13 @@ public class ID {
      * Validate that mandatory id components exist.
      */
     private void validate() throws IllegalArgumentException {
-        if (user == null) {
-            throw new IllegalArgumentException("User information is obligatory for IDs");
-        }
-
-        if (context == null) {
-            throw new IllegalArgumentException("Context information is obligatory for IDs");
-        }
+//        if (user == null) {
+//            throw new IllegalArgumentException("User information is obligatory for IDs");
+//        }
+//
+//        if (context == null) {
+//            throw new IllegalArgumentException("Context information is obligatory for IDs");
+//        }
     }
 
     public String getProtocol() {

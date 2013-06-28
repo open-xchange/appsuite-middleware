@@ -47,41 +47,73 @@
  *
  */
 
-package com.openexchange.realtime.client.room;
+package com.openexchange.realtime.client.impl.room.chinese;
 
-import com.openexchange.realtime.client.ID;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONValue;
+import com.openexchange.realtime.client.RTConnection;
 import com.openexchange.realtime.client.RTException;
-import com.openexchange.realtime.client.RTMessageHandler;
+import com.openexchange.realtime.client.impl.room.AbstractRoomImpl;
+
 
 /**
- * Interface that should be implemented when it is desired to use the chat functionality of the realtime framework.
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4
+ * {@link ChineseRoom}
+ *
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface RTRoom {
+public class ChineseRoom extends AbstractRoomImpl {
 
     /**
-     * Use this to join a room. One user is able to join many different rooms. For each room an own {@link RTMessageHandler} implementation
-     * is required which means, that you should avoid joining a room twice and using {@link RTMessageHandler} implementation twice.
-     *
-     * @param room - defines the room to join to.
-     * @param messageHandler - {@link RTMessageHandler} to deal with messages
+     * Initializes a new {@link ChineseRoom}.
+     * @param rtUser
+     * @param rtConnectionProperties
      */
-    public void join(ID room, RTMessageHandler messageHandler) throws RTException;
-
+    public ChineseRoom(RTConnection connection) {
+        super(connection);
+    }
     /**
-     * Use this method to say something into a room. Based on settings made with com.openexchange.realtime.client.room.RTRoom.join(String,
-     * String, RTMessageHandler) your message will be transferred to all users joined the room.
      * 
-     * @param message - the message to send.
+     * @param message
+     * @return 
+     * @throws JSONException 
+     * @throws RTException 
      */
-    public void say(String message) throws RTException;
-
-    /**
-     * Use this to leave the room joined with com.openexchange.realtime.client.room.RTRoom.join(String, String, RTMessageHandler) before.
-     * After leaving the room you are allowed to use the instance of {@link RTMessageHandler} again.
-     */
-    public void leave() throws RTException;
+//    [
+//     {
+//       "seq": 3,
+//       "to": "synthetic.china://room1",
+//       "payloads": [
+//         {
+//           "data": "say",
+//           "element": "action"
+//         },
+//         {
+//           "data": "Hallo, Hamburg! Gl..ckwunsch zum Einj..hrigen!",
+//           "namespace": "china",
+//           "element": "message"
+//         }
+//       ],
+//       "element": "message"
+//     }
+//   ]
+    public JSONArray toPayloads(String message) throws JSONException, RTException {
+        JSONArray payloads = new JSONArray();
+        JSONObject actionPayload = new JSONObject();
+        JSONObject messagePayload = new JSONObject();
+        
+        actionPayload.put("element", "action");
+        actionPayload.put("data", "say");
+        
+        messagePayload.put("element", "message");
+        messagePayload.put("namespace", "china");
+        messagePayload.put("data", message);
+        
+        payloads.put(actionPayload);
+        payloads.put(messagePayload);
+        
+        return payloads;
+    }
 
 }

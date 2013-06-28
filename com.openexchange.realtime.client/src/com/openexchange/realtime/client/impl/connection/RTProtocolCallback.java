@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,38 @@
  *
  */
 
-package com.openexchange.realtime.client.room;
+package com.openexchange.realtime.client.impl.connection;
 
-import com.openexchange.realtime.client.ID;
+import org.json.JSONObject;
+import com.openexchange.realtime.client.RTConnection;
 import com.openexchange.realtime.client.RTException;
-import com.openexchange.realtime.client.RTMessageHandler;
+
 
 /**
- * Interface that should be implemented when it is desired to use the chat functionality of the realtime framework.
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4
+ * A {@link RTProtocolCallback} is used to realize a bidirectional communication between
+ * a {@link RTConnection} and the {@link RTProtocol}. It is meant to be implemented by
+ * concrete {@link RTProtocol} implementations.
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface RTRoom {
+public interface RTProtocolCallback {
 
     /**
-     * Use this to join a room. One user is able to join many different rooms. For each room an own {@link RTMessageHandler} implementation
-     * is required which means, that you should avoid joining a room twice and using {@link RTMessageHandler} implementation twice.
+     * The protocol is handling a message containing a sequence number. In these cases the
+     * received message must be acknowledged. The according message has already been prepared
+     * and needs to be sent now by the connection.
      *
-     * @param room - defines the room to join to.
-     * @param messageHandler - {@link RTMessageHandler} to deal with messages
+     * @param ack The ACK message.
      */
-    public void join(ID room, RTMessageHandler messageHandler) throws RTException;
+    void sendACK(JSONObject ack) throws RTException;
 
     /**
-     * Use this method to say something into a room. Based on settings made with com.openexchange.realtime.client.room.RTRoom.join(String,
-     * String, RTMessageHandler) your message will be transferred to all users joined the room.
-     * 
-     * @param message - the message to send.
+     * Clients have to send PINGs regularly to let the server know that they are still alive.
+     * The protocol does the necessary PING handling and prepares the according messages. These
+     * need to be sent to the server then.
+     *
+     * @param ping The PING message.
      */
-    public void say(String message) throws RTException;
-
-    /**
-     * Use this to leave the room joined with com.openexchange.realtime.client.room.RTRoom.join(String, String, RTMessageHandler) before.
-     * After leaving the room you are allowed to use the instance of {@link RTMessageHandler} again.
-     */
-    public void leave() throws RTException;
+    void sendPing(JSONObject ping) throws RTException;
 
 }

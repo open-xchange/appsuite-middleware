@@ -47,41 +47,22 @@
  *
  */
 
-package com.openexchange.realtime.client.room;
+package com.openexchange.realtime.client.impl.connection;
 
-import com.openexchange.realtime.client.ID;
-import com.openexchange.realtime.client.RTException;
-import com.openexchange.realtime.client.RTMessageHandler;
 
 /**
- * Interface that should be implemented when it is desired to use the chat functionality of the realtime framework.
+ * {@link Constants} - Gathers constants used throughout the project.
  * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface RTRoom {
+public class Constants {
 
-    /**
-     * Use this to join a room. One user is able to join many different rooms. For each room an own {@link RTMessageHandler} implementation
-     * is required which means, that you should avoid joining a room twice and using {@link RTMessageHandler} implementation twice.
-     *
-     * @param room - defines the room to join to.
-     * @param messageHandler - {@link RTMessageHandler} to deal with messages
-     */
-    public void join(ID room, RTMessageHandler messageHandler) throws RTException;
+    //Cookies
+    public static final String JSESSIONID_NAME = "JSESSIONID";
 
-    /**
-     * Use this method to say something into a room. Based on settings made with com.openexchange.realtime.client.room.RTRoom.join(String,
-     * String, RTMessageHandler) your message will be transferred to all users joined the room.
-     * 
-     * @param message - the message to send.
-     */
-    public void say(String message) throws RTException;
+    //Request
+    public static final long REQUEST_TIMEOUT = 100;
 
-    /**
-     * Use this to leave the room joined with com.openexchange.realtime.client.room.RTRoom.join(String, String, RTMessageHandler) before.
-     * After leaving the room you are allowed to use the instance of {@link RTMessageHandler} again.
-     */
-    public void leave() throws RTException;
-
+    // Client
+    public static final String USER_AGENT_NAME = "rt/1.0";
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,24 @@
  *
  */
 
-package com.openexchange.realtime.client.room;
+package com.openexchange.realtime.client.impl.connection.mixedmode;
 
-import com.openexchange.realtime.client.ID;
+import com.openexchange.realtime.client.RTConnection;
+import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
-import com.openexchange.realtime.client.RTMessageHandler;
+import com.openexchange.realtime.client.impl.connection.ConnectionProvider;
+
 
 /**
- * Interface that should be implemented when it is desired to use the chat functionality of the realtime framework.
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4
+ * {@link MixedModeProvider}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface RTRoom {
+public class MixedModeProvider implements ConnectionProvider {
 
-    /**
-     * Use this to join a room. One user is able to join many different rooms. For each room an own {@link RTMessageHandler} implementation
-     * is required which means, that you should avoid joining a room twice and using {@link RTMessageHandler} implementation twice.
-     *
-     * @param room - defines the room to join to.
-     * @param messageHandler - {@link RTMessageHandler} to deal with messages
-     */
-    public void join(ID room, RTMessageHandler messageHandler) throws RTException;
-
-    /**
-     * Use this method to say something into a room. Based on settings made with com.openexchange.realtime.client.room.RTRoom.join(String,
-     * String, RTMessageHandler) your message will be transferred to all users joined the room.
-     * 
-     * @param message - the message to send.
-     */
-    public void say(String message) throws RTException;
-
-    /**
-     * Use this to leave the room joined with com.openexchange.realtime.client.room.RTRoom.join(String, String, RTMessageHandler) before.
-     * After leaving the room you are allowed to use the instance of {@link RTMessageHandler} again.
-     */
-    public void leave() throws RTException;
+    @Override
+    public RTConnection create(RTConnectionProperties properties) throws RTException {
+        return new MixedModeRTConnection(properties);
+    }
 
 }

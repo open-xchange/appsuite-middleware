@@ -47,41 +47,97 @@
  *
  */
 
-package com.openexchange.realtime.client.room;
+package com.openexchange.realtime.client.impl.room;
 
-import com.openexchange.realtime.client.ID;
-import com.openexchange.realtime.client.RTException;
-import com.openexchange.realtime.client.RTMessageHandler;
+import java.util.TimerTask;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.realtime.client.RTConnection;
 
 /**
- * Interface that should be implemented when it is desired to use the chat functionality of the realtime framework.
+ * Sends a ping into a room to give a heart beat the realtime server and with that to not be removed out of the room.
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-public interface RTRoom {
+public class RTRoomPingTimerTask extends TimerTask {
 
     /**
-     * Use this to join a room. One user is able to join many different rooms. For each room an own {@link RTMessageHandler} implementation
-     * is required which means, that you should avoid joining a room twice and using {@link RTMessageHandler} implementation twice.
-     *
-     * @param room - defines the room to join to.
-     * @param messageHandler - {@link RTMessageHandler} to deal with messages
+     * The logger
      */
-    public void join(ID room, RTMessageHandler messageHandler) throws RTException;
+    private static final Logger LOG = LoggerFactory.getLogger(RTRoomPingTimerTask.class);
 
     /**
-     * Use this method to say something into a room. Based on settings made with com.openexchange.realtime.client.room.RTRoom.join(String,
-     * String, RTMessageHandler) your message will be transferred to all users joined the room.
+     * Lock for the ping
+     */
+    final Object lock = new Object();
+
+    /**
+     * {@link RTConnection} to send the ping
+     */
+    private RTConnection rtConnection;
+
+    /**
+     * String with the to address to send the ping.
+     */
+    private String to;
+
+    /**
+     * Initializes a new {@link RTRoomPingTimerTask}.
      * 
-     * @param message - the message to send.
+     * @param rtConnection
+     * @param to
      */
-    public void say(String message) throws RTException;
+    public RTRoomPingTimerTask(RTConnection rtConnection, String to) {
+        super();
+        this.rtConnection = rtConnection;
+        this.to = to;
+    }
 
     /**
-     * Use this to leave the room joined with com.openexchange.realtime.client.room.RTRoom.join(String, String, RTMessageHandler) before.
-     * After leaving the room you are allowed to use the instance of {@link RTMessageHandler} again.
+     * {@inheritDoc}
      */
-    public void leave() throws RTException;
+    @Override
+    public void run() {
+        synchronized (this.lock) {
+            try {
+                final JSONValue ping = this.createPingObject();
+                this.rtConnection.post(ping);
+            } catch (final Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
 
+    /**
+     * Creates the object to send a ping.
+     * 
+     * @return {@JSONObject} which includes the ping data.
+     * @throws JSONException - thrown when an error while JSON object creation occurs.
+     */
+    private JSONValue createPingObject() throws JSONException {
+        JSONObject pingObject = new JSONObject();
+
+        pingObject.put("element", "message");
+        pingObject.put("to", to);
+
+        JSONObject payload = new JSONObject();
+        payload.put("element", "ping");
+        payload.put("namespace", "group");
+        payload.put("data", "1");
+
+        final JSONArray payloads = new JSONArray();
+        payloads.put(payload);
+
+        pingObject.put("payloads", payloads);
+        
+        JSONArray pingArray = new JSONArray();
+        pingArray.put(pingObject);
+
+        return pingArray;
+    }
 }

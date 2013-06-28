@@ -47,41 +47,62 @@
  *
  */
 
-package com.openexchange.realtime.client.room;
+package com.openexchange.realtime.client.impl.connection.mixedmode;
 
+import org.json.JSONValue;
+import org.junit.Test;
 import com.openexchange.realtime.client.ID;
+import com.openexchange.realtime.client.RTConnection;
+import com.openexchange.realtime.client.RTConnectionFactory;
+import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
+import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
+import com.openexchange.realtime.client.RTUserState;
+import com.openexchange.realtime.client.impl.room.chinese.ChineseRoom;
+import com.openexchange.realtime.client.room.RTRoom;
+import com.openexchange.realtime.client.room.RTRoomFacory;
+import com.openexchange.realtime.client.room.chinese.ChineseRoomFactory;
+
 
 /**
- * Interface that should be implemented when it is desired to use the chat functionality of the realtime framework.
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4
+ * {@link MixedModeConnectionTest}
+ *
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface RTRoom {
+public class MixedModeConnectionTest {
 
-    /**
-     * Use this to join a room. One user is able to join many different rooms. For each room an own {@link RTMessageHandler} implementation
-     * is required which means, that you should avoid joining a room twice and using {@link RTMessageHandler} implementation twice.
-     *
-     * @param room - defines the room to join to.
-     * @param messageHandler - {@link RTMessageHandler} to deal with messages
-     */
-    public void join(ID room, RTMessageHandler messageHandler) throws RTException;
+    @Test
+    public void testWasyncConnection() throws RTException {
+        RTConnectionProperties connectionProperties = RTConnectionProperties.newBuilder("marc.arens", "secret", "chineseRoom")
+            .setHost("localhost")
+            .setConnectionType(RTConnectionType.LONG_POLLING)
+            .setSecure(true)
+            .build();
+        RTConnectionFactory.getInstance().newConnection(connectionProperties);
+    }
 
-    /**
-     * Use this method to say something into a room. Based on settings made with com.openexchange.realtime.client.room.RTRoom.join(String,
-     * String, RTMessageHandler) your message will be transferred to all users joined the room.
-     * 
-     * @param message - the message to send.
-     */
-    public void say(String message) throws RTException;
-
-    /**
-     * Use this to leave the room joined with com.openexchange.realtime.client.room.RTRoom.join(String, String, RTMessageHandler) before.
-     * After leaving the room you are allowed to use the instance of {@link RTMessageHandler} again.
-     */
-    public void leave() throws RTException;
+    @Test
+    public void testRoom() throws Exception {
+        RTConnectionProperties connectionProperties = RTConnectionProperties.newBuilder("marc.arens@premium", "secret", "desktop1")
+            .setHost("localhost")
+            .setConnectionType(RTConnectionType.LONG_POLLING)
+            .setSecure(true)
+            .build();
+        RTConnection connection = RTConnectionFactory.getInstance().newConnection(connectionProperties);
+        RTUserState state = connection.connect();
+        RTRoomFacory roomFactory = new ChineseRoomFactory();
+        RTRoom chineseRoom = roomFactory.newRoom(connection);
+        chineseRoom.join(new ID("synthetic.china://room1"), new RTMessageHandler() {
+            @Override
+            public void onMessage(JSONValue message) {
+                System.out.println(message.toString());
+            }
+        });
+        chineseRoom.say("Hello World");
+        Thread.sleep(120000);
+        chineseRoom.say("This is Marc speaking");
+        chineseRoom.leave();
+    }
 
 }

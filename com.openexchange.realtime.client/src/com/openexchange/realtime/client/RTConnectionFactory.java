@@ -52,8 +52,8 @@ package com.openexchange.realtime.client;
 import java.util.EnumMap;
 import org.apache.commons.lang.Validate;
 import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
-import com.openexchange.realtime.client.impl.RTConnectionProvider;
-import com.openexchange.realtime.client.impl.mixedmode.MixedModeProvider;
+import com.openexchange.realtime.client.impl.connection.ConnectionProvider;
+import com.openexchange.realtime.client.impl.connection.mixedmode.MixedModeProvider;
 
 /**
  * A {@link RTConnectionFactory} is responsible for instantiating {@link RTConnection}s.
@@ -64,7 +64,7 @@ public class RTConnectionFactory {
 
     private static final RTConnectionFactory INSTANCE = new RTConnectionFactory();
 
-    protected final EnumMap<RTConnectionType, RTConnectionProvider> generators = new EnumMap<RTConnectionType, RTConnectionProvider>(
+    protected final EnumMap<RTConnectionType, ConnectionProvider> generators = new EnumMap<RTConnectionType, ConnectionProvider>(
         RTConnectionType.class);
 
     protected RTConnectionFactory() {
@@ -86,7 +86,7 @@ public class RTConnectionFactory {
     public RTConnection newConnection(RTConnectionProperties properties) throws RTException {
         RTConnectionType type = properties.getConnectionType();
         Validate.notNull(type, "ConnectionType must be set in RTConnectionProperties.");
-        RTConnectionProvider provider = generators.get(type);
+        ConnectionProvider provider = generators.get(type);
         if (provider == null) {
             throw new RTException("No provider exists for ConnectionType " + type.toString());
         }

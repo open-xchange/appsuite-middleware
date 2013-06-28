@@ -59,14 +59,17 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-import org.json.JSONException;
 import org.json.JSONValue;
+import com.openexchange.realtime.client.ID;
+import com.openexchange.realtime.client.RTConnection;
+import com.openexchange.realtime.client.RTConnectionFactory;
 import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
-import com.openexchange.realtime.client.room.impl.ChineseRoom;
-import com.openexchange.realtime.client.user.RTUser;
+import com.openexchange.realtime.client.room.RTRoom;
+import com.openexchange.realtime.client.room.RTRoomFacory;
+import com.openexchange.realtime.client.room.chinese.ChineseRoomFactory;
 
 /**
  * {@link RealtimeGroupChatClientCLT}
@@ -75,7 +78,7 @@ import com.openexchange.realtime.client.user.RTUser;
  */
 public class RealtimeGroupChatClientCLT {
 
-    public static ChineseRoom room;
+    public static RTRoom room;
 
     /**
      * Initializes a new {@link RealtimeGroupChatClientCLT}.
@@ -110,12 +113,16 @@ public class RealtimeGroupChatClientCLT {
             UUID uuid = UUID.randomUUID();
             System.out.print("Password: ");
             String password = new BufferedReader(new InputStreamReader(System.in)).readLine();
-            RTUser rtuser = new RTUser(user, password, "GroupChatClient-" + uuid.toString());
-            RTConnectionProperties con = RTConnectionProperties.newBuilder(rtuser).setConnectionType(RTConnectionType.LONG_POLLING).setHost(
-                hostname).setSecure(false).build();
-            room = new ChineseRoom(rtuser, con);
-            room.join("chineseRoomSelector", "synthetic.china://room1", new RTMessageHandler() {
-
+            RTConnectionProperties properties = RTConnectionProperties.newBuilder(user, password, "GroupChatClient-" + uuid.toString())
+                .setConnectionType(RTConnectionType.LONG_POLLING)
+                .setHost(hostname)
+                .setSecure(false)
+                .build();
+            RTConnection connection = RTConnectionFactory.getInstance().newConnection(properties);
+            connection.connect();
+            RTRoomFacory roomFactory = new ChineseRoomFactory();
+            room = roomFactory.newRoom(connection);
+            room.join(new ID("synthetic.china://room1"), new RTMessageHandler() {
                 @Override
                 public void onMessage(JSONValue message) {
                     System.out.println(message);
@@ -162,7 +169,7 @@ public class RealtimeGroupChatClientCLT {
     }
 
     static class Chat implements Runnable {
-        
+
         private boolean run = true;
 
         @Override
@@ -179,8 +186,6 @@ public class RealtimeGroupChatClientCLT {
                 }
                 room.leave();
             } catch (IOException e) {
-                System.err.println(e.getMessage());
-            } catch (JSONException e) {
                 System.err.println(e.getMessage());
             } catch (RTException e) {
                 System.err.println(e.getMessage());
