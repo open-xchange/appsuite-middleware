@@ -16,7 +16,7 @@
                 <filter class="de.kippdata.solrext.analyzer.DomainSkipFilterFactory" domains="de com co.uk net fr it" />
                 <filter class="solr.WordDelimiterFilterFactory" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"
                     splitOnNumerics="0" />
-                <filter class="solr.GermanNormalizationFilterFactory" />
+<!--                 <filter class="solr.GermanNormalizationFilterFactory" /> -->
                 <filter class="solr.LengthFilterFactory" min="2" max="30" />
                 <filter class="solr.LowerCaseFilterFactory" />
             </analyzer>
@@ -29,7 +29,7 @@
                 <filter class="de.kippdata.solrext.analyzer.DomainSkipFilterFactory" domains="de com co.uk net fr it" />
                 <filter class="solr.WordDelimiterFilterFactory" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"
                     splitOnNumerics="1" />
-                <filter class="solr.GermanNormalizationFilterFactory" />
+<!--                 <filter class="solr.GermanNormalizationFilterFactory" /> -->
                 <filter class="solr.LengthFilterFactory" min="2" max="30" />
                 <filter class="solr.LowerCaseFilterFactory" />
             </analyzer>
