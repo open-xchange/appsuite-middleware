@@ -1,3 +1,7 @@
+* 2013-06-27 - marcus.klein@open-xchange.com
+
+ - Fix for bug 27268: Replaced old source code import for XML pull implementation kXML with latest released binary library.
+
 * 2013-06-26 - marcus.klein@open-xchange.com
 
  - Fix for bug 25996: Adding property com.openexchange.mail.JavaMailProperties in postinst scripts to mail.properties configuration file.
