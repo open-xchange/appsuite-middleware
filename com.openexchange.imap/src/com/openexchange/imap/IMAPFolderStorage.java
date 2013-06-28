@@ -2287,6 +2287,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             /*
              * Try NAMESPACE command
              */
+            final String prefixByInferiors = prefixByInferiors();
             final String prefix;
             try {
                 final String[] namespaces = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId);
@@ -2294,20 +2295,24 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     /*
                      * No namespaces available
                      */
-                    return prefixByInferiors();
+                    return prefixByInferiors;
                 }
                 prefix = namespaces[0];
             } catch (final MessagingException e) {
                 /*
                  * NAMESPACE command failed for any reason
                  */
-                return prefixByInferiors();
+                return prefixByInferiors;
             }
             final boolean isEmpty = prefix.length() == 0;
             if (isEmpty && RootSubfolderCache.canCreateSubfolders((DefaultFolder) imapStore.getDefaultFolder(), true, session, accountId).booleanValue()) {
                 return prefix;
             }
-            return new com.openexchange.java.StringAllocator(isEmpty ? STR_INBOX : prefix).append(NamespaceFoldersCache.getPersonalSeparator()).toString();
+            final String retvalPrefix = new com.openexchange.java.StringAllocator(isEmpty ? STR_INBOX : prefix).append(NamespaceFoldersCache.getPersonalSeparator()).toString();
+            if (!retvalPrefix.equals(prefixByInferiors)) {
+                LOG.warn("The personal namespace indicated by NAMESPACE command does not match root folder's capabilities: " + retvalPrefix + " IS NOT " + prefixByInferiors);
+            }
+            return retvalPrefix;
         } catch (final MessagingException e) {
             throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, null);
         } catch (final RuntimeException e) {
