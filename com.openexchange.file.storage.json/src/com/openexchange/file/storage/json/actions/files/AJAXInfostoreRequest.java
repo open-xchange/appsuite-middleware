@@ -264,10 +264,10 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         for (final String id : ids) {
             final Set<String> versions = versionMapping.get(id);
             if (null == versions) {
-                retval.add(new IdVersionPair(id, FileStorageFileAccess.CURRENT_VERSION));
+                retval.add(new IdVersionPair(id, FileStorageFileAccess.CURRENT_VERSION, folderMapping.get(id)));
             } else {
                 for (final String version : versions) {
-                    retval.add(new IdVersionPair(id, version));
+                    retval.add(new IdVersionPair(id, version, folderMapping.get(id)));
                 }
             }
         }

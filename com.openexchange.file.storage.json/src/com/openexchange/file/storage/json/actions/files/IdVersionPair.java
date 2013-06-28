@@ -60,6 +60,7 @@ public final class IdVersionPair {
 
     private final String identifier;
     private final String version;
+    private final String folderId;
 
     /**
      * Initializes a new {@link IdVersionPair}.
@@ -67,10 +68,20 @@ public final class IdVersionPair {
      * @param identifier
      * @param version
      */
-    public IdVersionPair(String identifier, String version) {
+    public IdVersionPair(final String identifier, final String version, final String folderId) {
         super();
         this.identifier = identifier;
         this.version = version == null ? FileStorageFileAccess.CURRENT_VERSION : version;
+        this.folderId = folderId;
+    }
+
+    /**
+     * Gets the folder identifier
+     *
+     * @return The folder identifier
+     */
+    public String getFolderId() {
+        return folderId;
     }
 
     /**

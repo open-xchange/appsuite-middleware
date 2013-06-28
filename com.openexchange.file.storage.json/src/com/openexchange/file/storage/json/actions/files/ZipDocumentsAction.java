@@ -51,9 +51,13 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -64,7 +68,9 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link ZipDocumentsAction}
@@ -84,7 +90,33 @@ public class ZipDocumentsAction extends AbstractFileAction {
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         // Get IDs
-        final List<IdVersionPair> idVersionPairs = request.getIdVersionPairs();
+        final List<IdVersionPair> idVersionPairs;
+        {
+            final String value = request.getParameter("body");
+            if (isEmpty(value)) {
+                idVersionPairs = request.getIdVersionPairs();
+            } else {
+                try {
+                    final JSONArray jsonArray = new JSONArray(value);
+                    final int len = jsonArray.length();
+                    idVersionPairs = new ArrayList<IdVersionPair>(len);
+                    for (int i = 0; i < len; i++) {
+                        final JSONObject tuple = jsonArray.getJSONObject(i);
+                        // Identifier
+                        final String id = tuple.getString(Param.ID.getName());
+                        // Folder
+                        final String folderId = tuple.optString(Param.FOLDER_ID.getName());
+                        // Version
+                        final String version = tuple.optString(Param.VERSION.getName(), FileStorageFileAccess.CURRENT_VERSION);
+
+                        final IdVersionPair pair = new IdVersionPair(id, version, folderId);
+                        idVersionPairs.add(pair);
+                    }
+                } catch (final JSONException e) {
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "body", value);
+                }
+            }
+        }
         // Get file access
         final IDBasedFileAccess fileAccess = request.getFileAccess();
         // Initialize ZIP'ing
@@ -168,6 +200,19 @@ public class ZipDocumentsAction extends AbstractFileAction {
         thresholdFileHolder.setName("documents.zip");
         // Return AJAX result
         return new AJAXRequestResult(thresholdFileHolder, "file");
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }
