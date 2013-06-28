@@ -59,6 +59,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.realtime.client.ID;
 import com.openexchange.realtime.client.RTConnection;
@@ -125,7 +127,15 @@ public class RealtimeGroupChatClientCLT {
             room.join(new ID("synthetic.china://room1"), new RTMessageHandler() {
                 @Override
                 public void onMessage(JSONValue message) {
-                    System.out.println(message);
+                    JSONObject array = message.toObject();
+                    try {
+                        String from = array.getString("from");
+                        JSONObject payloads = array.getJSONArray("payloads").getJSONObject(0);
+                        String data = payloads.getString("data");
+                        System.out.println(from.substring(5, from.length()).split("/")[0] + ": " + data);
+                    } catch (JSONException e) {
+                        System.err.println("JSONException: " + e.getMessage());
+                    }
                 }
             });
             Thread chat = new Thread(new Chat());
