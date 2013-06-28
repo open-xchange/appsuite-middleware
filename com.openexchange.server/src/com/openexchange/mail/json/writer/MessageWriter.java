@@ -140,6 +140,7 @@ public final class MessageWriter {
         }
         try {
             final MIMEStructureHandler handler = new MIMEStructureHandler(maxSize);
+            mail.setAccountId(accountId);
             new StructureMailMessageParser().setParseTNEFParts(true).parseMailMessage(mail, handler);
             return handler.getJSONMailObject();
         } finally {

@@ -177,15 +177,10 @@ public final class StructureMailMessageParser {
      */
 
     private boolean parseTNEFParts;
-
     private boolean parseUUEncodedParts;
-
     private boolean stop;
-
     private boolean multipartDetected;
-
     private InlineDetector inlineDetector;
-
     private boolean neverTreatMessageAsAttachment;
 
     /**
