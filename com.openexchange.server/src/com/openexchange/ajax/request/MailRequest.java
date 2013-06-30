@@ -449,12 +449,12 @@ public final class MailRequest {
         public ColorCollectObject(final JSONObject dataObject, final Mail mailServlet) throws OXException {
             super(mailServlet);
             this.srcFld = JSONUtil.requireString(PARAMETER_FOLDERID, dataObject);
-            flagInt = JSONUtil.requireInt(MailJSONField.FLAGS.getKey(), JSONUtil.requireDataObject(dataObject));
+            flagInt = JSONUtil.requireInt(MailJSONField.COLOR_LABEL.getKey(), JSONUtil.requireDataObject(dataObject));
         }
 
         @Override
         public boolean collectable(final JSONObject dataObject, final CollectableOperation op) throws OXException {
-            return (CollectableOperation.COLOR_LABEL.equals(op) && srcFld.equals(JSONUtil.requireString(PARAMETER_FOLDERID, dataObject)) && flagInt == JSONUtil.requireInt(MailJSONField.FLAGS.getKey(), JSONUtil.requireDataObject(dataObject)));
+            return (CollectableOperation.COLOR_LABEL.equals(op) && srcFld.equals(JSONUtil.requireString(PARAMETER_FOLDERID, dataObject)) && flagInt == JSONUtil.requireInt(MailJSONField.COLOR_LABEL.getKey(), JSONUtil.requireDataObject(dataObject)));
         }
 
         @Override
