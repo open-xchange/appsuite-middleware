@@ -1,3 +1,7 @@
+* 2013-06-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27292: Check for proper field name on color label update
+
 * 2013-06-27 - marcus.klein@open-xchange.com
 
  - Fix for bug 27268: Replaced old source code import for XML pull implementation kXML with latest released binary library.
