@@ -243,6 +243,109 @@ public class UpdateMailTest extends AbstractMailTest {
         }
     }
 
+    public void testShouldBeAbleToAddColorLabel2AllMessages() throws OXException, IOException, SAXException, JSONException {
+        String newId = null;
+        try {
+            /*
+             * Create new mail folder
+             */
+            {
+                final FolderObject fo = new FolderObject();
+                {
+                    final String inboxFolder = values.getInboxFolder();
+                    final String name = "TestFolder" + System.currentTimeMillis();
+                    final String fullName = inboxFolder + "/" + name;
+                    fo.setFullName(fullName);
+                    fo.setFolderName(name);
+                }
+                fo.setModule(FolderObject.MAIL);
+
+                final OCLPermission oclP = new OCLPermission();
+                oclP.setEntity(client.getValues().getUserId());
+                oclP.setGroupPermission(false);
+                oclP.setFolderAdmin(true);
+                oclP.setAllPermission(
+                    OCLPermission.ADMIN_PERMISSION,
+                    OCLPermission.ADMIN_PERMISSION,
+                    OCLPermission.ADMIN_PERMISSION,
+                    OCLPermission.ADMIN_PERMISSION);
+                fo.setPermissionsAsArray(new OCLPermission[] { oclP });
+
+                final InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, fo);
+                final InsertResponse response = client.execute(request);
+
+                newId = (String) response.getResponse().getData();
+            }
+            /*
+             * Append mails to new folder
+             */
+            {
+                final String eml =
+                    "Message-Id: <4A002517.4650.0059.1@deployfast.com>\n" +
+                    "X-Mailer: Novell GroupWise Internet Agent 8.0.0 \n" +
+                    "Date: Tue, 05 May 2009 11:37:58 -0500\n" +
+                    "From: " + getSendAddress() + "\n" +
+                    "To: " + getSendAddress() + "\n" +
+                    "Subject: Re: Your order for East Texas Lighthouse\n" +
+                    "Mime-Version: 1.0\n" +
+                    "Content-Type: text/plain; charset=\"UTF-8\"\n" +
+                    "Content-Transfer-Encoding: 8bit\n" +
+                    "\n" +
+                    "This is a MIME message. If you are reading this text, you may want to \n" +
+                    "consider changing to a mail reader or gateway that understands how to \n" +
+                    "properly handle MIME multipart messages.";
+
+                for (int i = 0; i < 10; i++) {
+                    final NewMailRequest newMailRequest = new NewMailRequest(newId, eml, -1, true);
+                    final NewMailResponse newMailResponse = getClient().execute(newMailRequest);
+                    final String folder = newMailResponse.getFolder();
+                    assertNotNull("Missing folder in response.", folder);
+                    assertNotNull("Missing ID in response.", newMailResponse.getId());
+                    assertEquals("Folder ID mismatch in newly appended message.", newId, folder);
+                }
+            }
+            /*
+             * Perform batch update call
+             */
+            final int colorLable = 5;
+            {
+                final UpdateMailRequest updateRequest = new UpdateMailRequest(newId);
+                updateRequest.setColor(colorLable);
+                final UpdateMailResponse updateResponse = getClient().execute(updateRequest);
+                assertEquals("Folder ID mismatch.", newId, updateResponse.getFolder());
+            }
+            /*
+             * Check
+             */
+            {
+                final AllRequest allRequest =
+                    new AllRequest(
+                        newId,
+                        new int[] { MailListField.ID.getField(), MailListField.COLOR_LABEL.getField() },
+                        MailSortField.RECEIVED_DATE.getField(),
+                        Order.ASCENDING,
+                        true);
+                final AllResponse allResponse = getClient().execute(allRequest);
+                final Object[][] array = allResponse.getArray();
+                for (final Object[] arr : array) {
+                    final Integer label = (Integer) arr[1];
+                    assertEquals("Color label not set for message " + arr[0] + " in folder " + newId, colorLable, label.intValue());
+                }
+            }
+
+        } finally {
+            if (null != newId) {
+                // Delete folder
+                try {
+                    final DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OUTLOOK, newId, new Date());
+                    client.execute(deleteRequest);
+                } catch (final Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     public void notestShouldBeAbleToAddFlagsByMessageId() throws OXException, IOException, SAXException, JSONException{
         final String mail = values.getSendAddress();
         sendMail( createEMail(mail, "Update test for adding and removing a flag by message id", "ALTERNATE", "Just a little bit").toString() );

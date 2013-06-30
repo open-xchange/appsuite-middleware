@@ -145,6 +145,8 @@ public class UpdateMailRequest extends AbstractMailRequest<UpdateMailResponse> {
     public UpdateMailRequest(final String folderID) {
         super();
         this.folderID = folderID;
+        flags = -1;
+        color = -1;
     }
 
     /**
@@ -154,14 +156,20 @@ public class UpdateMailRequest extends AbstractMailRequest<UpdateMailResponse> {
         super();
         this.folderID = folderID;
         this.mailID = mailID;
+        flags = -1;
+        color = -1;
     }
 
     @Override
     public Object getBody() throws JSONException {
         final JSONObject json = new JSONObject();
-        json.put("color_label", color);
-        json.put("flags", flags);
-        json.put("value", !removeFlags);
+        if (color >= 0) {
+            json.put("color_label", color);
+        }
+        if (flags >= 0) {
+            json.put("flags", flags);
+            json.put("value", !removeFlags);
+        }
         return json;
     }
 
