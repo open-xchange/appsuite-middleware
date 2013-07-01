@@ -84,7 +84,7 @@ public class AddPrimaryKeyVcardIdsTask extends UpdateTaskAdapter {
         try {
             con.setAutoCommit(false);
             if (!Tools.hasPrimaryKey(con, "vcard_ids")) {
-                Tools.createPrimaryKey(con, "vcard_ids", new String[] { "object_id", "cid" });
+                Tools.createPrimaryKey(con, "vcard_ids", new String[] { "cid", "object_id" });
             }
             con.commit();
         } catch (SQLException e) {
