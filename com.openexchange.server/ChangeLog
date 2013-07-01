@@ -1,3 +1,7 @@
+* 2013-07-01 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 27317: Restored accidentally deleted sql file.
+
 * 2013-07-01 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 27309: Remove 'days' property when changing recurrence rule from weekly to daily   
@@ -7,7 +11,7 @@
 
  - Fix for bug 27284: Don't null'ify default folders' full names if located on root level
 
-* 2013-07-26 - martin.herfurth@open-xchange.com
+* 2013-06-26 - martin.herfurth@open-xchange.com
 
  - Fix for bug 26954: Already deleted Exceptions within invitation mails.
  - Fix for bug 27257: Broken Create Table Statement.
