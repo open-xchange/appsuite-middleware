@@ -322,6 +322,8 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     private boolean dropReplyForwardPrefix;
 
+    private int attachOriginalMessage;
+
     /**
      * Initializes a new {@link UserSettingMail}.
      *
@@ -332,6 +334,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
         super();
         this.userId = userId;
         this.cid = cid;
+        attachOriginalMessage = -1;
     }
 
     @Override
@@ -596,7 +599,16 @@ public final class UserSettingMail implements Cloneable, Serializable {
      *         added inline.
      */
     public boolean isForwardAsAttachment() {
-        return forwardAsAttachment;
+        return forwardAsAttachment || attachOriginalMessage > 0;
+    }
+
+    /**
+     * Checks whether to attach original message
+     *
+     * @return <code>1</code> to attach original message; <code>0</code> to not attach or <code>-1</code> if not set at all
+     */
+    public int getAttachOriginalMessage() {
+        return attachOriginalMessage;
     }
 
     /**
@@ -878,6 +890,11 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     public void setForwardAsAttachment(final boolean forwardAsAttachment) {
         this.forwardAsAttachment = forwardAsAttachment;
+        modifiedDuringSession = true;
+    }
+
+    public void setAttachOriginalMessage(final boolean attachOriginalMessage) {
+        this.attachOriginalMessage = attachOriginalMessage ? 1 : 0;
         modifiedDuringSession = true;
     }
 

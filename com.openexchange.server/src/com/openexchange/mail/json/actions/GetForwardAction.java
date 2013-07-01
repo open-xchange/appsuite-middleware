@@ -123,6 +123,9 @@ public final class GetForwardAction extends AbstractMailAction {
             if (Boolean.parseBoolean(req.getParameter("dropPrefix"))) {
                 usmNoSave.setDropReplyForwardPrefix(true);
             }
+            if (Boolean.parseBoolean(req.getParameter("attachOriginalMessage"))) {
+                usmNoSave.setAttachOriginalMessage(true);
+            }
             /*
              * Get mail interface
              */

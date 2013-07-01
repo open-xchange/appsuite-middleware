@@ -77,6 +77,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
@@ -105,8 +106,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MimeForward} - MIME message forward.
@@ -515,12 +514,12 @@ public final class MimeForward {
             if (originalMsg instanceof MimeMailMessage) {
                 nested = MimeMessageConverter.convertMessage(((MimeMailMessage) originalMsg).getMimeMessage());
             } else {
-                final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream((int) originalMsg.getSize());
+                final ByteArrayOutputStream tmp = Streams.newByteArrayOutputStream((int) originalMsg.getSize());
                 originalMsg.writeTo(tmp);
                 nested =
                     MimeMessageConverter.convertMessage(new MimeMessage(
                         MimeDefaultSession.getDefaultSession(),
-                        new UnsynchronizedByteArrayInputStream(tmp.toByteArray())));
+                        Streams.asInputStream(tmp)));
             }
             nested.setMsgref(originalMsg.getMailPath());
             compositeMail.addAdditionalParts(new NestedMessageMailPart(nested));
