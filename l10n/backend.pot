@@ -1961,6 +1961,26 @@ msgstr ""
 msgid "The directory \"%1$s\" with checksum \"%2$s\""
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:73
+msgid "You are not allowed to delete the file \"%1$s\" at \"%2$s\""
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:74
+msgid "You are not allowed to create files at \"%1$s\""
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:75
+msgid "You are not allowed to modify the file \"%1$s\" at \"%2$s\""
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:76
+msgid "You are not allowed to delete the directory \"%1$s\""
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:77
+msgid "You are not allowed to create directories at \"%1$s\""
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:63
 msgid "An error occurred for action: %1$s"
 msgstr ""
@@ -10823,9 +10843,15 @@ msgstr ""
 msgid "Unsupported format: %1$s"
 msgstr ""
 
-#. Missing cookie: %s
+#. Missing cookie: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:146
-msgid "Missing cookie: %s"
+msgid "Missing cookie: %1$s"
+msgstr ""
+
+#. Cookie "%1$s" cannot be found because requests does not have any cookies.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:149
+msgid ""
+"Cookie \"%1$s\" cannot be found because requests does not have any cookies."
 msgstr ""
 
 #. *
