@@ -3,6 +3,5 @@ opt/open-xchange/etc/Group.properties
 opt/open-xchange/etc/ModuleAccessDefinitions.properties
 opt/open-xchange/etc/mpasswd
 opt/open-xchange/etc/Resource.properties
-opt/open-xchange/etc/Sql.properties
 opt/open-xchange/etc/AdminUser.properties
 opt/open-xchange/etc/plugin/hosting.properties
