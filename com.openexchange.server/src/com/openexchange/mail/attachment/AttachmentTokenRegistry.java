@@ -122,15 +122,22 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
         map = new ConcurrentHashMap<Key, ConcurrentMap<String, AttachmentToken>>();
         tokens = new ConcurrentHashMap<String, AttachmentToken>();
         final TimerService timerService = ThreadPools.getTimerService();
-        final Runnable task = new CleanExpiredTokensRunnable(map, tokens);
-        timerTask = timerService.scheduleWithFixedDelay(task, CLEANER_FREQUENCY, CLEANER_FREQUENCY);
+        if (null != timerService) {
+            final Runnable task = new CleanExpiredTokensRunnable(map, tokens);
+            timerTask = timerService.scheduleWithFixedDelay(task, CLEANER_FREQUENCY, CLEANER_FREQUENCY);
+        } else {
+            timerTask = null;
+        }
     }
 
     /**
      * Disposes this registry.
      */
     private void dispose() {
-        timerTask.cancel(false);
+        final ScheduledTimerTask timerTask = this.timerTask;
+        if (null != timerTask) {
+            timerTask.cancel(false);
+        }
         tokens.clear();
         map.clear();
     }
