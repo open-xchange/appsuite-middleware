@@ -608,21 +608,27 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
                     @Override
                     @SuppressWarnings("unchecked")
                     public Object addingService(final ServiceReference<Object> reference) {
-                        final Object addedService = m_context.getService(reference);
-                        for (final Entry<?> entry : bundleMap) {
-                            final Class<?> clazz = entry.getClazz();
-                            if (clazz.isInstance(addedService)) {
-                                final Object cast = clazz.cast(addedService);
-                                @SuppressWarnings("rawtypes")
-                                final AvailabilityActivationClosure closure = entry.getClosure();
-                                if (null != closure) {
-                                    closure.serviceAvailable(cast);
+                        try {
+                            final Object addedService = m_context.getService(reference);
+                            for (final Entry<?> entry : bundleMap) {
+                                final Class<?> clazz = entry.getClazz();
+                                if (clazz.isInstance(addedService)) {
+                                    final Object cast = clazz.cast(addedService);
+                                    @SuppressWarnings("rawtypes")
+                                    final AvailabilityActivationClosure closure = entry.getClosure();
+                                    if (null != closure) {
+                                        closure.serviceAvailable(cast);
+                                    }
+                                    registry.addService(clazz, cast);
+                                    checkStarted();
                                 }
-                                registry.addService(clazz, cast);
-                                checkStarted();
                             }
+                            return addedService;
+                        } catch (final RuntimeException e) {
+                            LOG.error("A runtime exception occurred while addingService: " + e.getMessage(), e);
+                            shutdownBundle();
+                            throw e;
                         }
-                        return addedService;
                     }
 
                     @Override
@@ -632,15 +638,21 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
 
                     @Override
                     public void removedService(final ServiceReference<Object> arg0, final Object arg1) {
-                        for (final Entry<?> entry : bundleMap) {
-                            if (entry.getClazz().isInstance(arg1)) {
-                                if (entry.isRequired()) {
-                                    final Bundle bundle = m_context.getBundle();
-                                    LOG.error("The required service \"" + entry.getClazz().getName() +"\" was removed from OSGi system, shutting down " + bundle.getSymbolicName());
-                                    shutdownBundle();
+                        try {
+                            for (final Entry<?> entry : bundleMap) {
+                                if (entry.getClazz().isInstance(arg1)) {
+                                    if (entry.isRequired()) {
+                                        final Bundle bundle = m_context.getBundle();
+                                        LOG.error("The required service \"" + entry.getClazz().getName() + "\" was removed from OSGi system, shutting down " + bundle.getSymbolicName());
+                                        shutdownBundle();
+                                    }
+                                    registry.removeService(entry.getClazz());
                                 }
-                                registry.removeService(entry.getClazz());
                             }
+                        } catch (final RuntimeException e) {
+                            LOG.error("A runtime exception occurred while removedService: " + e.getMessage(), e);
+                            shutdownBundle();
+                            throw e;
                         }
                     }
                 });
