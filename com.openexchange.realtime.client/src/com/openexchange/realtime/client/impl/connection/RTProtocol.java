@@ -163,7 +163,15 @@ public class RTProtocol {
      * sent a message to the server the next PING can be delayed to avoid unnecessary traffic.
      */
     public void resetPingTimeout() {
-        resetPingTimer();
+        pingPongTimer.resetPingTimer();
+    }
+
+    /**
+     * Let the {@link RTConnection} reset the PONG timeout. That means if the connection just
+     * received a message from the server the next PONG may be delayed to avoid unnecessary traffic.
+     */
+    public void resetPongTimeout() {
+        pingPongTimer.resetPongTimer();
     }
 
     /**
@@ -223,9 +231,9 @@ public class RTProtocol {
     }
 
     /**
-     * Parse an element for for a pong message from the server.
+     * Parse an element from the server.
      * @param element the element to parse
-     * @return false if the message contains only a pong as payload, true otherwise
+     * @return false if the message should not be handled further because it only contains protocol overhead.
      * @throws JSONException
      */
     private boolean parseElement(JSONObject element) throws JSONException {
@@ -241,28 +249,38 @@ public class RTProtocol {
                     if (payloads.length() == 1) {
                         return false;
                     }
+                } else if (isNextSequence(payload)) {
+                    sequenceGenerator.reset();
+                    if (payloads.length() == 1) {
+                        return false;
+                    }
                 }
+            }
+        } else if (element.has("error") && element.has("code")) {
+            if (element.getString("code").equals("SES-0206")) {
+                // session invalid
+                callback.onSessionInvalid();
             }
         }
 
         return true;
     }
 
-    private void resetPingTimer() {
-        pingPongTimer.resetTimer();
-    }
-
-
     private boolean isMessage(JSONObject element) throws JSONException {
         return element.hasAndNotNull("element") && element.get("element").equals("message");
     }
 
     private boolean isPong(JSONObject payload) throws JSONException {
-        return
-            payload.hasAndNotNull("namespace")
-            && payload.get("namespace").equals("atmosphere")
-            && payload.hasAndNotNull("element")
-            && payload.get("element").equals("pong");
+        return isProtocolPayload(payload) && payload.get("element").equals("pong");
     }
 
+    private boolean isNextSequence(JSONObject payload) throws JSONException {
+        return isProtocolPayload(payload) && payload.get("element").equals("nextSequence");
+    }
+
+    private boolean isProtocolPayload(JSONObject payload) throws JSONException {
+        return payload.hasAndNotNull("namespace")
+            && payload.get("namespace").equals("atmosphere")
+            && payload.hasAndNotNull("element");
+    }
 }
