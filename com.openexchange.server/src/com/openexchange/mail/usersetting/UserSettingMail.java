@@ -612,7 +612,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
-     * Checks if messages are supposed to be deleted permanently or backuped into trash folder.
+     * Checks if messages are supposed to be deleted permanently or a backup is moved to trash folder.
      *
      * @return <code>true</code> if messages are supposed to be deleted permanently; otherwise <code>false</code> to backup in trash folder
      */
