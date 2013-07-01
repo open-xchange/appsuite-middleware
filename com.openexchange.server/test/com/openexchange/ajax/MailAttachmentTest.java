@@ -52,11 +52,15 @@ package com.openexchange.ajax;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -107,8 +111,37 @@ public class MailAttachmentTest extends TestCase {
             };
             PowerMockito.when(mockResponse.getOutputStream()).thenReturn(out);
 
+            final AtomicReference<String> cts = new AtomicReference<String>();
+            PowerMockito.doAnswer(new Answer<Object>() {
+                @Override
+                public Object answer(InvocationOnMock invocation) throws Throwable {
+                    if ("content-type".equalsIgnoreCase((String) invocation.getArguments()[0])) {
+                        cts.set((String) invocation.getArguments()[1]);
+                    }
+                    return null;
+                }
+            }).when(mockResponse).setHeader(Mockito.anyString(), Mockito.anyString());
+            PowerMockito.doAnswer(new Answer<Object>() {
+                @Override
+                public Object answer(InvocationOnMock invocation) throws Throwable {
+                    cts.set((String) invocation.getArguments()[0]);
+                    return null;
+                }
+            }).when(mockResponse).setContentType(Mockito.anyString());
+
+            final AtomicReference<String> cds = new AtomicReference<String>();
+            PowerMockito.doAnswer(new Answer<Object>() {
+                @Override
+                public Object answer(InvocationOnMock invocation) throws Throwable {
+                    if ("Content-Disposition".equalsIgnoreCase((String) invocation.getArguments()[0])) {
+                        cds.set((String) invocation.getArguments()[1]);
+                    }
+                    return null;
+                }
+            }).when(mockResponse).setHeader(Mockito.anyString(), Mockito.anyString());
+
             PowerMockito.when(mockRequest.getParameter("id")).thenReturn("123");
-            PowerMockito.when(mockRequest.getParameter("save")).thenReturn(null);
+            PowerMockito.when(mockRequest.getParameter("save")).thenReturn("1");
             PowerMockito.when(mockRequest.getParameter("filter")).thenReturn(null);
 
             final AttachmentTokenRegistry mockAttachmentTokenRegistry = PowerMockito.mock(AttachmentTokenRegistry.class);
@@ -146,6 +179,9 @@ public class MailAttachmentTest extends TestCase {
             for (int i = 0; i < length; i++) {
                 assertEquals("Unexpected byte written to ServletOutputStream.", (byte) i, byteArray[i]);
             }
+
+            assertEquals("Unexpected Content-Type.", "application/zip", cts.get());
+            assertTrue("Unexpected Content-Disposition.", null != cds.get() && cds.get().startsWith("attachment"));
 
         } catch (final Exception e) {
             e.printStackTrace();
