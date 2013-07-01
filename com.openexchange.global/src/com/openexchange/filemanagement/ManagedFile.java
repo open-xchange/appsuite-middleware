@@ -51,6 +51,7 @@ package com.openexchange.filemanagement;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.OutputStream;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -148,6 +149,17 @@ public interface ManagedFile {
      * @throws OXException If file content cannot be returned as an input stream.
      */
     public InputStream getInputStream() throws OXException;
+
+    /**
+     * Writes specified byte range into given output stream.
+     *
+     * @param out The output stream to write to
+     * @param off The offset position to start reading from
+     * @param len The number of bytes to write into output stream
+     * @return The number of bytes written to output stream
+     * @throws OXException If writing to output stream fails
+     */
+    public int writeTo(OutputStream out, int off, int len) throws OXException;
 
     /**
      * Gets last-access timestamp.

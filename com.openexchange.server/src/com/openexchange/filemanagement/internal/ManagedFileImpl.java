@@ -53,7 +53,10 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
@@ -63,6 +66,7 @@ import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.image.ImageLocation;
+import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 
 /**
@@ -208,6 +212,54 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
         } catch (final FileNotFoundException e) {
             throw ManagedFileExceptionErrorMessage.FILE_NOT_FOUND.create(e, file.getPath());
         }
+    }
+
+    @Override
+    public int writeTo(OutputStream out, int off, int len) throws OXException {
+        if (null == out) {
+            return 0;
+        }
+        if (!file.exists()) {
+            return -1;
+        }
+        touch();
+        RandomAccessFile raf = null;
+        try {
+            final File tmpFile = file;
+            raf = new RandomAccessFile(tmpFile, "r");
+            final long total = raf.length();
+            if (off >= total) {
+                return 0;
+            }
+            // Check available bytes
+            {
+                final long actualLen = total - off;
+                if (actualLen < len) {
+                    len = (int) actualLen;
+                }
+            }
+            // Set file pointer & start reading
+            raf.seek(off);
+            final int buflen = 2048;
+            final byte[] bytes = new byte[buflen];
+            int n = 0;
+            while (n < len) {
+                final int available = len - n;
+                final int read = raf.read(bytes, 0, buflen > available ? available : buflen);
+                if (read > 0) {
+                    out.write(bytes, 0, read);
+                    n += read;
+                } else {
+                    break;
+                }
+            }
+            return n;
+        } catch (final IOException e) {
+            throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(raf);
+        }
+
     }
 
     @Override
