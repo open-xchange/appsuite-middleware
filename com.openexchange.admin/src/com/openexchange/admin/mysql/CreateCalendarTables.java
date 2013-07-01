@@ -184,7 +184,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "principal VARCHAR(255),"
         + "principalId INT4 UNSIGNED,"
         + "filename VARCHAR(255),"
-        + "PRIMARY KEY (cid, intfield01),"
+        + "PRIMARY KEY (cid, intfield01, fid),"
         + "INDEX (cid, intfield02),"
         + "INDEX (cid, timestampfield01),"
         + "INDEX (cid, timestampfield02),"
@@ -207,7 +207,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "pfid INT4,"
         + "reminder INT4 UNSIGNED,"
         + "cid INT4 UNSIGNED NOT NULL,"
-        + "PRIMARY KEY (cid, object_id, member_uid),"
+        + "PRIMARY KEY (cid, object_id, member_uid, pfid),"
         + "UNIQUE INDEX member (cid, member_uid, object_id)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
