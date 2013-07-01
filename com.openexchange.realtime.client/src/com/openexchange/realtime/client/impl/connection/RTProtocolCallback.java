@@ -81,4 +81,14 @@ public interface RTProtocolCallback {
      */
     void sendPing(JSONObject ping) throws RTException;
 
+    /**
+     * Server did not send a pong message for more than 120 seconds.
+     */
+    void onTimeout();
+
+    /**
+     * The server sent a message that indicated an invalid session.
+     */
+    void onSessionInvalid();
+
 }

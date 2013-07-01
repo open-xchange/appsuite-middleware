@@ -70,13 +70,14 @@ import com.openexchange.realtime.client.impl.config.ConfigurationProvider;
  */
 public class RTConnectionTest extends AbstractRTConnection implements RTMessageHandler {
 
-    public RTConnectionTest() {
-        super(RTConnectionProperties.newBuilder("steffen.templin@premium", "secret", "ce9a19d9-b6ec-bbdf-741e-22123110db07")
+    public RTConnectionTest() throws RTException {
+        super();
+        init(RTConnectionProperties.newBuilder("steffen.templin@premium", "secret", "ce9a19d9-b6ec-bbdf-741e-22123110db07")
             .setConnectionType(RTConnectionType.LONG_POLLING)
             .setHost("host")
             .setPort(1234)
             .setSecure(false)
-            .build());
+            .build(), null);
     }
 
     private static final String SELECTOR = "rt-group-1";
@@ -118,7 +119,7 @@ public class RTConnectionTest extends AbstractRTConnection implements RTMessageH
                     "}" +
                 "],\"from\":\"synthetic.office://operations@premium/2580.24335\"}" +
             "]";
-        onReceive(joinResp);
+        onReceive(joinResp, true);
         barrier.await(1, TimeUnit.SECONDS);
         if (lastException != null) {
             throw lastException;
@@ -171,5 +172,14 @@ public class RTConnectionTest extends AbstractRTConnection implements RTMessageH
 
     @Override
     public void send(JSONValue message) throws RTException {}
+
+    /* (non-Javadoc)
+     * @see com.openexchange.realtime.client.impl.connection.AbstractRTConnection#reconnect()
+     */
+    @Override
+    protected void reconnect() throws RTException {
+        // TODO Auto-generated method stub
+        
+    }
 
 }

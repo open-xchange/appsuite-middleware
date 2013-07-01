@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class PingPongTimer implements Runnable {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(PingPongTimer.class);
 
     private final RTProtocolCallback callback;
@@ -69,7 +69,9 @@ public class PingPongTimer implements Runnable {
 
     private final boolean commit;
 
-    private AtomicLong lastContact;
+    private final AtomicLong lastContact;
+
+    private final AtomicLong lastPong;
 
     public PingPongTimer(final RTProtocolCallback callback, final long idleTime, final boolean commit) {
         super();
@@ -77,16 +79,14 @@ public class PingPongTimer implements Runnable {
         this.idleTime = idleTime;
         this.commit = commit;
         lastContact = new AtomicLong(System.currentTimeMillis());
+        lastPong = new AtomicLong(System.currentTimeMillis());
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Runnable#run()
-     */
     @Override
     public void run() {
         while (true) {
             if (Thread.interrupted()) {
+                logInterruption();
                 return;
             }
 
@@ -108,33 +108,47 @@ public class PingPongTimer implements Runnable {
                         ping.put("commit", commit);
 
                         callback.sendPing(ping);
-                        reset();
+                        resetPingTimer0();
                     } catch (Throwable e) {
-                        // TODO: log
+                        LOG.warn("Could not send PING.", e);
                     }
 
+                    if (commit && lastPong.get() < (System.currentTimeMillis() - 120000L)) {
+                        callback.onTimeout();
+                    }
                     Thread.sleep(idleTime);
                 } else {
                     LOG.debug("Thread.sleep(timeToPing - System.currentTimeMillis()): {}", timeToPing - System.currentTimeMillis());
                     Thread.sleep(timeToPing - System.currentTimeMillis());
                 }
             } catch (InterruptedException e) {
-                // TODO: log
+                logInterruption();
                 return;
             }
         }
     }
 
-    public void resetTimer() {
-        reset();
+    public void resetPingTimer() {
+        resetPingTimer0();
+    }
+
+    public void resetPongTimer() {
+        resetPongTimer0();
     }
 
     public void onPong() {
-        // Nothing to do yet
+        resetPongTimer0();
     }
 
-    private void reset() {
+    private void resetPingTimer0() {
         lastContact.set(System.currentTimeMillis());
     }
 
+    private void resetPongTimer0() {
+        lastPong.set(System.currentTimeMillis());
+    }
+
+    private void logInterruption() {
+        LOG.info("PingPongTimer shuts down due to interrupt...");
+    }
 }

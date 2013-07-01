@@ -76,31 +76,32 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     private final static Logger LOG = LoggerFactory.getLogger(AbstractRTConnection.class);
 
-    protected final RTConnectionProperties connectionProperties;
+    protected RTConnectionProperties connectionProperties;
 
-    protected final AtomicReference<Thread> delivererRef;
+    protected AtomicReference<Thread> delivererRef;
 
-    protected final ConcurrentHashMap<String, RTMessageHandler> messageHandlers;
+    protected ConcurrentHashMap<String, RTMessageHandler> messageHandlers;
 
-    protected final RTProtocol protocol;
+    protected RTProtocol protocol;
 
     protected RTSession session;
 
-    //did we successfully login to the backend to receive a serversession?
-    protected boolean loggedIn = false;
 
-    //did we establish a "duplex" connection to the backend?
-    protected  boolean isConnected = false;
-
-
-    protected AbstractRTConnection(RTConnectionProperties connectionProperties) {
+    protected AbstractRTConnection() {
         super();
+    }
+
+    protected void init(RTConnectionProperties connectionProperties, RTMessageHandler messageHandler) throws RTException {
         Validate.notNull(connectionProperties, "ConnectionProperties are needed to create a new Connection");
         this.connectionProperties = connectionProperties;
         delivererRef = new AtomicReference<Thread>();
         messageHandlers = new ConcurrentHashMap<String, RTMessageHandler>();
         protocol = new RTProtocol(this);
+        login(messageHandler);
+        reconnect();
     }
+
+    protected abstract void reconnect() throws RTException;
 
     @Override
     public void registerHandler(String selector, RTMessageHandler messageHandler) throws RTException {
@@ -114,11 +115,32 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     @Override
     public RTSession getOXSession() {
-        if (session == null || !loggedIn) {
-            throw new IllegalStateException();
+        if (session == null) {
+            throw new IllegalStateException("The connection has not been successfully established.");
         }
 
         return session;
+    }
+
+    @Override
+    public void onTimeout() {
+        try {
+            LOG.info("PONG timeout. Reconnecting...");
+            reconnect();
+        } catch (RTException e) {
+            throw new IllegalStateException("Could not reconnect after timeout.", e);
+        }
+    }
+
+    @Override
+    public void onSessionInvalid() {
+        try {
+            LOG.info("Received invalid session error. Reconnecting...");
+            login(null);
+            reconnect();
+        } catch (RTException e) {
+            throw new IllegalStateException("Could not reconnect after invalid session error.", e);
+        }
     }
 
     @Override
@@ -146,31 +168,25 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
             registerHandler0(ConfigurationProvider.getInstance().getDefaultSelector(), messageHandler);
         }
 
-        if (!loggedIn) {
-            session = Login.doLogin(
-                connectionProperties.getSecure(),
-                connectionProperties.getHost(),
-                connectionProperties.getPort(),
-                connectionProperties.getUser(),
-                connectionProperties.getPassword());
-            loggedIn = true;
-        } else {
-            LOG.info("User is already logged in. Returning existing user state.");
-        }
+        session = Login.doLogin(
+            connectionProperties.getSecure(),
+            connectionProperties.getHost(),
+            connectionProperties.getPort(),
+            connectionProperties.getUser(),
+            connectionProperties.getPassword());
     }
 
     /**
      * Destroys the active user session and performs a logout on the server.
      */
     protected void logout() {
-        if (loggedIn && session != null) {
+        if (session != null) {
             try {
                 Login.doLogout(session, connectionProperties.getSecure(), connectionProperties.getHost(), connectionProperties.getPort());
             } catch (RTException e) {
                 LOG.warn("Error during logout request.", e);
             }
 
-            loggedIn = false;
             session = null;
         }
     }
@@ -182,9 +198,14 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
      * is not <code>null</code>.
      *
      * @param message The received message.
+     * @param Whether the PONG timeout should be reset or not
      */
-    protected void onReceive(String message) throws RTException {
+    protected void onReceive(String message, boolean resetPongTimeout) throws RTException {
         try {
+            if (resetPongTimeout) {
+                protocol.resetPongTimeout();
+            }
+
             JSONValue json = JSONObject.parse(new StringReader(message));
             //Array or Object
             if(json.isArray()) {

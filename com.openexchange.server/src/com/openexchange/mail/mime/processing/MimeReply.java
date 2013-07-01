@@ -69,8 +69,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -99,6 +102,8 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
+import com.openexchange.mail.mime.dataobjects.NestedMessageMailPart;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.InlineContentHandler;
@@ -232,8 +237,7 @@ public final class MimeReply {
             originalMsg.setAccountId(accountId);
             final MailMessage origMsg = ManagedMimeMessage.clone(originalMsg);
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-            final UserSettingMail usm =
-                userSettingMail == null ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : userSettingMail;
+            final UserSettingMail usm = userSettingMail == null ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : userSettingMail;
             /*
              * New MIME message with a dummy session
              */
@@ -410,6 +414,50 @@ public final class MimeReply {
                 replyMsg.addRecipients(RecipientType.TO, recipientAddrs);
             }
             /*
+             * Check whether to attach original message
+             */
+            if (usm.getAttachOriginalMessage() > 0) {
+                /*
+                 * Append original message
+                 */
+                final CompositeMailMessage compositeMail;
+                {
+                    final Multipart multipart = new MimeMultipart();
+                    /*
+                     * Add empty text content as message's body
+                     */
+                    final MimeBodyPart textPart = new MimeBodyPart();
+                    MessageUtility.setText("", MailProperties.getInstance().getDefaultMimeCharset(), "plain", textPart);
+                    // textPart.setText("", MailProperties.getInstance().getDefaultMimeCharset(), "plain");
+                    textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+                    textPart.setHeader(
+                        MessageHeaders.HDR_CONTENT_TYPE,
+                        MimeTypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst("#CS#", MailProperties.getInstance().getDefaultMimeCharset()));
+                    multipart.addBodyPart(textPart);
+                    MessageUtility.setContent(multipart, replyMsg);
+                    // forwardMsg.setContent(multipart);
+                    replyMsg.saveChanges();
+                    // Remove generated Message-Id header
+                    replyMsg.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
+                    compositeMail = new CompositeMailMessage(MimeMessageConverter.convertMessage(replyMsg));
+                }
+                // Attach original message
+                {
+                    final MailMessage nested;
+                    if (originalMsg instanceof MimeMailMessage) {
+                        nested = MimeMessageConverter.convertMessage(((MimeMailMessage) originalMsg).getMimeMessage());
+                    } else {
+                        final ByteArrayOutputStream tmp = Streams.newByteArrayOutputStream((int) originalMsg.getSize());
+                        originalMsg.writeTo(tmp);
+                        nested = MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), Streams.asInputStream(tmp)));
+                    }
+                    nested.setMsgref(originalMsg.getMailPath());
+                    compositeMail.addAdditionalParts(new NestedMessageMailPart(nested));
+                }
+                // Return
+                return compositeMail;
+            }
+            /*
              * Set mail text of reply message
              */
             if (usm.isIgnoreOriginalMailTextOnReply()) {
@@ -419,9 +467,7 @@ public final class MimeReply {
                 MessageUtility.setText("", MailProperties.getInstance().getDefaultMimeCharset(), replyMsg);
                 // replyMsg.setText("", MailProperties.getInstance().getDefaultMimeCharset(), "plain");
                 replyMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                replyMsg.setHeader(
-                    MessageHeaders.HDR_CONTENT_TYPE,
-                    MimeTypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst("#CS#", MailProperties.getInstance().getDefaultMimeCharset()));
+                replyMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeTypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst("#CS#", MailProperties.getInstance().getDefaultMimeCharset()));
                 final MailMessage replyMail = MimeMessageConverter.convertMessage(replyMsg);
                 if (null != msgref) {
                     replyMail.setMsgref(msgref);

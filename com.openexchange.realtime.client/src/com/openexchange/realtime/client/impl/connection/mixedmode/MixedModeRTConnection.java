@@ -58,7 +58,6 @@ import org.atmosphere.wasync.Socket;
 import org.atmosphere.wasync.impl.AtmosphereClient;
 import org.atmosphere.wasync.impl.AtmosphereRequest.AtmosphereRequestBuilder;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.slf4j.Logger;
@@ -198,11 +197,14 @@ public class MixedModeRTConnection extends AbstractRTConnection {
     SequenceGenerator sequenceGenerator = new SequenceGenerator();
 
     public MixedModeRTConnection(RTConnectionProperties connectionProperties, RTMessageHandler messageHandler) throws RTException {
-        super(connectionProperties);
+        super();
         asyncHttpClient = new AsyncHttpClient();
         atmosphereClient = new AtmosphereClient();
+        init(connectionProperties, messageHandler);
+    }
 
-        login(messageHandler);
+    @Override
+    protected void reconnect() throws RTException {
         request = this.createAtmosphereRequest();
         socket = this.createSocket();
         try {
@@ -259,7 +261,6 @@ public class MixedModeRTConnection extends AbstractRTConnection {
         fireAtmosphereRequest(ping);
     }
 
-
     private boolean isQueryAction(JSONValue json) {
         // query actions consist of a single json object
         if(json.isObject()) {
@@ -279,7 +280,6 @@ public class MixedModeRTConnection extends AbstractRTConnection {
         }
         return false;
     }
-
 
     private boolean isSendAction(JSONValue json) {
         if (json.isObject()) {
@@ -363,11 +363,8 @@ public class MixedModeRTConnection extends AbstractRTConnection {
             if(response.getStatusCode()!= 200) {
                 throw new RTException("Expected a HTTP status code but got: " + response.getStatusCode());
             }
-            JSONObject jsonResponse = new JSONObject(response.getResponseBody());
-            if(jsonResponse.optString("error") != "") {
-                throw new RTException("Request caused server side error: " + jsonResponse.toString());
-            }
-            protocol.handleIncoming(jsonResponse);
+
+            onReceive(response.getResponseBody(), false);
         } catch (Exception e) {
             LOG.error("Exception while executing send request.", e);
             throw new RTException("Exception while executing send request.", e);
@@ -407,21 +404,8 @@ public class MixedModeRTConnection extends AbstractRTConnection {
 
                 if (event.equals(Event.MESSAGE)) {
                     LOG.debug("Received message in atmosphere channel: " + received);
-
                     try {
-                        JSONObject jsonObject = null;
-                        if (received.startsWith("[")) {
-                            JSONArray jsonArray = new JSONArray(received);
-                            jsonObject = jsonArray.getJSONObject(0);
-                        } else {
-                            jsonObject = new JSONObject(received);
-                        }
-
-                        if ((protocol != null) && (jsonObject != null)) {
-                            protocol.handleIncoming(jsonObject);
-                        }
-                    } catch (JSONException jsonException) {
-                        LOG.error("Error in dealing with received objects.", jsonException);
+                        onReceive(received, true);
                     } catch (RTException rtException) {
                         LOG.error("Error in handling the incoming object.", rtException);
                     }
