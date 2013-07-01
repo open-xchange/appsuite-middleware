@@ -1,5 +1,6 @@
 * 2013-07-01 - tobias.friedrich@open-xchange.com
 
+ - Fix for bug 27309: Remove 'days' property when changing recurrence rule from weekly to daily   
  - Fix for bug 27300: Pass down changed folder ID when updating referenced distribution list members   
 
 * 2013-06-28 - thorben.betten@open-xchange.com

@@ -502,6 +502,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     if (CalendarObject.UNTIL == field) {
                         // getUntil returns 'max until date' if not set
                         updatedAppointment.set(field, null);
+                    } else if (CalendarObject.DAYS == field) {
+                        // days must not be 'set' here, even not to '0'
+                        updatedAppointment.removeDays();
                     } else {
                         updatedAppointment.set(field, updatedAppointment.get(field));
                     }

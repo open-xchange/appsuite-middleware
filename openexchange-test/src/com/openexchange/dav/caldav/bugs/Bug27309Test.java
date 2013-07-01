@@ -49,35 +49,60 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.dav.StatusCodes;
+import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.ICalResource;
+import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link CalDAVBugSuite}
+ * {@link Bug27309Test}
+ *
+ * iCal: Changing frequency of series not possible
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class CalDAVBugSuite {
+public class Bug27309Test extends CalDAVTest {
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(Bug21794Test.class);
-        suite.addTestSuite(Bug22094Test.class);
-        suite.addTestSuite(Bug22352Test.class);
-        suite.addTestSuite(Bug22338Test.class);
-        suite.addTestSuite(Bug22395Test.class);
-        suite.addTestSuite(Bug22451Test.class);
-        suite.addTestSuite(Bug22723Test.class);
-        suite.addTestSuite(Bug23067Test.class);
-        suite.addTestSuite(Bug23167Test.class);
-        suite.addTestSuite(Bug23181Test.class);
-        suite.addTestSuite(Bug22689Test.class);
-        suite.addTestSuite(Bug23610Test.class);
-        suite.addTestSuite(Bug23612Test.class);
-        suite.addTestSuite(Bug24682Test.class);
-        suite.addTestSuite(Bug25783Test.class);
-        suite.addTestSuite(Bug25672Test.class);
-        suite.addTestSuite(Bug27309Test.class);
-        return suite;
-    }
+	public Bug27309Test(String name) {
+		super(name);
+	}
+
+	public void testChangeToDaily() throws Exception {
+		/*
+		 * create appointment series on server
+		 */
+		String uid = randomUID();
+        Appointment appointment = new Appointment();
+        appointment.setUid(uid);
+        appointment.setTitle(getClass().getCanonicalName());
+        appointment.setIgnoreConflicts(true);
+        appointment.setStartDate(TimeTools.D("next monday at 17:00"));
+        appointment.setEndDate(TimeTools.D("next monday at 18:00"));
+        appointment.setRecurrenceType(Appointment.WEEKLY);
+        appointment.setDays(Appointment.MONDAY);
+        appointment.setInterval(1);
+        super.create(appointment);
+        super.rememberForCleanUp(appointment);
+        /*
+         * verify appointment on client
+         */
+        ICalResource iCalResource = super.get(uid, null);
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
+        /*
+         * update appointment on client
+         */
+        iCalResource.getVEvent().setProperty("RRULE", "FREQ=DAILY;INTERVAL=1;COUNT=3");
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICalUpdate(iCalResource));
+        /*
+         * verify appointment on server
+         */
+        appointment = super.getAppointment(uid);
+        assertNotNull("appointment not found on server", appointment);
+        assertEquals("recurrence type wrong", Appointment.DAILY, appointment.getRecurrenceType());
+        assertEquals("interval wrong", 1, appointment.getInterval());
+        assertEquals("recurrence count wrong", 3, appointment.getOccurrence());
+	}
+
 }
