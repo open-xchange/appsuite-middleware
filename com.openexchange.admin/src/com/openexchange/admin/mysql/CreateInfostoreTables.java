@@ -117,7 +117,7 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "`last_modified` int8 NOT NULL,"
       + "`created_by` int4 unsigned NOT NULL,"
       + "`changed_by` int4 unsigned ,"
-      + "PRIMARY KEY (`cid`,`id`),"
+      + "PRIMARY KEY (`cid`,`id`,`folder_id`),"
       + "INDEX `lastModified` (`cid`,`last_modified`),"
       + "INDEX `folder` (`cid`,`folder_id`)"
     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
