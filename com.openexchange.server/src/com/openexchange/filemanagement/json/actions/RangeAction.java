@@ -50,12 +50,14 @@
 package com.openexchange.filemanagement.json.actions;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.FileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
-import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -64,6 +66,7 @@ import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.upload.impl.UploadException;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceLookup;
@@ -71,54 +74,41 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link GetAction}
+ * {@link RangeAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.GET, name = "get", description = "Requesting a formerly uploaded file", parameters = {
+@Action(method = RequestMethod.GET, name = "range", description = "Requesting a range from a formerly uploaded file", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "The ID of the uploaded file.")
-}, responseDescription = "The content of the requested file is directly written into output stream.")
+    @Parameter(name = "id", description = "The ID of the uploaded file."),
+    @Parameter(name = "off", description = "The offset position to read from."),
+    @Parameter(name = "len", description = "The number of bytes to read.")
+}, responseDescription = "The content of the requested file range is directly written into output stream.")
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
-public final class GetAction implements ETagAwareAJAXActionService {
+public final class RangeAction implements AJAXActionService {
 
     private final ServiceLookup services;
 
-    public GetAction(final ServiceLookup services) {
+    public RangeAction(final ServiceLookup services) {
         super();
         this.services = services;
     }
 
     @Override
-    public boolean checkETag(final String clientETag, final AJAXRequestData request, final ServerSession session) throws OXException {
-        if (clientETag == null || clientETag.length() == 0) {
-            return false;
-        }
-        try {
-            final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-            management.getByID(clientETag);
-            request.setExpires(ManagedFileManagement.TIME_TO_LIVE);
-            return true;
-        } catch (final OXException e) {
-            if (ManagedFileExceptionErrorMessage.NOT_FOUND.equals(e)) {
-                return false;
-            }
-            throw e;
-        }
-    }
-
-    @Override
-    public void setETag(final String eTag, final long expires, final AJAXRequestResult result) throws OXException {
-        result.setExpires(expires);
-        result.setHeader("ETag", eTag);
-    }
-
-    @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        RandomAccessFile raf = null;
         try {
             final String id = requestData.getParameter(AJAXServlet.PARAMETER_ID);
             if (id == null || id.length() == 0) {
-                throw UploadException.UploadCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_ID).setAction(AJAXServlet.ACTION_GET);
+                throw UploadException.UploadCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_ID).setAction("range");
+            }
+            final int off = requestData.getIntParameter("off");
+            if (off < 0) {
+                throw UploadException.UploadCode.MISSING_PARAM.create("off").setAction("range");
+            }
+            int len = requestData.getIntParameter("len");
+            if (len < 0) {
+                throw UploadException.UploadCode.MISSING_PARAM.create("len").setAction("range");
             }
             final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             final ManagedFile file = management.getByID(id);
@@ -142,11 +132,35 @@ public final class GetAction implements ETagAwareAJAXActionService {
                 // Set as "name" parameter
                 contentType.setParameter("name", fileName);
             }
-            /*
-             * Write from content's input stream to response output stream
-             */
+            // Create RandomAccessFile
             final File tmpFile = file.getFile();
-            final FileHolder fileHolder = new FileHolder(FileHolder.newClosureFor(tmpFile), tmpFile.length(), null, null);
+            raf = new RandomAccessFile(tmpFile, "r");
+            final long total = raf.length();
+            final ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+            if (off >= total) {
+                fileHolder.write(new byte[0]);
+            } else {
+                // Check available bytes
+                final long available = total - off;
+                if (available < len) {
+                    len = (int) available;
+                }
+                // Set file pointer & read
+                raf.seek(off);
+                final int buflen = 2048;
+                final byte[] bytes = new byte[buflen];
+                int n = 0;
+                while (n < len) {
+                    final int toRead = len - n;
+                    final int read = raf.read(bytes, 0, buflen > toRead ? toRead : buflen);
+                    if (read > 0) {
+                        fileHolder.write(bytes, 0, read);
+                        n += read;
+                    } else {
+                        break;
+                    }
+                }
+            }
             /*
              * Parameterize file holder
              */
@@ -155,17 +169,15 @@ public final class GetAction implements ETagAwareAJAXActionService {
             }
             fileHolder.setContentType(contentType.toString());
             fileHolder.setDisposition(disposition);
-            final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
-            /*
-             * Set ETag
-             */
-            setETag(id, ManagedFileManagement.TIME_TO_LIVE, result);
             /*
              * Return result
              */
-            return result;
-        } catch (final RuntimeException e) {
+            requestData.setFormat("file");
+            return new AJAXRequestResult(fileHolder, "file");
+        } catch (final IOException e) {
             throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(raf);
         }
     }
 
