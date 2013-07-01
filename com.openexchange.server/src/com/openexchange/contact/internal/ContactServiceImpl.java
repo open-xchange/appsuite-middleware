@@ -234,6 +234,9 @@ public class ContactServiceImpl extends DefaultContactService {
         }
         Tools.invalidateAddressesIfNeeded(delta);
         Tools.setFileAsIfNeeded(delta);
+        Contact updatedContact = new Contact();
+        ContactMapper.getInstance().mergeDifferences(updatedContact, storedContact);
+        ContactMapper.getInstance().mergeDifferences(updatedContact, delta);
 		/*
 		 * pass through to storage
 		 */
@@ -248,8 +251,7 @@ public class ContactServiceImpl extends DefaultContactService {
 			 * different storage, perform delete & create of complete contact information
 			 */
 			//TODO: move attachments
-			ContactMapper.getInstance().mergeDifferences(storedContact, delta);
-			targetStorage.create(session, targetFolderId, storedContact);
+			targetStorage.create(session, targetFolderId, updatedContact);
 			try {
 				sourceStorage.delete(session, sourceFolderId, objectID, lastRead);
 			} catch (final OXException e) {
@@ -263,13 +265,10 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * broadcast event
 		 */
-		ContactMapper.getInstance().mergeDifferences(contact, delta);
-		contact.setObjectID(storedContact.getObjectID());
-		contact.setParentFolderID(storedContact.getParentFolderID());
 		for (final ContactStorage contactStorage : Tools.getStorages(session)) {
-			contactStorage.updateReferences(session, contact);
+			contactStorage.updateReferences(session, storedContact, updatedContact);
 		}
-		new EventClient(session).modify(storedContact, contact, targetFolder);
+		new EventClient(session).modify(storedContact, updatedContact, targetFolder);
 	}
 
 	@Override
@@ -347,6 +346,9 @@ public class ContactServiceImpl extends DefaultContactService {
         }
         Tools.invalidateAddressesIfNeeded(delta);
         Tools.setFileAsIfNeeded(delta);
+        Contact updatedContact = new Contact();
+        ContactMapper.getInstance().mergeDifferences(updatedContact, storedContact);
+        ContactMapper.getInstance().mergeDifferences(updatedContact, delta);
 		/*
 		 * pass through to storage
 		 */
@@ -354,13 +356,10 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * broadcast event
 		 */
-		ContactMapper.getInstance().mergeDifferences(contact, delta);
-		contact.setObjectID(storedContact.getObjectID());
-		contact.setParentFolderID(storedContact.getParentFolderID());
 		for (final ContactStorage contactStorage : Tools.getStorages(session)) {
-			contactStorage.updateReferences(session, contact);
+			contactStorage.updateReferences(session, storedContact, updatedContact);
 		}
-		new EventClient(session).modify(storedContact, contact, folder);
+		new EventClient(session).modify(storedContact, updatedContact, folder);
 	}
 
     @Override
@@ -447,6 +446,9 @@ public class ContactServiceImpl extends DefaultContactService {
         }
         Tools.invalidateAddressesIfNeeded(delta);
         Tools.setFileAsIfNeeded(delta);
+        Contact updatedContact = new Contact();
+        ContactMapper.getInstance().mergeDifferences(updatedContact, storedContact);
+        ContactMapper.getInstance().mergeDifferences(updatedContact, delta);
         /*
          * pass through to storage
          */
@@ -454,13 +456,10 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * broadcast event
          */
-        ContactMapper.getInstance().mergeDifferences(contact, delta);
-        contact.setObjectID(storedContact.getObjectID());
-        contact.setParentFolderID(storedContact.getParentFolderID());
         for (final ContactStorage contactStorage : Tools.getStorages(session)) {
-            contactStorage.updateReferences(session, contact);
+            contactStorage.updateReferences(session, storedContact, updatedContact);
         }
-        new EventClient(session).modify(storedContact, contact, Tools.getFolder(contextID, folderID));
+        new EventClient(session).modify(storedContact, updatedContact, Tools.getFolder(contextID, folderID));
     }
 
     @Override

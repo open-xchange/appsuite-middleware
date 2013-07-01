@@ -497,27 +497,28 @@ public class RdbContactStorage extends DefaultContactStorage {
     }
 
     @Override
-    public void updateReferences(Session session, Contact contact) throws OXException {
+    public void updateReferences(Session session, Contact originalContact, Contact updatedContact) throws OXException {
         int contextID = session.getContextId();
         ConnectionHelper connectionHelper = new ConnectionHelper(session);
         Connection connection = connectionHelper.getWritable();
         try {
         	/*
-        	 * check with existing member references
+        	 * Check which existing member references are affected
         	 */
         	List<Integer> affectedDistributionLists = new ArrayList<Integer>();
-    		List<DistListMember> referencedMembers = executor.select(connection, Table.DISTLIST, contextID, contact.getObjectID(),
-    				contact.getParentFolderID(), DistListMemberField.values());
+    		List<DistListMember> referencedMembers = executor.select(connection, Table.DISTLIST, contextID, originalContact.getObjectID(),
+    		    originalContact.getParentFolderID(), DistListMemberField.values());
     		if (null != referencedMembers && 0 < referencedMembers.size()) {
     			for (DistListMember member : referencedMembers) {
-    				if (Tools.updateMember(member, contact)) {
-    					/*
-    					 * Update member, remember affected parent contact id of the list
-    					 */
-    					if (0 < executor.updateMember(connection, Table.DISTLIST, contextID, member, DistListMemberField.values())) {
-    						affectedDistributionLists.add(Integer.valueOf(member.getParentContactID()));
-    					}
-    				}
+    			    DistListMemberField[] updatedFields = Tools.updateMember(member, updatedContact);
+    			    if (null != updatedFields && 0 < updatedFields.length) {
+                        /*
+                         * Update member, remember affected parent contact id of the list
+                         */
+                        if (0 < executor.updateMember(connection, Table.DISTLIST, contextID, member, updatedFields)) {
+                            affectedDistributionLists.add(Integer.valueOf(member.getParentContactID()));
+                        }
+    			    }
     			}
     		}
         	/*
@@ -525,7 +526,7 @@ public class RdbContactStorage extends DefaultContactStorage {
         	 */
     		if (0 < affectedDistributionLists.size()) {
     			for (Integer distListID : affectedDistributionLists) {
-					executor.update(connection, Table.CONTACTS, contextID, distListID.intValue(), Long.MIN_VALUE, contact,
+					executor.update(connection, Table.CONTACTS, contextID, distListID.intValue(), Long.MIN_VALUE, updatedContact,
 							new ContactField[] { ContactField.LAST_MODIFIED, ContactField.MODIFIED_BY });
 				}
     		}
@@ -535,7 +536,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             connectionHelper.commit();
         } catch (DataTruncation e) {
             DBUtils.rollback(connection);
-            throw Tools.getTruncationException(connection, e, contact, Table.CONTACTS);
+            throw Tools.getTruncationException(connection, e, updatedContact, Table.CONTACTS);
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
@@ -582,7 +583,7 @@ public class RdbContactStorage extends DefaultContactStorage {
     public SearchIterator<Contact> list(Session session, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
     	return this.getContacts(false, session, folderId, ids, null, fields, null, sortOptions);
     }
-    
+
     @Override
     public int count(Session session, String folderId, boolean canReadAll) throws OXException {
         int contextID = session.getContextId();

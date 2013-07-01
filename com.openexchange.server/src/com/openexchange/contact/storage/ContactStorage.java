@@ -152,7 +152,7 @@ public interface ContactStorage {
 
     /**
      * Counts all contacts within the given folder.
-     * 
+     *
      * @param session the session
      * @param folderId the ID of the folder
      * @param canReadAll Whether the requesting user is allowed to see all objects within the folder.
@@ -335,10 +335,11 @@ public interface ContactStorage {
      * references to the updated contact.
      *
      * @param session the session
-     * @param contact the contact that has been updated
+     * @param originalContact the original contact
+     * @param updatedContact the updated contact
      * @throws OXException
      */
-    void updateReferences(Session session, Contact contact) throws OXException;
+    void updateReferences(Session session, Contact originalContact, Contact updatedContact) throws OXException;
 
     /**
      * Deletes a contact.

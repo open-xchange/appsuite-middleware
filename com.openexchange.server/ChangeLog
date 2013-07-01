@@ -1,3 +1,7 @@
+* 2013-07-01 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 27300: Pass down changed folder ID when updating referenced distribution list members   
+
 * 2013-06-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 27284: Don't null'ify default folders' full names if located on root level

@@ -199,7 +199,7 @@ public class LdapContactStorage extends DefaultContactStorage {
     }
 
     @Override
-    public void updateReferences(Session session, Contact contact) throws OXException {
+    public void updateReferences(Session session, Contact originalContact, Contact updatedContact) throws OXException {
         // Nothing to do
     }
 
