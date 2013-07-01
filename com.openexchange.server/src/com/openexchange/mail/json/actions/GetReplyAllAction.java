@@ -56,6 +56,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -145,10 +146,10 @@ public final class GetReplyAllAction extends AbstractMailAction {
              * Overwrite settings with request's parameters
              */
             detectDisplayMode(true, view, usmNoSave);
-            if (Boolean.parseBoolean(req.getParameter("dropPrefix"))) {
+            if (AJAXRequestDataTools.parseBoolParameter(req.getParameter("dropPrefix"))) {
                 usmNoSave.setDropReplyForwardPrefix(true);
             }
-            if (Boolean.parseBoolean(req.getParameter("attachOriginalMessage"))) {
+            if (AJAXRequestDataTools.parseBoolParameter(req.getParameter("attachOriginalMessage"))) {
                 usmNoSave.setAttachOriginalMessage(true);
             }
             /*
