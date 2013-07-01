@@ -71,6 +71,9 @@ import com.openexchange.groupware.update.tasks.CreateIcalIdsPrimaryKeyTask;
 import com.openexchange.groupware.update.tasks.CreateIcalPrincipalPrimaryKeyTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnUserAttributesForAliasLookupTask;
+import com.openexchange.groupware.update.tasks.DelDatesMembersPrimaryKeyUpdateTask;
+import com.openexchange.groupware.update.tasks.DelDatesPrimaryKeyUpdateTask;
+import com.openexchange.groupware.update.tasks.DelInfostorePrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddPrimaryKey;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddPrimaryKey;
@@ -569,6 +572,15 @@ public final class InternalList {
         
         //Add UUID column to user_setting_server table
         list.add(new UserSettingServerAddUuidUpdateTask());
+        
+        //Add folder_id to primary key in del_infostore table
+        list.add(new DelInfostorePrimaryKeyUpdateTask());
+        
+        //Add folder_id to primary key in del_dates
+        list.add(new DelDatesPrimaryKeyUpdateTask());
+        
+        //Add folder_id to primary key in del_dates_members
+        list.add(new DelDatesMembersPrimaryKeyUpdateTask());
 
         // Add synthetic primary keys to tables without natural key if full primary key support is enabled
         final FullPrimaryKeySupportService fullPrimaryKeySupportService = ServerServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
