@@ -66,6 +66,33 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class FileHolder implements IFileHolder {
 
+    private static final class FileInputStreamClosure implements InputStreamClosure {
+
+        private final File file;
+
+        FileInputStreamClosure(final File file) {
+            super();
+            this.file = file;
+        }
+
+        @Override
+        public InputStream newStream() throws IOException {
+            return new FileInputStream(file);
+        }
+    }
+
+    /**
+     * Generates a new {@link InputStreamClosure} for specified file.
+     *
+     * @param file The file
+     * @return The {@link InputStreamClosure} instance
+     */
+    public static InputStreamClosure newClosureFor(final File file) {
+        return null == file ? null : new FileInputStreamClosure(file);
+    }
+
+    // --------------------------------------------------------------------------------- //
+
     private InputStreamClosure isClosure;
     private InputStream is;
     private long length;
