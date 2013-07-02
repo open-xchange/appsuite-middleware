@@ -67,6 +67,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -101,7 +102,7 @@ public class MailAttachment extends AJAXServlet {
 
     private static final long serialVersionUID = -3109402774466180271L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAttachment.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailAttachment.class);
 
     private static final String MULTIPART_BOUNDARY = "MULTIPART_BYTERANGES";
     private static final int BUFLEN = 2048;
