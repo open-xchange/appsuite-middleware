@@ -1,3 +1,7 @@
+* 2013-07-02 - marcus.klein@open-xchange.com
+
+ - Fix for bug 27322: Corrected default configuration file for Kerberos authentication bundle.
+
 * 2013-07-01 - martin.herfurth@open-xchange.com
 
  - Fix for bug 27317: Restored accidentally deleted sql file.
