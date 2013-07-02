@@ -3779,7 +3779,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                     if (cdao.getGlobalFolderID() == 0) {
                         pid.setInt(3, newdel_up[a].getPersonalFolderId());
                     } else {
-                        pid.setNull(3, java.sql.Types.INTEGER);
+                        //TODO
+//                        pid.setNull(3, java.sql.Types.INTEGER);
+                        pid.setInt(3, -2);
                     }
                     cleanStatement.setInt(3, cid);
                     pid.setInt(4, cid);

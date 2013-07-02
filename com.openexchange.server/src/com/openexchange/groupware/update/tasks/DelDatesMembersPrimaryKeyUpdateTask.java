@@ -57,6 +57,7 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 
@@ -85,6 +86,8 @@ public class DelDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         Connection con = Database.getNoTimeout(cid, true);
         try {
             con.setAutoCommit(false);
+            Column column = new Column("pfid", "INT(11) NOT NULL DEFAULT -2");
+            Tools.modifyColumns(con, DEL_DATES_MEMBERS, column);
             if (Tools.hasPrimaryKey(con, DEL_DATES_MEMBERS)) {
                 Tools.dropPrimaryKey(con, DEL_DATES_MEMBERS);
             }

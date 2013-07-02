@@ -71,6 +71,7 @@ import com.openexchange.groupware.update.tasks.CreateIcalIdsPrimaryKeyTask;
 import com.openexchange.groupware.update.tasks.CreateIcalPrincipalPrimaryKeyTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnUserAttributesForAliasLookupTask;
+import com.openexchange.groupware.update.tasks.DelDatesMembersPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DelDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DelInfostorePrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddPrimaryKey;
@@ -580,7 +581,7 @@ public final class InternalList {
         list.add(new DelDatesPrimaryKeyUpdateTask());
 
         //Add folder_id to primary key in del_dates_members
-        //        list.add(new DelDatesMembersPrimaryKeyUpdateTask());
+        list.add(new DelDatesMembersPrimaryKeyUpdateTask());
 
         // Add folder_id to primary key in del_contacts
         list.add(new MakeFolderIdPrimaryForDelContactsTable());
