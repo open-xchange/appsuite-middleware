@@ -900,7 +900,7 @@ public class AppointmentRequest extends CalendarRequest {
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         try {
             final Appointment appointmentobject = appointmentsql.getObjectById(id, inFolder);
-            if(appointmentobject.getPrivateFlag() && session.getUserId() != appointmentobject.getCreatedBy()) {
+            if(shouldAnonymize(appointmentobject, session.getUserId())) {
                 anonymize(appointmentobject);
             }
 
@@ -1262,6 +1262,23 @@ public class AppointmentRequest extends CalendarRequest {
         }
 
         return jsonResponseObj;
+    }
+
+    private boolean shouldAnonymize(Appointment cdao, int uid) {
+        if (!cdao.getPrivateFlag()) {
+            return false;
+        }
+        
+        if (cdao.getCreatedBy() == uid) {
+            return false;
+        }
+        
+        for (UserParticipant user : cdao.getUsers()) {
+            if (user.getIdentifier() == uid) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void compareStartDateForList(final LinkedList<Appointment> appointmentList, final Appointment appointmentObj, final int limit) {

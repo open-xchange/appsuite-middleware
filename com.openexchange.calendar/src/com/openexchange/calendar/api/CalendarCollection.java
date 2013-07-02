@@ -1714,7 +1714,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                 if (cdao.getFolderType() == FolderObject.SHARED) {
                     cdao.setSharedFolderOwner(access.getFolderOwner(inFolder));
                     //cdao.setSharedFolderOwner(OXFolderTools.getFolderOwner(inFolder, cdao.getContext(), readcon));
-                    if (cdao.getPrivateFlag()) {
+                    if (cdao.getPrivateFlag() && !isParticipant(cdao, so.getUserId())) {
                         return false;
                     }
                     EffectivePermission oclp = null;
@@ -1743,7 +1743,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                 if (cdao.getFolderType() == FolderObject.SHARED) {
                     cdao.setSharedFolderOwner(access.getFolderOwner(inFolder));
                     //cdao.setSharedFolderOwner(OXFolderTools.getFolderOwner(inFolder, cdao.getContext(), readcon));
-                    if (cdao.getPrivateFlag()) {
+                    if (cdao.getPrivateFlag() && !isParticipant(cdao, so.getUserId())) {
                         return false;
                     }
                     EffectivePermission oclp = null;
@@ -1779,6 +1779,15 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         } catch (final RuntimeException e) {
             LOG.error("ERROR getting read permissions", e);
             return false;
+        }
+        return false;
+    }
+    
+    private boolean isParticipant(CalendarDataObject cdao, int id) {
+        for (Participant participant : cdao.getParticipants()) {
+            if (participant.getIdentifier() == id) {
+                return true;
+            }
         }
         return false;
     }

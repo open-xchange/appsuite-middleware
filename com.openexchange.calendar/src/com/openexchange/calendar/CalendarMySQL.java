@@ -3126,15 +3126,15 @@ public class CalendarMySQL implements CalendarSqlImp {
          * storage version specifies more than one appointment in participant
          * information
          */
-        if ((cdao.containsPrivateFlag() ? cdao.getPrivateFlag() : edao.getPrivateFlag())
-                && ((participants == null ? old_participants.length > 1 : participants.length > 1) || (users == null ? old_users.length > 1
-                        : users.length > 1))) {
-            /*
-             * Updated appointment has private flag set but contains more than
-             * one participant
-             */
-            throw OXCalendarExceptionCodes.PRIVATE_FLAG_AND_PARTICIPANTS.create(new Object[0]);
-        }
+//        if ((cdao.containsPrivateFlag() ? cdao.getPrivateFlag() : edao.getPrivateFlag())
+//                && ((participants == null ? old_participants.length > 1 : participants.length > 1) || (users == null ? old_users.length > 1
+//                        : users.length > 1))) {
+//            /*
+//             * Updated appointment has private flag set but contains more than
+//             * one participant
+//             */
+//            throw OXCalendarExceptionCodes.PRIVATE_FLAG_AND_PARTICIPANTS.create(new Object[0]);
+//        }
 
         int check_up = old_users.length;
 
