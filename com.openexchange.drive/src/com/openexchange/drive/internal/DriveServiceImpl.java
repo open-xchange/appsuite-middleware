@@ -463,18 +463,24 @@ public class DriveServiceImpl implements DriveService {
         return serverFiles;
     }
 
-    private static List<ServerDirectoryVersion> getServerDirectories(DriveSession session) throws OXException {
-        Map<String, FileStorageFolder> folders = session.getStorage().getFolders();
-        List<String> folderIDs = new ArrayList<String>(folders.size());
-        for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
-            folderIDs.add(entry.getValue().getId());
-        }
-        List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(session, folderIDs);
-        List<ServerDirectoryVersion> serverDirectories = new ArrayList<ServerDirectoryVersion>(folderIDs.size());
-        for (int i = 0; i < folderIDs.size(); i++) {
-            serverDirectories.add(new ServerDirectoryVersion(session.getStorage().getPath(folderIDs.get(i)), checksums.get(i)));
-        }
-        return serverDirectories;
+    private static List<ServerDirectoryVersion> getServerDirectories(final DriveSession session) throws OXException {
+        return session.getStorage().wrapInTransaction(new StorageOperation<List<ServerDirectoryVersion>>() {
+
+            @Override
+            public List<ServerDirectoryVersion> call() throws OXException {
+                Map<String, FileStorageFolder> folders = session.getStorage().getFolders();
+                List<String> folderIDs = new ArrayList<String>(folders.size());
+                for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
+                    folderIDs.add(entry.getValue().getId());
+                }
+                List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(session, folderIDs);
+                List<ServerDirectoryVersion> serverDirectories = new ArrayList<ServerDirectoryVersion>(folderIDs.size());
+                for (int i = 0; i < folderIDs.size(); i++) {
+                    serverDirectories.add(new ServerDirectoryVersion(session.getStorage().getPath(folderIDs.get(i)), checksums.get(i)));
+                }
+                return serverDirectories;
+            }
+        });
     }
 
     private static DriveSession createSession(ServerSession session, String rootFolderID) {

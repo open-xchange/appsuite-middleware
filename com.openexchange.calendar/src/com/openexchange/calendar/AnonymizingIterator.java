@@ -51,6 +51,7 @@ package com.openexchange.calendar;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -75,10 +76,7 @@ public class AnonymizingIterator extends CachedCalendarIterator {
         if (null == app) {
             return null;
         }
-        if (!app.getPrivateFlag()) {
-            return app;
-        }
-        if (app.getPrivateFlag() && app.getCreatedBy() == uid) {
+        if (!shouldAnonymize(app)) {
             return app;
         }
         final CalendarDataObject anonymized = app.clone();
@@ -95,5 +93,22 @@ public class AnonymizingIterator extends CachedCalendarIterator {
         anonymized.removeShownAs();
         anonymized.removeUsers();
         return anonymized;
+    }
+    
+    private boolean shouldAnonymize(CalendarDataObject cdao) {
+        if (!cdao.getPrivateFlag()) {
+            return false;
+        }
+        
+        if (cdao.getCreatedBy() == uid) {
+            return false;
+        }
+        
+        for (UserParticipant user : cdao.getUsers()) {
+            if (user.getIdentifier() == uid) {
+                return false;
+            }
+        }
+        return true;
     }
 }

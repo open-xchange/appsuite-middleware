@@ -4,6 +4,7 @@
 .lint4jprefs
 bin
 bin/
+.git-rewrite/
 openexchange-test/conf/test.properties
 openexchange-test/conf/ajax.properties
 open-xchange-development/adminTmp

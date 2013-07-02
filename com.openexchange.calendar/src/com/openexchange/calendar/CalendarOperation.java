@@ -466,6 +466,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setModifiedBy(setInt(i++, load_resultset));
                 cdao.setGlobalFolderID(setInt(i++, load_resultset));
                 cdao.setPrivateFlag(setBooleanToInt(i++, load_resultset));
+                Participant[] participants = cimp.getParticipants(cdao, readcon).getList();
+                cdao.setParticipants(participants);
                 if (check_permissions && !recColl.checkPermissions(cdao, so, ctx, readcon, check_special_action, action_folder)) {
                     if (DEBUG && action_folder != inFolder) {
                         LOG.debug(StringCollection.convertArraytoString(new Object[] {
@@ -508,7 +510,6 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setPrincipal(setString(i++, load_resultset));
                 cdao.setPrincipalId(setInt(i++, load_resultset));
                 cdao.setUsers(cimp.getUserParticipants(cdao, readcon, so.getUserId()).getUsers());
-                cdao.setParticipants(cimp.getParticipants(cdao, readcon).getList());
                 if (check_permissions && cdao.getEffectiveFolderId() != inFolder) {
                     if (cdao.getFolderType() != FolderObject.SHARED && check_special_action == action) {
                         if (DEBUG) {
@@ -1586,9 +1587,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     if (cdao.getFolderType() != FolderObject.PRIVATE) {
                         throw OXCalendarExceptionCodes.PRIVATE_FLAG_IN_PRIVATE_FOLDER.create();
                     }
-                    if ((cdao.getUsers() != null && cdao.getUsers().length > 1) || (cdao.getParticipants() != null && cdao.getParticipants().length > 1)) {
-                        throw OXCalendarExceptionCodes.PRIVATE_FLAG_AND_PARTICIPANTS.create();
-                    }
+//                    if ((cdao.getUsers() != null && cdao.getUsers().length > 1) || (cdao.getParticipants() != null && cdao.getParticipants().length > 1)) {
+//                        throw OXCalendarExceptionCodes.PRIVATE_FLAG_AND_PARTICIPANTS.create();
+//                    }
                 }
             } else if (cdao.getPrivateFlag()) {
                 throw OXCalendarExceptionCodes.UNSUPPORTED_PRIVATE_FLAG.create(cdao.getPrivateFlag());

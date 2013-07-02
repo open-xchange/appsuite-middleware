@@ -95,6 +95,7 @@ public class AppointmentAJAXSuite extends TestSuite{
         tests.addTest(RecurrenceTestSuite.suite());
         tests.addTest(AppointmentBugTestSuite.suite());
         tests.addTest(NewAppointmentHttpApiTestSuite.suite());
+        tests.addTestSuite(PrivateTests.class);
         return tests;
     }
 }

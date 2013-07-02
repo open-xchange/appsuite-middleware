@@ -97,7 +97,7 @@ public final class GetAction extends AppointmentAction {
 
         try {
             final Appointment appointmentobject = appointmentsql.getObjectById(id, inFolder);
-            if(appointmentobject.getPrivateFlag() && session.getUserId() != appointmentobject.getCreatedBy()) {
+            if(shouldAnonymize(appointmentobject, session.getUserId())) {
                 anonymize(appointmentobject);
             }
 

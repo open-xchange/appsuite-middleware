@@ -203,6 +203,23 @@ public abstract class AppointmentAction implements AJAXActionService {
         anonymized.removeUsers();
     }
 
+    protected boolean shouldAnonymize(Appointment cdao, int uid) {
+        if (!cdao.getPrivateFlag()) {
+            return false;
+        }
+        
+        if (cdao.getCreatedBy() == uid) {
+            return false;
+        }
+        
+        for (UserParticipant user : cdao.getUsers()) {
+            if (user.getIdentifier() == uid) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     protected Date getDateByFieldId(final int field, final Appointment appointmentObj, final TimeZone timeZone) {
         final Date date = null;
         if (field == CalendarObject.START_DATE) {
