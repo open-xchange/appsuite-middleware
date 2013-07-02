@@ -207,7 +207,8 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "pfid INT4,"
         + "reminder INT4 UNSIGNED,"
         + "cid INT4 UNSIGNED NOT NULL,"
-        + "PRIMARY KEY (cid, object_id, member_uid, pfid),"
+//        + "PRIMARY KEY (cid, object_id, member_uid, pfid),"
+        + "PRIMARY KEY (cid, object_id, member_uid),"
         + "UNIQUE INDEX member (cid, member_uid, object_id)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
