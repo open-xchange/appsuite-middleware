@@ -1,3 +1,8 @@
+* 2013-07-02 - choeger@open-xchange.com
+
+ - Fixed bug #27337: Customer name in exception
+   Use own prefix for Exception codes.
+ 
 * 2012-11-13 - choeger@open-xchange.com
 
   - Fixed bug #23151: parallels authentication bundle logs irritating error messages as fatal
