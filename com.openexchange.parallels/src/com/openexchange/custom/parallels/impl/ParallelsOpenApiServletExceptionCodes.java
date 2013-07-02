@@ -100,7 +100,7 @@ public enum ParallelsOpenApiServletExceptionCodes implements OXExceptionCode {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
-    private static final String PREFIX = "CUSTOM_STRATO_SMS_MESSAGING";
+    private static final String PREFIX = "PARALLELS_OPENAPI";
     
     @Override
     public String getPrefix() {
