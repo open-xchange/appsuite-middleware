@@ -29,7 +29,7 @@ import java.net.URL;
  * @author roland
  * @since Jan 7, 2010
  */
-class JolokiaHttpContext implements HttpContext {
+public class JolokiaHttpContext implements HttpContext {
 
     /**
      * This metod always returns true and does not handle security

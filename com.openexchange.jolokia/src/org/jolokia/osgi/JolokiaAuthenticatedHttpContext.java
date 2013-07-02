@@ -29,7 +29,7 @@ import java.util.StringTokenizer;
 * @author roland
 * @since Jan 7, 2010
 */
-class JolokiaAuthenticatedHttpContext extends JolokiaHttpContext {
+public class JolokiaAuthenticatedHttpContext extends JolokiaHttpContext {
     private final String user;
     private final String password;
 
@@ -39,7 +39,7 @@ class JolokiaAuthenticatedHttpContext extends JolokiaHttpContext {
      * @param pUser user to check against
      * @param pPassword password to check against
      */
-    JolokiaAuthenticatedHttpContext(String pUser, String pPassword) {
+    public JolokiaAuthenticatedHttpContext(String pUser, String pPassword) {
         user = pUser;
         password = pPassword;
     }

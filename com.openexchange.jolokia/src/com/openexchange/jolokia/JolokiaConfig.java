@@ -60,7 +60,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link JolokiaConfig} Collects and exposes configuration parameters needed by Jolokia
- *
+ * 
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  */
 public class JolokiaConfig implements Initialization {
@@ -76,13 +76,18 @@ public class JolokiaConfig implements Initialization {
     private final AtomicBoolean started = new AtomicBoolean();
 
     // Jolokia properties
-    
-    /** boolean which will start jolokia or not*/
+
+    /** boolean which will start jolokia or not */
     private boolean jolokiaStart = false;
-    
-    /** The Servlet Name, jolokia will try to get connected to */
+
+    /** The servlet name, jolokia will try to get connected to */
     private String jolokiaServletName = "/servlet/jolokia";
 
+    /** The user for authentication */
+    private String user;
+
+    /** The password for authentication */
+    private String password;
 
     @Override
     public void start() throws OXException {
@@ -110,12 +115,14 @@ public class JolokiaConfig implements Initialization {
         // jolokia properties
         this.jolokiaServletName = configService.getProperty("com.openexchange.jolokia.servlet.name", "/servlet/jolokia");
         this.jolokiaStart = configService.getBoolProperty("com.openexchange.jolokia.start", false);
+        this.user = configService.getProperty("com.openexchange.jolokia.user");
+        this.password = configService.getProperty("com.openexchange.jolokia.password", "password");
 
     }
 
     /**
      * Gets the started
-     *
+     * 
      * @return The started
      */
     public AtomicBoolean getStarted() {
@@ -124,7 +131,7 @@ public class JolokiaConfig implements Initialization {
 
     /**
      * Gets the servletName
-     *
+     * 
      * @return The servlteName
      */
     public String getServletName() {
@@ -133,11 +140,19 @@ public class JolokiaConfig implements Initialization {
 
     /**
      * Gets the boolean, if jolokia will be run or not
-     *
+     * 
      * @return true if jolokia will start and false if not
      */
     public boolean getJolokiaStart() {
         return jolokiaStart;
     }
-    
+
+    public String getUser() {
+        return user;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
 }
