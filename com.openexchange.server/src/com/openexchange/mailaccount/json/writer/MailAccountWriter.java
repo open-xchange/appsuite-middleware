@@ -128,8 +128,19 @@ public final class MailAccountWriter implements MailAccountFields {
      * @throws JSONException If writing JSON fails
      */
     public static JSONObject write(final MailAccount account) throws JSONException {
+        return write(account, hideDetailsForDefaultAccount());
+    }
+
+    /**
+     * Writes specified mail account to a JSON object.
+     *
+     * @param account The mail account to write
+     * @return A JSON object filled with
+     * @throws JSONException If writing JSON fails
+     */
+    public static JSONObject write(final MailAccount account, final boolean hideDetailsForDefaultAccount) throws JSONException {
         final int accountId = account.getId();
-        final boolean hideForDefault = MailAccount.DEFAULT_ID == accountId && hideDetailsForDefaultAccount();
+        final boolean hideForDefault = MailAccount.DEFAULT_ID == accountId && hideDetailsForDefaultAccount;
         final JSONObject json;
         if (hideForDefault) {
             json = new JSONObject(24);
@@ -270,10 +281,21 @@ public final class MailAccountWriter implements MailAccountFields {
      * @throws OXException If writing JSON fails
      */
     public static JSONArray writeArray(final MailAccount[] mailAccounts, final List<Attribute> attributes, final Session session) throws OXException {
+        return writeArray(mailAccounts, attributes, session, hideDetailsForDefaultAccount());
+    }
+
+    /**
+     * Writes specified attributes for each mail account contained in given array in an own JSON array surrounded by a super JSON array.
+     *
+     * @param mailAccounts The mail accounts
+     * @param attributes The attributes
+     * @return A JSON array of JSON arrays for each account
+     * @throws OXException If writing JSON fails
+     */
+    public static JSONArray writeArray(final MailAccount[] mailAccounts, final List<Attribute> attributes, final Session session, final boolean hideDetailsForDefaultAccount) throws OXException {
         final JSONArray rows = new JSONArray(mailAccounts.length);
         final JSlobStorage jSlobStorage = AbstractMailAccountAction.getStorage();
         final int defaultId = MailAccount.DEFAULT_ID;
-        final boolean hideDetailsForDefaultAccount = hideDetailsForDefaultAccount();
         // Write accounts
         for (final MailAccount account : mailAccounts) {
             final boolean hideForDefault = hideDetailsForDefaultAccount && defaultId == account.getId();
