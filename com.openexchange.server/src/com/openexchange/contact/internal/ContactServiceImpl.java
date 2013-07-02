@@ -246,12 +246,20 @@ public class ContactServiceImpl extends DefaultContactService {
 			 * same storage, send update as delta
 			 */
 			sourceStorage.update(session, sourceFolderId, objectID, delta, lastRead);
+	        /*
+	         * merge back differences to supplied contact
+	         */
+	        ContactMapper.getInstance().mergeDifferences(contact, delta);
 		} else {
 			/*
 			 * different storage, perform delete & create of complete contact information
 			 */
 			//TODO: move attachments
 			targetStorage.create(session, targetFolderId, updatedContact);
+	        /*
+	         * merge back differences to supplied contact
+	         */
+	        ContactMapper.getInstance().mergeDifferences(contact, updatedContact);
 			try {
 				sourceStorage.delete(session, sourceFolderId, objectID, lastRead);
 			} catch (final OXException e) {
@@ -354,6 +362,10 @@ public class ContactServiceImpl extends DefaultContactService {
 		 */
 		storage.update(session, folderID, objectID, delta, lastRead);
 		/*
+		 * merge back differences to supplied contact
+		 */
+		ContactMapper.getInstance().mergeDifferences(contact, delta);
+		/*
 		 * broadcast event
 		 */
 		for (final ContactStorage contactStorage : Tools.getStorages(session)) {
@@ -453,6 +465,10 @@ public class ContactServiceImpl extends DefaultContactService {
          * pass through to storage
          */
         storage.update(session, folderID, objectID, delta, lastRead);
+        /*
+         * merge back differences to supplied contact
+         */
+        ContactMapper.getInstance().mergeDifferences(contact, delta);
         /*
          * broadcast event
          */
