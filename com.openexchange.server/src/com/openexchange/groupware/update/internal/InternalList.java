@@ -78,6 +78,7 @@ import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddUuidUpda
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddPrimaryKey;
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.MailAccountAddReplyToTask;
+import com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForDListTables;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUpdateTaskTable;
@@ -565,21 +566,24 @@ public final class InternalList {
 
         // Add UUID column to user_attribute table
         list.add(new AddUUIDForUserAttributeTable());
-        
+
         //Add UUID column to infostoreReservedPaths table
         list.add(new AddUUIDForInfostoreReservedPaths());
-        
+
         //Add UUID column to user_setting_server table
         list.add(new UserSettingServerAddUuidUpdateTask());
-        
+
         //Add folder_id to primary key in del_infostore table
         list.add(new DelInfostorePrimaryKeyUpdateTask());
-        
+
         //Add folder_id to primary key in del_dates
         list.add(new DelDatesPrimaryKeyUpdateTask());
-        
+
         //Add folder_id to primary key in del_dates_members
-//        list.add(new DelDatesMembersPrimaryKeyUpdateTask());
+        //        list.add(new DelDatesMembersPrimaryKeyUpdateTask());
+
+        // Add folder_id to primary key in del_contacts
+        list.add(new MakeFolderIdPrimaryForDelContactsTable());
 
         // Add synthetic primary keys to tables without natural key if full primary key support is enabled
         final FullPrimaryKeySupportService fullPrimaryKeySupportService = ServerServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);
@@ -605,10 +609,10 @@ public final class InternalList {
 
             //Add primary key to dlist tables
             list.add(new MakeUUIDPrimaryForDListTables());
-            
+
             //Add primary key to infostoreReservedPaths table;
             list.add(new MakeUUIDPrimaryForInfostoreReservedPaths());
-            
+
             //Add primary key to user_setting_server table
             list.add(new UserSettingServerAddPrimaryKeyUpdateTask());
 

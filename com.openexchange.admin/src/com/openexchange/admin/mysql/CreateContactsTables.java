@@ -83,7 +83,7 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "INDEX (intfield01, cid),"
         + "INDEX (intfield01, intfield02, intfield03, cid)"
         + ") ENGINE  = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     /**
      * SQL statement for prg_dlist table
      */
@@ -125,7 +125,7 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "INDEX (intfield01, cid),"
         + "INDEX (intfield01, intfield02, intfield03, cid)"
         + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     /**
      * SQL statement for del_dlist table
      */
@@ -163,9 +163,9 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "INDEX (intfield01, intfield02, cid),"
         + "INDEX (cid)"
         + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     /**
-     * SQL statement for prg_contacts_linkage table 
+     * SQL statement for prg_contacts_linkage table
      */
     private static final String CREATE_PRG_CONTACTS_LINKAGE_PRIMARY_KEY = "CREATE TABLE " + TABLE_PRG_CONTACTS_LINKAGE + " ("
         + "intfield01 INT4 NOT NULL,"
@@ -349,7 +349,7 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "INDEX `email1` (`cid`,`field65`(255)),"
         + "INDEX `email2` (`cid`,`field66`(255)),"
         + "INDEX `email3` (`cid`,`field67`(255)),"
-        + "PRIMARY KEY (cid, intfield01)"
+ + "PRIMARY KEY (cid, intfield01, fid)"
         + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**
