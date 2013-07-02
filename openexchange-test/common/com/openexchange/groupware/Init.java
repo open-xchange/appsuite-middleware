@@ -129,6 +129,8 @@ import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.impl.id.IDGeneratorServiceImpl;
 import com.openexchange.groupware.reminder.internal.TargetRegistry;
+import com.openexchange.groupware.update.FullPrimaryKeySupportService;
+import com.openexchange.groupware.update.internal.FullPrimaryKeySupportImpl;
 import com.openexchange.groupware.update.internal.InternalList;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.HtmlServiceImpl;
@@ -356,6 +358,7 @@ public final class Init {
         startAndInjectBasicServices();
         startAndInjectHTMLService();
         startAndInjectServerConfiguration();
+        startAndInjectFullPrimaryKeySupportService();
         startAndInjectNotification();
         startAndInjectQuotaService();
         startAndInjectCache();
@@ -384,6 +387,15 @@ public final class Init {
         startAndInjectContactCollector();
         startAndInjectImportExportServices();
 
+    }
+
+    /**
+     * 
+     */
+    private static void startAndInjectFullPrimaryKeySupportService() {
+        FullPrimaryKeySupportImpl s = new FullPrimaryKeySupportImpl(null);
+        services.put(FullPrimaryKeySupportService.class, s);
+        TestServiceRegistry.getInstance().addService(FullPrimaryKeySupportService.class, s);
     }
 
     private static void startVersionBundle() throws Exception {
