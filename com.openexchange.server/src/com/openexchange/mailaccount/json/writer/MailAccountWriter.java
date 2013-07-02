@@ -303,7 +303,9 @@ public final class MailAccountWriter implements MailAccountFields {
             final JSONArray row = new JSONArray(hideForDefault ? 32 : 64);
             for (final Attribute attribute : attributes) {
                 if (hideForDefault) {
-                    if (!HIDDEN_FOR_DEFAULT.contains(attribute)) {
+                    if (HIDDEN_FOR_DEFAULT.contains(attribute)) {
+                        row.put(JSONObject.NULL);
+                    } else {
                         writeAttribute(attribute, account, getter, row, session, jSlobStorage);
                     }
                 } else {
