@@ -1,3 +1,7 @@
+* 2013-07-02 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 27323: Merge changed properties back to supplied contact after performing updates    
+
 * 2013-07-02 - marcus.klein@open-xchange.com
 
  - Fix for bug 27322: Corrected default configuration file for Kerberos authentication bundle.
