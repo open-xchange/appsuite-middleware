@@ -40,7 +40,7 @@
  * or the cumulation interfaces ( {@link com.openexchange.report.appsuite.UserReportCumulator}, {@link com.openexchange.report.appsuite.ContextReportCumulator}, {@link com.openexchange.report.appsuite.ReportFinishingTouches} )
  * and export them via the OSGi system. Note that even if a single class implements more than one of these service interfaces, it must be registered in OSGi once for each of these interfaces.
  * The method #appliesTo is used to determine whether an analysis or cumulator applies to a given report run. If a report run is triggered with the reportType (a String) as an argument
- * that reportTyoe is passed along to #appliesTo so an implementation can decide whether it wants to participate in a given report run. Have a look at {@link com.openexchange.report.appsuite.defaultHandlers.CapabilityHandler}, {@link com.openexchange.report.appsuite.defaultHandlers.ClientLoginCount} and {@link com.openexchange.report.appsuite.defaultHandlers.Total}
+ * that reportType is passed along to #appliesTo so an implementation can decide whether it wants to participate in a given report run. Have a look at {@link com.openexchange.report.appsuite.defaultHandlers.CapabilityHandler}, {@link com.openexchange.report.appsuite.defaultHandlers.ClientLoginCount} and {@link com.openexchange.report.appsuite.defaultHandlers.Total}
  * for implementations for the default report. These classes are exported, so can be used as superclasses for custom reports
  *
  */
