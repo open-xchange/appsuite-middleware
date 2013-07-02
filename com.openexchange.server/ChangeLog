@@ -1,3 +1,7 @@
+* 2013-07-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27335: Support brackets in URL strings
+
 * 2013-07-02 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 27323: Merge changed properties back to supplied contact after performing updates    
