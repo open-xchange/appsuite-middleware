@@ -112,7 +112,9 @@ public class DownloadHelper {
                     throw DriveExceptionCodes.FILE_NOT_FOUND.create(fileVersion.getName(), path);
                 }
                 String contentType = null != file.getFileMIMEType() ? file.getFileMIMEType() : "application/octet-stream";
-                return new FileHolder(inputStream, -1, contentType, fileVersion.getName());
+                FileHolder fileHolder = new FileHolder(inputStream, -1, contentType, fileVersion.getName());
+                fileHolder.setDelivery("download");
+                return fileHolder;
             }
         });
     }
