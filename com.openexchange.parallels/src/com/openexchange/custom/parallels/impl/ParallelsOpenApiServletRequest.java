@@ -153,7 +153,11 @@ public final class ParallelsOpenApiServletRequest  {
             rpcargs.put("list",list);
 
 
-            rpcargs.put("login", this.user.getMail());
+            // Bugfix ID#27047 - [L3] POA antispam shows errors when service user and primary email address not match
+            // use user login (LoginInfo) instead of email address to identify user in POA as this is what
+            // POA also does
+            //rpcargs.put("login", this.user.getMail());
+            rpcargs.put("login", this.user.getLoginInfo());
             final Map<?, ?> response = (HashMap<?, ?>) getRpcClient().execute(method,new Object[]{rpcargs});
             checkXMLRpcResponseForError(response);
         } catch (final XmlRpcException e) {
@@ -177,7 +181,7 @@ public final class ParallelsOpenApiServletRequest  {
      * @throws ParallelsOpenApiServletExceptionCodes
      */
     private void checkXMLRpcResponseForError(final Map<?, ?> response) throws OXException {
-        if(response.containsKey("error_code")){
+        if(response.containsKey("error_code") || response.containsKey("error_message")){
             throw ParallelsOpenApiServletExceptionCodes.OPENAPI_COMMUNICATION_ERROR.create(response.get("error_message")+" (OPEN_API_ERROR_CODE:"+response.get("error_code")+" )");
         }
     }
@@ -192,7 +196,11 @@ public final class ParallelsOpenApiServletRequest  {
 
             final HashMap<String, String> rpcargs = new HashMap<String, String>();
             rpcargs.put("list",list);
-            rpcargs.put("login", this.user.getMail());
+            // Bugfix ID#27047 - [L3] POA antispam shows errors when service user and primary email address not match
+            // use user login (LoginInfo) instead of email address to identify user in POA as this is what
+            // POA also does
+            //rpcargs.put("login", this.user.getMail());
+            rpcargs.put("login", this.user.getLoginInfo());
             final HashMap<?, ?> response = (HashMap<?, ?>) getRpcClient().execute("pem.spam_assassin.getItems",new Object[]{rpcargs});
             checkXMLRpcResponseForError(response);
 
@@ -228,7 +236,7 @@ public final class ParallelsOpenApiServletRequest  {
     private XmlRpcClient getRpcClient() throws MalformedURLException, ServiceException{
         final XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
         config.setServerURL(new URL(getOpenAPIInterfaceURL()));
-        config.setUserAgent("OX-HE POA PLUGIN");
+        config.setUserAgent("Open-Xchange Paralles Plugin");
         if(isOpenAPIAuthEnabled()){
             if(LOG.isDebugEnabled()){
                 LOG.debug("Using HTTP BASIC AUTH (Username: "+getOpenAPIAuthID()+") for sending XML-RPC requests to OpenAPI...");
