@@ -287,6 +287,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
             final IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
             boolean performRollback = false;
+            JSONObject fileData = new JSONObject();
             try {
                 if (!session.getUserConfiguration().hasInfostore()) {
                     throw MailExceptionCode.NO_MAIL_ACCESS.create();
@@ -329,6 +330,9 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 performRollback = true;
                 fileAccess.saveDocument(file, mailPart.getInputStream(), System.currentTimeMillis(), fields);
                 fileAccess.commit();
+                fileData.put("id", file.getId());
+                fileData.put("folder_id", file.getFolderId());
+                fileData.put("filename", file.getFileName());
             } catch (final Exception e) {
                 if (performRollback) {
                     fileAccess.rollback();
@@ -339,7 +343,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     fileAccess.finish();
                 }
             }
-            return new AJAXRequestResult(new JSONArray(0), "json");
+            return new AJAXRequestResult(fileData, "json");
         } catch (final OXException e) {
             throw e;
         } catch (final JSONException e) {
