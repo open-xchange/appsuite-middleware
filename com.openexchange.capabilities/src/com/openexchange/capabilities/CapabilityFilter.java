@@ -50,7 +50,7 @@
 package com.openexchange.capabilities;
 
 /**
- * {@link CapabilityFilter} - A filter for abstract capabilities.
+ * {@link CapabilityFilter} - A filter for capabilities.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
