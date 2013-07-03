@@ -96,7 +96,7 @@ public class ConfigAction implements AJAXActionService {
 
 		computedValues = new ComputedServerConfigValueService[]{
 				new Manifests(services, manifests, capabilityFilter),
-				new Capabilities(services),
+				new Capabilities(services, capabilityFilter),
 				new Hosts(),
 				new ServerVersion(),
 				new Languages(services),
