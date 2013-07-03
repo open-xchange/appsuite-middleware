@@ -50,7 +50,10 @@
 package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -86,6 +89,7 @@ public class DelDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         Connection con = Database.getNoTimeout(cid, true);
         try {
             con.setAutoCommit(false);
+            fillPfid(con);
             Column column = new Column("pfid", "INT(11) NOT NULL DEFAULT -2");
             Tools.modifyColumns(con, DEL_DATES_MEMBERS, column);
             if (Tools.hasPrimaryKey(con, DEL_DATES_MEMBERS)) {
@@ -111,6 +115,66 @@ public class DelDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
     @Override
     public String[] getDependencies() {
         return new String[0];
+    }
+    
+    private void fillPfid(Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        int oldPos, newPos;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT object_id, member_uid, confirm, reason, reminder, cid FROM " + DEL_DATES_MEMBERS + " WHERE pfid IS NULL FOR UPDATE");
+            rs = stmt.executeQuery();
+            PreparedStatement stmt2 = null;
+            try {
+                while (rs.next()) {
+                    oldPos = 1;
+                    StringBuilder sb = new StringBuilder();
+                    int objectId = rs.getInt(oldPos++);
+                    sb.append("UPDATE " + DEL_DATES_MEMBERS + " SET pfid = -2 WHERE object_id = ? ");
+                    int memberUid = rs.getInt(oldPos++);
+                    sb.append("AND member_uid = ? ");
+                    int confirm = rs.getInt(oldPos++);
+                    sb.append("AND confirm = ? ");
+                    String reason = rs.getString(oldPos++);
+                    boolean reasonNull = rs.wasNull();
+                    if (reasonNull) {
+                        sb.append("AND reason IS ? ");
+                    } else {
+                        sb.append("AND reason = ? ");
+                    }
+                    int reminder = rs.getInt(oldPos++);
+                    boolean reminderNull = rs.wasNull();
+                    if (reminderNull) {
+                        sb.append("AND reminder IS ? ");
+                    } else {
+                        sb.append("AND reminder = ? ");
+                    }
+                    int cid = rs.getInt(oldPos++);
+                    sb.append("AND cid = ?");
+                    stmt2 = con.prepareStatement(sb.toString());
+                    newPos = 1;
+                    stmt2.setInt(newPos++, objectId);
+                    stmt2.setInt(newPos++, memberUid);
+                    stmt2.setInt(newPos++, confirm);
+                    if (reasonNull) {
+                        stmt2.setNull(newPos++, Types.CHAR);
+                    } else {
+                        stmt2.setString(newPos++, reason);
+                    }
+                    if (reminderNull) {
+                        stmt2.setNull(newPos++, Types.INTEGER);
+                    } else {
+                        stmt2.setInt(newPos++, reminder);
+                    }
+                    stmt2.setInt(newPos++, cid);
+                    stmt2.execute();
+                }
+            } finally {
+                DBUtils.closeSQLStuff(stmt2);
+            }
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
     }
 
 }

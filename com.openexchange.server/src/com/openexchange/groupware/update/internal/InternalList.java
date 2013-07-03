@@ -78,6 +78,8 @@ import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddPrimaryK
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddPrimaryKey;
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddUuidUpdateTask;
+import com.openexchange.groupware.update.tasks.InfostoreDocumentCreateForeignKeyUpdateTask;
+import com.openexchange.groupware.update.tasks.InfostoreDocumentDropForeignKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.InfostorePrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.MailAccountAddReplyToTask;
 import com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable;
@@ -577,8 +579,14 @@ public final class InternalList {
         //Add UUID column to user_setting_server table
         list.add(new UserSettingServerAddUuidUpdateTask());
         
+        //Drop foreign key from infostore_document table
+        list.add(new InfostoreDocumentDropForeignKeyUpdateTask());
+        
         //Add folder_id to primary key in infostore table
         list.add(new InfostorePrimaryKeyUpdateTask());
+        
+        //Add foreign key to infostore_document_table
+        list.add(new InfostoreDocumentCreateForeignKeyUpdateTask());
 
         //Add folder_id to primary key in del_infostore table
         list.add(new DelInfostorePrimaryKeyUpdateTask());

@@ -50,37 +50,34 @@
 package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
+
 /**
- * {@link PrgDatesMembersPrimaryKeyUpdateTask}
- * 
+ * {@link InfostoreDocumentCreateForeignKeyUpdateTask}
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class PrgDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
-
-    private static final String PRG_DATES_MEMBERS = "prg_dates_members";
+public class InfostoreDocumentCreateForeignKeyUpdateTask extends UpdateTaskAdapter {
+    
+    private final static String INFOSTORE = "infostore";
+    private final static String INFOSTORE_DOCUMENT = "infostore_document";
 
     /**
-     * Initializes a new {@link PrgDatesMembersPrimaryKeyUpdateTask}.
+     * Initializes a new {@link InfostoreDocumentCreateForeignKeyUpdateTask}.
      */
-    public PrgDatesMembersPrimaryKeyUpdateTask() {
+    public InfostoreDocumentCreateForeignKeyUpdateTask() {
         super();
     }
 
-    /*
-     * (non-Javadoc)
+    /* (non-Javadoc)
      * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
      */
     @Override
@@ -89,13 +86,7 @@ public class PrgDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         Connection con = Database.getNoTimeout(cid, true);
         try {
             con.setAutoCommit(false);
-            fillPfid(con);
-            Column column = new Column("pfid", "INT(11) NOT NULL DEFAULT -2");
-            Tools.modifyColumns(con, PRG_DATES_MEMBERS, column);
-            if (Tools.hasPrimaryKey(con, PRG_DATES_MEMBERS)) {
-                Tools.dropPrimaryKey(con, PRG_DATES_MEMBERS);
-            }
-            Tools.createPrimaryKey(con, PRG_DATES_MEMBERS, new String[] { "cid", "object_id", "member_uid", "pfid" });
+            Tools.createForeignKey(con, "infostore_document_ibfk_1", INFOSTORE_DOCUMENT, new String[] {"cid", "infostore_id"}, INFOSTORE, new String[] {"cid", "id"});
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);
@@ -109,73 +100,12 @@ public class PrgDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    /*
-     * (non-Javadoc)
+    /* (non-Javadoc)
      * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
      */
     @Override
     public String[] getDependencies() {
-        return new String[0];
-    }
-
-    private void fillPfid(Connection con) throws SQLException {
-        PreparedStatement stmt = null;
-        int oldPos, newPos;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT object_id, member_uid, confirm, reason, reminder, cid FROM " + PRG_DATES_MEMBERS + " WHERE pfid IS NULL FOR UPDATE");
-            rs = stmt.executeQuery();
-            PreparedStatement stmt2 = null;
-            try {
-                while (rs.next()) {
-                    oldPos = 1;
-                    StringBuilder sb = new StringBuilder();
-                    int objectId = rs.getInt(oldPos++);
-                    sb.append("UPDATE " + PRG_DATES_MEMBERS + " SET pfid = -2 WHERE object_id = ? ");
-                    int memberUid = rs.getInt(oldPos++);
-                    sb.append("AND member_uid = ? ");
-                    int confirm = rs.getInt(oldPos++);
-                    sb.append("AND confirm = ? ");
-                    String reason = rs.getString(oldPos++);
-                    boolean reasonNull = rs.wasNull();
-                    if (reasonNull) {
-                        sb.append("AND reason IS ? ");
-                    } else {
-                        sb.append("AND reason = ? ");
-                    }
-                    int reminder = rs.getInt(oldPos++);
-                    boolean reminderNull = rs.wasNull();
-                    if (reminderNull) {
-                        sb.append("AND reminder IS ? ");
-                    } else {
-                        sb.append("AND reminder = ? ");
-                    }
-                    int cid = rs.getInt(oldPos++);
-                    sb.append("AND cid = ?");
-                    stmt2 = con.prepareStatement(sb.toString());
-                    newPos = 1;
-                    stmt2.setInt(newPos++, objectId);
-                    stmt2.setInt(newPos++, memberUid);
-                    stmt2.setInt(newPos++, confirm);
-                    if (reasonNull) {
-                        stmt2.setNull(newPos++, Types.CHAR);
-                    } else {
-                        stmt2.setString(newPos++, reason);
-                    }
-                    if (reminderNull) {
-                        stmt2.setNull(newPos++, Types.INTEGER);
-                    } else {
-                        stmt2.setInt(newPos++, reminder);
-                    }
-                    stmt2.setInt(newPos++, cid);
-                    stmt2.execute();
-                }
-            } finally {
-                DBUtils.closeSQLStuff(stmt2);
-            }
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-        }
+        return new String[] { "com.openexchange.groupware.update.tasks.InfostorePrimaryKeyUpdateTask" };
     }
 
 }
