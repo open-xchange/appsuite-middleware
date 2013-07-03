@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,40 +47,47 @@
  *
  */
 
-package com.openexchange.drive;
+package com.openexchange.drive.sync;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.drive.FileVersion;
+
+
 
 /**
- * {@link DriveExceptionMessages}
- *
- * Translatable messages for {@link DriveExceptionCodes}.
+ * {@link SimpleFileVersion}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class DriveExceptionMessages implements LocalizableStrings {
+public class SimpleFileVersion implements FileVersion {
 
-    public static final String INVALID_PATH_MSG = "The path \"%1$s\" is invalid";
-    public static final String PATH_NOT_FOUND_MSG = "The path \"%1$s\" was not found";
-    public static final String FILE_NOT_FOUND_MSG = "The file \"%1$s\" was not found at \"%2$s\"";
-    public static final String IO_ERROR_MSG = "An I/O error occurred: \"%1$s\"";
-    public static final String INVALID_FILE_OFFSET_MSG = "The file offset \"%1$d\" is invalid";
-    public static final String DB_ERROR_MSG = "Unexpected database error: \"%1$s\"";
-    public static final String FILEVERSION_NOT_FOUND_MSG = "The file \"%1$s\" with checksum \"%2$s\" was not found at \"%3$s\"";
-    public static final String NO_CHECKSUM_FOR_FILE_MSG = "No checksum for file \"%1$s\" available";
-    public static final String UPLOADED_FILE_CHECKSUM_ERROR_MSG = "Checksum \"%1$s\" for uploaded file \"%2$s\" different from \"%3$s\"";
-    public static final String DIRECTORYVERSION_NOT_FOUND_MSG = "The directory \"%1$s\" with checksum \"%2$s\"";
-    public static final String NO_DELETE_FILE_PERMISSION_MSG = "You are not allowed to delete the file \"%1$s\" at \"%2$s\"";
-    public static final String NO_CREATE_FILE_PERMISSION_MSG = "You are not allowed to create files at \"%1$s\"";
-    public static final String NO_MODIFY_FILE_PERMISSION_MSG = "You are not allowed to modify the file \"%1$s\" at \"%2$s\"";
-    public static final String NO_DELETE_DIRECTORY_PERMISSION_MSG = "You are not allowed to delete the directory \"%1$s\"";
-    public static final String NO_CREATE_DIRECTORY_PERMISSION_MSG = "You are not allowed to create directories at \"%1$s\"";
-    public static final String QUOTA_REACHED_MSG = "The allowed Quota is reached";
+    private final String name;
+    private final String checksum;
 
     /**
-     * Prevent instantiation.
+     * Initializes a new {@link SimpleFileVersion}.
+     *
+     * @param name The filename
+     * @param checksum The checksum
      */
-    private DriveExceptionMessages() {
+    public SimpleFileVersion(String name, String checksum) {
         super();
+        this.name = name;
+        this.checksum = checksum;
     }
+
+    @Override
+    public String getChecksum() {
+        return checksum;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
+        return getName() + " | " + getChecksum();
+    }
+
 }

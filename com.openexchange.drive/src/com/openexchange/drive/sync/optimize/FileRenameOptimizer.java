@@ -62,7 +62,8 @@ import com.openexchange.drive.actions.AcknowledgeFileAction;
 import com.openexchange.drive.actions.EditFileAction;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
-import com.openexchange.drive.sync.FileSynchronizer;
+import com.openexchange.drive.sync.RenameTools;
+import com.openexchange.drive.sync.SimpleFileVersion;
 import com.openexchange.drive.sync.SyncResult;
 
 
@@ -173,12 +174,10 @@ Actions for client:
                         /*
                          * merge into corresponding rename actions for server
                          */
-                        String tempName = FileSynchronizer.findAlternativeName(clientAction.getVersion().getName(), usedFilenames);
-                        usedFilenames.add(tempName);
-                        SimpleFileVersion tempVersion = new SimpleFileVersion(tempName, clientAction.getVersion().getChecksum());
-                        optimizedActionsForServer.add(new EditFileAction(clientActionServerVersion, tempVersion, null, path, 1));
+                        FileVersion renamedVersion = getRenamedVersion(clientAction.getVersion());
+                        optimizedActionsForServer.add(new EditFileAction(clientActionServerVersion, renamedVersion, null, path, 1));
                         optimizedActionsForServer.add(new EditFileAction(matchingActionServerVersion, clientActionServerVersion, null, path, 2));
-                        optimizedActionsForServer.add(new EditFileAction(tempVersion, matchingActionServerVersion, null, path, 3));
+                        optimizedActionsForServer.add(new EditFileAction(renamedVersion, matchingActionServerVersion, null, path, 3));
                         /*
                          * acknowledge client renames
                          */
@@ -226,6 +225,14 @@ Actions for client:
             }
         }
         return optimizedList;
+    }
+
+    private FileVersion getRenamedVersion(FileVersion conflictingVersion) {
+        String alternativeName = RenameTools.findAlternativeName(conflictingVersion.getName(), usedFilenames);
+        if (null != usedFilenames) {
+            usedFilenames.add(alternativeName);
+        }
+        return new SimpleFileVersion(alternativeName, conflictingVersion.getChecksum());
     }
 
     private static FileVersion findByNameAndChecksum(String name, String checksum, Collection<? extends FileVersion> fileVersions) {

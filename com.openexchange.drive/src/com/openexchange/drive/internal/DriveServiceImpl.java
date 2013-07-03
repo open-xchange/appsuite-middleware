@@ -57,10 +57,13 @@ import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
+import com.openexchange.drive.actions.DownloadFileAction;
 import com.openexchange.drive.actions.EditFileAction;
+import com.openexchange.drive.actions.ErrorFileAction;
 import com.openexchange.drive.actions.RemoveFileAction;
 import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.checksum.DirectoryChecksum;
@@ -71,6 +74,8 @@ import com.openexchange.drive.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.drive.storage.StorageOperation;
+import com.openexchange.drive.sync.RenameTools;
+import com.openexchange.drive.sync.SimpleFileVersion;
 import com.openexchange.drive.sync.SyncResult;
 import com.openexchange.drive.sync.Synchronizer;
 import com.openexchange.drive.sync.optimize.OptimizingDirectorySynchronizer;
@@ -218,7 +223,39 @@ public class DriveServiceImpl implements DriveService {
                 ", offset: " + offset + ", total length: " + totalLength);
         }
         SyncResult<FileVersion> syncResult = new SyncResult<FileVersion>();
-        File createdFile = new UploadHelper(driveSession).perform(path, originalVersion, newVersion, uploadStream, contentType, offset, totalLength);
+        File createdFile = null;
+        try {
+            createdFile = new UploadHelper(driveSession).perform(path, originalVersion, newVersion, uploadStream, contentType, offset, totalLength);
+        } catch (OXException e) {
+            if ("FLS-0024".equals(e.getErrorCode())) {
+                /*
+                 * quota reached
+                 */
+                OXException quotaException = DriveExceptionCodes.QUOTA_REACHED.create(e, (Object[])null);
+                if (null != originalVersion) {
+                    /*
+                     * upload should have replaced an existing file, let client first rename it's file and mark as error with quarantine flag...
+                     */
+                    String alternativeName = RenameTools.findRandomAlternativeName(originalVersion.getName());
+                    FileVersion renamedVersion = new SimpleFileVersion(alternativeName, originalVersion.getChecksum());
+                    syncResult.addActionForClient(new EditFileAction(newVersion, renamedVersion, null, path));
+                    syncResult.addActionForClient(new ErrorFileAction(newVersion, renamedVersion, null, path, quotaException, true));
+                    /*
+                     * ... then download the server version afterwards
+                     */
+                    File serverFile = ServerFileVersion.valueOf(originalVersion, path, driveSession).getFile();
+                    syncResult.addActionForClient(new DownloadFileAction(null, originalVersion, null, path,
+                        serverFile.getFileSize(), serverFile.getFileMIMEType()));
+                } else {
+                    /*
+                     * upload of new file, mark as error with quarantine flag
+                     */
+                    syncResult.addActionForClient(new ErrorFileAction(null, newVersion, null, path, quotaException, true));
+                }
+            } else {
+                throw e;
+            }
+        }
         if (null != createdFile) {
             /*
              * store checksum

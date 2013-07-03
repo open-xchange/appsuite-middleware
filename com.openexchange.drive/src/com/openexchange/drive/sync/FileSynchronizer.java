@@ -51,8 +51,6 @@ package com.openexchange.drive.sync;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
@@ -149,7 +147,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 /*
                  * not allowed, keep both client- and server versions, let client first rename it's file...
                  */
-                FileVersion renamedVersion = getRenamedVersion(comparison.getClientVersion(), usedFilenames);
+                FileVersion renamedVersion = getRenamedVersion(comparison.getClientVersion());
                 result.addActionForClient(new EditFileAction(comparison.getClientVersion(), renamedVersion, comparison, path));
                 /*
                  * ... then mark that file as error (without quarantine)...
@@ -167,7 +165,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 /*
                  * not allowed, let client first rename it's file and mark as error with quarantine flag...
                  */
-                FileVersion renamedVersion = getRenamedVersion(comparison.getClientVersion(), usedFilenames);
+                FileVersion renamedVersion = getRenamedVersion(comparison.getClientVersion());
                 result.addActionForClient(new EditFileAction(comparison.getClientVersion(), renamedVersion, comparison, path));
                 result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), renamedVersion, comparison,
                     path, DriveExceptionCodes.NO_MODIFY_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path), true));
@@ -223,7 +221,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 /*
                  * keep both client- and server versions, let client first rename it's file...
                  */
-                FileVersion renamedVersion = getRenamedVersion(comparison.getClientVersion(), usedFilenames);
+                FileVersion renamedVersion = getRenamedVersion(comparison.getClientVersion());
                 result.addActionForClient(new EditFileAction(comparison.getClientVersion(), renamedVersion, comparison, path));
                 /*
                  * ... then upload it if possible...
@@ -279,6 +277,14 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
         }
     }
 
+    protected FileVersion getRenamedVersion(FileVersion conflictingVersion) {
+        String alternativeName = RenameTools.findAlternativeName(conflictingVersion.getName(), usedFilenames);
+        if (null != usedFilenames) {
+            usedFilenames.add(alternativeName);
+        }
+        return new SimpleFileVersion(alternativeName, conflictingVersion.getChecksum());
+    }
+
     private boolean mayCreate() throws OXException {
         FileStoragePermission permission = getPermission();
         return FileStoragePermission.CREATE_OBJECTS_IN_FOLDER <= permission.getFolderPermission() &&
@@ -306,61 +312,8 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
         return folderPermission;
     }
 
-    private static FileVersion getRenamedVersion(final FileVersion conflictingVersion, Set<String> usedFilenames) {
-        final String alternativeName = findAlternativeName(conflictingVersion.getName(), usedFilenames);
-        usedFilenames.add(alternativeName);
-        return new FileVersion() {
-
-            @Override
-            public String getName() {
-                return alternativeName;
-            }
-
-            @Override
-            public String getChecksum() {
-                return conflictingVersion.getChecksum();
-            }
-        };
-    }
-
     private long getUploadOffset(String path, FileVersion fileVersion) throws OXException {
         return new UploadHelper(session).getUploadOffset(fileVersion);
-    }
-
-    public static String findAlternativeName(String conflictingName, Set<String> usedFilenames) {
-        int extensionIndex = conflictingName.lastIndexOf('.');
-        String fileName, fileExtension;
-        if (-1 == extensionIndex) {
-            fileName = conflictingName;
-            fileExtension = "";
-        } else {
-            fileName = conflictingName.substring(0, extensionIndex);
-            fileExtension = conflictingName.substring(extensionIndex);
-        }
-        Pattern regex = Pattern.compile("\\((\\d+)\\)\\z");
-        String alternativeName;
-        do {
-            Matcher matcher = regex.matcher(fileName);
-            if (false == matcher.find()) {
-                /*
-                 * append new initial sequence number
-                 */
-                fileName += " (1)";
-            } else {
-                /*
-                 * incremented existing sequence number
-                 */
-                int number = 0;
-                try {
-                    number = Integer.valueOf(matcher.group(1)).intValue();
-                } catch (NumberFormatException e) {
-                    // should not get here
-                }
-                fileName = fileName.substring(0, matcher.start()) + '(' + String.valueOf(1 + number) + ')';
-            }
-            alternativeName = fileName + fileExtension;
-        } while (usedFilenames.contains(alternativeName));
-        return alternativeName;
     }
 
 }
