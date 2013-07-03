@@ -52,10 +52,10 @@ package com.openexchange.apps.manifests.json.values;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.apps.manifests.json.AllAction;
+import com.openexchange.capabilities.CapabilityFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -69,10 +69,12 @@ public class Manifests implements ComputedServerConfigValueService {
 
 	private final JSONArray manifests;
 	private final ServiceLookup services;
+    private final CapabilityFilter capabilityFilter;
 
 
-	public Manifests(ServiceLookup services, JSONArray manifests) {
+	public Manifests(ServiceLookup services, JSONArray manifests, CapabilityFilter capabilityFilter) {
 		super();
+		this.capabilityFilter = capabilityFilter;
 		this.services = services;
 		this.manifests = manifests;
 	}
@@ -81,7 +83,7 @@ public class Manifests implements ComputedServerConfigValueService {
 	public void addValue(JSONObject serverConfig, AJAXRequestData request,
 			ServerSession session) throws OXException, JSONException {
 
-		serverConfig.put("manifests", AllAction.getManifests(session, manifests, services));
+		serverConfig.put("manifests", AllAction.getManifests(session, manifests, services, capabilityFilter));
 
 	}
 

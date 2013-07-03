@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,52 +49,18 @@
 
 package com.openexchange.capabilities;
 
-import java.util.Set;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-
 /**
- * {@link CapabilityService} - A capability service.
+ * {@link CapabilityFilter} - A filter for abstract capabilities.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface CapabilityService {
+public interface CapabilityFilter {
 
     /**
-     * Gets the capabilities associated with given user.
+     * Tests whether or not the specified capability should be included in a capability list.
      *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param filter An optional filter; pass <code>null</code> to retrieve all available capabilities
-     * @return The capabilities
-     * @throws OXException If capabilities cannot be determined
+     * @param capability The capability to be tested
+     * @return <code>true</code> if and only if <code>capability</code> should be included
      */
-    Set<Capability> getCapabilities(int userId, int contextId, CapabilityFilter filter) throws OXException;
-
-    /**
-     * Gets the capabilities associated with given user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The capabilities
-     * @throws OXException If capabilities cannot be determined
-     */
-    Set<Capability> getCapabilities(int userId, int contextId) throws OXException;
-
-    /**
-     * Gets the capabilities associated with given session.
-     *
-     * @param session The session
-     * @return The capabilities
-     * @throws OXException If capabilities cannot be determined
-     */
-    Set<Capability> getCapabilities(Session session) throws OXException;
-
-    /**
-     * Declares specified capability.
-     *
-     * @param capability The capability to declare
-     */
-    void declareCapability(String capability);
-
+    boolean accept(Capability capability);
 }

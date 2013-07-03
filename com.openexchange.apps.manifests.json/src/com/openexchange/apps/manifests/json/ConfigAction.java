@@ -70,6 +70,7 @@ import com.openexchange.apps.manifests.json.values.Languages;
 import com.openexchange.apps.manifests.json.values.Manifests;
 import com.openexchange.apps.manifests.json.values.ServerVersion;
 import com.openexchange.apps.manifests.json.values.UIVersion;
+import com.openexchange.capabilities.CapabilityFilter;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -88,13 +89,13 @@ public class ConfigAction implements AJAXActionService {
 	private final ServerConfigServicesLookup registry;
 	private final ComputedServerConfigValueService[] computedValues;
 
-	public ConfigAction(ServiceLookup services, JSONArray manifests, ServerConfigServicesLookup registry) {
+	public ConfigAction(ServiceLookup services, JSONArray manifests, ServerConfigServicesLookup registry, final CapabilityFilter capabilityFilter) {
 		super();
 		this.services = services;
 		this.registry = registry;
 
 		computedValues = new ComputedServerConfigValueService[]{
-				new Manifests(services, manifests),
+				new Manifests(services, manifests, capabilityFilter),
 				new Capabilities(services),
 				new Hosts(),
 				new ServerVersion(),

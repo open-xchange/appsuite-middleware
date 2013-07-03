@@ -51,9 +51,15 @@ package com.openexchange.capabilities.json.osgi;
 
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.CapabilityFilter;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.json.Capability2JSON;
 import com.openexchange.capabilities.json.CapabilityActionFactory;
+import com.openexchange.groupware.userconfiguration.AvailabilityChecker;
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.groupware.userconfiguration.TrackerAvailabilityChecker;
+import com.openexchange.passwordchange.PasswordChangeService;
 
 /**
  * {@link CapabilitiesJSONActivator}
@@ -62,7 +68,7 @@ import com.openexchange.capabilities.json.CapabilityActionFactory;
  */
 public class CapabilitiesJSONActivator extends AJAXModuleActivator {
 
-    private volatile CapabilityActionFactory factory;
+    private volatile AvailabilityChecker editPasswordChecker;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -71,18 +77,27 @@ public class CapabilitiesJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        final AvailabilityChecker editPasswordChecker = TrackerAvailabilityChecker.getAvailabilityCheckerFor(PasswordChangeService.class, true, context);
+        this.editPasswordChecker = editPasswordChecker;
+        final String editPasswordName = Permission.EDIT_PASSWORD.name().toLowerCase();
+        final CapabilityFilter capabilityFilter = new CapabilityFilter() {
+
+            @Override
+            public boolean accept(final Capability capability) {
+                return (!editPasswordName.equals(capability.getId()) || editPasswordChecker.isAvailable());
+            }
+        };
+
         registerService(ResultConverter.class, new Capability2JSON());
-        final CapabilityActionFactory factory = new CapabilityActionFactory(this, context);
-        this.factory = factory;
-        registerModule(factory, "capabilities");
+        registerModule(new CapabilityActionFactory(this, capabilityFilter), "capabilities");
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        final CapabilityActionFactory factory = this.factory;
-        if (null != factory) {
-            factory.close();
-            this.factory = null;
+        final AvailabilityChecker editPasswordChecker = this.editPasswordChecker;
+        if (null != editPasswordChecker) {
+            editPasswordChecker.close();
+            this.editPasswordChecker = null;
         }
         super.stopBundle();
     }

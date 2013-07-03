@@ -49,18 +49,13 @@
 
 package com.openexchange.capabilities.json;
 
-import java.util.Set;
-import org.osgi.framework.BundleContext;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
-import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.CapabilityFilter;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.capabilities.json.osgi.TrackerAvailabilityChecker;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -73,36 +68,27 @@ import com.openexchange.tools.session.ServerSession;
 public class CapabilityAllAction implements AJAXActionService {
 
     private final ServiceLookup services;
-    private final Capability editPasswordCapability;
-    private final AvailabilityChecker editPasswordChecker;
+    private final CapabilityFilter capabilityFilter;
 
     /**
      * Initializes a new {@link CapabilityAllAction}.
      *
      * @param services The service look-up
-     * @param context The bundle context
+     * @param capabilityFilter2 The bundle context
      */
-    public CapabilityAllAction(final ServiceLookup services, final BundleContext context) {
+    public CapabilityAllAction(final ServiceLookup services, final CapabilityFilter capabilityFilter) {
         super();
         this.services = services;
-        editPasswordCapability = new Capability(Permission.EDIT_PASSWORD.name().toLowerCase());
-        editPasswordChecker = TrackerAvailabilityChecker.getAvailabilityCheckerFor(PasswordChangeService.class, true, context);
+        this.capabilityFilter = capabilityFilter;
     }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        final CapabilityService capabilityService = services.getService(CapabilityService.class);
         // Get capabilities
-        final Set<Capability> capabilities = capabilityService.getCapabilities(session);
-        // Check them
-        if (!editPasswordChecker.isAvailable()) {
-            capabilities.remove(editPasswordCapability);
-        }
-        return new AJAXRequestResult(capabilities, "capability");
-    }
-
-    public void close() {
-        editPasswordChecker.close();
+        return new AJAXRequestResult(services.getService(CapabilityService.class).getCapabilities(
+            session.getUserId(),
+            session.getContextId(),
+            capabilityFilter), "capability");
     }
 
 }

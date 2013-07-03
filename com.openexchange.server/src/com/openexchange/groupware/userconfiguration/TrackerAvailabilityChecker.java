@@ -47,20 +47,19 @@
  *
  */
 
-package com.openexchange.capabilities.json.osgi;
+package com.openexchange.groupware.userconfiguration;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.capabilities.json.AvailabilityChecker;
 
 /**
  * {@link TrackerAvailabilityChecker} - The {@link AvailabilityChecker} backed by a {@link ServiceTracker}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class TrackerAvailabilityChecker<S> extends ServiceTracker<S, S> implements com.openexchange.capabilities.json.AvailabilityChecker {
+public class TrackerAvailabilityChecker<S> extends ServiceTracker<S, S> implements AvailabilityChecker {
 
     /**
      * Gets the checker for specified service.

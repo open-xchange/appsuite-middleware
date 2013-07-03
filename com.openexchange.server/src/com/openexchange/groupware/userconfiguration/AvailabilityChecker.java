@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.capabilities.json;
+package com.openexchange.groupware.userconfiguration;
 
 
 /**

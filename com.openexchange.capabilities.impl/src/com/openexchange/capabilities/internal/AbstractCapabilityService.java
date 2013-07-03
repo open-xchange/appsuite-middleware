@@ -55,6 +55,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,6 +68,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityExceptionCodes;
+import com.openexchange.capabilities.CapabilityFilter;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.DependentCapabilityChecker;
 import com.openexchange.config.ConfigurationService;
@@ -168,7 +170,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     }
 
     @Override
-    public Set<Capability> getCapabilities(final int userId, final int contextId) throws OXException {
+    public Set<Capability> getCapabilities(final int userId, final int contextId, final CapabilityFilter filter) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(userId, contextId);
 
         Set<Capability> capabilities = new HashSet<Capability>(64);
@@ -319,14 +321,29 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             }
         }
 
-     // Now the declared ones
+        // Now the declared ones
         for (String cap : declaredCapabilities.keySet()) {
             if (check(cap, serverSession, capabilities)) {
                 capabilities.add(getCapability(cap));
             }
         }
 
+        // Apply filter if not null
+        if (filter != null) {
+            final Iterator<Capability> it = capabilities.iterator();
+            for (int i = capabilities.size(); i-- > 0;) {
+                if (!filter.accept(it.next())) {
+                    it.remove();
+                }
+            }
+        }
+
         return capabilities;
+    }
+
+    @Override
+    public Set<Capability> getCapabilities(final int userId, final int contextId) throws OXException {
+        return getCapabilities(userId, contextId, null);
     }
 
     @Override

@@ -56,17 +56,24 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
+import org.osgi.framework.BundleContext;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.apps.manifests.ServerConfigMatcherService;
 import com.openexchange.apps.manifests.json.ManifestActionFactory;
 import com.openexchange.apps.manifests.json.values.UIVersion;
+import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.CapabilityFilter;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.groupware.userconfiguration.AvailabilityChecker;
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.groupware.userconfiguration.TrackerAvailabilityChecker;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.NearRegistryServiceTracker;
+import com.openexchange.passwordchange.PasswordChangeService;
 
 /**
  * {@link ManifestJSONActivator}
@@ -74,8 +81,17 @@ import com.openexchange.osgi.NearRegistryServiceTracker;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ManifestJSONActivator extends AJAXModuleActivator {
+
     private static final Log LOG = LogFactory.getLog(ManifestJSONActivator.class);
 
+    private volatile AvailabilityChecker editPasswordChecker;
+
+    /**
+     * Initializes a new {@link ManifestJSONActivator}.
+     */
+    public ManifestJSONActivator() {
+        super();
+    }
 
 	@Override
 	protected Class<?>[] getNeededServices() {
@@ -84,8 +100,20 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 
 	@Override
 	protected void startBundle() throws Exception {
+	    final BundleContext context = this.context;
 
-	    UIVersion.UIVERSION = context.getBundle().getVersion().toString();
+        UIVersion.UIVERSION = context.getBundle().getVersion().toString();
+
+        final AvailabilityChecker editPasswordChecker = TrackerAvailabilityChecker.getAvailabilityCheckerFor(PasswordChangeService.class, true, context);
+        this.editPasswordChecker = editPasswordChecker;
+        final String editPasswordName = Permission.EDIT_PASSWORD.name().toLowerCase();
+        final CapabilityFilter capabilityFilter = new CapabilityFilter() {
+
+            @Override
+            public boolean accept(final Capability capability) {
+                return (editPasswordChecker.isAvailable() || !editPasswordName.equals(capability.getId()));
+            }
+        };
 
 	    final NearRegistryServiceTracker<ServerConfigMatcherService> matcherTracker = new NearRegistryServiceTracker<ServerConfigMatcherService>(context, ServerConfigMatcherService.class);
 	    rememberTracker(matcherTracker);
@@ -103,9 +131,19 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 			public List<ComputedServerConfigValueService> getComputed() {
 				return Collections.unmodifiableList(computedValueTracker.getServiceList());
 			}
-		}), "apps/manifests");
+		}, capabilityFilter), "apps/manifests");
 
 		openTrackers();
+	}
+
+	@Override
+	protected void stopBundle() throws Exception {
+	    final AvailabilityChecker editPasswordChecker = this.editPasswordChecker;
+	    if (null != editPasswordChecker) {
+            editPasswordChecker.close();
+            this.editPasswordChecker = null;
+        }
+	    super.stopBundle();
 	}
 
     private JSONArray readManifests() {
