@@ -351,6 +351,11 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         return getCapabilities(session.getUserId(), session.getContextId());
     }
 
+    @Override
+    public Set<Capability> getCapabilities(final Session session, final CapabilityFilter filter) throws OXException {
+        return getCapabilities(session.getUserId(), session.getContextId(), filter);
+    }
+
     private boolean check(String cap, ServerSession session, Set<Capability> allCapabilities) throws OXException {
         final Map<String, List<CapabilityChecker>> checkers = getCheckers();
 
