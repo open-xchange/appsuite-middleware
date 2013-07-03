@@ -50,7 +50,6 @@
 package com.openexchange.groupware.userconfiguration;
 
 import java.util.HashSet;
-import java.util.Set;
 import com.openexchange.groupware.contexts.Context;
 
 
@@ -61,24 +60,24 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class AllowAllUserConfiguration extends UserConfiguration {
 
-    public AllowAllUserConfiguration(int userId, int[] groups, Context ctx) {
+    public AllowAllUserConfiguration(final int userId, final int[] groups, final Context ctx) {
         super(new HashSet<String>(), userId, groups, ctx);
     }
 
     private static final long serialVersionUID = 1L;
-    
+
     @Override
-    public boolean hasPermission(int permissionBit) {
+    public boolean hasPermission(final int permissionBit) {
         return true;
     }
-    
+
     @Override
-    public boolean hasPermission(Permission permission) {
+    public boolean hasPermission(final Permission permission) {
         return true;
     }
-    
+
     @Override
-    public boolean hasPermission(String name) {
+    public boolean hasPermission(final String name) {
         return true;
     }
 }

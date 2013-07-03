@@ -51,6 +51,7 @@ package com.openexchange.capabilities.json;
 
 import java.util.Arrays;
 import java.util.Collection;
+import org.osgi.framework.BundleContext;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
@@ -71,9 +72,9 @@ public class CapabilityActionFactory implements AJAXActionServiceFactory {
      *
      * @param services The service look-up
      */
-    public CapabilityActionFactory(ServiceLookup services) {
+    public CapabilityActionFactory(ServiceLookup services, BundleContext context) {
         super();
-        this.allAction = new CapabilityAllAction(services);
+        this.allAction = new CapabilityAllAction(services, context);
     }
 
     @Override
@@ -87,6 +88,10 @@ public class CapabilityActionFactory implements AJAXActionServiceFactory {
     @Override
     public Collection<?> getSupportedServices() {
         return Arrays.asList("all");
+    }
+
+    public void close() {
+        allAction.close();
     }
 
 }

@@ -77,12 +77,10 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.userconf.UserPermissionService;
@@ -91,7 +89,7 @@ import com.openexchange.userconf.UserPermissionService;
  * {@link AbstractCapabilityService}
  *
  * {@link CapabilityServiceImpl}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -169,28 +167,26 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         return tmp.booleanValue();
     }
 
+    @Override
     public Set<Capability> getCapabilities(final int userId, final int contextId) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(userId, contextId);
 
         Set<Capability> capabilities = new HashSet<Capability>(64);
-        
+
         // What about autologin?
         if (autologin()) {
             capabilities.add(new Capability("autologin", true));
         }
-        
+
         // ------------- Combined capabilities/permissions ------------ //
         if (!serverSession.isAnonymous()) {
-            // Portal
-            final UserPermissionBits userConfiguration = services.getService(UserPermissionService.class).getUserPermissionBits(
-                serverSession.getUserId(),
-                serverSession.getContext());
-            
-            for (Permission p: Permission.byBits(userConfiguration.getPermissionBits())) {
-                capabilities.add(getCapability(p.name().toLowerCase()));
+            final UserPermissionBits userPermissionBits = services.getService(UserPermissionService.class).getUserPermissionBits(serverSession.getUserId(), serverSession.getContext());
+            // Capabilities by user permission bits
+            for (Permission p: Permission.byBits(userPermissionBits.getPermissionBits())) {
+                capabilities.add(getCapability(toLowerCase(p.name())));
             }
-            
-            if (userConfiguration.hasPortal()) {
+            // Portal
+            if (userPermissionBits.hasPortal()) {
                 capabilities.add(getCapability("portal"));
                 capabilities.remove(getCapability("deniedPortal"));
             } else {
@@ -198,31 +194,31 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 capabilities.add(getCapability("deniedPortal"));
             }
             // Free-Busy
-            if (userConfiguration.hasFreeBusy()) {
+            if (userPermissionBits.hasFreeBusy()) {
                 capabilities.add(getCapability("freebusy"));
             } else {
                 capabilities.remove(getCapability("freebusy"));
             }
             // Conflict-Handling
-            if (userConfiguration.hasConflictHandling()) {
+            if (userPermissionBits.hasConflictHandling()) {
                 capabilities.add(getCapability("conflict_handling"));
             } else {
                 capabilities.remove(getCapability("conflict_handling"));
             }
             // Participants-Dialog
-            if (userConfiguration.hasParticipantsDialog()) {
+            if (userPermissionBits.hasParticipantsDialog()) {
                 capabilities.add(getCapability("participants_dialog"));
             } else {
                 capabilities.remove(getCapability("participants_dialog"));
             }
             // Group-ware
-            if (userConfiguration.hasGroupware()) {
+            if (userPermissionBits.hasGroupware()) {
                 capabilities.add(getCapability("groupware"));
             } else {
                 capabilities.remove(getCapability("groupware"));
             }
             // PIM
-            if (userConfiguration.hasPIM()) {
+            if (userPermissionBits.hasPIM()) {
                 capabilities.add(getCapability("pim"));
             } else {
                 capabilities.remove(getCapability("pim"));
@@ -322,7 +318,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 }
             }
         }
-        
+
      // Now the declared ones
         for (String cap : declaredCapabilities.keySet()) {
             if (check(cap, serverSession, capabilities)) {
@@ -374,7 +370,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     /**
      * Gets all currently known capabilities.
-     * 
+     *
      * @return All capabilities
      * @throws OXException If operation fails
      */
@@ -384,11 +380,11 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     /**
      * Gets the singleton capability for given identifier
-     * 
+     *
      * @param id The identifier
      * @return The singleton capability
      */
-    public Capability getCapability(String id) {
+    public Capability getCapability(final String id) {
         Capability capability = capabilities.get(id);
         if (capability != null) {
             return capability;
@@ -404,7 +400,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     /**
      * Gets the available capability checkers.
-     * 
+     *
      * @return The checkers
      */
     protected abstract Map<String, List<CapabilityChecker>> getCheckers();

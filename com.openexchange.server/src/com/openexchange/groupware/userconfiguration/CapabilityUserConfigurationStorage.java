@@ -63,11 +63,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link CapabilityUserConfigurationStorage} - The database storage implementation of a user configuration storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CapabilityUserConfigurationStorage extends UserConfigurationStorage {
@@ -133,7 +134,7 @@ public class CapabilityUserConfigurationStorage extends UserConfigurationStorage
 
     /**
      * Loads the user configuration from database specified through user ID and context
-     * 
+     *
      * @param userId - the user ID
      * @param ctx - the context
      * @return the instance of <code>{@link UserConfiguration}</code>
@@ -147,7 +148,7 @@ public class CapabilityUserConfigurationStorage extends UserConfigurationStorage
 
     /**
      * Loads the user configuration from database specified through user ID and context
-     * 
+     *
      * @param userId - the user ID
      * @param groups - the group IDs the user belongs to; may be <code>null</code>
      * @param ctx - the context
@@ -161,25 +162,38 @@ public class CapabilityUserConfigurationStorage extends UserConfigurationStorage
     }
 
     private static Set<String> getCapabilities(final int userId, final int cid) throws OXException {
-        CapabilityService capabilities = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
-        if (capabilities == null) {
+        CapabilityService capabilityService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
+        if (capabilityService == null) {
             return new HashSet<String>();
         }
-        return stringify(capabilities.getCapabilities(userId, cid));
+        return stringify(capabilityService.getCapabilities(userId, cid));
     }
 
     private static Set<String> stringify(Set<Capability> capabilities) {
         Set<String> set = new HashSet<String>(capabilities.size());
         for (Capability capability : capabilities) {
-            set.add(capability.getId().toLowerCase());
+            set.add(toLowerCase(capability.getId()));
         }
-
         return set;
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
     /**
      * Loads the user configuration from database specified through user ID and context
-     * 
+     *
      * @param userId - the user ID
      * @param groupsArg - the group IDs the user belongs to; may be <code>null</code>
      * @param ctx - the context
@@ -201,7 +215,7 @@ public class CapabilityUserConfigurationStorage extends UserConfigurationStorage
 
 
     public static UserConfiguration[] loadUserConfiguration(final Context ctx, final Connection conArg, final User[] users) throws OXException, SQLException {
-        
+
         UserConfiguration[] retval = new UserConfiguration[users.length];
         // Here we just assume the users exist
         for (int i = 0; i < users.length; i++) {
@@ -214,7 +228,7 @@ public class CapabilityUserConfigurationStorage extends UserConfigurationStorage
 
             retval[i] = userConfiguration;
         }
-        
+
         return retval;
     }
 
@@ -234,7 +248,7 @@ public class CapabilityUserConfigurationStorage extends UserConfigurationStorage
     }
 
     private static UserConfiguration[] loadUserConfigurations(Context ctx, Connection con, int[] userIds, int[][] groupsArg) throws OXException, SQLException {
-        
+
         final List<UserConfiguration> list = new ArrayList<UserConfiguration>(userIds.length);
         for (int i = 0; i < userIds.length; i++) {
             final int userId = userIds[i];
@@ -242,6 +256,6 @@ public class CapabilityUserConfigurationStorage extends UserConfigurationStorage
             list.add(new UserConfiguration(getCapabilities(userId, ctx.getContextId()), userId, groups, ctx));
         }
         return list.toArray(new UserConfiguration[0]);
-        
+
     }
 }

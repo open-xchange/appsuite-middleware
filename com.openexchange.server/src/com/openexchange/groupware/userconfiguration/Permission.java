@@ -55,15 +55,11 @@ import gnu.trove.procedure.TIntObjectProcedure;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.userconfiguration.osgi.TrackerAvailabilityChecker;
-import com.openexchange.passwordchange.PasswordChangeService;
-import com.openexchange.server.Initialization;
 
 /**
  * Enumeration of known permissions.
  */
-public enum Permission implements Initialization {
+public enum Permission {
 
     WEBMAIL(UserConfiguration.WEBMAIL, "WebMail"),
     CALENDAR(UserConfiguration.CALENDAR, "Calendar"),
@@ -85,7 +81,7 @@ public enum Permission implements Initialization {
     DELEGATE_TASKS(UserConfiguration.DELEGATE_TASKS, "DelegateTasks"),
     EDIT_GROUP(UserConfiguration.EDIT_GROUP, "EditGroup"),
     EDIT_RESOURCE(UserConfiguration.EDIT_RESOURCE, "EditResource"),
-    EDIT_PASSWORD(UserConfiguration.EDIT_PASSWORD, "EditPassword", TrackerAvailabilityChecker.getAvailabilityCheckerFor(PasswordChangeService.class, true)),
+    EDIT_PASSWORD(UserConfiguration.EDIT_PASSWORD, "EditPassword"),
     COLLECT_EMAIL_ADDRESSES(UserConfiguration.COLLECT_EMAIL_ADDRESSES, "CollectEMailAddresses"),
     MULTIPLE_MAIL_ACCOUNTS(UserConfiguration.MULTIPLE_MAIL_ACCOUNTS, "MultipleMailAccounts"),
     SUBSCRIPTION(UserConfiguration.SUBSCRIPTION, "Subscription"),
@@ -96,7 +92,7 @@ public enum Permission implements Initialization {
     DENIED_PORTAL(UserConfiguration.DENIED_PORTAL, "DeniedPortal"),
     CALDAV(UserConfiguration.CALDAV, "CalDAV"),
     CARDDAV(UserConfiguration.CARDDAV, "CardDAV");
-    
+
     private static final class AdderProcedure implements TIntObjectProcedure<Permission> {
 
         private final Set<String> set;
@@ -110,7 +106,7 @@ public enum Permission implements Initialization {
 
         @Override
         public boolean execute(final int bit, final Permission p) {
-            if (bit == (bits & bit) && p.isAvailable()) {
+            if (bit == (bits & bit)) {
                 set.add(UserConfiguration.toLowerCase(p.name()));
             }
             return true;
@@ -129,38 +125,13 @@ public enum Permission implements Initialization {
 
     /** The associated bit constant */
     final int bit;
+
     /** The associated tag name */
     final String tagName;
-    /** The availability checker */
-    private final AvailabilityChecker checker;
 
     private Permission(final int bit, final String name) {
-        this(bit, name, AvailabilityChecker.TRUE_AVAILABILITY_CHECKER);
-    }
-
-    private Permission(final int bit, final String name, final AvailabilityChecker checker) {
         this.bit = bit;
         this.tagName = name;
-        this.checker = checker;
-    }
-
-    @Override
-    public void start() throws OXException {
-        checker.start();
-    }
-
-    @Override
-    public void stop() throws OXException {
-        checker.stop();
-    }
-
-    /**
-     * Indicates if associated {@link Permission permission}'s service is available.
-     *
-     * @return <code>true</code> if available; otherwise <code>false</code>
-     */
-    public boolean isAvailable() {
-        return checker.isAvailable();
     }
 
     /**
@@ -202,7 +173,7 @@ public enum Permission implements Initialization {
         final List<Permission> permissions = new ArrayList<Permission>(pa.length);
         for (final Permission p : pa) {
             final int bit = p.bit;
-            if (((bits & bit) == bit) && p.checker.isAvailable()) {
+            if ((bits & bit) == bit) {
                 permissions.add(p);
             }
         }
@@ -218,7 +189,7 @@ public enum Permission implements Initialization {
     public static void addByBits(final int bits, final Set<String> set) {
         byBit.forEachEntry(new AdderProcedure(bits, set));
     }
-    
+
     public Permission get(String name) {
         for (Permission p: values()) {
             if (p.name().equalsIgnoreCase(name)) {

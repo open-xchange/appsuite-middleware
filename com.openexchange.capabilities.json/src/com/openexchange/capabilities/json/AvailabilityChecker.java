@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,13 +47,33 @@
  *
  */
 
-package com.openexchange.groupware.userconfiguration;
+package com.openexchange.capabilities.json;
 
-import com.openexchange.server.Initialization;
 
-/** Checks if associated {@link Permission permission}'s service is available. */
-public interface AvailabilityChecker extends Initialization {
-    
+/**
+ * {@link AvailabilityChecker} - Checks for availability for a certain capability and/or permission.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public interface AvailabilityChecker {
+
+    /**
+     * Indicates if associated {@link Permission permission}'s service is available.
+     *
+     * @return <code>true</code> if available; otherwise <code>false</code>
+     */
+    boolean isAvailable();
+
+    /**
+     * Open this {@code AvailabilityChecker}.
+     */
+    void open();
+
+    /**
+     * Close this {@code AvailabilityChecker}.
+     */
+    void close();
+
     /** Returns always <code>true</code> */
     public static final AvailabilityChecker TRUE_AVAILABILITY_CHECKER = new AvailabilityChecker() {
 
@@ -63,20 +83,13 @@ public interface AvailabilityChecker extends Initialization {
         }
 
         @Override
-        public void start() {
-            // Nothing to do
+        public void open() {
+            // Nope
         }
 
         @Override
-        public void stop() {
-            // Nothing to do
+        public void close() {
+            // Nope
         }
     };
-    
-    /**
-     * Indicates if associated {@link Permission permission}'s service is available.
-     *
-     * @return <code>true</code> if available; otherwise <code>false</code>
-     */
-    boolean isAvailable();
 }

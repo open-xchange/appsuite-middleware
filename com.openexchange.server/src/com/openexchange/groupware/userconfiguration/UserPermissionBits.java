@@ -55,7 +55,6 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Set;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
 
 
 /**
@@ -64,7 +63,7 @@ import com.openexchange.groupware.contexts.Context;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class UserPermissionBits implements Serializable{
-    
+
     private static final long serialVersionUID = -4210686154175384469L;
 
     /**
@@ -222,17 +221,17 @@ public class UserPermissionBits implements Serializable{
      * The permission bit for carddav access. ATTENTION: This is actually handled by the config cascade!
      */
     public static final int CARDDAV = 1 << 30;
-    
-    private int userId;
-    private int contextId;
+
+    private final int userId;
+    private final int contextId;
     private int permissionBits;
 
-    public UserPermissionBits(int permissions, int userId, int contextId) {
+    public UserPermissionBits(final int permissions, final int userId, final int contextId) {
         this.userId = userId;
         this.contextId = contextId;
         this.permissionBits = permissions;
     }
-    
+
     /**
      * Gets this user configuration's bit pattern.
      *
@@ -590,7 +589,7 @@ public class UserPermissionBits implements Serializable{
     public void setDeniedPortal(final boolean deniedPortal) {
         setPermission(deniedPortal, DENIED_PORTAL);
     }
-    
+
     /**
      * Determines all accessible modules as defined in user configuration. The returned array of <code>int</code> is sorted according to
      * <code>{@link Arrays#sort(int[])}</code>, thus <code>{@link Arrays#binarySearch(int[], int)}</code> can be used to detect if a user
@@ -906,12 +905,9 @@ public class UserPermissionBits implements Serializable{
         return hasPermissionInternal(permission);
     }
 
-    private boolean hasPermissionInternal(final int permission) {
-        return (permissionBits & permission) == permission;
-    }
-
-    private boolean hasPermissionInternal(Permission permission) {
-        return permission.isAvailable() && hasPermissionInternal(permission.bit);
+    private boolean hasPermissionInternal(final Permission permission) {
+        final int bit = permission.bit;
+        return (permissionBits & bit) == bit;
     }
 
     private void setPermission(final boolean enable, final int permission) {
@@ -920,7 +916,7 @@ public class UserPermissionBits implements Serializable{
          */
         permissionBits = enable ? (permissionBits | permission) : (permissionBits & ~permission);
     }
-    
+
     public int getUserId() {
         return userId;
     }
@@ -930,10 +926,10 @@ public class UserPermissionBits implements Serializable{
     }
 
 
-    public static int getPermissionBits(Set<String> capabilities) {
+    public static int getPermissionBits(final Set<String> capabilities) {
         int bits = 0;
-        for (String string : capabilities) {
-            Permission permission = Permission.valueOf(string);
+        for (final String string : capabilities) {
+            final Permission permission = Permission.valueOf(string);
             if (permission != null) {
                 bits = bits | permission.bit;
             }

@@ -47,65 +47,66 @@
  *
  */
 
-package com.openexchange.groupware.userconfiguration.osgi;
+package com.openexchange.capabilities.json.osgi;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.groupware.userconfiguration.AvailabilityChecker;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.server.osgi.ServerActivator;
+import com.openexchange.capabilities.json.AvailabilityChecker;
 
 /**
  * {@link TrackerAvailabilityChecker} - The {@link AvailabilityChecker} backed by a {@link ServiceTracker}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class TrackerAvailabilityChecker<S> extends ServiceTracker<S, S> implements AvailabilityChecker {
+public class TrackerAvailabilityChecker<S> extends ServiceTracker<S, S> implements com.openexchange.capabilities.json.AvailabilityChecker {
 
     /**
      * Gets the checker for specified service.
      *
      * @param clazz The service's class
      * @param defaultAvailability The default availability value
+     * @param bundleContext The bundle context
      * @return The checker for given service
      */
-    public static <S> AvailabilityChecker getAvailabilityCheckerFor(final Class<S> clazz, final boolean defaultAvailability) {
-        final BundleContext bundleContext = ServerActivator.getContext();
+    public static <S> AvailabilityChecker getAvailabilityCheckerFor(final Class<S> clazz, final boolean defaultAvailability, final BundleContext bundleContext) {
         if (null == bundleContext) {
             return AvailabilityChecker.TRUE_AVAILABILITY_CHECKER;
         }
-        return new TrackerAvailabilityChecker<S>(clazz, defaultAvailability);
+        final TrackerAvailabilityChecker<S> checker = new TrackerAvailabilityChecker<S>(clazz, defaultAvailability, bundleContext);
+        checker.open();
+        return checker;
     }
 
-    private final AtomicBoolean available;
+    private volatile AtomicBoolean available;
+    private final boolean defaultAvailability;
 
     /**
      * Initializes a new {@link TrackerAvailabilityChecker}.
      *
      * @param clazz The service's class to track
      * @param defaultAvailability The default availability value
+     * @param bundleContext The bundle context
      */
-    private TrackerAvailabilityChecker(final Class<S> clazz, final boolean defaultAvailability) {
-        super(ServerActivator.getContext(), clazz, null);
-        available = new AtomicBoolean(defaultAvailability);
-    }
-
-    @Override
-    public void start() {
-        if (available.compareAndSet(true, false)) {
-            open();
-        }
-    }
-
-    @Override
-    public void stop() {
-        close();
+    private TrackerAvailabilityChecker(final Class<S> clazz, final boolean defaultAvailability, final BundleContext bundleContext) {
+        super(bundleContext, clazz, null);
+        this.defaultAvailability = defaultAvailability;
     }
 
     @Override
     public S addingService(final ServiceReference<S> reference) {
+        AtomicBoolean available = this.available;
+        if (null == available) {
+            synchronized (this) {
+                available = this.available;
+                if (null == available) {
+                    available = new AtomicBoolean();
+                    this.available = available;
+                }
+            }
+        }
+        // CAS
         if (available.compareAndSet(false, true)) {
             return super.addingService(reference);
         }
@@ -115,14 +116,19 @@ public class TrackerAvailabilityChecker<S> extends ServiceTracker<S, S> implemen
     @Override
     public void removedService(final ServiceReference<S> reference, final S service) {
         if (null != service) {
-            available.compareAndSet(true, false);
+            final AtomicBoolean available = this.available;
+            if (null != available) {
+                available.compareAndSet(true, false);
+                this.available = null;
+            }
             context.ungetService(reference);
         }
     }
 
     @Override
     public boolean isAvailable() {
-        return available.get();
+        final AtomicBoolean available = this.available;
+        return null == available ? defaultAvailability : available.get();
     }
 
 }

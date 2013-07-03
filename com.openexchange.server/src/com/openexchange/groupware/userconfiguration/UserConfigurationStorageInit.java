@@ -117,7 +117,7 @@ public final class UserConfigurationStorageInit implements Initialization {
         }
         return null;
     }
-    
+
     private static String getUserPermissionBitsImpl(final String alias) {
         final UserConfigurationImpl[] arr = UserConfigurationImpl.values();
         for (int i = 0; i < arr.length; i++) {
@@ -147,18 +147,18 @@ public final class UserConfigurationStorageInit implements Initialization {
                 LOG.info("UserConfigurationStorage implementation: " + implementingClass.getName());
             }
             UserConfigurationStorage.setInstance(implementingClass.newInstance());
-            
+
             // Now for the permission bits
             final String bitClassName = getUserPermissionBitsImpl(classNameProp);
             final Class<? extends UserPermissionBitsStorage> bitsImplementingClass = Class.forName(bitClassName).asSubclass(UserPermissionBitsStorage.class);
-            
+
             if (LOG.isInfoEnabled()) {
                 LOG.info("UserPermissionBitsStorage implementation: " + bitsImplementingClass.getName());
             }
-            
+
             UserPermissionBitsStorage.setInstance(bitsImplementingClass.newInstance());
-            
-            
+
+
         } catch (final ClassNotFoundException e) {
             throw UserConfigurationCodes.CLASS_NOT_FOUND.create(e, classNameProp);
         } catch (final ClassCastException e) {
@@ -168,10 +168,6 @@ public final class UserConfigurationStorageInit implements Initialization {
         } catch (final IllegalAccessException e) {
             throw UserConfigurationCodes.CLASS_NOT_FOUND.create(e, classNameProp);
         }
-        // Initialize permissions
-        for (final Permission p : Permission.values()) {
-            p.start();
-        }
     }
 
     @Override
@@ -179,10 +175,6 @@ public final class UserConfigurationStorageInit implements Initialization {
         if (!started.compareAndSet(true, false)) {
             LOG.error(UserConfigurationStorageInit.class.getName() + " cannot be stopped since it has not been started before");
             return;
-        }
-        // Shut-down permissions
-        for (final Permission p : Permission.values()) {
-            p.stop();
         }
         // Release instance
         UserConfigurationStorage.releaseInstance();

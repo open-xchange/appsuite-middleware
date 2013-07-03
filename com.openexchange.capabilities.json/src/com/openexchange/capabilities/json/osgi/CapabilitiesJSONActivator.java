@@ -62,6 +62,8 @@ import com.openexchange.capabilities.json.CapabilityActionFactory;
  */
 public class CapabilitiesJSONActivator extends AJAXModuleActivator {
 
+    private volatile CapabilityActionFactory factory;
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { CapabilityService.class };
@@ -70,7 +72,19 @@ public class CapabilitiesJSONActivator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         registerService(ResultConverter.class, new Capability2JSON());
-        registerModule(new CapabilityActionFactory(this), "capabilities");
+        final CapabilityActionFactory factory = new CapabilityActionFactory(this, context);
+        this.factory = factory;
+        registerModule(factory, "capabilities");
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        final CapabilityActionFactory factory = this.factory;
+        if (null != factory) {
+            factory.close();
+            this.factory = null;
+        }
+        super.stopBundle();
     }
 
 }

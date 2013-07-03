@@ -55,17 +55,11 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link UserConfiguration} - Represents a user configuration.
@@ -228,12 +222,10 @@ public class UserConfiguration implements Serializable, Cloneable {
      */
     public static final int CALDAV = UserPermissionBits.CALDAV;
 
-
     /**
      * The permission bit for carddav access. ATTENTION: This is actually handled by the config cascade!
      */
     public static final int CARDDAV = UserPermissionBits.CARDDAV;
-
 
     /*-
      * Field members
@@ -312,19 +304,23 @@ public class UserConfiguration implements Serializable, Cloneable {
         }
         return (null == uc.ctx);
     }
-    
+
+    /**
+     * Gets the mutable user configuration
+     *
+     * @return The mutable user configuration
+     */
     public MutableUserConfiguration getMutable() {
-        int[] groupCopy = new int[groups.length];
+        final int[] groupCopy = new int[groups.length];
         System.arraycopy(groups, 0, groupCopy, 0, groups.length);
         return new MutableUserConfiguration(new HashSet<String>(capabilities), userId, groupCopy, ctx);
     }
-
 
     @Override
     public int hashCode() {
         int hash = 7;
         hash = 31 * hash + userId;
-        for(String p: capabilities) {
+        for(final String p: capabilities) {
         	hash = 31 * hash + p.hashCode();
         }
         if (null != groups) {
@@ -753,7 +749,7 @@ public class UserConfiguration implements Serializable, Cloneable {
             //  (permissionBits & permission) == permission
             return true;
         }
-        
+
         for (final Permission p : Permission.byBits(permissionBit)) {
             if (!capabilities.contains(toLowerCase(p.name()))) {
                 return false;
