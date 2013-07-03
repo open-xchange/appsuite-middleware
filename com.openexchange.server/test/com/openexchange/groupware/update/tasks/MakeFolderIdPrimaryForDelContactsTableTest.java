@@ -77,6 +77,10 @@ public class MakeFolderIdPrimaryForDelContactsTableTest {
             Tools.hasPrimaryKey(
                 this.mockConnection,
                 com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable.DEL_CONTACTS)).thenReturn(false);
+        PowerMockito.when(
+            Tools.hasPrimaryKey(
+                this.mockConnection,
+                com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable.PRG_CONTACTS)).thenReturn(false);
 
         MakeFolderIdPrimaryForDelContactsTable makeFolderIdPrimaryForDelContactsTable = new MakeFolderIdPrimaryForDelContactsTable();
         makeFolderIdPrimaryForDelContactsTable.perform(mockParams);
@@ -86,11 +90,15 @@ public class MakeFolderIdPrimaryForDelContactsTableTest {
 
         PowerMockito.verifyStatic(Mockito.times(1));
         Tools.hasPrimaryKey(mockConnection, com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable.DEL_CONTACTS);
+        Tools.hasPrimaryKey(mockConnection, com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable.PRG_CONTACTS);
 
-        PowerMockito.verifyStatic(Mockito.times(1));
         Tools.createPrimaryKey(
             mockConnection,
             com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable.DEL_CONTACTS,
+            new String[] { "cid", "intfield01", "fid" });
+        Tools.createPrimaryKey(
+            mockConnection,
+            com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable.PRG_CONTACTS,
             new String[] { "cid", "intfield01", "fid" });
     }
 
@@ -107,20 +115,28 @@ public class MakeFolderIdPrimaryForDelContactsTableTest {
             Tools.hasPrimaryKey(
                 this.mockConnection,
                 com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable.DEL_CONTACTS)).thenReturn(true);
+        PowerMockito.when(
+            Tools.hasPrimaryKey(
+                this.mockConnection,
+                com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable.PRG_CONTACTS)).thenReturn(true);
 
         MakeFolderIdPrimaryForDelContactsTable makeFolderIdPrimaryForDelContactsTable = new MakeFolderIdPrimaryForDelContactsTable();
         makeFolderIdPrimaryForDelContactsTable.perform(mockParams);
 
         PowerMockito.verifyStatic(Mockito.times(1));
         Tools.dropPrimaryKey(mockConnection, com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable.DEL_CONTACTS);
+        Tools.dropPrimaryKey(mockConnection, com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable.PRG_CONTACTS);
 
-        PowerMockito.verifyStatic(Mockito.times(1));
         Tools.hasPrimaryKey(mockConnection, com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable.DEL_CONTACTS);
+        Tools.hasPrimaryKey(mockConnection, com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable.PRG_CONTACTS);
 
-        PowerMockito.verifyStatic(Mockito.times(1));
         Tools.createPrimaryKey(
             mockConnection,
             com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable.DEL_CONTACTS,
+            new String[] { "cid", "intfield01", "fid" });
+        Tools.createPrimaryKey(
+            mockConnection,
+            com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable.PRG_CONTACTS,
             new String[] { "cid", "intfield01", "fid" });
     }
 }

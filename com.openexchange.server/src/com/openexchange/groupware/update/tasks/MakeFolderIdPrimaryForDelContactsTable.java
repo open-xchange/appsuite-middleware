@@ -69,9 +69,14 @@ import com.openexchange.tools.update.Tools;
 public class MakeFolderIdPrimaryForDelContactsTable extends UpdateTaskAdapter {
 
     /**
-     * Constant of the table name to add the primary key
+     * Constant of the del_ table name to add the primary key
      */
     protected static final String DEL_CONTACTS = "del_contacts";
+
+    /**
+     * Constant of the prg_ table name to add the primary key
+     */
+    protected static final String PRG_CONTACTS = "prg_contacts";
 
     /**
      * Initializes a new {@link MakeFolderIdPrimaryForDelContactsTable}.
@@ -92,10 +97,17 @@ public class MakeFolderIdPrimaryForDelContactsTable extends UpdateTaskAdapter {
 
         try {
             con.setAutoCommit(false);
+
             if (Tools.hasPrimaryKey(con, DEL_CONTACTS)) {
                 Tools.dropPrimaryKey(con, DEL_CONTACTS);
             }
             Tools.createPrimaryKey(con, DEL_CONTACTS, new String[] { "cid", "intfield01", "fid" });
+
+            if (Tools.hasPrimaryKey(con, PRG_CONTACTS)) {
+                Tools.dropPrimaryKey(con, PRG_CONTACTS);
+            }
+            Tools.createPrimaryKey(con, PRG_CONTACTS, new String[] { "cid", "intfield01", "fid" });
+
             con.commit();
 
         } catch (SQLException e) {
