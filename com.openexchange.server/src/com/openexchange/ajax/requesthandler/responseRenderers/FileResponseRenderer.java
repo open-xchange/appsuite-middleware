@@ -69,11 +69,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
-import com.drew.imaging.ImageMetadataReader;
-import com.drew.imaging.ImageProcessingException;
-import com.drew.metadata.MetadataException;
-import com.drew.metadata.exif.ExifIFD0Directory;
-import com.drew.metadata.jpeg.JpegDirectory;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
@@ -597,86 +592,6 @@ public class FileResponseRenderer implements ResponseRenderer {
         return false;
     }
 
-    /** Checks if transformation is needed */
-    private boolean isTransformationNeeded(final AJAXRequestData request, final IFileHolder file, final String delivery) throws OXException, IOException {
-
-        // this check is only for jpeg images, other image formats are always transformated
-        boolean transformationNeeded = !file.getContentType().toLowerCase().startsWith("image/jpeg");
-        if (!transformationNeeded) {
-            transformationNeeded = request.isSet("cropWidth") || request.isSet("cropHeight");
-        }
-        if (!transformationNeeded) {
-            // we need repetitive access to the stream for further testing
-            final InputStream stream = file.getStream();
-            if (null == stream) {
-                LOG.warn("(Possible) Image file misses stream data");
-                return false;
-            }
-            BufferedInputStream inputStream = null;
-            if (file.repetitive()) {
-                inputStream = new BufferedInputStream(stream);
-            } else if (stream.markSupported() && file.getLength() > 0 && file.getLength() < 0x20000) {
-                // mark supported, but only allowing files < 128kb
-                inputStream = new BufferedInputStream(stream, (int) file.getLength());
-            }
-            if (inputStream == null) {
-                // no repetitive stream available... transformation must be done
-                transformationNeeded = true;
-            }
-            else {
-
-                try {
-                    // retrieve MetaData to check if width, height or rotate requires a transformation
-                    final com.drew.metadata.Metadata metadata = ImageMetadataReader.readMetadata(inputStream, false);
-                    if (metadata == null)
-                        transformationNeeded = true;
-                    else {
-                        // check for rotation
-                        int orientation = 1;
-                        final ExifIFD0Directory exifDirectory = metadata.getDirectory(ExifIFD0Directory.class);
-                        if(exifDirectory!=null)
-                            orientation = exifDirectory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
-                        if(orientation!=1) {
-                            final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
-                            if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue())
-                                transformationNeeded = true;
-                        }
-
-                        // check width & height
-                        final JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
-                        if (null == jpegDirectory)
-                            transformationNeeded = true;
-                        else if (transformationNeeded==false) {
-                            // check width & height
-                            final int width = jpegDirectory.getImageWidth();
-                            final int height = jpegDirectory.getImageHeight();
-                            final int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
-                            final int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
-                            final ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
-
-                            // transformation only required if the image size exceeds the requested size
-                            if(scaleType==ScaleType.CONTAIN) {
-                                transformationNeeded = (maxWidth > 0 && width > maxWidth) || (maxHeight > 0 && height > maxHeight);
-                            }
-                            // cover... the size must have the exact size
-                            else {
-                                transformationNeeded = (maxWidth > 0 && width != maxWidth) || (maxHeight > 0 && height != maxHeight);
-                            }
-                        }
-                    }
-                } catch (final ImageProcessingException e) {
-                    transformationNeeded = true;
-                } catch (final MetadataException e) {
-                    transformationNeeded = true;
-                }
-                if (!file.repetitive() && stream.markSupported()) {
-                    stream.reset();
-                }
-            }
-        }
-        return transformationNeeded;
-    }
-
     private IFileHolder transformIfImage(final AJAXRequestData request, final IFileHolder file, final String delivery) throws IOException, OXException {
         /*
          * check input
@@ -686,9 +601,10 @@ public class FileResponseRenderer implements ResponseRenderer {
             return file;
         }
 
-        if(!isTransformationNeeded(request, file, delivery)) {
+        // the optional parameter "transformationNeeded" is set by the PreviewImageResultConverter if no transformation is needed.
+        // This is done if the preview was generated by the com.openexchage.documentpreview.OfficePreviewDocument service
+        if(request.isSet("transformationNeeded") && (request.getParameter("transformationNeeded", Boolean.class) == false))
             return file;
-        }
 
         /*
          * build transformations
