@@ -132,7 +132,7 @@ public class Node1077Test extends CalendarSqlTest {
         appointments.save(appointment);
         clean.add(appointment);
 
-        appointments.switchUser(secondUser);
+        appointments.switchUser(thirdUser);
 
         final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(participant1, participant3);
         conflictingAppointment.setIgnoreConflicts(false);
