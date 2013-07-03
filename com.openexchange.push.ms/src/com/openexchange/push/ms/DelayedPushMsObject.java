@@ -51,69 +51,69 @@ package com.openexchange.push.ms;
 
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * Wrapper for PushMSObject if the Push should be delayed by a certain amount of time. Use case for this delaying wrapper: Unlike E-Mails
- * other PIM Objects shouldn't be pushed immediately because they can be changed within a short timeframe to adjust details or other objects
+ * other PIM Objects shouldn't be pushed immediately because they can be changed within a short time frame to adjust details or other objects
  * might be created in the same folder which would lead to yet another push event. Introduced to stay compatible with old {c.o}.push.udp
  * implementation.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class DelayedPushMsObject implements Delayed {
 
-    private static final long serialVersionUID = -2259438183887625194L;
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DelayedPushMsObject.class));
-
-    // How long should the Push of the wrapped PIM Object be delayed in milliseconds
+    /** How long should the Push of the wrapped PIM Object be delayed in milliseconds */
     private final int delayDuration;
 
-    // How long should the Push of the wrapped PIM Object be delayed in milliseconds
-    private final long maxDelayDuration;
+    /** Determine when the object should be pushed by saving when it was last touched (either created or delayed) */
+    private volatile long stamp;
 
-    // Determine when the object should be pushed by saving when it was last touched (either created or delayed)
-    private long touchTime;
-    
-    // The wrapped object
-    PushMsObject pushMsObject;
+    /** Determine when the object should be pushed by saving when it was last touched (either created or delayed) */
+    private final long maxStamp;
+
+    /** The wrapped object */
+    private final PushMsObject pushMsObject;
 
     /**
      * Initializes a new {@link DelayedPushMsObject} by wrapping the given PushMsObject.
+     *
      * @param pushMsObject the original PushMsObject
      * @param delayDuration how long should the push of the wrapped PushMsObject be delayed in milliseconds
      * @param maxDelayDuration the maximum time a PushMsObject can be delayed
+     * @throws IllegalArgumentException If <code>delayDuration</code> is greater than <code>maxDelayDuration</code>
      */
-    public DelayedPushMsObject(PushMsObject pushMsObject, int delayDuration, int maxDelayDuration) {
+    public DelayedPushMsObject(final PushMsObject pushMsObject, final int delayDuration, final int maxDelayDuration) {
+        super();
+        if (delayDuration > maxDelayDuration) {
+            throw new IllegalArgumentException("delayDuration is greater than maxDelayDuration.");
+        }
         this.pushMsObject = pushMsObject;
         this.delayDuration = delayDuration;
-        this.touchTime = System.currentTimeMillis();
-        this.maxDelayDuration = touchTime + maxDelayDuration;
+        final long now = System.currentTimeMillis();
+        stamp = now + delayDuration;
+        maxStamp = now + maxDelayDuration;
     }
 
     @Override
-    public int compareTo(Delayed other) {
-        long thisDelay = getDelay(TimeUnit.MICROSECONDS);
-        long otherDelay = other.getDelay(TimeUnit.MICROSECONDS);
-        return (thisDelay < otherDelay ? -1 : (thisDelay == otherDelay ? 0 : 1));
+    public int compareTo(final Delayed o) {
+        final long thisStamp = this.stamp;
+        final long otherStamp = ((DelayedPushMsObject) o).stamp;
+        return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
     }
 
     /*
-     * The Delay has elapsed if
-     * Either:  the delayDuration since last time this object was touched has elapsed  
-     * Or:      the maxDelayDuration was reached
+     * The Delay has elapsed if Either: the delayDuration since last time this object was touched has elapsed Or: the maxDelayDuration was
+     * reached
      */
     @Override
-    public long getDelay(TimeUnit unit) {
-        long currentTimeMillis = System.currentTimeMillis();
-        long retval = Math.min((touchTime + delayDuration) - currentTimeMillis, maxDelayDuration - currentTimeMillis);
-        return unit.convert(retval,TimeUnit.MILLISECONDS);
+    public long getDelay(final TimeUnit unit) {
+        final long toGo = stamp - System.currentTimeMillis();
+        return unit.convert(toGo, TimeUnit.MILLISECONDS);
     }
-    
+
     /**
      * Get the wrapped pushMsObject.
+     *
      * @return the wrapped pushMsObject
      */
     public PushMsObject getPushObject() {
@@ -124,7 +124,9 @@ public class DelayedPushMsObject implements Delayed {
      * Refresh delay by touching the object.
      */
     public void touch() {
-        this.touchTime = System.currentTimeMillis();
+        final long stamp = System.currentTimeMillis() + delayDuration;
+        // Stamp must not be greater than maxStamp
+        this.stamp = stamp >= maxStamp ? maxStamp : stamp;
     }
 
 }
