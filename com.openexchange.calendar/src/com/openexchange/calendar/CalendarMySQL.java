@@ -2376,7 +2376,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             member.reason = null;
                         }
                         member.pfid = result.getInt(pos++);
-                        if (result.wasNull()) {
+                        if (result.wasNull() || member.pfid == -2) {
                             member.pfid = -1;
                         }
                         member.alarm = result.getInt(pos);
