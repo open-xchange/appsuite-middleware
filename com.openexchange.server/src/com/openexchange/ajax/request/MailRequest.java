@@ -83,11 +83,11 @@ public final class MailRequest {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(MailRequest.class);
 
-    private static final String PARAMETER_ID = AJAXServlet.PARAMETER_ID;
-    private static final String FOLDER_ID = FolderChildFields.FOLDER_ID;
-    private static final String KEY = MailJSONField.FLAGS.getKey();
-    private static final String COLORLABEL = CommonFields.COLORLABEL;
-    private static final String DATA = ResponseFields.DATA;
+    static final String PARAMETER_ID = AJAXServlet.PARAMETER_ID;
+    static final String FOLDER_ID = FolderChildFields.FOLDER_ID;
+    static final String KEY = MailJSONField.FLAGS.getKey();
+    static final String COLORLABEL = CommonFields.COLORLABEL;
+    static final String DATA = ResponseFields.DATA;
     static final String PARAMETER_FOLDERID = AJAXServlet.PARAMETER_FOLDERID;
 
     private static enum CollectableOperation {
