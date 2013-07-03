@@ -153,7 +153,7 @@ public class Bug27335Test {
 
     @Test
     public void testFormatURL4() {
-        String content = "echo \"Re: http://support.open-xchange.com/~schweigi/hidden/itil/data/Page_1_1_1.htm (change Management)\"";
+        String content = "echo \"Re: http://support.open-xchange.com/~karl/hidden/itil/data/Page_1_1_1.htm (change Management)\"";
 
         String test = service.formatURLs(content, "aaa");
 
@@ -167,7 +167,7 @@ public class Bug27335Test {
         Assert.assertNotNull(group1);
         Assert.assertNotNull(group2);
 
-        Assert.assertEquals("Unexpected URL", "http://support.open-xchange.com/~schweigi/hidden/itil/data/Page_1_1_1.htm", group1);
-        Assert.assertEquals("Unexpected URL", "http://support.open-xchange.com/~schweigi/hidden/itil/data/Page_1_1_1.htm", group2);
+        Assert.assertEquals("Unexpected URL", "http://support.open-xchange.com/~karl/hidden/itil/data/Page_1_1_1.htm", group1);
+        Assert.assertEquals("Unexpected URL", "http://support.open-xchange.com/~karl/hidden/itil/data/Page_1_1_1.htm", group2);
     }
 }
