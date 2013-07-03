@@ -2015,7 +2015,8 @@ public class CalendarMySQL implements CalendarSqlImp {
                                 }
                             }
                         } else if (FolderObject.PUBLIC == folderType) {
-                            stmt.setNull(3, java.sql.Types.INTEGER);
+//                            stmt.setNull(3, java.sql.Types.INTEGER);
+                            stmt.setInt(3, -2);
                         } else if (FolderObject.SHARED == folderType) {
                             if (cdao.getSharedFolderOwner() == 0) {
                                 throw OXCalendarExceptionCodes.NO_SHARED_FOLDER_OWNER.create();
@@ -3369,7 +3370,8 @@ public class CalendarMySQL implements CalendarSqlImp {
                                         pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
                                     }
                                     if (pfid == 0) {
-                                        pi.setNull(5, java.sql.Types.INTEGER);
+//                                        pi.setNull(5, java.sql.Types.INTEGER);
+                                        pi.setInt(5, -2);
                                     } else {
                                         pi.setInt(5, pfid);
                                     }
@@ -3398,7 +3400,8 @@ public class CalendarMySQL implements CalendarSqlImp {
                                 pfid = 0;
                             }
                             if (pfid == 0) {
-                                pi.setNull(5, java.sql.Types.INTEGER);
+//                                pi.setNull(5, java.sql.Types.INTEGER);
+                                pi.setInt(5, -2);
                             } else {
                                 pi.setInt(5, pfid);
                             }
@@ -3448,7 +3451,8 @@ public class CalendarMySQL implements CalendarSqlImp {
                                         pfid = access.getDefaultFolder(new_userparticipants[a].getIdentifier(), FolderObject.CALENDAR).getObjectID();
                                     }
                                     if (pfid == 0) {
-                                        pi.setNull(5, java.sql.Types.INTEGER);
+//                                        pi.setNull(5, java.sql.Types.INTEGER);
+                                        pi.setInt(5, -2);
                                     } else {
                                         pi.setInt(5, pfid);
                                     }
@@ -3539,7 +3543,8 @@ public class CalendarMySQL implements CalendarSqlImp {
                                 modified_userparticipants[a].setPersonalFolderId(cdao.getGlobalFolderID());
                             }
                         } else if (FolderObject.PUBLIC == folderType) {
-                            pu.setNull(3, java.sql.Types.INTEGER);
+//                            pu.setNull(3, java.sql.Types.INTEGER);
+                            pu.setInt(3, -2);
                         } else if (FolderObject.SHARED == folderType) {
                             if (modified_userparticipants[a].getIdentifier() == uid && uid == cdao.getSharedFolderOwner()) {
                                 if (cdao.getGlobalFolderID() == 0) {
@@ -3593,7 +3598,8 @@ public class CalendarMySQL implements CalendarSqlImp {
                             }
                             pu.setInt(3, pfid);
                         } else if (FolderObject.PUBLIC == folderType) {
-                            pu.setNull(3, java.sql.Types.INTEGER);
+//                            pu.setNull(3, java.sql.Types.INTEGER);
+                            pu.setInt(3, -2);
                         } else if (FolderObject.SHARED == folderType) {
                             if (edao.getSharedFolderOwner() == 0) {
                                 throw OXCalendarExceptionCodes.NO_SHARED_FOLDER_OWNER.create();

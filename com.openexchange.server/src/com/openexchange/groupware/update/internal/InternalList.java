@@ -78,6 +78,7 @@ import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddPrimaryK
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddPrimaryKey;
 import com.openexchange.groupware.update.tasks.GenconfAttributesStringsAddUuidUpdateTask;
+import com.openexchange.groupware.update.tasks.InfostorePrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.MailAccountAddReplyToTask;
 import com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForDListTables;
@@ -86,6 +87,8 @@ import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUpdateTaskTable
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUserAttributeTable;
 import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddUuidUpdateTask;
+import com.openexchange.groupware.update.tasks.PrgDatesMembersPrimaryKeyUpdateTask;
+import com.openexchange.groupware.update.tasks.PrgDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddPrimaryKeyUpdateTask;
@@ -573,13 +576,22 @@ public final class InternalList {
 
         //Add UUID column to user_setting_server table
         list.add(new UserSettingServerAddUuidUpdateTask());
+        
+        //Add folder_id to primary key in infostore table
+        list.add(new InfostorePrimaryKeyUpdateTask());
 
         //Add folder_id to primary key in del_infostore table
         list.add(new DelInfostorePrimaryKeyUpdateTask());
 
+        //Add folder_id to primary key in prg_dates
+        list.add(new PrgDatesPrimaryKeyUpdateTask());
+        
         //Add folder_id to primary key in del_dates
         list.add(new DelDatesPrimaryKeyUpdateTask());
 
+        //Add folder_id to primary key in prg_dates_members
+        list.add(new PrgDatesMembersPrimaryKeyUpdateTask());
+        
         //Add folder_id to primary key in del_dates_members
         list.add(new DelDatesMembersPrimaryKeyUpdateTask());
 
