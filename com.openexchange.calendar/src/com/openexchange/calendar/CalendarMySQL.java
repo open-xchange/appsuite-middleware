@@ -2507,7 +2507,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 }
 
                 final int pfid = rs.getInt(4);
-                if (!rs.wasNull()) {
+                if (!(rs.wasNull() || pfid == -2)) {
                     if (pfid < 1) {
                         LOG.error(StringCollection.convertArraytoString(new Object[] { "ERROR: getUserParticipants oid:uid ", Integer.valueOf(uid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(cdao.getObjectID()) }));
                     }
