@@ -49,6 +49,7 @@
 
 package com.openexchange.mailaccount;
 
+import static com.openexchange.java.Strings.isWhitespace;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -68,8 +69,7 @@ import com.openexchange.tools.net.URITools;
  */
 public final class MailAccountDescription implements Serializable {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountDescription.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountDescription.class));
 
     private static final long serialVersionUID = -2443656355399068302L;
 
@@ -94,6 +94,8 @@ public final class MailAccountDescription implements Serializable {
     private String spamHandler;
 
     private String trash;
+
+    private String archive;
 
     private String sent;
 
@@ -130,6 +132,8 @@ public final class MailAccountDescription implements Serializable {
     private boolean unifiedINBOXEnabled;
 
     private String trashFullname;
+
+    private String archiveFullname;
 
     private String sentFullname;
 
@@ -648,6 +652,24 @@ public final class MailAccountDescription implements Serializable {
     }
 
     /**
+     * Gets the name for default archive folder.
+     *
+     * @return The name for default archive folder
+     */
+    public String getArchive() {
+        return archive;
+    }
+
+    /**
+     * Sets the name for default archive folder.
+     *
+     * @param archive The name for default archive folder
+     */
+    public void setArchive(final String archive) {
+        this.archive = archive;
+    }
+
+    /**
      * Gets the name for default confirmed-ham folder.
      *
      * @return The name for default confirmed-ham folder
@@ -810,108 +832,126 @@ public final class MailAccountDescription implements Serializable {
     }
 
     /**
-     * Gets the trash fullname
+     * Gets the trash full name
      *
-     * @return The trash fullname
+     * @return The trash full name
      */
     public String getTrashFullname() {
         return trashFullname;
     }
 
     /**
-     * Sets the trash fullname
+     * Sets the trash full name
      *
-     * @param trashFullname The trash fullname to set
+     * @param trashFullname The trash full name to set
      */
     public void setTrashFullname(final String trashFullname) {
         this.trashFullname = trashFullname;
     }
 
     /**
-     * Gets the sent fullname
+     * Gets the archive full name
      *
-     * @return The sent fullname
+     * @return The archive full name
+     */
+    public String getArchiveFullname() {
+        return archiveFullname;
+    }
+
+    /**
+     * Sets the archive full name
+     *
+     * @param archiveFullname The archive full name
+     */
+    public void setArchiveFullname(final String archiveFullname) {
+        this.archiveFullname = archiveFullname;
+    }
+
+    /**
+     * Gets the sent full name
+     *
+     * @return The sent full name
      */
     public String getSentFullname() {
         return sentFullname;
     }
 
     /**
-     * Sets the sent fullname
+     * Sets the sent full name
      *
-     * @param sentFullname The sent fullname to set
+     * @param sentFullname The sent full name to set
      */
     public void setSentFullname(final String sentFullname) {
         this.sentFullname = sentFullname;
     }
 
     /**
-     * Gets the drafts fullname
+     * Gets the drafts full name
      *
-     * @return The drafts fullname
+     * @return The drafts full name
      */
     public String getDraftsFullname() {
         return draftsFullname;
     }
 
     /**
-     * Sets the drafts fullname
+     * Sets the drafts full name
      *
-     * @param draftsFullname The drafts fullname to set
+     * @param draftsFullname The drafts full name to set
      */
     public void setDraftsFullname(final String draftsFullname) {
         this.draftsFullname = draftsFullname;
     }
 
     /**
-     * Gets the spam fullname
+     * Gets the spam full name
      *
-     * @return The spam fullname
+     * @return The spam full name
      */
     public String getSpamFullname() {
         return spamFullname;
     }
 
     /**
-     * Sets the spam fullname
+     * Sets the spam full name
      *
-     * @param spamFullname The spam fullname to set
+     * @param spamFullname The spam full name to set
      */
     public void setSpamFullname(final String spamFullname) {
         this.spamFullname = spamFullname;
     }
 
     /**
-     * Gets the confirmed-spam fullname
+     * Gets the confirmed-spam full name
      *
-     * @return The confirmed-spam fullname
+     * @return The confirmed-spam full name
      */
     public String getConfirmedSpamFullname() {
         return confirmedSpamFullname;
     }
 
     /**
-     * Sets the confirmed-spam fullname
+     * Sets the confirmed-spam full name
      *
-     * @param confirmedSpamFullname The confirmed-spam fullname to set
+     * @param confirmedSpamFullname The confirmed-spam full name to set
      */
     public void setConfirmedSpamFullname(final String confirmedSpamFullname) {
         this.confirmedSpamFullname = confirmedSpamFullname;
     }
 
     /**
-     * Gets the confirmed-ham fullname
+     * Gets the confirmed-ham full name
      *
-     * @return The confirmed-ham fullname
+     * @return The confirmed-ham full name
      */
     public String getConfirmedHamFullname() {
         return confirmedHamFullname;
     }
 
     /**
-     * Sets the confirmed-ham fullname
+     * Sets the confirmed-ham full name
      *
-     * @param confirmedHamFullname The confirmed-ham fullname to set
+     * @param confirmedHamFullname The confirmed-ham full name to set
      */
     public void setConfirmedHamFullname(final String confirmedHamFullname) {
         this.confirmedHamFullname = confirmedHamFullname;
@@ -994,7 +1034,7 @@ public final class MailAccountDescription implements Serializable {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
+            isWhitespace = isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

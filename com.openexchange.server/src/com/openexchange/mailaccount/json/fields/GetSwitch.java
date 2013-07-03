@@ -64,7 +64,7 @@ public class GetSwitch implements AttributeSwitch {
 
     /**
      * Initializes a new {@link GetSwitch}.
-     * 
+     *
      * @param desc The account description
      */
     public GetSwitch(final MailAccountDescription desc) {
@@ -153,6 +153,11 @@ public class GetSwitch implements AttributeSwitch {
     }
 
     @Override
+    public Object archive() {
+        return desc.getArchive();
+    }
+
+    @Override
     public Object mailPort() {
         return Integer.valueOf(desc.getMailPort());
     }
@@ -235,6 +240,11 @@ public class GetSwitch implements AttributeSwitch {
     @Override
     public Object trashFullname() {
         return desc.getTrashFullname();
+    }
+
+    @Override
+    public Object archiveFullname() {
+        return desc.getArchiveFullname();
     }
 
     @Override

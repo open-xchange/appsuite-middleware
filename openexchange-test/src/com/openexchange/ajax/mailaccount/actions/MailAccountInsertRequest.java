@@ -246,6 +246,11 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
             }
 
             @Override
+            public String getArchive() {
+                return acc.getArchive();
+            }
+
+            @Override
             public int getUserId() {
                 return -1;
             }
@@ -298,6 +303,11 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
             @Override
             public String getTrashFullname() {
                 return acc.getTrashFullname();
+            }
+
+            @Override
+            public String getArchiveFullname() {
+                return acc.getArchiveFullname();
             }
 
             @Override

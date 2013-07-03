@@ -578,13 +578,13 @@ public final class InternalList {
 
         //Add UUID column to user_setting_server table
         list.add(new UserSettingServerAddUuidUpdateTask());
-        
+
         //Drop foreign key from infostore_document table
         list.add(new InfostoreDocumentDropForeignKeyUpdateTask());
-        
+
         //Add folder_id to primary key in infostore table
         list.add(new InfostorePrimaryKeyUpdateTask());
-        
+
         //Add foreign key to infostore_document_table
         list.add(new InfostoreDocumentCreateForeignKeyUpdateTask());
 
@@ -593,13 +593,13 @@ public final class InternalList {
 
         //Add folder_id to primary key in prg_dates
         list.add(new PrgDatesPrimaryKeyUpdateTask());
-        
+
         //Add folder_id to primary key in del_dates
         list.add(new DelDatesPrimaryKeyUpdateTask());
 
         //Add folder_id to primary key in prg_dates_members
         list.add(new PrgDatesMembersPrimaryKeyUpdateTask());
-        
+
         //Add folder_id to primary key in del_dates_members
         list.add(new DelDatesMembersPrimaryKeyUpdateTask());
 
@@ -637,6 +637,11 @@ public final class InternalList {
             //Add primary key to user_setting_server table
             list.add(new UserSettingServerAddPrimaryKeyUpdateTask());
 
+        }
+
+        // Adds "archive" and "archive_fullname" columns to mail/transport account table
+        if (false) { // TODO: Enable if appropriate
+            list.add(new com.openexchange.groupware.update.tasks.MailAccountAddArchiveTask());
         }
 
         return list.toArray(new UpdateTaskV2[list.size()]);

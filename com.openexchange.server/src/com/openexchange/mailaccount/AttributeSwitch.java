@@ -69,6 +69,7 @@ public interface AttributeSwitch {
     public Object personal();
     public Object spamHandler();
     public Object trash();
+    public Object archive();
     public Object sent();
     public Object drafts();
     public Object spam();
@@ -86,6 +87,7 @@ public interface AttributeSwitch {
     public Object transportPassword();
     public Object unifiedINBOXEnabled();
     public Object trashFullname();
+    public Object archiveFullname();
     public Object sentFullname();
     public Object draftsFullname();
     public Object spamFullname();

@@ -69,7 +69,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link MailAccountParser} - Parses a JSON object to a mail account.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountParser extends DataParser {
@@ -117,7 +117,7 @@ public class MailAccountParser extends DataParser {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static MailAccountParser getInstance() {
@@ -133,7 +133,7 @@ public class MailAccountParser extends DataParser {
 
     /**
      * Parses the attributes from the JSON and writes them into the account object.
-     * 
+     *
      * @param account Any attributes will be stored in this account object.
      * @param json A JSON object containing a reminder.
      * @throws OXException If parsing fails.
@@ -245,6 +245,11 @@ public class MailAccountParser extends DataParser {
             account.setTrash(null == string ? string : string.trim());
             attributes.add(Attribute.TRASH_LITERAL);
         }
+        if (json.has(MailAccountFields.ARCHIVE)) {
+            final String string = parseString(json, MailAccountFields.ARCHIVE);
+            account.setTrash(null == string ? string : string.trim());
+            attributes.add(Attribute.ARCHIVE_LITERAL);
+        }
         if (json.has(MailAccountFields.SENT)) {
             final String string = parseString(json, MailAccountFields.SENT);
             account.setSent(null == string ? string : string.trim());
@@ -278,6 +283,11 @@ public class MailAccountParser extends DataParser {
             final String string = parseString(json, MailAccountFields.TRASH_FULLNAME);
             account.setTrashFullname(null == string ? string : string.trim());
             attributes.add(Attribute.TRASH_FULLNAME_LITERAL);
+        }
+        if (json.has(MailAccountFields.ARCHIVE_FULLNAME)) {
+            final String string = parseString(json, MailAccountFields.ARCHIVE_FULLNAME);
+            account.setTrashFullname(null == string ? string : string.trim());
+            attributes.add(Attribute.ARCHIVE_FULLNAME_LITERAL);
         }
         if (json.has(MailAccountFields.SENT_FULLNAME)) {
             final String string = parseString(json, MailAccountFields.SENT_FULLNAME);

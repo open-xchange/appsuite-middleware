@@ -109,6 +109,9 @@ public enum Attribute {
     ADDRESSES(MailAccountFields.ADDRESSES, 1039),
     /** (Virtual attribute) Meta */
     META(MailAccountFields.META, 1040),
+    // Archive
+    ARCHIVE_LITERAL(MailAccountFields.ARCHIVE, 1041),
+    ARCHIVE_FULLNAME_LITERAL(MailAccountFields.ARCHIVE_FULLNAME, 1042),
 
     ;
 
