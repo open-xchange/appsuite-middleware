@@ -148,6 +148,26 @@ public class Bug27335Test {
         Assert.assertNotNull(group2);
 
         Assert.assertEquals("Unexpected URL", "http://www.ox.io/blub/blab.php?foo=bar&[showUid]=1275", group1);
+        Assert.assertEquals("Unexpected URL", "http://www.ox.io/blub/blab.php?foo=bar&[showUid]=1275", group2);
     }
 
+    @Test
+    public void testFormatURL4() {
+        String content = "echo \"Re: http://support.open-xchange.com/~schweigi/hidden/itil/data/Page_1_1_1.htm (change Management)\"";
+
+        String test = service.formatURLs(content, "aaa");
+
+        final String regex = "<a[^>]+href=\"([^\"]+)\"[^>]+>(.*?)</a>";
+        final Matcher m = Pattern.compile(regex).matcher(test);
+
+        Assert.assertTrue("Anchor not found", m.find());
+
+        String group1 = m.group(1);
+        String group2 = m.group(2);
+        Assert.assertNotNull(group1);
+        Assert.assertNotNull(group2);
+
+        Assert.assertEquals("Unexpected URL", "http://support.open-xchange.com/~schweigi/hidden/itil/data/Page_1_1_1.htm", group1);
+        Assert.assertEquals("Unexpected URL", "http://support.open-xchange.com/~schweigi/hidden/itil/data/Page_1_1_1.htm", group2);
+    }
 }
