@@ -54,6 +54,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +78,9 @@ import com.openexchange.calendar.CalendarReminderDelete;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.cache.CalendarVolatileCache;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.internal.AbstractCapabilityService;
 import com.openexchange.charset.CollectionCharsetProvider;
 import com.openexchange.charset.CustomCharsetProvider;
 import com.openexchange.charset.CustomCharsetProviderInit;
@@ -386,7 +390,34 @@ public final class Init {
         startAndInjectContactServices();
         startAndInjectContactCollector();
         startAndInjectImportExportServices();
+        startAndInjectCapabilitiesServices();
+    }
 
+    /**
+     * 
+     */
+    private static void startAndInjectCapabilitiesServices() {
+        AbstractCapabilityService c = new AbstractCapabilityService(new ServiceLookup() {
+
+            @Override
+            public <S> S getService(final Class<? extends S> clazz) {
+                return TestServiceRegistry.getInstance().getService(clazz);
+            }
+
+            @Override
+            public <S> S getOptionalService(final Class<? extends S> clazz) {
+                return null;
+            }
+        }) {
+
+            @Override
+            protected Map<String, List<CapabilityChecker>> getCheckers() {
+                return Collections.emptyMap();
+            }
+        };
+        
+        services.put(CapabilityService.class, c);
+        TestServiceRegistry.getInstance().addService(CapabilityService.class, c);
     }
 
     /**
@@ -457,6 +488,7 @@ public final class Init {
             services.put(UserConfigurationService.class, new UserConfigurationServiceImpl());
             services.put(UserPermissionService.class, new UserPermissionServiceImpl());
             TestServiceRegistry.getInstance().addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
+            TestServiceRegistry.getInstance().addService(UserPermissionService.class, services.get(UserPermissionService.class));
         }
     }
 
