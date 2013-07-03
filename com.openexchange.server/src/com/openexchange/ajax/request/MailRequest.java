@@ -50,10 +50,13 @@
 package com.openexchange.ajax.request;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONWriter;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.fields.CommonFields;
@@ -62,6 +65,7 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.tools.JSONUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -70,28 +74,187 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
+/**
+ * {@link MailRequest} - A mail request handle via <code>Multiple</code> Servlet.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public final class MailRequest {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(MailRequest.class);
 
-    private static final String PARAMETER_ID = AJAXServlet.PARAMETER_ID;
-    private static final String DATA = ResponseFields.DATA;
+    static final String PARAMETER_ID = AJAXServlet.PARAMETER_ID;
+    static final String FOLDER_ID = FolderChildFields.FOLDER_ID;
+    static final String KEY = MailJSONField.FLAGS.getKey();
+    static final String COLORLABEL = CommonFields.COLORLABEL;
+    static final String DATA = ResponseFields.DATA;
     static final String PARAMETER_FOLDERID = AJAXServlet.PARAMETER_FOLDERID;
 
     private static enum CollectableOperation {
         MOVE, COPY, STORE_FLAG, COLOR_LABEL;
     }
 
-    private static final Mail MAIL_SERVLET = new Mail();
+    /**
+     *  The mail servlet instance
+     */
+    static final Mail MAIL_SERVLET = new Mail();
+
+    private static interface Handler {
+
+        void requestPerformed(ServerSession session, JSONWriter writer, JSONObject jsonObject, MailServletInterface mailInterface) throws OXException, JSONException;
+    }
+
+    private static final Map<String, Handler> HANDERS_MAP;
+
+    static {
+        final Map<String, Handler> m = new HashMap<String, Handler>(24);
+        m.put(AJAXServlet.ACTION_ALL, new Handler() {
+
+            @Override
+            public void requestPerformed(final ServerSession session, final JSONWriter writer, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
+                MAIL_SERVLET.actionGetAllMails(session, writer, jsonObject, mailInterface);
+            }
+        });
+        m.put(AJAXServlet.ACTION_COUNT, new Handler() {
+
+            @Override
+            public void requestPerformed(final ServerSession session, final JSONWriter writer, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
+                MAIL_SERVLET.actionGetMailCount(session, writer, jsonObject, mailInterface);
+            }
+        });
+        m.put(AJAXServlet.ACTION_UPDATES, new Handler() {
+
+            @Override
+            public void requestPerformed(final ServerSession session, final JSONWriter writer, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
+                MAIL_SERVLET.actionGetUpdates(session, writer, jsonObject, mailInterface);
+            }
+        });
+        m.put(AJAXServlet.ACTION_REPLY, new Handler() {
+
+            @Override
+            public void requestPerformed(final ServerSession session, final JSONWriter writer, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
+                if (jsonObject.has(DATA) && !jsonObject.isNull(DATA)) {
+                    MAIL_SERVLET.actionPutReply(session, false, writer, jsonObject, mailInterface);
+                } else {
+                    MAIL_SERVLET.actionGetReply(session, writer, jsonObject, false, mailInterface);
+                }
+            }
+        });
+        m.put(AJAXServlet.ACTION_REPLYALL, new Handler() {
+
+            @Override
+            public void requestPerformed(final ServerSession session, final JSONWriter writer, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
+                if (jsonObject.has(DATA) && !jsonObject.isNull(DATA)) {
+                    MAIL_SERVLET.actionPutReply(session, true, writer, jsonObject, mailInterface);
+                } else {
+                    MAIL_SERVLET.actionGetReply(session, writer, jsonObject, true, mailInterface);
+                }
+            }
+        });
+        m.put(AJAXServlet.ACTION_FORWARD, new Handler() {
+
+            @Override
+            public void requestPerformed(final ServerSession session, final JSONWriter writer, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
+                if (jsonObject.has(DATA) && !jsonObject.isNull(DATA)) {
+                    /*
+                     * Perform forward with multiple mails
+                     */
+                    MAIL_SERVLET.actionPutForwardMultiple(session, writer, jsonObject, mailInterface);
+                } else {
+                    MAIL_SERVLET.actionGetForward(session, writer, jsonObject, mailInterface);
+                }
+            }
+        });
+        m.put(AJAXServlet.ACTION_GET, new Handler() {
+
+            @Override
+            public void requestPerformed(final ServerSession session, final JSONWriter writer, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
+                if (jsonObject.has(DATA) && !jsonObject.isNull(DATA)) {
+                    MAIL_SERVLET.actionPutGet(session, writer, jsonObject, mailInterface);
+                } else {
+                    MAIL_SERVLET.actionGetMessage(session, writer, jsonObject, mailInterface);
+                }
+            }
+        });
+        m.put(AJAXServlet.ACTION_GET_STRUCTURE, new Handler() {
+
+            @Override
+            public void requestPerformed(final ServerSession session, final JSONWriter writer, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
+                MAIL_SERVLET.actionGetStructure(session, writer, jsonObject, mailInterface);
+            }
+        });
+        m.put(AJAXServlet.ACTION_MATTACH, new Handler() {
+
+            @Override
+            public void requestPerformed(final ServerSession session, final JSONWriter writer, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
+                MAIL_SERVLET.actionGetAttachment();
+            }
+        });
+        m.put("attachmenttoken", new Handler() {
+
+            @Override
+            public void requestPerformed(final ServerSession session, final JSONWriter writer, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
+                MAIL_SERVLET.actionGetAttachmentToken(session, writer, jsonObject, mailInterface);
+            }
+        });
+        m.put(AJAXServlet.ACTION_NEW_MSGS, new Handler() {
+
+            @Override
+            public void requestPerformed(final ServerSession session, final JSONWriter writer, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
+                MAIL_SERVLET.actionGetNew(session, writer, jsonObject, mailInterface);
+            }
+        });
+        m.put(AJAXServlet.ACTION_LIST, new Handler() {
+
+            @Override
+            public void requestPerformed(final ServerSession session, final JSONWriter writer, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
+                MAIL_SERVLET.actionPutMailList(session, writer, jsonObject, mailInterface);
+            }
+        });
+        m.put(AJAXServlet.ACTION_DELETE, new Handler() {
+
+            @Override
+            public void requestPerformed(final ServerSession session, final JSONWriter writer, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
+                MAIL_SERVLET.actionPutDeleteMails(session, writer, jsonObject, mailInterface);
+            }
+        });
+        m.put("transport", new Handler() {
+
+            @Override
+            public void requestPerformed(final ServerSession session, final JSONWriter writer, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
+                MAIL_SERVLET.actionPutTransportMail(session, writer, jsonObject, mailInterface);
+            }
+        });
+        m.put(AJAXServlet.ACTION_MAIL_RECEIPT_ACK, new Handler() {
+
+            @Override
+            public void requestPerformed(final ServerSession session, final JSONWriter writer, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
+                MAIL_SERVLET.actionPutReceiptAck(session, writer, jsonObject, mailInterface);
+            }
+        });
+        m.put(AJAXServlet.ACTION_SEARCH, new Handler() {
+
+            @Override
+            public void requestPerformed(final ServerSession session, final JSONWriter writer, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
+                MAIL_SERVLET.actionPutMailSearch(session, writer, jsonObject, mailInterface);
+            }
+        });
+        m.put(AJAXServlet.ACTION_CLEAR, new Handler() {
+
+            @Override
+            public void requestPerformed(final ServerSession session, final JSONWriter writer, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
+                MAIL_SERVLET.actionPutClear(session, writer, jsonObject, mailInterface);
+            }
+        });
+        HANDERS_MAP = m;
+    }
 
     /* -------------- Fields -------------- */
 
     private final ServerSession session;
-
     private final OXJSONWriter writer;
 
     private CollectObject collectObj;
-
     private boolean contCollecting;
 
     /**
@@ -117,56 +280,18 @@ public final class MailRequest {
         if (!session.getUserConfiguration().hasWebMail()) {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail");
         }
-        if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
-            MAIL_SERVLET.actionGetAllMails(session, writer, jsonObject, mailInterface);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COUNT)) {
-            MAIL_SERVLET.actionGetMailCount(session, writer, jsonObject, mailInterface);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
-            MAIL_SERVLET.actionGetUpdates(session, writer, jsonObject, mailInterface);
-        } else if (action.regionMatches(true, 0, AJAXServlet.ACTION_REPLY, 0, 5)) {
-            if (jsonObject.has(DATA) && !jsonObject.isNull(DATA)) {
-                MAIL_SERVLET.actionPutReply(
-                    session,
-                    (action.equalsIgnoreCase(AJAXServlet.ACTION_REPLYALL)),
-                    writer,
-                    jsonObject,
-                    mailInterface);
-            } else {
-                MAIL_SERVLET.actionGetReply(
-                    session,
-                    writer,
-                    jsonObject,
-                    (action.equalsIgnoreCase(AJAXServlet.ACTION_REPLYALL)),
-                    mailInterface);
-            }
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_FORWARD)) {
-            if (jsonObject.has(DATA) && !jsonObject.isNull(DATA)) {
-                /*
-                 * Perform forward with multiple mails
-                 */
-                MAIL_SERVLET.actionPutForwardMultiple(session, writer, jsonObject, mailInterface);
-            } else {
-                MAIL_SERVLET.actionGetForward(session, writer, jsonObject, mailInterface);
-            }
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
-            if (jsonObject.has(DATA) && !jsonObject.isNull(DATA)) {
-                MAIL_SERVLET.actionPutGet(session, writer, jsonObject, mailInterface);
-            } else {
-                MAIL_SERVLET.actionGetMessage(session, writer, jsonObject, mailInterface);
-            }
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET_STRUCTURE)) {
-            MAIL_SERVLET.actionGetStructure(session, writer, jsonObject, mailInterface);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_MATTACH)) {
-            MAIL_SERVLET.actionGetAttachment();
-        } else if (action.equalsIgnoreCase("attachmentToken")) {
-            MAIL_SERVLET.actionGetAttachmentToken(session, writer, jsonObject, mailInterface);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW_MSGS)) {
-            MAIL_SERVLET.actionGetNew(session, writer, jsonObject, mailInterface);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
-            MAIL_SERVLET.actionPutMailList(session, writer, jsonObject, mailInterface);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
-            MAIL_SERVLET.actionPutDeleteMails(session, writer, jsonObject, mailInterface);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
+        if (null == action) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("action");
+        }
+
+        final String act = toLowerCase(action);
+        final Handler handler = HANDERS_MAP.get(act);
+        if (null != handler) {
+            handler.requestPerformed(session, writer, jsonObject, mailInterface);
+            return;
+        }
+
+        if (AJAXServlet.ACTION_UPDATE.equals(act)) {
             if (isMove(jsonObject)) {
                 handleMultiple(jsonObject, mailInterface, CollectableOperation.MOVE);
             } else if (isStoreFlags(jsonObject)) {
@@ -176,18 +301,8 @@ public final class MailRequest {
             } else {
                 MAIL_SERVLET.actionPutUpdateMail(session, writer, jsonObject, mailInterface);
             }
-        }  else if (action.equalsIgnoreCase("transport")) {
-            MAIL_SERVLET.actionPutTransportMail(session, writer, jsonObject, mailInterface);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COPY)) {
+        } else if (AJAXServlet.ACTION_COPY.equals(act)) {
             handleMultiple(jsonObject, mailInterface, CollectableOperation.COPY);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_MATTACH)) {
-            MAIL_SERVLET.actionPutAttachment(session, writer, jsonObject, mailInterface);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_MAIL_RECEIPT_ACK)) {
-            MAIL_SERVLET.actionPutReceiptAck(session, writer, jsonObject, mailInterface);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_SEARCH)) {
-            MAIL_SERVLET.actionPutMailSearch(session, writer, jsonObject, mailInterface);
-        } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_CLEAR)) {
-            MAIL_SERVLET.actionPutClear(session, writer, jsonObject, mailInterface);
         } else {
             throw MailExceptionCode.UNKNOWN_ACTION.create(action);
         }
@@ -252,23 +367,24 @@ public final class MailRequest {
         if (LOG.isDebugEnabled()) {
             final long start = System.currentTimeMillis();
             collectObj.performOperations(session, writer, mailInterface);
+            final long dur = System.currentTimeMillis() - start;
             LOG.debug(new com.openexchange.java.StringAllocator(128).append("Multiple '").append(getOpName(collectObj.getOperation())).append(
-                "' mail request successfully performed: ").append(System.currentTimeMillis() - start).append("msec").toString());
+                "' mail request successfully performed: ").append(dur).append("msec").toString());
         } else {
             collectObj.performOperations(session, writer, mailInterface);
         }
     }
 
     public static boolean isMove(final JSONObject jsonObject) throws JSONException {
-        return jsonObject.has(DATA) && jsonObject.getJSONObject(DATA).has(FolderChildFields.FOLDER_ID);
+        return jsonObject.has(DATA) && jsonObject.getJSONObject(DATA).has(FOLDER_ID);
     }
 
     public static boolean isStoreFlags(final JSONObject jsonObject) throws JSONException {
-        return jsonObject.has(PARAMETER_ID) && jsonObject.has(DATA) && jsonObject.getJSONObject(DATA).has(MailJSONField.FLAGS.getKey());
+        return jsonObject.has(PARAMETER_ID) && jsonObject.has(DATA) && jsonObject.getJSONObject(DATA).has(KEY);
     }
 
     public static boolean isColorLabel(final JSONObject jsonObject) throws JSONException {
-        return jsonObject.has(PARAMETER_ID) && jsonObject.has(DATA) && jsonObject.getJSONObject(DATA).has(CommonFields.COLORLABEL);
+        return jsonObject.has(PARAMETER_ID) && jsonObject.has(DATA) && jsonObject.getJSONObject(DATA).has(COLORLABEL);
     }
 
     private static abstract class CollectObject {
@@ -362,12 +478,12 @@ public final class MailRequest {
         public MoveCollectObject(final JSONObject dataObject, final Mail mailServlet) throws OXException {
             super(mailServlet);
             this.srcFld = JSONUtil.requireString(PARAMETER_FOLDERID, dataObject);
-            this.destFld = JSONUtil.requireString(FolderChildFields.FOLDER_ID, JSONUtil.requireDataObject(dataObject));
+            this.destFld = JSONUtil.requireString(FOLDER_ID, JSONUtil.requireDataObject(dataObject));
         }
 
         @Override
         public boolean collectable(final JSONObject dataObject, final CollectableOperation op) throws OXException {
-            return (CollectableOperation.MOVE.equals(op) && this.srcFld.equals(JSONUtil.requireString(PARAMETER_FOLDERID, dataObject)) && this.destFld.equals(JSONUtil.requireString(FolderChildFields.FOLDER_ID, JSONUtil.requireDataObject(dataObject))));
+            return (CollectableOperation.MOVE.equals(op) && this.srcFld.equals(JSONUtil.requireString(PARAMETER_FOLDERID, dataObject)) && this.destFld.equals(JSONUtil.requireString(FOLDER_ID, JSONUtil.requireDataObject(dataObject))));
         }
 
         @Override
@@ -390,12 +506,12 @@ public final class MailRequest {
         public CopyCollectObject(final JSONObject dataObject, final Mail mailServlet) throws OXException {
             super(mailServlet);
             this.srcFld = JSONUtil.requireString(PARAMETER_FOLDERID, dataObject);
-            this.destFld = JSONUtil.requireString(FolderChildFields.FOLDER_ID, JSONUtil.requireDataObject(dataObject));
+            this.destFld = JSONUtil.requireString(FOLDER_ID, JSONUtil.requireDataObject(dataObject));
         }
 
         @Override
         public boolean collectable(final JSONObject dataObject, final CollectableOperation op) throws OXException {
-            return (CollectableOperation.COPY.equals(op) && this.srcFld.equals(JSONUtil.requireString(PARAMETER_FOLDERID, dataObject)) && this.destFld.equals(JSONUtil.requireString(FolderChildFields.FOLDER_ID, JSONUtil.requireDataObject(dataObject))));
+            return (CollectableOperation.COPY.equals(op) && this.srcFld.equals(JSONUtil.requireString(PARAMETER_FOLDERID, dataObject)) && this.destFld.equals(JSONUtil.requireString(FOLDER_ID, JSONUtil.requireDataObject(dataObject))));
         }
 
         @Override
@@ -420,14 +536,14 @@ public final class MailRequest {
             super(mailServlet);
             this.srcFld = JSONUtil.requireString(PARAMETER_FOLDERID, dataObject);
             final JSONObject bodyObj = JSONUtil.requireDataObject(dataObject);
-            flagInt = JSONUtil.requireInt(MailJSONField.FLAGS.getKey(), bodyObj);
+            flagInt = JSONUtil.requireInt(KEY, bodyObj);
             flagValue = JSONUtil.requireBoolean(MailJSONField.VALUE.getKey(), bodyObj);
         }
 
         @Override
         public boolean collectable(final JSONObject dataObject, final CollectableOperation op) throws OXException {
             final JSONObject bodyObj = JSONUtil.requireDataObject(dataObject);
-            return (CollectableOperation.STORE_FLAG.equals(op) && this.srcFld.equals(JSONUtil.requireString(PARAMETER_FOLDERID, dataObject)) && flagInt == JSONUtil.requireInt(MailJSONField.FLAGS.getKey(), bodyObj) && flagValue == JSONUtil.requireBoolean(MailJSONField.VALUE.getKey(), bodyObj));
+            return (CollectableOperation.STORE_FLAG.equals(op) && this.srcFld.equals(JSONUtil.requireString(PARAMETER_FOLDERID, dataObject)) && flagInt == JSONUtil.requireInt(KEY, bodyObj) && flagValue == JSONUtil.requireBoolean(MailJSONField.VALUE.getKey(), bodyObj));
         }
 
         @Override
@@ -481,5 +597,19 @@ public final class MailRequest {
         default:
             throw new InternalError("Unknown collectable operation: " + op);
         }
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 }

@@ -106,6 +106,9 @@ public enum DriveExceptionCodes implements OXExceptionCode {
     /** You are not allowed to create directories at \"%1$s\" */
     NO_CREATE_DIRECTORY_PERMISSION(DriveExceptionMessages.NO_CREATE_DIRECTORY_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 15),
 
+    /** The allowed Quota is reached */
+    QUOTA_REACHED(DriveExceptionMessages.QUOTA_REACHED_MSG, Category.CATEGORY_PERMISSION_DENIED, 16),
+
     ;
 
     private static final String PREFIX = "DRV";

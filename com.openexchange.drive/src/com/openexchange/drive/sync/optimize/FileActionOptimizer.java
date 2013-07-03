@@ -83,31 +83,4 @@ public abstract class FileActionOptimizer extends AbstractActionOptimizer<FileVe
         }
     }
 
-    protected static class SimpleFileVersion implements FileVersion {
-
-        private final String name;
-        private final String checksum;
-
-        public SimpleFileVersion(String name, String checksum) {
-            super();
-            this.name = name;
-            this.checksum = checksum;
-        }
-
-        @Override
-        public String getChecksum() {
-            return checksum;
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public String toString() {
-            return getName() + " | " + getChecksum();
-        }
-    }
-
 }
