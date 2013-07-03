@@ -147,6 +147,9 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer{
 
     private CalendarDataObject getToDelete(final Session session, CalendarDataObject appointment) throws OXException {
         CalendarDataObject toDelete = util.resolveUid(appointment.getUid(), session);
+        if (toDelete == null) {
+            return null;
+        }
         if (appointment.containsRecurrenceDatePosition() && toDelete.containsDeleteExceptions()) {
             for (Date deleteException : toDelete.getDeleteException()) {
                 if (deleteException.equals(appointment.getRecurrenceDatePosition())) {
