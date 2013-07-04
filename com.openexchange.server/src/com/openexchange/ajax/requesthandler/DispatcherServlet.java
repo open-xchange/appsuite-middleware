@@ -213,8 +213,8 @@ public class DispatcherServlet extends SessionServlet {
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
-        ServerSession session = null;
-        boolean sessionParamFound = false;
+        final ServerSession session;
+        final boolean sessionParamFound;
         {
             final String sSession = req.getParameter("session");
             if (sSession != null && sSession.length() > 0) {
@@ -223,6 +223,9 @@ public class DispatcherServlet extends SessionServlet {
                 verifySession(req, sessiondService, sessionId, session);
                 rememberSession(req, session);
                 sessionParamFound = true;
+            } else {
+                session = null;
+                sessionParamFound = false;
             }
         }
         // Check if associated request allows no session (if no "session" parameter was found)
@@ -243,19 +246,25 @@ public class DispatcherServlet extends SessionServlet {
                         final String altId = cookie.getValue();
                         if (null != altId && null != session && altId.equals(session.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
                             // same session
-                            simpleSession = session;
+                            rememberPublicSession(req, session);
                         } else {
                             // lookup session by alternative id
-                            simpleSession = ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(cookie.getValue()));
+                            simpleSession = null == altId ? null : ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(altId));
                         }
                         break;
                     }
                 }
                 // Check if a simple (aka public) session has been found
                 if (simpleSession != null) {
-                    checkSecret(hashSource, req, simpleSession);
-                    verifySession(req, sessiondService, simpleSession.getSessionID(), simpleSession);
-                    rememberPublicSession(req, simpleSession);
+                    // Need to verify
+                    try {
+                        checkSecret(hashSource, req, simpleSession, false);
+                        verifySession(req, sessiondService, simpleSession.getSessionID(), simpleSession);
+                        rememberPublicSession(req, simpleSession);
+                    } catch (final OXException e) {
+                        // Verification of public session failed
+                        LOG.info("Public session is invalid.");
+                    }
                 }
             }
         }
