@@ -155,9 +155,9 @@ public interface File {
     void setNumberOfVersions(int numberOfVersions);
 
     int getNumberOfVersions();
-    
+
     Map<String, Object> getDynamicProperties();
-    
+
     void setDynamicProperties(Map<String, Object> properties);
 
     File dup();
@@ -336,7 +336,7 @@ public interface File {
 
         static {
             for (final Field field : values()) {
-                byNumber.put(field.getNumber(), field);
+                byNumber.put(Integer.valueOf(field.getNumber()), field);
             }
         }
 
@@ -350,7 +350,7 @@ public interface File {
             }
             try {
                 final int number = Integer.parseInt(key);
-                return byNumber.get(number);
+                return byNumber.get(Integer.valueOf(number));
             } catch (final NumberFormatException x) {
                 return null;
             }
