@@ -215,7 +215,7 @@ public class DispatcherServlet extends SessionServlet {
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
-        final ServerSession session;
+        ServerSession session;
         final boolean sessionParamFound;
         {
             final String sSession = req.getParameter("session");
