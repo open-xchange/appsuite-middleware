@@ -58,6 +58,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
@@ -84,24 +86,25 @@ import com.openexchange.server.ServiceLookup;
  */
 public class GroupDispatcher implements ComponentHandle {
 
-    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(GroupDispatcher.class);
+    /** The logger constant. */
+    static final org.apache.commons.logging.Log LOG = Log.loggerFor(GroupDispatcher.class);
 
-    /**
-     * The <code>ServiceLookup</code> reference.
-     */
+    /** The <code>ServiceLookup</code> reference. */
     public static final AtomicReference<ServiceLookup> SERVICE_REF = new AtomicReference<ServiceLookup>();
 
     /** The collection of IDs that might be concurrently accessed */
     private final AtomicReference<Set<ID>> idsRef = new AtomicReference<Set<ID>>(Collections.<ID> emptySet());
 
-    private final Map<ID, String> stamps = new HashMap<ID, String>();
+    private final Map<ID, String> stamps = new ConcurrentHashMap<ID, String>();
 
     /** ID of the group */
     private final ID id;
 
-    private long sequenceNumber = 0;
+    /** Sequence numer */
+    private final AtomicLong sequenceNumber = new AtomicLong();
 
-    private ActionHandler handler = null;
+    /** Action handler */
+    private final ActionHandler handler;
 
     /**
      * Initializes a new {@link GroupDispatcher}.
@@ -119,6 +122,7 @@ public class GroupDispatcher implements ComponentHandle {
      * @param handler An action handler for introspection
      */
     public GroupDispatcher(ID id, ActionHandler handler) {
+        super();
         this.id = id;
         this.handler = handler;
         final AtomicReference<Set<ID>> idsRef = this.idsRef;
@@ -344,8 +348,7 @@ public class GroupDispatcher implements ComponentHandle {
     public void stamp(Stanza s) {
         s.setSelector(getStamp(s.getTo()));
         s.setSequencePrincipal(id);
-        s.setSequenceNumber(sequenceNumber);
-        sequenceNumber++;
+        s.setSequenceNumber(sequenceNumber.getAndIncrement());
     }
 
     /**

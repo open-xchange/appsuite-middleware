@@ -623,7 +623,7 @@ public class Login extends AJAXServlet {
                                 } catch (final UndeclaredThrowableException e) {
                                     throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
                                 }
-                                final JSONObject json = new JSONObject();
+                                final JSONObject json = new JSONObject(8);
                                 LoginWriter.write(session, json);
                                 // Append "config/modules"
                                 appendModules(session, json, req);
@@ -653,6 +653,12 @@ public class Login extends AJAXServlet {
                         }
                         return;
                     }
+
+                    /*-
+                     * Ensure appropriate public-session-cookie is set
+                     */
+                    writePublicSessionCookie(resp, session, req.isSecure(), req.getServerName(), conf);
+
                 } catch (final OXException e) {
                     if (AjaxExceptionCodes.DISABLED_ACTION.equals(e)) {
                         LOG.debug(e.getMessage(), e);
@@ -758,7 +764,7 @@ public class Login extends AJAXServlet {
         handlerMap.put(ACTION_TOKENLOGIN, new TokenLogin(conf));
         handlerMap.put(ACTION_TOKENS,  new Tokens(conf));
         handlerMap.put(ACTION_REDEEM_TOKEN, new RedeemToken(conf));
-        
+
     }
 
     @Override
@@ -900,6 +906,23 @@ public class Login extends AJAXServlet {
         final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
         if (null != altId) {
             cookie = new Cookie(PUBLIC_SESSION_NAME, altId);
+            configureCookie(cookie, secure, serverName, conf);
+            resp.addCookie(cookie);
+        }
+    }
+
+    /**
+     * Writes the (groupware's) public session cookie <code>"open-xchange-public-session"</code> to specified HTTP servlet response.
+     *
+     * @param resp The HTTP servlet response
+     * @param session The session providing the public session cookie identifier
+     * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
+     * @param serverName The HTTP request's server name
+     */
+    public static void writePublicSessionCookie(final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
+        final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
+        if (null != altId) {
+            final Cookie cookie = new Cookie(PUBLIC_SESSION_NAME, altId);
             configureCookie(cookie, secure, serverName, conf);
             resp.addCookie(cookie);
         }

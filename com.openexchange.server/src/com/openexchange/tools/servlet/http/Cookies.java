@@ -63,6 +63,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.google.common.net.InternetDomainName;
 import com.openexchange.ajax.Login;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 
@@ -281,6 +282,44 @@ public final class Cookies {
             isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    /**
+     * Pretty-prints given cookies.
+     *
+     * @param cookies The cookies
+     * @return The string representation
+     */
+    public static String prettyPrint(final Cookie[] cookies) {
+        if (null == cookies) {
+            return "";
+        }
+        final StringAllocator sb = new StringAllocator(cookies.length << 4);
+        final String sep = System.getProperty("line.separator");
+        for (int i = 0; i < cookies.length; i++) {
+            final Cookie cookie = cookies[i];
+            sb.append(i + 1).append(": ").append(cookie.getName());
+            sb.append('=').append(cookie.getValue());
+            sb.append("; version=").append(cookie.getVersion());
+            final int maxAge = cookie.getMaxAge();
+            if (maxAge >= 0) {
+                sb.append("; max-age=").append(maxAge);
+            }
+            final String path = cookie.getPath();
+            if (null != path) {
+                sb.append("; path=").append(path);
+            }
+            final String domain = cookie.getDomain();
+            if (null != domain) {
+                sb.append("; domain=").append(path);
+            }
+            final boolean secure = cookie.getSecure();
+            if (secure) {
+                sb.append("; secure");
+            }
+            sb.append(sep);
+        }
+        return sb.toString();
     }
 
     /**

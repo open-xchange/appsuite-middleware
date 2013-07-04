@@ -89,7 +89,13 @@ public enum PublicationErrorMessage implements OXExceptionCode {
      * Cannot find the publication site (according ID and Context).
      */
     PublicationNotFound(CATEGORY_USER_INPUT, 5, PUBLICATION_NOT_FOUND_MSG),
+    /**
+     * %s has already been taken (field: %s)
+     */
     UniquenessConstraintViolation(CATEGORY_USER_INPUT, 6, UNIQUENESS_CONSTRAINT_VIOLATION),
+    /**
+     * You do not have the permissions to perform the chosen action (%s)
+     */
     AccessDenied(CATEGORY_PERMISSION_DENIED, 7, ACCESS_DENIED_MSG),
     /**
      * Published document has been deleted in meantime and therefore is no longer available.

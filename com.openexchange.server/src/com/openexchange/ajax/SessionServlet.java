@@ -221,14 +221,16 @@ public abstract class SessionServlet extends AJAXServlet {
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
-        ServerSession session = null;
+        final ServerSession session;
         {
             final String sSession = req.getParameter("session");
-            if (sSession != null && !sSession.equals("")) {
+            if (sSession != null && sSession.length() > 0) {
                 final String sessionId = getSessionId(req);
                 session = getSession(req, sessionId, sessiondService);
                 verifySession(req, sessiondService, sessionId, session);
                 rememberSession(req, session);
+            } else {
+                session = null;
             }
         }
         // Try public session
@@ -240,19 +242,25 @@ public abstract class SessionServlet extends AJAXServlet {
                     final String altId = cookie.getValue();
                     if (null != altId && null != session && altId.equals(session.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
                         // same session
-                        simpleSession = session;
+                        rememberPublicSession(req, session);
                     } else {
                         // lookup session by alternative id
-                        simpleSession = ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(cookie.getValue()));
+                        simpleSession = null == altId ? null : ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(altId));
                     }
                     break;
                 }
             }
-        	if (simpleSession != null) {
-        	    checkSecret(hashSource, req, simpleSession);
-        		verifySession(req, sessiondService, simpleSession.getSessionID(), simpleSession);
-        		rememberPublicSession(req, simpleSession);
-        	}
+            if (simpleSession != null) {
+                // Need to verify
+                try {
+                    checkSecret(hashSource, req, simpleSession, false);
+                    verifySession(req, sessiondService, simpleSession.getSessionID(), simpleSession);
+                    rememberPublicSession(req, simpleSession);
+                } catch (final OXException e) {
+                    // Verification of public session failed
+                    LOG.info("Public session is invalid.");
+                }
+            }
         }
     }
 
@@ -638,12 +646,26 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param source    The configured CookieHashSource
      * @param req       The incoming HttpServletRequest
      * @param session   The Session object looked up for the incoming request
+     * @param logInfo   Whether to log info or not
      * @throws OXException If the secrets differ
      */
     public static void checkSecret(final CookieHashSource source, final HttpServletRequest req, final Session session) throws OXException {
+        checkSecret(source, req, session, INFO);
+    }
+
+    /**
+     * Check if the secret encoded in the open-xchange-secret Cookie matches the secret saved in the Session.
+     *
+     * @param source    The configured CookieHashSource
+     * @param req       The incoming HttpServletRequest
+     * @param session   The Session object looked up for the incoming request
+     * @param logInfo   Whether to log info or not
+     * @throws OXException If the secrets differ
+     */
+    public static void checkSecret(final CookieHashSource source, final HttpServletRequest req, final Session session, final boolean logInfo) throws OXException {
         final String secret = extractSecret(source, req, session.getHash(), session.getClient(), (String) session.getParameter("user-agent"));
         if (secret == null || !session.getSecret().equals(secret)) {
-            if (INFO && null != secret) {
+            if (logInfo && null != secret) {
                 LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
             }
             final OXException oxe = SessionExceptionCodes.WRONG_SESSION_SECRET.create();
@@ -682,15 +704,11 @@ public abstract class SessionServlet extends AJAXServlet {
                     return cookie.getValue();
                 }
             }
-            final String userAgent = req.getHeader("User-Agent");
-            if (null != userAgent && null != originalUserAgent) {
-                final BrowserDetector browserDetector = new BrowserDetector(originalUserAgent);
-                if (browserDetector.isSafari() && toLowerCase(userAgent).startsWith("applecoremedia/")) {
-                    cookieName = Login.SECRET_PREFIX + hash;
-                    for (final Cookie cookie : cookies) {
-                        if (cookieName.equals(cookie.getName())) {
-                            return cookie.getValue();
-                        }
+            if (isSafariMediaPlayer(req.getHeader("User-Agent"), originalUserAgent)) {
+                cookieName = Login.SECRET_PREFIX + hash;
+                for (final Cookie cookie : cookies) {
+                    if (cookieName.equals(cookie.getName())) {
+                        return cookie.getValue();
                     }
                 }
             }
@@ -701,6 +719,10 @@ public abstract class SessionServlet extends AJAXServlet {
             LOG.info("Missing Cookies in HTTP request. No session secret can be looked up.");
         }
         return null;
+    }
+
+    private static boolean isSafariMediaPlayer(final String currentUserAgent, final String sessionUserAgent) {
+        return null != currentUserAgent && null != sessionUserAgent && toLowerCase(currentUserAgent).startsWith("applecoremedia/") && new BrowserDetector(sessionUserAgent).isSafari();
     }
 
     /**

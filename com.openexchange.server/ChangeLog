@@ -1,3 +1,8 @@
+* 2013-07-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27374: Properly parse & download nested parts in a winmail.dat file
+ - Fix for bug 27379: Properly validate public session cookie and restore if invalid during auto-login attempt
+
 * 2013-07-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 27316: Moved service dependency check to JSON layer
