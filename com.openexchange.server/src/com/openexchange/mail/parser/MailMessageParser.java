@@ -49,11 +49,8 @@
 
 package com.openexchange.mail.parser;
 
-import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -84,8 +81,6 @@ import net.freeutils.tnef.mime.TNEFMime;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
-import com.openexchange.java.CharsetDetector;
-import com.openexchange.java.Charsets;
 import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
@@ -105,12 +100,10 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
-import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.tnef.TNEF2ICal;
 
@@ -674,7 +667,7 @@ public final class MailMessageParser {
                 if (s > 0) {
                     final Iterator<?> iter = attachments.iterator();
                     final ByteArrayOutputStream os = new UnsynchronizedByteArrayOutputStream(BUF_SIZE);
-                    Next: for (int i = 0; i < s; i++) {
+                    Next: for (int i = 0; !stop && i < s; i++) {
                         final Attachment attachment = (Attachment) iter.next();
                         final TNEFBodyPart bodyPart = new TNEFBodyPart();
                         if (attachment.getNestedMessage() == null) {
@@ -960,135 +953,14 @@ public final class MailMessageParser {
     }
 
     private static String readContent(final MailPart mailPart, final ContentType contentType, final String mailId, final String folder) throws OXException, IOException {
-        if (false && is7BitTransferEncoding(mailPart) && (mailPart instanceof MimeRawSource)) {
-            try {
-                final byte[] bytes = MessageUtility.getBytesFrom(((MimeRawSource) mailPart).getRawInputStream());
-                if (!MessageUtility.isAscii(bytes)) {
-                    try {
-                        String cs = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));
-                        if ("US-ASCII".equalsIgnoreCase(cs)) {
-                            cs = "ISO-8859-1";
-                        }
-                        return new String(bytes, Charsets.forName(cs));
-                    } catch (final UnsupportedCharsetException e) {
-                        if (WARN_ENABLED) {
-                            LOG.warn("Unsupported encoding: " + e.getMessage(), e);
-                        }
-                        return new String(bytes, com.openexchange.java.Charsets.ISO_8859_1);
-                    }
-                }
-                /*
-                 * Determine proper character set
-                 */
-                String charset = contentType.getCharsetParameter();
-                if (!CharsetDetector.isValid(charset)) {
-                    com.openexchange.java.StringAllocator sb = null;
-                    if (null != charset) {
-                        sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(charset).append("\".");
-                        mailInterfaceMonitor.addUnsupportedEncodingExceptions(charset);
-                    }
-                    charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));
-                    if (WARN_ENABLED && null != sb) {
-                        if ("US-ASCII".equalsIgnoreCase(charset)) {
-                            charset = "ISO-8859-1";
-                        }
-                        sb.append(" Using auto-detected encoding: \"").append(charset).append('"');
-                        LOG.warn(sb.toString());
-                    }
-                }
-                /*
-                 * Return textual content
-                 */
-                return new String(bytes, Charsets.forName(charset));
-            } catch (final OXException e) {
-                // getRawInputStream() failed
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("MIMERawSource.getRawInputStream() failed. Fallback to transfer-decoded reading.", e);
-                }
-            }
-        }
         /*
          * Read content
          */
-        final String charset = getCharset(mailPart, contentType);
-        try {
-            if (contentType.startsWith("text/htm")) {
-                final String html = MessageUtility.readMailPart(mailPart, charset);
-                return MessageUtility.simpleHtmlDuplicateRemoval(html);
-            }
-            return MessageUtility.readMailPart(mailPart, charset);
-        } catch (final java.io.CharConversionException e) {
-            // Obviously charset was wrong or bogus implementation of character conversion
-            final String fallback = "ISO-8859-1";
-            if (WARN_ENABLED) {
-                LOG.warn(
-                    new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
-                        "\". Using fallback charset \"").append(fallback).append("\" instead."),
-                    e);
-            }
-            return MessageUtility.readMailPart(mailPart, fallback);
-        } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND.create(e, mailId, folder);
-            }
-            throw e;
+        final String content = MimeMessageUtility.readContent(mailPart, contentType);
+        if (null == content) {
+            throw MailExceptionCode.MAIL_NOT_FOUND.create(mailId, folder);
         }
-    }
-
-    private static final String HDR_CONTENT_TRANSFER_ENC = MessageHeaders.HDR_CONTENT_TRANSFER_ENC;
-
-    private static boolean is7BitTransferEncoding(final MailPart mailPart) {
-        final String transferEncoding = mailPart.getFirstHeader(HDR_CONTENT_TRANSFER_ENC);
-        /*-
-         * Taken from RFC 2045 Section 6.1. (Content-Transfer-Encoding Syntax):
-         * ...
-         * "Content-Transfer-Encoding: 7BIT" is assumed if the Content-Transfer-Encoding header field is not present.
-         * ...
-         */
-        return (null == transferEncoding || "7bit".equalsIgnoreCase(transferEncoding.trim()));
-    }
-
-    private static String getCharset(final MailPart mailPart, final ContentType contentType) throws OXException {
-        final String charset;
-        if (mailPart.containsHeader(HDR_CONTENT_TYPE)) {
-            String cs = contentType.getCharsetParameter();
-            if (!CharsetDetector.isValid(cs)) {
-                com.openexchange.java.StringAllocator sb = null;
-                if (null != cs) {
-                    sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
-                    mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
-                }
-                if (contentType.startsWith(PRIMARY_TEXT)) {
-                    cs = CharsetDetector.detectCharset(mailPart.getInputStream());
-                    if ("US-ASCII".equalsIgnoreCase(cs)) {
-                        cs = "ISO-8859-1";
-                    }
-                    if (WARN_ENABLED && null != sb) {
-                        sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
-                        LOG.warn(sb.toString());
-                    }
-                } else {
-                    cs = MailProperties.getInstance().getDefaultMimeCharset();
-                    if (WARN_ENABLED && null != sb) {
-                        sb.append(" Using fallback encoding: \"").append(cs).append('"');
-                        LOG.warn(sb.toString());
-                    }
-                }
-            }
-            charset = cs;
-        } else {
-            if (contentType.startsWith(PRIMARY_TEXT)) {
-                final InputStream inputStream = mailPart.getInputStream();
-                if (null == inputStream) {
-                    charset = MailProperties.getInstance().getDefaultMimeCharset();
-                } else {
-                    charset = CharsetDetector.detectCharset(inputStream);
-                }
-            } else {
-                charset = MailProperties.getInstance().getDefaultMimeCharset();
-            }
-        }
-        return charset;
+        return content;
     }
 
     private static final String PRIMARY_TEXT = "text/";

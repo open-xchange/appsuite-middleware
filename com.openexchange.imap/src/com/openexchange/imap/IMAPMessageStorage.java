@@ -168,7 +168,6 @@ import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -849,20 +848,27 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             try {
                 final MailPart part = IMAPCommandsCollection.getPart(imapFolder, msgUID, sequenceId, false);
                 if (null != part) {
-                    return part;
+                    // Appropriate part found -- check for special content
+                    final ContentType contentType = part.getContentType();
+                    if (!isTNEFMimeType(contentType) && !isUUEncoded(part, contentType)) {
+                        return part;
+                    }
                 }
+            } catch (final IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND.create(e, Long.valueOf(msgUID), fullName);
+                }
+                // Ignore
             } catch (final Exception e) {
                 // Ignore
             }
             /*
              * Regular look-up
              */
-            final IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
-            if (null == msg) {
+            final MailMessage mail = getMessageLong(fullName, msgUID, false);
+            if (null == mail) {
                 throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(msgUID), fullName);
             }
-            msg.setUID(msgUID);
-            final MimeMailMessage mail = new MimeMailMessage(msg);
             final MailPartHandler handler = new MailPartHandler(sequenceId);
             new MailMessageParser().parseMailMessage(mail, handler);
             if (handler.getMailPart() == null) {
@@ -877,6 +883,21 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
+    }
+
+    private static boolean isTNEFMimeType(final ContentType contentType) {
+        // note that application/ms-tnefx was also observed in the wild
+        return contentType != null && (contentType.startsWith("application/ms-tnef") || contentType.startsWith("application/vnd.ms-tnef"));
+    }
+
+    private static boolean isUUEncoded(final MailPart part, final ContentType contentType) throws OXException, IOException {
+        if (null == part) {
+            return false;
+        }
+        if (!contentType.startsWith("text/plain")) {
+            return false;
+        }
+        return new UUEncodedMultiPart(MimeMessageUtility.readContent(part, contentType)).isUUEncoded();
     }
 
     @Override
