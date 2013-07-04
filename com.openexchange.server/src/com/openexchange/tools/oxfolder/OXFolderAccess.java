@@ -59,7 +59,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.contact.ContactService;
 import com.openexchange.database.provider.DBPoolProvider;
@@ -75,7 +74,6 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.tasks.TaskStorage;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -595,15 +593,9 @@ public class OXFolderAccess {
                 return 0;
             case FolderObject.INFOSTORE:
                 try {
-                    final InfostoreFacade db =
-                        new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
-                    final User user =
-                        session instanceof ServerSession ? ((ServerSession) session).getUser() : UserStorage.getStorageUser(userId, ctx);
-                    final UserConfiguration userConf =
-                        session instanceof ServerSession ? ((ServerSession) session).getUserConfiguration() : UserConfigurationStorage.getInstance().getUserConfiguration(
-                            userId,
-                            user.getGroups(),
-                            ctx);
+                    final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
+                    final User user = getUser(session, ctx, userId);
+                    final UserConfiguration userConf = getUserConfig(session, ctx, userId, user);
                     return db.countDocuments(folder.getObjectID(), ctx, user, userConf);
                 } catch (final OXException e) {
                     if (InfostoreExceptionCodes.NO_READ_PERMISSION.equals(e)) {
@@ -617,6 +609,20 @@ public class OXFolderAccess {
         } catch (final RuntimeException t) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(ctx.getContextId()));
         }
+    }
+
+    private UserConfiguration getUserConfig(final Session session, final Context ctx, final int userId, final User user) throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUserConfiguration();
+        }
+        return UserConfigurationStorage.getInstance().getUserConfiguration(userId, user.getGroups(), ctx);
+    }
+
+    private User getUser(final Session session, final Context ctx, final int userId) {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser();
+        }
+        return UserStorage.getStorageUser(userId, ctx);
     }
 
 }
