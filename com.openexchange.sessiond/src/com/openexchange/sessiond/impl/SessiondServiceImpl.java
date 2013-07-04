@@ -191,6 +191,9 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public Session getSessionByAlternativeId(final String altId) {
+        if (null == altId) {
+            return null;
+        }
         final SessionControl sessionControl = SessionHandler.getSessionByAlternativeId(altId);
         if (null == sessionControl) {
             LOG.info("Session not found by alternative identifier. Alternative ID: " + altId);
