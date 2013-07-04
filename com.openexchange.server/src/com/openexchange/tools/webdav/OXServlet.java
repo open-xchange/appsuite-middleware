@@ -77,6 +77,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
+import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.webdav.digest.Authorization;
 import com.openexchange.tools.webdav.digest.DigestUtility;
@@ -342,21 +343,18 @@ public abstract class OXServlet extends WebDavServlet {
     }
 
     private static void removeCookie(final HttpServletRequest req, final HttpServletResponse resp, final String...cookiesToRemove) {
-        final Cookie[] cookies = req.getCookies();
+        final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (cookies == null) {
             return;
         }
         final List<String> cookieNames = Arrays.asList(cookiesToRemove);
-        for (final Cookie cookie : cookies) {
-            final String name = cookie.getName();
-
-            for (final String string : cookieNames) {
-                if (name.startsWith(string)) {
-                    final Cookie respCookie = new Cookie(name, cookie.getValue());
-                    respCookie.setPath("/");
-                    respCookie.setMaxAge(0); // delete
-                    resp.addCookie(respCookie);
-                }
+        for (final String name : cookieNames) {
+            final Cookie cookie = cookies.get(name);
+            if (null != cookie) {
+                final Cookie respCookie = new Cookie(name, cookie.getValue());
+                respCookie.setPath("/");
+                respCookie.setMaxAge(0); // delete
+                resp.addCookie(respCookie);
             }
         }
     }
@@ -485,14 +483,12 @@ public abstract class OXServlet extends WebDavServlet {
     }
 
     private static Session findSessionByCookie(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
-        final Cookie[] cookies = req.getCookies();
+        final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         String sessionId = null;
         if (null != cookies) {
-            for (final Cookie cookie : cookies) {
-                if (COOKIE_SESSIONID.equals(cookie.getName())) {
-                    sessionId = cookie.getValue();
-                    break;
-                }
+            final Cookie cookie = cookies.get(COOKIE_SESSIONID);
+            if (null != cookie) {
+                sessionId = cookie.getValue();
             }
         }
         if (null == sessionId) {

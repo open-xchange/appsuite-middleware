@@ -61,7 +61,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -254,35 +253,7 @@ public class DispatcherServlet extends SessionServlet {
         }
         // Try public session
         if (!mayOmitSession) {
-            final Cookie[] cookies = req.getCookies();
-            if (cookies != null) {
-                ServerSession simpleSession = null;
-                for (final Cookie cookie : cookies) {
-                    if (Login.PUBLIC_SESSION_NAME.equals(cookie.getName())) {
-                        final String altId = cookie.getValue();
-                        if (null != altId && null != session && altId.equals(session.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
-                            // same session
-                            rememberPublicSession(req, session);
-                        } else {
-                            // lookup session by alternative id
-                            simpleSession = null == altId ? null : ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(altId));
-                        }
-                        break;
-                    }
-                }
-                // Check if a simple (aka public) session has been found
-                if (simpleSession != null) {
-                    // Need to verify
-                    try {
-                        checkSecret(hashSource, req, simpleSession, false);
-                        verifySession(req, sessiondService, simpleSession.getSessionID(), simpleSession);
-                        rememberPublicSession(req, simpleSession);
-                    } catch (final OXException e) {
-                        // Verification of public session failed
-                        LOG.info("Public session is invalid.");
-                    }
-                }
-            }
+            findPublicSessionId(req, session, sessiondService);
         }
     }
 

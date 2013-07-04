@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
@@ -72,6 +73,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.servlet.Rate.Result;
+import com.openexchange.tools.servlet.http.Cookies;
 
 /**
  * {@link RateLimiter}
@@ -96,16 +98,12 @@ public final class RateLimiter {
 
         @Override
         public String getValue(final HttpServletRequest servletRequest) {
-            final Cookie[] cookies = servletRequest.getCookies();
+            final Map<String, Cookie> cookies = Cookies.cookieMapFor(servletRequest);
             if (null == cookies) {
                 return null;
             }
-            for (final Cookie cookie : cookies) {
-                if ("jsessionid".equals(toLowerCase(cookie.getName()))) {
-                    return cookie.getValue();
-                }
-            }
-            return null;
+            final Cookie cookie = cookies.get("JSESSIONID");
+            return null == cookie ? null : cookie.getValue();
         }
     };
 
@@ -120,16 +118,12 @@ public final class RateLimiter {
 
         @Override
         public String getValue(final HttpServletRequest servletRequest) {
-            final Cookie[] cookies = servletRequest.getCookies();
+            final Map<String, Cookie> cookies = Cookies.cookieMapFor(servletRequest);
             if (null == cookies) {
                 return null;
             }
-            for (final Cookie cookie : cookies) {
-                if (cookieName.equals(toLowerCase(cookie.getName()))) {
-                    return cookie.getValue();
-                }
-            }
-            return null;
+            final Cookie cookie = cookies.get(cookieName);
+            return null == cookie ? null : cookie.getValue();
         }
 
     }
