@@ -337,7 +337,7 @@ public class RdbUserStorage extends UserStorage {
             throw UserExceptionCode.LOAD_FAILED.create(e, e.getMessage());
         }
         for (final int userId : userIds) {
-            if (!users.containsKey(I(userId))) {
+            if (!users.containsKey(userId)) {
                 throw UserExceptionCode.USER_NOT_FOUND.create(I(userId), I(ctx.getContextId()));
             }
         }
@@ -347,7 +347,7 @@ public class RdbUserStorage extends UserStorage {
         loadAttributes(ctx.getContextId(), con, users, false);
         final User[] retval = new User[users.size()];
         for (int i = 0; i < length; i++) {
-            retval[i] = users.get(I(userIds[i]));
+            retval[i] = users.get(userIds[i]);
         }
         return retval;
     }
