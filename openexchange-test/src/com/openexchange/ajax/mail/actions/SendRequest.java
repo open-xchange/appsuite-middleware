@@ -80,6 +80,8 @@ public class SendRequest implements AJAXRequest<SendResponse> {
 
     private String recipientTo;
 
+    private boolean failOnError;
+
     /**
      * Initializes a new {@link SendRequest}
      *
@@ -87,6 +89,17 @@ public class SendRequest implements AJAXRequest<SendResponse> {
      */
     public SendRequest(final String mailStr) {
         this(mailStr, null);
+    }
+    
+    public SendRequest(String mailStr, boolean failOnError) {
+        this(mailStr, null, failOnError);
+    }
+    
+    public SendRequest(String mailStr, InputStream upload, boolean failOnError) {
+        super();
+        this.mailStr = mailStr;
+        this.upload = upload;
+        this.failOnError = failOnError;
     }
 
     /**
@@ -96,9 +109,7 @@ public class SendRequest implements AJAXRequest<SendResponse> {
      * @param upload The upload input stream
      */
     public SendRequest(final String mailStr, final InputStream upload) {
-        super();
-        this.mailStr = mailStr;
-        this.upload = upload;
+        this(mailStr, upload, true);
     }
 
     @Override
@@ -134,7 +145,7 @@ public class SendRequest implements AJAXRequest<SendResponse> {
 
     @Override
     public SendParser getParser() {
-        return new SendParser(true);
+        return new SendParser(failOnError);
     }
 
     private static final class SendParser extends AbstractUploadParser<SendResponse> {

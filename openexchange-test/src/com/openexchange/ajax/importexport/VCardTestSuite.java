@@ -63,6 +63,7 @@ public class VCardTestSuite extends TestSuite{
 		tests.addTestSuite(Bug15229Test.class);
 		tests.addTestSuite(Bug18094Test_VCardRoundtrip.class);
 		tests.addTestSuite(VCardMailPartAttachTest.class);
+		tests.addTestSuite(Bug27151Test_RoundtripOfYomiFields.class);
 		return tests;
 	}
 }

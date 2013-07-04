@@ -55,6 +55,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.json.SecretRecoveryAJAXRequest;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -78,11 +79,18 @@ public final class CheckAction extends AbstractSecretRecoveryAction {
 
     @Override
     protected AJAXRequestResult perform(final SecretRecoveryAJAXRequest req) throws OXException, JSONException {
-        final String diagnosis = getService(SecretInconsistencyDetector.class).isSecretWorking(req.getSession());
-        final JSONObject object = new JSONObject();
-        object.put("secretWorks", diagnosis == null);
-        if (diagnosis != null) {
+        final SecretInconsistencyDetector secretInconsistencyDetector = getService(SecretInconsistencyDetector.class);
+        if (null == secretInconsistencyDetector) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SecretInconsistencyDetector.class.getName());
+        }
+
+        final String diagnosis = secretInconsistencyDetector.isSecretWorking(req.getSession());
+        final JSONObject object = new JSONObject(2);
+        if (diagnosis == null) {
+            object.put("secretWorks", true);
+        } else {
             LOG.info("Secrets in session " + req.getSession().getSessionID() + " seem to need migration: " + diagnosis);
+            object.put("secretWorks", false);
             object.put("diagnosis", diagnosis);
         }
         return new AJAXRequestResult(object, "json");

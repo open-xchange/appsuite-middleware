@@ -50,6 +50,7 @@
 package com.openexchange.admin.console;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
@@ -57,8 +58,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
@@ -77,7 +83,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 public class StatisticTools extends AbstractJMXTools {
 
-    
+
     public class ThreadOutputElem {
 
         private final long threadId;
@@ -87,7 +93,7 @@ public class StatisticTools extends AbstractJMXTools {
         private final long userTime;
         private StackTraceElement[] stackTrace;
 
-        public ThreadOutputElem(long threadId, String threadName, long allocatedBytes, long cpuTime, long userTime) {
+        public ThreadOutputElem(final long threadId, final String threadName, final long allocatedBytes, final long cpuTime, final long userTime) {
             this.threadId = threadId;
             this.threadName = threadName;
             this.allocatedBytes = allocatedBytes;
@@ -95,7 +101,7 @@ public class StatisticTools extends AbstractJMXTools {
             this.userTime = userTime;
         }
 
-        public ThreadOutputElem(long threadId, String threadName, long allocatedBytes, long cpuTime, long userTime, StackTraceElement[] stackTrace) {
+        public ThreadOutputElem(final long threadId, final String threadName, final long allocatedBytes, final long cpuTime, final long userTime, final StackTraceElement[] stackTrace) {
             this.threadId = threadId;
             this.threadName = threadName;
             this.allocatedBytes = allocatedBytes;
@@ -108,7 +114,7 @@ public class StatisticTools extends AbstractJMXTools {
             return threadId;
         }
 
-        
+
         public String getThreadName() {
             return threadName;
         }
@@ -125,12 +131,12 @@ public class StatisticTools extends AbstractJMXTools {
             return userTime;
         }
 
-        
+
         public StackTraceElement[] getStackTrace() {
             return stackTrace;
         }
 
-        public void setStackTrace(StackTraceElement[] stackTrace) {
+        public void setStackTrace(final StackTraceElement[] stackTrace) {
             this.stackTrace = stackTrace;
         }
 
@@ -171,15 +177,15 @@ public class StatisticTools extends AbstractJMXTools {
     private static final char OPT_DOOPERATIONS_STATS_SHORT = 'd';
 
     private static final String OPT_DOOPERATIONS_STATS_LONG = "dooperation";
-    
+
     private static final char OPT_MEMORY_THREADS_STATS_SHORT = 'm';
-    
+
     private static final String OPT_MEMORY_THREADS_STATS_LONG = "memory";
-    
+
     private static final char OPT_MEMORY_THREADS_FULL_STATS_SHORT = 'M';
-    
+
     private static final String OPT_MEMORY_THREADS_FULL_STATS_LONG = "Memory";
-    
+
     private CLIOption xchangestats = null;
 
     private CLIOption threadpoolstats = null;
@@ -197,11 +203,11 @@ public class StatisticTools extends AbstractJMXTools {
     private CLIOption showoperation = null;
 
     private CLIOption dooperation = null;
-    
+
     private CLIOption memorythreadstats = null;
-    
+
     private CLIOption memorythreadstatsfull = null;
-    
+
     private CLIOption sessionStats = null;
 
     private CLIOption usmSessionStats = null;
@@ -218,154 +224,292 @@ public class StatisticTools extends AbstractJMXTools {
     }
 
     @Override
-    protected void furtherOptionsHandling(final AdminParser parser, final HashMap<String, String[]> env) throws JMException, InterruptedException, IOException, InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, MalformedObjectNameException, InvalidDataException {
-        boolean admin = false;
-        if (null != parser.getOptionValue(this.admindaemonstats)) {
-            admin = true;
-        }
-        int count = 0;
-        if (null != parser.getOptionValue(this.xchangestats)) {
-            final MBeanServerConnection initConnection = initConnection(admin, env);
-            showOXData(initConnection, admin);
-            count++;
-        }
-        if (null != parser.getOptionValue(this.threadpoolstats)) {
-            final MBeanServerConnection initConnection = initConnection(admin, env);
-            showThreadPoolData(initConnection);
-            count++;
-        }
-        if (null != parser.getOptionValue(this.runtimestats)) {
-            if (0 == count) {
-                final MBeanServerConnection initConnection = initConnection(admin, env);
-                System.out.print(getStats(initConnection, "sun.management.RuntimeImpl"));
-                showMemoryPoolData(initConnection);
-            }
-            count++;
-        }
-        if (null != parser.getOptionValue(this.osstats)) {
-            if (0 == count) {
-                final MBeanServerConnection initConnection = initConnection(admin, env);
-                System.out.print(getStats(initConnection, "com.sun.management.UnixOperatingSystem"));
-            }
-            count++;
+    protected void furtherOptionsHandling(final AdminParser parser, final Map<String, String[]> env) throws JMException, InterruptedException, IOException, InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, MalformedObjectNameException, InvalidDataException {
+        final boolean admin = (null != parser.getOptionValue(this.admindaemonstats));
 
-        }
-        if (null != parser.getOptionValue(this.threadingstats)) {
-            if (0 == count) {
-                final MBeanServerConnection initConnection = initConnection(admin, env);
-                showSysThreadingData(initConnection);
-            }
-            count++;
+        ExecutorService executor = null;
+        try {
+            SubmitCountExecutorCompletionService<String> completionService = null;
+            int count = 0;
 
-        }
-        if (null != parser.getOptionValue(this.sessionStats)) {
-            if (0 == count) {
-                final MBeanServerConnection initConnection = initConnection(admin, env);
-                System.out.print(getStats(initConnection, "com.openexchange.sessiond", "name", "SessionD Toolkit"));
+            if (null != parser.getOptionValue(this.xchangestats)) {
+                executor = Executors.newCachedThreadPool(new CommandlineThreadFactory());
+                completionService = new SubmitCountExecutorCompletionService<String>(executor);
+                showOXData(admin, completionService, env);
+
                 count++;
             }
-        }
-        if (null != parser.getOptionValue(this.usmSessionStats)) {
-            if (0 == count) {
-                final MBeanServerConnection initConnection = initConnection(admin, env);
-                System.out.print(getStats(initConnection, "com.openexchange.usm.session", "name", "USMSessionInformation"));
-                count++;
+            if (null != parser.getOptionValue(this.threadpoolstats)) {
+                if (0 == count) {
+                    final MBeanServerConnection initConnection = initConnection(admin, env);
+                    showThreadPoolData(initConnection, System.out);
+
+                    count++;
+                }
             }
-        }
-        if (null != parser.getOptionValue(this.jsonStats)) {
-            if (0 == count) {
-                final MBeanServerConnection initConnection = initConnection(admin, env);
-                System.out.print(getStats(initConnection, "org.json", "name", "JSONMBean"));
-                count++;
+            if (null != parser.getOptionValue(this.runtimestats)) {
+                if (0 == count) {
+                    final MBeanServerConnection initConnection = initConnection(admin, env);
+                    System.out.print(getStats(initConnection, "sun.management.RuntimeImpl"));
+                    showMemoryPoolData(initConnection, System.out);
+
+                    count++;
+                }
             }
-        }
-        if (null != parser.getOptionValue(this.clusterStats)) {
-            if (0 == count) {
-                final MBeanServerConnection initConnection = initConnection(admin, env);
-                showClusterData(initConnection);
-                count++;
+            if (null != parser.getOptionValue(this.osstats)) {
+                if (0 == count) {
+                    final MBeanServerConnection initConnection = initConnection(admin, env);
+                    System.out.print(getStats(initConnection, "com.sun.management.UnixOperatingSystem"));
+
+                    count++;
+                }
             }
-        }
-        if (null != parser.getOptionValue(this.grizzlyStats)) {
-            if (0 == count) {
-                final MBeanServerConnection initConnection = initConnection(admin, env);
-                showGrizzlyData(initConnection);
-                count++;
+            if (null != parser.getOptionValue(this.threadingstats)) {
+                if (0 == count) {
+                    final MBeanServerConnection initConnection = initConnection(admin, env);
+                    showSysThreadingData(initConnection, System.out);
+
+                    count++;
+                }
             }
-        }
-        if (null != parser.getOptionValue(this.allstats)) {
+            if (null != parser.getOptionValue(this.sessionStats)) {
+                if (0 == count) {
+                    final MBeanServerConnection initConnection = initConnection(admin, env);
+                    System.out.print(getStats(initConnection, "com.openexchange.sessiond", "name", "SessionD Toolkit"));
+
+                    count++;
+                }
+            }
+            if (null != parser.getOptionValue(this.usmSessionStats)) {
+                if (0 == count) {
+                    final MBeanServerConnection initConnection = initConnection(admin, env);
+                    System.out.print(getStats(initConnection, "com.openexchange.usm.session", "name", "USMSessionInformation"));
+
+                    count++;
+                }
+            }
+            if (null != parser.getOptionValue(this.jsonStats)) {
+                if (0 == count) {
+                    final MBeanServerConnection initConnection = initConnection(admin, env);
+                    System.out.print(getStats(initConnection, "org.json", "name", "JSONMBean"));
+
+                    count++;
+                }
+            }
+            if (null != parser.getOptionValue(this.clusterStats)) {
+                if (0 == count) {
+                    final MBeanServerConnection initConnection = initConnection(admin, env);
+                    showClusterData(initConnection, System.out);
+
+                    count++;
+                }
+            }
+            if (null != parser.getOptionValue(this.grizzlyStats)) {
+                if (0 == count) {
+                    final MBeanServerConnection initConnection = initConnection(admin, env);
+                    showGrizzlyData(initConnection, System.out);
+
+                    count++;
+                }
+            }
+            if (null != parser.getOptionValue(this.allstats)) {
+                if (0 == count) {
+                    if (null == executor) {
+                        executor = Executors.newCachedThreadPool(new CommandlineThreadFactory());
+                    }
+                    if (null == completionService) {
+                        completionService = new SubmitCountExecutorCompletionService<String>(executor);
+                    }
+
+                    showOXData(admin, completionService, env);
+
+                    Callable<String> task = new Callable<String>() {
+
+                        @Override
+                        public String call() throws Exception {
+                            final MBeanServerConnection initConnection = initConnection(admin, env);
+                            final StringPrintStream out = StringPrintStream.newInstance(1024);
+                            out.print(getStats(initConnection, "com.openexchange.sessiond", "name", "SessionD Toolkit"));
+                            return out.toString();
+                        }
+                    };
+                    completionService.submit(task);
+                    task = new Callable<String>() {
+
+                        @Override
+                        public String call() throws Exception {
+                            final MBeanServerConnection initConnection = initConnection(admin, env);
+                            final StringPrintStream out = StringPrintStream.newInstance(1024);
+                            showThreadPoolData(initConnection, out);
+                            return out.toString();
+                        }
+                    };
+                    completionService.submit(task);
+                    task = new Callable<String>() {
+
+                        @Override
+                        public String call() throws Exception {
+                            final MBeanServerConnection initConnection = initConnection(admin, env);
+                            final StringPrintStream out = StringPrintStream.newInstance(1024);
+                            out.print(getStats(initConnection, "com.sun.management.UnixOperatingSystem"));
+                            return out.toString();
+                        }
+                    };
+                    completionService.submit(task);
+                    task = new Callable<String>() {
+
+                        @Override
+                        public String call() throws Exception {
+                            final MBeanServerConnection initConnection = initConnection(admin, env);
+                            final StringPrintStream out = StringPrintStream.newInstance(1024);
+                            out.print(getStats(initConnection, "sun.management.RuntimeImpl"));
+                            return out.toString();
+                        }
+                    };
+                    completionService.submit(task);
+                    task = new Callable<String>() {
+
+                        @Override
+                        public String call() throws Exception {
+                            final MBeanServerConnection initConnection = initConnection(admin, env);
+                            final StringPrintStream out = StringPrintStream.newInstance(1024);
+                            showMemoryPoolData(initConnection, out);
+                            return out.toString();
+                        }
+                    };
+                    completionService.submit(task);
+                    task = new Callable<String>() {
+
+                        @Override
+                        public String call() throws Exception {
+                            final MBeanServerConnection initConnection = initConnection(admin, env);
+                            final StringPrintStream out = StringPrintStream.newInstance(1024);
+                            showSysThreadingData(initConnection, out);
+                            return out.toString();
+                        }
+                    };
+                    completionService.submit(task);
+                    task = new Callable<String>() {
+
+                        @Override
+                        public String call() throws Exception {
+                            final MBeanServerConnection initConnection = initConnection(admin, env);
+                            final StringPrintStream out = StringPrintStream.newInstance(1024);
+                            out.print(getStats(initConnection, "org.json", "name", "JSONMBean"));
+                            return out.toString();
+                        }
+                    };
+                    completionService.submit(task);
+                    task = new Callable<String>() {
+
+                        @Override
+                        public String call() throws Exception {
+                            final MBeanServerConnection initConnection = initConnection(admin, env);
+                            final StringPrintStream out = StringPrintStream.newInstance(1024);
+                            showGrizzlyData(initConnection, out);
+                            return out.toString();
+                        }
+                    };
+                    completionService.submit(task);
+                    task = new Callable<String>() {
+
+                        @Override
+                        public String call() throws Exception {
+                            final MBeanServerConnection initConnection = initConnection(admin, env);
+                            final StringPrintStream out = StringPrintStream.newInstance(1024);
+                            try {
+                                out.print(getStats(
+                                    initConnection,
+                                    "com.openexchange.usm.session",
+                                    "name",
+                                    "com.openexchange.usm.session.impl.USMSessionInformation"));
+                            } catch (final IllegalStateException e) {
+                                // Skip it
+                            }
+                            return out.toString();
+                        }
+                    };
+                    completionService.submit(task);
+
+                    count++;
+                }
+            }
+            if (null != parser.getOptionValue(this.showoperation)) {
+                if (0 == count) {
+                    final MBeanServerConnection initConnection = initConnection(admin, env);
+                    showOperations(initConnection, System.out);
+
+                    count++;
+                }
+            }
+            final String operation = (String) parser.getOptionValue(this.dooperation);
+            if (null != operation) {
+                if (0 == count) {
+                    final MBeanServerConnection initConnection = initConnection(admin, env);
+                    final Object result = doOperation(initConnection, operation);
+                    if (null != result) {
+                        System.out.println(result);
+                    }
+
+                    count++;
+                }
+            }
+            if (null != parser.getOptionValue(this.memorythreadstats)) {
+                if (0 == count) {
+                    showThreadMemory(env, admin, false, System.out);
+
+                    count++;
+                }
+            }
+            if (null != parser.getOptionValue(this.memorythreadstatsfull)) {
+                if (0 == count) {
+                    showThreadMemory(env, admin, true, System.out);
+
+                    count++;
+                }
+            }
             if (0 == count) {
-                final MBeanServerConnection initConnection = initConnection(admin, env);
-                showOXData(initConnection, admin);
-                System.out.print(getStats(initConnection, "com.openexchange.sessiond", "name", "SessionD Toolkit"));
-                showThreadPoolData(initConnection);
-                System.out.print(getStats(initConnection, "com.sun.management.UnixOperatingSystem"));
-                System.out.print(getStats(initConnection, "sun.management.RuntimeImpl"));
-                showMemoryPoolData(initConnection);
-                showSysThreadingData(initConnection);
-                System.out.print(getStats(initConnection, "org.json", "name", "JSONMBean"));
-                showGrizzlyData(initConnection);
+                System.err.println(new StringBuilder("No option selected (").append(OPT_STATS_LONG).append(", ").append(
+                    OPT_RUNTIME_STATS_LONG).append(", ").append(OPT_OS_STATS_LONG).append(", ").append(OPT_THREADING_STATS_LONG).append(
+                    ", ").append(OPT_ALL_STATS_LONG).append(", sessionstats)"));
+                parser.printUsage();
+            } else {
+                if (count > 1) {
+                    System.err.println("More than one of the stat options given. Using the first one only");
+                }
+
+                if (null != completionService) {
+                    final int taskCount = completionService.getSubmitCount();
+                    for (int i = 0; i < taskCount; i++) {
+                        try {
+                            System.out.print(completionService.take().get());
+                        } catch (final ExecutionException e) {
+                            e.getCause().printStackTrace(System.err);
+                        }
+                    }
+                }
+
+                System.out.println("Done");
+            }
+        } finally {
+            if (null != executor) {
                 try {
-                    System.out.print(getStats(
-                        initConnection,
-                        "com.openexchange.usm.session",
-                        "name",
-                        "com.openexchange.usm.session.impl.USMSessionInformation"));
-                } catch (final IllegalStateException e) {
-                    // Skip it
+                    executor.shutdown();
+                } catch (final Exception e) {
+                    // Ignore
                 }
             }
-            count++;
-
-        }
-        if (null != parser.getOptionValue(this.showoperation)) {
-            if (0 == count) {
-                final MBeanServerConnection initConnection = initConnection(admin, env);
-                showOperations(initConnection);
-            }
-            count++;
-
-        }
-        final String operation = (String) parser.getOptionValue(this.dooperation);
-        if (null != operation) {
-            if (0 == count) {
-                final MBeanServerConnection initConnection = initConnection(admin, env);
-                final Object result = doOperation(initConnection, operation);
-                if (null != result) {
-                    System.out.println(result);
-                }
-            }
-            count++;
-            System.out.println("Done");
-        }
-        if (null != parser.getOptionValue(this.memorythreadstats)) {
-            showThreadMemory(env, admin, false);
-            count++;
-        }
-
-        if (null != parser.getOptionValue(this.memorythreadstatsfull)) {
-            showThreadMemory(env, admin, true);
-            count++;
-        }
-        
-        if (0 == count) {
-            System.err.println(new StringBuilder("No option selected (").append(OPT_STATS_LONG).append(", ").append(OPT_RUNTIME_STATS_LONG).append(
-                ", ").append(OPT_OS_STATS_LONG).append(", ").append(OPT_THREADING_STATS_LONG).append(", ").append(OPT_ALL_STATS_LONG).append(
-                ", sessionstats)"));
-            parser.printUsage();
-        } else if (count > 1) {
-            System.err.println("More than one of the stat options given. Using the first one only");
         }
     }
 
-    private void showThreadMemory(final HashMap<String, String[]> env, boolean admin, boolean stacktrace) throws InterruptedException, IOException, MalformedObjectNameException, InstanceNotFoundException, MBeanException, ReflectionException {
+    void showThreadMemory(final Map<String, String[]> env, final boolean admin, final boolean stacktrace, final PrintStream out) throws InterruptedException, IOException, MalformedObjectNameException, InstanceNotFoundException, MBeanException, ReflectionException {
         final MBeanServerConnection initConnection = initConnection(admin, env);
-        ThreadMXBean threadBean = ManagementFactory.newPlatformMXBeanProxy(initConnection, ManagementFactory.THREAD_MXBEAN_NAME, ThreadMXBean.class);
+        final ThreadMXBean threadBean = ManagementFactory.newPlatformMXBeanProxy(initConnection, ManagementFactory.THREAD_MXBEAN_NAME, ThreadMXBean.class);
         final long[] allThreadIds = threadBean.getAllThreadIds();
-        ObjectName srvThrdName = new ObjectName(ManagementFactory.THREAD_MXBEAN_NAME);
+        final ObjectName srvThrdName = new ObjectName(ManagementFactory.THREAD_MXBEAN_NAME);
         long[] allocatedBytes = null;
         long[] cpuTime = null;
-        long[] userTime = null; 
+        long[] userTime = null;
         final ThreadInfo[] threadInfo;
         if (stacktrace) {
             threadInfo = threadBean.getThreadInfo(allThreadIds, Integer.MAX_VALUE);
@@ -374,25 +518,25 @@ public class StatisticTools extends AbstractJMXTools {
         }
         try {
             allocatedBytes = (long[]) initConnection.invoke(srvThrdName, "getThreadAllocatedBytes", new Object[]{allThreadIds}, new String[] {"[J"});
-        } catch (javax.management.ReflectionException e) {
+        } catch (final javax.management.ReflectionException e) {
             System.err.println("AllocatedBytes is not supported on this JVM");
             // Simple set to an array of 0
-            allocatedBytes = new long[threadInfo.length]; 
+            allocatedBytes = new long[threadInfo.length];
             Arrays.fill(allocatedBytes, 0);
         }
-        // First try the new method everytime, if not available use the old iteration approach
+        // First try the new method every time, if not available use the old iteration approach
         try {
             cpuTime = (long[]) initConnection.invoke(srvThrdName, "getThreadCpuTime", new Object[]{allThreadIds}, new String[] {"[J"});
-        } catch (javax.management.ReflectionException e) {
-            cpuTime = new long[threadInfo.length]; 
+        } catch (final javax.management.ReflectionException e) {
+            cpuTime = new long[threadInfo.length];
             for (int i = 0; i < allThreadIds.length; i++) {
                 cpuTime[i] = threadBean.getThreadCpuTime(allThreadIds[i]);
             }
         }
         try {
             userTime = (long[]) initConnection.invoke(srvThrdName, "getThreadUserTime", new Object[]{allThreadIds}, new String[] {"[J"});
-        } catch (javax.management.ReflectionException e) {
-            userTime = new long[threadInfo.length]; 
+        } catch (final javax.management.ReflectionException e) {
+            userTime = new long[threadInfo.length];
             for (int i = 0; i < allThreadIds.length; i++) {
                 userTime[i] = threadBean.getThreadUserTime(allThreadIds[i]);
             }
@@ -403,21 +547,21 @@ public class StatisticTools extends AbstractJMXTools {
         }
         final ArrayList<ThreadOutputElem> arrayList = new ArrayList<ThreadOutputElem>();
         if (stacktrace) {
-            System.out.println("ThreadID, Name, AllocatedBytes, CpuTime, UserTime, StackTrace");
+            out.println("ThreadID, Name, AllocatedBytes, CpuTime, UserTime, StackTrace");
             for (int i = 0; i < allThreadIds.length; i++) {
                 arrayList.add(new ThreadOutputElem(allThreadIds[i], threadInfo[i].getThreadName(), allocatedBytes[i], cpuTime[i], userTime[i], threadInfo[i].getStackTrace()));
             }
         } else {
-            System.out.println("ThreadID, Name, AllocatedBytes, CpuTime, UserTime");
+            out.println("ThreadID, Name, AllocatedBytes, CpuTime, UserTime");
             for (int i = 0; i < allThreadIds.length; i++) {
                 arrayList.add(new ThreadOutputElem(allThreadIds[i], threadInfo[i].getThreadName(), allocatedBytes[i], cpuTime[i], userTime[i]));
             }
         }
-        
+
         Collections.sort(arrayList, new Comparator<ThreadOutputElem>() {
 
             @Override
-            public int compare(ThreadOutputElem o1, ThreadOutputElem o2) {
+            public int compare(final ThreadOutputElem o1, final ThreadOutputElem o2) {
                 if (o1.getAllocatedBytes() > o2.getAllocatedBytes()) {
                     return -1;
                 } else if (o1.getAllocatedBytes() == o2.getAllocatedBytes()) {
@@ -429,11 +573,11 @@ public class StatisticTools extends AbstractJMXTools {
         });
         if (stacktrace) {
             for (final ThreadOutputElem elem : arrayList) {
-                System.out.println(elem.getThreadId() + ", " + elem.getThreadName() + ", " + elem.getAllocatedBytes() + ", " + elem.getCpuTime() + ", " + elem.getUserTime() + ", " + Arrays.toString(elem.getStackTrace()));
+                out.println(elem.getThreadId() + ", " + elem.getThreadName() + ", " + elem.getAllocatedBytes() + ", " + elem.getCpuTime() + ", " + elem.getUserTime() + ", " + Arrays.toString(elem.getStackTrace()));
             }
         } else {
             for (final ThreadOutputElem elem : arrayList) {
-                System.out.println(elem.getThreadId() + ", " + elem.getThreadName() + ", " + elem.getAllocatedBytes() + ", " + elem.getCpuTime() + ", " + elem.getUserTime());
+                out.println(elem.getThreadId() + ", " + elem.getThreadName() + ", " + elem.getAllocatedBytes() + ", " + elem.getCpuTime() + ", " + elem.getUserTime());
             }
         }
     }
@@ -524,70 +668,139 @@ public class StatisticTools extends AbstractJMXTools {
         this.memorythreadstatsfull = setShortLongOpt(parser, OPT_MEMORY_THREADS_FULL_STATS_SHORT, OPT_MEMORY_THREADS_FULL_STATS_LONG, "shows memory usage of threads including stack traces", false, NeededQuadState.notneeded);
     }
 
-    private void showMemoryPoolData(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
-        System.out.print(getStats(mbc, ManagementFactory.getMemoryPoolMXBeans().get(0).getClass().getName()));
+    void showMemoryPoolData(final MBeanServerConnection mbc, final PrintStream out) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
+        out.print(getStats(mbc, ManagementFactory.getMemoryPoolMXBeans().get(0).getClass().getName()));
     }
 
-    private void showSysThreadingData(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
-        System.out.print(getStats(mbc, ManagementFactory.getThreadMXBean().getClass().getName()));
+    void showSysThreadingData(final MBeanServerConnection mbc, final PrintStream out) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
+        out.print(getStats(mbc, ManagementFactory.getThreadMXBean().getClass().getName()));
     }
 
-    private void showOXData(final MBeanServerConnection mbc, final boolean admin) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
+    void showOXData(final boolean admin, final CompletionService<String> completionService, final Map<String, String[]> env) {
         if (admin) {
-            System.out.print(getStats(mbc, "com.openexchange.admin.tools.monitoring.Monitor"));
+            final Callable<String> task = new Callable<String>() {
+
+                @Override
+                public String call() throws Exception {
+                    final MBeanServerConnection mbc = initConnection(admin, env);
+                    final StringPrintStream out = StringPrintStream.newInstance(1024);
+                    out.print(getStats(mbc, "com.openexchange.admin.tools.monitoring.Monitor"));
+                    return out.toString();
+                }
+            };
+            completionService.submit(task);
         } else {
-            System.out.print(getStats(mbc, "com.openexchange.ajp13.monitoring.AJPv13ServerThreadsMonitor"));
-            System.out.print(getStats(mbc, "com.openexchange.ajp13.watcher.AJPv13TaskMonitor"));
-            System.out.print(getStats(mbc, "com.openexchange.monitoring.internal.GeneralMonitor"));
-            System.out.print(getStats(mbc, "com.openexchange.api2.MailInterfaceMonitor"));
-            System.out.print(getStats(mbc, "com.openexchange.database.internal.ConnectionPool"));
-            System.out.print(getStats(mbc, "com.openexchange.database.internal.Overview"));
+            Callable<String> task = new Callable<String>() {
+
+                @Override
+                public String call() throws Exception {
+                    final MBeanServerConnection mbc = initConnection(admin, env);
+                    final StringPrintStream out = StringPrintStream.newInstance(1024);
+                    out.print(getStats(mbc, "com.openexchange.ajp13.monitoring.AJPv13ServerThreadsMonitor"));
+                    return out.toString();
+                }
+            };
+            completionService.submit(task);
+            task = new Callable<String>() {
+
+                @Override
+                public String call() throws Exception {
+                    final MBeanServerConnection mbc = initConnection(admin, env);
+                    final StringPrintStream out = StringPrintStream.newInstance(1024);
+                    out.print(getStats(mbc, "com.openexchange.ajp13.watcher.AJPv13TaskMonitor"));
+                    return out.toString();
+                }
+            };
+            completionService.submit(task);
+            task = new Callable<String>() {
+
+                @Override
+                public String call() throws Exception {
+                    final MBeanServerConnection mbc = initConnection(admin, env);
+                    final StringPrintStream out = StringPrintStream.newInstance(1024);
+                    out.print(getStats(mbc, "com.openexchange.monitoring.internal.GeneralMonitor"));
+                    return out.toString();
+                }
+            };
+            completionService.submit(task);
+            task = new Callable<String>() {
+
+                @Override
+                public String call() throws Exception {
+                    final MBeanServerConnection mbc = initConnection(admin, env);
+                    final StringPrintStream out = StringPrintStream.newInstance(1024);
+                    out.print(getStats(mbc, "com.openexchange.api2.MailInterfaceMonitor"));
+                    return out.toString();
+                }
+            };
+            completionService.submit(task);
+            task = new Callable<String>() {
+
+                @Override
+                public String call() throws Exception {
+                    final MBeanServerConnection mbc = initConnection(admin, env);
+                    final StringPrintStream out = StringPrintStream.newInstance(1024);
+                    out.print(getStats(mbc, "com.openexchange.database.internal.ConnectionPool"));
+                    return out.toString();
+                }
+            };
+            completionService.submit(task);
+            task = new Callable<String>() {
+
+                @Override
+                public String call() throws Exception {
+                    final MBeanServerConnection mbc = initConnection(admin, env);
+                    final StringPrintStream out = StringPrintStream.newInstance(1024);
+                    out.print(getStats(mbc, "com.openexchange.database.internal.Overview"));
+                    return out.toString();
+                }
+            };
+            completionService.submit(task);
         }
     }
 
-    private void showThreadPoolData(MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
-        System.out.print(getStats(mbc, "com.openexchange.threadpool.internal.ThreadPoolInformation"));
+    void showThreadPoolData(final MBeanServerConnection mbc, final PrintStream out) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
+        out.print(getStats(mbc, "com.openexchange.threadpool.internal.ThreadPoolInformation"));
     }
 
-    @SuppressWarnings("unchecked")
-    private void showOperations(final MBeanServerConnection mbc) throws IOException, InstanceNotFoundException, IntrospectionException, ReflectionException {
+    void showOperations(final MBeanServerConnection mbc, final PrintStream out) throws IOException, InstanceNotFoundException, IntrospectionException, ReflectionException {
         final Set<ObjectName> queryNames = mbc.queryNames(null, null);
         for (final ObjectName objname : queryNames) {
             final MBeanInfo beanInfo = mbc.getMBeanInfo(objname);
             final MBeanOperationInfo[] operations = beanInfo.getOperations();
             for (final MBeanOperationInfo operation : operations) {
-                System.out.println(new StringBuilder(objname.getCanonicalName()).append(", operationname: ").append(operation.getName()).append(
+                out.println(new StringBuilder(objname.getCanonicalName()).append(", operationname: ").append(operation.getName()).append(
                     ", desciption: ").append(operation.getDescription()));
             }
         }
     }
 
-    private void showClusterData(MBeanServerConnection mbc) throws MalformedObjectNameException, NullPointerException, IOException, InstanceNotFoundException, IntrospectionException, ReflectionException, AttributeNotFoundException, MBeanException {
+    void showClusterData(final MBeanServerConnection mbc, final PrintStream out) throws MalformedObjectNameException, NullPointerException, IOException, InstanceNotFoundException, IntrospectionException, ReflectionException, AttributeNotFoundException, MBeanException {
         /*
          * general info
          */
-        for (String type : new String[] { "Cluster", "Statistics", "Member" }) {
-            for (ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",*"), null)) {
-                ObjectName objectName = mbean.getObjectName();
-                MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
-                for (MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
+        for (final String type : new String[] { "Cluster", "Statistics", "Member" }) {
+            for (final ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",*"), null)) {
+                final ObjectName objectName = mbean.getObjectName();
+                final MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
+                for (final MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
                     if ("Cluster".equals(type) && "Config".equals(attributeInfo.getName())) {
-                        String value = mbc.getAttribute(mbean.getObjectName(), attributeInfo.getName()).toString();
-                        for (String keyword : new String[] { "groupConfig=", "properties=", "interfaces=", "tcpIpConfig=" }) {
-                            int startIdx = value.indexOf(keyword);
+                        final String value = mbc.getAttribute(mbean.getObjectName(), attributeInfo.getName()).toString();
+                        for (final String keyword : new String[] { "groupConfig=", "properties=", "interfaces=", "tcpIpConfig=" }) {
+                            final int startIdx = value.indexOf(keyword);
                             if (-1 < startIdx && startIdx + keyword.length() < value.length()) {
-                                System.out.println(objectName + "," + keyword.substring(0, keyword.length() - 1) + " = " + extractTextInBrackets(
+                                out.println(objectName + "," + keyword.substring(0, keyword.length() - 1) + " = " + extractTextInBrackets(
                                     value,
                                     startIdx + keyword.length()));
                             }
                         }
                     } else {
                         try {
-                            System.out.println(objectName + "," + attributeInfo.getName() + " = " + mbc.getAttribute(
+                            out.println(objectName + "," + attributeInfo.getName() + " = " + mbc.getAttribute(
                                 objectName,
                                 attributeInfo.getName()));
-                        } catch (Exception e) {
-                            System.out.println(objectName + "," + attributeInfo.getName() + " = [" + e.getMessage() + "]");
+                        } catch (final Exception e) {
+                            out.println(objectName + "," + attributeInfo.getName() + " = [" + e.getMessage() + "]");
                         }
                     }
                 }
@@ -596,17 +809,17 @@ public class StatisticTools extends AbstractJMXTools {
         /*
          * maps
          */
-        for (String type : new String[] { "Map", "MultiMap", "Topic", "Queue" }) {
-            for (ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",Cluster=*,name=*"), null)) {
-                ObjectName objectName = mbean.getObjectName();
-                MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
-                for (MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
+        for (final String type : new String[] { "Map", "MultiMap", "Topic", "Queue" }) {
+            for (final ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",Cluster=*,name=*"), null)) {
+                final ObjectName objectName = mbean.getObjectName();
+                final MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
+                for (final MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
                     try {
-                        System.out.println(objectName + "," + attributeInfo.getName() + " = " + mbc.getAttribute(
+                        out.println(objectName + "," + attributeInfo.getName() + " = " + mbc.getAttribute(
                             objectName,
                             attributeInfo.getName()));
-                    } catch (Exception e) {
-                        System.out.println(objectName + "," + attributeInfo.getName() + " = [" + e.getMessage() + "]");
+                    } catch (final Exception e) {
+                        out.println(objectName + "," + attributeInfo.getName() + " = [" + e.getMessage() + "]");
                     }
                 }
             }
@@ -621,31 +834,31 @@ public class StatisticTools extends AbstractJMXTools {
      * @throws MalformedObjectNameException
      * @throws NullPointerException
      */
-    private void showGrizzlyData(MBeanServerConnection mbeanServerConnection) throws MalformedObjectNameException, NullPointerException, IOException {
+    void showGrizzlyData(final MBeanServerConnection mbeanServerConnection, final PrintStream out) throws MalformedObjectNameException, NullPointerException, IOException {
         // Iterate over the MBeans we are interested in, query by objectName
-        for (GrizzlyMBean grizzlyMBean : GrizzlyMBean.values()) {
-            ObjectName objectName = new ObjectName(grizzlyMBean.getObjectName());
-            Set<ObjectInstance> mBeans = mbeanServerConnection.queryMBeans(objectName, null);
+        for (final GrizzlyMBean grizzlyMBean : GrizzlyMBean.values()) {
+            final ObjectName objectName = new ObjectName(grizzlyMBean.getObjectName());
+            final Set<ObjectInstance> mBeans = mbeanServerConnection.queryMBeans(objectName, null);
             // Iterate over the found MBeans and print the desired attributes for this MBean. If no MBeans are found (jmx disabled, ajp
             // backend in use) nothig will be printed to stdout
-            for (ObjectInstance mBean : mBeans) {
-                for (String attribute : grizzlyMBean.getAttributes()) {
+            for (final ObjectInstance mBean : mBeans) {
+                for (final String attribute : grizzlyMBean.getAttributes()) {
                     try {
-                        System.out.println(objectName + "," + attribute + " = " + mbeanServerConnection.getAttribute(objectName, attribute));
-                    } catch (Exception e) {
-                        System.out.println(objectName + "," + attribute + " = [" + e.getMessage() + "]");
+                        out.println(objectName + "," + attribute + " = " + mbeanServerConnection.getAttribute(objectName, attribute));
+                    } catch (final Exception e) {
+                        out.println(objectName + "," + attribute + " = [" + e.getMessage() + "]");
                     }
                 }
             }
         }
     }
 
-    private static String extractTextInBrackets(String value, int startIdx) {
-        StringBuilder stringBuilder = new StringBuilder();
+    private static String extractTextInBrackets(final String value, final int startIdx) {
+        final StringBuilder stringBuilder = new StringBuilder();
         if (-1 < startIdx && startIdx < value.length()) {
             int i = startIdx;
             for (; i < value.length(); i++) {
-                char c = value.charAt(i);
+                final char c = value.charAt(i);
                 if ('[' == c || '{' == c) {
                     i++;
                     break;
@@ -654,7 +867,7 @@ public class StatisticTools extends AbstractJMXTools {
             if (i < value.length()) {
                 int brackets = 1;
                 for (; i < value.length(); i++) {
-                    char c = value.charAt(i);
+                    final char c = value.charAt(i);
                     if ('[' == c || '{' == c) {
                         brackets++;
                     } else if (']' == c || '}' == c) {
@@ -662,9 +875,8 @@ public class StatisticTools extends AbstractJMXTools {
                     }
                     if (0 == brackets) {
                         break;
-                    } else {
-                        stringBuilder.append(c);
                     }
+                    stringBuilder.append(c);
                 }
             }
         }
@@ -701,7 +913,7 @@ public class StatisticTools extends AbstractJMXTools {
          * @param objectName The object name needed to query for this MBean
          * @param attributes The attributes of the MBean we are interested in.
          */
-        GrizzlyMBean(String objectName, String[] attributes) {
+        GrizzlyMBean(final String objectName, final String[] attributes) {
             this.objectName = objectName;
             this.attributes = attributes;
         }

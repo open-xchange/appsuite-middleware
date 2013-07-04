@@ -82,12 +82,13 @@ public interface OXContextRestoreInterface extends Remote {
      * This method is used to restore one single context
      *
      * @param ctx Context object
-     * @param filenames The filenames of the mysqldump files which contain the backup of the context. Note that these files
+     * @param filenames The file names of the MySQL dump files which contain the backup of the context. <b>Note</b> that these files
      *                  have to be available to the admin daemon, so they must reside on the machine on which the admin
      *                  daemon is running.
+     * @param optConfigDbName The optional name of the ConfigDB schema
      * @param auth Credentials for authenticating against server.
-     * @param dryrun TODO
-     * @return TODO
+     * @param dryrun <code>true</code> to perform a dry run; otherwise <code>false</code>
+     * @return The restored context's URI
      * @throws RemoteException General RMI Exception
      * @throws InvalidDataException
      * @throws StorageException
@@ -98,6 +99,6 @@ public interface OXContextRestoreInterface extends Remote {
      * @throws NoSuchContextException
      * @throws
      */
-    public String restore(final Context ctx, final String[] filenames, final Credentials auth, boolean dryrun) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXContextRestoreException, DatabaseUpdateException;
+    public String restore(final Context ctx, final String[] filenames, final String optConfigDbName, final Credentials auth, boolean dryrun) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXContextRestoreException, DatabaseUpdateException;
 
 }

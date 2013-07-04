@@ -232,7 +232,11 @@ public final class MessageParser {
                     /*
                      * Get uploaded file by field name: file_0, file_1, ...
                      */
-                    final UploadFile uf = uploadEvent.getUploadFileByFieldName(getFieldName(attachmentCounter++));
+                    final UploadFile uf;
+                    {
+                        final List<UploadFile> list = uploadEvent.getUploadFilesByFieldName(getFieldName(attachmentCounter++));
+                        uf = null == list || list.isEmpty() ? null : list.get(0);
+                    }
                     if (uf != null) {
                         final UploadFileMailPart mailPart = provider.getNewFilePart(uf);
                         attachmentHandler.addAttachment(mailPart);

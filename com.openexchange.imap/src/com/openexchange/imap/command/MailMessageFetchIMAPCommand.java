@@ -54,6 +54,7 @@ import gnu.trove.map.hash.TLongIntHashMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -72,14 +73,15 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
+import javax.mail.internet.ParameterList;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -140,6 +142,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      */
     public MailMessageFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final int[] seqNums, final FetchProfile fp) throws MessagingException {
         super(imapFolder);
+        determineAttachmentByHeader = false;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
@@ -174,6 +177,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      */
     public MailMessageFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final long[] uids, final FetchProfile fp) throws MessagingException {
         super(imapFolder);
+        determineAttachmentByHeader = false;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
@@ -590,6 +594,8 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             }
         };
 
+        private final Set<String> headerFields = new HashSet<String>(Arrays.asList("content-type", "from", "to", "cc", "bcc", "disposition-notification-to", "subject"));
+
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException, OXException {
             final InternetHeaders h;
@@ -616,9 +622,11 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                     h.load(headerStream);
                 }
             }
+            final Set<String> headerFields = new HashSet<String>(this.headerFields);
             for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
                 final Header hdr = (Header) e.nextElement();
                 final String name = hdr.getName();
+                headerFields.remove(toLowerCase(name));
                 {
                     final HeaderHandler headerHandler = hh.get(name);
                     if (null != headerHandler) {
@@ -641,6 +649,9 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                     hdrHandler.handleHeader(hdr.getValue(), msg);
                 }
                  */
+            }
+            if (headerFields.contains("disposition-notification-to")) {
+                msg.setDispositionNotification(null);
             }
         }
 
@@ -909,22 +920,21 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws OXException {
             final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
-            sb.append(bs.type).append('/').append(bs.subtype);
-            if (bs.cParams != null) {
-                sb.append(bs.cParams);
-            }
-            try {
-                final String contentType = sb.toString();
-                msg.setContentType(new ContentType(contentType));
-                msg.addHeader("Content-Type", contentType);
-            } catch (final OXException e) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn(e.getMessage(), e);
+            final ContentType contentType = new ContentType().setPrimaryType(bs.type).setSubType(bs.subtype);
+            {
+                final ParameterList cParams = bs.cParams;
+                if (cParams != null) {
+                    for (final Enumeration<?> names = cParams.getNames(); names.hasMoreElements();) {
+                        final String name = names.nextElement().toString();
+                        final String value = cParams.get(name);
+                        if (!isEmpty(value)) {
+                            contentType.setParameter(name, value);
+                        }
+                    }
                 }
-                msg.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
-                msg.addHeader("Content-Type", MimeTypes.MIME_DEFAULT);
             }
+            msg.setContentType(contentType);
+            msg.addHeader("Content-Type", contentType.toString(true));
             msg.setHasAttachment(bs.isMulti() && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MimeMessageUtility.hasAttachments(bs)));
         }
 
@@ -1145,6 +1155,19 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             }
         }
         return null;
+    }
+
+    /** Check for an empty string */
+    protected static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

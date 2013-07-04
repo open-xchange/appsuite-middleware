@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JSON Interface to templating services
 Bundle-SymbolicName: com.openexchange.templating.json
-Bundle-Version: 7.2.1
+Bundle-Version: 7.2.2
 Bundle-Activator: com.openexchange.templating.json.osgi.TemplatingJSONActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -17,6 +17,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.groupware,
  com.openexchange.groupware.ldap,
  com.openexchange.i18n.tools,
+ com.openexchange.java,
  com.openexchange.multiple,
  com.openexchange.osgi,
  com.openexchange.server,

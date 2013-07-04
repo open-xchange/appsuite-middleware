@@ -51,6 +51,9 @@ package com.openexchange.folderstorage;
 
 import java.util.Date;
 import java.util.Locale;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
 
 /**
  * {@link UserizedFolder} - Extends/overwrites {@link Folder} interface methods with user-sensitive methods.
@@ -58,6 +61,27 @@ import java.util.Locale;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface UserizedFolder extends ParameterizedFolder {
+
+    /**
+     * Gets the context.
+     *
+     * @return The context
+     */
+    Context getContext();
+
+    /**
+     * Gets the user.
+     *
+     * @return The user
+     */
+    User getUser();
+
+    /**
+     * Gets the session.
+     *
+     * @return The session
+     */
+    Session getSession();
 
     /**
      * Gets the subfolder IDs.

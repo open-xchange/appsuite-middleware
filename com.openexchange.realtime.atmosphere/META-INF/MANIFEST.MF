@@ -2,18 +2,21 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Atmosphere Realtime Channel Implementation
 Bundle-SymbolicName: com.openexchange.realtime.atmosphere
-Bundle-Version: 7.2.1
+Bundle-Version: 7.2.2
 Bundle-Activator: com.openexchange.realtime.atmosphere.osgi.AtmosphereRTActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.login,
+ com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.authentication,
  com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.configuration,
  com.openexchange.conversion,
  com.openexchange.conversion.simple,
+ com.openexchange.documentation,
  com.openexchange.exception,
  com.openexchange.groupware.contexts,
  com.openexchange.http.grizzly.service.atmosphere,
@@ -43,6 +46,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.tools.session,
  javax.servlet,
  javax.servlet.http,
+ org.apache.commons.lang,
  org.apache.commons.logging,
  org.atmosphere.cpr,
  org.atmosphere.handler,

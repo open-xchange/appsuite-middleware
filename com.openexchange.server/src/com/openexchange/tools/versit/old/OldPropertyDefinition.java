@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.mail.internet.MimeUtility;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.Charsets;
 import com.openexchange.log.LogFactory;
 import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.ParameterValue;
@@ -180,7 +181,7 @@ public class OldPropertyDefinition {
     }
 
     protected Object parseValue(final Property property, final OldScanner s, final byte[] value, final String charset) throws IOException {
-        return new String(value, charset).replaceAll("\\\\(.)", "$1");
+        return new String(value, Charsets.forName(charset)).replaceAll("\\\\(.)", "$1");
     }
 
     protected void writeType(final OldFoldingWriter fw, final Property property) throws IOException {

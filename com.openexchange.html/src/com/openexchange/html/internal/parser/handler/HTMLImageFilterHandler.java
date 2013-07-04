@@ -65,6 +65,8 @@ import java.util.regex.Pattern;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.parser.HtmlHandler;
+import com.openexchange.java.StringBuilderStringer;
+import com.openexchange.java.Stringer;
 
 /**
  * {@link HTMLImageFilterHandler} - Removes all possible sources of externally loaded images inside HTML content.
@@ -143,12 +145,12 @@ public class HTMLImageFilterHandler implements HtmlHandler {
 
     private boolean imageURLFound;
 
-    private final StringBuilder cssBuffer;
+    private final Stringer cssBuffer;
 
     public HTMLImageFilterHandler(final HtmlService htmlService, final int capacity) {
         super();
         this.htmlService = htmlService;
-        cssBuffer = new StringBuilder(256);
+        cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         htmlBuilder = new StringBuilder(capacity);
         attrBuilder = new StringBuilder(128);
     }

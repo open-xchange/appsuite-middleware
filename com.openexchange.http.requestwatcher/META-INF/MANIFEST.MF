@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange RequestWatcher Bundle
 Bundle-SymbolicName: com.openexchange.http.requestwatcher
-Bundle-Version: 7.2.1
+Bundle-Version: 7.2.2
 Bundle-Activator: com.openexchange.http.requestwatcher.osgi.RequestWatcherActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -13,6 +13,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,
+ com.openexchange.sessiond,
  com.openexchange.timer,
  javax.servlet,
  javax.servlet.http,

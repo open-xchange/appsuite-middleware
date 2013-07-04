@@ -65,7 +65,7 @@ import org.glassfish.grizzly.servlet.ServletRegistration;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.framework.Bundle;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
+import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.http.grizzly.servletfilter.WrappingFilter;
 
 
@@ -82,7 +82,7 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
 
     public AtmosphereServiceImpl(OXHttpServer grizzly, Bundle bundle) throws ServletException {
 
-        ConfigurationService configurationService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
+        ConfigurationService configurationService = Services.getService(ConfigurationService.class);
         String realtimeContextPath = configurationService.getProperty("com.openexchange.http.realtime.contextPath", "/realtime");
         atmosphereServletMapping = configurationService.getProperty("com.openexchange.http.atmosphere.servletMapping", "/atmosphere/*");
 

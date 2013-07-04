@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange User HTTP/JSON interface
 Bundle-SymbolicName: com.openexchange.user.json
-Bundle-Version: 7.2.1
+Bundle-Version: 7.2.2
 Bundle-Vendor: Open-Xchange Inc
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
@@ -32,6 +32,8 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.groupware.upload.impl,
  com.openexchange.java,
  com.openexchange.log,
+ com.openexchange.mail.mime,
+ com.openexchange.mail.mime.utils,
  com.openexchange.multiple,
  com.openexchange.osgi,
  com.openexchange.search,
@@ -49,6 +51,12 @@ Import-Package: com.openexchange.ajax,
  gnu.trove,
  gnu.trove.map,
  gnu.trove.map.hash,
+ javax.mail,
+ javax.mail.event,
+ javax.mail.internet,
+ javax.mail.internet.idn,
+ javax.mail.search,
+ javax.mail.util,
  javax.servlet,
  javax.servlet.http,
  org.apache.commons.logging,

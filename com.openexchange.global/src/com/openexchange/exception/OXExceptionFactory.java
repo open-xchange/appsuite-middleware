@@ -152,14 +152,10 @@ public class OXExceptionFactory {
         } else {
             if (DISPLAYABLE.contains(category.getType())) {
                 // Displayed message is equal to logged one
-                final String message = code.getMessage();
-                ret = new OXException(code.getNumber(), message, cause, args).setLogMessage(message, args);
+                ret = new OXException(code.getNumber(), code.getMessage(), cause, args).setLogMessage(code.getMessage(), args);
             } else {
-                ret = new OXException(
-                    code.getNumber(),
-                    Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
-                    cause,
-                    new Object[0]).setLogMessage(code.getMessage(), args);
+                final String displayMessage = Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE;
+                ret = new OXException(code.getNumber(), displayMessage, cause, new Object[0]).setLogMessage(code.getMessage(), args);
             }
         }
         if (code instanceof LogLevelAwareOXExceptionCode) {

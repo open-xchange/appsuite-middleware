@@ -50,7 +50,6 @@
 package com.openexchange.groupware.upload.impl;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -58,6 +57,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.java.StringAllocator;
 
 /**
  * Just a plain class that wraps information about an upload e.g. files, form fields, content type, size, etc.
@@ -103,7 +103,7 @@ public class UploadEvent {
 
     private int affiliationId = -1;
 
-    private final Map<String, UploadFile> uploadFilesByFieldName;
+    private final Map<String, List<UploadFile>> uploadFilesByFieldName;
 
     private final Map<String, String> formFields;
 
@@ -116,7 +116,7 @@ public class UploadEvent {
      */
     public UploadEvent() {
         super();
-        uploadFilesByFieldName = new HashMap<String, UploadFile>();
+        uploadFilesByFieldName = new HashMap<String, List<UploadFile>>();
         formFields = new HashMap<String, String>();
         parameters = new HashMap<String, Object>();
     }
@@ -147,20 +147,35 @@ public class UploadEvent {
     public final void addUploadFile(final UploadFile uploadFile) {
         if (null != uploadFile) {
             final String fieldName = uploadFile.getFieldName();
-            if (!uploadFilesByFieldName.containsKey(fieldName)) {
-                uploadFilesByFieldName.put(fieldName, uploadFile);
+            List<UploadFile> list = uploadFilesByFieldName.get(fieldName);
+            if (null == list) {
+                list = new LinkedList<UploadFile>();
+                uploadFilesByFieldName.put(fieldName, list);
             }
+            list.add(uploadFile);
         }
     }
 
     /**
-     * Gets the upload file associated with specified field name.
+     * Gets the (first) upload file associated with specified field name.
      *
      * @param fieldName The field name.
      * @return The upload file associated with specified field name or <code>null</code>
      */
     public final UploadFile getUploadFileByFieldName(final String fieldName) {
-        return uploadFilesByFieldName.get(fieldName);
+        final List<UploadFile> list = uploadFilesByFieldName.get(fieldName);
+        return null == list || list.isEmpty() ? null : list.get(0);
+    }
+
+    /**
+     * Gets the upload files associated with specified field name.
+     *
+     * @param fieldName The field name.
+     * @return The upload files associated with specified field name or <code>null</code>
+     */
+    public final List<UploadFile> getUploadFilesByFieldName(final String fieldName) {
+        final List<UploadFile> list = uploadFilesByFieldName.get(fieldName);
+        return null == list ? null : Collections.unmodifiableList(list);
     }
 
     /**
@@ -174,9 +189,11 @@ public class UploadEvent {
             return Collections.emptyList();
         }
         final List<UploadFile> ret = new LinkedList<UploadFile>();
-        for (final UploadFile uf : uploadFilesByFieldName.values()) {
-            if (fileName.equals(uf.getFileName())) {
-                ret.add(uf);
+        for (final List<UploadFile> ufs : uploadFilesByFieldName.values()) {
+            for (final UploadFile uf : ufs) {
+                if (fileName.equals(uf.getFileName())) {
+                    ret.add(uf);
+                }
             }
         }
         return ret;
@@ -220,7 +237,11 @@ public class UploadEvent {
         if (uploadFilesByFieldName.isEmpty()) {
             return Collections.emptyList();
         }
-        return new ArrayList<UploadFile>(uploadFilesByFieldName.values());
+        final List<UploadFile> ret = new LinkedList<UploadFile>();
+        for (final List<UploadFile> ufs : uploadFilesByFieldName.values()) {
+            ret.addAll(ufs);
+        }
+        return ret;
     }
 
     /**
@@ -324,15 +345,17 @@ public class UploadEvent {
      * Deletes all created temporary files created through this <code>UploadEvent</code> instance and clears upload files.
      */
     public final void cleanUp() {
-        for (final UploadFile uploadFile : uploadFilesByFieldName.values()) {
-            final File tmpFile = uploadFile.getTmpFile();
-            if (null != tmpFile && tmpFile.exists()) {
-                try {
-                    if (!tmpFile.delete()) {
-                        LOG.error(new StringBuilder("Temporary upload file could not be deleted: ").append(tmpFile.getName()));
+        for (final List<UploadFile> uploadFiles : uploadFilesByFieldName.values()) {
+            for (final UploadFile uploadFile : uploadFiles) {
+                final File tmpFile = uploadFile.getTmpFile();
+                if (null != tmpFile && tmpFile.exists()) {
+                    try {
+                        if (!tmpFile.delete()) {
+                            LOG.error(new StringAllocator("Temporary upload file could not be deleted: ").append(tmpFile.getName()));
+                        }
+                    } catch (final Exception e) {
+                        LOG.error(new StringAllocator("Temporary upload file could not be deleted: ").append(tmpFile.getName()), e);
                     }
-                } catch (final Exception e) {
-                    LOG.error(new StringBuilder("Temporary upload file could not be deleted: ").append(tmpFile.getName()), e);
                 }
             }
         }

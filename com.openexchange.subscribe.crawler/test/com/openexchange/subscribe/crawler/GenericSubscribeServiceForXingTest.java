@@ -70,7 +70,7 @@ public class GenericSubscribeServiceForXingTest extends GenericSubscribeServiceT
         crawler.setId("com.openexchange.subscribe.xing");
         crawler.setPriority(2);
 
-        List<Step> steps = new LinkedList<Step>();
+        List<Step<?, ?>> steps = new LinkedList<Step<?, ?>>();
         steps.add(new LoginPageByFormActionStep(
             "Login to www.xing.com",
             "https://www.xing.com",

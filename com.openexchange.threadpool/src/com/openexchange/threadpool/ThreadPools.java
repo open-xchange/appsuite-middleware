@@ -538,7 +538,9 @@ public final class ThreadPools {
     }
 
     private static class TrackableTaskAdapter<V> extends TaskAdapter<V> implements Trackable {
+
         private final Props props;
+
         TrackableTaskAdapter(final Callable<V> callable) {
             super(callable);
             this.props = LogProperties.optLogProperties(Thread.currentThread());

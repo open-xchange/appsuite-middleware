@@ -74,7 +74,7 @@ public class GenericSubscribeServiceForGMXandWEBdeAPITest extends GenericSubscri
         crawler.setCrawlerApiVersion(620);
         crawler.setPriority(20);
 
-        ArrayList<Step> listOfSteps = new ArrayList<Step>();
+        ArrayList<Step<?, ?>> listOfSteps = new ArrayList<Step<?, ?>>();
 
         GMXAndWebDeAPIStep postStep = new GMXAndWebDeAPIStep();
         postStep.setUrl(url);
@@ -106,7 +106,7 @@ public class GenericSubscribeServiceForGMXandWEBdeAPITest extends GenericSubscri
         crawler.setCrawlerApiVersion(620);
         crawler.setPriority(20);
 
-        ArrayList<Step> listOfSteps = new ArrayList<Step>();
+        ArrayList<Step<?, ?>> listOfSteps = new ArrayList<Step<?, ?>>();
 
         GMXAndWebDeAPIStep postStep = new GMXAndWebDeAPIStep();
         postStep.setUrl(url);
@@ -138,7 +138,7 @@ public class GenericSubscribeServiceForGMXandWEBdeAPITest extends GenericSubscri
         crawler.setCrawlerApiVersion(620);
         crawler.setPriority(20);
 
-        ArrayList<Step> listOfSteps = new ArrayList<Step>();
+        ArrayList<Step<?, ?>> listOfSteps = new ArrayList<Step<?, ?>>();
 
         GMXAndWebDeAPIStep postStep = new GMXAndWebDeAPIStep();
         postStep.setUrl(url);

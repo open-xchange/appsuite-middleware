@@ -1,3 +1,7 @@
+* 2013-06-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26164: Accept other boolean identifiers like "true","1","yes","y", and "on"
+
 * 2012-12-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 24158: Made master password optional

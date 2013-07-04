@@ -77,6 +77,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
@@ -446,7 +447,7 @@ public final class HtmlProcessing {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }
@@ -710,7 +711,7 @@ public final class HtmlProcessing {
                     /*
                      * Continue only if next starting position is equal to offset or if just one whitespace character has been skipped
                      */
-                    next = ((offset == pos) || ((pos - offset == 1) && Character.isWhitespace(line.charAt(offset))));
+                    next = ((offset == pos) || ((pos - offset == 1) && Strings.isWhitespace(line.charAt(offset))));
                     if (next) {
                         currentLevel++;
                         offset = (pos + 4);
@@ -719,7 +720,7 @@ public final class HtmlProcessing {
             }
             if (offset > 0) {
                 try {
-                    offset = (offset < line.length()) && Character.isWhitespace(line.charAt(offset)) ? offset + 1 : offset;
+                    offset = (offset < line.length()) && Strings.isWhitespace(line.charAt(offset)) ? offset + 1 : offset;
                 } catch (final StringIndexOutOfBoundsException e) {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace(e.getMessage(), e);
@@ -793,6 +794,8 @@ public final class HtmlProcessing {
         return ret;
     }
 
+    private static final String EVENT_RESTRICTIONS = "\" onmousedown=\"return false;\" oncontextmenu=\"return false;\"";
+
     private static String filterBackgroundInlineImages(final String content, final Session session, final MailPath msgUID) {
         String reval = content;
         try {
@@ -822,7 +825,7 @@ public final class HtmlProcessing {
                         imageURL = imgSource.generateUrl(imageLocation, session);
                     }
                     linkBuilder.setLength(0);
-                    linkBuilder.append(imgMatcher.group(1)).append("background=\"").append(imageURL).append('"').append(imgMatcher.group(4));
+                    linkBuilder.append(imgMatcher.group(1)).append("background=\"").append(imageURL).append(EVENT_RESTRICTIONS).append(imgMatcher.group(4));
                     imgReplacer.appendLiteralReplacement(sb, linkBuilder.toString());
                 } while (imgMatcher.find());
             }
@@ -882,7 +885,7 @@ public final class HtmlProcessing {
                                 imageURL = imgSource.generateUrl(imageLocation, session);
                             }
                             linkBuilder.setLength(0);
-                            linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"').append(" id=\"").append(filename).append('"');
+                            linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"').append(" id=\"").append(filename).append(EVENT_RESTRICTIONS);
                             mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
                         }
                         mr.appendTail(strBuffer);
@@ -937,7 +940,7 @@ public final class HtmlProcessing {
                     imageURL = imgSource.generateUrl(imageLocation, session);
                 }
                 linkBuilder.setLength(0);
-                linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"').append(" id=\"").append(cid).append('"');
+                linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"').append(" id=\"").append(cid).append(EVENT_RESTRICTIONS);
                 cidReplacer.appendLiteralReplacement(cidBuffer, linkBuilder.toString());
             } while (cidMatcher.find());
         }

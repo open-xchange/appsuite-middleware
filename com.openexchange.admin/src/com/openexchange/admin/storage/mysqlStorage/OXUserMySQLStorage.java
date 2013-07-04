@@ -85,6 +85,7 @@ import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.PoolException;
@@ -1223,13 +1224,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 // Get user's default group ID anf check its existence
                 final int def_group_id;
-                if (usrdata.getDefault_group() == null) {
-                    // Set to context's default group
-                    def_group_id = tool.getDefaultGroupForContext(ctx, con);
-                } else {
-                    def_group_id = usrdata.getDefault_group().getId().intValue();
-                    if (!tool.existsGroup(ctx, con, def_group_id)) {
-                        throw new StorageException("No such group with ID " + def_group_id + " in context " + ctx.getId());
+                {
+                    final Group defaultGroup = usrdata.getDefault_group();
+                    if (defaultGroup == null) {
+                        // Set to context's default group
+                        def_group_id = tool.getDefaultGroupForContext(ctx, con);
+                    } else {
+                        def_group_id = defaultGroup.getId().intValue();
+                        if (!tool.existsGroup(ctx, con, def_group_id)) {
+                            throw new StorageException("No such group with ID " + def_group_id + " in context " + ctx.getId());
+                        }
                     }
                 }
 
@@ -2480,7 +2484,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         try {
             read_ox_con = cache.getConnectionForContext(ctx.getId().intValue());
             final int[] all_groups_of_user = getGroupsForUser(ctx, user_id, read_ox_con);
-            final UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(user_id, all_groups_of_user, ctx.getId().intValue(), read_ox_con);
+            final UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(user_id, all_groups_of_user, true, ctx.getId().intValue(), read_ox_con);
 
             final UserModuleAccess acc = new UserModuleAccess();
 
@@ -2805,7 +2809,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     private void myChangeInsertModuleAccess(final Context ctx, final int userId, final UserModuleAccess access, final boolean insert, final Connection writeCon, final int[] groups) throws StorageException {
         checkForIllegalCombination(access);
         try {
-            final UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(userId, groups, ctx.getId().intValue(), writeCon);
+            final UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(userId, groups, false, ctx.getId().intValue(), writeCon);
             user.setCalendar(access.getCalendar());
             user.setContact(access.getContacts());
             user.setForum(access.getForum());

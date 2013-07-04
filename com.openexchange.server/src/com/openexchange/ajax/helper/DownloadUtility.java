@@ -289,7 +289,8 @@ public final class DownloadUtility {
              */
             final CheckedDownload retval;
             if (sContentDisposition == null) {
-                final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append("attachment");
+                // Assume "inline" as default disposition to trigger client's (Browser) internal viewer.
+                final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append("inline");
                 appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : contentType.toString(), userAgent, builder);
                 contentType.removeParameter("name");
                 retval = new CheckedDownload(contentType.toString(), builder.toString(), in, sz);

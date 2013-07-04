@@ -496,6 +496,26 @@ public class FolderTestManager implements TestManager{
             e.printStackTrace();
         }
     }
+    
+    public FolderObject generatePrivateFolder(final String name, final int moduleID, final int parentID, final int userID) {
+        final FolderObject folder = new FolderObject();
+        folder.setFolderName(name);
+        folder.setType(FolderObject.PRIVATE);
+        folder.setParentFolderID(parentID);
+        folder.setModule(moduleID);
+        final OCLPermission permissions = new OCLPermission();
+        permissions.setEntity(userID);
+        permissions.setGroupPermission(false);
+        permissions.setFolderAdmin(true);
+        permissions.setAllPermission(
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION);
+
+        folder.addPermission(permissions);
+        return folder;
+    }
 
     /**
      * Generates a folder with admin permissions for all given userIDs.
@@ -505,7 +525,7 @@ public class FolderTestManager implements TestManager{
      * @param userIDs the IDs of the users that have admin permission on this one
      * @return a fodler object according to the input parameters
      */
-    public FolderObject generateFolder(final String name, final int moduleID, final int parentID, final int... userIDs){
+    public FolderObject generatePublicFolder(final String name, final int moduleID, final int parentID, final int... userIDs){
         //create a folder
         final FolderObject folder = new FolderObject();
         folder.setFolderName(name);

@@ -58,6 +58,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -96,6 +97,8 @@ import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.StringBuilderStringer;
+import com.openexchange.java.Stringer;
 import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
@@ -581,6 +584,10 @@ public final class HtmlServiceImpl implements HtmlService {
 //        HTMLParser.parse(htmlContent, handler);
 //        return handler.getText();
 
+        if (isEmpty(htmlContent)) {
+            return htmlContent;
+        }
+
         try {
             String prepared = prepareSignatureStart(htmlContent);
             prepared = prepareHrTag(prepared);
@@ -734,7 +741,7 @@ public final class HtmlServiceImpl implements HtmlService {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }
@@ -912,7 +919,7 @@ public final class HtmlServiceImpl implements HtmlService {
     public String replaceHTMLEntities(final String content) {
         final Matcher m = PAT_ENTITIES.matcher(content);
         final MatcherReplacer mr = new MatcherReplacer(m, content);
-        final StringBuilder sb = new StringBuilder(content.length());
+        final Stringer sb = new StringBuilderStringer(new StringBuilder(content.length()));
         while (m.find()) {
             /*
              * Try decimal syntax; e.g. &#39; (single-quote)
@@ -1014,6 +1021,10 @@ public final class HtmlServiceImpl implements HtmlService {
         "(<[a-zA-Z]+[^>]*?)(?:(?:background=([^\\s>]*))|(?:background=\"([^\"]*)\"))([^>]*/?>)",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
+    private static final Pattern HREF_PATTERN = Pattern.compile(
+        "(<[a-zA-Z]+[^>]*?)(?:(?:href=([^\\s>]*))|(?:href=\"([^\"]*)\"))([^>]*/?>)",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
     private static String checkBaseTag(final String htmlContent, final boolean externalImagesAllowed, final int end) {
         Matcher m = PATTERN_BASE_TAG.matcher(htmlContent);
         if (!m.find() || m.end() >= end) {
@@ -1032,7 +1043,7 @@ public final class HtmlServiceImpl implements HtmlService {
         String html = htmlContent.substring(0, m.start()) + htmlContent.substring(m.end());
         m = IMG_PATTERN.matcher(html);
         MatcherReplacer mr = new MatcherReplacer(m, html);
-        final StringBuilder sb = new StringBuilder(html.length());
+        final Stringer sb = new StringBuilderStringer(new StringBuilder(html.length()));
         if (m.find()) {
             /*
              * Replace images
@@ -1074,28 +1085,65 @@ public final class HtmlServiceImpl implements HtmlService {
              * Replace images
              */
             do {
-                final String backgroundTag = m.group();
-                /*
-                 * Extract href
-                 */
-                int pos;
-                int epos;
-                String href = m.group(2);
-                if (href == null) {
-                    href = m.group(3);
-                    pos = m.start(3);
-                    epos = m.end(3);
-                } else {
-                    pos = m.start(2);
-                    epos = m.end(2);
-                }
-                href = trimHref(href);
-                if (!href.startsWith("cid") && !href.startsWith("http")) {
-                    if (href.charAt(0) != '/') {
-                        href = '/' + href;
+                final String hrefTag = m.group();
+                final int pos = hrefTag.indexOf("background=");
+                final int epos;
+                if (pos >= 0) {
+                    String href;
+                    final char c = hrefTag.charAt(pos+11);
+                    if ('"' == c) {
+                        epos = hrefTag.indexOf('"', pos+12);
+                        href = hrefTag.substring(pos+12, epos);
+                    } else if ('\'' == c) {
+                        epos = hrefTag.indexOf('\'', pos+12);
+                        href = hrefTag.substring(pos+12, epos);
+                    } else {
+                        epos = hrefTag.indexOf('>', pos+11);
+                        href = hrefTag.substring(pos+11, epos);
                     }
-                    final String replacement = backgroundTag.substring(0, pos) + base + href + backgroundTag.substring(epos);
-                    mr.appendLiteralReplacement(sb, replacement);
+                    if (!href.startsWith("cid") && !href.startsWith("http")) {
+                        if (href.charAt(0) != '/') {
+                            href = '/' + href;
+                        }
+                        final String replacement = hrefTag.substring(0, pos) + "background=\"" + base + href + "\"" + hrefTag.substring(epos);
+                        mr.appendLiteralReplacement(sb, replacement);
+                    }
+                }
+            } while (m.find());
+        }
+        mr.appendTail(sb);
+        html = sb.toString();
+        sb.setLength(0);
+        m = HREF_PATTERN.matcher(html);
+        mr = new MatcherReplacer(m, html);
+        if (m.find()) {
+            /*
+             * Replace images
+             */
+            do {
+                final String hrefTag = m.group();
+                final int pos = hrefTag.indexOf("href=");
+                final int epos;
+                if (pos >= 0) {
+                    String href;
+                    final char c = hrefTag.charAt(pos+5);
+                    if ('"' == c) {
+                        epos = hrefTag.indexOf('"', pos+6);
+                        href = hrefTag.substring(pos+6, epos);
+                    } else if ('\'' == c) {
+                        epos = hrefTag.indexOf('\'', pos+6);
+                        href = hrefTag.substring(pos+6, epos);
+                    } else {
+                        epos = hrefTag.indexOf('>', pos+5);
+                        href = hrefTag.substring(pos+5, epos);
+                    }
+                    if (!href.startsWith("cid") && !href.startsWith("http")) {
+                        if (href.charAt(0) != '/') {
+                            href = '/' + href;
+                        }
+                        final String replacement = hrefTag.substring(0, pos) + "href=\"" + base + href + "\"" + hrefTag.substring(epos);
+                        mr.appendLiteralReplacement(sb, replacement);
+                    }
                 }
             } while (m.find());
         }
@@ -1132,7 +1180,7 @@ public final class HtmlServiceImpl implements HtmlService {
         if (!m.find() || m.end() >= end) {
             return htmlContent;
         }
-        final StringBuilder sb = new StringBuilder(htmlContent.length());
+        final Stringer sb = new StringBuilderStringer(new StringBuilder(htmlContent.length()));
         final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
         do {
             mr.appendLiteralReplacement(sb, "");
@@ -1381,7 +1429,7 @@ public final class HtmlServiceImpl implements HtmlService {
         final Matcher m = PATTERN_XHTML_CDATA.matcher(htmlContent);
         if (m.find()) {
             final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
-            final StringBuilder sb = new StringBuilder(htmlContent.length());
+            final Stringer sb = new StringBuilderStringer(new StringBuilder(htmlContent.length()));
             final String endingComment = "-->";
             StringBuilder tmp = null;
             do {
@@ -1503,13 +1551,13 @@ public final class HtmlServiceImpl implements HtmlService {
 
     private static final Pattern PAT_HEX_ENTITIES = Pattern.compile("&#x([0-9a-fA-F]+);", Pattern.CASE_INSENSITIVE);
 
-    private static String replaceHexEntities(final String validated) {
-        final Matcher m = PAT_HEX_ENTITIES.matcher(validated);
+    private static String replaceHexEntities(final String htmlContent) {
+        final Matcher m = PAT_HEX_ENTITIES.matcher(htmlContent);
         if (!m.find()) {
-            return validated;
+            return htmlContent;
         }
-        final MatcherReplacer mr = new MatcherReplacer(m, validated);
-        final StringBuilder builder = new StringBuilder(validated.length());
+        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
+        final Stringer builder = new StringBuilderStringer(new StringBuilder(htmlContent.length()));
         final StringBuilder tmp = new StringBuilder(8).append("&#");
         do {
             try {
@@ -1526,6 +1574,62 @@ public final class HtmlServiceImpl implements HtmlService {
         } while (m.find());
         mr.appendTail(builder);
         return builder.toString();
+    }
+
+    private static final Pattern PAT_SPECIAL_ENTITIES = Pattern.compile("&#([0-9a-fA-F]{5,}+);&#([0-9a-fA-F]{5,}+);");
+
+    private static String replaceSpecialEntities(final String htmlContent) {
+        final Matcher m = PAT_SPECIAL_ENTITIES.matcher(htmlContent);
+        if (!m.find()) {
+            return htmlContent;
+        }
+        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
+        final Stringer builder = new StringBuilderStringer(new StringBuilder(htmlContent.length()));
+        final StringBuilder tmp = new StringBuilder(16);
+        do {
+            try {
+                tmp.setLength(0);
+                // Check for valid surrogate pair
+                final char c1 = (char) Integer.parseInt(m.group(1), 10);
+                final char c2 = (char) Integer.parseInt(m.group(2), 10);
+                if (Character.isSurrogatePair(c1, c2)) {
+                    final int codePoint = Character.toCodePoint(c1, c2);
+                    tmp.setLength(0);
+                    tmp.append("&#").append(codePoint).append(';');
+                    mr.appendLiteralReplacement(builder, tmp.toString());
+                }
+            } catch (final NumberFormatException e) {
+                tmp.setLength(0);
+                tmp.append("&amp;#x").append(m.group(1)).append("&#59;");
+                tmp.append("&amp;#x").append(m.group(2)).append("&#59;");
+                mr.appendLiteralReplacement(builder, tmp.toString());
+                tmp.setLength(0);
+            }
+        } while (m.find());
+        mr.appendTail(builder);
+        return builder.toString();
+    }
+
+    private static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+
+    /**
+     * Turns array of bytes into string representing each byte as unsigned hex number.
+     *
+     * @param hash Array of bytes to convert to hex-string
+     * @return Generated hex string
+     */
+    private static String asHex(final byte[] hash) {
+        final int length = hash.length;
+        final char[] buf = new char[length * 2];
+        for (int i = 0, x = 0; i < length; i++) {
+            buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
+            buf[x++] = HEX_CHARS[hash[i] & 0xf];
+        }
+        int pos = 0;
+        while (pos < buf.length && '0' == buf[pos]) {
+            pos++;
+        }
+        return new String(buf, pos, buf.length - pos);
     }
 
     private static final Pattern PAT_HEX_NBSP = Pattern.compile(Pattern.quote("&#160;"));
@@ -1566,6 +1670,7 @@ public final class HtmlServiceImpl implements HtmlService {
         props.setOmitDoctypeDeclaration(true);
         props.setOmitXmlDeclaration(true);
         props.setPruneTags("script");
+        props.setTranslateSpecialEntities(true);
         props.setTransSpecialEntitiesToNCR(true);
         props.setTransResCharsToNCR(true);
         props.setRecognizeUnicodeChars(false);
@@ -1586,19 +1691,23 @@ public final class HtmlServiceImpl implements HtmlService {
              *
              * Clean...
              */
-            final TagNode htmlNode = HTML_CLEANER.clean(preprocessWithJSoup(htmlContent));
+            String preprocessed = preprocessWithJSoup(htmlContent);
+            preprocessed = replaceSpecialEntities(preprocessed);
+            final TagNode htmlNode = HTML_CLEANER.clean(preprocessed);
             /*
              * Check for presence of HTML namespace
              */
             if (!htmlNode.hasAttribute("xmlns")) {
-                htmlNode.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+                final Map<String, String> attributes = new HashMap<String, String>(1);
+                attributes.put("xmlns", "http://www.w3.org/1999/xhtml");
+                htmlNode.setAttributes(attributes);
             }
             /*
              * Serialize
              */
-            final StringWriter writer = new StringWriter(htmlContent.length());
+            final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());
             SERIALIZER.write(htmlNode, writer, "UTF-8");
-            final StringBuffer buffer = writer.getBuffer();
+            final StringAllocator buffer = writer.getBuffer();
             /*
              * Insert DOCTYPE if absent
              */

@@ -989,6 +989,28 @@ public class ContactServiceImpl extends DefaultContactService {
          */
         return perform(tasks, session, queryFields.needsAttachmentInfo(), sOptions);
     }
+    
+    @Override
+    protected int doCountContacts(Session session, String folderId) throws OXException {
+        int contextId = session.getContextId();
+        /*
+         * check folder
+         */
+        FolderObject folder = Tools.getFolder(contextId, folderId);
+        Check.isContactFolder(folder, session);
+        /*
+         * check general permissions
+         */
+        EffectivePermission permission = Tools.getPermission(session, folder);
+        if (!permission.canReadOwnObjects()) {
+            return 0;
+        }
+        /*
+         * get contacts from storage
+         */
+        ContactStorage storage = Tools.getStorage(session, folderId);
+        return storage.count(session, folderId, permission.canReadAllObjects());
+    }
 
     /**
      * Performs a list of tasks returning a search iterator of contacts and merges the results into a single search iterator, respecting

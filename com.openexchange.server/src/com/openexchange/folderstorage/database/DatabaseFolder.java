@@ -49,7 +49,10 @@
 
 package com.openexchange.folderstorage.database;
 
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.util.Date;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
@@ -64,7 +67,19 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.session.Session;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DatabaseFolder} - A database folder.
@@ -77,21 +92,12 @@ public class DatabaseFolder extends AbstractFolder {
 
     private static final long serialVersionUID = -4035221612481906228L;
 
+    private static final TIntSet COUNTABLE_MODULES = new TIntHashSet(new int[] { FolderObject.CALENDAR, FolderObject.CONTACT, FolderObject.TASK, FolderObject.INFOSTORE });
+
     private boolean cacheable;
-
+    private final int objectId;
+    private final FolderObject folderObject;
     protected boolean global;
-
-    /**
-     * Initializes an empty {@link DatabaseFolder}.
-     *
-     * @param cacheable <code>true</code> if this database folder is cacheable; otherwise <code>false</code>
-     */
-    public DatabaseFolder(final boolean cacheable) {
-        super();
-        this.cacheable = cacheable;
-        global = true;
-        subscribed = true;
-    }
 
     /**
      * Initializes a new cacheable {@link DatabaseFolder} from given database folder.
@@ -118,7 +124,9 @@ public class DatabaseFolder extends AbstractFolder {
         super();
         this.cacheable = cacheable;
         global = true;
-        id = String.valueOf(folderObject.getObjectID());
+        this.folderObject = folderObject;
+        objectId = folderObject.getObjectID();
+        id = String.valueOf(objectId);
         name = folderObject.getFolderName();
         parent = String.valueOf(folderObject.getParentFolderID());
         type = getType(folderObject.getType());
@@ -166,44 +174,38 @@ public class DatabaseFolder extends AbstractFolder {
     }
 
     private static Type getType(final int type) {
-        if (FolderObject.SYSTEM_TYPE == type) {
+        switch (type) {
+        case FolderObject.SYSTEM_TYPE:
             return SystemType.getInstance();
-        }
-        if (FolderObject.PRIVATE == type) {
+        case FolderObject.PRIVATE:
             return PrivateType.getInstance();
-        }
-        if (FolderObject.PUBLIC == type) {
+        case FolderObject.PUBLIC:
             return PublicType.getInstance();
+        default:
+            return null;
         }
-        if (FolderObject.SYSTEM_TYPE == type) {
-            return SystemType.getInstance();
-        }
-        return null;
     }
 
     private static ContentType getContentType(final int module) {
-        if (FolderObject.SYSTEM_MODULE == module) {
+        switch (module) {
+        case FolderObject.SYSTEM_MODULE:
+            return SystemContentType.getInstance();
+        case FolderObject.CALENDAR:
+            return CalendarContentType.getInstance();
+        case FolderObject.CONTACT:
+            return ContactContentType.getInstance();
+        case FolderObject.TASK:
+            return TaskContentType.getInstance();
+        case FolderObject.INFOSTORE:
+            return InfostoreContentType.getInstance();
+        case FolderObject.UNBOUND:
+            return UnboundContentType.getInstance();
+        default:
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Unknown database folder content type: " + module);
+            }
             return SystemContentType.getInstance();
         }
-        if (FolderObject.CALENDAR == module) {
-            return CalendarContentType.getInstance();
-        }
-        if (FolderObject.CONTACT == module) {
-            return ContactContentType.getInstance();
-        }
-        if (FolderObject.TASK == module) {
-            return TaskContentType.getInstance();
-        }
-        if (FolderObject.INFOSTORE == module) {
-            return InfostoreContentType.getInstance();
-        }
-        if (FolderObject.UNBOUND == module) {
-            return UnboundContentType.getInstance();
-        }
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Unknown database folder content type: " + module);
-        }
-        return SystemContentType.getInstance();
     }
 
     @Override
@@ -218,6 +220,49 @@ public class DatabaseFolder extends AbstractFolder {
      */
     public void setGlobal(final boolean global) {
         this.global = global;
+    }
+
+    @Override
+    public int getTotal() {
+        final int module = contentType.getModule();
+        if (COUNTABLE_MODULES.contains(module)) {
+            return itemCount();
+        }
+        return super.getTotal();
+    }
+
+    private int itemCount() {
+        final Props props = LogProperties.optLogProperties();
+        final Session session = (Session) (null == props ? null : props.get(LogProperties.Name.SESSION_SESSION));
+        if (null != session) {
+            try {
+                final FolderObject folderObject = this.folderObject;
+                if (session instanceof ServerSession) {
+                    final ServerSession serverSession = (ServerSession) session;
+                    final EffectivePermission permission = folderObject.getEffectiveUserPermission(session.getUserId(), serverSession.getUserConfiguration());
+                    if (permission.getFolderPermission() <= 0 || permission.getReadPermission() <= 0) {
+                        return 0;
+                    }
+                    final Context ctx = serverSession.getContext();
+                    final int count = (int) new OXFolderAccess(ctx).getItemCount(folderObject, session, ctx);
+                    return count < 0 ? super.getTotal() : count;
+                }
+                final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+                final int userId = session.getUserId();
+                final User user = UserStorage.getStorageUser(userId, ctx);
+                final UserConfiguration userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(userId, user.getGroups(), ctx);
+                final EffectivePermission permission = folderObject.getEffectiveUserPermission(userId, userConfiguration);
+                if (permission.getFolderPermission() <= 0 || permission.getReadPermission() <= 0) {
+                    return 0;
+                }
+                final int count = (int) new OXFolderAccess(ctx).getItemCount(folderObject, session, ctx);
+                return count < 0 ? super.getTotal() : count;
+            } catch (final OXException e) {
+                // Ignore
+                LOG.debug(e.getMessage(), e);
+            }
+        }
+        return super.getTotal();
     }
 
 }

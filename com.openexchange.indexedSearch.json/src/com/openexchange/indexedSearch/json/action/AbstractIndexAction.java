@@ -143,7 +143,7 @@ public abstract class AbstractIndexAction implements AJAXActionService {
         final int length = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < length; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

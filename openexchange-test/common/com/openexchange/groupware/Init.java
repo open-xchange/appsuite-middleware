@@ -65,7 +65,6 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
-import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.servlet.ServletConfigLoader;
 import com.openexchange.ajp13.servlet.http.HttpManagersInit;
 import com.openexchange.caching.CacheService;
@@ -141,7 +140,6 @@ import com.openexchange.i18n.parsing.Translations;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.IMAPStoreCache;
-import com.openexchange.imap.osgi.IMAPActivator;
 import com.openexchange.imap.services.Services;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.config.MailProperties;
@@ -217,6 +215,19 @@ public final class Init {
     private static final AtomicBoolean running = new AtomicBoolean();
 
     private static final Map<Class<?>, Object> services = new HashMap<Class<?>, Object>();
+
+    private static final ServiceLookup LOOKUP = new ServiceLookup() {
+
+        @Override
+        public <S> S getService(Class<? extends S> clazz) {
+            return (S) services.get(clazz);
+        }
+
+        @Override
+        public <S> S getOptionalService(Class<? extends S> clazz) {
+            return (S) services.get(clazz);
+        }
+    };
 
     private static final Initialization[] inits = new Initialization[] {
         /**
@@ -397,9 +408,7 @@ public final class Init {
         final ConfigurationService config = new ConfigurationImpl();
         services.put(ConfigurationService.class, config);
         TestServiceRegistry.getInstance().addService(ConfigurationService.class, config);
-        AJPv13ServiceRegistry.SERVICE_REGISTRY.set(new ServiceRegistry());
-        AJPv13ServiceRegistry.getInstance().addService(ConfigurationService.class, config);
-        
+        com.openexchange.ajp13.Services.setServiceLookup(LOOKUP);
     }
 
     private static void startAndInjectThreadPoolBundle() {
@@ -684,16 +693,7 @@ public final class Init {
         MailProperties.getInstance().loadProperties();
 
         if (null == MailProviderRegistry.getMailProvider("imap_imaps")) {
-            Services.setServiceLookup(new ServiceLookup() {
-                @Override
-                public <S> S getService(Class<? extends S> clazz) {
-                    return (S) services.get(clazz);
-                }
-                @Override
-                public <S> S getOptionalService(Class<? extends S> clazz) {
-                    return (S) services.get(clazz);
-                }
-            });
+            Services.setServiceLookup(LOOKUP);
             IMAPStoreCache.initInstance();
             /*
              * Register IMAP bundle

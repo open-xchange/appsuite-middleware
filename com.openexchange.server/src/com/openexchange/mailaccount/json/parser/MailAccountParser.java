@@ -51,6 +51,7 @@ package com.openexchange.mailaccount.json.parser;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,13 +64,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.fields.SetSwitch;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link MailAccountParser} - Parses a JSON object to a mail account.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountParser extends DataParser {
@@ -117,7 +119,7 @@ public class MailAccountParser extends DataParser {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static MailAccountParser getInstance() {
@@ -133,21 +135,22 @@ public class MailAccountParser extends DataParser {
 
     /**
      * Parses the attributes from the JSON and writes them into the account object.
-     * 
+     *
      * @param account Any attributes will be stored in this account object.
      * @param json A JSON object containing a reminder.
+     * @param warnings A collection to add possible warnings to
      * @throws OXException If parsing fails.
      * @throws OXException If parsing fails
      */
-    public Set<Attribute> parse(final MailAccountDescription account, final JSONObject json) throws OXException, OXException {
+    public Set<Attribute> parse(final MailAccountDescription account, final JSONObject json, final Collection<OXException> warnings) throws OXException {
         try {
-            return parseElementAccount(account, json);
+            return parseElementAccount(account, json, warnings);
         } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json.toString());
         }
     }
 
-    protected Set<Attribute> parseElementAccount(final MailAccountDescription account, final JSONObject json) throws JSONException, OXException {
+    protected Set<Attribute> parseElementAccount(final MailAccountDescription account, final JSONObject json, final Collection<OXException> warnings) throws JSONException, OXException {
         final Set<Attribute> attributes = new HashSet<Attribute>();
         if (json.has(MailAccountFields.ID)) {
             account.setId(parseInt(json, MailAccountFields.ID));
@@ -204,8 +207,8 @@ public class MailAccountParser extends DataParser {
             }
         }
         // Check port for standards
-        checkMailPort(account);
-        checkTransportPort(account);
+        checkMailPort(account, warnings);
+        checkTransportPort(account, warnings);
         // Conitinue parsing
         if (json.has(MailAccountFields.TRANSPORT_LOGIN)) {
             account.setTransportLogin(parseString(json, MailAccountFields.TRANSPORT_LOGIN));
@@ -341,7 +344,7 @@ public class MailAccountParser extends DataParser {
         return attributes;
     }
 
-    private static void checkMailPort(final MailAccountDescription account) {
+    private static void checkMailPort(final MailAccountDescription account, final Collection<OXException> warnings) {
         final String mailProtocol = account.getMailProtocol();
         if (isEmpty(mailProtocol)) {
             return;
@@ -351,17 +354,17 @@ public class MailAccountParser extends DataParser {
             final int port = account.getMailPort();
             if (account.isMailSecure()) {
                 if (standardPorts.isDefaultPort(port)) {
-                    account.setMailSecure(false);
+                    warnings.add(MailAccountExceptionCodes.SECURE_BUT_DEFAULT_MAIL.create(mailProtocol));
                 }
             } else {
                 if (standardPorts.isDefaultSSLPort(port)) {
-                    account.setMailSecure(true);
+                    warnings.add(MailAccountExceptionCodes.DEFAULT_BUT_SECURE_MAIL.create(mailProtocol));
                 }
             }
         }
     }
 
-    private static void checkTransportPort(final MailAccountDescription account) {
+    private static void checkTransportPort(final MailAccountDescription account, final Collection<OXException> warnings) {
         final String transportProtocol = account.getTransportProtocol();
         if (isEmpty(transportProtocol)) {
             return;
@@ -371,11 +374,11 @@ public class MailAccountParser extends DataParser {
             final int port = account.getTransportPort();
             if (account.isTransportSecure()) {
                 if (standardPorts.isDefaultPort(port)) {
-                    account.setTransportSecure(false);
+                    warnings.add(MailAccountExceptionCodes.SECURE_BUT_DEFAULT_TRANSPORT.create(transportProtocol));
                 }
             } else {
                 if (standardPorts.isDefaultSSLPort(port)) {
-                    account.setTransportSecure(true);
+                    warnings.add(MailAccountExceptionCodes.DEFAULT_BUT_SECURE_TRANSPORT.create(transportProtocol));
                 }
             }
         }
@@ -389,7 +392,7 @@ public class MailAccountParser extends DataParser {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

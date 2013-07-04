@@ -51,7 +51,7 @@ package com.openexchange.capabilities;
 
 import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.session.Session;
 
 /**
  * {@link CapabilityService} - A capability service.
@@ -67,7 +67,7 @@ public interface CapabilityService {
      * @return The capabilities
      * @throws OXException If capabilities cannot be determined
      */
-    Set<Capability> getCapabilities(ServerSession session) throws OXException;
+    Set<Capability> getCapabilities(Session session) throws OXException;
 
     /**
      * Declares specified capability.

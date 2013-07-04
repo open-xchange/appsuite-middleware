@@ -184,6 +184,11 @@ public final class MailProperties implements IMailProperties {
     private String authProxyDelimiter;
 
     /**
+     * Indicates whether MSISDN addresses should be supported or not.
+     */
+    private boolean supportMsisdnAddresses;
+
+    /**
      * Initializes a new {@link MailProperties}
      */
     private MailProperties() {
@@ -272,6 +277,7 @@ public final class MailProperties implements IMailProperties {
         rateLimit = 0;
         maxToCcBcc = 0;
         authProxyDelimiter = null;
+        supportMsisdnAddresses = false;
     }
 
     private void loadProperties0() throws OXException {
@@ -371,8 +377,7 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            final String attachDisplaySizeStr =
-                configuration.getProperty("com.openexchange.mail.attachmentDisplaySizeLimit", "8192").trim();
+            final String attachDisplaySizeStr = configuration.getProperty("com.openexchange.mail.attachmentDisplaySizeLimit", "8192").trim();
             try {
                 attachDisplaySize = Integer.parseInt(attachDisplaySizeStr);
                 logBuilder.append("\tAttachment Display Size Limit: ").append(attachDisplaySize).append('\n');
@@ -414,8 +419,7 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            final String allowNestedStr =
-                configuration.getProperty("com.openexchange.mail.allowNestedDefaultFolderOnAltNamespace", "false").trim();
+            final String allowNestedStr = configuration.getProperty("com.openexchange.mail.allowNestedDefaultFolderOnAltNamespace", "false").trim();
             allowNestedDefaultFolderOnAltNamespace = Boolean.parseBoolean(allowNestedStr);
             logBuilder.append("\tAllow Nested Default Folders on AltNamespace: ").append(allowNestedDefaultFolderOnAltNamespace).append(
                 '\n');
@@ -448,8 +452,7 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            final String adminMailLoginEnabledStr =
-                configuration.getProperty("com.openexchange.mail.adminMailLoginEnabled", "false").trim();
+            final String adminMailLoginEnabledStr = configuration.getProperty("com.openexchange.mail.adminMailLoginEnabled", "false").trim();
             adminMailLoginEnabled = Boolean.parseBoolean(adminMailLoginEnabledStr);
             logBuilder.append("\tAdmin Mail Login Enabled: ").append(adminMailLoginEnabled).append('\n');
         }
@@ -491,8 +494,9 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            final String partModifierStr =
-                configuration.getProperty("com.openexchange.mail.partModifierImpl", DummyPartModifier.class.getName()).trim();
+            final String partModifierStr = configuration.getProperty(
+                "com.openexchange.mail.partModifierImpl",
+                DummyPartModifier.class.getName()).trim();
             try {
                 PartModifier.init(partModifierStr);
                 logBuilder.append("\tPartModifier Implementation: ").append(PartModifier.getInstance().getClass().getName()).append('\n');
@@ -626,6 +630,12 @@ public final class MailProperties implements IMailProperties {
             }
         }
 
+        {
+            final String supportMsisdnAddressesStr = configuration.getProperty("com.openexchange.mail.supportMsisdnAddresses", "false").trim();
+            supportMsisdnAddresses = Boolean.parseBoolean(supportMsisdnAddressesStr);
+            logBuilder.append("\tSupports MSISDN addresses: ").append(supportMsisdnAddresses).append('\n');
+        }
+
         logBuilder.append("Global mail properties successfully loaded!");
         if (LOG.isInfoEnabled()) {
             LOG.info(logBuilder.toString());
@@ -654,8 +664,8 @@ public final class MailProperties implements IMailProperties {
             return properties;
         } catch (final IOException e) {
             throw MailConfigException.create(
-                new com.openexchange.java.StringAllocator(256).append("I/O error while reading properties from file \"").append(propFile).append("\": ").append(
-                    e.getMessage()).toString(),
+                new com.openexchange.java.StringAllocator(256).append("I/O error while reading properties from file \"").append(propFile).append(
+                    "\": ").append(e.getMessage()).toString(),
                 e);
         } finally {
             Streams.close(fis);
@@ -675,7 +685,9 @@ public final class MailProperties implements IMailProperties {
             properties.load(in);
             return properties;
         } catch (final IOException e) {
-            throw MailConfigException.create(new com.openexchange.java.StringAllocator(256).append("I/O error: ").append(e.getMessage()).toString(), e);
+            throw MailConfigException.create(
+                new com.openexchange.java.StringAllocator(256).append("I/O error: ").append(e.getMessage()).toString(),
+                e);
         } finally {
             Streams.close(in);
         }
@@ -915,4 +927,12 @@ public final class MailProperties implements IMailProperties {
         return authProxyDelimiter;
     }
 
+    /**
+     * Signals if MSISDN addresses are supported or not.
+     *
+     * @return <code>true</code>, if MSISDN addresses are supported; otherwise <code>false</code>
+     */
+    public boolean isSupportMsisdnAddresses() {
+        return supportMsisdnAddresses;
+    }
 }

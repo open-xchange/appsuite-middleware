@@ -71,7 +71,7 @@ public class GenericSubscribeServiceForWKWTest extends GenericSubscribeServiceTe
         final CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("wer-kennt-wen.de");
         crawler.setId("com.openexchange.subscribe.crawler.wkw");
-        final List<Step> steps = new LinkedList<Step>();
+        final List<Step<?, ?>> steps = new LinkedList<Step<?, ?>>();
 
         // #####################################################################
         //TODO: insert steps

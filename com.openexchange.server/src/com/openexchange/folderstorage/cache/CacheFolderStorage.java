@@ -104,6 +104,7 @@ import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
@@ -342,7 +343,7 @@ public final class CacheFolderStorage implements FolderStorage {
                                                                 }
                                                             }
                                                             if (debugEnabled) {
-                                                                final StringBuilder tmp = new StringBuilder(64);
+                                                                final StringAllocator tmp = new StringAllocator(64);
                                                                 tmp.append("CacheFolderStorage.checkConsistency(): ");
                                                                 tmp.append("Loading external root folder \"");
                                                                 tmp.append(mailAccount.generateMailServerURL()).append("\" took ");
@@ -366,7 +367,7 @@ public final class CacheFolderStorage implements FolderStorage {
                                     }
                                 }
                                 if (debugEnabled) {
-                                    final StringBuilder tmp = new StringBuilder(64);
+                                    final StringAllocator tmp = new StringAllocator(64);
                                     tmp.append("CacheFolderStorage.checkConsistency(): Submitting loading external root folders took ");
                                     tmp.append((System.currentTimeMillis() - st)).append("msec");
                                     log.debug(tmp.toString());

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange File Storage RDB Bundle
 Bundle-SymbolicName: com.openexchange.file.storage.rdb
-Bundle-Version: 7.2.1
+Bundle-Version: 7.2.2
 Bundle-Vendor: Open-Xchange Inc
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.cache,
@@ -22,6 +22,7 @@ Import-Package: com.openexchange.cache,
  com.openexchange.groupware.delete,
  com.openexchange.groupware.update,
  com.openexchange.id,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.secret,

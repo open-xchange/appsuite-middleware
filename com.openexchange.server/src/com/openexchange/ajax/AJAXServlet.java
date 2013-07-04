@@ -66,6 +66,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -84,6 +85,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
@@ -118,6 +120,7 @@ import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
+import com.openexchange.tools.servlet.RateLimitedException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -509,6 +512,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
             super.service(new CountingHttpServletRequest(req), resp);
+        } catch (final RateLimitedException e) {
+            resp.setContentType("text/plain; charset=UTF-8");
+            resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
         } catch (final RuntimeException e) {
             LOG.error(e.getMessage(), e);
             final ServletException se = new ServletException(e.getMessage());
@@ -1119,64 +1125,84 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             throw UploadException.UploadCode.UNKNOWN_ACTION_VALUE.create(action);
         }
         /*
-         * Create file upload base
+         * Get file upload
          */
         final ServletFileUpload upload = getFileUploadBase();
-        final List<FileItem> items;
-        try {
-            @SuppressWarnings("unchecked") final List<FileItem> tmp = upload.parseRequest(req);
-            items = tmp;
-        } catch (final FileUploadException e) {
-            final Throwable cause = e.getCause();
-            if (cause instanceof IOException) {
-                final String message = cause.getMessage();
-                if (null != message && message.startsWith("Max. byte count of ")) {
-                    // E.g. Max. byte count of 10240 exceeded.
-                    final int pos = message.indexOf(" exceeded", 19 + 1);
-                    final String limit = message.substring(19, pos);
-                    throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, limit);
-                }
-            }
-            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage()  : cause.getMessage()));
-        }
         /*
-         * Create the upload event
+         * Parse the upload request
          */
-        final UploadEvent uploadEvent = new UploadEvent();
-        uploadEvent.setAction(action);
-        /*
-         * Set affiliation to mail upload
-         */
-        uploadEvent.setAffiliationId(UploadEvent.MAIL_UPLOAD);
-        /*
-         * Fill upload event instance
-         */
-        final String charEnc;
+        final List<FileItem> items = new LinkedList<FileItem>();
         {
-            final String rce = req.getCharacterEncoding();
-            charEnc = null == rce ? ServerConfig.getProperty(Property.DefaultEncoding) : rce;
-        }
-        for (final FileItem fileItem : items) {
-            if (fileItem.isFormField()) {
-                try {
-                    uploadEvent.addFormField(fileItem.getFieldName(), fileItem.getString(charEnc));
-                } catch (final UnsupportedEncodingException e) {
-                    throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+            boolean cleanUp = true;
+            try {
+                upload.parseRequest(new ServletRequestContext(req), items);
+                cleanUp = false;
+            } catch (final FileUploadException e) {
+                final Throwable cause = e.getCause();
+                if (cause instanceof IOException) {
+                    final String message = cause.getMessage();
+                    if (null != message && message.startsWith("Max. byte count of ")) {
+                        // E.g. Max. byte count of 10240 exceeded.
+                        final int pos = message.indexOf(" exceeded", 19 + 1);
+                        final String limit = message.substring(19, pos);
+                        throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, limit);
+                    }
                 }
-            } else {
-                if (fileItem.getSize() > 0 || !isEmpty(fileItem.getName())) {
-                    try {
-                        uploadEvent.addUploadFile(processUploadedFile(fileItem, ServerConfig.getProperty(Property.UploadDirectory)));
-                    } catch (final Exception e) {
-                        throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+                throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
+            } finally {
+                if (cleanUp) {
+                    for (final FileItem fileItem : items) {
+                        try { fileItem.delete(); } catch (final Exception e) { /* Ignore */ }
                     }
                 }
             }
         }
-        if (uploadEvent.getAffiliationId() < 0) {
-            throw UploadException.UploadCode.MISSING_AFFILIATION_ID.create(action);
+        /*
+         * Create the upload event
+         */
+        try {
+            final UploadEvent uploadEvent = new UploadEvent();
+            uploadEvent.setAction(action);
+            /*
+             * Set affiliation to mail upload
+             */
+            uploadEvent.setAffiliationId(UploadEvent.MAIL_UPLOAD);
+            /*
+             * Fill upload event instance
+             */
+            final String charEnc;
+            {
+                final String rce = req.getCharacterEncoding();
+                charEnc = null == rce ? ServerConfig.getProperty(Property.DefaultEncoding) : rce;
+            }
+            final String uploadDir = ServerConfig.getProperty(Property.UploadDirectory);
+            final String fileName = req.getParameter("filename");
+            for (final FileItem fileItem : items) {
+                if (fileItem.isFormField()) {
+                    try {
+                        uploadEvent.addFormField(fileItem.getFieldName(), fileItem.getString(charEnc));
+                    } catch (final UnsupportedEncodingException e) {
+                        throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+                    }
+                } else {
+                    if (fileItem.getSize() > 0 || !isEmpty(fileItem.getName())) {
+                        try {
+                            uploadEvent.addUploadFile(processUploadedFile(fileItem, uploadDir, fileName));
+                        } catch (final Exception e) {
+                            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+                        }
+                    }
+                }
+            }
+            if (uploadEvent.getAffiliationId() < 0) {
+                throw UploadException.UploadCode.MISSING_AFFILIATION_ID.create(action);
+            }
+            return uploadEvent;
+        } finally {
+            for (final FileItem fileItem : items) {
+                try { fileItem.delete(); } catch (final Exception e) { /* Ignore */ }
+            }
         }
-        return uploadEvent;
     }
 
     protected static boolean mayUpload(final String action) {
@@ -1190,16 +1216,39 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            switch (string.charAt(i)) {
+            case 9: // 'unicode: 0009
+            case 10: // 'unicode: 000A'
+            case 11: // 'unicode: 000B'
+            case 12: // 'unicode: 000C'
+            case 13: // 'unicode: 000D'
+            case 28: // 'unicode: 001C'
+            case 29: // 'unicode: 001D'
+            case 30: // 'unicode: 001E'
+            case 31: // 'unicode: 001F'
+            case ' ': // Space
+                // case Character.SPACE_SEPARATOR:
+                // case Character.LINE_SEPARATOR:
+            case Character.PARAGRAPH_SEPARATOR:
+                isWhitespace = true;
+                break;
+            default:
+                isWhitespace = false;
+                break;
+            }
         }
         return isWhitespace;
     }
 
- 	private static final UploadFile processUploadedFile(final FileItem item, final String uploadDir) throws Exception {
+ 	private static final UploadFile processUploadedFile(final FileItem item, final String uploadDir, final String fileName) throws Exception {
         try {
             final UploadFile retval = new UploadFileImpl();
             retval.setFieldName(item.getFieldName());
-            retval.setFileName(item.getName());
+            if (isEmpty(fileName)) {
+                retval.setFileName(item.getName());
+            } else {
+                retval.setFileName(fileName);
+            }
             retval.setContentType(item.getContentType());
             retval.setSize(item.getSize());
             final File tmpFile = File.createTempFile("openexchange", null, new File(uploadDir));

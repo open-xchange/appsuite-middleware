@@ -136,8 +136,9 @@ public class HazelcastActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         final Log logger = com.openexchange.log.Log.loggerFor(HazelcastActivator.class);
         final HazelcastConfigurationService service = getService(HazelcastConfigurationService.class);
+        final String lf = System.getProperty("line.separator");
         if (!service.isEnabled()) {
-            logger.info("\nHazelcast\n\tStartup of Hazelcast clustering and data distribution platform denied per configuration.");
+            logger.info(lf + "Hazelcast" + lf + "    Startup of Hazelcast clustering and data distribution platform denied per configuration.");
             return;
         }
         final boolean infoEnabled = logger.isInfoEnabled();
@@ -181,10 +182,10 @@ public class HazelcastActivator extends HousekeepingActivator {
                     final ClusterDiscoveryService discovery = context.getService(reference);
                     if (!clusterDiscoveryServiceReference.compareAndSet(null, discovery)) {
                         final com.openexchange.java.StringAllocator msg = new com.openexchange.java.StringAllocator();
-                        msg.append("\n\t").append(ClusterDiscoveryService.class.getName()).append(" is a singleton service!");
-                        msg.append("\n\tThis service is already tracked as \"").append(
+                        msg.append(lf).append("    ").append(ClusterDiscoveryService.class.getName()).append(" is a singleton service!");
+                        msg.append(lf).append("    This service is already tracked as \"").append(
                             clusterDiscoveryServiceReference.get().getClass().getName()).append("\".");
-                        msg.append("\n\tDenying \"").append(discovery.getClass().getName()).append("\".");
+                        msg.append(lf).append("    Denying \"").append(discovery.getClass().getName()).append("\".");
                         final BundleException be = new BundleException(msg.toString(), BundleException.ACTIVATOR_ERROR);
                         throw new IllegalStateException(msg.toString(), be);
                     }
@@ -218,8 +219,8 @@ public class HazelcastActivator extends HousekeepingActivator {
                 final List<InetAddress> nodes = discovery.getNodes();
                 if (infoEnabled) {
                     final long et = System.currentTimeMillis();
-                    logger.info("\nHazelcast\n\tAvailable cluster nodes received in " + (et - st) + "msec from " +
-                        ClusterDiscoveryService.class.getSimpleName() + ":\n\t" + nodes + "\n");
+                    logger.info(lf + "Hazelcast" + lf + "    Available cluster nodes received in " + (et - st) + "msec from " +
+                        ClusterDiscoveryService.class.getSimpleName() + ":" + lf + "    " + nodes + "" + lf);
                 }
                 /*-
                  * Check initially available nodes
@@ -227,7 +228,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                 if (nodes.isEmpty()) {
                     if (HazelcastInitializer.InitMode.INITIALIZED == initializer.init(nodes, false, st, logger)) {
                         if (infoEnabled) {
-                            logger.info("\nHazelcast:\n\tInitialized Hazelcast instance with empty Open-Xchange nodes.\n");
+                            logger.info(lf + "Hazelcast:" + lf + "    Initialized Hazelcast instance with empty Open-Xchange nodes." + lf);
                         }
                     }
                 } else {
@@ -236,7 +237,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                      */
                     if (HazelcastInitializer.InitMode.INITIALIZED == initializer.init(nodes, false, st, logger)) {
                         if (infoEnabled) {
-                            logger.info("\nHazelcast:\n\tInitialized Hazelcast instance via initially available Open-Xchange nodes.\n");
+                            logger.info(lf + "Hazelcast:" + lf + "    Initialized Hazelcast instance via initially available Open-Xchange nodes." + lf);
                         }
                     }
                 }
@@ -317,7 +318,7 @@ public class HazelcastActivator extends HousekeepingActivator {
         @Override
         public String getHelp() {
             final StringBuilder help = new StringBuilder();
-            help.append("\taddnode - Add a hazelcast node.\n");
+            help.append("    addnode - Add a hazelcast node." + System.getProperty("line.separator"));
             return help.toString();
         }
 
@@ -350,7 +351,7 @@ public class HazelcastActivator extends HousekeepingActivator {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

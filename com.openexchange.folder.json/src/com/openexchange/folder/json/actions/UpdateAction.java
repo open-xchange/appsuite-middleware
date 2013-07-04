@@ -62,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.parser.FolderParser;
 import com.openexchange.folder.json.services.ServiceRegistry;
+import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
@@ -125,7 +126,7 @@ public final class UpdateAction extends AbstractFolderAction {
          * Parse folder object
          */
         final JSONObject folderObject = (JSONObject) request.getData();
-        final Folder folder = FolderParser.parseFolder(folderObject);
+        final Folder folder = new FolderParser(ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class)).parseFolder(folderObject);
         folder.setID(id);
         try {
             final String fieldName = FolderField.SUBSCRIBED.getName();
@@ -148,7 +149,7 @@ public final class UpdateAction extends AbstractFolderAction {
          * Update
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        folderService.updateFolder(folder, timestamp, session, new FolderServiceDecorator().put("permissions", request.getParameter("permissions")).put("altNames", request.getParameter("altNames")).put("autorename", request.getParameter("autorename")));
+        folderService.updateFolder(folder, timestamp, session, new FolderServiceDecorator().put("permissions", request.getParameter("permissions")).put("altNames", request.getParameter("altNames")).put("ignoreTranslation", request.getParameter("ignoreTranslation")).put("autorename", request.getParameter("autorename")));
         /*
          * Invoke folder.getID() to obtain possibly new folder identifier
          */

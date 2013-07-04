@@ -104,16 +104,16 @@ public final class SystemRootFolder {
      *
      * @return The subfolder identifiers of database folder representing system root folder for given user
      */
-    public static List<String[]> getSystemRootFolderSubfolder(final Locale locale) {
+    public static List<String[]> getSystemRootFolderSubfolder(final Locale locale, final boolean translate) {
         /*
          * The system root folder
          */
-        final StringHelper sh = StringHelper.valueOf(locale);
+        final StringHelper sh = translate ? StringHelper.valueOf(locale) : null;
         final List<String[]> list = new ArrayList<String[]>(4);
-        list.add(new String[] { String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_PRIVATE_FOLDER_NAME) });
-        list.add(new String[] { String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_PUBLIC_FOLDER_NAME) });
-        list.add(new String[] { String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_SHARED_FOLDER_NAME) });
-        list.add(new String[] { String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME) });
+        list.add(new String[] { String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID), null == sh ? FolderStrings.SYSTEM_PRIVATE_FOLDER_NAME : sh.getString(FolderStrings.SYSTEM_PRIVATE_FOLDER_NAME) });
+        list.add(new String[] { String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID), null == sh ? FolderStrings.SYSTEM_PUBLIC_FOLDER_NAME : sh.getString(FolderStrings.SYSTEM_PUBLIC_FOLDER_NAME) });
+        list.add(new String[] { String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID), null == sh ? FolderStrings.SYSTEM_SHARED_FOLDER_NAME : sh.getString(FolderStrings.SYSTEM_SHARED_FOLDER_NAME) });
+        list.add(new String[] { String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID), null == sh ? FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME : sh.getString(FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME) });
         return list;
     }
 

@@ -90,6 +90,15 @@
  */
 package org.glassfish.grizzly.http.server;
 
+import static org.glassfish.grizzly.http.util.HttpCodecUtils.put;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.glassfish.grizzly.Buffer;
 import org.glassfish.grizzly.Connection;
 import org.glassfish.grizzly.Grizzly;
@@ -102,51 +111,125 @@ import org.glassfish.grizzly.http.HttpPacket;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.HttpResponsePacket;
 import org.glassfish.grizzly.http.Method;
-import org.glassfish.grizzly.http.server.HttpHandler;
-import org.glassfish.grizzly.http.server.HttpServerFilter;
-import org.glassfish.grizzly.http.server.HttpServerProbe;
-import org.glassfish.grizzly.http.server.HttpServerProbeNotifier;
-import org.glassfish.grizzly.http.server.Request;
-import org.glassfish.grizzly.http.server.Response;
-import org.glassfish.grizzly.http.server.ServerFilterConfiguration;
-import org.glassfish.grizzly.http.server.SuspendStatus;
+import org.glassfish.grizzly.http.server.io.OutputBuffer;
 import org.glassfish.grizzly.http.server.util.HtmlHelper;
+import org.glassfish.grizzly.http.util.Header;
 import org.glassfish.grizzly.http.util.HttpStatus;
+import org.glassfish.grizzly.memory.Buffers;
 import org.glassfish.grizzly.memory.MemoryManager;
 import org.glassfish.grizzly.monitoring.jmx.JmxMonitoringAware;
 import org.glassfish.grizzly.monitoring.jmx.JmxObject;
 import org.glassfish.grizzly.utils.DelayedExecutor;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.glassfish.grizzly.http.util.Header;
-
-import org.glassfish.grizzly.memory.Buffers;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.http.grizzly.osgi.Services;
+import com.openexchange.java.Charsets;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * Filter implementation to provide high-level HTTP request/response processing.
  */
 public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitoringAware<HttpServerProbe> {
 
-    private final static Logger LOGGER = Grizzly.logger(OXHttpServerFilter.class);
+    private static enum Ping {
+        /**
+         * No ping at all.
+         */
+        NONE,
+        /**
+         * The client SHOULD continue with its request. This interim response is used to inform the client that the initial part of the
+         * request has been received and has not yet been rejected by the server. The client SHOULD continue by sending the remainder of the
+         * request or, if the request has already been completed, ignore this response. The server MUST send a final response after the
+         * request has been completed. See section 8.2.3 for detailed discussion of the use and handling of this status code.
+         */
+        CONTINUE,
+        /**
+         * The 102 (Processing) status code is an interim response used to inform the client that the server has accepted the complete
+         * request, but has not yet completed it. This status code SHOULD only be sent when the server has a reasonable expectation that the
+         * request will take significant time to complete. As guidance, if a method is taking longer than 20 seconds (a reasonable, but
+         * arbitrary value) to process the server SHOULD return a 102 (Processing) response. The server MUST send a final response after the
+         * request has been completed.
+         * <p>
+         * Methods can potentially take a long period of time to process, especially methods that support the Depth header. In such cases
+         * the client may time-out the connection while waiting for a response. To prevent this the server may return a 102 (Processing)
+         * status code to indicate to the client that the server is still processing the method.
+         */
+        PROCESSING,
+        /**
+         * Tries to avoid a timeout through sending a whitespace.
+         */
+        WHITESPACE;
+
+        /**
+         * Gets the ping constant for specified identifier.
+         *
+         * @param identifier The identifier
+         * @return The ping constant or <code>null</code>
+         */
+        public static Ping pingFor(final String identifier) {
+            if (null == identifier) {
+                return null;
+            }
+            for (final Ping p : Ping.values()) {
+                if (identifier.equalsIgnoreCase(p.name())) {
+                    return p;
+                }
+            }
+            return null;
+        }
+    }
+
+    private static final class WatchInfo {
+
+        final ScheduledTimerTask timerTask;
+
+        WatchInfo(ScheduledTimerTask timerTask) {
+            super();
+            this.timerTask = timerTask;
+        }
+
+    }
+
+    private static final Logger LOGGER = Grizzly.logger(OXHttpServerFilter.class);
+
+    private static final byte[] CRLF = {(byte) '\r', (byte) '\n'};
+
     private final Attribute<Request> httpRequestInProcessAttr;
     private final Attribute<Boolean> reregisterForReadAttr;
     protected final DelayedExecutor.DelayQueue<Response> suspendedResponseQueue;
     private volatile HttpHandler httpHandler;
+    private final ConcurrentMap<FilterChainContext, WatchInfo> pingMap;
+    private final int pingDelay;
+    private final int maxPingCount;
+    private volatile Ping ping;
 
     // ------------------------------------------------------------ Constructors
 
-    public OXHttpServerFilter(final ServerFilterConfiguration config,
-            final DelayedExecutor delayedExecutor) {
+    public OXHttpServerFilter(final ServerFilterConfiguration config, final DelayedExecutor delayedExecutor) {
         super(config, delayedExecutor);
+        // Ping stuff
+        pingMap = new ConcurrentHashMap<FilterChainContext, WatchInfo>(512);
+        {
+            final ConfigurationService service = Services.getService(ConfigurationService.class);
+            pingDelay = null == service ? 90000 : service.getIntProperty("com.openexchange.http.grizzly.pingDelay", 90000);
+
+            maxPingCount = null == service ? 9 : service.getIntProperty("com.openexchange.http.grizzly.maxPingCount", 9);
+
+            ping = null == service ? Ping.PROCESSING : Ping.pingFor(service.getProperty("com.openexchange.http.grizzly.ping", "PROCESSING").trim());
+        }
+        // Rest
         suspendedResponseQueue = Response.createDelayQueue(delayedExecutor);
-        httpRequestInProcessAttr = Grizzly.DEFAULT_ATTRIBUTE_BUILDER.
-                createAttribute("HttpServerFilter.Request");
-        reregisterForReadAttr = Grizzly.DEFAULT_ATTRIBUTE_BUILDER.
-                createAttribute("HttpServerFilter.reregisterForReadAttr");
+        httpRequestInProcessAttr = Grizzly.DEFAULT_ATTRIBUTE_BUILDER.createAttribute("HttpServerFilter.Request");
+        reregisterForReadAttr = Grizzly.DEFAULT_ATTRIBUTE_BUILDER.createAttribute("HttpServerFilter.reregisterForReadAttr");
+    }
+
+    /**
+     * Sets the ping
+     *
+     * @param ping The ping to set
+     */
+    public void setPing(final Ping ping) {
+        this.ping = ping;
     }
 
     @Override
@@ -159,13 +242,12 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
     public void setHttpHandler(final HttpHandler httpHandler) {
         this.httpHandler = httpHandler;
     }
+
     // ----------------------------------------------------- Methods from Filter
 
-
-    @SuppressWarnings({"unchecked", "ReturnInsideFinallyBlock"})
+    @SuppressWarnings({ "unchecked", "ReturnInsideFinallyBlock" })
     @Override
-    public NextAction handleRead(final FilterChainContext ctx)
-          throws IOException {
+    public NextAction handleRead(final FilterChainContext ctx) throws IOException {
         final Object message = ctx.getMessage();
         final Connection connection = ctx.getConnection();
 
@@ -185,24 +267,26 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                 httpRequestInProcessAttr.set(connection, handlerRequest);
                 final Response handlerResponse = handlerRequest.getResponse();
 
-                handlerRequest.initialize(/*handlerResponse, */request, ctx, this);
-                final SuspendStatus suspendStatus = handlerResponse.initialize(
-                        handlerRequest, response, ctx, suspendedResponseQueue, this);
+                handlerRequest.initialize(/* handlerResponse, */request, ctx, this);
+                final SuspendStatus suspendStatus = handlerResponse.initialize(handlerRequest, response, ctx, suspendedResponseQueue, this);
 
-                HttpServerProbeNotifier.notifyRequestReceive(this, connection,
-                        handlerRequest);
+                HttpServerProbeNotifier.notifyRequestReceive(this, connection, handlerRequest);
 
                 boolean wasSuspended = false;
+                boolean pingInitiated = false;
 
                 try {
                     ctx.setMessage(handlerResponse);
 
-                    if (!getConfiguration().isPassTraceRequest()
-                            && request.getMethod() == Method.TRACE) {
+                    if (!getConfiguration().isPassTraceRequest() && request.getMethod() == Method.TRACE) {
                         onTraceRequest(handlerRequest, handlerResponse);
                     } else {
                         final HttpHandler httpHandlerLocal = httpHandler;
                         if (httpHandlerLocal != null) {
+                            // Initiate ping
+                            initiatePing(handlerResponse, ctx);
+                            pingInitiated = true;
+                            // Handle HTTP message
                             httpHandlerLocal.doHandle(handlerRequest, handlerResponse);
                         }
                     }
@@ -225,11 +309,18 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                 } finally {
                     // don't forget to invalidate the suspendStatus
                     wasSuspended = suspendStatus.getAndInvalidate();
+
+                    if (pingInitiated) {
+                        final WatchInfo watchInfo = pingMap.remove(ctx);
+                        if (null != watchInfo) {
+                            watchInfo.timerTask.cancel(false);
+                            Services.getService(TimerService.class).purge();
+                        }
+                    }
                 }
 
                 if (!wasSuspended) {
-                    return afterService(ctx, connection,
-                            handlerRequest, handlerResponse);
+                    return afterService(ctx, connection, handlerRequest, handlerResponse);
                 } else {
                     return ctx.getSuspendAction();
                 }
@@ -258,18 +349,84 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                 // We're finishing the request processing
                 final Response response = (Response) message;
                 final Request request = response.getRequest();
-                return afterService(ctx, connection,
-                        request, response);
+                return afterService(ctx, connection, request, response);
             }
         }
 
         return ctx.getStopAction();
     }
 
+    private void initiatePing(final Response handlerResponse, final FilterChainContext ctx) {
+        final Ping ping = this.ping;
+        if (ping != Ping.NONE) {
+            final TimerService timerService = Services.getService(TimerService.class);
+            if (null != timerService) {
+                final ConcurrentMap<FilterChainContext, WatchInfo> cm = pingMap;
+                final Logger logger = LOGGER;
+                final byte[] crlfBytes = CRLF;
+
+                final int maxPingCount = this.maxPingCount;
+                final AtomicInteger pingCount = new AtomicInteger(maxPingCount <= 0 ? Integer.MAX_VALUE : this.maxPingCount);
+                final AtomicReference<ScheduledTimerTask> ref = new AtomicReference<ScheduledTimerTask>();
+
+                final Runnable r = new Runnable() {
+
+                    @Override
+                    public void run() {
+                        if (pingCount.decrementAndGet() < 0) {
+                            final ScheduledTimerTask timerTask = ref.get();
+                            if (null != timerTask) {
+                                timerTask.cancel(false);
+                            }
+                            return;
+                        }
+                        try {
+                            final WatchInfo watchInfo = cm.get(ctx);
+                            if (null != watchInfo) {
+                                final MemoryManager memoryManager = ctx.getMemoryManager();
+                                if (Ping.PROCESSING == ping) {
+                                    final Buffer encodedBuffer = memoryManager.allocate(128);
+                                    put(memoryManager, encodedBuffer, Charsets.toAsciiBytes("HTTP/1.1 102 Processing"));
+                                    put(memoryManager, encodedBuffer, crlfBytes);
+                                    put(memoryManager, encodedBuffer, crlfBytes);
+                                    encodedBuffer.trim();
+                                    encodedBuffer.allowBufferDispose(true);
+                                    ctx.write(encodedBuffer, true);
+                                } else if (Ping.CONTINUE == ping) {
+                                    final Buffer encodedBuffer = memoryManager.allocate(128);
+                                    put(memoryManager, encodedBuffer, Charsets.toAsciiBytes("HTTP/1.1 100 Continue"));
+                                    put(memoryManager, encodedBuffer, crlfBytes);
+                                    put(memoryManager, encodedBuffer, crlfBytes);
+                                    encodedBuffer.trim();
+                                    encodedBuffer.allowBufferDispose(true);
+                                    ctx.write(encodedBuffer, true);
+                                } else {
+                                    final Buffer buffer = memoryManager.allocate(128);
+                                    put(memoryManager, buffer, Charsets.toAsciiBytes(" "));
+                                    buffer.trim();
+                                    buffer.allowBufferDispose(true);
+                                    final OutputBuffer outputBuffer = handlerResponse.getOutputBuffer();
+                                    outputBuffer.writeBuffer(buffer);
+                                    outputBuffer.flush();
+                                }
+                            }
+                        } catch (final Exception e) {
+                            logger.log(Level.WARNING, "Timer run failed: " + e.getMessage(), e);
+                        }
+                    }
+                };
+
+                final int delay = pingDelay;
+                final ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(r, delay, delay);
+                ref.set(timerTask);
+                cm.put(ctx, new WatchInfo(timerTask));
+            }
+        }
+    }
 
     /**
-     * Override the default implementation to notify the {@link ReadHandler},
-     * if available, of any read error that has occurred during processing.
+     * Override the default implementation to notify the {@link ReadHandler}, if available, of any read error that has occurred during
+     * processing.
      *
      * @param ctx event processing {@link FilterChainContext}
      * @param error error, which occurred during <tt>FilterChain</tt> execution
@@ -278,8 +435,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
     public void exceptionOccurred(FilterChainContext ctx, Throwable error) {
         final Connection c = ctx.getConnection();
 
-        final Request request =
-                httpRequestInProcessAttr.get(c);
+        final Request request = httpRequestInProcessAttr.get(c);
 
         if (request != null) {
             final ReadHandler handler = request.getInputBuffer().getReadHandler();
@@ -299,8 +455,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
     }
 
     @Override
-    protected void onTraceRequest(final Request request,
-            final Response response) throws IOException {
+    protected void onTraceRequest(final Request request, final Response response) throws IOException {
         if (getConfiguration().isTraceEnabled()) {
             HtmlHelper.writeTraceMessage(request, response);
         } else {
@@ -309,16 +464,10 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
         }
     }
 
-
     // --------------------------------------------------------- Private Methods
 
 
-    private NextAction afterService(
-            final FilterChainContext ctx,
-            final Connection connection,
-            final Request request,
-            final Response response)
-            throws IOException {
+    private NextAction afterService(final FilterChainContext ctx, final Connection connection, final Request request, final Response response) throws IOException {
 
         httpRequestInProcessAttr.remove(connection);
 

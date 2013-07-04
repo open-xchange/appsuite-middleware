@@ -406,7 +406,10 @@ public class RdbSettingStorage extends SettingStorage {
         }
         // During reading values all childs may be removed.
         if (setting.isLeaf()) {
-            setting.getParent().removeElement(setting);
+            Setting parent = setting.getParent();
+            if (null != parent) {
+                parent.removeElement(setting);
+            }
         }
     }
 

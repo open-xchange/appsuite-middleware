@@ -51,6 +51,7 @@ package com.openexchange.html.internal;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.java.Stringer;
 
 /**
  * {@link MatcherReplacer} - Implements faster append-and-replace steps for a {@link Matcher matcher} based on an unsynchronized
@@ -164,7 +165,7 @@ public final class MatcherReplacer {
      * @param replacement The literal replacement string
      * @see #appendReplacement(StringBuilder, String)
      */
-    public void appendLiteralReplacement(final StringBuilder sb, final String replacement) {
+    public void appendLiteralReplacement(final Stringer sb, final String replacement) {
         sb.append(input.subSequence(lastPos, matcher.start()));
         sb.append(replacement);
         lastPos = matcher.end();
@@ -235,7 +236,7 @@ public final class MatcherReplacer {
      * @throws IllegalArgumentException If the replacement string refers to a capturing group that does not exist in the pattern
      * @see #appendLiteralReplacement(StringBuilder, String)
      */
-    public void appendReplacement(final StringBuilder sb, final String replacement) {
+    public void appendReplacement(final Stringer sb, final String replacement) {
         sb.append(input.subSequence(lastPos, matcher.start()));
         int cursor = 0;
         final int rlen = replacement.length();
@@ -298,7 +299,7 @@ public final class MatcherReplacer {
      *
      * @param sb The target string builder
      */
-    public void appendTail(final StringBuilder sb) {
+    public void appendTail(final Stringer sb) {
         sb.append(input.subSequence(lastPos, input.length()));
     }
 

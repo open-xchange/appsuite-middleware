@@ -1033,7 +1033,7 @@ public final class IMAPCommandsCollection {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }
@@ -1840,9 +1840,9 @@ public final class IMAPCommandsCollection {
                             final int[] ni = new int[limit];
                             System.arraycopy(tmp, 0, ni, 0, limit);
                             newMsgSeqNums = ni;
-                        } catch (final OXException e) {
-                            throw wrapException(e, null);
                         } catch (final MessagingException e) {
+                            throw wrapException(e, null);
+                        } catch (final RuntimeException e) {
                             throw wrapException(e, null);
                         }
                     } else {

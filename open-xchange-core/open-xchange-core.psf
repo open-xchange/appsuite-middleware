@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,cern.colt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.google.common"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.caching"/>
@@ -9,6 +10,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.calendar"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.calendar.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.capabilities"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.capabilities.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.capabilities.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.charset"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.cluster.discovery"/>

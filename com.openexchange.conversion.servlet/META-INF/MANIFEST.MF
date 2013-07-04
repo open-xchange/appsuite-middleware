@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Conversion Servlet
 Bundle-SymbolicName: com.openexchange.conversion.servlet
-Bundle-Version: 7.2.1
+Bundle-Version: 7.2.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
@@ -16,6 +16,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
  com.openexchange.i18n,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,

@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 7
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -55,12 +55,51 @@ for FILE in ${CONFFILES}; do
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
 done
 
-PROTECT="facebookoauth.properties linkedinoauth.properties msnoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
-for FILE in $PROTECT
-do
-    ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
-done
-exit 0
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    PROTECT="facebookoauth.properties linkedinoauth.properties msnoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
+    for FILE in $PROTECT; do
+        ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
+    done
+
+    # SoftwareChange_Request-1494
+    pfile=/opt/open-xchange/etc/msnoauth.properties
+    if ! ox_exists_property com.openexchange.oauth.msn $pfile; then
+       if grep -E '^com.openexchange.*REPLACE_THIS_WITH_VALUE_OBTAINED_FROM' $pfile > /dev/null; then
+           ox_set_property com.openexchange.oauth.msn false $pfile
+       else
+           ox_set_property com.openexchange.oauth.msn true $pfile
+       fi
+    fi
+    pfile=/opt/open-xchange/etc/yahoooauth.properties
+    if ! ox_exists_property com.openexchange.oauth.yahoo $pfile; then
+       if grep -E '^com.openexchange.*REPLACE_THIS_WITH_VALUE_OBTAINED_FROM' $pfile > /dev/null; then
+           ox_set_property com.openexchange.oauth.yahoo false $pfile
+       else
+           ox_set_property com.openexchange.oauth.yahoo true $pfile
+       fi
+    fi
+    pfile=/opt/open-xchange/etc/linkedinoauth.properties
+    if ! ox_exists_property com.openexchange.oauth.linkedin $pfile; then
+       if grep -E '^com.openexchange.*REPLACE_THIS_WITH_THE_KEY_FROM' $pfile > /dev/null; then
+           ox_set_property com.openexchange.oauth.linkedin false $pfile
+       else
+           ox_set_property com.openexchange.oauth.linkedin true $pfile
+       fi
+    fi
+    pfile=/opt/open-xchange/etc/facebookoauth.properties
+    if ! ox_exists_property com.openexchange.oauth.facebook $pfile; then
+       if grep -E '^com.openexchange.*INSERT_YOUR_API_KEY_HERE' $pfile > /dev/null; then
+           ox_set_property com.openexchange.oauth.facebook false $pfile
+       else
+           ox_set_property com.openexchange.oauth.facebook true $pfile
+       fi
+    fi
+fi
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -84,12 +123,34 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Mon Jul 01 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Third candidate for 7.2.2 release
+* Fri Jun 28 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Second candidate for 7.2.2 release
+* Wed Jun 26 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Release candidate for 7.2.2 release
+* Fri Jun 21 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Second feature freeze for 7.2.2 release
+* Mon Jun 17 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Feature freeze for 7.2.2 release
+* Tue Jun 11 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2013-06-13
 * Mon Jun 10 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2013-06-11
 * Fri Jun 07 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2013-06-20
+* Mon Jun 03 2013 Steffen Templin <marcus.klein@open-xchange.com>
+First sprint increment for 7.2.2 release
+* Wed May 29 2013 Steffen Templin <marcus.klein@open-xchange.com>
+First candidate for 7.2.2 release
+* Tue May 28 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Second build for patch 2013-05-28
+* Mon May 27 2013 Steffen Templin <marcus.klein@open-xchange.com>
+prepare for 7.2.2
 * Thu May 23 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Third candidate for 7.2.1 release
+* Wed May 22 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2013-05-22
 * Wed May 22 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2013-05-22
 * Wed May 22 2013 Steffen Templin <marcus.klein@open-xchange.com>

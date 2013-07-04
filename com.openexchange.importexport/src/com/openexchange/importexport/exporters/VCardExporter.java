@@ -197,7 +197,9 @@ public class VCardExporter implements Exporter {
         Contact.USERFIELD18,
         Contact.USERFIELD19,
         Contact.USERFIELD20,
-        Contact.DEFAULT_ADDRESS
+        Contact.DEFAULT_ADDRESS,
+        Contact.YOMI_FIRST_NAME,
+        Contact.YOMI_LAST_NAME
     };
 
     @Override

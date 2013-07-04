@@ -484,5 +484,14 @@ public final class InternalList {
         // Extends the resources' description field
         new com.openexchange.groupware.update.tasks.EnlargeResourceDescription(),
 
+        // Extends the UID field
+        new com.openexchange.groupware.update.tasks.EnlargeCalendarUid(),
+
+        // Sets the changing date once for users with a different defaultSendAddress
+        new com.openexchange.groupware.update.tasks.ContactAdjustLastModifiedForChangedSenderAddress(),
+
+        // Drop foreign key constraints from obsolete tables
+        new com.openexchange.groupware.update.tasks.HeaderCacheDropFKTask(),
+
     };
 }

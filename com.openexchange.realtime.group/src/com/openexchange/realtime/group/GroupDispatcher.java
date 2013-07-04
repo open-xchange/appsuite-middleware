@@ -122,7 +122,7 @@ public class GroupDispatcher implements ComponentHandle {
         this.id = id;
         this.handler = handler;
         final AtomicReference<Set<ID>> idsRef = this.idsRef;
-        id.on("dispose", new IDEventHandler() {
+        id.on(ID.Events.DISPOSE, new IDEventHandler() {
 
             @Override
             public void handle(String event, ID id, Object source, Map<String, Object> properties) {
@@ -159,16 +159,6 @@ public class GroupDispatcher implements ComponentHandle {
         stanza.trace("Arrived in group dispatcher: " + id);
         if (!handleGroupCommand(stanza)) {
             processStanza(stanza);
-        }
-        if (stanza.traceEnabled()) {
-            // Send analysis back
-            stanza.trace("------------- SENDING RECEIPT ----------------");
-            Stanza stanza2 = stanza.newInstance();
-            stanza2.setFrom(id);
-            stanza2.setTo(stanza.getFrom());
-            stanza2.setTracer(stanza.getTracer());
-            stanza2.addLogMessages(stanza.getLogEntries());
-            send(stanza2);
         }
     }
 
@@ -293,7 +283,7 @@ public class GroupDispatcher implements ComponentHandle {
         }
 
         stamps.put(id, stamp);
-        id.on("dispose", LEAVE);
+        id.on(ID.Events.DISPOSE, LEAVE);
         if (first) {
             firstJoined(id);
         }
@@ -337,7 +327,7 @@ public class GroupDispatcher implements ComponentHandle {
         if (empty) {
             Map<String, Object> properties = new HashMap<String, Object>();
             properties.put("id", id);
-            this.id.trigger("dispose", this, properties);
+            this.id.trigger(ID.Events.DISPOSE, this, properties);
         }
     }
 
@@ -375,7 +365,7 @@ public class GroupDispatcher implements ComponentHandle {
     /**
      * Determine whether an ID is a member of this group. Useful if you want to only accept messages for IDs that are members.
      */
-    protected boolean isMember(ID id) {
+    public boolean isMember(ID id) {
         return idsRef.get().contains(id);
     }
 
@@ -490,6 +480,14 @@ public class GroupDispatcher implements ComponentHandle {
         }
 
         return false;
+    }
+
+    public Stanza getWelcomeMessage(ID onBehalfOf) {
+        throw new UnsupportedOperationException("Clients can not join this group synchronously");
+    }
+
+    public Stanza getSignOffMessage(ID onBehalfOf) {
+        throw new UnsupportedOperationException("Clients can not leave this group synchronously");
     }
 
 }

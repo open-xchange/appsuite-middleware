@@ -127,13 +127,15 @@ public class RdbContactStorage extends DefaultContactStorage {
     public Contact get(Session session, String folderId, String id, ContactField[] fields) throws OXException {
         int objectID = parse(id);
         int contextID = session.getContextId();
+        int folderID = parse(folderId);
         ConnectionHelper connectionHelper = new ConnectionHelper(session);
         Connection connection = connectionHelper.getReadOnly();
         try {
             /*
              * check fields
              */
-            QueryFields queryFields = new QueryFields(fields);
+            QueryFields queryFields = FolderObject.SYSTEM_LDAP_FOLDER_ID == folderID ?
+                new QueryFields(fields, ContactField.INTERNAL_USERID) : new QueryFields(fields);
             if (false == queryFields.hasContactData()) {
                 return null; // nothing to do
             }
@@ -584,6 +586,21 @@ public class RdbContactStorage extends DefaultContactStorage {
     }
 
     @Override
+    public int count(Session session, String folderId, boolean canReadAll) throws OXException {
+        int contextID = session.getContextId();
+        int userID = session.getUserId();
+        ConnectionHelper connectionHelper = new ConnectionHelper(session);
+        Connection connection = connectionHelper.getReadOnly();
+        try {
+            return executor.count(connection, Table.CONTACTS, contextID, userID, parse(folderId), canReadAll);
+        } catch (SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+        } finally {
+            connectionHelper.backReadOnly();
+        }
+    }
+
+    @Override
     public SearchIterator<Contact> searchByBirthday(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
         return searchByAnnualDate(session, folderIDs, from, until, fields, sortOptions, ContactField.BIRTHDAY);
     }
@@ -605,7 +622,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * check fields
              */
-            QueryFields queryFields = new QueryFields(fields, ContactField.OBJECT_ID);
+            QueryFields queryFields = new QueryFields(fields, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID);
             if (false == queryFields.hasContactData()) {
                 return null; // nothing to do
             }
@@ -672,7 +689,8 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * check fields
              */
-            QueryFields queryFields = new QueryFields(fields, ContactField.OBJECT_ID);
+            QueryFields queryFields = FolderObject.SYSTEM_LDAP_FOLDER_ID == parentFolderID ? new QueryFields(fields,
+                ContactField.OBJECT_ID, ContactField.INTERNAL_USERID) : new QueryFields(fields, ContactField.OBJECT_ID);
             if (false == queryFields.hasContactData()) {
                 return null; // nothing to do
             }
@@ -723,7 +741,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * check fields
              */
-            QueryFields queryFields = new QueryFields(fields, ContactField.OBJECT_ID);
+            QueryFields queryFields = new QueryFields(fields, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID);
             if (false == queryFields.hasContactData()) {
                 return null; // nothing to do
             }

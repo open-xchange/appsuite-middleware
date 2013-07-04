@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json;
 
+import java.io.Closeable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,10 +59,12 @@ import com.openexchange.ajax.requesthandler.AJAXState;
 import com.openexchange.ajax.requesthandler.AJAXStateHandler;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.actions.AllAction;
 import com.openexchange.mail.json.actions.AutosaveAction;
+import com.openexchange.mail.json.actions.BounceAction;
 import com.openexchange.mail.json.actions.ClearAction;
 import com.openexchange.mail.json.actions.CopyAction;
 import com.openexchange.mail.json.actions.DeleteAction;
@@ -83,6 +86,7 @@ import com.openexchange.mail.json.actions.ImportAction;
 import com.openexchange.mail.json.actions.ListAction;
 import com.openexchange.mail.json.actions.NewAction;
 import com.openexchange.mail.json.actions.ReceiptAckAction;
+import com.openexchange.mail.json.actions.ResendAction;
 import com.openexchange.mail.json.actions.SearchAction;
 import com.openexchange.mail.json.actions.SimpleThreadStructureAction;
 import com.openexchange.mail.json.actions.TransportMailAction;
@@ -117,6 +121,8 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         actions.put("replyall", new GetReplyAllAction(services));
         actions.put("updates", new GetUpdatesAction(services));
         actions.put("forward", new GetForwardAction(services));
+        actions.put("bounce", new BounceAction(services));
+        actions.put("resend", new ResendAction(services));
         actions.put("attachment", new GetAttachmentAction(services));
         actions.put("attachmentToken", new GetAttachmentTokenAction(services));
         actions.put("zip_attachments", new GetMultipleAttachmentAction(services));
@@ -161,6 +167,7 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         if (null != mailInterface) {
             mailInterface.close(true);
         }
+        Streams.close(state.<Collection<Closeable>>removeProperty(PROPERTY_CLOSEABLES));
     }
 
 }

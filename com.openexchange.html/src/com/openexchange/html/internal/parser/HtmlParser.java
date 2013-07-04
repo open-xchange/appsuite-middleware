@@ -49,14 +49,20 @@
 
 package com.openexchange.html.internal.parser;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 
 /**
@@ -73,16 +79,10 @@ public final class HtmlParser {
 
     private static final String FEATURE_RELAXED = "http://xmlpull.org/v1/doc/features.html#relaxed";
 
-    private static final String FEATURE_PRESERVE_TEXT = "open-xchange.org/preserveText";
-
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(HtmlParser.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(HtmlParser.class);
 
     private static final int INT_IS_EMPTY_TAG = 1;
 
-    /**
-     * Initializes a new {@link HtmlParser}
-     */
     private HtmlParser() {
         super();
     }
@@ -233,25 +233,23 @@ public final class HtmlParser {
                 }
             }
         } catch (final XmlPullParserException e) {
-            LOG.error(composeErrorMessage(e, DEBUG, html), e);
+            LOG.error(composeErrorMessage(e, html), e);
             handler.handleError(e.getMessage());
         } catch (final IOException e) {
-            LOG.error(composeErrorMessage(e, DEBUG, html), e);
+            LOG.error(composeErrorMessage(e, html), e);
             handler.handleError(e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(composeErrorMessage(e, DEBUG, html), e);
+            LOG.error(composeErrorMessage(e, html), e);
             handler.handleError(e.getMessage());
         }
     }
 
-    private static final String ERR01 = "Parsing of HTML content failed: ";
-
-    private static String composeErrorMessage(final Exception e, final boolean appendHtml, final String html) {
+    private static String composeErrorMessage(final Exception e, final String html) {
         final StringBuilder sb = new StringBuilder(html.length() + 256);
-        sb.append(ERR01);
+        sb.append("Parsing of HTML content failed: ");
         sb.append(e.getMessage());
-        if (appendHtml) {
-            sb.append(". Affected HTML content:\n");
+        if (LOG.isDebugEnabled()) {
+            sb.append(". Affected HTML content:").append('\n');
             dumpHtml(html, sb);
         }
         return sb.toString();
@@ -262,8 +260,17 @@ public final class HtmlParser {
         final DecimalFormat df = new DecimalFormat("0000");
         int count = 1;
         for (final String line : lines) {
-            sb.append(df.format(count++)).append(' ').append(line).append("\r\n");
+            sb.append(df.format(count++)).append(' ').append(line).append('\n');
+        }
+        OutputStreamWriter writer = null;
+        try {
+            File file = File.createTempFile("parsefailed", ".html", new File(System.getProperty("java.io.tmpdir")));
+            writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8);
+            writer.write(html);
+        } catch (IOException e) {
+            LOG.error("Problem writing not parsable HTML to tmp directory.", e);
+        } finally {
+            IOUtils.closeQuietly(writer);
         }
     }
-
 }

@@ -146,6 +146,13 @@ public interface Session {
     public static final String PARAM_ALTERNATIVE_ID = "__session.altId".intern();
 
     /**
+     * The parameter for optional token identifier.
+     *
+     * @type <code>java.lang.String</code>
+     */
+    public static final String PARAM_TOKEN = "__session.token".intern();
+
+    /**
      * @return the context identifier.
      */
     public int getContextId();

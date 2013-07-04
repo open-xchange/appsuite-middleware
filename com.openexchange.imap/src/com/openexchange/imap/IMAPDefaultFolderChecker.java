@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
@@ -398,11 +397,7 @@ public class IMAPDefaultFolderChecker {
      * Checks for possible over-quota error.
      */
     protected static boolean isOverQuotaException(final MessagingException e) {
-        if (null == e) {
-            return false;
-        }
-        final String msg = e.getMessage().toLowerCase(Locale.US);
-        return (msg.indexOf("quota") >= 0 || msg.indexOf("limit") >= 0);
+        return MimeMailException.isOverQuotaException(e);
     }
 
     /** Gets fall-back name */
@@ -482,36 +477,22 @@ public class IMAPDefaultFolderChecker {
                 /*
                  * Special handling for over-quota error
                  */
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
-                sb.append("Couldn't check default folder due to exceeded quota restrictions: ");
-                sb.append((null == fullName ? (prefix + name) : fullName));
-                if (Log.appendTraceToMessage()) {
-                    final String lineSeparator = System.getProperty("line.separator");
-                    sb.append(lineSeparator).append(lineSeparator);
-                    appendStackTrace(e.getStackTrace(), sb, new ClassNameMatcher(IMAPDefaultFolderChecker.class.getSimpleName()), lineSeparator);
-                    LOG.warn(sb.toString());
-                } else {
-                    LOG.warn(sb.toString(), e);
-                }
-                setDefaultMailFolder(index, null, cache);
-                final OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
-                imapStore.getImapAccess().addWarnings(Collections.singleton(warning));
-            } else {
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
-                sb.append("Couldn't check default folder: ");
-                sb.append((null == fullName ? (prefix + name) : fullName));
-                if (Log.appendTraceToMessage()) {
-                    final String lineSeparator = System.getProperty("line.separator");
-                    sb.append(lineSeparator).append(lineSeparator);
-                    appendStackTrace(e.getStackTrace(), sb, new ClassNameMatcher(IMAPDefaultFolderChecker.class.getSimpleName()), lineSeparator);
-                    LOG.warn(sb.toString());
-                } else {
-                    LOG.warn(sb.toString(), e);
-                }
-                setDefaultMailFolder(index, null, cache);
-                final OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
-                imapStore.getImapAccess().addWarnings(Collections.singleton(warning));
+                throw MimeMailException.handleMessagingException(e, imapConfig, session);
             }
+            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
+            sb.append("Couldn't check default folder: ");
+            sb.append((null == fullName ? (prefix + name) : fullName));
+            if (Log.appendTraceToMessage()) {
+                final String lineSeparator = System.getProperty("line.separator");
+                sb.append(lineSeparator).append(lineSeparator);
+                appendStackTrace(e.getStackTrace(), sb, new ClassNameMatcher(IMAPDefaultFolderChecker.class.getSimpleName()), lineSeparator);
+                LOG.warn(sb.toString());
+            } else {
+                LOG.warn(sb.toString(), e);
+            }
+            setDefaultMailFolder(index, null, cache);
+            final OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
+            imapStore.getImapAccess().addWarnings(Collections.singleton(warning));
         }
         return null;
     }
@@ -928,7 +909,7 @@ public class IMAPDefaultFolderChecker {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.linkedin.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.apache.commons.logging.Log;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
@@ -63,7 +65,9 @@ import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.oauth.linkedin.LinkedInServiceImpl;
 import com.openexchange.oauth.linkedin.OAuthServiceMetaDataLinkedInImpl;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class Activator extends HousekeepingActivator {
 
@@ -124,11 +128,15 @@ public class Activator extends HousekeepingActivator {
         track(ConfigurationService.class, new ConfigurationServiceRegisterer(context, this));
         track(OAuthService.class, new OAuthServiceRegisterer(context, this));
         openTrackers();
+
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "linkedin");
         registerService(CapabilityChecker.class, new CapabilityChecker() {
 
             @Override
-            public boolean isEnabled(String capability, ServerSession session) throws OXException {
+            public boolean isEnabled(String capability, Session ses) throws OXException {
                 if ("linkedin".equals(capability)) {
+                    final ServerSession session = ServerSessionAdapter.valueOf(ses);
                     if (session.isAnonymous()) {
                         return false;
                     }
@@ -137,9 +145,9 @@ public class Activator extends HousekeepingActivator {
                     return view.opt("com.openexchange.oauth.linkedin", boolean.class, Boolean.TRUE).booleanValue();
                 }
                 return true;
-                
+
             }
-        });
+        }, properties);
         getService(CapabilityService.class).declareCapability("linkedin");
     }
 

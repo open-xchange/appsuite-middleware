@@ -69,6 +69,8 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringBuilderStringer;
+import com.openexchange.java.Stringer;
 
 /**
  * {@link HTMLFilterHandler} - The HTML white-list filter.
@@ -144,7 +146,7 @@ public final class HTMLFilterHandler implements HtmlHandler {
 
     private boolean isCss;
 
-    private final StringBuilder cssBuffer;
+    private final Stringer cssBuffer;
 
     /**
      * Initializes a new {@link HTMLFilterHandler}.
@@ -156,7 +158,7 @@ public final class HTMLFilterHandler implements HtmlHandler {
     public HTMLFilterHandler(final HtmlService htmlService, final int capacity, final Map<String, Map<String, Set<String>>> htmlMap, final Map<String, Set<String>> styleMap) {
         super();
         this.htmlService = htmlService;
-        cssBuffer = new StringBuilder(256);
+        cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         htmlBuilder = new StringBuilder(capacity);
         attrBuilder = new StringBuilder(128);
         this.htmlMap = htmlMap;
@@ -173,7 +175,7 @@ public final class HTMLFilterHandler implements HtmlHandler {
     public HTMLFilterHandler(final HtmlService htmlService, final int capacity, final String mapStr) {
         super();
         this.htmlService = htmlService;
-        cssBuffer = new StringBuilder(256);
+        cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         htmlBuilder = new StringBuilder(capacity);
         attrBuilder = new StringBuilder(128);
         htmlMap = parseHTMLMap(mapStr);
@@ -189,7 +191,7 @@ public final class HTMLFilterHandler implements HtmlHandler {
     public HTMLFilterHandler(final HtmlService htmlService, final int capacity) {
         super();
         this.htmlService = htmlService;
-        cssBuffer = new StringBuilder(256);
+        cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         htmlBuilder = new StringBuilder(capacity);
         attrBuilder = new StringBuilder(128);
         if (null == staticHTMLMap) {

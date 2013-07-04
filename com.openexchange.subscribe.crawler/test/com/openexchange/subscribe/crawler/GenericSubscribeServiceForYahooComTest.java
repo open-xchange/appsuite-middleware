@@ -76,7 +76,7 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
         crawler.setId("com.openexchange.subscribe.crawler.yahoocom");
         crawler.setCrawlerApiVersion(616);
         crawler.setPriority(8);
-        List<Step> steps = new LinkedList<Step>();
+        List<Step<?, ?>> steps = new LinkedList<Step<?, ?>>();
 
         String crapBefore = "[^0-9\\+\\(\\)]*";
 

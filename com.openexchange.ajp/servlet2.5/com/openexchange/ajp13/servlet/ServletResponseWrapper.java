@@ -61,8 +61,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
-import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.AJPv13ServletOutputStream;
+import com.openexchange.ajp13.Services;
 import com.openexchange.ajp13.util.CharsetValidator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.tools.regex.MatcherReplacer;
@@ -91,7 +91,7 @@ public class ServletResponseWrapper implements ServletResponse {
             synchronized (ServletResponseWrapper.class) {
                 tmp = defaultCharset;
                 if (tmp == null) {
-                    final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
                     if (null == service) {
                         return "UTF-8";
                     }

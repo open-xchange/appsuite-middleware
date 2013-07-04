@@ -35,13 +35,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import org.json.helpers.CharArrayWriter;
 import org.json.helpers.UnsynchronizedStringReader;
 import org.json.helpers.UnsynchronizedStringWriter;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -115,30 +113,6 @@ public class JSONObject extends AbstractJSONValue {
      */
     public static void setMaxSize(final int maxSize) {
         MAX_SIZE.set(maxSize <= 0 ? 0 : maxSize);
-    }
-
-    /**
-     * The atomic boolean for <code>use-character-array-pool</code> flag.
-     */
-    protected static final AtomicBoolean USE_CHAR_POOL = new AtomicBoolean();
-
-    /**
-     * Sets whether to use character array pool.
-     *
-     * @param useCharPool <code>true</code> to use character array pool; otherwise <code>false</code>
-     */
-    public static void setUseCharPool(final boolean useCharPool) {
-        USE_CHAR_POOL.set(useCharPool);
-    }
-
-    /**
-     * Initializes character array pool.
-     *
-     * @see #setUseCharPool(boolean)
-     */
-    public static void initCharPool() {
-        USE_CHAR_POOL.set(true);
-        CharArrayPool.getInstance();
     }
 
     private static final String STR_TRUE = "true".intern();
@@ -1001,58 +975,6 @@ public class JSONObject extends AbstractJSONValue {
         int i;
         final int len = string.length();
 
-        if (USE_CHAR_POOL.get()) {
-            final DynamicCharArray sb = new DynamicCharArray(len + 4);
-            try {
-                String t;
-
-                sb.append('"');
-                for (i = 0; i < len; i += 1) {
-                    b = c;
-                    c = string.charAt(i);
-                    switch (c) {
-                    case '\\':
-                    case '"':
-                        sb.append('\\');
-                        sb.append(c);
-                        break;
-                    case '/':
-                        if (b == '<') {
-                            sb.append('\\');
-                        }
-                        sb.append(c);
-                        break;
-                    case '\b':
-                        sb.append("\\b");
-                        break;
-                    case '\t':
-                        sb.append("\\t");
-                        break;
-                    case '\n':
-                        sb.append("\\n");
-                        break;
-                    case '\f':
-                        sb.append("\\f");
-                        break;
-                    case '\r':
-                        sb.append("\\r");
-                        break;
-                    default:
-                        if (c < ' ' || (c >= '\u0080' && c < '\u00a0') || (c >= '\u2000' && c < '\u2100')) {
-                            t = "000" + Integer.toHexString(c);
-                            sb.append("\\u").append(t.substring(t.length() - 4));
-                        } else {
-                            sb.append(c);
-                        }
-                    }
-                }
-                sb.append('"');
-                return sb.toString();
-            } finally {
-                sb.reset();
-            }
-        }
-
         final org.json.helpers.StringAllocator sb = new org.json.helpers.StringAllocator(len + 4);
         String t;
 
@@ -1161,18 +1083,6 @@ public class JSONObject extends AbstractJSONValue {
                 return EMPTY;
             }
 
-            // Check whether to use character array pool
-            if (USE_CHAR_POOL.get()) {
-                final CharArrayWriter writer = new CharArrayWriter(n << 4);
-                try {
-                    write(writer);
-                    return writer.toString();
-                } finally {
-                    writer.resetCharArray();
-                }
-            }
-
-            // Regular
             final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(n << 4);
             write(writer, asciiOnly);
             return writer.toString();
@@ -1215,23 +1125,6 @@ public class JSONObject extends AbstractJSONValue {
         final int n = length();
         if (n == 0) {
             return EMPTY;
-        }
-
-        // Check whether to use character array pool
-        if (JSONObject.USE_CHAR_POOL.get()) {
-            final CharArrayWriter writer = new CharArrayWriter(n << 4);
-            JsonGenerator jGenerator = null;
-            try {
-                jGenerator = createGenerator(writer, false);
-                jGenerator.setPrettyPrinter(STANDARD_DEFAULT_PRETTY_PRINTER);
-                write(this, jGenerator);
-                return writer.toString();
-            } catch (final IOException e) {
-                throw new JSONException(e);
-            } finally {
-                writer.resetCharArray();
-                close(jGenerator);
-            }
         }
 
         JsonGenerator jGenerator = null;

@@ -52,7 +52,6 @@ package com.openexchange.apps.manifests.json.values;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.exception.OXException;
@@ -65,14 +64,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class Hosts implements ComputedServerConfigValueService {
 
-	@Override
-	public void addValue(JSONObject serverConfig, AJAXRequestData request,
-			ServerSession session) throws OXException, JSONException {
-		JSONArray jsonArray = new JSONArray();
-		jsonArray.put(request.getHostname());
-		if (!serverConfig.has("hosts")) {
-			serverConfig.put("hosts", jsonArray);
-		}
-	}
+    @Override
+    public void addValue(final JSONObject serverConfig, final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
+        if (!serverConfig.has("hosts")) {
+            serverConfig.put("hosts", new JSONArray(1).put(request.getHostname()));
+        }
+    }
 
 }

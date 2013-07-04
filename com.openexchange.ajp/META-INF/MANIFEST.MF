@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange AJP Bundle
 Bundle-SymbolicName: com.openexchange.ajp
-Bundle-Version: 7.2.1
+Bundle-Version: 7.2.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
@@ -24,6 +24,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.server,
  com.openexchange.server.impl,
  com.openexchange.session,
+ com.openexchange.sessiond,
  com.openexchange.threadpool,
  com.openexchange.timer,
  com.openexchange.tools,

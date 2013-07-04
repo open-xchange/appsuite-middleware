@@ -53,6 +53,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -66,8 +67,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link DocumentAction}
@@ -76,13 +79,12 @@ import com.openexchange.tools.session.ServerSession;
  */
 @Action(method = RequestMethod.GET, defaultFormat = "file", name = "[filename]?action=document", description = "Get an infoitem document", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "Object ID of the requested infoitem."),
-    @Parameter(name = "folder", description = "Object ID of the infoitem's folder."),
-    @Parameter(name = "version", optional=true, description = "If present the infoitem data describes the given version. Otherwise the current version is returned"),
-    @Parameter(name = "content_type", optional=true, description = "If present the response declares the given content_type in the Content-Type header.")
-}, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this infoitem or the content_type given.")
+    @Parameter(name = "id", description = "Object ID of the requested infoitem."), @Parameter(name = "folder", description = "Object ID of the infoitem's folder."),
+    @Parameter(name = "version", optional = true, description = "If present the infoitem data describes the given version. Otherwise the current version is returned"),
+    @Parameter(name = "content_type", optional = true, description = "If present the response declares the given content_type in the Content-Type header.") }, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this infoitem or the content_type given.")
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
-public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXActionService{
+public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXActionService {
+
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.ID);
@@ -112,25 +114,54 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         return result;
     }
 
-	private void createAndSetETag(File fileMetadata, InfostoreRequest request, AJAXRequestResult result) throws OXException {
-		setETag(FileStorageUtility.getETagFor(fileMetadata), 0, result);
-	}
+    private void createAndSetETag(File fileMetadata, InfostoreRequest request, AJAXRequestResult result) throws OXException {
+        setETag(FileStorageUtility.getETagFor(fileMetadata), 0, result);
+    }
 
-	@Override
-	public boolean checkETag(String clientETag, AJAXRequestData requestData,
-			ServerSession session) throws OXException {
-		final AJAXInfostoreRequest request = new AJAXInfostoreRequest(requestData, session);
-		final IDBasedFileAccess fileAccess = request.getFileAccess();
-	    final File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
-		return FileStorageUtility.getETagFor(fileMetadata).equals(clientETag);
-	}
+    @Override
+    public boolean checkETag(String clientETag, AJAXRequestData requestData, ServerSession session) throws OXException {
+        final AJAXInfostoreRequest request = new AJAXInfostoreRequest(requestData, session);
+        final IDBasedFileAccess fileAccess = request.getFileAccess();
+        final File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
+        return FileStorageUtility.getETagFor(fileMetadata).equals(clientETag);
+    }
 
-	@Override
-	public void setETag(String eTag, long expires, AJAXRequestResult result)
-			throws OXException {
-		 result.setExpires(expires);
-		 if (eTag != null) {
-		     result.setHeader("ETag", eTag);
-		 }
-	}
+    @Override
+    public void setETag(String eTag, long expires, AJAXRequestResult result) throws OXException {
+        result.setExpires(expires);
+        if (eTag != null) {
+            result.setHeader("ETag", eTag);
+        }
+    }
+
+    /**
+     * Gets the locale for given server session
+     *
+     * @param session The server session
+     * @return The locale
+     */
+    private static Locale localeFrom(final ServerSession session) {
+        if (null == session) {
+            return Locale.US;
+        }
+        final User user = session.getUser();
+        if (null != user) {
+            return user.getLocale();
+        }
+        return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
 }

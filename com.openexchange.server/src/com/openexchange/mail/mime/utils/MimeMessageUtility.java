@@ -319,7 +319,7 @@ public final class MimeMessageUtility {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }
@@ -406,7 +406,7 @@ public final class MimeMessageUtility {
     /**
      * Compares (case insensitive) the given values of message header "Content-ID". The leading/trailing characters '<code>&lt;</code>' and
      * ' <code>&gt;</code>' are ignored during comparison
-     * 
+     *
      * @param contentId1 The first content ID
      * @param contentId2 The second content ID
      * @return <code>true</code> if both are equal; otherwise <code>false</code>
@@ -566,6 +566,55 @@ public final class MimeMessageUtility {
     // private static final String MULTI_SUBTYPE_MIXED = "MIXED";
 
     // private static final String MULTI_SUBTYPE_SIGNED = "SIGNED";
+
+    /**
+     * Checks if given multipart contains (file) attachments
+     *
+     * @param mp The multipart to examine
+     * @param subtype The multipart's subtype
+     * @return <code>true</code> if given multipart contains (file) attachments; otherwise <code>false</code>
+     * @throws MessagingException If a messaging error occurs
+     * @throws OXException If a mail error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    public static boolean hasAttachments(final MailPart mp, final String subtype) throws MessagingException, OXException, IOException {
+        if (null == mp) {
+            return false;
+        }
+        if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(subtype)) {
+            if (mp.getEnclosedCount() > 2) {
+                return true;
+            }
+            return hasAttachments0(mp);
+        }
+        // TODO: Think about special check for multipart/signed
+        /*
+         * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) { if (mp.getCount() > 2) { return true; } return hasAttachments0(mp); }
+         */
+        if (mp.getEnclosedCount() > 1) {
+            return true;
+        }
+        return hasAttachments0(mp);
+    }
+
+    private static boolean hasAttachments0(final MailPart mp) throws MessagingException, OXException, IOException {
+        boolean found = false;
+        final int count = mp.getEnclosedCount();
+        final ContentType ct = new ContentType();
+        for (int i = 0; i < count && !found; i++) {
+            final MailPart part = mp.getEnclosedMailPart(i);
+            final String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+            if (tmp != null && tmp.length > 0) {
+                ct.setContentType(MimeMessageUtility.unfold(tmp[0]));
+            } else {
+                ct.setContentType(MimeTypes.MIME_DEFAULT);
+            }
+            if (ct.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
+                found |= hasAttachments((Multipart) part.getContent(), ct.getSubType());
+            }
+        }
+        return found;
+    }
 
     /**
      * Checks if given multipart contains (file) attachments
@@ -1098,6 +1147,10 @@ public final class MimeMessageUtility {
                 ret.add(string);
             }
         }
+        if (tmp.length() > 0) {
+            final String str = tmp.toString();
+            ret.add(str.endsWith(", ") ? str.substring(0, str.length() - 2) : str);
+        }
         return ret;
     }
 
@@ -1257,9 +1310,6 @@ public final class MimeMessageUtility {
         return quotePhrase(personal, true);
     }
 
-    private static final Pattern P_REPL1 = Pattern.compile("\\\\");
-    private static final Pattern P_REPL2 = Pattern.compile("\"");
-
     /**
      * Quotes given phrase if needed.
      *
@@ -1268,6 +1318,21 @@ public final class MimeMessageUtility {
      * @return The quoted phrase
      */
     public static String quotePhrase(final String phrase, final boolean encode) {
+        return quotePhrase(phrase, encode, true);
+    }
+
+    private static final Pattern P_REPL1 = Pattern.compile("\\\\");
+    private static final Pattern P_REPL2 = Pattern.compile("\"");
+
+    /**
+     * Quotes given phrase if needed.
+     *
+     * @param phrase The phrase
+     * @param encode <code>true</code> to encode phrase according to RFC 822 syntax if needed; otherwise <code>false</code>
+     * @param allowNonAscii Whether non-ascci characters need quoting or not
+     * @return The quoted phrase
+     */
+    public static String quotePhrase(final String phrase, final boolean encode, final boolean allowNonAscii) {
         if (null == phrase) {
             return phrase;
         }
@@ -1284,7 +1349,7 @@ public final class MimeMessageUtility {
         boolean needQuoting = false;
         for (int i = 0; !needQuoting && i < len; i++) {
             final char c = phrase.charAt(i);
-            needQuoting = (c == '"' || c == '\\' || (c < 32 && c != '\r' && c != '\n' && c != '\t') || c >= 127 || RFC822.indexOf(c) >= 0);
+            needQuoting = (c == '"' || c == '\\' || (c < 32 && c != '\r' && c != '\n' && c != '\t') || (!allowNonAscii && c >= 127) || RFC822.indexOf(c) >= 0);
         }
         try {
             if (!needQuoting) {

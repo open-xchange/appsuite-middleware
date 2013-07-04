@@ -86,7 +86,7 @@ import com.openexchange.tools.strings.StringParser;
 
 /**
  * {@link AJAXRequestData} contains the parameters and the payload of the request.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -99,7 +99,7 @@ public class AJAXRequestData {
 
         /**
          * Gets this provider's input stream.
-         * 
+         *
          * @return The input stream
          * @throws IOException If an I/O error occurs
          */
@@ -189,7 +189,7 @@ public class AJAXRequestData {
 
     /**
      * Initializes a new {@link AJAXRequestData}.
-     * 
+     *
      * @param json The JSON data
      * @throws OXException If an AJAX error occurs
      */
@@ -200,7 +200,7 @@ public class AJAXRequestData {
 
     /**
      * Initializes a new {@link AJAXRequestData}.
-     * 
+     *
      * @param data The payload to use data
      */
     public AJAXRequestData(final Object data) {
@@ -229,7 +229,7 @@ public class AJAXRequestData {
      * <li> {@link UploadEvent} is set to <code>null</code></li>
      * <li> {@link InputStreamProvider} is set to <code>null</code></li>
      * </ul>
-     * 
+     *
      * @return The copy
      */
     public AJAXRequestData copyOf() {
@@ -262,19 +262,19 @@ public class AJAXRequestData {
         copy.uploadStreamProvider = null;
         return copy;
     }
-    
+
     /**
      * Sets the <code>User-Agent</code> value
-     * 
+     *
      * @param userAgent The <code>User-Agent</code> value
      */
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
     }
-    
+
     /**
      * Gets the <code>User-Agent</code> value
-     * 
+     *
      * @return The <code>User-Agent</code> value
      */
     public String getUserAgent() {
@@ -289,7 +289,7 @@ public class AJAXRequestData {
      * <li> {@link #setCharacterEncoding(String)} </li>
      * <ul>
      * <p>
-     * 
+     *
      * @param resp The <code>HttpServletResponse</code> instance
      * @return This request data with <code>HttpServletResponse</code> instance applied
      */
@@ -300,7 +300,7 @@ public class AJAXRequestData {
 
     /**
      * Examines specified {@code HttpServletRequest} instance.
-     * 
+     *
      * @param servletRequest The HTTP Servlet request to examine
      */
     public void examineServletRequest(final HttpServletRequest servletRequest) {
@@ -312,7 +312,7 @@ public class AJAXRequestData {
 
     /**
      * Adds specified decorator identifier.
-     * 
+     *
      * @param decoratorId The decorator identifier
      * @return This AJAX request data instance with decorator identifier added
      */
@@ -323,7 +323,7 @@ public class AJAXRequestData {
 
     /**
      * Adds specified decorator identifiers.
-     * 
+     *
      * @param decoratorId The decorator identifiers
      * @return This AJAX request data instance with decorator identifiers added
      */
@@ -341,7 +341,7 @@ public class AJAXRequestData {
      * <p>
      * Calling flush() on the OutputStream commits the response. Either this method or {@link #getWriter} may be called to write the
      * body, not both.
-     * 
+     *
      * @return A {@link OutputStream} for writing binary data or <code>null</code>
      * @throws IllegalStateException If the <code>getWriter</code> method has already been called
      * @throws IOException If an input or output exception occurred
@@ -363,7 +363,7 @@ public class AJAXRequestData {
      * Calling flush() on the <code>PrintWriter</code> commits the response.
      * <p>
      * Either this method or {@link #getOutputStream} may be called to write the body, not both.
-     * 
+     *
      * @return A <code>PrintWriter</code> object that can return character data to the client or <code>null</code>
      * @throws UnsupportedEncodingException If the character encoding is invalid
      * @throws IllegalStateException If the <code>getOutputStream</code> method has already been called
@@ -383,7 +383,7 @@ public class AJAXRequestData {
      * <p>
      * This method can be called repeatedly to change the character encoding. This method has no effect if it is called after
      * <code>optWriter</code> has been called or after the response has been committed.
-     * 
+     *
      * @param charset A String specifying only the character set defined by IANA Character Sets
      *            (http://www.iana.org/assignments/character-sets)
      * @return <code>true</code> if set; otherwise <code>false</code>
@@ -401,7 +401,7 @@ public class AJAXRequestData {
      * Sets specified header.
      * <p>
      * Requires a valid {@link HttpServletResponse} instance to be available; otherwise this is a no-op.
-     * 
+     *
      * @param name The name
      * @param value The value
      * @return <code>true</code> if set; otherwise <code>false</code>
@@ -418,7 +418,7 @@ public class AJAXRequestData {
     /**
      * Remove <tt>Pragma</tt> response header value if we are going to write directly into servlet's output stream cause then some browsers
      * do not allow this header.
-     * 
+     *
      * @return <code>true</code> if applied; otherwise <code>false</code>
      */
     public boolean removeCachingHeader() {
@@ -461,7 +461,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the decorator identifiers
-     * 
+     *
      * @return The decorator identifiers
      */
     public List<String> getDecoratorIds() {
@@ -470,7 +470,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the session
-     * 
+     *
      * @return The session
      */
     public ServerSession getSession() {
@@ -479,7 +479,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the session
-     * 
+     *
      * @param session The session to set
      */
     public void setSession(final ServerSession session) {
@@ -488,7 +488,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the HTTP Servlet request.
-     * 
+     *
      * @return The HTTP Servlet request or <code>null</code> if absent
      */
     public HttpServletRequest optHttpServletRequest() {
@@ -497,7 +497,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the HTTP Servlet request.
-     * 
+     *
      * @param httpServletRequest The HTTP Servlet request to set
      */
     public void setHttpServletRequest(final HttpServletRequest httpServletRequest) {
@@ -509,7 +509,7 @@ public class AJAXRequestData {
      * Gets the expires time.
      * <p>
      * Have a notion of a time-to-live value.
-     * 
+     *
      * @return The expires time or <code>-1</code> for no expiry
      */
     public long getExpires() {
@@ -518,7 +518,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the expires time
-     * 
+     *
      * @param expires The expires time or <code>-1</code> for no expiry
      */
     public void setExpires(final long expires) {
@@ -527,7 +527,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the ETag which is the <code>"If-None-Match"</code> header taken from request.
-     * 
+     *
      * @return The ETag or <code>null</code>
      */
     public String getETag() {
@@ -543,7 +543,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the ETag which is the <code>"If-None-Match"</code> header taken from request.
-     * 
+     *
      * @param eTag The ETag to set
      */
     public void setETag(final String eTag) {
@@ -557,7 +557,7 @@ public class AJAXRequestData {
      * This method returns <code>null</code> if there was no extra path information.
      * <p>
      * Same as the value of the CGI variable PATH_INFO.
-     * 
+     *
      * @return a <code>String</code>, decoded by the web container, specifying extra path information that comes after the servlet path but
      *         before the query string in the request URL; or <code>null</code> if the URL does not have any extra path information
      */
@@ -567,7 +567,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the extra path information.
-     * 
+     *
      * @param pathInfo The extra path information to set
      */
     public void setPathInfo(final String pathInfo) {
@@ -576,7 +576,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the URI part after path to the Servlet.
-     * 
+     *
      * @param servletRequestUri The URI part
      */
     public void setServletRequestURI(final String servletRequestUri) {
@@ -585,7 +585,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the URI part after path to the Servlet.
-     * 
+     *
      * @return The URI part or <code>null</code> if not applicable
      */
     public String getSerlvetRequestURI() {
@@ -596,7 +596,7 @@ public class AJAXRequestData {
      * Puts given name-value-pair into this data's parameters.
      * <p>
      * A <code>null</code> value removes the mapping.
-     * 
+     *
      * @param name The parameter name
      * @param value The parameter value
      * @throws NullPointerException If name is <code>null</code>
@@ -619,7 +619,7 @@ public class AJAXRequestData {
 
     /**
      * Checks for presence of specified parameter.
-     * 
+     *
      * @param name The parameter name
      * @return <code>true</code> if such a parameter exists; otherwise <code>false</code> if absent
      */
@@ -632,7 +632,7 @@ public class AJAXRequestData {
 
     /**
      * Gets optional <code>int</code> parameter.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code> value or <code>-1</code> if absent
      * @throws OXException If parameter value is not a number
@@ -654,7 +654,7 @@ public class AJAXRequestData {
 
     /**
      * Gets this request's parameters as a {@link Map map}
-     * 
+     *
      * @return The parameters as a {@link Map map}
      */
     public Map<String, String> getParameters() {
@@ -668,7 +668,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the comma-separated value.
-     * 
+     *
      * @param name The parameter name
      * @return The values as an array
      */
@@ -685,7 +685,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the value mapped to given parameter name.
-     * 
+     *
      * @param name The parameter name
      * @return The value mapped to given parameter name or <code>null</code> if not present
      * @throws NullPointerException If name is <code>null</code>
@@ -699,7 +699,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the value mapped to given parameter name.
-     * 
+     *
      * @param name The parameter name
      * @return The value mapped to given parameter name
      * @throws NullPointerException If name is <code>null</code>
@@ -718,7 +718,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the value mapped to given parameter name.
-     * 
+     *
      * @param name The parameter name
      * @return The value mapped to given parameter name
      * @throws NullPointerException If name is <code>null</code>
@@ -730,7 +730,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the value mapped to given parameter name.
-     * 
+     *
      * @param name The parameter name
      * @return The value mapped to given parameter name
      * @throws NullPointerException If name is <code>null</code>
@@ -749,7 +749,7 @@ public class AJAXRequestData {
 
     /**
      * Checks for presence of comma-separated <code>int</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code> array
      * @throws OXException If an error occurs
@@ -781,7 +781,7 @@ public class AJAXRequestData {
 
     /**
      * Checks for presence of comma-separated <code>String</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>String</code> array
      * @throws OXException If parameter is absent
@@ -796,7 +796,7 @@ public class AJAXRequestData {
 
     /**
      * Tries to get a parameter value as parsed as a certain type
-     * 
+     *
      * @param name The parameter name
      * @param coerceTo The type the parameter should be interpreted as
      * @return The coerced value
@@ -817,7 +817,7 @@ public class AJAXRequestData {
 
     /**
      * Gets all available parameter names wrapped by an {@link Iterator iterator}.
-     * 
+     *
      * @return The {@link Iterator iterator} for available parameter names
      */
     public Iterator<String> getParameterNames() {
@@ -826,7 +826,7 @@ public class AJAXRequestData {
 
     /**
      * Gets an {@link Iterator iterator} for those parameters not matching given parameter names.
-     * 
+     *
      * @param nonMatchingParameterNames The non-matching parameter names
      * @return An {@link Iterator iterator} for non-matching parameters
      */
@@ -838,7 +838,7 @@ public class AJAXRequestData {
 
     /**
      * Gets an {@link Iterator iterator} for those parameters matching given parameter names.
-     * 
+     *
      * @param matchingParameterNames The matching parameter names
      * @return An {@link Iterator iterator} for matching parameters
      */
@@ -850,7 +850,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the data object.
-     * 
+     *
      * @return The data object or <code>null</code> if not available
      */
     public Object getData() {
@@ -859,7 +859,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the data object.
-     * 
+     *
      * @param data The data object to set
      */
     public void setData(final Object data) {
@@ -868,7 +868,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the format
-     * 
+     *
      * @return The format
      */
     public String getFormat() {
@@ -877,7 +877,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the format
-     * 
+     *
      * @param format The format to set
      */
     public void setFormat(final String format) {
@@ -888,7 +888,7 @@ public class AJAXRequestData {
      * Whether this request has a secure connection.
      * <p>
      * <b>Note</b>: This flag should already consider setting of <tt>'com.openexchange.forceHTTPS'</tt> property
-     * 
+     *
      * @return <code>true</code> if this request has a secure connection; otherwise <code>false</code>
      */
     public boolean isSecure() {
@@ -897,7 +897,7 @@ public class AJAXRequestData {
 
     /**
      * Checks if this request data signals extended response.
-     * 
+     *
      * @param request The request data
      * @return <code>true</code> if extended response is indicated; otherwise <code>false</code>
      */
@@ -907,7 +907,7 @@ public class AJAXRequestData {
 
     /**
      * Utility method that determines whether the request contains multipart content.
-     * 
+     *
      * @return <code>true</code> if the request is multipart; <code>false</code> otherwise.
      */
     public boolean isMultipartContent() {
@@ -916,7 +916,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the whether the request contains multipart content
-     * 
+     *
      * @param multipart <code>true</code> if the request is multipart; <code>false</code> otherwise.
      */
     public void setMultipart(final boolean multipart) {
@@ -927,7 +927,7 @@ public class AJAXRequestData {
      * Sets whether this request has a secure connection.
      * <p>
      * <b>Note</b>: This flag should already consider setting of <tt>'com.openexchange.forceHTTPS'</tt> property
-     * 
+     *
      * @param secure <code>true</code> if this request has a secure connection; otherwise <code>false</code>
      */
     public void setSecure(final boolean secure) {
@@ -936,7 +936,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the upload stream. Retrieves the body of the request as binary data as an {@link InputStream}.
-     * 
+     *
      * @return The upload stream or <code>null</code> if not available
      * @throws IOException If an I/O error occurs
      */
@@ -946,7 +946,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the upload stream provider
-     * 
+     *
      * @param uploadStream The upload stream provider to set
      */
     public void setUploadStreamProvider(final InputStreamProvider uploadStreamProvider) {
@@ -956,7 +956,7 @@ public class AJAXRequestData {
     /**
      * Computes a list of missing parameters from a list of mandatory parameters. Or use {@link #require(String...)} to check for the
      * presence of certain parameters
-     * 
+     *
      * @param mandatoryParameters The mandatory parameters expected.
      * @return A list of missing parameter names
      */
@@ -982,7 +982,7 @@ public class AJAXRequestData {
 
     /**
      * Signals if a parameter is set
-     * 
+     *
      * @return <code>true</code> if set; otherwise <code>false</code>
      */
     public boolean isSet(final String paramName) {
@@ -991,7 +991,7 @@ public class AJAXRequestData {
 
     /**
      * Sets a header value.
-     * 
+     *
      * @param header The header name
      * @param value The header value
      */
@@ -1007,7 +1007,7 @@ public class AJAXRequestData {
 
     /**
      * Gets a header value.
-     * 
+     *
      * @return The header value or <code>null</code>
      */
     public String getHeader(final String header) {
@@ -1016,7 +1016,7 @@ public class AJAXRequestData {
 
     /**
      * Gets a (coerced) header value
-     * 
+     *
      * @return The header value or <code>null</code>
      */
     public <T> T getHeader(final String header, final Class<T> coerceTo) {
@@ -1025,7 +1025,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the headers
-     * 
+     *
      * @return The headers
      */
     public Map<String, String> getHeaders() {
@@ -1035,7 +1035,7 @@ public class AJAXRequestData {
     /**
      * Find out whether this request contains an uploaded file. Note that this is only possible via a servlet interface and not via the
      * multiple module.
-     * 
+     *
      * @return <code>true</code> if one or more files were uploaded, <code>false</code> otherwise.
      * @throws OXException If upload files cannot be processed
      */
@@ -1046,7 +1046,7 @@ public class AJAXRequestData {
 
     /**
      * Retrieve file uploads.
-     * 
+     *
      * @return A list of file uploads.
      * @throws OXException If upload files cannot be processed
      */
@@ -1057,7 +1057,7 @@ public class AJAXRequestData {
 
     /**
      * Retrieve a file with a given form name.
-     * 
+     *
      * @param name The name of the form field that include the file
      * @return The file, or null if no file field of this name was found
      * @throws OXException If upload files cannot be processed
@@ -1096,47 +1096,73 @@ public class AJAXRequestData {
     }
 
     /**
-     * Constructs a URL to this server, injecting the hostname and optionally the jvm route.
-     * 
-     * @param protocol The protocol to use (http or https). If <code>null</code>, defaults to the protocol used for this request.
+     * Constructs a URL to this server, injecting the host name and optionally the JVM route.
+     *
+     * <pre>
+     *  &lt;protocol&gt; + "http://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt;
+     * </pre>
+     *
      * @param path The path on the server. If <code>null</code> no path is inserted
-     * @param withRoute Whether to include the jvm route in the server URL or not
+     * @param withRoute Whether to include the JVM route in the server URL or not
+     * @return A string builder with the URL so far, ready for meddling.
+     */
+    public StringBuilder constructURL(final String path, final boolean withRoute) {
+        return constructURL(null, path, withRoute, null);
+    }
+
+    /**
+     * Constructs a URL to this server, injecting the host name and optionally the JVM route.
+     *
+     * <pre>
+     *  &lt;protocol&gt; + "://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt; + "?" + &lt;query-string&gt;
+     * </pre>
+     *
+     * @param protocol The protocol to use (HTTP or HTTPS). If <code>null</code>, defaults to the protocol used for this request.
+     * @param path The path on the server. If <code>null</code> no path is inserted
+     * @param withRoute Whether to include the JVM route in the server URL or not
      * @param query The query string. If <code>null</code> no query is included
      * @return A string builder with the URL so far, ready for meddling.
      */
     public StringBuilder constructURL(final String protocol, final String path, final boolean withRoute, final String query) {
-        final StringBuilder url = new StringBuilder();
-        String prot = protocol;
-        if (prot == null) {
-            prot = isSecure() ? "https://" : "http://";
+        final StringBuilder url = new StringBuilder(64 + (null == query ? 0 : query.length()));
+        // Protocol/schema
+        {
+            String prot = protocol;
+            if (prot == null) {
+                prot = isSecure() ? "https://" : "http://";
+            }
+            url.append(prot);
+            if (!prot.endsWith("://")) {
+                url.append("://");
+            }
         }
-        url.append(prot);
-        if (!prot.endsWith("://")) {
-            url.append("://");
-        }
-
+        // Host name
         url.append(hostname);
+        // Path
         if (path != null) {
-            if (path.length() == 0 || path.charAt(0) != '/') {
+            if (!path.startsWith("/")) {
                 url.append('/');
             }
             url.append(path);
         }
+        // JVM route
         if (withRoute) {
             url.append(";jsessionid=").append(route);
         }
+        // Query string
         if (query != null) {
-            if (query.length() == 0 || query.charAt(0) != '?') {
+            if (!query.startsWith("?")) {
                 url.append('?');
             }
             url.append(query);
         }
+        // Return URL
         return url;
     }
 
     /**
      * Gets the host name either fetched from HTTP request or from host name service
-     * 
+     *
      * @return The host name
      */
     public String getHostname() {
@@ -1145,7 +1171,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the host name either fetched from HTTP request or from host name service
-     * 
+     *
      * @param hostname The host name
      */
     public void setHostname(final String hostname) {
@@ -1154,7 +1180,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the AJP route: &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
-     * 
+     *
      * @return The AJP route
      */
     public String getRoute() {
@@ -1163,7 +1189,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the remote address
-     * 
+     *
      * @return The remote address
      */
     public String getRemoteAddress() {
@@ -1172,7 +1198,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the remote address
-     * 
+     *
      * @param remoteAddress The remote address to set
      */
     public void setRemoteAddress(final String remoteAddress) {
@@ -1181,7 +1207,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the AJP route: &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
-     * 
+     *
      * @param route The AJP route
      */
     public void setRoute(final String route) {
@@ -1190,7 +1216,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the associated upload event.
-     * 
+     *
      * @return The upload event
      * @throws OXException If upload files cannot be processed
      */
@@ -1213,7 +1239,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the module, e.g. <code>"mail"</code>.
-     * 
+     *
      * @return The module
      */
     public String getModule() {
@@ -1222,7 +1248,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the module, e.g. <code>"mail"</code>.
-     * 
+     *
      * @param module The module
      */
     public void setModule(final String module) {
@@ -1231,7 +1257,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the action, e.g. <code>"all"</code>.
-     * 
+     *
      * @return The action
      */
     public String getAction() {
@@ -1240,7 +1266,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the action, e.g. <code>"all"</code>.
-     * 
+     *
      * @param action The action
      */
     public void setAction(final String action) {
@@ -1249,7 +1275,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the data object.
-     * 
+     *
      * @param object The data object
      * @param format The data's format
      */
@@ -1260,7 +1286,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the request state.
-     * 
+     *
      * @param state The state
      */
     public void setState(final AJAXState state) {
@@ -1269,7 +1295,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the request state.
-     * 
+     *
      * @return The state
      */
     public AJAXState getState() {
@@ -1281,7 +1307,7 @@ public class AJAXRequestData {
 
     /**
      * Tests existence of named property.
-     * 
+     *
      * @param name The name
      * @return <code>true</code> if existent; else <code>false</code>
      */
@@ -1294,7 +1320,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the property name.
-     * 
+     *
      * @param name The name
      * @return The value or <code>null</code> if absent
      */
@@ -1312,7 +1338,7 @@ public class AJAXRequestData {
 
     /**
      * Sets specified property. A <code>null</code> value performs a remove.
-     * 
+     *
      * @param name The property name
      * @param value The property value
      */
@@ -1333,7 +1359,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the property names.
-     * 
+     *
      * @return The property names
      */
     public Set<String> getPropertyNames() {
@@ -1342,7 +1368,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the request data's properties.
-     * 
+     *
      * @return The properties
      */
     public Map<String, Object> getProperties() {
@@ -1357,7 +1383,7 @@ public class AJAXRequestData {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }
@@ -1366,7 +1392,7 @@ public class AJAXRequestData {
      * Sets the path prefix.
      * <p>
      * &lt;prefix&gt; + <code>'/'</code> + &lt;module&gt;
-     * 
+     *
      * @param prefix The prefix
      */
     public void setPrefix(String prefix) {
@@ -1377,7 +1403,7 @@ public class AJAXRequestData {
      * Gets the path prefix.
      * <p>
      * &lt;prefix&gt; + <code>'/'</code> + &lt;module&gt;
-     * 
+     *
      * @return The prefix
      */
     public String getPrefix() {

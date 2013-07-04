@@ -165,7 +165,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
 
     /**
      * Gets the optional folder service decorator.
-     * 
+     *
      * @return The folder service decorator or <code>null</code>
      */
     protected final FolderServiceDecorator getDecorator() {
@@ -309,7 +309,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             final int createdBy = f.getCreatedBy();
             final Type type = f.getType();
             if (SharedType.getInstance().equals(type)) {
-                userizedFolder = new UserizedFolderImpl(f);
+                userizedFolder = new UserizedFolderImpl(f, storageParameters.getSession(), storageParameters.getUser(), storageParameters.getContext());
                 userizedFolder.setDefault(false);
                 isShared = true;
             } else if ((createdBy >= 0) && (createdBy != getUserId()) && PrivateType.getInstance().equals(type)) {
@@ -328,12 +328,12 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                     openedStorages.add(curStorage);
                 }
                 f = curStorage.prepareFolder(treeId, f, storageParameters);
-                userizedFolder = new UserizedFolderImpl(f);
+                userizedFolder = new UserizedFolderImpl(f, storageParameters.getSession(), storageParameters.getUser(), storageParameters.getContext());
                 userizedFolder.setDefault(false);
                 userizedFolder.setType(SharedType.getInstance());
                 isShared = true;
             } else {
-                userizedFolder = new UserizedFolderImpl(f);
+                userizedFolder = new UserizedFolderImpl(f, storageParameters.getSession(), storageParameters.getUser(), storageParameters.getContext());
                 isShared = false;
             }
         }

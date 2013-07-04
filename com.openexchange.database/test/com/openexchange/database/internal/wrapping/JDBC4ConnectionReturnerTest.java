@@ -87,9 +87,14 @@ public class JDBC4ConnectionReturnerTest {
     }
 
     private static Constructor<?> getConstructor() throws ClassNotFoundException, SecurityException, NoSuchMethodException {
-        final Class<?> clazz;
+        Class<?> clazz;
         if (isJDBC41()) {
-            clazz = Class.forName("com.openexchange.database.internal.wrapping.JDBC41ConnectionReturner");
+            try {
+                clazz = Class.forName("com.openexchange.database.internal.wrapping.JDBC41ConnectionReturner");
+            } catch (ClassNotFoundException e) {
+                // maybe test executing JVM is newer. Try to load old class.
+                clazz = Class.forName("com.openexchange.database.internal.wrapping.JDBC4ConnectionReturner");
+            }
         } else {
             clazz = Class.forName("com.openexchange.database.internal.wrapping.JDBC4ConnectionReturner");
         }

@@ -55,6 +55,7 @@ import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
@@ -201,7 +202,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         return retval.toString();
     }
 
-    protected MBeanServerConnection initConnection(final boolean adminstats, final HashMap<String, String[]> env) throws InterruptedException, IOException {
+    protected MBeanServerConnection initConnection(final boolean adminstats, final Map<String, String[]> env) throws InterruptedException, IOException {
         updatejmxurl(adminstats);
         // Set timeout here, it is given in ms
         final long timeout = 2000;
@@ -284,7 +285,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         }
     }
 
-    protected HashMap<String, String[]> setCreds(final AdminParser parser, HashMap<String, String[]> env) throws CLIIllegalOptionValueException {
+    protected Map<String, String[]> setCreds(final AdminParser parser) throws CLIIllegalOptionValueException {
         final String jmxuser = (String)parser.getOptionValue(this.jmxuser);
         final String jmxpass = (String)parser.getOptionValue(this.jmxpass);
 
@@ -292,11 +293,13 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
             if( jmxpass == null ) {
                 throw new CLIIllegalOptionValueException(this.jmxpass,null);
             }
-            env = new HashMap<String, String[]>();
+            Map<String, String[]> env = new HashMap<String, String[]>();
             final String[] creds = new String[]{ jmxuser, jmxpass };
             env.put(JMXConnector.CREDENTIALS, creds);
+            return env;
+        } else {
+            return null;
         }
-        return env;
     }
 
     protected void readAndSetHost(final AdminParser parser) {
@@ -314,8 +317,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         try {
             parser.ownparse(args);
 
-            HashMap<String, String[]> env = null;
-            env = setCreds(parser, env);
+            Map<String, String[]> env = setCreds(parser);
 
             readAndSetHost(parser);
 
@@ -377,6 +379,6 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
     	}
     }
 
-    protected abstract void furtherOptionsHandling(AdminParser parser, HashMap<String, String[]> env) throws InterruptedException, IOException, MalformedURLException, InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, MalformedObjectNameException, InvalidDataException, JMException;
+    protected abstract void furtherOptionsHandling(AdminParser parser, Map<String, String[]> env) throws InterruptedException, IOException, MalformedURLException, InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, MalformedObjectNameException, InvalidDataException, JMException;
 
 }

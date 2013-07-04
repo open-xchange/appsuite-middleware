@@ -57,7 +57,9 @@ import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -66,28 +68,29 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class MailIndexChecker implements CapabilityChecker {
-    
+
     public static final String CAPABILITY = "indexedSearch-mail";
-    
+
     private final ServiceLookup serviceLookup;
-    
+
     public MailIndexChecker(ServiceLookup serviceLookup) {
         super();
         this.serviceLookup = serviceLookup;
     }
 
     @Override
-    public boolean isEnabled(String capability, ServerSession session) throws OXException {
+    public boolean isEnabled(String capability, Session ses) throws OXException {
         if (capability.equals(CAPABILITY)) {
+            final ServerSession session = ServerSessionAdapter.valueOf(ses);
             if (session.isAnonymous()) {
                 return false;
             }
-            
+
             IndexFacadeService indexFacade = serviceLookup.getOptionalService(IndexFacadeService.class);
             if (indexFacade == null) {
                 return false;
             }
-            
+
             try {
                 IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, session);
                 try {
@@ -99,11 +102,11 @@ public class MailIndexChecker implements CapabilityChecker {
                 if (IndexExceptionCodes.INDEXING_NOT_ENABLED.equals(e) || IndexExceptionCodes.INDEX_LOCKED.equals(e)) {
                     return false;
                 }
-                
+
                 throw e;
             }
         }
-        
+
         return true;
     }
 

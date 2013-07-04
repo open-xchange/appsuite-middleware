@@ -453,10 +453,11 @@ public class ImageTransformationsImpl implements ImageTransformations {
             if (null != directory) {
                 orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
             }
-            JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
-            if (null != jpegDirectory) {
-                width = jpegDirectory.getImageWidth();
-                height = jpegDirectory.getImageHeight();
+            Directory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
+            if (null != jpegDirectory && jpegDirectory instanceof JpegDirectory) {
+                JpegDirectory jpegDirectory2 = (JpegDirectory) jpegDirectory;
+                width = jpegDirectory2.getImageWidth();
+                height = jpegDirectory2.getImageHeight();
             }
         } catch (MetadataException e) {
             LOG.debug("Unable to retrieve image information.", e);

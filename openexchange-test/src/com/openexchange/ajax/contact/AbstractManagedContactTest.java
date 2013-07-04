@@ -79,7 +79,7 @@ public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
 	    folderManager.setFailOnError(false);
 
 	    UserValues values = getClient().getValues();
-	    FolderObject folder = folderManager.generateFolder(
+	    FolderObject folder = folderManager.generatePublicFolder(
 	    		"ManagedContactTest_"+(new Date().getTime()),
 	    		Module.CONTACTS.getFolderConstant(),
 	    		values.getPrivateContactFolder(),

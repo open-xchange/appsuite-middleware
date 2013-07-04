@@ -50,11 +50,14 @@
 package com.openexchange.mail.json.actions;
 
 import static com.openexchange.mail.json.parser.MessageParser.parseAddressKey;
+import java.io.Closeable;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -75,6 +78,7 @@ import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.json.MailRequest;
@@ -82,6 +86,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -118,8 +123,9 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     /**
      * Cachable formats: <code>"apiResponse"</code>, <code>"json"</code>.
      */
-    protected static final Set<String> CACHABLE_FORMATS = Collections.unmodifiableSet(new HashSet<String>(
-        Arrays.asList("apiResponse", "json")));
+    protected static final Set<String> CACHABLE_FORMATS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+        "apiResponse",
+        "json")));
 
     /**
      * Gets the service of specified type
@@ -145,10 +151,9 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         final AJAXState state = mailRequest.getRequest().getState();
         MailServletInterface mailInterface = null;
         if (state == null) {
-        	return MailServletInterface.getInstance(mailRequest.getSession());
-        } else {
-        	mailInterface = state.optProperty(PROPERTY_MAIL_IFACE);
+            return MailServletInterface.getInstance(mailRequest.getSession());
         }
+        mailInterface = state.optProperty(PROPERTY_MAIL_IFACE);
         if (mailInterface == null) {
             final MailServletInterface newMailInterface = MailServletInterface.getInstance(mailRequest.getSession());
             mailInterface = state.putProperty(PROPERTY_MAIL_IFACE, newMailInterface);
@@ -159,6 +164,29 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             }
         }
         return mailInterface;
+    }
+
+    /**
+     * Gets the closeables.
+     *
+     * @param mailRequest The mail request
+     * @return The closeables or <code>null</code> if state is absent
+     * @throws OXException If closebales cannot be returned
+     */
+    protected Collection<Closeable> getCloseables(final MailRequest mailRequest) throws OXException {
+        final AJAXState state = mailRequest.getRequest().getState();
+        if (state == null) {
+            return null;
+        }
+        Collection<Closeable> closeables = state.optProperty(PROPERTY_CLOSEABLES);
+        if (null == closeables) {
+            final Collection<Closeable> newCloseables = new LinkedList<Closeable>();
+            closeables = state.putProperty(PROPERTY_CLOSEABLES, newCloseables);
+            if (null == closeables) {
+                closeables = newCloseables;
+            }
+        }
+        return closeables;
     }
 
     @Override
@@ -311,8 +339,8 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 usm.setAllowHTMLImages(false);
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             } else {
-                LOG.warn(new com.openexchange.java.StringAllocator(64).append("Unknown value in parameter ").append(Mail.PARAMETER_VIEW).append(": ").append(view).append(
-                    ". Using user's mail settings as fallback."));
+                LOG.warn(new com.openexchange.java.StringAllocator(64).append("Unknown value in parameter ").append(Mail.PARAMETER_VIEW).append(
+                    ": ").append(view).append(". Using user's mail settings as fallback."));
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             }
         } else {
@@ -386,6 +414,14 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                     for (final String alias : aliases) {
                         validAddrs.add(new QuotedInternetAddress(alias));
                     }
+                    if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
+                        MsisdnUtility.addMsisdnAddress(validAddrs, session);
+                        final String address = from.getAddress();
+                        final int pos = address.indexOf('/');
+                        if (pos > 0) {
+                            from.setAddress(address.substring(0, pos));
+                        }
+                    }
                     if (!validAddrs.contains(from)) {
                         throw MailExceptionCode.INVALID_SENDER.create(from.toString());
                     }
@@ -412,7 +448,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

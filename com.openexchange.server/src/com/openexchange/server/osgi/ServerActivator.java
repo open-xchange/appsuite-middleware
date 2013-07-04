@@ -60,7 +60,6 @@ import javax.servlet.ServletException;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
 import org.apache.commons.logging.Log;
-import org.json.CharArrayPool;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.osgi.framework.BundleActivator;
@@ -83,6 +82,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.charset.CustomCharsetProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -156,6 +156,7 @@ import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.loginhandler.MailLoginHandler;
 import com.openexchange.mail.loginhandler.TransportLoginHandler;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.osgi.MailCapabilityServiceTracker;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
 import com.openexchange.mail.osgi.MailcapServiceTracker;
 import com.openexchange.mail.osgi.TransportProviderServiceTracker;
@@ -365,26 +366,6 @@ public final class ServerActivator extends HousekeepingActivator {
             // JSON configuration
             final ConfigurationService service = getService(ConfigurationService.class);
             JSONObject.setMaxSize(service.getIntProperty("com.openexchange.json.maxSize", 2500));
-            // Configure character array pool
-            if (service.getBoolProperty("com.openexchange.json.poolEnabled", false)) {
-                {
-                    final String s = service.getProperty("com.openexchange.json.poolSize", "10000, 1000, 10");
-                    final String[] sa = s.split(" *, *");
-                    final int smallPoolSize = parseInt(0, sa, 10000);
-                    final int mediumPoolSize = parseInt(1, sa, 1000);
-                    final int largePoolSize = parseInt(2, sa, 10);
-                    CharArrayPool.setCapacities(smallPoolSize, mediumPoolSize, largePoolSize);
-                }
-                {
-                    final String s = service.getProperty("com.openexchange.json.poolCharArrayLength", "1024, 10240, 102400");
-                    final String[] sa = s.split(" *, *");
-                    final int smallLength = parseInt(0, sa, 1024);
-                    final int mediumLength = parseInt(1, sa, 10240);
-                    final int largeLength = parseInt(2, sa, 102400);
-                    CharArrayPool.setLengths(smallLength, mediumLength, largeLength);
-                }
-                JSONObject.initCharPool();
-            }
         }
         Config.LoggerProvider = LoggerProvider.DISABLED;
         // (Re-)Initialize server service registry with available services
@@ -421,6 +402,7 @@ public final class ServerActivator extends HousekeepingActivator {
         // Mail provider service tracker
         track(MailProvider.class, new MailProviderServiceTracker(context));
         track(MailcapCommandMap.class, new MailcapServiceTracker(context));
+        track(CapabilityService.class, new MailCapabilityServiceTracker(context));
 
         // Transport provider service tracker
         track(TransportProvider.class, new TransportProviderServiceTracker(context));
@@ -452,7 +434,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Folder Delete Listener Service Tracker
         track(FolderDeleteListenerService.class, new FolderDeleteListenerServiceTrackerCustomizer(context));
-        
+
         // Distributed files
         track(DistributedFileManagement.class, new DistributedFilesListener());
 

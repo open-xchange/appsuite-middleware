@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -124,8 +124,11 @@ public final class CloudmarkSpamHandler extends SpamHandler {
                     mailAccess.getMessageStorage().moveMessages(fullname, mailAccess.getFolderStorage().getSpamFolder(), mailIDs, true);
                 } else if (targetSpamFolder.equals("3")) {
                     mailAccess.getMessageStorage().moveMessages(fullname, mailAccess.getFolderStorage().getConfirmedSpamFolder(), mailIDs, true);
+                } else if (targetSpamFolder.equals("0")) {
+                	// no move at all
                 } else {
                     mailAccess.getMessageStorage().moveMessages(fullname, mailAccess.getFolderStorage().getTrashFolder(), mailIDs, true);
+                    LOG.error("There is no valid 'com.openexchange.spamhandler.cloudmark.targetSpamFolder' configured. Moving spam to trash.");
                 }
             }
         } finally {
@@ -142,7 +145,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }
@@ -174,15 +177,19 @@ public final class CloudmarkSpamHandler extends SpamHandler {
             }
             
             if (move) {
-            	try {
-            		mailAccess = MailAccess.getInstance(session, accountId);
-            		mailAccess.connect();
-            		mailAccess.getMessageStorage().moveMessages(fullname, "INBOX", mailIDs, true);
-            	} finally {
-            		if (null != mailAccess) {
-            			mailAccess.close(true);
-            		}
-            	}
+            	final String targetSpamFolder = configuration.getProperty("com.openexchange.spamhandler.cloudmark.targetSpamFolder", "1").trim();
+
+                if (!targetSpamFolder.equals("0")) {
+                	try {
+                		mailAccess = MailAccess.getInstance(session, accountId);
+                		mailAccess.connect();
+                		mailAccess.getMessageStorage().moveMessages(fullname, "INBOX", mailIDs, true);
+                	} finally {
+                		if (null != mailAccess) {
+                			mailAccess.close(true);
+                		}
+                	}
+                }
             }
         } finally {
             if (null != mailAccess) {

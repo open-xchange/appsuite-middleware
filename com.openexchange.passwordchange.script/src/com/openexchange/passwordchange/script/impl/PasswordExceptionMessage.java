@@ -100,4 +100,7 @@ public class PasswordExceptionMessage implements LocalizableStrings {
      */
     public final static String PERMISSION_MSG = "No permission to modify resources in context %1$s";
 
+    // Cannot change password: %1$s
+    public static final String PASSWORD_FAILED_WITH_MSG_MSG = "Cannot change password: %1$s";
+
 }

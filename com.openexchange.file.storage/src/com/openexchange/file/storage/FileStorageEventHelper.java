@@ -63,16 +63,16 @@ import com.openexchange.session.Session;
  */
 public class FileStorageEventHelper {
 
-    public static Event buildUpdateEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId) {
-        return new Event(FileStorageEventConstants.UPDATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId));
+    public static Event buildUpdateEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId, final String optFileName) {
+        return new Event(FileStorageEventConstants.UPDATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId, optFileName));
     }
 
-    public static Event buildCreateEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId) {
-        return new Event(FileStorageEventConstants.CREATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId));
+    public static Event buildCreateEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId, final String optFileName) {
+        return new Event(FileStorageEventConstants.CREATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId, optFileName));
     }
 
-    public static Event buildDeleteEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId, final Set<String> versions) {
-        final Dictionary<String, Object> properties = buildProperties(session, service, accountId, folderId, objectId);
+    public static Event buildDeleteEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId, final String optFileName, final Set<String> versions) {
+        final Dictionary<String, Object> properties = buildProperties(session, service, accountId, folderId, objectId, optFileName);
         /*
          * version may be null to indicate a complete deletion of a document.
          */
@@ -82,8 +82,8 @@ public class FileStorageEventHelper {
         return new Event(FileStorageEventConstants.DELETE_TOPIC, properties);
     }
 
-    private static Dictionary<String, Object> buildProperties(final Session session, final String service, final String accountId, final String folderId, final String objectId) {
-        final Dictionary<String, Object> ht = new Hashtable<String, Object>(6);
+    private static Dictionary<String, Object> buildProperties(final Session session, final String service, final String accountId, final String folderId, final String objectId, final String optFileName) {
+        final Dictionary<String, Object> ht = new Hashtable<String, Object>(8);
         if (null != session) {
             ht.put(FileStorageEventConstants.SESSION, session);
         }
@@ -99,6 +99,9 @@ public class FileStorageEventHelper {
         }
         if (null != folderId) {
             ht.put(FileStorageEventConstants.FOLDER_ID, folderId);
+        }
+        if (null != optFileName) {
+            ht.put(FileStorageEventConstants.FILE_NAME, optFileName);
         }
         return ht;
     }

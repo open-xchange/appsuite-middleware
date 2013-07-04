@@ -90,7 +90,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
         super.setUp();
         calendarMgr = new CalendarTestManager(getClient());
         folderMgr = new FolderTestManager(getClient());
-        testFolder = folderMgr.generateFolder(
+        testFolder = folderMgr.generatePublicFolder(
             "Calendar Manager Tests",
             FolderObject.CALENDAR,
             getClient().getValues().getPrivateAppointmentFolder(),

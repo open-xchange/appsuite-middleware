@@ -93,6 +93,10 @@ public class Starter implements Initialization {
      */
     com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),
     /**
+     * The Servlet initialization
+     */
+    new com.openexchange.tools.servlet.ServletInitialization(),
+    /**
      * Folder initialization
      */
     com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
@@ -189,6 +193,10 @@ public class Starter implements Initialization {
      * Setup of ContextStorage and LoginInfo.
      */
     com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),
+    /**
+     * The Servlet initialization
+     */
+    new com.openexchange.tools.servlet.ServletInitialization(),
     /**
      * Folder initialization
      */

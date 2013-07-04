@@ -92,72 +92,74 @@ public final class SaneScriptTags {
         if (isEmpty(html)) {
             return html;
         }
-        String s = html;
-        s = decode(s);
-        s = dropConcatenations(s);
-        s = dropScriptTags(s, sanitized);
-        return s;
+        final StringBuffer sb = new StringBuffer(html);
+        decode(sb);
+        dropConcatenations(sb);
+        dropScriptTags(sanitized, sb);
+        return sb.toString();
     }
 
     private static final Pattern PAT_URLDECODE_ENTITIES = Pattern.compile("%([0-9a-fA-F]{2})");
     private static final Pattern PAT_URLDECODE_PERCENT = Pattern.compile("%25");
-    private static final Set<String> REPLACEES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("3c", "3e", "2b", "22")));
+    private static final Set<String> REPLACEES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("3c", "3e", "22")));
 
-    private static String decode(final String html) {
-        if (html.indexOf('%') < 0) {
-            return html;
+    private static void decode(final StringBuffer sb) {
+        if (sb.indexOf("%") < 0) {
+            return;
         }
-        final String ret = PAT_URLDECODE_PERCENT.matcher(html).replaceAll("%");
-        final Matcher m = PAT_URLDECODE_ENTITIES.matcher(ret);
+        Matcher m = PAT_URLDECODE_PERCENT.matcher(sb.toString());
+        sb.setLength(0);
+        while (m.find()) {
+            m.appendReplacement(sb, "%");
+        }
+        m.appendTail(sb);
+        m = PAT_URLDECODE_ENTITIES.matcher(sb.toString());
         if (!m.find()) {
-            return ret;
+            return;
         }
-        final StringBuffer sb = new StringBuffer(ret.length());
+        sb.setLength(0);
         do {
             final String entity = toLowerCase(m.group(1));
             if (REPLACEES.contains(entity)) {
                 m.appendReplacement(sb, Matcher.quoteReplacement(Character.toString((char) Integer.parseInt(m.group(1), 16))));
-            } else {
-                m.appendReplacement(sb, "$0");
             }
         } while (m.find());
         m.appendTail(sb);
-        return sb.toString();
     }
 
-    private static String urlDecode(final String html) {
+    private static void urlDecode(final StringBuffer sb) {
         try {
-            return URLDecoder.decode(html, "UTF-8");
+            final String decoded = URLDecoder.decode(sb.toString(), "UTF-8");
+            sb.setLength(0);
+            sb.append(decoded);
         } catch (final Exception e) {
-            final Matcher m = PAT_URLDECODE_ENTITIES.matcher(html);
+            final Matcher m = PAT_URLDECODE_ENTITIES.matcher(sb.toString());
             if (!m.find()) {
-                return html;
+                return;
             }
-            final StringBuffer sb = new StringBuffer(html.length());
+            sb.setLength(0);
             do {
                 m.appendReplacement(sb, Matcher.quoteReplacement(Character.toString((char) Integer.parseInt(m.group(1), 16))));
             } while (m.find());
             m.appendTail(sb);
-            return sb.toString();
         }
     }
 
-    private static final Pattern PAT_CONCAT = Pattern.compile("[\"\u201d\u201c]\\+[\"\u201d\u201c]");
+    private static final Pattern PAT_CONCAT = Pattern.compile("[\"\u201d\u201c](\\+|%2b)[\"\u201d\u201c]");
 
-    private static String dropConcatenations(final String html) {
-        if (html.indexOf('+') < 0) {
-            return html;
+    private static void dropConcatenations(final StringBuffer sb) {
+        if ((sb.indexOf("+") < 0) && (sb.indexOf("%2b") < 0)) {
+            return;
         }
-        final Matcher m = PAT_CONCAT.matcher(html);
+        final Matcher m = PAT_CONCAT.matcher(sb.toString());
         if (!m.find()) {
-            return html;
+            return;
         }
-        final StringBuffer sb = new StringBuffer(html.length());
+        sb.setLength(0);
         do {
             m.appendReplacement(sb, "");
         } while (m.find());
         m.appendTail(sb);
-        return sb.toString();
     }
 
     private static final Pattern PATTERN_SCRIPT_TAG;
@@ -171,30 +173,20 @@ public final class SaneScriptTags {
         PATTERN_SCRIPT_TAG_END = Pattern.compile(regexScriptEnd, Pattern.CASE_INSENSITIVE);
     }
 
-    private static String dropScriptTags(final String htmlContent, final boolean[] sanitized) {
-        Matcher m = PATTERN_SCRIPT_TAG.matcher(htmlContent);
+    private static void dropScriptTags(final boolean[] sanitized, final StringBuffer sb) {
+        Matcher m = PATTERN_SCRIPT_TAG.matcher(sb.toString());
         if (m.find()) {
-            final StringBuffer sb = new StringBuffer(htmlContent.length());
+            sb.setLength(0);
             do {
                 m.appendReplacement(sb, "");
                 sanitized[0] = true;
             } while (m.find());
             m.appendTail(sb);
-            return sb.toString();
+            return;
         }
-        m = PATTERN_SCRIPT_TAG_START.matcher(htmlContent);
+        m = PATTERN_SCRIPT_TAG_START.matcher(sb.toString());
         if (!m.find()) {
-            return htmlContent;
-        }
-        final StringBuffer sb = new StringBuffer(htmlContent.length());
-        do {
-            m.appendReplacement(sb, "");
-            sanitized[0] = true;
-        } while (m.find());
-        m.appendTail(sb);
-        m = PATTERN_SCRIPT_TAG_END.matcher(sb.toString());
-        if (!m.find()) {
-            return sb.toString();
+            return;
         }
         sb.setLength(0);
         do {
@@ -202,7 +194,16 @@ public final class SaneScriptTags {
             sanitized[0] = true;
         } while (m.find());
         m.appendTail(sb);
-        return sb.toString();
+        m = PATTERN_SCRIPT_TAG_END.matcher(sb.toString());
+        if (!m.find()) {
+            return;
+        }
+        sb.setLength(0);
+        do {
+            m.appendReplacement(sb, "");
+            sanitized[0] = true;
+        } while (m.find());
+        m.appendTail(sb);
     }
 
     private static boolean isEmpty(final String string) {
@@ -212,7 +213,7 @@ public final class SaneScriptTags {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

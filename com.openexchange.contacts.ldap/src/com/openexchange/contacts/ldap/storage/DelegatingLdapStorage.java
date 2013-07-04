@@ -147,6 +147,14 @@ public class DelegatingLdapStorage extends DefaultContactStorage {
     }
 
     @Override
+    public int count(Session session, String folderID, boolean canReadAll) throws OXException {
+        SearchIterator<Contact> contactsInFolder = delegate(session).getContactsInFolder(parse(folderID), 0, Integer.MAX_VALUE, 0, Order.NO_ORDER, null, getColumns(new ContactField[] { ContactField.OBJECT_ID }));
+        int retval = contactsInFolder.size();
+        contactsInFolder.close();
+        return retval;
+    }
+
+    @Override
     public <O> SearchIterator<Contact> search(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
         Order order = Order.NO_ORDER;
         int orderBy = 0;

@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.facebook.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import com.openexchange.capabilities.CapabilityChecker;
@@ -60,7 +62,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -86,11 +90,16 @@ public final class Activator extends HousekeepingActivator {
         FacebookRegisterer fbRegisterer = new FacebookRegisterer(context);
         track(filter, fbRegisterer);
         openTrackers();
+
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+        final String sCapability = "facebook";
+        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
         registerService(CapabilityChecker.class, new CapabilityChecker() {
 
             @Override
-            public boolean isEnabled(String capability, ServerSession session) throws OXException {
-                if ("facebook".equals(capability)) {
+            public boolean isEnabled(String capability, Session ses) throws OXException {
+                if (sCapability.equals(capability)) {
+                    final ServerSession session = ServerSessionAdapter.valueOf(ses);
                     if (session.isAnonymous()) {
                         return false;
                     }
@@ -99,11 +108,11 @@ public final class Activator extends HousekeepingActivator {
                     return view.opt("com.openexchange.oauth.facebook", boolean.class, Boolean.TRUE).booleanValue();
                 }
                 return true;
-                
-            }
-        });
-        getService(CapabilityService.class).declareCapability("facebook");
 
+            }
+        }, properties);
+
+        getService(CapabilityService.class).declareCapability(sCapability);
     }
 
     @Override

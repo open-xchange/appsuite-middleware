@@ -8,7 +8,7 @@ BuildRequires:  java-devel >= 1.6.0
 BuildRequires:  open-xchange-core
 BuildRequires:  open-xchange-admin
 Version:        @OXVERSION@
-%define         ox_release 5
+%define         ox_release 7
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -58,12 +58,34 @@ ox_update_permissions "/opt/open-xchange/etc/upsell.properties" root:open-xchang
 %doc com.openexchange.upsell.multiple/ChangeLog
 
 %changelog
+* Mon Jul 01 2013 Carsten Hoeger <choeger@open-xchange.com>
+Third candidate for 7.2.2 release
+* Fri Jun 28 2013 Carsten Hoeger <choeger@open-xchange.com>
+Second candidate for 7.2.2 release
+* Wed Jun 26 2013 Carsten Hoeger <choeger@open-xchange.com>
+Release candidate for 7.2.2 release
+* Fri Jun 21 2013 Carsten Hoeger <choeger@open-xchange.com>
+Second feature freeze for 7.2.2 release
+* Mon Jun 17 2013 Carsten Hoeger <choeger@open-xchange.com>
+Feature freeze for 7.2.2 release
+* Tue Jun 11 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-06-13
 * Mon Jun 10 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-06-11
 * Fri Jun 07 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-06-20
+* Mon Jun 03 2013 Carsten Hoeger <choeger@open-xchange.com>
+First sprint increment for 7.2.2 release
+* Wed May 29 2013 Carsten Hoeger <choeger@open-xchange.com>
+First candidate for 7.2.2 release
+* Tue May 28 2013 Carsten Hoeger <choeger@open-xchange.com>
+Second build for patch 2013-05-28
+* Mon May 27 2013 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 7.2.2
 * Thu May 23 2013 Carsten Hoeger <choeger@open-xchange.com>
 Third candidate for 7.2.1 release
+* Wed May 22 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-05-22
 * Wed May 22 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-05-22
 * Wed May 22 2013 Carsten Hoeger <choeger@open-xchange.com>
@@ -208,3 +230,5 @@ prepare for next EDP drop
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Carsten Hoeger <choeger@open-xchange.com>
 prepare for 6.22.0
+* Wed Jul 18 2012 Carsten Hoeger <choeger@open-xchange.com>
+Initial release

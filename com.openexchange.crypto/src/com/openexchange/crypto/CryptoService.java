@@ -71,7 +71,7 @@ public interface CryptoService {
     /**
      * Decrypts specified encrypted data with given password.
      *
-     * @param encryptedData The Base64 encoded encrypted data
+     * @param encryptedPayload The Base64 encoded encrypted data
      * @param password The password
      * @return The decrypted data
      * @throws OXException If decryption fails

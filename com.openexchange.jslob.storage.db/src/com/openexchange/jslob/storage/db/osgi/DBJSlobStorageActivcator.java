@@ -75,7 +75,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link DBJSlobStorageActivcator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DBJSlobStorageActivcator extends HousekeepingActivator {
@@ -121,7 +121,20 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
                             final CacheService cacheService = context.getService(reference);
                             try {
                                 final byte[] ccf =
-                                    ("jcs.region." + regionName + "=LTCP\n" + "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" + "jcs.region." + regionName + ".cacheattributes.MaxObjects=10000000\n" + "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" + "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n" + "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=180\n" + "jcs.region." + regionName + ".cacheattributes.ShrinkerIntervalSeconds=60\n" + "jcs.region." + regionName + ".elementattributes=org.apache.jcs.engine.ElementAttributes\n" + "jcs.region." + regionName + ".elementattributes.IsEternal=false\n" + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=300\n" + "jcs.region." + regionName + ".elementattributes.IdleTime=180\n" + "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" + "jcs.region." + regionName + ".elementattributes.IsRemote=false\n" + "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
+                                    ("jcs.region." + regionName + "=LTCP\n"
+                                   + "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n"
+                                   + "jcs.region." + regionName + ".cacheattributes.MaxObjects=10000000\n"
+                                   + "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n"
+                                   + "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n"
+                                   + "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=180\n"
+                                   + "jcs.region." + regionName + ".cacheattributes.ShrinkerIntervalSeconds=60\n"
+                                   + "jcs.region." + regionName + ".elementattributes=org.apache.jcs.engine.ElementAttributes\n"
+                                   + "jcs.region." + regionName + ".elementattributes.IsEternal=false\n"
+                                   + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=300\n"
+                                   + "jcs.region." + regionName + ".elementattributes.IdleTime=180\n"
+                                   + "jcs.region." + regionName + ".elementattributes.IsSpool=false\n"
+                                   + "jcs.region." + regionName + ".elementattributes.IsRemote=false\n"
+                                   + "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
                                 cacheService.loadConfiguration(Streams.newByteArrayInputStream(ccf));
                                 addService(CacheService.class, cacheService);
                                 CachingJSlobStorage.setCacheService(cacheService);

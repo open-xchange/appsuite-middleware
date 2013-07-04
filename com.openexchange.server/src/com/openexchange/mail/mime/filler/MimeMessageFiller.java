@@ -1765,8 +1765,7 @@ public class MimeMessageFiller {
                             m.appendLiteralReplacement(sb, null == blankImageTag ? blankSrc(imageTag) : blankImageTag);
                             continue;
                         }
-                        final ImageDataSource dataSource =
-                            (ImageDataSource) conversionService.getDataSource(imageLocation.getRegistrationName());
+                        final ImageDataSource dataSource = (ImageDataSource) conversionService.getDataSource(imageLocation.getRegistrationName());
                         if (null == dataSource) {
                             if (LOG.isWarnEnabled()) {
                                 tmp.setLength(0);
@@ -1789,6 +1788,11 @@ public class MimeMessageFiller {
                                 continue;
                             }
                             throw e;
+                        } catch (final RuntimeException rte) {
+                            LOG.warn("Couldn't load image data", rte);
+                            tmp.setLength(0);
+                            m.appendLiteralReplacement(sb, blankSrc(imageTag));
+                            continue;
                         }
                     }
                     final String iid;
@@ -1887,11 +1891,14 @@ public class MimeMessageFiller {
          */
         final String cid;
         {
-            tmp.setLength(0);
-            final int atPos = id.indexOf('@');
-            tmp.append(PATTERN_DASHES.matcher(atPos < 0 ? id : id.substring(0, atPos)).replaceAll(""));
-            tmp.append('@').append(VERSION_NAME);
-            cid = tmp.toString();
+            if (imageProvider.isLocalFile()) {
+                tmp.setLength(0);
+                tmp.append(PATTERN_DASHES.matcher(id).replaceAll(""));
+                tmp.append('@').append(Version.NAME);
+                cid = tmp.toString();
+            } else {
+                cid = id;
+            }
         }
         if (appendBodyPart) {
             boolean found = false;
@@ -1978,6 +1985,8 @@ public class MimeMessageFiller {
 
     private static interface ImageProvider {
 
+        public boolean isLocalFile();
+
         public String getFileName();
 
         public DataSource getDataSource() throws OXException;
@@ -1992,6 +2001,11 @@ public class MimeMessageFiller {
         public ManagedFileImageProvider(final ManagedFile managedFile) {
             super();
             this.managedFile = managedFile;
+        }
+
+        @Override
+        public boolean isLocalFile() {
+            return true;
         }
 
         @Override
@@ -2027,6 +2041,11 @@ public class MimeMessageFiller {
         }
 
         @Override
+        public boolean isLocalFile() {
+            return false;
+        }
+
+        @Override
         public String getContentType() {
             return contentType;
         }
@@ -2056,7 +2075,7 @@ public class MimeMessageFiller {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

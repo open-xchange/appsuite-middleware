@@ -63,6 +63,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -169,5 +170,7 @@ public interface CalendarSqlImp {
     public Date setExternalConfirmation(int oid, int folderId, String mail, int confirm, String message, Session so, Context ctx) throws OXException;
     
     public int countAppointments(Session session) throws OXException;
+    
+    public int countObjectsInFolder(Session session, int folderId, int folderType, EffectivePermission permission) throws OXException;
 
 }

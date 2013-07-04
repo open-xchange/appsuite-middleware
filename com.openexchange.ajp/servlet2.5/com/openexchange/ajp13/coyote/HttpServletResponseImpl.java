@@ -83,8 +83,8 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
-import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.AJPv13ServletOutputStream;
+import com.openexchange.ajp13.Services;
 import com.openexchange.ajp13.servlet.ServletResponseWrapper;
 import com.openexchange.ajp13.servlet.http.HttpDateFormatRegistry;
 import com.openexchange.ajp13.util.CharsetValidator;
@@ -122,7 +122,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
             synchronized (ServletResponseWrapper.class) {
                 tmp = defaultCharset;
                 if (tmp == null) {
-                    final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
                     if (null == service) {
                         return "UTF-8";
                     }
@@ -244,7 +244,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         status = HttpServletResponse.SC_OK;
         statusMsg = "OK";
         this.ajpProcessor = ajpProcessor;
-        final ConfigurationService cs = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final ConfigurationService cs = Services.getService(ConfigurationService.class);
         httpOnly = (null != cs && cs.getBoolProperty(ServerConfig.Property.COOKIE_HTTP_ONLY.getPropertyName(), true));
     }
 
@@ -689,7 +689,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
             synchronized (AjpProcessor.class) {
                 tmp = filterByName;
                 if (null == tmp) {
-                    final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
                     tmp = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.cookie.filterByName", false));
                     filterByName = tmp;
                 }
@@ -761,7 +761,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
             synchronized (HttpServletResponseImpl.class) {
                 tmp = cookieParams;
                 if (null == tmp) {
-                    final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
                     if (null == service) {
                         tmp = new String[] { "; expires=", "; version=", "; path=", "; domain=", "; secure" };
                     } else {
@@ -851,7 +851,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

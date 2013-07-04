@@ -84,6 +84,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
+import javax.mail.internet.MimeUtility;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -392,7 +393,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         final Enumeration<Header> others = mimeMessage.getAllHeaders();
         while (others.hasMoreElements()) {
             final Header hdr = others.nextElement();
-            snippet.put(hdr.getName(), hdr.getValue());
+            snippet.put(hdr.getName(), MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue()));
         }
     }
 
@@ -411,7 +412,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             for (final Map.Entry<String, Object> entry : snippet.getProperties().entrySet()) {
                 final String name = entry.getKey();
                 if (!IGNORABLES.contains(name)) {
-                    mimeMessage.setHeader(name, entry.getValue().toString());
+                    mimeMessage.setHeader(name, MimeUtility.encodeText(entry.getValue().toString(), "UTF-8", "Q"));
                 }
             }
             // Set other stuff
@@ -909,7 +910,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

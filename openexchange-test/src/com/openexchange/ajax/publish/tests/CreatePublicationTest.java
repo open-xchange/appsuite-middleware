@@ -76,7 +76,7 @@ public class CreatePublicationTest extends AbstractPublicationTest {
 
     public void testOnePublicationOfOneContactFolderShouldNotBeAHassle() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
         //create contact folder
-        FolderObject folder = fMgr.generateFolder("publishedContacts"+new Date().getTime(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        FolderObject folder = fMgr.generatePublicFolder("publishedContacts"+new Date().getTime(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         fMgr.insertFolderOnServer( folder );
 
         //fill contact folder
@@ -108,7 +108,7 @@ public class CreatePublicationTest extends AbstractPublicationTest {
 
     public void testOnePublicationOfOneContactFolderWithoutAContactShouldNotBeAHassle() throws OXException, IOException, SAXException, JSONException, OXException, OXException{
         //create contact folder
-        FolderObject folder = fMgr.generateFolder("publishedContacts"+new Date().getTime(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
+        FolderObject folder = fMgr.generatePublicFolder("publishedContacts"+new Date().getTime(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         fMgr.insertFolderOnServer( folder );
 
         //fill contact folder

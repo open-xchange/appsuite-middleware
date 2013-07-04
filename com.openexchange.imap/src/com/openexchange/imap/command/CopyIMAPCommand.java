@@ -244,7 +244,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
          * Find next starting ATOM in IMAP response
          */
         pos += COPYUID.length();
-        while (Character.isWhitespace(resp.charAt(pos))) {
+        while (Strings.isWhitespace(resp.charAt(pos))) {
             pos++;
         }
         /*

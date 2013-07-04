@@ -49,6 +49,8 @@
 
 package com.openexchange.indexedSearch.json.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityChecker;
@@ -88,9 +90,13 @@ public class IndexJSONActivator extends AJAXModuleActivator {
         registry.start(context);
 
         registerModule(new IndexActionFactory(this, registry), "indexedSearch");
-        
+
         getService(CapabilityService.class).declareCapability(MailIndexChecker.CAPABILITY);
-        registerService(CapabilityChecker.class, new MailIndexChecker(this));
+
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, MailIndexChecker.CAPABILITY);
+        registerService(CapabilityChecker.class, new MailIndexChecker(this), properties);
+
         registerService(ResultConverter.class, new SearchResult2JSONConverter());
     }
 

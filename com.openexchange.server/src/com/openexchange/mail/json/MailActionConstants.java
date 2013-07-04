@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json;
 
+import java.io.Closeable;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
@@ -66,6 +67,11 @@ public interface MailActionConstants {
      * The property name for {@link MailServletInterface} instance.
      */
     public static final String PROPERTY_MAIL_IFACE = "com.openexchange.mail.json.mailInterface";
+
+    /**
+     * The property name for the collection of {@link Closeable} instances.
+     */
+    public static final String PROPERTY_CLOSEABLES = "com.openexchange.mail.json.closeables";
 
     /**
      * A set containing all log property names.

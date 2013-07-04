@@ -87,7 +87,7 @@ public final class Check {
 
 	public static void hasStorages(final Map<ContactStorage, List<String>> storages) throws OXException {
 	    if (null == storages || 0 == storages.size()) {
-	        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No contact storage available");
+	        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContactStorage.class.getName());
         }
 	}
 

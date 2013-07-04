@@ -86,6 +86,13 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
 
     private static final SearchTerm<Integer> TERM_FLAG_SEEN = new FlagTerm(MailMessage.FLAG_SEEN, false);
 
+    /**
+     * Initializes a new {@link MailMessageStorageLong}.
+     */
+    protected MailMessageStorageLong() {
+        super();
+    }
+
     @Override
     public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws OXException {
         return longs2uids(appendMessagesLong(destFolder, msgs));

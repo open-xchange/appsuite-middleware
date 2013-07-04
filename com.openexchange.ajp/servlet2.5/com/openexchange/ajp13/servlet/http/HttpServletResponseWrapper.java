@@ -67,14 +67,14 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
-import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.ajp13.Services;
 import com.openexchange.ajp13.servlet.ServletResponseWrapper;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.version.Version;
 import com.openexchange.session.Session;
+import com.openexchange.version.Version;
 
 /**
  * HttpServletResponseWrapper
@@ -164,7 +164,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         cookies = new LinkedHashSet<Cookie>();
         status = HttpServletResponse.SC_OK;
         this.request = request;
-        final ConfigurationService cs = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final ConfigurationService cs = Services.getService(ConfigurationService.class);
         httpOnly = (null != cs && cs.getBoolProperty(ServerConfig.Property.COOKIE_HTTP_ONLY.getPropertyName(), true));
     }
 
@@ -386,7 +386,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

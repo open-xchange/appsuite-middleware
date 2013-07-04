@@ -303,7 +303,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final JSONArray jChildMessages = new JSONArray(mails.size());
         if (writeThreadAsObjects) {
             for (final MailMessage child : mails) {
-                final JSONObject jChild = new JSONObject();
+                final JSONObject jChild = new JSONObject(writers.length);
                 accountID = child.getAccountId();
                 for (int j = 0; j < writers.length; j++) {
                     writers[j].writeField(jChild, child, 0, true, accountID, userId, contextId, optTimeZone);
@@ -385,7 +385,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             final int contextId = session.getContextId();
             for (final MailMessage mail : mails) {
                 if (mail != null) {
-                    final JSONArray ja = new JSONArray();
+                    final JSONArray ja = new JSONArray(writers.length);
                     final int accountID = mail.getAccountId();
                     for (int j = 0; j < writers.length; j++) {
                         writers[j].writeField(ja, mail, 0, false, accountID, userId, contextId, timeZone);
@@ -431,7 +431,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
              */
             if (("thread".equalsIgnoreCase(sort))) {
                 for (final MailMessage mail : mails) {
-                    final JSONArray ja = new JSONArray();
+                    final JSONArray ja = new JSONArray(writers.length);
                     if (mail != null) {
                         final int accountId = mail.getAccountId();
                         for (final MailFieldWriter writer : writers) {
@@ -446,7 +446,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                  * Get iterator
                  */
                 for (final MailMessage mail : mails) {
-                    final JSONArray ja = new JSONArray();
+                    final JSONArray ja = new JSONArray(writers.length);
                     if (mail != null) {
                         final int accountId = mail.getAccountId();
                         for (final MailFieldWriter writer : writers) {
@@ -678,7 +678,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

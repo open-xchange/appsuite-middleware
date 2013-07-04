@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Server
 Bundle-SymbolicName: com.openexchange.server
-Bundle-Version: 7.2.1
+Bundle-Version: 7.2.2
 Bundle-Activator: com.openexchange.server.osgi.ServerCompositeActivator
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.damienmiller,
@@ -16,10 +16,12 @@ Import-Package: com.damienmiller,
  com.google.common.primitives,
  com.google.common.util.concurrent,
  com.googlecode.concurrentlinkedhashmap,
+ com.javacodegeeks.concurrent,
  com.openexchange.authentication,
  com.openexchange.cache,
  com.openexchange.cache.dynamic,
  com.openexchange.caching,
+ com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.configjump,

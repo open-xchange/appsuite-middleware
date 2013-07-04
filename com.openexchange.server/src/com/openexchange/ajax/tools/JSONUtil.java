@@ -55,6 +55,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link JSONUtil} - Provides JSON utility methods.
@@ -165,6 +168,85 @@ public final class JSONUtil {
             return null;
         }
         return new JSONTokener(value).nextValue();
+    }
+
+    /**
+     * Requires specified string value.
+     *
+     * @param name The field name
+     * @param jsonObject The JSON object
+     * @return The string value
+     * @throws OXException If value is not available
+     */
+    public static String requireString(final String name, final JSONObject jsonObject) throws OXException {
+        try {
+            final String value = jsonObject.optString(name, null);
+            if (null == value) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+            }
+            return value;
+        } catch (final RuntimeException e) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(e, name);
+        }
+    }
+
+    /**
+     * Requires specified integer value.
+     *
+     * @param name The field name
+     * @param jsonObject The JSON object
+     * @return The integer value
+     * @throws OXException If value is not available
+     */
+    public static int requireInt(final String name, final JSONObject jsonObject) throws OXException {
+        try {
+            if (!jsonObject.has(name)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+            }
+            return jsonObject.optInt(name, -1);
+        } catch (final RuntimeException e) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(e, name);
+        }
+    }
+
+    /**
+     * Requires specified boolean value.
+     *
+     * @param name The field name
+     * @param jsonObject The JSON object
+     * @return The boolean value
+     * @throws OXException If value is not available
+     */
+    public static boolean requireBoolean(final String name, final JSONObject jsonObject) throws OXException {
+        try {
+            if (!jsonObject.has(name)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+            }
+            return jsonObject.optBoolean(name, false);
+        } catch (final RuntimeException e) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(e, name);
+        }
+    }
+
+    private static final String DATA = ResponseFields.DATA;
+
+    /**
+     * Requires specified data object.
+     *
+     * @param jsonObject The JSON object
+     * @return The data JSON object
+     * @throws OXException If data JSON object is not available
+     */
+    public static JSONObject requireDataObject(final JSONObject jsonObject) throws OXException {
+        try {
+            final JSONObject value = jsonObject.optJSONObject(DATA);
+            if (null == value) {
+                throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+            }
+            return value;
+        } catch (final RuntimeException e) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create(e);
+        }
     }
 
 }

@@ -613,7 +613,8 @@ public final class MessagingFolderStorage implements FolderStorage {
                     openMessagingAccess(accountAccess);
 
                     final MessagingFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
-                    retval = new MessagingFolderImpl(rootFolder, accountId, serviceId, storageParameters.getUser(), null);
+                    final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
+                    retval = new MessagingFolderImpl(rootFolder, accountId, serviceId, storageParameters.getUser(), null, translate);
                     /*
                      * Set proper name
                      */
@@ -629,13 +630,8 @@ public final class MessagingFolderStorage implements FolderStorage {
                     getMessagingAccessForAccount(serviceId, accountId, session, accesses);
                 openMessagingAccess(accountAccess);
                 final MessagingFolder messagingFolder = accountAccess.getFolderAccess().getFolder(fullname);
-                retval =
-                    new MessagingFolderImpl(
-                        messagingFolder,
-                        accountId,
-                        serviceId,
-                        storageParameters.getUser(),
-                        new MessagingAccountAccessFullnameProvider(accountAccess));
+                final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
+                retval = new MessagingFolderImpl(messagingFolder, accountId, serviceId, storageParameters.getUser(), new MessagingAccountAccessFullnameProvider(accountAccess), translate);
                 hasSubfolders = messagingFolder.hasSubfolders();
                 /*
                  * Check if denoted parent can hold default folders like Trash, Sent, etc.

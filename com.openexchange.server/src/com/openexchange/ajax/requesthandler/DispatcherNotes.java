@@ -79,4 +79,10 @@ public @interface DispatcherNotes {
      * @return whether to allow access to this action without a session
      */
 	boolean noSession() default false;
+
+	/**
+     * Indicates whether this action is allowed to miss the associated secret cookie, because it is meant as a callback.
+     * @return Whether to allow access without secret
+     */
+	boolean noSecretCallback() default false;
 }

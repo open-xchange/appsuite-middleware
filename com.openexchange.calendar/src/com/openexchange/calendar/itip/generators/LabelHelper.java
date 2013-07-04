@@ -238,7 +238,10 @@ public class LabelHelper {
     	}
     	final ConfigurationService config = services.getService(ConfigurationService.class);
 		final String template = config.getProperty("object_link", "https://[hostname]/[uiwebpath]#m=[module]&i=[object]&f=[folder]");
-    	final String webpath = config.getProperty("com.openexchange.UIWebPath", "/ox6/index.html");
+		String webpath = config.getProperty("com.openexchange.UIWebPath", "/ox6/index.html");
+		if (webpath.startsWith("/")) {
+		    webpath = webpath.substring(1, webpath.length());
+		}
     	final int objectId = (mail.getAppointment() != null) ? mail.getAppointment().getObjectID() : mail.getOriginal().getObjectID();
     	final String module = "calendar";
     	int folder = mail.getRecipient().getFolderId();

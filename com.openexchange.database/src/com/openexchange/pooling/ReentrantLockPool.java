@@ -375,7 +375,16 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 
     @Override
     public void destroy() {
-        running = false;
+        lock.lock();
+        try {
+            running = false;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public boolean isStopped() {
+        return !running;
     }
 
     @Override

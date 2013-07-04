@@ -4,7 +4,7 @@
 	<classpathentry kind="src" path="sim"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry exported="true" kind="lib" path="lib/jaudiotagger-2.0.3.jar" sourcepath="lib/jaudiotagger-2.0.3-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/metadata-extractor-2.6.1.jar"/>
+        <classpathentry exported="true" kind="lib" path="lib/metadata-extractor-2.6.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xmpcore.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jacksum.jar" sourcepath="lib/jacksum-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/java-image-scaling-0.8.5.jar" sourcepath="lib/java-image-scaling-0.8.5-sources.jar"/>

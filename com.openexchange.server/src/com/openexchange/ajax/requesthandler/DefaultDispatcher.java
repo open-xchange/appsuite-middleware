@@ -81,6 +81,7 @@ public class DefaultDispatcher implements Dispatcher {
 
     private final ConcurrentMap<StrPair, Boolean> fallbackSessionActionsCache;
     private final ConcurrentMap<StrPair, Boolean> omitSessionActionsCache;
+    private final ConcurrentMap<StrPair, Boolean> noSecretCallbackCache;
 
     private final ConcurrentMap<String, AJAXActionServiceFactory> actionFactories;
     private final Queue<AJAXActionCustomizerFactory> customizerFactories;
@@ -92,6 +93,7 @@ public class DefaultDispatcher implements Dispatcher {
         super();
         fallbackSessionActionsCache = new ConcurrentHashMap<StrPair, Boolean>(128);
         omitSessionActionsCache = new ConcurrentHashMap<StrPair, Boolean>(128);
+        noSecretCallbackCache = new ConcurrentHashMap<StrPair, Boolean>(128);
 
         actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>();
         customizerFactories = new Java7ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
@@ -257,7 +259,7 @@ public class DefaultDispatcher implements Dispatcher {
             final Props props = LogProperties.getLogProperties();
             props.put(LogProperties.Name.AJAX_ACTION, ForceLog.valueOf(requestData.getAction()));
             props.put(LogProperties.Name.AJAX_MODULE, ForceLog.valueOf(requestData.getModule()));
-    
+
             final Map<String, String> parameters = requestData.getParameters();
             if (null != parameters) {
                 final StringAllocator sb = new StringAllocator(256);
@@ -403,6 +405,23 @@ public class DefaultDispatcher implements Dispatcher {
                 ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.noSession());
             }
             omitSessionActionsCache.put(key, ret);
+        }
+        return ret.booleanValue();
+	}
+
+	@Override
+	public boolean noSecretCallback(String module, String action) throws OXException {
+	    final StrPair key = new StrPair(module, action);
+        Boolean ret = noSecretCallbackCache.get(key);
+        if (null == ret) {
+            final AJAXActionServiceFactory factory = lookupFactory(module);
+            if (factory == null) {
+                ret = Boolean.FALSE;
+            } else {
+                final DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
+                ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.noSecretCallback());
+            }
+            noSecretCallbackCache.put(key, ret);
         }
         return ret.booleanValue();
 	}

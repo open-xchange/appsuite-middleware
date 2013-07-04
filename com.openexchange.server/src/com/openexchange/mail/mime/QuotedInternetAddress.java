@@ -58,6 +58,8 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.idn.IDNA;
+import com.openexchange.java.Strings;
+import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
@@ -162,10 +164,9 @@ public final class QuotedInternetAddress extends InternetAddress {
      * RFC822 Address parser. XXX - This is complex enough that it ought to be a real parser, not this ad-hoc mess, and because of that,
      * this is not perfect. XXX - Deal with encoded Headers too.
      */
-    private static InternetAddress[] parse(final String str, final boolean strict, final boolean parseHdr) throws AddressException {
+    private static InternetAddress[] parse(final String s, final boolean strict, final boolean parseHdr) throws AddressException {
         int start, end, index, nesting;
         int start_personal = -1, end_personal = -1;
-        final String s = MimeMessageUtility.decodeMultiEncodedHeader(str);
         final int length = s.length();
         final boolean ignoreErrors = parseHdr && !strict;
         boolean in_group = false; // we're processing a group term
@@ -709,7 +710,7 @@ public final class QuotedInternetAddress extends InternetAddress {
          */
 
         if (c != '@') {
-            if (validate) {
+            if (validate && !MsisdnCheck.checkMsisdn(addr)) {
                 throw new AddressException("Missing final '@domain'", addr.toString());
             }
             return;
@@ -1289,7 +1290,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         final int len = str.length();
         boolean ret = true;
         for (int i = 0; ret && i < len; i++) {
-            ret = Character.isWhitespace(str.charAt(i));
+            ret = Strings.isWhitespace(str.charAt(i));
         }
         return ret;
     }

@@ -69,8 +69,10 @@ import org.apache.commons.logging.Log;
 import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ElementPath;
 
 /**
@@ -81,21 +83,29 @@ import com.openexchange.realtime.util.ElementPath;
  */
 public abstract class Stanza implements Serializable {
 
+    public static final ElementPath ERROR_PATH = new ElementPath("error");
+    
     private static final long serialVersionUID = 1L;
 
     private static final Log LOG = LogFactory.getLog(Stanza.class);
 
     // recipient and sender
-    private ID to, from, sequencePrincipal;
+    private ID to, from, sequencePrincipal, onBehalfOf;
 
     // All 3 basic stanza types either have an optional or mandatory id field
     private String id = "";
+    
+    /**
+     * The error object for Presence Stanza of type error.
+     */
+    protected RealtimeException error = null;
 
     private String selector = "default";
     
     private long sequenceNumber = -1;
     
     private String tracer; 
+    
     private List<String> logEntries = new LinkedList<String>();
 
     // Payloads carried by this Stanza as n-ary trees
@@ -162,6 +172,44 @@ public abstract class Stanza implements Serializable {
         this.from = from;
     }
     
+    /**
+     * Get the error element describing the error-type Stanza in more detail.
+     * 
+     * @return Null or the OXException representing the error
+     */
+    public RealtimeException getError() {
+        return error;
+    }
+
+    /**
+     * Set the error element describing the error-type Stanza in more detail.
+     * 
+     * @param error The OXException representing the error
+     */
+    public void setError(RealtimeException error) {
+        this.error = error;
+        writeThrough(ERROR_PATH, error);
+    }
+    
+    /**
+     * Sets the onBehalfOf
+     *
+     * @param onBehalfOf The onBehalfOf to set
+     */
+    public void setOnBehalfOf(ID onBehalfOf) {
+        this.onBehalfOf = onBehalfOf;
+    }
+    
+    
+    /**
+     * Gets the onBehalfOf
+     *
+     * @return The onBehalfOf
+     */
+    public ID getOnBehalfOf() {
+        return onBehalfOf;
+    }
+    
     
     /**
      * Sets the sequenceNumber
@@ -199,7 +247,7 @@ public abstract class Stanza implements Serializable {
      * @return The SequencePrincipal (ID) set via setSequencePrincipal or the SequencePrincipal of the sender ID
      */
     public ID getSequencePrincipal() {
-        return (sequencePrincipal != null) ? sequencePrincipal : from;
+        return (sequencePrincipal != null) ? sequencePrincipal : (onBehalfOf != null) ? onBehalfOf : from;
     }
 
     /**
@@ -413,6 +461,41 @@ public abstract class Stanza implements Serializable {
         setPayloads(copy);
     }
 
+    /**
+     * Write a payload to the PayloadTree identified by the ElementPath. There is only one tree for the default elements which only contains
+     * one node so we can set the data by directly writing to the root node.
+     * 
+     * @param path The ElementPath identifying the PayloadTree.
+     * @param data The payload data to write into the root node.
+     */
+    protected void writeThrough(ElementPath path, Object data) {
+        List<PayloadTree> payloadTrees = payloads.get(path);
+        if (payloadTrees == null) {
+            payloadTrees = new ArrayList<PayloadTree>();
+        }
+        if (payloadTrees.size() > 1) {
+            throw new IllegalStateException("Stanza shouldn't contain more than one PayloadTree per basic ElementPath");
+        }
+        PayloadTree tree;
+        if (payloadTrees.isEmpty()) {
+            PayloadElement payloadElement = new PayloadElement(
+                data,
+                data.getClass().getSimpleName(),
+                path.getNamespace(),
+                path.getElement());
+            PayloadTreeNode payloadTreeNode = new PayloadTreeNode(payloadElement);
+            tree = new PayloadTree(payloadTreeNode);
+            addPayload(tree);
+        } else {
+            tree = payloadTrees.get(0);
+            PayloadTreeNode node = tree.getRoot();
+            if (node == null) {
+                throw new IllegalStateException("PayloadTreeNode removed? This shouldn't happen!");
+            }
+            node.setData(data, data.getClass().getSimpleName());
+        }
+
+    }
     /**
      * Init default fields from values found in the PayloadTrees of the Stanza.
      * 

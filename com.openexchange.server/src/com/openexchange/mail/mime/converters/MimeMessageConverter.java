@@ -87,6 +87,7 @@ import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimePart;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.parser.ContentHandler;
 import org.apache.james.mime4j.parser.MimeStreamParser;
@@ -96,6 +97,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -117,6 +119,7 @@ import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -528,6 +531,36 @@ public final class MimeMessageConverter {
     }
 
     /**
+     * Gets the multipart from passed content object.
+     *
+     * @param content The content object
+     * @param contentType The content type
+     * @return The appropriate multipart
+     * @throws OXException If content cannot be presented as a multipart
+     */
+    public static Multipart multipartFor(final Object content, final ContentType contentType) throws OXException {
+        if (null == content) {
+            return null;
+        }
+        if (content instanceof Multipart) {
+            return (Multipart) content;
+        }
+        if (content instanceof InputStream) {
+            try {
+                return new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
+            } catch (MessagingException e) {
+                throw MimeMailException.handleMessagingException(e);
+            } catch (IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            }
+        }
+        throw MailExceptionCode.MESSAGING_ERROR.create("Content is not of type javax.mail.Multipart, but " + content.getClass().getName());
+    }
+
+    /**
      * Performs {@link MimeMessage#saveChanges() saveChanges()} on specified message with sanitizing for a possibly corrupt/wrong Content-Type header.
      * <p>
      * Aligns <i>Message-Id</i> header to given host name.
@@ -567,12 +600,17 @@ public final class MimeMessageConverter {
     }
 
     /**
-     * Performs {@link MimeMessage#saveChanges() saveChanges()} on specified message with sanitizing for a possibly corrupt/wrong Content-Type header.
+     * Performs {@link MimeMessage#saveChanges() saveChanges()} on specified message with sanitizing for a possibly corrupt/wrong
+     * Content-Type header.
      *
      * @param mimeMessage The message
      * @throws OXException If an error occurs
      */
     public static void saveChanges(final MimeMessage mimeMessage) throws OXException {
+        saveChanges(mimeMessage, true);
+    }
+
+    private static void saveChanges(final MimeMessage mimeMessage, final boolean trySanitizeMultipart) throws OXException {
         if (null == mimeMessage) {
             return;
         }
@@ -590,9 +628,56 @@ public final class MimeMessageConverter {
                  * ... and retry
                  */
                 mimeMessage.saveChanges();
+            } catch (final javax.mail.MessagingException e) {
+                if (!trySanitizeMultipart) {
+                    throw MimeMailException.handleMessagingException(e);
+                }
+                // Check for DCH error
+                final String msg = toLowerCase(e.getMessage());
+                if (null != msg && msg.startsWith("mime part of type \"multipart/")) {
+                    sanitizeMultipartContent(mimeMessage);
+                    saveChanges(mimeMessage, false);
+                } else {
+                    throw MimeMailException.handleMessagingException(e);
+                }
             }
         } catch (final MessagingException e) {
             throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static boolean sanitizeMultipartContent(final MimePart part) throws OXException {
+        try {
+            final String sContentType = toLowerCase(part.getHeader("Content-Type", null));
+            if (null != sContentType && sContentType.startsWith("multipart/")) {
+                final Object o = part.getContent();
+                if (o instanceof MimeMultipart) {
+                    MimeMultipart multipart = (MimeMultipart) o;
+                    final int count = multipart.getCount();
+                    for (int i = 0; i < count; i++) {
+                        if (!sanitizeMultipartContent((MimePart) multipart.getBodyPart(i))) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                // Not an instance of MimeMultipart.
+                // Try to sanitize
+                if (o instanceof InputStream) {
+                    final MimeMultipart multipart = new MimeMultipart(new MessageDataSource((InputStream) o, sContentType));
+                    part.setContent(multipart);
+                    return true;
+                }
+                return false;
+            }
+            return true;
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -1707,6 +1792,8 @@ public final class MimeMessageConverter {
 
     private static final String MULTI_SUBTYPE_MIXED = "MIXED";
 
+    private static final String MULTI_SUBTYPE_ALTERNATIVE = "ALTERNATIVE";
+
     /**
      * Creates a message data object from given MIME message.
      *
@@ -1795,6 +1882,9 @@ public final class MimeMessageConverter {
                     if (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType())) {
                         // For convenience consider multipart/mixed to hold file attachments
                         mail.setHasAttachment(true);
+                    } else if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(ct.getSubType())) {
+                        // For convenience consider multipart/mixed to hold file attachments
+                        mail.setHasAttachment(mail.getEnclosedCount() > 2);
                     } else {
                         // Examine Multipart object
                         Object content = null;
@@ -1808,7 +1898,17 @@ public final class MimeMessageConverter {
                             mail.setHasAttachment(false);
                         } else {
                             try {
-                                mail.setHasAttachment(hasAttachments((Multipart) content, ct.getSubType()));
+                                mail.setHasAttachment(hasAttachments(mail, ct.getSubType()));
+                            } catch (final OXException e) {
+                                if (!MailExceptionCode.MESSAGING_ERROR.equals(e)) {
+                                    throw e;
+                                }
+                                // A messaging error occurred
+                                LOG.warn(new com.openexchange.java.StringAllocator(256).append(
+                                    "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
+                                    e.getMessage()).append(
+                                    ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString(), e);
+                                mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                             } catch (final ClassCastException e) {
                                 // Cast to javax.mail.Multipart failed
                                 LOG.warn(new com.openexchange.java.StringAllocator(256).append(
@@ -2045,7 +2145,7 @@ public final class MimeMessageConverter {
      */
     public static MailPart convertPart(final byte[] asciiBytes) throws OXException {
         try {
-            return convertPart(new MimeBodyPart(new UnsynchronizedByteArrayInputStream(asciiBytes)));
+            return convertPart(new MimeBodyPart(new UnsynchronizedByteArrayInputStream(asciiBytes)), false);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
@@ -2791,6 +2891,20 @@ public final class MimeMessageConverter {
             }
         }
         return priority;
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

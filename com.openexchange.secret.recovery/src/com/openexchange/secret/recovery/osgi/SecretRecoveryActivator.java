@@ -147,10 +147,13 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
                     @Override
                     public void handleEvent(final Event event) {
                         final String oldPassword = (String) event.getProperty("com.openexchange.passwordchange.oldPassword");
-                        final String newPassword = (String) event.getProperty("com.openexchange.passwordchange.newPassword");
+                        // final String newPassword = (String) event.getProperty("com.openexchange.passwordchange.newPassword");
                         final Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
+                        // Current secret
+                        final String secret = whiteboardSecretService.getSecret(session);
+                        // Try to migrate
                         try {
-                            migrator.migrate(oldPassword, newPassword, ServerSessionAdapter.valueOf(session));
+                            migrator.migrate(oldPassword, secret, ServerSessionAdapter.valueOf(session));
                         } catch (final Exception e) {
                             log.warn("Password change event could not be handled.", e);
                         }

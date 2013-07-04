@@ -154,6 +154,12 @@ public class LdapContactStorage extends DefaultContactStorage {
     }
 
     @Override
+    public int count(Session session, String folderId, boolean canReadAll) throws OXException {
+        check(session.getContextId(), folderId);
+        return count(session, config.getBaseDN(), config.getSearchfilter());
+    }
+
+    @Override
     public SearchIterator<Contact> deleted(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
         check(session.getContextId(), folderId);
         if (null == mapper.opt(ContactField.LAST_MODIFIED)) {
@@ -305,6 +311,19 @@ public class LdapContactStorage extends DefaultContactStorage {
             return search(session, fields, mapper, baseDN, filter, sortKeys, getMaxResults(sortOptions), deleted);
         } else {
             return sort(search(session, fields, mapper, baseDN, filter, null, getMaxResults(sortOptions), deleted), mapper, sortOptions);
+        }
+    }
+
+    protected int count(Session session, String baseDN, String filter) throws OXException {
+        LdapExecutor executor = null;
+        try {
+            executor = new LdapExecutor(factory, session);
+            List<LdapResult> results = executor.search(baseDN, filter, new String[0], null, getMaxResults(SortOptions.EMPTY));
+            return results.size();
+        } finally {
+            if (null != executor) {
+                executor.close();
+            }
         }
     }
 

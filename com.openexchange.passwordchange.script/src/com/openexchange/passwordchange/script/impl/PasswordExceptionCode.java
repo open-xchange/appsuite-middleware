@@ -66,6 +66,10 @@ public enum PasswordExceptionCode implements OXExceptionCode {
      */
     PASSWORD_FAILED(PasswordExceptionMessage.PASSWORD_FAILED_MSG, CATEGORY_PERMISSION_DENIED, 1),
     /**
+     * Cannot change password: %1$s
+     */
+    PASSWORD_FAILED_WITH_MSG(PasswordExceptionMessage.PASSWORD_FAILED_WITH_MSG_MSG, CATEGORY_PERMISSION_DENIED, 1),
+    /**
      * New password too short.
      */
     PASSWORD_SHORT(PasswordExceptionMessage.PASSWORD_SHORT_MSG, CATEGORY_USER_INPUT, 2),

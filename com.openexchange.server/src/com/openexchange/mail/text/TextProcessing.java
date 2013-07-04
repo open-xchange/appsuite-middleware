@@ -59,6 +59,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.java.CharsetDetector;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -223,7 +224,7 @@ public final class TextProcessing {
             if (c == '>') {
                 sb.append(c);
                 lastGT = i;
-            } else if (Character.isWhitespace(c)) {
+            } else if (Strings.isWhitespace(c)) {
                 sb.append(c);
             } else {
                 break;

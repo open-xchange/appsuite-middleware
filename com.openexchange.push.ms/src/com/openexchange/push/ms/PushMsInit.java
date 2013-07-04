@@ -59,12 +59,12 @@ import com.openexchange.ms.Topic;
 
 /**
  * {@link PushMsInit} - Initializes the messaging-based push bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PushMsInit {
 
-    private volatile Topic<Map<String, Object>> publisher;
+    private volatile Topic<Map<String, Object>> publishTopic;
 
     private volatile MessageListener<Map<String, Object>> subscriber;
 
@@ -79,16 +79,16 @@ public class PushMsInit {
 
     /**
      * Gets the topic to publish messages to.
-     * 
+     *
      * @return The topic
      */
-    public Topic<Map<String, Object>> getPublisher() {
-        return publisher;
+    public Topic<Map<String, Object>> getPublishTopic() {
+        return publishTopic;
     }
 
     /**
      * Gets the message listener receiving incoming messages.
-     * 
+     *
      * @return The message listener
      */
     public MessageListener<Map<String, Object>> getSubscriber() {
@@ -97,7 +97,7 @@ public class PushMsInit {
 
     /**
      * Get the delaying push queue.
-     * 
+     *
      * @return the delaying push queue.
      */
     public DelayPushQueue getDelayPushQueue() {
@@ -106,24 +106,24 @@ public class PushMsInit {
 
     /**
      * Initializes the messaging-based push bundle.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public void init() throws OXException {
-        Topic<Map<String, Object>> publisher = this.publisher;
-        if (null == publisher) {
+        Topic<Map<String, Object>> publishTopic = this.publishTopic;
+        if (null == publishTopic) {
             synchronized (this) {
-                publisher = this.publisher;
-                if (null == publisher) {
+                publishTopic = this.publishTopic;
+                if (null == publishTopic) {
                     try {
                         final MsService msService = Services.getService(MsService.class);
                         if (null == msService) {
                             throw MsExceptionCodes.ILLEGAL_STATE.create("Missing service: " + MsService.class.getName());
                         }
-                        publisher = msService.getTopic("oxEventTopic");
+                        publishTopic = msService.getTopic("oxEventTopic");
                         final PushMsListener listener = new PushMsListener();
-                        publisher.addMessageListener(listener);
-                        this.publisher = publisher;
+                        publishTopic.addMessageListener(listener);
+                        this.publishTopic = publishTopic;
                         subscriber = listener;
                     } catch (final RuntimeException e) {
                         throw MsExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -141,7 +141,7 @@ public class PushMsInit {
                     }
                     int delayDuration = configService.getIntProperty("com.openexchange.push.ms.delayDuration", 120000);
                     int maxDelays = configService.getIntProperty("com.openexchange.push.ms.maxDelayDuration", 600000);
-                    delayPushQueue = new DelayPushQueue(publisher, delayDuration, maxDelays);
+                    delayPushQueue = new DelayPushQueue(publishTopic, delayDuration, maxDelays);
                 }
             }
         }
@@ -151,17 +151,17 @@ public class PushMsInit {
      * Shuts-down the messaging-based push bundle.
      */
     public void close() {
-        Topic<Map<String, Object>> publisher = this.publisher;
+        Topic<Map<String, Object>> publisher = this.publishTopic;
         if (null != publisher) {
             synchronized (this) {
-                publisher = this.publisher;
+                publisher = this.publishTopic;
                 if (null != publisher) {
                     final MessageListener<Map<String, Object>> listener = subscriber;
                     if (null != listener) {
                         publisher.removeMessageListener(subscriber);
                         subscriber = null;
                     }
-                    this.publisher = null;
+                    this.publishTopic = null;
                 }
             }
         }

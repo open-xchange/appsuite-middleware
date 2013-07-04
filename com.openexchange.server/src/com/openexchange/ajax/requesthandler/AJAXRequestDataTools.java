@@ -64,6 +64,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.java.UnsynchronizedStringReader;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -204,10 +205,21 @@ public class AJAXRequestDataTools {
                 UnsynchronizedPushbackReader reader = null;
                 try {
                     reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req));
-                    final int read = reader.read();
+                    int read = reader.read();
                     if (read < 0) {
                         trySetDataByParameter(req, retval);
                     } else {
+                        // Skip whitespaces
+                        while (isWhitespace((char) read)) {
+                            read = reader.read();
+                            if (read < 0) {
+                                trySetDataByParameter(req, retval);
+                                Streams.close(reader);
+                                reader = null;
+                                return retval;
+                            }
+                        }
+                        // Check first non-whitespace character
                         final char c = (char) read;
                         reader.unread(c);
                         if ('[' == c || '{' == c) {
@@ -245,6 +257,31 @@ public class AJAXRequestDataTools {
                 retval.setData(data);
             }
         }
+    }
+
+    /**
+     * High speed test for whitespace!  Faster than the java one (from some testing).
+     *
+     * @return <code>true</code> if the indicated character is whitespace; otherwise <code>false</code>
+     */
+    private boolean isWhitespace(char c) {
+        switch (c) {
+            case 9:  //'unicode: 0009
+            case 10: //'unicode: 000A'
+            case 11: //'unicode: 000B'
+            case 12: //'unicode: 000C'
+            case 13: //'unicode: 000D'
+            case 28: //'unicode: 001C'
+            case 29: //'unicode: 001D'
+            case 30: //'unicode: 001E'
+            case 31: //'unicode: 001F'
+            case ' ': // Space
+                //case Character.SPACE_SEPARATOR:
+                //case Character.LINE_SEPARATOR:
+            case Character.PARAGRAPH_SEPARATOR:
+                return true;
+        }
+        return false;
     }
 
     /**
@@ -327,10 +364,10 @@ public class AJAXRequestDataTools {
             return false;
         }
         int i = 0;
-        if (Character.isWhitespace(toCheck.charAt(i))) {
+        if (Strings.isWhitespace(toCheck.charAt(i))) {
             do {
                 i++;
-            } while (i < len && Character.isWhitespace(toCheck.charAt(i)));
+            } while (i < len && Strings.isWhitespace(toCheck.charAt(i)));
         }
         if (i >= len) {
             return false;

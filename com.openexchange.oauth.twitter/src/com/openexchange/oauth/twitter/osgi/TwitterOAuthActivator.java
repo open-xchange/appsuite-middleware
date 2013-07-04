@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.twitter.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
@@ -59,7 +61,9 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.twitter.OAuthServiceMetaDataTwitterImpl;
 import com.openexchange.oauth.twitter.TwitterOAuthServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -92,11 +96,15 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
              * Register service
              */
             registerService(OAuthServiceMetaData.class, new OAuthServiceMetaDataTwitterImpl());
+
+            final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "twitter");
             registerService(CapabilityChecker.class, new CapabilityChecker() {
 
                 @Override
-                public boolean isEnabled(String capability, ServerSession session) throws OXException {
+                public boolean isEnabled(String capability, Session ses) throws OXException {
                     if ("twitter".equals(capability)) {
+                        final ServerSession session = ServerSessionAdapter.valueOf(ses);
                         if (session.isAnonymous()) {
                             return false;
                         }
@@ -105,9 +113,10 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
                         return view.opt("com.openexchange.oauth.twitter", boolean.class, Boolean.TRUE).booleanValue();
                     }
                     return true;
-                    
+
                 }
-            });
+            }, properties);
+
             getService(CapabilityService.class).declareCapability("twitter");
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TwitterOAuthActivator.class)).error(e.getMessage(), e);

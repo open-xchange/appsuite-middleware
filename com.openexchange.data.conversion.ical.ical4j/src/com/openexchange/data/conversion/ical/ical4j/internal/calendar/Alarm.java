@@ -210,12 +210,19 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
             warnings.add(new ConversionWarning(index, "Can only extract alarms from VTODO or VEVENT components"));
         }
         if (null != alarms) {
-            for (int i = 0; i < alarms.size(); i++) {
-                VAlarm alarm = (VAlarm)alarms.get(i);
-                if (null != alarm.getTrigger() && "DISPLAY".equalsIgnoreCase(alarm.getAction().getValue())) {
-                    return alarm.getTrigger();
+            final int size = alarms.size();
+            for (int i = 0; i < size; i++) {
+                final VAlarm alarm = (VAlarm)alarms.get(i);
+                if (null != alarm) {
+                    final Trigger trigger = alarm.getTrigger();
+                    if (null != trigger) {
+                        final Action action = alarm.getAction();
+                        if (null != action && "DISPLAY".equalsIgnoreCase(action.getValue())) {
+                            return trigger;
+                        }
+                        warnings.add(new ConversionWarning(index, "Can only convert DISPLAY alarms with triggers"));
+                    }
                 }
-                warnings.add(new ConversionWarning(index, "Can only convert DISPLAY alarms with triggers"));
             }
         }
 

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -106,6 +107,10 @@ public class MailTestManager {
 
     public MailTestManager(AJAXClient client, boolean failOnError) {
         this(client);
+        this.failOnError = failOnError;
+    }
+    
+    public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
     }
 
@@ -171,9 +176,33 @@ public class MailTestManager {
      * @return The mail as placed in the sent box.
      */
     public TestMail send(TestMail mail) throws JSONException, OXException, IOException, SAXException {
-        SendRequest request = new SendRequest(mail.toJSON().toString());
+        SendRequest request = new SendRequest(mail.toJSON().toString(), failOnError);
         SendResponse response = client.execute(request);
         lastResponse = response;
+        if (lastResponse.hasError()) {
+            return null;
+        }
+        String[] folderAndID = response.getFolderAndID();
+        mail = get(folderAndID[0], folderAndID[1]);
+
+        cleaningSteps.add(new MailCleaner(mail, client));
+        markCopyInInboxIfNecessary(mail);
+
+        return mail;
+    }
+
+    /**
+     * Sends a mail. This methods also sets the lastResponse field.
+     *
+     * @return The mail as placed in the sent box.
+     */
+    public TestMail send(TestMail mail, InputStream upload) throws JSONException, OXException, IOException, SAXException {
+        SendRequest request = new SendRequest(mail.toJSON().toString(), upload, failOnError);
+        SendResponse response = client.execute(request);
+        lastResponse = response;
+        if (lastResponse.hasError()) {
+            return null;
+        }
         String[] folderAndID = response.getFolderAndID();
         mail = get(folderAndID[0], folderAndID[1]);
 
