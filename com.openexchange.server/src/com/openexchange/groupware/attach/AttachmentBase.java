@@ -49,9 +49,9 @@
 
 package com.openexchange.groupware.attach;
 
+import gnu.trove.map.TIntObjectMap;
 import java.io.InputStream;
 import java.util.Date;
-import java.util.Map;
 import java.util.SortedSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -148,5 +148,5 @@ public interface AttachmentBase extends TransactionAware {
      */
     public abstract Date getNewestCreationDate(Context ctx, int moduleId, int attachedId) throws OXException;
 
-    public abstract Map<Integer, Date> getNewestCreationDates(Context ctx, int moduleId, int[] attachedIds) throws OXException;
+    public abstract TIntObjectMap<Date> getNewestCreationDates(Context ctx, int moduleId, int[] attachedIds) throws OXException;
 }

@@ -50,6 +50,7 @@
 package com.openexchange.groupware.tasks;
 
 import static com.openexchange.java.Autoboxing.I;
+import gnu.trove.map.TIntObjectMap;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -289,9 +290,9 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
             ids[i] = tasks.get(i).getObjectID();
         }
         final AttachmentBase attachmentBase = Attachments.getInstance();
-        final Map<Integer, Date> dates = attachmentBase.getNewestCreationDates(ctx, Types.TASK, ids);
+        final TIntObjectMap<Date> dates = attachmentBase.getNewestCreationDates(ctx, Types.TASK, ids);
         for (final Task task : tasks) {
-            final Date newestCreationDate = dates.get(I(task.getObjectID()));
+            final Date newestCreationDate = dates.get(task.getObjectID());
             if (null != newestCreationDate) {
                 task.setLastModifiedOfNewestAttachment(newestCreationDate);
             }
