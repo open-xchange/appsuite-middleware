@@ -77,10 +77,10 @@ public class CrawlerDescription {
     private boolean quirkyCookieQuotes;
 
     public CrawlerDescription() {
-
+        super();
     }
 
-    public void finishUp (List<Step> steps){
+    public void finishUp (List<Step<?, ?>> steps){
         Workflow workflow = new Workflow(steps);
         if (mobileUserAgentEnabled) {
             workflow.setMobileUserAgent(true);

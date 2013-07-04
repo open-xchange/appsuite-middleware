@@ -231,4 +231,37 @@ public class EmailProvider {
     public void setInstructions(Collection<Instruction> instructions) {
         this.instructions = instructions;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(256);
+        builder.append("EmailProvider [");
+        if (provider != null) {
+            builder.append("provider=").append(provider).append(", ");
+        }
+        if (domains != null) {
+            builder.append("domains=").append(domains).append(", ");
+        }
+        if (displayName != null) {
+            builder.append("displayName=").append(displayName).append(", ");
+        }
+        if (displayShortName != null) {
+            builder.append("displayShortName=").append(displayShortName).append(", ");
+        }
+        if (incomingServer != null) {
+            builder.append("incomingServer=").append(incomingServer).append(", ");
+        }
+        if (outgoingServer != null) {
+            builder.append("outgoingServer=").append(outgoingServer).append(", ");
+        }
+        if (documentations != null) {
+            builder.append("documentations=").append(documentations).append(", ");
+        }
+        if (instructions != null) {
+            builder.append("instructions=").append(instructions);
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
 }

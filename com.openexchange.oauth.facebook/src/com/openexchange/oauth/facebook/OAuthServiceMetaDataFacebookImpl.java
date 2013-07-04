@@ -61,8 +61,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.FacebookApi;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.API;

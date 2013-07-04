@@ -109,8 +109,7 @@ public class ConfigurationFile extends AbstractConfigSource {
             LOG.warn("Unable to find file: " + files[0], e);
             return null;
         }
-        AutoconfigParser parser = new AutoconfigParser(fis);
-        ClientConfig clientConfig = parser.getConfig();
+        ClientConfig clientConfig = new AutoconfigParser().getConfig(fis);
 
         Autoconfig autoconfig = getBestConfiguration(clientConfig, emailDomain);
         replaceUsername(autoconfig, emailLocalPart, emailDomain);

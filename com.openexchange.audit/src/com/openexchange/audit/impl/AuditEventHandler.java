@@ -154,6 +154,12 @@ public class AuditEventHandler implements EventHandler {
                 appendUserInformation(session.getUserId(), session.getContextId(), log);
                 log.append("CONTEXT ID: ").append(session.getContextId()).append("; ");
                 log.append("OBJECT ID: ").append(event.getProperty(FileStorageEventConstants.OBJECT_ID)).append("; ");
+                {
+                    final Object fileName = event.getProperty(FileStorageEventConstants.FILE_NAME);
+                    if (null != fileName) {
+                        log.append("FILE NAME: ").append(fileName).append("; ");
+                    }
+                }
                 log.append("SERVICE ID: ").append(event.getProperty(FileStorageEventConstants.SERVICE)).append("; ");
                 log.append("ACCOUNT ID: ").append(event.getProperty(FileStorageEventConstants.ACCOUNT_ID)).append("; ");
                 {

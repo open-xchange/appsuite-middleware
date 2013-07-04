@@ -64,6 +64,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import javax.mail.Flags;
 import javax.mail.Folder;
@@ -80,6 +82,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserExceptionCode;
+import com.openexchange.imap.OperationKey.Type;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.cache.FolderCache;
 import com.openexchange.imap.cache.ListLsubCache;
@@ -109,6 +112,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -116,6 +120,7 @@ import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ParsingException;
@@ -704,36 +709,18 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
          */
         final List<String> additionalFullNames = new ArrayList<String>(4);
         if (imapConfig.getImapCapabilities().hasNamespace()) {
-            {
-                mergeWithNamespaceFolders(
-                    subfolders,
-                    NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId),
-                    subscribed,
-                    parent,
-                    additionalFullNames);
-            }
-            {
-                mergeWithNamespaceFolders(
-                    subfolders,
-                    NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId),
-                    subscribed,
-                    parent,
-                    additionalFullNames);
-            }
-            {
-                mergeWithNamespaceFolders(
-                    subfolders,
-                    NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accountId),
-                    subscribed,
-                    parent,
-                    additionalFullNames);
-            }
+
+            mergeWithNamespaceFolders(subfolders, NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId), subscribed, parent, additionalFullNames);
+
+            mergeWithNamespaceFolders(subfolders, NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId), subscribed, parent, additionalFullNames);
+
+            mergeWithNamespaceFolders(subfolders, NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accountId), subscribed, parent, additionalFullNames);
+
         }
         /*
          * Convert to MailFolder instances
          */
-        final List<MailFolder> list =
-            new ArrayList<MailFolder>(subfolders.size() + (additionalFullNames.isEmpty() ? 0 : additionalFullNames.size()));
+        final List<MailFolder> list = new ArrayList<MailFolder>(subfolders.size() + (additionalFullNames.isEmpty() ? 0 : additionalFullNames.size()));
         for (final ListLsubEntry current : subfolders) {
             final MailFolder mailFolder = FolderCache.getCachedFolder(current.getFullName(), this);
             if (mailFolder.exists()) {
@@ -1971,6 +1958,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 if (IMAPSessionStorageAccess.isEnabled()) {
                     IMAPSessionStorageAccess.removeDeletedFolder(accountId, session, fullName);
                 }
+                final OperationKey opKey = new OperationKey(Type.MSG_DELETE, accountId, new Object[] { fullName });
+                boolean marked = false;
                 f.open(Folder.READ_WRITE);
                 try {
                     final int msgCount = f.getMessageCount();
@@ -1980,6 +1969,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                          */
                         return;
                     }
+
+                    marked = setMarker(opKey, f);
+
                     String trashFullname = null;
                     final boolean hardDeleteMsgsByConfig = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs();
                     final boolean backup = (!hardDelete && !hardDeleteMsgsByConfig && !isSubfolderOf(
@@ -1994,6 +1986,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         }
                     }
                 }  finally {
+                    if (marked) {
+                        unsetMarker(opKey);
+                    }
                     f.close(true);
                 }
             }
@@ -2046,6 +2041,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 if (IMAPSessionStorageAccess.isEnabled()) {
                     IMAPSessionStorageAccess.removeDeletedFolder(accountId, session, fullName);
                 }
+                final OperationKey opKey = new OperationKey(Type.MSG_DELETE, accountId, new Object[] { fullName });
+                boolean marked = false;
                 f.open(Folder.READ_WRITE);
                 try {
                     int msgCount = f.getMessageCount();
@@ -2055,6 +2052,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                          */
                         return;
                     }
+
+                    marked = setMarker(opKey, f);
+
                     String trashFullname = null;
                     final boolean hardDeleteMsgsByConfig = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs();
                     final boolean backup =
@@ -2205,7 +2205,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             System.currentTimeMillis() - startClear).append(STR_MSEC));
                     }
                 } finally {
-                    f.close(false);
+                    closeSafe(f);
+                    if (marked) {
+                        unsetMarker(opKey);
+                    }
                 }
             }
         } catch (final MessagingException e) {
@@ -2470,6 +2473,51 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     /*
      * ++++++++++++++++++ Helper methods ++++++++++++++++++
      */
+
+    private static final String IMAP_OPERATIONS = "__imap-operations".intern();
+
+    private void unsetMarker(final OperationKey key) {
+        @SuppressWarnings("unchecked") final ConcurrentMap<OperationKey, Object> map = (ConcurrentMap<OperationKey, Object>) session.getParameter(IMAP_OPERATIONS);
+        if (null != map) {
+            map.remove(key);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean setMarker(final OperationKey key, final Folder imapFolder) throws OXException {
+        if (session instanceof PutIfAbsent) {
+            final PutIfAbsent session = (PutIfAbsent) this.session;
+            ConcurrentMap<OperationKey, Object> map = (ConcurrentMap<OperationKey, Object>) session.getParameter(IMAP_OPERATIONS);
+            if (null == map) {
+                final ConcurrentMap<OperationKey, Object> newMap = new ConcurrentHashMap<OperationKey, Object>(16);
+                map = (ConcurrentMap<OperationKey, Object>) session.setParameterIfAbsent(IMAP_OPERATIONS, newMap);
+                if (null == map) {
+                    map = newMap;
+                }
+            }
+            if (null != map.putIfAbsent(key, OperationKey.PRESENT)) {
+                // In use...
+                throw MimeMailExceptionCode.IN_USE_ERROR_EXT.create(
+                    imapConfig.getServer(),
+                    imapConfig.getLogin(),
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()),
+                    MimeMailException.appendInfo("Mailbox is currently in use.", imapFolder));
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private static void closeSafe(final Folder folder) {
+        if (null != folder) {
+            try {
+                folder.close(false);
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
+    }
 
     /*-
      * Get the QUOTA resource with the highest usage-per-limitation value

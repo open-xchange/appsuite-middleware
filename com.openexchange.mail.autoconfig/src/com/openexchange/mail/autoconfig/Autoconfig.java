@@ -219,21 +219,46 @@ public class Autoconfig {
     }
 
     /**
-     * Gets the username
+     * Gets the user name
      *
-     * @return The username
+     * @return The user name
      */
     public String getUsername() {
         return username;
     }
 
     /**
-     * Sets the username
+     * Sets the user name
      *
-     * @param username The username to set
+     * @param username The user name to set
      */
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(256);
+        builder.append("Autoconfig [");
+        if (mailServer != null) {
+            builder.append("mailServer=").append(mailServer).append(", ");
+        }
+        if (transportServer != null) {
+            builder.append("transportServer=").append(transportServer).append(", ");
+        }
+        if (mailProtocol != null) {
+            builder.append("mailProtocol=").append(mailProtocol).append(", ");
+        }
+        if (transportProtocol != null) {
+            builder.append("transportProtocol=").append(transportProtocol).append(", ");
+        }
+        builder.append("mailPort=").append(mailPort).append(", transportPort=").append(transportPort).append(", mailSecure=").append(mailSecure).append(", transportSecure=").append(
+            transportSecure).append(", ");
+        if (username != null) {
+            builder.append("username=").append(username);
+        }
+        builder.append("]");
+        return builder.toString();
     }
 
 }

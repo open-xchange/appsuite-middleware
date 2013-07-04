@@ -56,7 +56,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
+import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.server.Initialization;
 
@@ -178,7 +178,7 @@ public class GrizzlyConfig implements Initialization {
     }
 
     private void init() throws OXException {
-        ConfigurationService configService = GrizzlyServiceRegistry.getInstance().getService(ConfigurationService.class);
+        ConfigurationService configService = Services.getService(ConfigurationService.class);
         if (configService == null) {
             throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getSimpleName());
         }

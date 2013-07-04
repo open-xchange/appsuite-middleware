@@ -50,7 +50,6 @@
 package com.openexchange.apps.manifests;
 
 import java.util.Map;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
@@ -61,5 +60,15 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ServerConfigMatcherService {
-	public boolean looksApplicable(Map config, AJAXRequestData request, ServerSession session) throws OXException;
+
+    /**
+     * Checks if given argument look applicable for this matcher service.
+     *
+     * @param config The configuration
+     * @param request The associated AJAX request
+     * @param session The user session
+     * @return <code>true</code> if applicable; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    boolean looksApplicable(Map<String, Object> config, AJAXRequestData request, ServerSession session) throws OXException;
 }

@@ -51,6 +51,7 @@ package com.openexchange.mail.mime;
 
 import static com.openexchange.i18n.TextPattern.LINE_SEPARATOR;
 import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 
 /**
@@ -255,14 +256,14 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
     public final static String MESSAGING_ERROR_MSG = "Messaging error: %1$s";
 
     /**
-     * The quota on mail server exceeded.
+     * The quota on mail server exceeded. Error message: %1$s
      */
-    public final static String QUOTA_EXCEEDED_MSG = "The quota on mail server exceeded.";
+    public final static String QUOTA_EXCEEDED_MSG = "The quota on mail server exceeded. Error message: %1$s";
 
     /**
-     * The quota on mail server "%1$s" exceeded with login %2$s (user=%3$s, context=%4$s).
+     * The quota on mail server "%1$s" exceeded with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
      */
-    public final static String QUOTA_EXCEEDED_EXT_MSG = "The quota on mail server \"%1$s\" exceeded with login %2$s (user=%3$s, context=%4$s).";
+    public final static String QUOTA_EXCEEDED_EXT_MSG = "The quota on mail server \"%1$s\" exceeded with login %2$s (user=%3$s, context=%4$s). Error message: %5$s";
 
     /**
      * A command to mail server failed. Server response: %1$s
@@ -350,5 +351,9 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
      * message: %5$s
      */
     public final static String PROCESSING_ERROR_WE_EXT_MSG = "Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed. Error message: %5$s";
+
+    public static final String IN_USE_ERROR_MSG = "That mailbox is already in use by another process. Please try again later." + Strings.getLineSeparator() + "Error message: %1$s";
+
+    public static final String IN_USE_ERROR_EXT_MSG = "That mailbox is already in use by another process on %1$s mail server for login %2$s (user=%3$s, context=%4$s). Please try again later." + Strings.getLineSeparator() + "Error message: %5$s";;
 
 }

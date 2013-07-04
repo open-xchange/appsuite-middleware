@@ -78,119 +78,116 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(noSession = true)
 public class AllAction implements AJAXActionService {
 
-	private final JSONArray manifests;
-	private final ServiceLookup services;
+    private final JSONArray manifests;
+    private final ServiceLookup services;
     private final CapabilityFilter capabilityFilter;
 
-	public AllAction(ServiceLookup services, JSONArray manifests, final CapabilityFilter capabilityFilter) {
-		super();
-		this.manifests = manifests;
-		this.services = services;
+    public AllAction(ServiceLookup services, JSONArray manifests, final CapabilityFilter capabilityFilter) {
+        super();
+        this.manifests = manifests;
+        this.services = services;
         this.capabilityFilter = capabilityFilter;
-	}
+    }
 
-	@Override
-	public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-		return new AJAXRequestResult(getManifests(session, manifests, services, capabilityFilter), "json");
-	}
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        return new AJAXRequestResult(getManifests(session, manifests, services, capabilityFilter), "json");
+    }
 
-	public static JSONArray getManifests(ServerSession session, JSONArray manifests, ServiceLookup services, final CapabilityFilter capabilityFilter) throws OXException {
-		JSONArray result = new JSONArray();
-		try {
-			if (session.isAnonymous()) {
-				// Deliver no apps and only plugins with the namespace 'signin'
-
-				for (int i = 0, size = manifests.length(); i < size; i++) {
-					JSONObject definition = manifests.getJSONObject(i);
-					if (isSigninPlugin(definition)) {
-						result.put(new JSONObject(definition));
-					}
-				}
-
-			} else {
-				Set<Capability> capabilities = services.getService(CapabilityService.class).getCapabilities(session.getUserId(), session.getContextId(), capabilityFilter);
-
-				Map<String, Capability> capMap = new HashMap<String, Capability>(capabilities.size());
-				for (Capability capability : capabilities) {
-					capMap.put(capability.getId(), capability);
-				}
-
-				for (int i = 0, size = manifests.length(); i < size; i++) {
-					JSONObject definition = manifests.getJSONObject(i);
-					if (hasCapability(capMap, definition)) {
-						result.put(new JSONObject(definition));
-					}
-				}
-			}
-		} catch (JSONException x) {
-			throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage(), x);
-		}
-		return result;
-	}
-
-	private static boolean isSigninPlugin(JSONObject definition) throws JSONException {
-		if (!definition.has("namespace")) {
-			return false;
-		}
-
-		return definition.getString("namespace").equalsIgnoreCase("signin");
-	}
-
-	private static boolean hasCapability(Map<String, Capability> capMap,
-			JSONObject definition) throws JSONException {
-
-		if (!definition.has("requires")) {
-			return true;
-		}
-		Object requires = definition.get("requires");
-		// This could be a string or an array
-		List<String> capDef = new ArrayList<String>();
-
-		if (JSONArray.class.isInstance(requires)) {
-			JSONArray arr = (JSONArray) requires;
-			for (int i = 0, size = arr.length(); i < size; i++) {
-				capDef.add(arr.getString(i));
-			}
-		} else {
-			capDef.add(requires.toString());
-		}
-
-		for (String c : capDef) {
-			String[] split = Strings.splitByWhitespaces(c);
-			String name = split[0];
-			boolean inverse = false;
-			if (name.charAt(0) == '!') {
-				inverse = true;
-				name = name.substring(1);
-			}
-			boolean needsBackend = false;
-			if (split.length > 1) {
-				needsBackend = split[1].equalsIgnoreCase("withbackend")
-						|| split[1].equalsIgnoreCase("withbackendsupport")
-						|| split[1].equals("backend")
-						|| split[1].equals("backendsupport");
-			}
-
-			Capability capability = capMap.get(name);
-
-			if (inverse) {
-				if (capability != null) {
-					return false;
-				}
-			} else {
-				if (capability == null) {
-					return false;
-				}
-                if (needsBackend) {
-                	if (!capability.isSupportedByBackend()) {
-                		return false;
-                	}
+    public static JSONArray getManifests(ServerSession session, JSONArray manifests, ServiceLookup services, final CapabilityFilter capabilityFilter) throws OXException {
+        JSONArray result = new JSONArray();
+        try {
+            if (session.isAnonymous()) {
+                // Deliver no apps and only plugins with the namespace 'signin'
+                
+                for (int i = 0, size = manifests.length(); i < size; i++) {
+                    JSONObject definition = manifests.getJSONObject(i);
+                    if (isSigninPlugin(definition)) {
+                        result.put(new JSONObject(definition));
+                    }
                 }
-			}
+                
+            } else {
+                Set<Capability> capabilities = services.getService(CapabilityService.class).getCapabilities(session.getUserId(), session.getContextId(), capabilityFilter);
+                
+                Map<String, Capability> capMap = new HashMap<String, Capability>(capabilities.size());
+                for (Capability capability : capabilities) {
+                    capMap.put(capability.getId(), capability);
+                }
 
-		}
+                for (int i = 0, size = manifests.length(); i < size; i++) {
+                    JSONObject definition = manifests.getJSONObject(i);
+                    if (hasCapability(capMap, definition)) {
+                        result.put(new JSONObject(definition));
+                    }
+                }
+            }
+        } catch (JSONException x) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage(), x);
+        }
+        return result;
+    }
 
-		return true;
-	}
+    private static boolean isSigninPlugin(JSONObject definition) throws JSONException {
+        if (!definition.has("namespace")) {
+            return false;
+        }
+
+        return definition.getString("namespace").equalsIgnoreCase("signin");
+    }
+
+    private static boolean hasCapability(Map<String, Capability> capMap, JSONObject definition) throws JSONException {
+
+        if (!definition.has("requires")) {
+            return true;
+        }
+        Object requires = definition.get("requires");
+        // This could be a string or an array
+        List<String> capDef = new ArrayList<String>();
+
+        if (JSONArray.class.isInstance(requires)) {
+            JSONArray arr = (JSONArray) requires;
+            for (int i = 0, size = arr.length(); i < size; i++) {
+                capDef.add(arr.getString(i));
+            }
+        } else {
+            capDef.add(requires.toString());
+        }
+
+        for (String c : capDef) {
+            String[] split = Strings.splitByWhitespaces(c);
+            String name = split[0];
+            boolean inverse = false;
+            if (name.charAt(0) == '!') {
+                inverse = true;
+                name = name.substring(1);
+            }
+            boolean needsBackend = false;
+            if (split.length > 1) {
+                final String word = split[1];
+                needsBackend = "withbackend".equalsIgnoreCase(word) || "withbackendsupport".equalsIgnoreCase(word) || "backend".equals(word) || "backendsupport".equals(word);
+            }
+
+            Capability capability = capMap.get(name);
+
+            if (inverse) {
+                if (capability != null) {
+                    return false;
+                }
+            } else {
+                if (capability == null) {
+                    return false;
+                }
+                if (needsBackend) {
+                    if (!capability.isSupportedByBackend()) {
+                        return false;
+                    }
+                }
+            }
+
+        }
+
+        return true;
+    }
 
 }

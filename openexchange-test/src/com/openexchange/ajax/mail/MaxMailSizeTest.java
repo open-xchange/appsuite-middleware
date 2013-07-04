@@ -80,7 +80,7 @@ public class MaxMailSizeTest extends AbstractMailTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        manager = new MailTestManager(client, false);
+        manager = new MailTestManager(client, true);
     }
 
     @Override
@@ -114,6 +114,7 @@ public class MaxMailSizeTest extends AbstractMailTest {
         mail.setBody("Test Mail");
         mail.sanitize();
 
+        manager.setFailOnError(false);
         manager.send(mail, new FooInputStream(3800000L)); // Results in > 5000000 Byte Mail Size
         assertTrue("Should not pass", manager.getLastResponse().hasError());
         OXException exception = manager.getLastResponse().getException();

@@ -60,6 +60,9 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import com.openexchange.realtime.exception.RealtimeExceptionFactory;
 import com.openexchange.realtime.packet.Presence.Type;
 import com.openexchange.realtime.payload.PayloadTree;
 
@@ -79,8 +82,13 @@ public class PresenceTest {
     private static byte priority = 1;
 
     @Test
-    public void testInitialPresenceBuilder() {
-        Presence initialPresence = Presence.builder().from(fromID).build();
+    public void testInitialPresenceBuilder() throws OXException {
+        RealtimeException realtimeException = RealtimeExceptionFactory.getInstance().create(RealtimeExceptionCodes.SESSION_INVALID);
+        
+        Presence initialPresence = Presence.builder()
+            .from(fromID)
+            .error(realtimeException)
+            .build();
 
         assertEquals(fromID, initialPresence.getFrom());
         assertNull(initialPresence.getTo());
@@ -88,8 +96,10 @@ public class PresenceTest {
         assertEquals("", initialPresence.getMessage());
         assertEquals(0, initialPresence.getPriority());
         assertEquals(Type.NONE, initialPresence.getType());
-        assertNull(initialPresence.getError());
-        assertEquals(Collections.EMPTY_LIST, initialPresence.getPayloads());
+        assertEquals(realtimeException, initialPresence.getError());
+        assertEquals(1, initialPresence.getPayloads().size());
+        
+        initialPresence.transformPayloadsToInternal();
 
     }
 

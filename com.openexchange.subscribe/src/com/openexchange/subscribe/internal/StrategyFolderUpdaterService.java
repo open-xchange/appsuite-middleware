@@ -51,11 +51,11 @@ package com.openexchange.subscribe.internal;
 
 import java.util.Collection;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.generic.FolderUpdaterService;
+import com.openexchange.groupware.generic.FolderUpdaterServiceV2;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
+import com.openexchange.log.LogFactory;
 
 
 /**
@@ -64,7 +64,7 @@ import com.openexchange.groupware.generic.TargetFolderDefinition;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> {
+public class StrategyFolderUpdaterService<T> implements FolderUpdaterServiceV2<T> {
 
     private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(StrategyFolderUpdaterService.class));
 
@@ -103,6 +103,32 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> 
                 }
             } catch (final OXException x) {
                 LOG.error(x.getMessage(), x);
+            }
+        }
+
+        strategy.closeSession(session);
+    }
+
+    @Override
+    public void save(Collection<T> data, TargetFolderDefinition target, Collection<OXException> errors) throws OXException {
+        final Object session = strategy.startSession(target);
+
+        final Collection<T> dataInFolder = strategy.getData(target, session);
+
+        for(final T element : data) {
+            try {
+                final T bestMatch = findBestMatch(element, dataInFolder, session);
+                if(bestMatch == null) {
+                    strategy.save(element, session);
+                } else {
+                    strategy.update(bestMatch, element, session);
+                }
+            } catch (final OXException x) {
+                if (null == errors) {
+                    LOG.error(x.getMessage(), x);
+                } else {
+                    errors.add(x);
+                }
             }
         }
 

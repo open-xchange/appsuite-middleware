@@ -50,14 +50,24 @@
 package com.openexchange.realtime.hazelcast.channel;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.directory.Resource;
+import com.openexchange.realtime.directory.ResourceDirectory;
+import com.openexchange.realtime.dispatch.DispatchExceptionCode;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.hazelcast.Services;
+import com.openexchange.realtime.hazelcast.Utils;
+import com.openexchange.realtime.hazelcast.impl.GlobalMessageDispatcherImpl;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.IDMap;
 
 /**
  * {@link StanzaDispatcher}
@@ -97,7 +107,14 @@ public class StanzaDispatcher implements Callable<Map<ID, OXException>>, Seriali
     public Map<ID, OXException> call() throws Exception {
         stanza.trace("Received remove delivery. Dispatching locally");
         LocalMessageDispatcher dispatcher = Services.getService(LocalMessageDispatcher.class);
-        return dispatcher.send(stanza, targets);
+        Map<ID, OXException> exceptions = dispatcher.send(stanza, targets);
+        if (Utils.shouldResend(exceptions, stanza)) {
+            ResourceDirectory directory = Services.optService(ResourceDirectory.class);
+            directory.remove(stanza.getTo());
+            Services.getService(MessageDispatcher.class).send(stanza);
+        }
+        return exceptions;
+            
     }
 
 }

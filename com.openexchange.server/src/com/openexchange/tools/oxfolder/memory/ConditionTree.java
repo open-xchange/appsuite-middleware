@@ -51,21 +51,21 @@ package com.openexchange.tools.oxfolder.memory;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
- * {@link ConditionTree}
+ * {@link ConditionTree} - A condition tree for a certain user/group.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConditionTree {
 
-    private static final Condition CONDITION_ADMIN = new Condition() {
+    private static final int SYSTEM_GLOBAL_FOLDER_ID = FolderObject.SYSTEM_GLOBAL_FOLDER_ID;
+
+    static final Condition CONDITION_ADMIN = new Condition() {
 
         @Override
         public boolean fulfilled(final Permission p) {
@@ -73,7 +73,7 @@ public final class ConditionTree {
         }
     };
 
-    private static final Condition CONDITION_READ_FOLDER = new Condition() {
+    static final Condition CONDITION_READ_FOLDER = new Condition() {
 
         @Override
         public boolean fulfilled(final Permission p) {
@@ -81,15 +81,20 @@ public final class ConditionTree {
         }
     };
 
-    private static final List<Condition> CONDITIONS = Collections.unmodifiableList(new ArrayList<Condition>(Arrays.asList(CONDITION_ADMIN, CONDITION_READ_FOLDER)));
+    private static final Condition CONDITION_FOLDER_VISIBLE = new Condition() {
 
-    private static final int LENGTH = CONDITIONS.size();
+        @Override
+        public boolean fulfilled(Permission p) {
+            return CONDITION_ADMIN.fulfilled(p) || CONDITION_READ_FOLDER.fulfilled(p);
+        }
+    };
+
+    // ------------------------------------------------------------------------------------------- //
 
     private final TIntSet folderIds;
-
     private final List<Permission> permissions;
-
     private final boolean ignoreSharedAddressbook;
+    private final long stamp;
 
     /**
      * Initializes a new {@link ConditionTree}.
@@ -97,8 +102,19 @@ public final class ConditionTree {
     public ConditionTree() {
         super();
         folderIds = new TIntHashSet();
-        permissions = new ArrayList<Permission>();
+        permissions = new LinkedList<Permission>();
         ignoreSharedAddressbook = OXFolderProperties.isIgnoreSharedAddressbook();
+        stamp = System.currentTimeMillis();
+    }
+
+    /**
+     * Checks if this user-associated condition tree is elapsed according to given time stamp.
+     *
+     * @param stamp The time stamp to compare with
+     * @return <code>true</code> if elapsed; otherwise <code>false</code>
+     */
+    public boolean isElapsed(final long stamp) {
+        return this.stamp < stamp;
     }
 
     /**
@@ -107,27 +123,12 @@ public final class ConditionTree {
      * @param p The permission associated with a certain entity
      */
     public void insert(final Permission p) {
-        if (ignoreSharedAddressbook && FolderObject.SYSTEM_GLOBAL_FOLDER_ID == p.fuid) {
+        if (ignoreSharedAddressbook && (SYSTEM_GLOBAL_FOLDER_ID == p.fuid)) {
             return;
         }
-        insert(CONDITION_ADMIN, p, 0);
-    }
-
-    private void insert(final Condition condition, final Permission p, final int index) {
-        if (index >= LENGTH) {
-            // Failed every condition
-            return;
-        }
-        if (condition.fulfilled(p)) {
+        if (CONDITION_FOLDER_VISIBLE.fulfilled(p)) {
             folderIds.add(p.fuid);
             permissions.add(p);
-        } else {
-            final int nextIndex = index + 1;
-            if (nextIndex >= LENGTH) {
-                // Failed every condition
-                return;
-            }
-            insert(CONDITIONS.get(nextIndex), p, nextIndex);
         }
     }
 

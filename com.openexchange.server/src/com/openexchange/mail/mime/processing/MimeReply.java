@@ -81,6 +81,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Streams;
@@ -684,7 +685,7 @@ public final class MimeReply {
                 final InternetAddress[] from = msg.getFrom();
                 replyPrefix =
                     PATTERN_SENDER.matcher(replyPrefix).replaceFirst(
-                        from == null || from.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(from[0].toUnicodeString()));
+                        from == null || from.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.addr2String(from[0])));
             }
             {
                 final char nextLine = '\n';
@@ -877,17 +878,22 @@ public final class MimeReply {
             partContentType.setContentType(part.getContentType());
             if (partContentType.startsWith(TEXT) && (avoidHTML ? !partContentType.startsWith(TEXT_HTM) : true) && MimeProcessingUtility.isInline(part, partContentType) && !MimeProcessingUtility.isSpecial(partContentType.getBaseType())) {
                 if (pc.retvalContentType.getPrimaryType() == null) {
+                    String text = MimeProcessingUtility.handleInlineTextPart(part, partContentType, pc.usm.isDisplayHtmlInlineContent());
+                    if (isEmpty(text)) {
+                        final String htmlContent = getHtmlContent(multipartPart, count);
+                        if (null != htmlContent) {
+                            final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                            text = null == htmlService ? "" : htmlService.html2text(htmlContent, true);
+                        }
+                    }
                     pc.retvalContentType.setContentType(partContentType);
                     final String charset = MessageUtility.checkCharset(part, partContentType);
                     pc.retvalContentType.setCharsetParameter(charset);
-                    final String text =
-                        MimeProcessingUtility.handleInlineTextPart(part, pc.retvalContentType, pc.usm.isDisplayHtmlInlineContent());
                     pc.textBuilder.append(text);
                 } else {
                     final String charset = MessageUtility.checkCharset(part, partContentType);
                     partContentType.setCharsetParameter(charset);
-                    final String text =
-                        MimeProcessingUtility.handleInlineTextPart(part, partContentType, pc.usm.isDisplayHtmlInlineContent());
+                    final String text = MimeProcessingUtility.handleInlineTextPart(part, partContentType, pc.usm.isDisplayHtmlInlineContent());
                     MimeProcessingUtility.appendRightVersion(pc.retvalContentType, partContentType, text, pc.textBuilder);
                 }
                 found = true;
@@ -896,6 +902,19 @@ public final class MimeReply {
             }
         }
         return found;
+    }
+
+    private static String getHtmlContent(final MailPart multipartPart, final int count) throws OXException, IOException {
+        boolean found = false;
+        for (int i = 0; !found && i < count; i++) {
+            final MailPart part = multipartPart.getEnclosedMailPart(i);
+            final ContentType partContentType = part.getContentType();
+            if (partContentType.startsWith(TEXT_HTM) && MimeProcessingUtility.isInline(part, partContentType) && !MimeProcessingUtility.isSpecial(partContentType.getBaseType())) {
+                final String charset = MessageUtility.checkCharset(part, partContentType);
+                return MimeProcessingUtility.readContent(part, charset);
+            }
+        }
+        return null;
     }
 
     /*-

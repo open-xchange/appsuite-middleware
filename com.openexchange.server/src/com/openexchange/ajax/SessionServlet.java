@@ -98,6 +98,7 @@ import com.openexchange.log.Props;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionSecretChecker;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
@@ -106,6 +107,7 @@ import com.openexchange.sessiond.impl.SubnetMask;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
+import com.openexchange.tools.servlet.RateLimitedException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -315,6 +317,9 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
             }
             super.service(new CountingHttpServletRequest(req), resp);
+        } catch (final RateLimitedException e) {
+            resp.setContentType("text/plain; charset=UTF-8");
+            resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
         } catch (final OXException e) {
             if (SessionExceptionCodes.getErrorPrefix().equals(e.getPrefix())) {
                 LOG.debug(e.getMessage(), e);
@@ -562,6 +567,19 @@ public abstract class SessionServlet extends AJAXServlet {
      * @throws SessionException if the session can not be found.
      */
     public static ServerSession getSession(final CookieHashSource source, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws OXException {
+        return getSession(source, req, sessionId, sessiondService, null);
+    }
+
+    /**
+     * Finds appropriate local session.
+     *
+     * @param source defines how the cookie should be found
+     * @param sessionId identifier of the session.
+     * @param sessiondService The SessionD service
+     * @return the session.
+     * @throws SessionException if the session can not be found.
+     */
+    public static ServerSession getSession(final CookieHashSource source, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService, final SessionSecretChecker optChecker) throws OXException {
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
             if (INFO) {
@@ -573,7 +591,11 @@ public abstract class SessionServlet extends AJAXServlet {
         /*
          * Get session secret
          */
-        checkSecret(source, req, session);
+        if (null == optChecker) {
+            checkSecret(source, req, session);
+        } else {
+            optChecker.checkSecret(session, req, source.name());
+        }
         try {
             final Context context = ContextStorage.getInstance().getContext(session.getContextId());
             final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
@@ -624,7 +646,9 @@ public abstract class SessionServlet extends AJAXServlet {
             if (INFO && null != secret) {
                 LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
             }
-            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
+            final OXException oxe = SessionExceptionCodes.WRONG_SESSION_SECRET.create();
+            oxe.setProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name(), null == secret ? "null" : secret);
+            throw oxe;
         }
     }
 
@@ -707,6 +731,12 @@ public abstract class SessionServlet extends AJAXServlet {
         session.setParameter("JSESSIONID", req.getSession().getId());
     }
 
+    /**
+     * Convenience method to remember the public session for a request in the servlet attributes.
+     *
+     * @param req The servlet request.
+     * @param session The public session to remember.
+     */
     public static void rememberPublicSession(final HttpServletRequest req, final ServerSession session) {
     	req.setAttribute(PUBLIC_SESSION_KEY, session);
         session.setParameter("JSESSIONID", req.getSession().getId());
@@ -801,7 +831,7 @@ public abstract class SessionServlet extends AJAXServlet {
     protected static ServerSession getSessionObject(final ServletRequest req, final boolean mayUseFallbackSession) {
         final Object attribute = req.getAttribute(SESSION_KEY);
         if (attribute != null) {
-            return (ServerSession) req.getAttribute(SESSION_KEY);
+            return (ServerSession) attribute;
         }
         if (mayUseFallbackSession) {
             return (ServerSession) req.getAttribute(PUBLIC_SESSION_KEY);

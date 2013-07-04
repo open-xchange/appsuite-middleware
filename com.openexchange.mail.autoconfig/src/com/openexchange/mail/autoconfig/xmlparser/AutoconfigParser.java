@@ -89,13 +89,21 @@ import com.openexchange.mail.autoconfig.AutoconfigException;
  */
 public class AutoconfigParser {
 
-    private final InputStream is;
-
-    public AutoconfigParser(InputStream is) {
-        this.is = is;
+    /**
+     * Initializes a new {@link AutoconfigParser}.
+     */
+    public AutoconfigParser() {
+        super();
     }
 
-    public ClientConfig getConfig() throws OXException {
+    /**
+     * Gets the configuration from passed stream.
+     *
+     * @param is The input stream to read from
+     * @return The parsed configuration
+     * @throws OXException If an error occurs
+     */
+    public ClientConfig getConfig(InputStream is) throws OXException {
         ClientConfig clientConfig = new ClientConfig();
         XmlPullParser parser = new KXmlParser();
         try {
@@ -116,6 +124,13 @@ public class AutoconfigParser {
             throw AutoconfigException.xml(e);
         } catch (IOException e) {
             throw AutoconfigException.io(e);
+        } finally {
+            try {
+                is.close();
+            } catch (final Exception e) {
+                // Ignore
+            }
+
         }
         return clientConfig;
     }

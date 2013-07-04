@@ -171,7 +171,7 @@ public class Activator extends DeferredActivator {
                     }
 
                     private void handleDroppedSession(final Session session) {
-                        if (null == getService(SessiondService.class).getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
+                        if (!session.isTransient() && null == getService(SessiondService.class).getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
                             MailfilterAction.removeFor(session);
                         }
                     }

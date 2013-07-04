@@ -49,11 +49,11 @@
 
 package com.openexchange.tools.oxfolder.treeconsistency;
 
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
@@ -101,7 +101,7 @@ public final class CheckPermissionOnInsert extends CheckPermission {
      */
     public void checkParentPermissions(final int parent, final OCLPermission[] perms, final long lastModified) throws OXException {
         try {
-            final Map<Integer, ToDoPermission> map = new HashMap<Integer, ToDoPermission>();
+            final TIntObjectMap<ToDoPermission> map = new TIntObjectHashMap<ToDoPermission>();
             for (int i = 0; i < perms.length; i++) {
                 final OCLPermission assignedPerm = perms[i];
                 if (assignedPerm.isFolderVisible()) {
@@ -115,22 +115,22 @@ public final class CheckPermissionOnInsert extends CheckPermission {
              * Auto-insert system-folder-read permission to make possible non-visible parent folders visible in folder tree
              */
             if (!map.isEmpty()) {
-                final int mapSize = map.size();
-                final Iterator<Map.Entry<Integer, ToDoPermission>> mapIterator = map.entrySet().iterator();
-                for (int i = 0; i < mapSize; i++) {
-                    final Map.Entry<Integer, ToDoPermission> entry = mapIterator.next();
-                    final int folderId = entry.getKey().intValue();
+                final TIntObjectIterator<ToDoPermission> it = map.iterator();
+                for ( int i = map.size(); i-- > 0; ) {
+                    it.advance();
+                    final int folderId = it.key();
                     /*
                      * Insert read permissions
                      */
-                    final int[] users = entry.getValue().getUsers();
+                    final ToDoPermission toDoPermission = it.value();
+                    final int[] users = toDoPermission.getUsers();
                     for (int j = 0; j < users.length; j++) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Auto-Insert system-folder-read permission for user " + UserStorage.getStorageUser(users[j], ctx).getDisplayName() + " to folder " + folderId);
                         }
                         addSystemFolderReadPermission(folderId, users[j], false);
                     }
-                    final int[] groups = entry.getValue().getGroups();
+                    final int[] groups = toDoPermission.getGroups();
                     for (int j = 0; j < groups.length; j++) {
                         if (LOG.isDebugEnabled()) {
                             try {
@@ -172,7 +172,7 @@ public final class CheckPermissionOnInsert extends CheckPermission {
         }
     }
 
-    private void ensureParentVisibility(final int parent, final int entity, final boolean isGroup, final Map<Integer, ToDoPermission> map) throws OXException, OXException, SQLException {
+    private void ensureParentVisibility(final int parent, final int entity, final boolean isGroup, final TIntObjectMap<ToDoPermission> map) throws OXException, OXException, SQLException {
         if (parent < FolderObject.MIN_FOLDER_ID) {
             /*
              * We reached a context-created folder
@@ -187,11 +187,10 @@ public final class CheckPermissionOnInsert extends CheckPermission {
             /*
              * Add system-read-folder permission for current entity
              */
-            final Integer key = Integer.valueOf(parent);
-            ToDoPermission todo = map.get(key);
+            ToDoPermission todo = map.get(parent);
             if (todo == null) {
                 todo = new ToDoPermission(parent);
-                map.put(key, todo);
+                map.put(parent, todo);
             }
             if (isGroup) {
                 todo.addGroup(entity);

@@ -280,6 +280,9 @@ public class OXContainerConverter {
     }
 
     public Task convertTask(final VersitObject object) throws ConverterException {
+        if (null == object) {
+            return null;
+        }
         try {
             final Task taskContainer = new Task();
             // CLASS
@@ -385,6 +388,9 @@ public class OXContainerConverter {
     }
 
     public CalendarDataObject convertAppointment(final VersitObject object) throws ConverterException {
+        if (null == object) {
+            return null;
+        }
         final CalendarDataObject appContainer = new CalendarDataObject();
         // CLASS
         PrivacyProperty(appContainer, object, P_CLASS, CommonObject.PRIVATE_FLAG);
@@ -509,10 +515,16 @@ public class OXContainerConverter {
     }
 
     public Contact convertContact(final VersitObject object) throws ConverterException {
+        if (null == object) {
+            return null;
+        }
         final Contact contactContainer = new Contact();
         // SOURCE is ignored
         // NAME is ignored
         // PROFILE is ignored
+        //YOMIGANA/Furigana phonetic pronounciation helpers
+        StringProperty(contactContainer, object, "X-PHONETIC-FIRST-NAME", Contact.YOMI_FIRST_NAME);
+        StringProperty(contactContainer, object, "X-PHONETIC-LAST-NAME", Contact.YOMI_LAST_NAME);
         // FN
         StringProperty(contactContainer, object, "FN", Contact.DISPLAY_NAME);
         // N
@@ -1544,6 +1556,9 @@ public class OXContainerConverter {
     }
 
     public VersitObject convertTask(final Task task) throws ConverterException {
+        if (null == task) {
+            return null;
+        }
         final VersitObject object = new VersitObject("VTODO");
         // TODO CLASS
         addProperty(object, P_CLASS, "PUBLIC");
@@ -1630,6 +1645,9 @@ public class OXContainerConverter {
     }
 
     public VersitObject convertAppointment(final Appointment app) throws ConverterException {
+        if (null == app) {
+            return null;
+        }
         modifyRecurring(app);
         final VersitObject object = new VersitObject("VEVENT");
         // TODO CLASS
@@ -1759,6 +1777,9 @@ public class OXContainerConverter {
     }
 
     public VersitObject convertContact(final Contact contact, final String version) throws ConverterException {
+        if (null == contact) {
+            return null;
+        }
         final VersitObject object = new VersitObject("VCARD");
         // VERSION
         addProperty(object, "VERSION", version);
@@ -1769,6 +1790,9 @@ public class OXContainerConverter {
         // PROFILE is ignored
         // FN
         addProperty(object, "FN", contact.getDisplayName());
+        // YOMI/Furigana
+        addProperty(object, "X-PHONETIC-FIRST-NAME", contact.getYomiFirstName());
+        addProperty(object, "X-PHONETIC-LAST-NAME", contact.getYomiLastName());
         // N
         final ArrayList<ArrayList> n = new ArrayList<ArrayList>();
         n.add(makeList(contact.getSurName()));

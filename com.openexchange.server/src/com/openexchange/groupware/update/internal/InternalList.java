@@ -538,6 +538,14 @@ public final class InternalList {
         // Extends the UID field
         list.add(new com.openexchange.groupware.update.tasks.EnlargeCalendarUid());
 
+        // Sets the changing date once for users with a different defaultSendAddress
+        list.add(new com.openexchange.groupware.update.tasks.ContactAdjustLastModifiedForChangedSenderAddress());
+
+        // Drop foreign key constraints from obsolete tables
+        list.add(new com.openexchange.groupware.update.tasks.HeaderCacheDropFKTask());
+
+        list.add(new com.openexchange.groupware.update.tasks.EnlargeCalendarUid());
+
         // +++++++++++++++++++++++++++++++++ Version 7.4.0 starts here. +++++++++++++++++++++++++++++++++
 
         // Add UUID column to genconf_attributes_strings table

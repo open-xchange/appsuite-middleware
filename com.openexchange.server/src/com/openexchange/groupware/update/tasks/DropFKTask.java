@@ -60,6 +60,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -92,8 +93,7 @@ public final class DropFKTask extends UpdateTaskAdapter {
         final int cid = params.getContextId();
         final Connection con = Database.getNoTimeout(cid, true);
         try {
-            con.setAutoCommit(false);
-            con.setAutoCommit(false);
+            Databases.startTransaction(con);
 
             /*
              * Drop foreign keys
@@ -163,7 +163,6 @@ public final class DropFKTask extends UpdateTaskAdapter {
                 }
             }
 
-            con.commit();
             con.commit();
         } catch (final SQLException e) {
             rollback(con);

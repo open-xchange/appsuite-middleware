@@ -94,7 +94,7 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public static final String INIT_CONNECTION_FROM_DBPOOL_MSG = "Unable to pick up a connection from the DBPool";
 
-    public static final String DATA_TRUNCATION_MSG = "Import failed. Some data entered exceed the database field limit. Please shorten the following entries: %1$s character limit: %2$s sent %3$s Please add a comment for the variables";
+    public static final String DATA_TRUNCATION_MSG = "Some data entered exceeded the field limit. Please shorten the value for \"%1$s\" (limit: %2$s, current: %3$s) and try again.";
 
     public static final String NOT_VALID_IMAGE_MSG = "The image you tried to attach is not a valid picture. It may be broken or is not a valid file.";
 

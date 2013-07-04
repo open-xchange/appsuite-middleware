@@ -50,15 +50,15 @@
 package com.openexchange.groupware.settings.tree.modules.mail.folder;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.AbstractWarningAwareReadOnlyValue;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mailaccount.MailAccount;
@@ -95,7 +95,7 @@ public class Sent implements PreferencesItemService {
      */
     @Override
     public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
+        return new AbstractWarningAwareReadOnlyValue() {
             @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
@@ -108,6 +108,7 @@ public class Sent implements PreferencesItemService {
                 try {
                     mail = MailServletInterface.getInstance(session);
                     setting.setSingleValue(mail.getSentFolder(MailAccount.DEFAULT_ID));
+                    addWarnings(mail.getWarnings());
                 } catch (final OXException e) {
                     if (e.isPrefix("ACC") && MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getCode()) {
                         // Admin has no mail access

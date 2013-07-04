@@ -52,8 +52,8 @@ package com.openexchange.ajp13.coyote.sockethandler;
 import java.net.Socket;
 import javax.management.NotCompliantMBeanException;
 import com.openexchange.ajp13.AJPv13Config;
-import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.IAJPv13SocketHandler;
+import com.openexchange.ajp13.Services;
 import com.openexchange.ajp13.coyote.AjpProcessor;
 import com.openexchange.ajp13.coyote.Constants;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
@@ -120,7 +120,7 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
      */
     public CoyoteSocketHandler() {
         super();
-        final ConfigurationService configurationService = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
         if (configurationService == null) {
             forceHttps = false;
         } else {

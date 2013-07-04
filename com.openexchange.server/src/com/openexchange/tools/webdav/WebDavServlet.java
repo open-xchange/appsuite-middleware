@@ -58,6 +58,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
+import com.openexchange.tools.servlet.RateLimitedException;
 
 /**
  * {@link WebDavServlet} - An abstract class for servlets serving WebDAV requests
@@ -222,6 +223,9 @@ public abstract class WebDavServlet extends HttpServlet {
             } else {
                 super.service(req, resp);
             }
+        } catch (final RateLimitedException e) {
+            resp.setContentType("text/plain; charset=UTF-8");
+            resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
         } finally {
             decrementRequests();
         }

@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -81,6 +82,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link ConfigAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Some clean-up
  */
 @DispatcherNotes(noSession = true)
 public class ConfigAction implements AJAXActionService {
@@ -116,66 +118,63 @@ public class ConfigAction implements AJAXActionService {
 		} catch (JSONException x) {
 			throw AjaxExceptionCodes.JSON_ERROR.create(x.toString());
 		}
-	}
+    }
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private JSONObject getFromConfiguration(AJAXRequestData requestData,
-			ServerSession session) throws JSONException, OXException {
+    @SuppressWarnings("unchecked")
+    private JSONObject getFromConfiguration(AJAXRequestData requestData, ServerSession session) throws JSONException, OXException {
 
-		Map serverConfigs = (Map) services.getService(ConfigurationService.class).getYaml("as-config.yml");
+        Map<String, Object> serverConfigs = (Map<String, Object>) services.getService(ConfigurationService.class).getYaml("as-config.yml");
 
-		Map serverConfig = new HashMap();
+        Map<String, Object> serverConfig = new HashMap<String, Object>();
 
-		Map defaults = (Map) services.getService(ConfigurationService.class).getYaml("as-config-defaults.yml");
-		if (defaults != null) {
-			serverConfig.putAll((Map) defaults.get("default"));
-		}
+        Map<String, Object> defaults = (Map<String, Object>) services.getService(ConfigurationService.class).getYaml("as-config-defaults.yml");
+        if (defaults != null) {
+            serverConfig.putAll((Map<String, Object>) defaults.get("default"));
+        }
 
+        // Find other applicable configurations
+        if (serverConfigs != null) {
+            for (Object value : serverConfigs.values()) {
+                if (looksApplicable((Map<String, Object>) value, requestData, session)) {
+                    serverConfig.putAll((Map<String, Object>) value);
+                }
+            }
+        }
 
+        return (JSONObject) JSONCoercion.coerceToJSON(serverConfig);
+    }
 
-		// Find other applicable configs
-		if (serverConfigs != null) {
-			for(Object value: serverConfigs.values()) {
-				if (looksApplicable((Map) value, requestData, session)) {
-					serverConfig.putAll((Map) value);
-				}
-			}
-		}
+    private boolean looksApplicable(Map<String, Object> value, AJAXRequestData requestData, ServerSession session) throws OXException {
+        if (value == null) {
+            return false;
+        }
+        String host = (String) value.get("host");
+        if (host != null) {
+            if (host.equals(requestData.getHostname()) || "all".equals(host)) {
+                return true;
+            }
+        }
 
-		return (JSONObject) JSONCoercion.coerceToJSON(serverConfig);
-	}
+        String hostRegex = (String) value.get("hostRegex");
+        if (hostRegex != null) {
+            try {
+                Pattern pattern = Pattern.compile(hostRegex);
+                if (pattern.matcher(requestData.getHostname()).find()) {
+                    return true;
+                }
+            } catch (final PatternSyntaxException e) {
+                // Ignore. Treat as absent.
+            }
+        }
 
-	private boolean looksApplicable(Map value, AJAXRequestData requestData,
-			ServerSession session) throws OXException {
+        List<ServerConfigMatcherService> matchers = registry.getMatchers();
+        for (ServerConfigMatcherService matcher : matchers) {
+            if (matcher.looksApplicable(value, requestData, session)) {
+                return true;
+            }
+        }
 
-		if (value == null) {
-			return false;
-		}
-		String host = (String) value.get("host");
-		if (host != null) {
-			if (requestData.getHostname().equals(host) || host.equals("all")) {
-				return true;
-			}
-		}
-
-		String hostRegex = (String) value.get("hostRegex");
-
-		if (hostRegex != null) {
-			Pattern pattern = Pattern.compile(hostRegex);
-			if (pattern.matcher(requestData.getHostname()).find()) {
-				return true;
-			}
-		}
-
-
-		List<ServerConfigMatcherService> matchers = registry.getMatchers();
-		for (ServerConfigMatcherService matcher : matchers) {
-			if (matcher.looksApplicable(value, requestData, session)) {
-				return true;
-			}
-		}
-
-		return false;
+        return false;
     }
 
     private void addComputedValues(JSONObject serverconfig, AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {

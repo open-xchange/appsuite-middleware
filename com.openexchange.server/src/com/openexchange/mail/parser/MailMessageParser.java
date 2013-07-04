@@ -539,6 +539,10 @@ public final class MailMessageParser {
                      */
                     final Multipart mp;
                     try {
+                        final Attr subjetcAttr = message.getAttribute(Attr.attSubject);
+                        if (null == subjetcAttr) {
+                            message.addAttribute(new Attr(Attr.LVL_MESSAGE, Attr.atpText, Attr.attSubject, "vcard"));
+                        }
                         mp = ContactHandler.convert(message);
                     } catch (final RuntimeException e) {
                         LOG.error("Invalid TNEF contact", e);

@@ -115,10 +115,9 @@ public abstract class AbstractExportAction implements AJAXActionService {
             return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
         }
 
-        AJAXRequestResult result = new AJAXRequestResult();
-        result.setResultObject(
-            new FileHolder(sis, sis.getSize(), sis.getFormat().getMimeType(), "export." + sis.getFormat().getExtension()),
-            "file");
-        return result;
+        final FileHolder fileHolder = new FileHolder(sis, sis.getSize(), sis.getFormat().getMimeType(), "export." + sis.getFormat().getExtension());
+        fileHolder.setDisposition("attachment");
+        req.getRequest().setFormat("file");
+        return new AJAXRequestResult(fileHolder, "file");
     }
 }

@@ -82,7 +82,7 @@ public class HazelcastConfigurationActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.set(this);
-        registerService(HazelcastConfigurationService.class, new HazelcastConfigurationServiceImpl());
+        registerService(HazelcastConfigurationService.class, new HazelcastConfigurationServiceImpl(context));
     }
 
     @Override

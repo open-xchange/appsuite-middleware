@@ -49,33 +49,18 @@
 
 package gnu.trove.procedure;
 
-
 /**
  * {@link TIntObjectErrorAwareAbstractProcedure} - Provides access to an expected exception via {@link #getException()}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class TIntObjectErrorAwareAbstractProcedure<T, E extends Exception> implements TIntObjectProcedure<T> {
-
-    /**
-     * The exception reference.
-     */
-    protected E exception;
+public abstract class TIntObjectErrorAwareAbstractProcedure<T, E extends Exception> extends AbstractErrorAware<E> implements TIntObjectProcedure<T> {
 
     /**
      * Initializes a new {@link TIntObjectErrorAwareAbstractProcedure}.
      */
     protected TIntObjectErrorAwareAbstractProcedure() {
         super();
-    }
-
-    /**
-     * Gets the exception possibly thrown during iteration.
-     *
-     * @return The exception or <code>null</code>
-     */
-    public E getException() {
-        return exception;
     }
 
     @Override
@@ -88,14 +73,15 @@ public abstract class TIntObjectErrorAwareAbstractProcedure<T, E extends Excepti
         }
     }
 
-    private E valueOf(final Exception e) {
-        try {
-            return (E) e;
-        } catch (final ClassCastException cce) {
-            throw new IllegalStateException(e.getMessage(), e);
-        }
-    }
-
+    /**
+     * Executes this procedure. A false return value indicates that the application executing this procedure should not invoke this
+     * procedure again.
+     *
+     * @param a a <code>int</code> value
+     * @param b an <code>Object</code> value
+     * @return true if additional invocations of the procedure are allowed.
+     * @throws E The expected exception
+     */
     protected abstract boolean next(int key, T value) throws E;
 
 }

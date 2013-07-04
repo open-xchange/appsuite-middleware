@@ -67,36 +67,68 @@ import java.util.regex.Pattern;
  * {@link Strings} - A library for performing operations that create Strings
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Strings {
 
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+
+    /**
+     * Initializes a new {@link Strings}.
+     */
     private Strings() {
         super();
     }
 
     /**
-     * High speed test for whitespace!  Faster than the java one (from some testing).
+     * Builds up a string from passed objects.
+     *
+     * @param objects The objects
+     * @return The string build up from concatenating objects' string representation
+     */
+    public static String concat(final Object... objects) {
+        if (null == objects || 0 == objects.length) {
+            return "";
+        }
+        final StringAllocator sb = new StringAllocator(2048);
+        for (final Object object : objects) {
+            sb.append(String.valueOf(object));
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Gets the lineSeparator
+     *
+     * @return The lineSeparator
+     */
+    public static String getLineSeparator() {
+        return LINE_SEPARATOR;
+    }
+
+    /**
+     * High speed test for whitespace! Faster than the java one (from some testing).
      *
      * @return <code>true</code> if the indicated character is whitespace; otherwise <code>false</code>
      */
     public static boolean isWhitespace(final char c) {
         switch (c) {
-            case 9:  //'unicode: 0009
-            case 10: //'unicode: 000A'
-            case 11: //'unicode: 000B'
-            case 12: //'unicode: 000C'
-            case 13: //'unicode: 000D'
-            case 28: //'unicode: 001C'
-            case 29: //'unicode: 001D'
-            case 30: //'unicode: 001E'
-            case 31: //'unicode: 001F'
-            case ' ': // Space
-                //case Character.SPACE_SEPARATOR:
-                //case Character.LINE_SEPARATOR:
-            case Character.PARAGRAPH_SEPARATOR:
-                return true;
-            default:
-                return false;
+        case 9: // 'unicode: 0009
+        case 10: // 'unicode: 000A'
+        case 11: // 'unicode: 000B'
+        case 12: // 'unicode: 000C'
+        case 13: // 'unicode: 000D'
+        case 28: // 'unicode: 001C'
+        case 29: // 'unicode: 001D'
+        case 30: // 'unicode: 001E'
+        case 31: // 'unicode: 001F'
+        case ' ': // Space
+            // case Character.SPACE_SEPARATOR:
+            // case Character.LINE_SEPARATOR:
+        case Character.PARAGRAPH_SEPARATOR:
+            return true;
+        default:
+            return false;
         }
     }
 
@@ -107,19 +139,19 @@ public class Strings {
      */
     public static boolean isDigit(final char c) {
         switch (c) {
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                return true;
-            default:
-                return false;
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            return true;
+        default:
+            return false;
         }
     }
 
@@ -347,9 +379,8 @@ public class Strings {
     public static String trimBOM(final String str) {
         final byte[][] byteOrderMarks =
             new byte[][] {
-                new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0xFE, (byte) 0xFF },
-                new byte[] { (byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x0 }, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF },
-                new byte[] { (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFE, (byte) 0xFF } };
+                new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x0 },
+                new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF }, new byte[] { (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFE, (byte) 0xFF } };
 
         final byte[] bytes = str.getBytes();
         for (final byte[] bom : byteOrderMarks) {

@@ -55,33 +55,70 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.LogRecord;
+import org.apache.commons.logging.Log;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.impl.JSONProtocolHandler;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
+import com.openexchange.realtime.atmosphere.protocol.RTProtocol;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import com.openexchange.realtime.packet.GenericError;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.CustomGateAction;
 import com.openexchange.realtime.util.StanzaSequenceGate;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.Task;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * The {@link QueryAction} delivers a message, waits for a response and sends that back to the client
+ * The {@link QueryAction} delivers a message, waits for a response and sends that back to the client.
+ *     <li> Query action examples:
+ *       <ol>
+ *         <li> Join a room via PUT
+ *           <pre>
+ *           {
+ *              "payloads": [
+ *               {
+ *                 "namespace": "group",
+ *                 "data": "join",
+ *                 "element": "command"
+ *               }
+ *             ],
+ *             "element": "message",
+ *             "selector": "chineseRoomSelector",
+ *             "to": "synthetic.china://room1"
+ *           }
+ *           </pre>
+ *         <li> Leave a room via PUT
+ *         <pre>
+ *         {
+ *           "payloads": [
+ *             {
+ *               "namespace": "group",
+ *               "data": "leave",
+ *               "element": "command"
+ *             }
+ *           ],
+ *           "element": "message",
+ *           "to": "synthetic.china://room1"
+ *         }
+ *         </pre>
+ *       </ol>
+ *     </li>
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class QueryAction extends RTAction {
 
+    private final static Log LOG = com.openexchange.log.Log.loggerFor(QueryAction.class);
     private ServiceLookup services;
     private StanzaSequenceGate gate;
     
@@ -124,7 +161,7 @@ public class QueryAction extends RTAction {
                 public void handle(final Stanza stanza, ID recipient) {
                     
                     try {
-                        values.put("answer", services.getService(MessageDispatcher.class).sendSynchronously(stanza, request.isSet("timeout") ? request.getIntParameter("timeout") : 30, TimeUnit.SECONDS));
+                        values.put("answer", services.getService(MessageDispatcher.class).sendSynchronously(stanza, request.isSet("timeout") ? request.getIntParameter("timeout") : 50, TimeUnit.SECONDS));
                     } catch (OXException e) {
                         values.put("exception", e);
                     }
@@ -142,14 +179,23 @@ public class QueryAction extends RTAction {
             if (!values.containsKey("done")) {
                 handled.await(request.isSet("timeout") ? request.getIntParameter("timeout") : 30, TimeUnit.SECONDS);
             }
+            OXException exception = (OXException) values.get("exception");
+            if (exception != null) {
+                throw RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(exception, exception.getMessage());
+            }
+        //gate.handle e.g. nextSequence
+        } catch (RealtimeException e) {
+            LOG.error(e);
+            throw e;
+            //Condition.await
         } catch (InterruptedException e) {
+            LOG.error(e);
+            RealtimeException re = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(e, e.getMessage());
+            throw re;
         } finally {
             sendLock.unlock();
         }
-        OXException exception = (OXException) values.get("exception");
-        if (exception != null) {
-            throw exception;
-        }
+        
         return new AJAXRequestResult(new StanzaWriter().write((Stanza)values.get("answer")), "json");
     }
 

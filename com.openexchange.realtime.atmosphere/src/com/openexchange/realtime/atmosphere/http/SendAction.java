@@ -57,15 +57,12 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.impl.JSONProtocolHandler;
-import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
 import com.openexchange.realtime.atmosphere.impl.StateEntry;
 import com.openexchange.realtime.atmosphere.impl.StateManager;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -73,6 +70,54 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SendAction}
+ * <li> Send action examples:
+ *   <ol>
+ *     <li> Send an acknowledgement
+ *       <pre>
+ *       {
+ *         "seq": [
+ *           "0"
+ *         ],
+ *         "type": "ack"
+ *       }
+ *       </pre>
+ *     <li> Send a ping into a room to verify that you didn't leve the room without a proper leave message
+ *       <pre>
+ *       [
+ *         {
+ *           "payloads": [
+ *             {
+ *               "data": 1,
+ *               "namespace": "group",
+ *               "element": "ping"
+ *             }
+ *           ],
+ *           "to": "synthetic.china://room1",
+ *           "element": "message"
+ *         }
+ *       ]
+ *       </pre>
+ *     <li> Generally send messages to the server, e.g. say something into a room
+ *     <pre>
+ *     {
+ *       "payloads": [
+ *         {
+ *           "data": "say",
+ *           "element": "action"
+ *         },
+ *         {
+ *           "namespace": "china",
+ *           "data": "Hello World",
+ *           "element": "message"
+ *         }
+ *       ],
+ *       "seq": 0,
+ *       "element": "message",
+ *       "to": "synthetic.china://room1"
+ *     }
+ *     </pre>
+ *   </ol>
+ * </li>
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

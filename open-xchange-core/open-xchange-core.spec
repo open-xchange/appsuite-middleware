@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 6
+%define        ox_release 7
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -215,6 +215,41 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1497
+pfile=/opt/open-xchange/etc/hazelcast.properties
+if ! ox_exists_property com.openexchange.hazelcast.logging.enabled $pfile; then
+    ox_set_property com.openexchange.hazelcast.logging.enabled true $pfile
+fi
+
+# SoftwareChange_Request-1492
+pfile=/opt/open-xchange/etc/server.properties
+for key in com.openexchange.json.poolEnabled com.openexchange.json.poolSize com.openexchange.json.poolCharArrayLength; do
+    if ox_exists_property $key $pfile; then
+       ox_remove_property $key $pfile
+    fi
+done
+
+# SoftwareChange_Request-1483
+pfile=/opt/open-xchange/etc/server.properties
+if ! ox_exists_property com.openexchange.servlet.maxRateTimeWindow $pfile; then
+    ox_set_property com.openexchange.servlet.maxRateTimeWindow 300000 $pfile
+fi
+if ! ox_exists_property com.openexchange.servlet.maxRate $pfile; then
+    ox_set_property com.openexchange.servlet.maxRate 1500 $pfile
+fi
+if ! ox_exists_property com.openexchange.servlet.maxRateLenientClients $pfile; then
+    ox_set_property com.openexchange.servlet.maxRateLenientClients '"Open-Xchange .NET HTTP Client*", "Open-Xchange USM HTTP Client*", "Jakarta Commons-HttpClient*"' $pfile
+fi
+if ! ox_exists_property com.openexchange.servlet.maxRateKeyPartProviders $pfile; then
+    ox_set_property com.openexchange.servlet.maxRateKeyPartProviders '' $pfile
+fi
+
+# SoftwareChange_Request-1459
+pfile=/opt/open-xchange/etc/mail.properties
+if ! ox_exists_property com.openexchange.mail.supportMsisdnAddresses $pfile; then
+    ox_set_property com.openexchange.mail.supportMsisdnAddresses false $pfile
+fi
+
 # SoftwareChange_Request-1458
 pfile=/opt/open-xchange/etc/mail.properties
 if ! ox_exists_property com.openexchange.mail.maxMailSize $pfile; then
@@ -391,6 +426,8 @@ fi
 # SoftwareChange_Request-1243
 # SoftwareChange_Request-1245
 # SoftwareChange_Request-1392
+# SoftwareChange_Request-1468
+# SoftwareChange_Request-1498
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/ox-scriptconf.sh
 jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
@@ -404,7 +441,8 @@ fi
 # -----------------------------------------------------------------------
 for opt in "-XX:+DisableExplicitGC" "-server" "-Djava.awt.headless=true" \
     "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=" \
-    "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB"; do
+    "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB" \
+    "-XX:-OmitStackTraceInFastThrow"; do
     if ! echo $nopts | grep -- $opt > /dev/null; then
         if [ "$opt" = "-XX:CMSInitiatingOccupancyFraction=" ]; then
             opt="-XX:CMSInitiatingOccupancyFraction=75"
@@ -415,7 +453,7 @@ for opt in "-XX:+DisableExplicitGC" "-server" "-Djava.awt.headless=true" \
     fi
 done
 # -----------------------------------------------------------------------
-for opt in "-XX:+UnlockExperimentalVMOptions" "-XX:+UseG1GC"; do
+for opt in "-XX:+UnlockExperimentalVMOptions" "-XX:+UseG1GC" "-XX:+CMSClassUnloadingEnabled"; do
     if echo $nopts | grep -- $opt > /dev/null; then
         nopts=$(echo $nopts | sed "s;$opt;;")
     fi
@@ -454,8 +492,10 @@ fi
 
 # SoftwareChange_Request-1214
 # SoftwareChange_Request-1429
+# SoftwareChange_Request-1467
 pfile=/opt/open-xchange/etc/file-logging.properties
-for opt in org.apache.cxf.level com.openexchange.soap.cxf.logger.level org.jaudiotagger.level; do
+for opt in org.apache.cxf.level com.openexchange.soap.cxf.logger.level org.jaudiotagger.level \
+    com.gargoylesoftware.htmlunit.level; do
     if ! ox_exists_property $opt $pfile; then
        ox_set_property $opt WARNING $pfile
     fi
@@ -533,7 +573,7 @@ if ! ox_exists_property com.openexchange.carddav.exposedCollections $pfile; then
 fi
 # SoftwareChange_Request-1091
 pfile=/opt/open-xchange/etc/contact.properties
-if ! ox_exists_property contactldap.configuration.path $pfile; then
+if ox_exists_property contactldap.configuration.path $pfile; then
     ox_remove_property contactldap.configuration.path $pfile
 fi
 
@@ -568,8 +608,8 @@ if ! ox_exists_property com.openexchange.import.mapper.path $pfile; then
     ox_set_property com.openexchange.import.mapper.path /opt/open-xchange/importCSV $pfile
 fi
 pfile=/opt/open-xchange/etc/mail.properties
-if ox_exists_property com.openexchange.mail.JavaMailProperties $pfile; then
-    ox_remove_property com.openexchange.mail.JavaMailProperties $pfile
+if ! ox_exists_property com.openexchange.mail.JavaMailProperties $pfile || grep -E '^com.openexchange.mail.JavaMailProperties.*/' $pfile >/dev/null; then
+    ox_set_property com.openexchange.mail.JavaMailProperties javamail.properties $pfile
 fi
 pfile=/opt/open-xchange/etc/sessiond.properties
 if ox_exists_property com.openexchange.sessiond.sessionCacheConfig $pfile; then
@@ -656,24 +696,46 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Mon Jul 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.2.2 release
+* Fri Jun 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.2.2 release
+* Wed Jun 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Release candidate for 7.2.2 release
 * Tue Jun 25 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-05
 * Mon Jun 24 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-06-21
+* Fri Jun 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second feature freeze for 7.2.2 release
 * Mon Jun 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-06-11
 * Mon Jun 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-06-11
+* Mon Jun 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-06-11
+* Mon Jun 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Feature freeze for 7.2.2 release
 * Tue Jun 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-06-13
 * Mon Jun 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-06-11
 * Fri Jun 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-06-20
+* Mon Jun 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First sprint increment for 7.2.2 release
+* Wed May 29 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.2.2 release
 * Tue May 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second build for patch 2013-05-28
+* Tue May 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second build for patch 2013-05-28
+* Mon May 27 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.2.2
 * Thu May 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Third candidate for 7.2.1 release
+* Wed May 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-05-22
 * Wed May 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-05-22
 * Wed May 22 2013 Marcus Klein <marcus.klein@open-xchange.com>

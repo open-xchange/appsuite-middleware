@@ -112,6 +112,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -273,15 +274,19 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private Locale getUserLocale() {
         if (null == locale) {
-            final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
-            if (null == userService) {
-                return Locale.ENGLISH;
-            }
-            try {
-                locale = userService.getUser(session.getUserId(), ctx).getLocale();
-            } catch (final OXException e) {
-                LOG.warn(e.getMessage(), e);
-                return Locale.ENGLISH;
+            if (session instanceof ServerSession) {
+                locale = ((ServerSession) session).getUser().getLocale();
+            } else {
+                final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
+                if (null == userService) {
+                    return Locale.ENGLISH;
+                }
+                try {
+                    locale = userService.getUser(session.getUserId(), ctx).getLocale();
+                } catch (final OXException e) {
+                    LOG.warn(e.getMessage(), e);
+                    return Locale.ENGLISH;
+                }
             }
         }
         return locale;
@@ -1075,7 +1080,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         boolean sameAccount = true;
         final int accountId = arguments[0].getAccountId();
-        for (int i = 1; sameAccount && i < arguments.length; i++) {
+        final int length = arguments.length;
+        for (int i = 1; sameAccount && i < length; i++) {
             sameAccount = accountId == arguments[i].getAccountId();
         }
         final TransportProperties transportProperties = TransportProperties.getInstance();
@@ -1085,26 +1091,26 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (sameAccount) {
             initConnection(accountId);
             final MailMessage[] originalMails = new MailMessage[folders.length];
+            final int mlength = length - 1;
             if (transportProperties.isPublishOnExceededQuota() && (!transportProperties.isPublishPrimaryAccountOnly() || MailAccount.DEFAULT_ID == accountId)) {
-                for (int i = 0; i < arguments.length; i++) {
-                    final MailMessage origMail = mailAccess.getMessageStorage().getMessage(
-                        arguments[i].getFullname(),
-                        fowardMsgUIDs[i],
-                        false);
+                for (int i = 0; i < length; i++) {
+                    final String fullName = arguments[i].getFullname();
+                    final MailMessage origMail = mailAccess.getMessageStorage().getMessage(fullName, fowardMsgUIDs[i], false);
                     if (null == origMail) {
-                        throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], arguments[i].getFullname());
+                        throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], fullName);
+                    }
+                    if (i < mlength && !fullName.equals(arguments[i + 1].getFullname())) {
+                        origMail.loadContent();
                     }
                     originalMails[i] = origMail;
                 }
             } else {
                 long total = 0;
-                for (int i = 0; i < arguments.length; i++) {
-                    final MailMessage origMail = mailAccess.getMessageStorage().getMessage(
-                        arguments[i].getFullname(),
-                        fowardMsgUIDs[i],
-                        false);
+                for (int i = 0; i < length; i++) {
+                    final String fullName = arguments[i].getFullname();
+                    final MailMessage origMail = mailAccess.getMessageStorage().getMessage(fullName, fowardMsgUIDs[i], false);
                     if (null == origMail) {
-                        throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], arguments[i].getFullname());
+                        throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], fullName);
                     }
                     long size = origMail.getSize();
                     if (size <= 0) {
@@ -1112,14 +1118,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     }
                     if (maxPerMsg > 0 && size > maxPerMsg) {
                         final String fileName = origMail.getSubject();
-                        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(
-                            Long.valueOf(maxPerMsg),
-                            null == fileName ? "" : fileName,
-                            Long.valueOf(size));
+                        throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED_FOR_FILE.create(Long.valueOf(maxPerMsg), null == fileName ? "" : fileName, Long.valueOf(size));
                     }
                     total += size;
                     if (max > 0 && total > max) {
                         throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(max));
+                    }
+                    if (i < mlength && !fullName.equals(arguments[i + 1].getFullname())) {
+                        origMail.loadContent();
                     }
                     originalMails[i] = origMail;
                 }
@@ -1128,7 +1134,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         final MailMessage[] originalMails = new MailMessage[folders.length];
         if (transportProperties.isPublishOnExceededQuota() && (!transportProperties.isPublishPrimaryAccountOnly() || MailAccount.DEFAULT_ID == accountId)) {
-            for (int i = 0; i < arguments.length && sameAccount; i++) {
+            for (int i = 0; i < length && sameAccount; i++) {
                 final MailAccess<?, ?> ma = initMailAccess(arguments[i].getAccountId());
                 try {
                     final MailMessage origMail = ma.getMessageStorage().getMessage(arguments[i].getFullname(), fowardMsgUIDs[i], false);
@@ -1143,7 +1149,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         } else {
             long total = 0;
-            for (int i = 0; i < arguments.length && sameAccount; i++) {
+            for (int i = 0; i < length && sameAccount; i++) {
                 final MailAccess<?, ?> ma = initMailAccess(arguments[i].getAccountId());
                 try {
                     final MailMessage origMail = ma.getMessageStorage().getMessage(arguments[i].getFullname(), fowardMsgUIDs[i], false);
@@ -1721,14 +1727,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final int accountId = argument.getAccountId();
         initConnection(accountId);
         final String fullName = argument.getFullname();
-        MailMessage[] mails =
-            mailAccess.getMessageStorage().searchMessages(
-                fullName,
-                null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
-                MailSortField.getField(sortCol),
-                OrderDirection.getOrderDirection(order),
-                searchTerm,
-                FIELDS_ID_INFO);
+        MailMessage[] mails = mailAccess.getMessageStorage().searchMessages(
+            fullName,
+            null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
+            MailSortField.getField(sortCol),
+            OrderDirection.getOrderDirection(order),
+            searchTerm,
+            FIELDS_ID_INFO);
         /*
          * Proceed
          */
@@ -1919,12 +1924,22 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 for (final String alias : user.getAliases()) {
                     validAddrs.add(new QuotedInternetAddress(alias));
                 }
-                if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
+                final boolean supportMsisdnAddresses = MailProperties.getInstance().isSupportMsisdnAddresses();
+                if (supportMsisdnAddresses) {
                     MsisdnUtility.addMsisdnAddress(validAddrs, this.session);
                 }
                 for (final MailMessage mail : mails) {
                     final InternetAddress[] from = mail.getFrom();
                     final List<InternetAddress> froms = Arrays.asList(from);
+                    if (supportMsisdnAddresses) {
+                        for (final InternetAddress internetAddress : froms) {
+                            final String address = internetAddress.getAddress();
+                            final int pos = address.indexOf('/');
+                            if (pos > 0) {
+                                internetAddress.setAddress(address.substring(0, pos));
+                            }
+                        }
+                    }
                     if (!validAddrs.containsAll(froms)) {
                         throw MailExceptionCode.INVALID_SENDER.create(froms.size() == 1 ? froms.get(0).toString() : Arrays.toString(from));
                     }
@@ -3089,9 +3104,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (rateLimit > 0) {
             final Long parameter = (Long) session.getParameter(LAST_SEND_TIME);
             if (null != parameter && (parameter.longValue() + rateLimit) >= System.currentTimeMillis()) {
-                final NumberFormat numberInstance = NumberFormat.getNumberInstance(UserStorage.getStorageUser(
-                    session.getUserId(),
-                    session.getContextId()).getLocale());
+                final NumberFormat numberInstance = NumberFormat.getNumberInstance(getUserLocale());
                 throw MailExceptionCode.SENT_QUOTA_EXCEEDED.create(numberInstance.format(((double) rateLimit) / 1000));
             }
         }
@@ -3132,10 +3145,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     for (final String alias : user.getAliases()) {
                         validAddrs.add(new QuotedInternetAddress(alias));
                     }
+                    final QuotedInternetAddress fromAddress = new QuotedInternetAddress(fromAddr);
                     if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
                         MsisdnUtility.addMsisdnAddress(validAddrs, session);
+                        final String address = fromAddress.getAddress();
+                        final int pos = address.indexOf('/');
+                        if (pos > 0) {
+                            fromAddress.setAddress(address.substring(0, pos));
+                        }
                     }
-                    if (!validAddrs.contains(new QuotedInternetAddress(fromAddr))) {
+                    if (!validAddrs.contains(fromAddress)) {
                         throw MailExceptionCode.INVALID_SENDER.create(fromAddr);
                     }
                 } catch (final AddressException e) {

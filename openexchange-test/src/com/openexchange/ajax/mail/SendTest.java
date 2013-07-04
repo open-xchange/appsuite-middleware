@@ -52,9 +52,12 @@ package com.openexchange.ajax.mail;
 import java.io.IOException;
 import java.util.Arrays;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.UserValues;
+import com.openexchange.ajax.mail.actions.GetRequest;
+import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
@@ -136,4 +139,57 @@ public final class SendTest extends AbstractMailTest {
         assertFalse("Sending resulted in error", manager.getLastResponse().hasError());
         assertEquals("Mail went into inbox", values.getSentFolder(), inSentBox.getFolder());
     }
+
+    /**
+     * Tests the <code>action=new</code> request on INBOX folder
+     *
+     * @throws Throwable
+     */
+    public void testSendUnicode() throws Throwable {
+
+        /*
+         * Clean everything
+         */
+        clearFolder(getInboxFolder());
+        clearFolder(getSentFolder());
+        clearFolder(getTrashFolder());
+        /*
+         * Create JSON mail object
+         */
+        final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
+
+
+        JSONObject jMail = new JSONObject(mailObject_25kb);
+        JSONObject jAttach = jMail.getJSONArray("attachments").getJSONObject(0);
+
+        jAttach.put("content", "Pile of poo \uD83D\uDCA9");
+
+        /*
+         * Perform send request
+         */
+        final SendResponse response = Executor.execute(getSession(), new SendRequest(jMail.toString(true)));
+        final String[] folderAndID = response.getFolderAndID();
+        assertTrue("Send request failed", folderAndID != null && folderAndID.length > 0);
+
+        if (null != folderAndID) {
+            final GetResponse getResponse = Executor.execute(getSession(), new GetRequest(folderAndID[0], folderAndID[1]));
+
+            final String content = getResponse.getAttachments().getJSONObject(0).getString("content");
+            assertTrue("Content is empty", null != content && content.length() > 0);
+
+            int pos = content.indexOf("Pile of poo ");
+            assertTrue("Content is empty", pos >= 0);
+
+            pos += 12;
+            assertEquals("Missing \\uD83D unicode", (int) '\uD83D', (int) content.charAt(pos++));
+            assertEquals("Missing \\uDCA9 unicode", (int) '\uDCA9', (int) content.charAt(pos++));
+        }
+        /*
+         * Clean everything
+         */
+        clearFolder(getInboxFolder());
+        clearFolder(getSentFolder());
+        clearFolder(getTrashFolder());
+    }
+
 }

@@ -179,6 +179,7 @@ public final class GetAction extends AbstractMailAction {
             }
             tmp = req.getParameter(Mail.PARAMETER_UNSEEN);
             final boolean unseen = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
+            // Check for possible MIME filter
             tmp = req.getParameter("ignorable");
             final MimeFilter mimeFilter;
             if (isEmpty(tmp)) {
@@ -247,17 +248,19 @@ public final class GetAction extends AbstractMailAction {
                     final OutputStream directOutputStream = requestData.optOutputStream();
                     if (null != directOutputStream) {
                         if (saveToDisk) {
-                            requestData.setResponseHeader("Content-Type", "application/octet-stream");
-                            final StringAllocator sb = new StringAllocator(64).append("attachment");
-                            {
-                                final String subject = mail.getSubject();
-                                final String fileName = isEmpty(subject) ? "mail.eml" : saneForFileName(subject) + ".eml";
-                                DownloadUtility.appendFilenameParameter(fileName, requestData.getUserAgent(), sb);
+                            if (requestData.setResponseHeader("Content-Type", "application/octet-stream")) {
+                                final StringAllocator sb = new StringAllocator(64).append("attachment");
+                                {
+                                    final String subject = mail.getSubject();
+                                    final String fileName = isEmpty(subject) ? "mail.eml" : saneForFileName(subject) + ".eml";
+                                    DownloadUtility.appendFilenameParameter(fileName, requestData.getUserAgent(), sb);
+                                }
+                                requestData.setResponseHeader("Content-Disposition",  sb.toString());
+                                requestData.removeCachingHeader();
+                                mail.writeTo(directOutputStream);
+                                directOutputStream.flush();
+                                return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
                             }
-                            requestData.setResponseHeader("Content-Disposition",  sb.toString());
-                            requestData.removeCachingHeader();
-                            mail.writeTo(directOutputStream);
-                            directOutputStream.flush();
                         } else {
                             // As JSON response: {"data":"..."}
                             directOutputStream.write(CHUNK1); // {"data":"...
@@ -268,8 +271,8 @@ public final class GetAction extends AbstractMailAction {
                             }
                             directOutputStream.write(CHUNK2); // ..."}
                             directOutputStream.flush();
+                            return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
                         }
-                        return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
                     }
                 }
                 /*-
@@ -340,30 +343,31 @@ public final class GetAction extends AbstractMailAction {
                      * Create appropriate file holder
                      */
                     final AJAXRequestData requestData = req.getRequest();
-                    requestData.setResponseHeader("Content-Type", "application/octet-stream");
-                    final OutputStream directOutputStream = requestData.optOutputStream();
-                    if (null != directOutputStream) {
-                        // Direct output
-                        final StringAllocator sb = new StringAllocator(64).append("attachment");
-                        {
-                            final String subject = mail.getSubject();
-                            final String fileName = isEmpty(subject) ? "mail.eml" : saneForFileName(subject) + ".eml";
-                            DownloadUtility.appendFilenameParameter(fileName, requestData.getUserAgent(), sb);
-                        }
-                        requestData.setResponseHeader("Content-Disposition",  sb.toString());
-                        requestData.removeCachingHeader();
-                        final InputStream is = fileHolder.getStream();
-                        try {
-                            final int len = 2048;
-                            final byte[] buf = new byte[len];
-                            for (int read; (read = is.read(buf, 0, len)) > 0;) {
-                                directOutputStream.write(buf, 0, read);
+                    if (requestData.setResponseHeader("Content-Type", "application/octet-stream")) {
+                        final OutputStream directOutputStream = requestData.optOutputStream();
+                        if (null != directOutputStream) {
+                            // Direct output
+                            final StringAllocator sb = new StringAllocator(64).append("attachment");
+                            {
+                                final String subject = mail.getSubject();
+                                final String fileName = isEmpty(subject) ? "mail.eml" : saneForFileName(subject) + ".eml";
+                                DownloadUtility.appendFilenameParameter(fileName, requestData.getUserAgent(), sb);
                             }
-                        } finally {
-                            Streams.close(is);
+                            requestData.setResponseHeader("Content-Disposition",  sb.toString());
+                            requestData.removeCachingHeader();
+                            final InputStream is = fileHolder.getStream();
+                            try {
+                                final int len = 2048;
+                                final byte[] buf = new byte[len];
+                                for (int read; (read = is.read(buf, 0, len)) > 0;) {
+                                    directOutputStream.write(buf, 0, read);
+                                }
+                            } finally {
+                                Streams.close(is);
+                            }
+                            directOutputStream.flush();
+                            return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
                         }
-                        directOutputStream.flush();
-                        return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
                     }
                     // As file holder
                     requestData.setFormat("file");

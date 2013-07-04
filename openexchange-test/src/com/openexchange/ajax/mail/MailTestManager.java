@@ -110,6 +110,10 @@ public class MailTestManager {
         this.failOnError = failOnError;
     }
 
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
     /**
      * returns the last response executed or null if none happened.
      */

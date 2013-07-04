@@ -157,6 +157,9 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 	// Something went wrong reading from specified file. Please try again.
     public static final String IOEXCEPTION_RETRY_MSG = "Something went wrong reading from specified file. Please try again.";
 
+    // Could not create: %s
+    public static final String COULD_NOT_CREATE_EXT_MSG = "Could not create: %s";
+
     private ImportExportExceptionMessages() {
         super();
     }

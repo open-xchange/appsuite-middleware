@@ -125,6 +125,18 @@ public final class MailAccountExceptionStrings implements LocalizableStrings {
     // Could not connect to transport server "%1$s" for login %2$s
     public static final String VALIDATE_FAILED_TRANSPORT_MSG = "Could not connect to transport server \"%1$s\" for login %2$s";
 
+    // Default port specified for mail protocol "%1$s", but SSL is enabled. Please review if appropriate.
+    public static final String DEFAULT_BUT_SECURE_MAIL_MSG = "Default port specified for mail protocol \"%1$s\", but SSL is enabled. Please review if appropriate.";
+
+    // Secure port specified for mail protocol "%1$s", but SSL is not enabled. Please review if appropriate.
+    public static final String SECURE_BUT_DEFAULT_MAIL_MSG = "Secure port specified for mail protocol \"%1$s\", but SSL is not enabled. Please review if appropriate.";
+
+    // Default port specified for transport protocol "%1$s", but SSL is enabled. Please review if appropriate.
+    public static final String DEFAULT_BUT_SECURE_TRANSPORT_MSG = "Default port specified for transport protocol \"%1$s\", but SSL is enabled. Please review if appropriate.";
+
+    // Secure port specified for transport protocol "%1$s", but SSL is not enabled. Please review if appropriate.
+    public static final String SECURE_BUT_DEFAULT_TRANSPORT_MSG = "Secure port specified for transport protocol \"%1$s\", but SSL is not enabled. Please review if appropriate.";
+
     /**
      * Initializes a new {@link MailAccountExceptionStrings}.
      */

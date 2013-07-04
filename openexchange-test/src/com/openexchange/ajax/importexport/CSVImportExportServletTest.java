@@ -54,7 +54,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.ajax.contact.AbstractManagedContactTest;
 import com.openexchange.ajax.importexport.actions.CSVExportRequest;
 import com.openexchange.ajax.importexport.actions.CSVExportResponse;
@@ -91,12 +90,12 @@ public class CSVImportExportServletTest extends AbstractManagedContactTest  {
 	public void notestCSVRoundtrip() throws Exception{
 		client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
 		CSVExportResponse exportResponse = client.execute(new CSVExportRequest(folderID));
-		
+
 		CSVParser parser = new CSVParser();
 		List<List<String>> expected = parser.parse(CSV);
 		List<List<String>> actual  = parser.parse((String) exportResponse.getData());
 		Map<ContactField, Integer> positions = getPositions(actual);
-		
+
 		for(int i = 1; i <= 2; i++) {
 			assertEquals("Mismatch of given name in row #"+i, expected.get(i).get(0), actual.get(i).get(positions.get(ContactField.GIVEN_NAME)));
 			assertEquals("Mismatch of email 1 in row #"+i, expected.get(i).get(1), actual.get(i).get(positions.get(ContactField.EMAIL1)));
@@ -107,7 +106,7 @@ public class CSVImportExportServletTest extends AbstractManagedContactTest  {
 
 	public void testUnknownFile() throws Exception{
 		final String insertedCSV = "bla1\nbla2,bla3";
-		
+
 		CSVImportResponse importResponse = client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(insertedCSV.getBytes()), false));
 		assertEquals("Unexpected error code: " + importResponse.getException(), "I_E-0804", importResponse.getException().getErrorCode());
 	}
@@ -115,14 +114,14 @@ public class CSVImportExportServletTest extends AbstractManagedContactTest  {
 	public void testEmptyFileUploaded() throws Exception{
 		final InputStream is = new ByteArrayInputStream("Given name,Email 1, Display name".getBytes());
 		CSVImportResponse importResponse = client.execute(new CSVImportRequest(folderID, is, false));
-		assertEquals("Unexpected error code: " + importResponse.getException(), "I_E-1314", importResponse.getException().getErrorCode());
+		assertEquals("Unexpected error code: " + importResponse.getException(), "I_E-1315", importResponse.getException().getErrorCode());
 	}
 
 	public void notestDoubleImport() throws Exception{
 		client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
 		client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
 		CSVExportResponse exportResponse = client.execute(new CSVExportRequest(folderID));
-		
+
 		CSVParser parser = new CSVParser();
 		List<List<String>> expected = parser.parse(CSV);
 		assertEquals(3, expected.size());

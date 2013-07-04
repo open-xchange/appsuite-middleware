@@ -103,7 +103,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
     public void startServer() throws AJPv13Exception {
         if (running.compareAndSet(false, true)) {
             try {
-                final ConfigurationService service = AJPv13ServiceRegistry.SERVICE_REGISTRY.get().getService(ConfigurationService.class);
+                final ConfigurationService service = Services.getService(ConfigurationService.class);
                 final int backlog = null == service ? DEFAULT_BACKLOG : service.getIntProperty("AJP_BACKLOG", DEFAULT_BACKLOG);
                 serverSocket = new ServerSocket(AJPv13Config.getAJPPort(), backlog, AJPv13Config.getAJPBindAddress());
             } catch (final IOException ex) {

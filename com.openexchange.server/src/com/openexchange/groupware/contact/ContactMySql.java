@@ -62,6 +62,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.Strings;
+import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.Contacts.Mapper;
 import com.openexchange.groupware.contact.sqlinjectors.IntSQLInjector;

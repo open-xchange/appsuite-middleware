@@ -245,6 +245,9 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
                     }
 
                     private void dropMemoryTable(final Session session) {
+                        if (session.isTransient()) {
+                            return;
+                        }
                         /*
                          * Any active session left?
                          */

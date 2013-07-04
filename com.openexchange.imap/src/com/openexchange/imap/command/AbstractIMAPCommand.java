@@ -51,10 +51,11 @@ package com.openexchange.imap.command;
 
 import static com.openexchange.imap.IMAPCommandsCollection.performCommand;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import java.util.Locale;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotaExceededException;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
@@ -147,7 +148,7 @@ public abstract class AbstractIMAPCommand<T> {
                             LOG.debug("Runtime error during Protocol.notifyResponseHandlers() invocation.", e);
                         }
                     } catch (final MessagingException e) {
-                        final ProtocolException pe = new ProtocolException(response);
+                        final ProtocolException pe = new ProtocolException(e.getMessage());
                         pe.initCause(e);
                         throw pe;
                     }
@@ -160,17 +161,23 @@ public abstract class AbstractIMAPCommand<T> {
                         imapCmd,
                         ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else if (response.isNO()) {
-                    final String error = response.toString();
-                    if (error.toLowerCase(Locale.ENGLISH).indexOf("quota") >= 0) {
+                    final String error = toLowerCase(response.toString());
+                    if (MimeMailException.isOverQuotaException(error)) {
                         /*
                          * Assume a quota exceeded exception
                          */
                         throw new QuotaExceededException(response);
                     }
+                    if (null != error && error.indexOf("[nonexistent]") >= 0) {
+                        /*
+                         * Treat as an empty folder
+                         */
+                        return abstractIMAPCommand.getDefaultValue();
+                    }
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         imapCmd,
-                        ImapUtility.appendCommandInfo(error, imapFolder)));
+                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else {
                     protocol.handleResult(response);
                 }
@@ -183,6 +190,20 @@ public abstract class AbstractIMAPCommand<T> {
                 throw pe;
             }
         }
+    }
+
+    /** ASCII-wise to lower-case */
+    protected static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
     public final T doCommand() throws MessagingException {

@@ -73,6 +73,7 @@ import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.sim.SimBuilder;
 
 /**
@@ -99,6 +100,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         ExternalUserParticipant externalParticipant = new ExternalUserParticipant("external@somewhere.invalid");
         externalParticipant.setStatus(status);
         appointment.setParticipants(new Participant[] { externalParticipant });
+        appointment.setConfirmations(new ConfirmableParticipant[] { externalParticipant });
 
         // Build the message with the update
         ITipMessage msg = new ITipMessage();
@@ -119,6 +121,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
 
         original.setParticipants(new Participant[] { theUser, externalParticipant });
+        original.setConfirmations(new ConfirmableParticipant[] { externalParticipant });
 
         ITipIntegrationUtility utility = integrationBuilder.getSim(ITipIntegrationUtility.class);
 
@@ -297,6 +300,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         ExternalUserParticipant externalParticipant = new ExternalUserParticipant("external@somewhere.invalid");
         externalParticipant.setStatus(status);
         changedException.setParticipants(new Participant[] { externalParticipant });
+        changedException.setConfirmations(new ConfirmableParticipant[] { externalParticipant });
 
         // Build the message with the update
         ITipMessage msg = new ITipMessage();
@@ -325,6 +329,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
 
         originalException.setParticipants(new Participant[] { theUser, externalParticipant });
+        originalException.setConfirmations(new ConfirmableParticipant[] { externalParticipant });
 
         ITipIntegrationUtility utility = integrationBuilder.getSim(ITipIntegrationUtility.class);
 

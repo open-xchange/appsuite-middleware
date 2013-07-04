@@ -49,23 +49,24 @@
 
 package com.openexchange.http.requestwatcher.internal;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.http.requestwatcher.RequestWatcherExceptionMessage;
-import com.openexchange.http.requestwatcher.osgi.RequestWatcherServiceRegistry;
+import com.openexchange.http.requestwatcher.osgi.Services;
 import com.openexchange.http.requestwatcher.osgi.services.RequestRegistryEntry;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -76,16 +77,16 @@ import com.openexchange.timer.TimerService;
  */
 public class RequestWatcherServiceImpl implements RequestWatcherService {
 
-    /**
-     * The logger.
-     */
+    /** The logger. */
     protected static final Log LOG = com.openexchange.log.Log.loggerFor(RequestWatcherServiceImpl.class);
 
-    // Navigable set, entries ordered by age(youngest first), weakly consistent iterator
+    /** The request number */
+    private static final AtomicLong NUMBER = new AtomicLong();
+
+    /** Navigable set, entries ordered by age(youngest first), weakly consistent iterator */
     private final ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry;
 
-    private final RequestWatcherServiceRegistry serviceRegistry;
-
+    /** The watcher task */
     private volatile ScheduledTimerTask requestWatcherTask;
 
     /**
@@ -94,17 +95,16 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
     public RequestWatcherServiceImpl() {
         super();
         requestRegistry = new ConcurrentSkipListSet<RequestRegistryEntry>();
-        serviceRegistry = RequestWatcherServiceRegistry.getInstance();
         // Get Configuration
-        final ConfigurationService configService = serviceRegistry.getService(ConfigurationService.class);
+        final ConfigurationService configService = Services.getService(ConfigurationService.class);
         final boolean isWatcherEnabled = configService.getBoolProperty("com.openexchange.requestwatcher.isEnabled", true);
         final int watcherFrequency = configService.getIntProperty("com.openexchange.requestwatcher.frequency", 30000);
         final int requestMaxAge = configService.getIntProperty("com.openexchange.requestwatcher.maxRequestAge", 60000);
         if (isWatcherEnabled) {
             // Create ScheduledTimerTask to watch requests
-            final TimerService timerService = serviceRegistry.getService(TimerService.class);
             final ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry = this.requestRegistry;
-            final ScheduledTimerTask requestWatcherTask = timerService.scheduleAtFixedRate(new Runnable() {
+            final String lineSeparator = System.getProperty("line.separator");
+            final ScheduledTimerTask requestWatcherTask = Services.getService(TimerService.class).scheduleAtFixedRate(new Runnable() {
 
                 /*
                  * Start at the end of the navigable Set to get the oldest request first. Then proceed to the younger requests. Stop
@@ -114,14 +114,14 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                 public void run() {
                     final boolean debugEnabled = LOG.isDebugEnabled();
                     final Iterator<RequestRegistryEntry> descendingEntryIterator = requestRegistry.descendingIterator();
-                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256);
+                    final StringBuilder sb = new StringBuilder(256);
                     boolean stillOldRequestsLeft = true;
                     while (stillOldRequestsLeft && descendingEntryIterator.hasNext()) {
-                        sb.reinitTo(0);
                         if (debugEnabled) {
+                            sb.setLength(0);
                             for (final RequestRegistryEntry entry : requestRegistry) {
-                                sb.append("RegisteredThreads:\n\tage: ").append(entry.getAge()).append(" ms").append(", thread: ").append(
-                                    entry.getThreadInfo());
+                                sb.append(lineSeparator).append("RegisteredThreads:").append(lineSeparator).append("    age: ").append(entry.getAge()).append(" ms").append(
+                                    ", thread: ").append(entry.getThreadInfo());
                             }
                             final String entries = sb.toString();
                             if (!entries.isEmpty()) {
@@ -130,55 +130,82 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                         }
                         final RequestRegistryEntry requestRegistryEntry = descendingEntryIterator.next();
                         if (requestRegistryEntry.getAge() > requestMaxAge) {
-                            sb.reinitTo(0);
+                            sb.setLength(0);
                             logRequestRegistryEntry(requestRegistryEntry, sb);
-                            requestRegistry.remove(requestRegistryEntry);
-                            
+                            // Don't remove
+                            // requestRegistry.remove(requestRegistryEntry);
                         } else {
                             stillOldRequestsLeft = false;
                         }
                     }
                 }
 
-                private void logRequestRegistryEntry(final RequestRegistryEntry entry, final com.openexchange.java.StringAllocator logBuilder) {
+                private void logRequestRegistryEntry(final RequestRegistryEntry entry, final StringBuilder logBuilder) {
                     final Throwable trace = new Throwable();
-                    trace.setStackTrace(entry.getStackTrace());
-                    Props logProperties = LogProperties.optLogProperties(entry.getThread());
-                    logBuilder.append("Request\n");
+                    {
+                        final StackTraceElement[] stackTrace = entry.getStackTrace();
+                        if (dontLog(stackTrace)) {
+                            return;
+                        }
+                        trace.setStackTrace(stackTrace);
+                    }
+                    logBuilder.append("Request").append(lineSeparator);
 
                     // If we have additional log properties from the ThreadLocal add it to the logBuilder
-                    if (logProperties != null) {
-                        Map<String, Object> propertyMap = logProperties.asMap();
-                        // Sort the properties for readability
-                        Map<String, String> sorted = new TreeMap<String, String>();
-                        for (Entry<String, Object> propertyEntry : propertyMap.entrySet()) {
-                            String propertyName = propertyEntry.getKey();
-                            Object value = propertyEntry.getValue();
-                            if (null != value) {
-                                sorted.put(propertyName, value.toString());
+                    {
+                        final Props logProperties = LogProperties.optLogProperties(entry.getThread());
+                        if (logProperties != null) {
+                            Map<String, Object> propertyMap = logProperties.asMap();
+                            // Sort the properties for readability
+                            Map<String, String> sorted = new TreeMap<String, String>();
+                            for (Entry<String, Object> propertyEntry : propertyMap.entrySet()) {
+                                String propertyName = propertyEntry.getKey();
+                                Object value = propertyEntry.getValue();
+                                if (null != value) {
+                                    if (LogProperties.Name.SESSION_SESSION_ID.getName().equals(propertyName) && !isValidSession(value.toString())) {
+                                        // Non-existent or elapsed session
+                                        entry.getThread().interrupt();
+                                        requestRegistry.remove(entry);
+                                        return;
+                                    }
+                                    sorted.put(propertyName, value.toString());
+                                }
                             }
-                        }
-                        logBuilder.append("with properties:\n");
-                        // And add them to the logBuilder
-                        for (Map.Entry<String, String> propertyEntry : sorted.entrySet()) {
-                            logBuilder.append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue()).append('\n');
+                            logBuilder.append("with properties:").append(lineSeparator);
+                            // And add them to the logBuilder
+                            for (Map.Entry<String, String> propertyEntry : sorted.entrySet()) {
+                                logBuilder.append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue()).append(lineSeparator);
+                            }
                         }
                     }
 
-                      // Make sure not to log any client specific parameters as security consideration
-//                    String requestParameters = entry.getRequestParameters();
-//                    if(!requestParameters.isEmpty()) {
-//                        logBuilder
-//                        .append("with parameters:\n")
-//                        .append(requestParameters).append("\n");
-//                    }
+                    // Make sure not to log any client specific parameters as security consideration
+                    // String requestParameters = entry.getRequestParameters();
+                    // if(!requestParameters.isEmpty()) {
+                    // logBuilder
+                    // .append("with parameters:").append(lineSeparator)
+                    // .append(requestParameters).append(lineSeparator);
+                    // }
 
-                    RequestWatcherServiceImpl.LOG.info(
-                        logBuilder
-                        .append("with age: ").append(entry.getAge()).append(" ms").append("\n")
-                        .append("exceeds max. age of: ").append(requestMaxAge).append(" ms.")
-                        .toString(),
-                        trace);
+                    LOG.info(logBuilder.append("with age: ").append(entry.getAge()).append("ms exceeds max. age of: ").append(requestMaxAge).append("ms.").toString(), trace);
+                }
+
+                private boolean isValidSession(final String sessionId) {
+                    final SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+                    return sessiondService instanceof SessiondServiceExtended ? ((SessiondServiceExtended) sessiondService).isActive(sessionId) : true;
+                }
+
+                private boolean dontLog(final StackTraceElement[] stackTrace) {
+                    for (final StackTraceElement ste : stackTrace) {
+                        final String className = ste.getClassName();
+                        if (null != className) {
+                            if (className.startsWith("org.apache.commons.fileupload.MultipartStream$ItemInputStream")) {
+                                // A long-running file upload. Ignore
+                                return true;
+                            }
+                        }
+                    }
+                    return false;
                 }
             },
                 1000,
@@ -190,7 +217,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
 
     @Override
     public RequestRegistryEntry registerRequest(final HttpServletRequest request, final HttpServletResponse response, final Thread thread) {
-        final RequestRegistryEntry registryEntry = new RequestRegistryEntry(request, response, thread);
+        final RequestRegistryEntry registryEntry = new RequestRegistryEntry(NUMBER.incrementAndGet(), request, response, thread);
         requestRegistry.add(registryEntry);
         return registryEntry;
     }

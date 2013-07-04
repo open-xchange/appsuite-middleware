@@ -39,3 +39,6 @@ org.jaudiotagger.level=WARNING
 
 # Set global documentconverter logging level to WARNING
 com.openexchange.documentconverter.impl.Manager.level=WARNING
+
+# Reduce log level for htmlunit.jar
+com.gargoylesoftware.htmlunit.level=WARNING

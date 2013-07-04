@@ -435,7 +435,10 @@ public class Login extends AJAXServlet {
                         }
                         final String oldIP = session.getLocalIp();
                         if (!newIP.equals(oldIP)) {
-                            LOG.info("Changing IP of session " + session.getSessionID() + " with authID: " + session.getAuthId() + " from " + oldIP + " to " + newIP + '.');
+                            // In case changing IP is intentionally requested by client, log it only if DEBUG aka FINE log level is enabled
+                            if (LOG.isDebugEnabled()) {
+                                LOG.info("Changing IP of session " + session.getSessionID() + " with authID: " + session.getAuthId() + " from " + oldIP + " to " + newIP + '.');
+                            }
                             session.setLocalIp(newIP);
                         }
                         response.setData("1");

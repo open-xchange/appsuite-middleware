@@ -52,8 +52,6 @@ package com.openexchange.realtime.packet;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
 
 
 /**

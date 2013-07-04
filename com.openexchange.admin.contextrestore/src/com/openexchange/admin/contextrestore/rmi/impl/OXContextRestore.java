@@ -61,6 +61,7 @@ import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -93,6 +94,18 @@ import com.openexchange.log.LogFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>: Bugfix 20044
  */
 public class OXContextRestore extends OXCommonImpl implements OXContextRestoreInterface {
+
+    /** The reference for ConfigDB name */
+    static final AtomicReference<String> CONFIGDB_NAME = new AtomicReference<String>("configdb");
+
+    /**
+     * Sets the name of the ConfigDB.
+     *
+     * @param configDbName The name
+     */
+    public static void setConfigDbName(final String configDbName) {
+        CONFIGDB_NAME.set(configDbName);
+    }
 
     /**
      * Safely closes specified {@link Closeable} instance.
@@ -203,11 +216,12 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
          *
          * @param cid The context identifier
          * @param fileName The name of the MySQL dump file
+         * @param optConfigDbName The optional name of the ConfigDB schema
          * @return The information object for parsed MySQL dump file
          * @throws IOException If an I/O error occurs
          * @throws OXContextRestoreException If a context restore error occurs
          */
-        public PoolIdSchemaAndVersionInfo start(final int cid, final String fileName) throws IOException, OXContextRestoreException {
+        public PoolIdSchemaAndVersionInfo start(final int cid, final String fileName, final String optConfigDbName) throws IOException, OXContextRestoreException {
             int c;
             int state = 0;
             int oldstate = 0;
@@ -248,7 +262,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                             if (dbmatcher.matches()) {
                                 // Database found
                                 final String databasename = dbmatcher.group(1);
-                                if ("configdb".equals(databasename) || (null != schema && schema.equals(databasename))) {
+                                if (getConfigDbName(optConfigDbName).equals(databasename) || (null != schema && schema.equals(databasename))) {
                                     furthersearch = true;
                                     LOG.info("Database: " + databasename);
                                     if (null != bufferedWriter) {
@@ -256,7 +270,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                                         bufferedWriter.flush();
                                         bufferedWriter.close();
                                     }
-                                    
+
                                     final String file = "/tmp/" + databasename + ".txt";
                                     bufferedWriter = new BufferedWriter(new FileWriter(file));
                                     bufferedWriter.append("/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;\n");
@@ -366,6 +380,17 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             //    throw new OXContextRestoreException(Code.NO_UPDATE_TASK_INFORMATION_FOUND);
             // }
             return new PoolIdSchemaAndVersionInfo(fileName, cid, poolId, schema, versionInformation, updateTaskInformation);
+        }
+
+        private String getConfigDbName(final String optConfigDbName) {
+            String configDbName = optConfigDbName;
+            if (null == configDbName) {
+                configDbName = CONFIGDB_NAME.get();
+                if (null == configDbName) {
+                    configDbName = "configdb";
+                }
+            }
+            return configDbName;
         }
 
         /**
@@ -652,7 +677,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
     }
 
     @Override
-    public String restore(final Context ctx, final String[] fileNames, final Credentials auth, final boolean dryrun) throws InvalidDataException, InvalidCredentialsException, StorageException, OXContextRestoreException, DatabaseUpdateException {
+    public String restore(final Context ctx, final String[] fileNames, final String optConfigDbName, final Credentials auth, final boolean dryrun) throws InvalidDataException, InvalidCredentialsException, StorageException, OXContextRestoreException, DatabaseUpdateException {
         try {
             doNullCheck(ctx, fileNames);
             for (final String filename : fileNames) {
@@ -679,7 +704,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             UpdateTaskInformation updateTaskInfo = null;
             PoolIdSchemaAndVersionInfo result = null;
             for (final String fileName : fileNames) {
-                final PoolIdSchemaAndVersionInfo infoObject = parser.start(ctx.getId().intValue(), fileName);
+                final PoolIdSchemaAndVersionInfo infoObject = parser.start(ctx.getId().intValue(), fileName, optConfigDbName);
                 final VersionInformation versionInformation = infoObject.getVersionInformation();
                 final UpdateTaskInformation updateTaskInformation = infoObject.getUpdateTaskInformation();
                 final String schema = infoObject.getSchema();

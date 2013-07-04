@@ -49,6 +49,7 @@
 
 package com.openexchange.mailaccount.json.writer;
 
+import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.util.EnumSet;
 import java.util.List;
@@ -58,9 +59,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.storage.JSlobStorage;
+import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.json.actions.AbstractMailAccountAction;
@@ -146,7 +150,7 @@ public final class MailAccountWriter implements MailAccountFields {
             json = new JSONObject(24);
             json.put(ID, accountId);
             json.put(NAME, account.getName());
-            json.put(PRIMARY_ADDRESS, account.getPrimaryAddress());
+            json.put(PRIMARY_ADDRESS, addr2String(account.getPrimaryAddress()));
             json.put(PERSONAL, account.getPersonal());
             json.put(SPAM_HANDLER, account.getSpamHandler());
 
@@ -207,7 +211,7 @@ public final class MailAccountWriter implements MailAccountFields {
             // json.put(TRANSPORT_PASSWORD, account.getTransportPassword());
 
             json.put(NAME, account.getName());
-            json.put(PRIMARY_ADDRESS, account.getPrimaryAddress());
+            json.put(PRIMARY_ADDRESS, addr2String(account.getPrimaryAddress()));
             json.put(PERSONAL, account.getPersonal());
             json.put(SPAM_HANDLER, account.getSpamHandler());
 
@@ -339,9 +343,70 @@ public final class MailAccountWriter implements MailAccountFields {
             } else {
                 row.put(jSlob.getJsonObject());
             }
+        } else if (Attribute.PRIMARY_ADDRESS_LITERAL == attribute) {
+            final Object value  = attribute.doSwitch(getter);
+            if (null == value) {
+                row.put(JSONObject.NULL);
+            } else {
+                row.put(addr2String(value.toString()));
+            }
         } else {
             final Object value  = attribute.doSwitch(getter);
             row.put(value == null ? JSONObject.NULL : value);
         }
     }
+
+    private static String addr2String(final String primaryAddress) {
+        if (null == primaryAddress) {
+            return primaryAddress;
+        }
+        try {
+            final QuotedInternetAddress addr = new QuotedInternetAddress(primaryAddress);
+            final String sAddress = addr.getAddress();
+            final int pos = null == sAddress ? 0 : sAddress.indexOf('/');
+            if (pos <= 0) {
+                // No slash character present
+                return addr.toUnicodeString();
+            }
+            final StringAllocator sb = new StringAllocator(32);
+            final String personal = addr.getPersonal();
+            if (null == personal) {
+                sb.append(prepareAddress(sAddress.substring(0, pos)));
+            } else {
+                sb.append(preparePersonal(personal));
+                sb.append(" <").append(prepareAddress(sAddress.substring(0, pos))).append('>');
+            }
+            return sb.toString();
+        } catch (final Exception e) {
+            return primaryAddress;
+        }
+    }
+
+    /**
+     * Prepares specified personal string by surrounding it with quotes if needed.
+     *
+     * @param personal The personal
+     * @return The prepared personal
+     */
+    static String preparePersonal(final String personal) {
+        return MimeMessageUtility.quotePhrase(personal, false);
+    }
+
+    private static final String DUMMY_DOMAIN = "@unspecified-domain";
+
+    /**
+     * Prepares given address string by checking for possible mail-safe encodings.
+     *
+     * @param address The address
+     * @return The prepared address
+     */
+    static String prepareAddress(final String address) {
+        final String decoded = toIDN(MimeMessageUtility.decodeMultiEncodedHeader(address));
+        final int pos = decoded.indexOf(DUMMY_DOMAIN);
+        if (pos >= 0) {
+            return decoded.substring(0, pos);
+        }
+        return decoded;
+    }
+
 }

@@ -53,6 +53,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -70,6 +71,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
@@ -285,6 +287,34 @@ public class Patches {
             }
         }
 
+        /**
+         * Tries to restore the original task status and percent-completed in case the updated task does not look like a 'done' / 'undone'
+         * operation by the client (relevant for bugs #23058, #25240, 24812)
+         *
+         * @param originalTask
+         * @param updatedTask
+         */
+        public static void adjustTaskStatus(Task originalTask, Task updatedTask) {
+            if (Task.DONE == updatedTask.getStatus() && Task.DONE != originalTask.getStatus()) {
+                /*
+                 * 'Done' in Mac OS client: STATUS:COMPLETED / PERCENT-COMPLETE:100
+                 */
+                updatedTask.setPercentComplete(100);
+                updatedTask.setStatus(Task.DONE);
+            } else if (Task.NOT_STARTED == updatedTask.getStatus() && Task.DONE == originalTask.getStatus()) {
+                /*
+                 * 'Undone' in Mac OS client: STATUS:NEEDS-ACTION
+                 */
+                updatedTask.setPercentComplete(0);
+            } else if (Task.NOT_STARTED == updatedTask.getStatus() && Task.NOT_STARTED != originalTask.getStatus()) {
+                /*
+                 * neither done/undone transition, restore from original task
+                 */
+                updatedTask.setPercentComplete(originalTask.getPercentComplete());
+                updatedTask.setStatus(originalTask.getStatus());
+            }
+        }
+
     }
 
     /**
@@ -324,6 +354,61 @@ public class Patches {
                 CalendarCollectionService calUtils = factory.getCalendarUtilities();
                 calUtils.safelySetStartAndEndDateForRecurringAppointment(appointment);
             }
+        }
+
+        /**
+         * Transforms change- to delete-exceptions where user is removed from participants if needed (bug #26293).
+         *
+         * @param factory
+         * @param appointment
+         * @param changeExceptions
+         * @return
+         */
+        public static CalendarDataObject[] setDeleteExceptionForRemovedParticipant(GroupwareCaldavFactory factory, Appointment appointment, CalendarDataObject[] changeExceptions) {
+            if (0 < appointment.getRecurrenceID() && null != changeExceptions && 0 < changeExceptions.length) {
+                int userID = factory.getUser().getId();
+                boolean isParticipantInMaster = false;
+                if (null != appointment.getUsers() && 0 < appointment.getUsers().length) {
+                    for (UserParticipant userParticipant : appointment.getUsers()) {
+                        if (userID == userParticipant.getIdentifier()) {
+                            isParticipantInMaster = true;
+                            break;
+                        }
+                    }
+                }
+                if (isParticipantInMaster) {
+                    List<CalendarDataObject> patchedChangeExceptions = new ArrayList<CalendarDataObject>();
+                    for (CalendarDataObject changeException : changeExceptions) {
+                        boolean isParticipantInException = false;
+                        if (null != changeException.getUsers() && 0 < changeException.getUsers().length) {
+                            for (UserParticipant userParticipant : changeException.getUsers()) {
+                                if (userID == userParticipant.getIdentifier()) {
+                                    isParticipantInException = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (false == isParticipantInException && null != changeException.getChangeException()
+                            && 1 == changeException.getChangeException().length) {
+                            /*
+                             * transfer to delete exceptions
+                             */
+                            Date recurrenceDatePosition = changeException.getChangeException()[0];
+                            HashSet<Date> patchedChangeExceptionDates = new HashSet<Date>(Arrays.asList(appointment.getChangeException()));
+                            patchedChangeExceptionDates.remove(recurrenceDatePosition);
+                            appointment.setChangeExceptions(patchedChangeExceptionDates.toArray(new Date[patchedChangeExceptionDates.size()]));
+                            appointment.addDeleteException(recurrenceDatePosition);
+                        } else {
+                            /*
+                             * keep in change exceptions
+                             */
+                            patchedChangeExceptions.add(changeException);
+                        }
+                    }
+                    changeExceptions = patchedChangeExceptions.toArray(new CalendarDataObject[patchedChangeExceptions.size()]);
+                }
+            }
+            return changeExceptions;
         }
 
         /**

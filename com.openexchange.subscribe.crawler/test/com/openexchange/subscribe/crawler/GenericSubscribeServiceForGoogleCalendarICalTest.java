@@ -74,7 +74,7 @@ public class GenericSubscribeServiceForGoogleCalendarICalTest extends GenericSub
         crawler.setPriority(3);
         // crawler.setJavascriptEnabled(true);
 
-        ArrayList<Step> steps = new ArrayList<Step>();
+        ArrayList<Step<?, ?>> steps = new ArrayList<Step<?, ?>>();
         steps.add(new LoginPageByFormActionReturningStringStep(
             "Log into Google Calendar",
             "https://calendar.google.com",

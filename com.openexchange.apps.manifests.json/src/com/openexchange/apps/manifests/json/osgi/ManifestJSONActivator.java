@@ -49,9 +49,9 @@
 
 package com.openexchange.apps.manifests.json.osgi;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.Reader;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.logging.Log;
@@ -118,7 +118,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 	    final NearRegistryServiceTracker<ServerConfigMatcherService> matcherTracker = new NearRegistryServiceTracker<ServerConfigMatcherService>(context, ServerConfigMatcherService.class);
 	    rememberTracker(matcherTracker);
 	    final NearRegistryServiceTracker<ComputedServerConfigValueService> computedValueTracker = new NearRegistryServiceTracker<ComputedServerConfigValueService>(context, ComputedServerConfigValueService.class);
-	    rememberTracker(computedValueTracker);;
+	    rememberTracker(computedValueTracker);
 
 		registerModule(new ManifestActionFactory(this, readManifests(), new ServerConfigServicesLookup() {
 
@@ -147,19 +147,22 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 	}
 
     private JSONArray readManifests() {
-        final ConfigurationService conf = getService(ConfigurationService.class);
-        String property = conf.getProperty("com.openexchange.apps.manifestPath");
-        if (null == property) {
-            property = conf.getProperty("com.openexchange.apps.path");
+        String property;
+        {
+            final ConfigurationService conf = getService(ConfigurationService.class);
+            property = conf.getProperty("com.openexchange.apps.manifestPath");
             if (null == property) {
-                return new JSONArray(0);
+                property = conf.getProperty("com.openexchange.apps.path");
+                if (null == property) {
+                    return new JSONArray(0);
+                }
+                property += "/manifests";
             }
-            property += "/manifests";
         }
 
         final String[] paths = property.split(":");
         final JSONArray array = new JSONArray(paths.length << 1);
-        for(final String path: paths) {
+        for (final String path : paths) {
             final File file = new File(path);
             if (file.exists()) {
                 for (final File f : file.listFiles()) {
@@ -167,17 +170,20 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
                 }
             }
         }
+
         return array;
     }
 
-    private void read(final File f, final JSONArray array) {
-        Reader r = null;
+    private void read(File f, JSONArray array) {
+        BufferedReader r = null;
         try {
-            final JSONArray fileContent = new JSONArray((r = new FileReader(f)));
-            for (int i = 0, size = fileContent.length(); i < size; i++) {
+            r = new BufferedReader(new FileReader(f));
+            final JSONArray fileContent = new JSONArray(r);
+            final int length = fileContent.length();
+            for (int i = 0, size = length; i < size; i++) {
                 array.put(fileContent.get(i));
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         } finally {
             Streams.close(r);

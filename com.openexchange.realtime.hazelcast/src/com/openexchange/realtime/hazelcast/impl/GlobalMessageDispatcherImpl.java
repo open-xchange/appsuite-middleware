@@ -73,10 +73,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
+import com.openexchange.realtime.dispatch.DispatchExceptionCode;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.hazelcast.Services;
+import com.openexchange.realtime.hazelcast.Utils;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.channel.StanzaDispatcher;
 import com.openexchange.realtime.packet.ID;
@@ -167,6 +170,10 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
             ensureSequence(stanza, localMember);
             stanza.trace("Deliver locally");
             Map<ID, OXException> sent = Services.getService(LocalMessageDispatcher.class).send(stanza, localIds);
+            if (Utils.shouldResend(sent, stanza)) {
+                resend(stanza);
+                return exceptions;
+            }
             exceptions.putAll(sent);
         }
         // Sent to remote receivers
@@ -190,6 +197,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
                 Thread.currentThread().interrupt();
                 throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e, "Execution interrupted");
             } catch (ExecutionException e) {
+                resend(stanza);
                 throw ThreadPools.launderThrowable(e, OXException.class);
             }
         }
@@ -199,6 +207,13 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
         return exceptions;
     }
     
+    private void resend(Stanza stanza) throws OXException {
+        directory.remove(stanza.getTo());
+        send(stanza);
+    }
+
+    
+
     private ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>> peerMapPerID = new ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>>();
 
     private void ensureSequence(Stanza stanza, Member receiver) {
