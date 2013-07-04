@@ -50,16 +50,17 @@
 package com.openexchange.groupware.ldap;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
-import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.IN_LIMIT;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.io.UnsupportedEncodingException;
@@ -293,7 +294,7 @@ public class RdbUserStorage extends UserStorage {
         if (0 == length) {
             return new User[0];
         }
-        final Map<Integer, UserImpl> users = new HashMap<Integer, UserImpl>(length);
+        final TIntObjectMap<UserImpl> users = new TIntObjectHashMap<UserImpl>(length);
         try {
             for (int i = 0; i < userIds.length; i += IN_LIMIT) {
                 PreparedStatement stmt = null;
@@ -326,7 +327,7 @@ public class RdbUserStorage extends UserStorage {
                         user.setPreferredLanguage(result.getString(pos++));
                         user.setPasswordMech(result.getString(pos++));
                         user.setContactId(result.getInt(pos++));
-                        users.put(I(user.getId()), user);
+                        users.put(user.getId(), user);
                     }
                 } finally {
                     closeSQLStuff(result, stmt);
@@ -374,9 +375,9 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private static void loadLoginInfo(Context context, Connection con, Map<Integer, UserImpl> users) throws OXException {
+    private static void loadLoginInfo(Context context, Connection con, TIntObjectMap<UserImpl> users) throws OXException {
         try {
-            final Iterator<Integer> iter = users.keySet().iterator();
+            final TIntIterator iter = users.keySet().iterator();
             for (int i = 0; i < users.size(); i += IN_LIMIT) {
                 PreparedStatement stmt = null;
                 ResultSet result = null;
@@ -386,11 +387,11 @@ public class RdbUserStorage extends UserStorage {
                     int pos = 1;
                     stmt.setInt(pos++, context.getContextId());
                     for (int j = 0; j < length; j++) {
-                        stmt.setInt(pos++, i(iter.next()));
+                        stmt.setInt(pos++, iter.next());
                     }
                     result = stmt.executeQuery();
                     while (result.next()) {
-                        users.get(I(result.getInt(1))).setLoginInfo(result.getString(2));
+                        users.get(result.getInt(1)).setLoginInfo(result.getString(2));
                     }
                 } finally {
                     closeSQLStuff(result, stmt);
@@ -401,9 +402,9 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private static void loadContact(Context ctx, Connection con, Map<Integer, UserImpl> users) throws OXException {
+    private static void loadContact(Context ctx, Connection con, TIntObjectMap<UserImpl> users) throws OXException {
         try {
-            final Iterator<UserImpl> iter = users.values().iterator();
+            final Iterator<UserImpl> iter = users.valueCollection().iterator();
             for (int i = 0; i < users.size(); i += IN_LIMIT) {
                 PreparedStatement stmt = null;
                 ResultSet result = null;
@@ -412,16 +413,16 @@ public class RdbUserStorage extends UserStorage {
                     stmt = con.prepareStatement(getIN(SELECT_CONTACT, length));
                     int pos = 1;
                     stmt.setInt(pos++, ctx.getContextId());
-                    final Map<Integer, UserImpl> userByContactId = new HashMap<Integer, UserImpl>(length, 1);
+                    final TIntObjectMap<UserImpl> userByContactId = new TIntObjectHashMap<UserImpl>(length, 1);
                     for (int j = 0; j < length; j++) {
                         final UserImpl user = iter.next();
                         stmt.setInt(pos++, user.getContactId());
-                        userByContactId.put(I(user.getContactId()), user);
+                        userByContactId.put(user.getContactId(), user);
                     }
                     result = stmt.executeQuery();
                     while (result.next()) {
                         pos = 1;
-                        final UserImpl user = userByContactId.get(I(result.getInt(pos++)));
+                        final UserImpl user = userByContactId.get(result.getInt(pos++));
                         user.setGivenName(result.getString(pos++));
                         user.setSurname(result.getString(pos++));
                         user.setDisplayName(result.getString(pos++));
@@ -435,15 +436,15 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private static void loadGroups(Context context, Connection con, Map<Integer, UserImpl> users) throws OXException {
-        final Map<Integer, List<Integer>> tmp = new HashMap<Integer, List<Integer>>(users.size(), 1);
-        for (final User user : users.values()) {
-            final List<Integer> userGroups = new ArrayList<Integer>();
-            userGroups.add(I(0));
-            tmp.put(I(user.getId()), userGroups);
+    private static void loadGroups(Context context, Connection con, TIntObjectMap<UserImpl> users) throws OXException {
+        final TIntObjectMap<TIntList> tmp = new TIntObjectHashMap<TIntList>(users.size(), 1);
+        for (final User user : users.valueCollection()) {
+            final TIntList userGroups = new TIntArrayList();
+            userGroups.add(0);
+            tmp.put(user.getId(), userGroups);
         }
         try {
-            final Iterator<Integer> iter = users.keySet().iterator();
+            final TIntIterator iter = users.keySet().iterator();
             for (int i = 0; i < users.size(); i += IN_LIMIT) {
                 PreparedStatement stmt = null;
                 ResultSet result = null;
@@ -454,11 +455,11 @@ public class RdbUserStorage extends UserStorage {
                     int pos = 1;
                     stmt.setInt(pos++, context.getContextId());
                     for (int j = 0; j < length; j++) {
-                        stmt.setInt(pos++, i(iter.next()));
+                        stmt.setInt(pos++, iter.next());
                     }
                     result = stmt.executeQuery();
                     while (result.next()) {
-                        tmp.get(I(result.getInt(1))).add(I(result.getInt(2)));
+                        tmp.get(result.getInt(1)).add(result.getInt(2));
                     }
                 } finally {
                     closeSQLStuff(result, stmt);
@@ -467,18 +468,18 @@ public class RdbUserStorage extends UserStorage {
         } catch (final SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
-        for (final UserImpl user : users.values()) {
-            user.setGroups(I2i(tmp.get(I(user.getId()))));
+        for (final UserImpl user : users.valueCollection()) {
+            user.setGroups(tmp.get(user.getId()).toArray());
         }
     }
 
-    private static void loadAttributes(int contextId, Connection con, Map<Integer, UserImpl> users, boolean lockRows) throws OXException {
+    private static void loadAttributes(int contextId, Connection con, TIntObjectMap<UserImpl> users, boolean lockRows) throws OXException {
         if (lockRows && users.size() != 1) {
             throw UserExceptionCode.LOCKING_NOT_ALLOWED.create(I(users.size()));
         }
-        final Map<Integer, Map<String, UserAttribute>> usersAttrs = new HashMap<Integer, Map<String, UserAttribute>>();
+        final TIntObjectMap<Map<String, UserAttribute>> usersAttrs = new TIntObjectHashMap<Map<String,UserAttribute>>();
         try {
-            final Iterator<Integer> iter = users.keySet().iterator();
+            final TIntIterator iter = users.keySet().iterator();
             for (int i = 0; i < users.size(); i += IN_LIMIT) {
                 PreparedStatement stmt = null;
                 ResultSet result = null;
@@ -492,14 +493,14 @@ public class RdbUserStorage extends UserStorage {
                     int pos = 1;
                     stmt.setInt(pos++, contextId);
                     for (int j = 0; j < length; j++) {
-                        final int userId = i(iter.next());
+                        final int userId = iter.next();
                         stmt.setInt(pos++, userId);
-                        usersAttrs.put(I(userId), new HashMap<String, UserAttribute>());
+                        usersAttrs.put(userId, new HashMap<String, UserAttribute>());
                     }
                     result = stmt.executeQuery();
                     // Gather attributes
                     while (result.next()) {
-                        Map<String, UserAttribute> attrs = usersAttrs.get(I(result.getInt(1)));
+                        Map<String, UserAttribute> attrs = usersAttrs.get(result.getInt(1));
                         String name = result.getString(3);
                         UserAttribute attribute = attrs.get(name);
                         if (null == attribute) {
@@ -523,8 +524,8 @@ public class RdbUserStorage extends UserStorage {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         // Proceed iterating users
-        for (final UserImpl user : users.values()) {
-            final Map<String, UserAttribute> attrs = usersAttrs.get(I(user.getId()));
+        for (final UserImpl user : users.valueCollection()) {
+            final Map<String, UserAttribute> attrs = usersAttrs.get(user.getId());
             // Check for aliases
             {
                 UserAttribute aliases = attrs.get("alias");
@@ -682,9 +683,9 @@ public class RdbUserStorage extends UserStorage {
     }
 
     private static void setAttribute(int contextId, Connection con, int userId, String name, String value) throws SQLException, OXException {
-        Map<Integer, UserImpl> userMap = createSingleUserMap(userId);
+        TIntObjectMap<UserImpl> userMap = createSingleUserMap(userId);
         loadAttributes(contextId, con, userMap, true);
-        Map<String, UserAttribute> oldAttributes = userMap.get(I(userId)).getAttributesInternal();
+        Map<String, UserAttribute> oldAttributes = userMap.get(userId).getAttributesInternal();
         Map<String, UserAttribute> attributes = new HashMap<String, UserAttribute>(oldAttributes);
         if (null == value) {
             attributes.remove(name);
@@ -733,9 +734,9 @@ public class RdbUserStorage extends UserStorage {
     private static void updateAttributes(Context ctx, User user, Connection con) throws SQLException, OXException {
         final int contextId = ctx.getContextId();
         final int userId = user.getId();
-        final Map<Integer, UserImpl> loadMap = createSingleUserMap(userId);
+        final TIntObjectMap<UserImpl> loadMap = createSingleUserMap(userId);
         loadAttributes(ctx.getContextId(), con, loadMap, true);
-        final Map<String, UserAttribute> oldAttributes = loadMap.get(I(userId)).getAttributesInternal();
+        final Map<String, UserAttribute> oldAttributes = loadMap.get(userId).getAttributesInternal();
         final Map<String, UserAttribute> attributes = UserImpl.toInternal(user.getAttributes());
         updateAttributes(contextId, userId, con, oldAttributes, attributes);
     }
@@ -869,10 +870,10 @@ public class RdbUserStorage extends UserStorage {
                         final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
                         LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, changed), e);
                         LOG.error("Expected lines: " + size1 + " Updated lines: " + lines1);
-                        final Map<Integer, UserImpl> map = createSingleUserMap(userId);
+                        final TIntObjectMap<UserImpl> map = createSingleUserMap(userId);
                         loadAttributes(contextId, con, map, false);
-                        for (int i : map.keySet()) {
-                            LOG.error("User " + i + ": " + map.get(I(i)).getAttributes().toString());
+                        for (int i : map.keys()) {
+                            LOG.error("User " + i + ": " + map.get(i).getAttributes().toString());
                         }
                         throw e;
                     }
@@ -892,10 +893,10 @@ public class RdbUserStorage extends UserStorage {
                         final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
                         LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, changed), e);
                         LOG.error("Expected lines: " + size2 + " Updated lines: " + lines2);
-                        final Map<Integer, UserImpl> map = createSingleUserMap(userId);
+                        final TIntObjectMap<UserImpl> map = createSingleUserMap(userId);
                         loadAttributes(contextId, con, map, false);
-                        for (int i : map.keySet()) {
-                            LOG.error("User " + i + ": " + map.get(I(i)).getAttributes().toString());
+                        for (int i : map.keys()) {
+                            LOG.error("User " + i + ": " + map.get(i).getAttributes().toString());
                         }
                         throw e;
                     }
@@ -907,11 +908,11 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private static Map<Integer, UserImpl> createSingleUserMap(int userId) {
+    private static TIntObjectMap<UserImpl> createSingleUserMap(int userId) {
         final UserImpl load = new UserImpl();
         load.setId(userId);
-        Map<Integer, UserImpl> loadMap = new HashMap<Integer, UserImpl>(1);
-        loadMap.put(I(userId), load);
+        TIntObjectMap<UserImpl> loadMap = new TIntObjectHashMap<UserImpl>(1);
+        loadMap.put(userId, load);
         return loadMap;
     }
 
