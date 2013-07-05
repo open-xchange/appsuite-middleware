@@ -49,9 +49,9 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
-import javax.servlet.sim.ByteArrayServletOutputStream;
 import javax.servlet.http.sim.SimHttpServletRequest;
 import javax.servlet.http.sim.SimHttpServletResponse;
+import javax.servlet.sim.ByteArrayServletOutputStream;
 import junit.framework.TestCase;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -113,6 +113,93 @@ public class FileResponseRendererTest extends TestCase {
             assertTrue("Unexpected Content-Length: " + contentLength + ", but should be less than " + length, length > contentLength);
             final int size = servletOutputStream.size();
             assertEquals("Unexpected Content-Length.", size, contentLength);
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    public void testChunkRead() {
+        try {
+            final int length = 2048;
+            final byte[] bytes = new byte[length];
+            for (int i = 0; i < length; i++) {
+                bytes[i] = (byte) i;
+            }
+            bytes[256] = 120;
+
+            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+            fileHolder.setContentType("application/octet-stream");
+            fileHolder.setDelivery("download");
+            fileHolder.setDisposition("attachment");
+            fileHolder.setName("bin.dat");
+
+            final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+
+            {
+                final AJAXRequestData requestData = new AJAXRequestData();
+                final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+                final SimHttpServletRequest req = new SimHttpServletRequest();
+                req.setParameter("off", "0");
+                req.setParameter("len", "256");
+                final SimHttpServletResponse resp = new SimHttpServletResponse();
+                final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+                resp.setOutputStream(servletOutputStream);
+                fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+
+                final byte[] writtenBytes = servletOutputStream.toByteArray();
+                assertEquals("Unexpected number of written bytes.", 256, writtenBytes.length);
+            }
+
+            {
+                final AJAXRequestData requestData = new AJAXRequestData();
+                final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+                final SimHttpServletRequest req = new SimHttpServletRequest();
+                req.setParameter("off", "256");
+                req.setParameter("len", "256");
+                final SimHttpServletResponse resp = new SimHttpServletResponse();
+                final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+                resp.setOutputStream(servletOutputStream);
+                fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+
+                final byte[] writtenBytes = servletOutputStream.toByteArray();
+                assertEquals("Unexpected number of written bytes.", 256, writtenBytes.length);
+                assertEquals("Unexpected starting byte.", 120, writtenBytes[0]);
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    public void testChunkReadOutOfRange() {
+        try {
+            final int length = 2048;
+            final byte[] bytes = new byte[length];
+            for (int i = 0; i < length; i++) {
+                bytes[i] = (byte) i;
+            }
+
+            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+            fileHolder.setContentType("application/octet-stream");
+            fileHolder.setDelivery("download");
+            fileHolder.setDisposition("attachment");
+            fileHolder.setName("bin.dat");
+
+            final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+
+            final AJAXRequestData requestData = new AJAXRequestData();
+            final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+            final SimHttpServletRequest req = new SimHttpServletRequest();
+            req.setParameter("off", "2049");
+            req.setParameter("len", "256");
+            final SimHttpServletResponse resp = new SimHttpServletResponse();
+            final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+            resp.setOutputStream(servletOutputStream);
+            fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+
+            assertEquals("Unexpected status code.", 416, resp.getStatus());
+            assertEquals("Unexpected 'Content-Range' header.", "bytes */2048", resp.getHeaders().get("content-range"));
         } catch (final Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

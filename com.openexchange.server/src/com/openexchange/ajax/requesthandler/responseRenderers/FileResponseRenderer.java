@@ -84,6 +84,7 @@ import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.helper.HTMLDetector;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
@@ -530,24 +531,36 @@ public class FileResponseRenderer implements ResponseRenderer {
                         outputStream.println(new StringAllocator("--").append(boundary).append("--").toString());
                     }
                 } else {
-                    final int len = BUFLEN;
-                    final byte[] buf = new byte[len];
-                    if (length > 0) {
-                        // Check actual transferred number of bytes against provided length
-                        long count = 0L;
-                        for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
-                            outputStream.write(buf, 0, read);
-                            count += read;
-                        }
-                        if (length != count) {
-                            StringAllocator sb = new StringAllocator("Transferred ").append((length > count ? "less" : "more"));
-                            sb.append(" bytes than signaled through \"Content-Length\" response header. File download may get paused (less) or be corrupted (more).");
-                            sb.append(" Associated file \"").append(fileName).append("\" with indicated length of ").append(length).append(", but is ").append(count);
-                            LOG.warn(sb.toString());
+                    final int off = AJAXRequestDataTools.parseIntParameter(req.getParameter("off"), -1);
+                    final int amount = AJAXRequestDataTools.parseIntParameter(req.getParameter("len"), -1);
+                    if (off >= 0 && amount > 0) {
+                        try {
+                            copy(documentData, outputStream, off, amount);
+                        } catch (final OffsetOutOfRangeIOException e) {
+                            resp.setHeader("Content-Range", "bytes */" + e.getAvailable()); // Required in 416.
+                            resp.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+                            return;
                         }
                     } else {
-                        for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
-                            outputStream.write(buf, 0, read);
+                        final int len = BUFLEN;
+                        final byte[] buf = new byte[len];
+                        if (length > 0) {
+                            // Check actual transferred number of bytes against provided length
+                            long count = 0L;
+                            for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
+                                outputStream.write(buf, 0, read);
+                                count += read;
+                            }
+                            if (length != count) {
+                                final StringAllocator sb = new StringAllocator("Transferred ").append((length > count ? "less" : "more"));
+                                sb.append(" bytes than signaled through \"Content-Length\" response header. File download may get paused (less) or be corrupted (more).");
+                                sb.append(" Associated file \"").append(fileName).append("\" with indicated length of ").append(length).append(", but is ").append(count);
+                                LOG.warn(sb.toString());
+                            }
+                        } else {
+                            for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
+                                outputStream.write(buf, 0, read);
+                            }
                         }
                     }
                 }
@@ -923,7 +936,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         for (int i = 0; i < start; i++) {
             if (input.read() < 0) {
                 // Stream does not provide enough bytes
-                throw new IOException("Start index " + start + " out of range. Got only " + i);
+                throw new OffsetOutOfRangeIOException(start, i);
             }
             // Valid byte read... Continue.
         }
@@ -966,5 +979,44 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
     } // End of class Range
+
+    private static final class OffsetOutOfRangeIOException extends IOException {
+
+        private final long off;
+        private final long available;
+
+        /**
+         * Initializes a new {@link OffsetOutOfRangeIOException}.
+         */
+        public OffsetOutOfRangeIOException(final long off, final long available) {
+            super("Offset " + off + " out of range. Got only " + available);
+            this.off = off;
+            this.available = available;
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
+
+        /**
+         * Gets the off
+         *
+         * @return The off
+         */
+        public long getOff() {
+            return off;
+        }
+
+        /**
+         * Gets the available
+         *
+         * @return The available
+         */
+        public long getAvailable() {
+            return available;
+        }
+
+    } // End of class OffsetOutOfRangeIOException
 
 }

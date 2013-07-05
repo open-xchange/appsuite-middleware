@@ -194,6 +194,16 @@ public class SimHttpServletRequest implements HttpServletRequest {
         this.inputStream = inputStream;
     }
 
+    /**
+     * Sets given parameter.
+     *
+     * @param name The name
+     * @param value The value
+     */
+    public void setParameter(String name, String value) {
+        parameters.put(name, value);
+    }
+
     @Override
     public String getParameter(String name) {
         return parameters.get(name);
