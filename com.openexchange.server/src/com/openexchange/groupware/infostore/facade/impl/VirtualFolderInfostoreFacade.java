@@ -65,6 +65,7 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.quota.Quota;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.session.ServerSession;
@@ -319,4 +320,20 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     public void setSessionHolder(final SessionHolder sessionHolder) {
         // Nothing to do.
     }
+
+    @Override
+    public long getQuota(ServerSession session) {
+        return Quota.UNLIMITED;
+    }
+
+    @Override
+    public long getUsage(ServerSession session) throws OXException {
+        return Quota.UNLIMITED;
+    }
+
+    @Override
+    public void recalculateUsage(ServerSession session) throws OXException {
+        // Nothing to do.
+    }
+
 }

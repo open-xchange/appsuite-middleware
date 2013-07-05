@@ -1,6 +1,5 @@
 /*
  *
-
  *    OPEN-XCHANGE legal information
  *
  *    All intellectual property rights in the Software are protected by
@@ -29,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -433,5 +432,11 @@ public interface InfostoreFacade extends TransactionAware {
      * @param sessionHolder The session holder
      */
     public void setSessionHolder(SessionHolder sessionHolder);
+
+    long getQuota(ServerSession session);
+
+    long getUsage(ServerSession session) throws OXException;
+
+    void recalculateUsage(ServerSession session) throws OXException;
 
 }

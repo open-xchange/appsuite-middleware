@@ -360,6 +360,26 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
     }
 
+    @Override
+    public long getQuota(ServerSession session) {
+        try {
+            return getFileStorage(session.getContext()).getQuota();
+        } catch (OXException e) {
+            LOG.warn("Error getting file storage quota for context " + session.getContextId(), e);
+            return Quota.UNLIMITED;
+        }
+    }
+
+    @Override
+    public long getUsage(ServerSession session) throws OXException {
+        return getFileStorage(session.getContext()).getUsage();
+    }
+
+    @Override
+    public void recalculateUsage(ServerSession session) throws OXException {
+        getFileStorage(session.getContext()).recalculateUsage();
+    }
+
     private Delta<DocumentMetadata> addLocked(final Delta<DocumentMetadata> delta, final Map<Integer, List<Lock>> locks, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         try {
             return new LockDelta(delta, locks, ctx, user, userConfig);

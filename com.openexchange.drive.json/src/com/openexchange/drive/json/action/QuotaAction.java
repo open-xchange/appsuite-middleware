@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,41 +49,61 @@
 
 package com.openexchange.drive.json.action;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.DriveService;
+import com.openexchange.drive.json.internal.Services;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Quota;
+import com.openexchange.java.Strings;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link DriveActionFactory}
+ * {@link QuotaAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DriveActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions;
-
-    public DriveActionFactory() {
-        super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(10);
-        actions.put("syncfolders", new SyncFoldersAction());
-        actions.put("syncfiles", new SyncFilesAction());
-        actions.put("upload", new UploadAction());
-        actions.put("download", new DownloadAction());
-        actions.put("listen", new ListenAction());
-        actions.put("quota", new QuotaAction());
-    }
+public class QuotaAction extends AbstractDriveAction {
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        /*
+         * get request data
+         */
+        String rootFolderID = requestData.getParameter("root");
+        if (Strings.isEmpty(rootFolderID)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
+        }
+        /*
+         * determine quota
+         */
+        DriveService driveService = Services.getService(DriveService.class, true);
+        Quota[] quota = driveService.getQuota(session, rootFolderID);
+        /*
+         * return json result
+         */
+        try {
+            JSONArray jsonArray = new JSONArray(2);
+            if (null != quota) {
+                for (Quota q : quota) {
+                    if (Quota.UNLIMITED != q.getLimit()) {
+                        JSONObject jsonQuota = new JSONObject();
+                        jsonQuota.put("quota", q.getLimit());
+                        jsonQuota.put("use", q.getUsage());
+                        jsonQuota.put("type", String.valueOf(q.getType()).toLowerCase());
+                        jsonArray.put(jsonQuota);
+                    }
+                }
+            }
+            return new AJAXRequestResult(jsonArray, "json");
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 
 }

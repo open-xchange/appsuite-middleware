@@ -62,7 +62,11 @@ import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.quota.QuotaService;
+import com.openexchange.quota.QuotaType;
+import com.openexchange.quota.Resource;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -78,14 +82,16 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
     private static final String REAL_TREE_ID = FolderStorage.REAL_TREE_ID;
 
     private final ServerSession session;
+    private final InfostoreFacade infostore;
 
     /**
      * Initializes a new {@link InfostoreFolderAccess}.
      * @param session
      */
-    public InfostoreFolderAccess(final ServerSession session) {
+    public InfostoreFolderAccess(final ServerSession session, final InfostoreFacade infostore) {
         super();
         this.session = session;
+        this.infostore = infostore;
     }
 
     @Override
@@ -133,11 +139,6 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
     }
 
     @Override
-    public Quota getFileQuota(final String folderId) throws OXException {
-        return null;
-    }
-
-    @Override
     public FileStorageFolder getFolder(final String folderId) throws OXException {
         final FolderService service = Services.getService(FolderService.class);
         return FolderWriter.writeFolder(service.getFolder(REAL_TREE_ID, folderId, session, null));
@@ -177,22 +178,45 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
     }
 
     @Override
+    public Quota getFileQuota(final String folderId) throws OXException {
+        com.openexchange.quota.Quota filesQuota = Services.getService(QuotaService.class).getQuotaFor(Resource.INFOSTORE_FILES, session);
+        long limit = null != filesQuota ? filesQuota.getQuota(QuotaType.AMOUNT) : Quota.UNLIMITED;
+        long usage = Quota.UNLIMITED;//TODO!
+        return new Quota(limit, usage, Type.FILE);
+    }
+
+    @Override
+    public Quota getStorageQuota(final String folderId) throws OXException {
+        long limit = infostore.getQuota(session);
+        long usage = Quota.UNLIMITED != limit ? infostore.getUsage(session) : Quota.UNLIMITED;
+        return new Quota(limit, usage, Type.STORAGE);
+    }
+
+    @Override
     public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
-        final Quota[] ret = new Quota[types.length];
-        for (int i = 0; i < types.length; i++) {
-            ret[i] = types[i].getUnlimited();
+        if (null == types) {
+            return null;
+        } else {
+            Quota[] quotas = new Quota[types.length];
+            for (int i = 0; i < types.length; i++) {
+                switch (types[i]) {
+                case FILE:
+                    quotas[i] = getFileQuota(folder);
+                    break;
+                case STORAGE:
+                    quotas[i] = getStorageQuota(folder);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("unknown type: " + types[i]);
+                }
+            }
+            return quotas;
         }
-        return ret;
     }
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
         return getFolder(INFOSTORE_FOLDER_ID);
-    }
-
-    @Override
-    public Quota getStorageQuota(final String folderId) throws OXException {
-        return Type.STORAGE.getUnlimited();
     }
 
     @Override
