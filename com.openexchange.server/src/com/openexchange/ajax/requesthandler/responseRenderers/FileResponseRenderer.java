@@ -537,7 +537,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                         try {
                             copy(documentData, outputStream, off, amount);
                         } catch (final OffsetOutOfRangeIOException e) {
-                            resp.setHeader("Content-Range", "bytes */" + e.getAvailable()); // Required in 416.
+                            setHeaderSafe("Content-Range", "bytes */" + e.getAvailable(), resp); // Required in 416.
                             resp.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
                             return;
                         }
@@ -631,6 +631,14 @@ public class FileResponseRenderer implements ResponseRenderer {
             resp.setContentType(fallbackContentType);
         }
         return false;
+    }
+
+    private void setHeaderSafe(final String name, final String value, final HttpServletResponse resp) {
+        try {
+            resp.setHeader(name, value);
+        } catch (final Exception e) {
+            // Ignore
+        }
     }
 
     /** Checks if transformation is needed */
