@@ -75,7 +75,6 @@ import com.openexchange.groupware.update.tasks.DateExternalCreateForeignKeyUpdat
 import com.openexchange.groupware.update.tasks.DateExternalDropForeignKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DelDateExternalCreateForeignKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DelDateExternalDropForeignKeyUpdateTask;
-import com.openexchange.groupware.update.tasks.DelDatesMembersPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DelDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DelInfostorePrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddPrimaryKey;
@@ -93,7 +92,6 @@ import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUpdateTaskTable
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUserAttributeTable;
 import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddUuidUpdateTask;
-import com.openexchange.groupware.update.tasks.PrgDatesMembersPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddUuidUpdateTask;
@@ -622,10 +620,10 @@ public final class InternalList {
         list.add(new DelDateExternalCreateForeignKeyUpdateTask());
 
         //Add folder_id to primary key in prg_dates_members
-        list.add(new PrgDatesMembersPrimaryKeyUpdateTask());
+//        list.add(new PrgDatesMembersPrimaryKeyUpdateTask());
         
         //Add folder_id to primary key in del_dates_members
-        list.add(new DelDatesMembersPrimaryKeyUpdateTask());
+//        list.add(new DelDatesMembersPrimaryKeyUpdateTask());
 
         // Add folder_id to primary key in del_contacts
         list.add(new MakeFolderIdPrimaryForDelContactsTable());
