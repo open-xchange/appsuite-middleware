@@ -554,6 +554,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
         final MailServletInterface mailInterface = getMailInterface(requestData, session);
         final List<OXException> warnings = new ArrayList<OXException>(2);
+        final boolean exactLength = AJAXRequestDataTools.parseBoolParameter(requestData.getParameter("exact_length"));
         final JSONObject jMail;
         try {
             jMail = MessageWriter.writeMailMessage(
@@ -567,7 +568,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 token,
                 ttlMillis,
                 mimeFilter,
-                timeZone);
+                timeZone,
+                exactLength);
         } catch (final OXException e) {
             if (MailExceptionCode.MESSAGING_ERROR.equals(e)) {
                 final Throwable cause = e.getCause();

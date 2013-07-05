@@ -209,8 +209,8 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                         }
                     };
                 } else {
-                    final boolean withLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("with_length"));
-                    if (withLength) {
+                    final boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
+                    if (exactLength) {
                         size = Streams.countInputStream(mailPart.getInputStream());
                     }
                     isClosure = new IFileHolder.InputStreamClosure() {
@@ -226,8 +226,8 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 if (mailPart == null) {
                     throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
                 }
-                final boolean withLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("with_length"));
-                if (withLength) {
+                final boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
+                if (exactLength) {
                     size = Streams.countInputStream(mailPart.getInputStream());
                 }
                 isClosure = new IFileHolder.InputStreamClosure() {

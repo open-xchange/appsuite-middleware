@@ -203,7 +203,7 @@ public final class MessageWriter {
      * @throws OXException If writing message fails
      */
     public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout, final MimeFilter mimeFilter) throws OXException {
-        return writeMailMessage(accountId, mail, displayMode, embedded, session, settings, warnings, token, tokenTimeout, mimeFilter, null);
+        return writeMailMessage(accountId, mail, displayMode, embedded, session, settings, warnings, token, tokenTimeout, mimeFilter, null, false);
     }
 
     /**
@@ -222,7 +222,7 @@ public final class MessageWriter {
      * @return The written JSON object
      * @throws OXException If writing message fails
      */
-    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout, final MimeFilter mimeFilter, final TimeZone optTimeZone) throws OXException {
+    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout, final MimeFilter mimeFilter, final TimeZone optTimeZone, final boolean exactLength) throws OXException {
         final MailPath mailPath;
         final String fullName = mail.getFolder();
         final String mailId = mail.getMailId();
@@ -252,6 +252,7 @@ public final class MessageWriter {
         }
         try {
             final JsonMessageHandler handler = new JsonMessageHandler(accountId, mailPath, mail, displayMode, embedded, session, usm, token, tokenTimeout);
+            handler.setExactLength(exactLength);
             if (null != optTimeZone) {
                 handler.setTimeZone(optTimeZone);
             }
