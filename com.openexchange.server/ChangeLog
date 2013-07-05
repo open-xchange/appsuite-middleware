@@ -1,3 +1,7 @@
+* 2013-07-05 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 27372: Update task to drop foreign keys and create them again
+
 * 2013-07-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 27374: Properly parse & download nested parts in a winmail.dat file
