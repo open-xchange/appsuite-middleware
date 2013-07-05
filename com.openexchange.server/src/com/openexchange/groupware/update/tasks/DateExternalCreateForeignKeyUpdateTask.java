@@ -61,18 +61,19 @@ import com.openexchange.tools.update.Tools;
 
 
 /**
- * {@link PrgDatesPrimaryKeyUpdateTask}
+ * {@link DateExternalCreateForeignKeyUpdateTask}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class PrgDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
+public class DateExternalCreateForeignKeyUpdateTask extends UpdateTaskAdapter {
     
     private static final String PRG_DATES = "prg_dates";
+    private static final String DATE_EXTERNAL = "dateExternal";
 
     /**
-     * Initializes a new {@link PrgDatesPrimaryKeyUpdateTask}.
+     * Initializes a new {@link DateExternalCreateForeignKeyUpdateTask}.
      */
-    public PrgDatesPrimaryKeyUpdateTask() {
+    public DateExternalCreateForeignKeyUpdateTask() {
         super();
     }
 
@@ -85,10 +86,7 @@ public class PrgDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         Connection con = Database.getNoTimeout(cid, true);
         try {
             con.setAutoCommit(false);
-            if (Tools.hasPrimaryKey(con, PRG_DATES)) {
-                Tools.dropPrimaryKey(con, PRG_DATES);
-            }
-            Tools.createPrimaryKey(con, PRG_DATES, new String[] { "cid", "intfield01", "fid" });
+            Tools.createForeignKey(con, "dateExternal_ibfk_1", DATE_EXTERNAL, new String[] {"cid", "objectId"}, PRG_DATES, new String[] {"cid", "intfield01"});
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);
@@ -107,7 +105,7 @@ public class PrgDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
      */
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.groupware.update.tasks.DateExternalDropForeignKeyUpdateTask" };
+        return new String[] { "com.openexchange.groupware.update.tasks.DateExternalDropForeignKeyUpdateTask", "com.openexchange.groupware.update.tasks.PrgDatesPrimaryKeyUpdateTask" };
     }
 
 }

@@ -105,7 +105,7 @@ public class InfostoreDocumentCreateForeignKeyUpdateTask extends UpdateTaskAdapt
      */
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.groupware.update.tasks.InfostorePrimaryKeyUpdateTask" };
+        return new String[] { "com.openexchange.groupware.update.tasks.InfostoreDocumentDropForeignKeyUpdateTask", "com.openexchange.groupware.update.tasks.InfostorePrimaryKeyUpdateTask" };
     }
 
 }

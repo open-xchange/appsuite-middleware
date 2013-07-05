@@ -61,18 +61,19 @@ import com.openexchange.tools.update.Tools;
 
 
 /**
- * {@link PrgDatesPrimaryKeyUpdateTask}
+ * {@link DelDateExternalDropForeignKeyUpdateTask}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class PrgDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
+public class DelDateExternalDropForeignKeyUpdateTask extends UpdateTaskAdapter {
     
-    private static final String PRG_DATES = "prg_dates";
+    private static final String DEL_DATES = "del_dates";
+    private static final String DEL_DATE_EXTERNAL = "delDateExternal"; 
 
     /**
-     * Initializes a new {@link PrgDatesPrimaryKeyUpdateTask}.
+     * Initializes a new {@link DelDateExternalDropForeignKeyUpdateTask}.
      */
-    public PrgDatesPrimaryKeyUpdateTask() {
+    public DelDateExternalDropForeignKeyUpdateTask() {
         super();
     }
 
@@ -85,10 +86,10 @@ public class PrgDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         Connection con = Database.getNoTimeout(cid, true);
         try {
             con.setAutoCommit(false);
-            if (Tools.hasPrimaryKey(con, PRG_DATES)) {
-                Tools.dropPrimaryKey(con, PRG_DATES);
+            String foreignKey = Tools.existsForeignKey(con, DEL_DATES, new String[] {"cid", "intfield01"}, DEL_DATE_EXTERNAL, new String[] {"cid", "objectId"});
+            if (null != foreignKey && !foreignKey.equals("")) {
+                Tools.dropForeignKey(con, DEL_DATE_EXTERNAL, foreignKey);
             }
-            Tools.createPrimaryKey(con, PRG_DATES, new String[] { "cid", "intfield01", "fid" });
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);
@@ -107,7 +108,7 @@ public class PrgDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
      */
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.groupware.update.tasks.DateExternalDropForeignKeyUpdateTask" };
+        return new String[0];
     }
 
 }
