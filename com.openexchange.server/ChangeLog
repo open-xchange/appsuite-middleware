@@ -1,3 +1,7 @@
+* 2013-07-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27397: Set generated file name if missing to signal non-empty file holder
+
 * 2013-07-05 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 27372: Update task to drop foreign keys and create them again
