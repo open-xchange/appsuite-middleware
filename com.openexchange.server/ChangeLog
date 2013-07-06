@@ -1,6 +1,7 @@
 * 2013-07-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 27397: Set generated file name if missing to signal non-empty file holder
+ - Fix for bug 26979: Drop large inline data elements prior to parsing CSS block
 
 * 2013-07-05 - jan.bauerdick@open-xchange.com
 
