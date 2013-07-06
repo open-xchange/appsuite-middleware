@@ -990,6 +990,8 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private static final class OffsetOutOfRangeIOException extends IOException {
 
+        private static final long serialVersionUID = 8094333124726048736L;
+
         private final long off;
         private final long available;
 
