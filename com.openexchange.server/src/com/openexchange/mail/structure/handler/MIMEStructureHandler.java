@@ -665,6 +665,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             final long size = part.getSize();
             if (maxSize > 0 && size > maxSize) {
                 bodyObject.put(DATA, JSONObject.NULL);
+                bodyObject.put("exact_size", Streams.countInputStream(part.getInputStream()));
             } else {
                 final ContentType contentType = part.getContentType();
                 if (contentType.startsWith(PRIMARY_TEXT)) {
@@ -720,6 +721,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             bodyObject.put(KEY_ID, id);
             if (maxSize > 0 && size > maxSize) {
                 bodyObject.put(DATA, JSONObject.NULL);
+                bodyObject.put("exact_size", Streams.countInputStream(isp.getInputStream()));
             } else {
                 if (contentType.startsWith(PRIMARY_TEXT)) {
                     // Check for special "text/comma-separated-values" Content-Type
