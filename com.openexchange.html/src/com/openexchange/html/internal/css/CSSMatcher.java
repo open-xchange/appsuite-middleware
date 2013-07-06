@@ -49,9 +49,10 @@
 
 package com.openexchange.html.internal.css;
 
+import gnu.trove.set.TCharSet;
 import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TCharHashSet;
 import gnu.trove.set.hash.TIntHashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -599,7 +600,7 @@ public final class CSSMatcher {
         }
         final String css = CRLF.matcher(cssBuilder).replaceAll(" ");
         final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(css.length()));
-        final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
+        final Matcher m = PATTERN_STYLE_STARTING_BLOCK.matcher(css);
         if (!m.find()) {
             return false;
         }
@@ -612,16 +613,20 @@ public final class CSSMatcher {
             final String prefix = cssElemsBuffer.toString();
             cssElemsBuffer.setLength(0);
             // Check block part
-            cssElemsBuffer.append(m.group(2));
+            {
+                int i = m.end();
+                for (char c; (c = css.charAt(i++)) != '}';) {
+                    cssElemsBuffer.append(c);
+                }
+                lastPos = i + 1;
+            }
             modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
-            cssElemsBuffer.insert(0, m.group(1)).append('}').append('\n'); // Surround with block definition
-            final String block = cssElemsBuffer.toString();
-            cssElemsBuffer.setLength(0);
+            cssElemsBuffer.insert(0, m.group()).append('}').append('\n'); // Surround with block definition
             // Add to main builder
             cssBuilder.append(prefix);
-            cssBuilder.append(block);
-            lastPos = m.end();
-        } while (m.find());
+            cssBuilder.append(cssElemsBuffer);
+            cssElemsBuffer.setLength(0);
+        } while (m.find(lastPos));
         cssElemsBuffer.append(css.substring(lastPos, css.length()));
         modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
         final String tail = cssElemsBuffer.toString();
@@ -652,18 +657,26 @@ public final class CSSMatcher {
                 return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
             }
             final String css = CRLF.matcher(cssBuilder.toString()).replaceAll(" ");
-            final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
+            final Matcher m = PATTERN_STYLE_STARTING_BLOCK.matcher(css);
             final MatcherReplacer mr = new MatcherReplacer(m, css);
             cssBuilder.setLength(0);
+            int lastPos = 0;
             while (m.find()) {
-                modified |= checkCSSElements(cssElemsBuffer.append(m.group(2)), styleMap, removeIfAbsent);
+                {
+                    int i = m.end();
+                    for (char c; (c = css.charAt(i++)) != '}';) {
+                        cssElemsBuffer.append(c);
+                    }
+                    lastPos = i + 1;
+                }
+                modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
                 tmpBuilder.setLength(0);
                 mr.appendLiteralReplacement(
                     cssBuilder,
-                    tmpBuilder.append(m.group(1)).append(cssElemsBuffer.toString()).append('}').append('\n').toString());
+                    tmpBuilder.append(m.group()).append(cssElemsBuffer.toString()).append('}').append('\n').toString());
                 cssElemsBuffer.setLength(0);
             }
-            mr.appendTail(cssBuilder);
+            cssBuilder.append(css.substring(lastPos));
             return modified;
         }
         return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
@@ -672,6 +685,8 @@ public final class CSSMatcher {
     private static final Pattern PATTERN_STYLE_LINE = Pattern.compile(
         "([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}&&[^;{}]]+);?",
         Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_START_STYLE_LINE = Pattern.compile(
+        "([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}&&[^;{}]])");
 
     /**
      * Corrects rgb functions; e.g.<br>
@@ -694,6 +709,24 @@ public final class CSSMatcher {
         mr.appendTail(cssBuilder);
     }
 
+    private static final Pattern PATTERN_INLINE_DATA = Pattern.compile("url\\(data:[^,]+,.+?\\)");
+
+    private static boolean dropInlineData(final Stringer cssBuilder) {
+        // url(data:font/woff;charset=utf-8;base64,
+        if (cssBuilder.indexOf("data") < 0) {
+            return false;
+        }
+        final Matcher m = PATTERN_INLINE_DATA.matcher(cssBuilder.toString());
+        final StringBuffer sb = new StringBuffer(cssBuilder.length());
+        while (m.find()) {
+            m.appendReplacement(sb, "");
+        }
+        m.appendTail(sb);
+        cssBuilder.setLength(0);
+        cssBuilder.append(sb);
+        return true;
+    }
+
     /**
      * Iterates over CSS elements contained in specified string argument and checks each element and its value against given style map
      *
@@ -709,6 +742,7 @@ public final class CSSMatcher {
         }
         boolean modified = false;
         correctRGBFunc(cssBuilder);
+        modified = dropInlineData(cssBuilder);
         /*
          * Feed matcher with buffer's content and reset
          */
@@ -724,9 +758,9 @@ public final class CSSMatcher {
         while (m.find()) {
             final String elementName = m.group(1);
             if (null != elementName) {
-                if (styleMap.containsKey(elementName.toLowerCase(Locale.ENGLISH))) {
+                if (styleMap.containsKey(toLowerCase(elementName))) {
                     elemBuilder.append(elementName).append(':').append(' ');
-                    final Set<String> allowedValuesSet = styleMap.get(elementName.toLowerCase(Locale.ENGLISH));
+                    final Set<String> allowedValuesSet = styleMap.get(toLowerCase(elementName));
                     final String elementValues = m.group(2);
                     boolean hasValues = false;
                     if (matches(elementValues, allowedValuesSet)) {

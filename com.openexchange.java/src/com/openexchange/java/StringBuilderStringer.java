@@ -115,13 +115,13 @@ public final class StringBuilderStringer implements Stringer {
 
     @Override
     public Stringer append(StringBuilder sb) {
-        sb.append(sb);
+        this.sb.append(sb);
         return this;
     }
 
     @Override
     public Stringer append(StringBuffer sb) {
-        sb.append(sb);
+        this.sb.append(sb);
         return this;
     }
 
