@@ -3160,12 +3160,16 @@ msgid "No such element."
 msgstr ""
 
 #. An unexpected error occurred: %1$s
+#. *
+#. * Inserted for those exception that will turn to an <code>OXException</code> in future
+#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:75
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index/src/com/openexchange/index/IndexExceptionMessages.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.langdetect/src/com/openexchange/langdetect/LanguageDetectionExceptionMessages.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:149
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:355
 msgid "An unexpected error occurred: %1$s"
 msgstr ""
 
@@ -3259,7 +3263,7 @@ msgstr ""
 
 #. The argument contains the filename of the .po file that could not be read.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.i18n/src/com/openexchange/i18n/parsing/I18NErrorStrings.java:74
-msgid "An IOException ocurred reading .po file %s."
+msgid "An I/O error ocurred reading .po file %s."
 msgstr ""
 
 #. Help //
@@ -4900,6 +4904,7 @@ msgid "Invalid session identifier: %1$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.json/src/com/openexchange/publish/json/PublicationJSONExceptionMessage.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:78
 msgid "An unexpected error occurred: %s"
 msgstr ""
 
@@ -4908,6 +4913,7 @@ msgid "Missing value for parameter %s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.json/src/com/openexchange/publish/json/PublicationJSONExceptionMessage.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:70
 msgid "Unknown action: %s"
 msgstr ""
 
@@ -6005,7 +6011,7 @@ msgid ""
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:156
-msgid "Missing start date, unable to calculate recurring."
+msgid "Missing start date, unable to calculate recurrence."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:158
@@ -6104,13 +6110,13 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:214
 msgid ""
-"You are trying to create a new recurring from an exception. This is not "
-"possible."
+"You are trying to create a new recurring appointment from an exception. This "
+"is not possible."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:216
 msgid ""
-"You can not move one element of a recurring appointment into another folder."
+"You cannot move one instance of a recurring appointment into another folder."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:218
@@ -6332,8 +6338,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:358
 msgid ""
-"Unable to calculate given position. Seems to be a delete exception or "
-"outside range"
+"The recurring appointment has been deleted or is outside of the range of the "
+"recurrence."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:360
@@ -8298,9 +8304,9 @@ msgstr ""
 msgid "Date range in search must contain 2 and not %d values."
 msgstr ""
 
-#. Cannot decrease number of attachments below zero.
+#. Cannot detach more attachments than actually available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:126
-msgid "Cannot decrease number of attachments below zero."
+msgid "Cannot detach more attachments than actually available."
 msgstr ""
 
 #. You are not allowed to read the contents of folder %1$s (%2$d).
@@ -9603,17 +9609,15 @@ msgid ""
 "context=%4$s). Error message: %5$s"
 msgstr ""
 
-#. *
-#. * A command to mail server failed. Server response: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:271
-msgid "A command to mail server failed. Server response: %1$s."
+#. A command sent to mail server failed. Server response: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:269
+msgid "A command sent to mail server failed. Server response: %1$s"
 msgstr ""
 
 #. *
 #. * A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:276
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:274
 msgid ""
 "A command failed on mail server %1$s with login %2$s (user=%3$s, context="
 "%4$s). Server response: %5$s"
@@ -9622,14 +9626,14 @@ msgstr ""
 #. *
 #. * Mail server indicates a bad command. Server response: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:281
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:279
 msgid "Mail server indicates a bad command. Server response: %1$s"
 msgstr ""
 
 #. *
 #. * Bad command indicated by mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:286
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:284
 msgid ""
 "Bad command indicated by mail server %1$s with login %2$s (user=%3$s, "
 "context=%4$s). Server response: %5$s"
@@ -9638,44 +9642,42 @@ msgstr ""
 #. *
 #. * Error in mail server protocol. Error message: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:291
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:289
 msgid "Error in mail server protocol. Error message: %1$s"
 msgstr ""
 
-#. *
-#. * An error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:296
+#. Protocol error in data sent to to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:292
 msgid ""
-"Error in protocol to mail server %1$s with login %2$s (user=%3$s, context="
-"%4$s). Error message: %5$s"
+"Protocol error in data sent to to mail server %1$s with login %2$s (user="
+"%3$s, context=%4$s). Error message: %5$s"
 msgstr ""
 
 #. *
 #. * Message could not be sent: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:301
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:297
 msgid "Message could not be sent: %1$s"
 msgstr ""
 
 #. *
 #. * Message could not be sent: %1$s %2$s (arbitrary server information)
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:306
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:302
 msgid "Message could not be sent: %1$s %2$s"
 msgstr ""
 
 #. *
 #. * Message cannot be displayed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:311
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:307
 msgid "Message cannot be displayed."
 msgstr ""
 
 #. *
 #. * Wrong or missing login data to access mail transport server %1$s. Error message from mail transport server: %2$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:316
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:312
 msgid ""
 "Wrong or missing login data to access mail transport server %1$s. Error "
 "message from mail transport server: %2$s"
@@ -9685,7 +9687,7 @@ msgstr ""
 #. * Wrong or missing login data to access mail transport server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail
 #. * transport server: %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:322
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:318
 msgid ""
 "Wrong or missing login data to access mail transport server %1$s with login "
 "%2$s (user=%3$s, context=%4$s). Error message from mail transport server: "
@@ -9695,7 +9697,7 @@ msgstr ""
 #. *
 #. * Error processing mail server response. The administrator has been informed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:327
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:323
 msgid ""
 "Error processing mail server response. The administrator has been informed."
 msgstr ""
@@ -9703,7 +9705,7 @@ msgstr ""
 #. *
 #. * Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:332
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:328
 msgid ""
 "Error processing %1$s mail server response for login %2$s (user=%3$s, "
 "context=%4$s). The administrator has been informed."
@@ -9712,7 +9714,7 @@ msgstr ""
 #. *
 #. * I/O error "%1$s" occurred in communication with "%2$s" mail server for login %3$s (user=%4$s, context=%5$s).
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:342
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:338
 msgid ""
 "I/O error \"%1$s\" occurred in communication with \"%2$s\" mail server for "
 "login %3$s (user=%4$s, context=%5$s)."
@@ -9721,7 +9723,7 @@ msgstr ""
 #. *
 #. * Error processing mail server response. The administrator has been informed. Error message: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:347
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:343
 msgid ""
 "Error processing mail server response. The administrator has been informed. "
 "Error message: %1$s"
@@ -9731,28 +9733,28 @@ msgstr ""
 #. * Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed. Error
 #. * message: %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:353
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:349
 msgid ""
 "Error processing %1$s mail server response for login %2$s (user=%3$s, "
 "context=%4$s). The administrator has been informed. Error message: %5$s"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:355
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:351
 msgid ""
 "That mailbox is already in use by another process. Please try again later."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:355
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:351
 msgid "Error message: %1$s"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:357
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:353
 msgid ""
 "That mailbox is already in use by another process on %1$s mail server for "
 "login %2$s (user=%3$s, context=%4$s). Please try again later."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:357
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:353
 msgid "Error message: %5$s"
 msgstr ""
 
@@ -10010,9 +10012,9 @@ msgstr ""
 msgid "File store could not be accessed: %s"
 msgstr ""
 
-#. Cannot create directory \"%1$s\" for FileStorage.
+#. Cannot create directory "%1$s" in file storage.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:76
-msgid "Cannot create directory \"%1$s\" for FileStorage."
+msgid "Cannot create directory \"%1$s\" in file storage."
 msgstr ""
 
 #. Unsupported encoding.
@@ -10040,19 +10042,19 @@ msgstr ""
 msgid "Cannot remove lock file."
 msgstr ""
 
-#. Cannot create lock file here %1$s. Please check for a stale .lock file, permissions or too long usage of the filestore.
+#. Cannot create lock file here %1$s. Please check for a stale .lock file, inappropriate permissions or usage of the file store for too long a time.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:94
 msgid ""
 "Cannot create lock file here %1$s. Please check for a stale .lock file, "
-"permissions or too long usage of the file store."
+"inappropriate permissions or usage of the file store for too long a time."
 msgstr ""
 
-#. Eliminating the FileStorage failed.
+#. Eliminating the file storage failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:97
-msgid "Eliminating the FileStorage failed."
+msgid "Eliminating the file storage failed."
 msgstr ""
 
-#. File does not exist in filestore \"%1$s\". Consider running consistency tool.
+#. File does not exist in file storage "%1$s". Consider running consistency tool.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:100
 msgid ""
 "File does not exist in file store \"%1$s\". Consider running the consistency "
@@ -10208,26 +10210,23 @@ msgid "A duplicate folder exists in parent folder %1$s in context %2$s"
 msgstr ""
 
 #. *
-#. * Parent folder %1$s does not allow folder's type setting %2$s in context %3$s
+#. * Parent folder %1$s does not allow type %2$s in context %3$s
 #. * <p>
 #. * Folder's type setting is invalid
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:152
-msgid ""
-"Parent folder %1$s does not allow folder's type setting %2$s in context %3$s"
+msgid "Parent folder %1$s does not allow type %2$s in context %3$s"
 msgstr ""
 
 #. *
-#. * Parent folder %1$s does not allow folder's module setting (%2$s) in context %3$s
+#. * Parent folder %1$s does not allow module %2$s in context %3$s
 #. * <p>
 #. * Folder's module setting is invalid
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:159
-msgid ""
-"Parent folder %1$s does not allow folder's module setting (%2$s) in context "
-"%3$s"
+msgid "Parent folder %1$s does not allow module %2$s in context %3$s"
 msgstr ""
 
 #. *
@@ -10520,13 +10519,6 @@ msgid "Folder %1$s must not be moved to one of its subfolders in context %2$s"
 msgstr ""
 
 #. *
-#. * Inserted for those exception that will turn to an <code>OXException</code> in future
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:355
-msgid "UNKNOWN EXCEPTION"
-msgstr ""
-
-#. *
 #. * A LDAP error occurred in context %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:359
@@ -10616,10 +10608,10 @@ msgid "Unknown action: %1$s"
 msgstr ""
 
 #. *
-#. * Shared folder %1$s MUST NOT be updated in context %2$s
+#. * Shared folder %1$s must not be updated in context %2$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:423
-msgid "Shared folder %1$s MUST NOT be updated in context %2$s"
+msgid "Shared folder %1$s must not be updated in context %2$s"
 msgstr ""
 
 #. *
@@ -10668,26 +10660,25 @@ msgid "No subfolder creation below shared folder %1$s in context %2$s"
 msgstr ""
 
 #. *
-#. * User %1$s grants invalid permissions on shared folder %2$s in context %3$s. Only owner of parental shared folder %4$s may be
-#. * folder admin
+#. * User %1$s granted invalid permissions on shared folder %2$s in context %3$s. Only the owner of the parent shared folder %4$s can administrate the folder.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:452
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:451
 msgid ""
-"User %1$s grants invalid permissions on shared folder %2$s in context %3$s. "
-"Only the owner of parental shared folder %4$s can be the folder admin."
+"User %1$s granted invalid permissions on shared folder %2$s in context %3$s. "
+"Only the owner of the parent shared folder %4$s can administrate the folder."
 msgstr ""
 
 #. *
 #. * Owner %1$s of default folder %2$s must keep the folder admin permission
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:456
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:455
 msgid "Owner %1$s of default folder %2$s must keep the folder admin permission"
 msgstr ""
 
 #. *
 #. * User %1$s is not allowed to share folder %2$s in context %3$s due to user configuration
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:460
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:459
 msgid ""
 "User %1$s is not allowed to share folder %2$s in context %3$s due to user "
 "configuration"
@@ -10697,7 +10688,7 @@ msgstr ""
 #. * The permissions for the user %1$s are limited. It is not possible to grant this user the wanted permissions for the folder %2$s
 #. * in context %3$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:465
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:464
 msgid ""
 "The permissions for the user %1$s are limited. It is not possible to grant "
 "this user the wanted permissions for the folder %2$s in context %3$s."
@@ -10707,7 +10698,7 @@ msgstr ""
 #. * Folder %1$s in context %2$s contains a hidden subfolder. User %3$s has no delete rights for this subfolder and consequently
 #. * cannot delete its parent folder.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:470
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:469
 msgid ""
 "Folder %1$s in context %2$s contains a hidden subfolder. User %3$s has no "
 "delete rights for this subfolder and consequently cannot delete its parent "
@@ -10717,7 +10708,7 @@ msgstr ""
 #. *
 #. * An infostore folder named %1$s already exists below folder %2$s (%3$s) in context %4$s. Please choose another display name.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:474
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:473
 msgid ""
 "An infostore folder named %1$s already exists below folder %2$s (%3$s) in "
 "context %4$s. Please choose another display name."
@@ -10726,7 +10717,7 @@ msgstr ""
 #. *
 #. * Folder contains invalid data: "%1$s"
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:478
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:477
 msgid "Folder contains invalid data: \"%1$s\""
 msgstr ""
 
@@ -10734,7 +10725,7 @@ msgstr ""
 #. * You already share a personal folder named "%1$s" with the same user. You can not share two folders with exactly the same name
 #. * with a user. Please rename the folder before sharing it with this user.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:483
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:482
 msgid ""
 "You already share a personal folder named \"%1$s\" with the same user. You "
 "can not share two folders with exactly the same name with a user. Please "
@@ -10744,14 +10735,14 @@ msgstr ""
 #. *
 #. * Folder module cannot be updated since folder is not empty
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:487
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:486
 msgid "Folder module cannot be updated since folder is not empty"
 msgstr ""
 
 #. *
 #. * Duplicate permission defined for user %1$s. Only one permission per user is allowed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:491
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:490
 msgid ""
 "Duplicate permission defined for user %1$s. Only one permission per user is "
 "allowed."
@@ -10760,7 +10751,7 @@ msgstr ""
 #. *
 #. * Duplicate permission defined for group %1$s. Only one permission per group is allowed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:495
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:494
 msgid ""
 "Duplicate permission defined for group %1$s. Only one permission per group "
 "is allowed."
@@ -10769,7 +10760,7 @@ msgstr ""
 #. *
 #. * Only the folder visibility permission is allowed to be changed for folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:499
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:498
 msgid ""
 "Only the folder visibility permission is allowed to be changed for folder "
 "%1$s in context %2$s."
@@ -10778,7 +10769,7 @@ msgstr ""
 #. *
 #. * Only individual user permissions, but no group permissions are allowed for folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:503
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:502
 msgid ""
 "Only individual user permissions, but no group permissions are allowed for "
 "folder %1$s in context %2$s."
@@ -10787,7 +10778,7 @@ msgstr ""
 #. *
 #. * No individual user permissions are allowed for folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:507
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:506
 msgid ""
 "No individual user permissions are allowed for folder %1$s in context %2$s."
 msgstr ""
@@ -10795,14 +10786,14 @@ msgstr ""
 #. *
 #. * Folder module must not be updated.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:511
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:510
 msgid "Folder module must not be updated."
 msgstr ""
 
 #. *
 #. * The module of a default folder must not be changed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:515
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:514
 msgid "The module of a default folder must not be changed."
 msgstr ""
 
@@ -10812,21 +10803,21 @@ msgstr ""
 #. * No necessary rename access granted for update operation
 #. * </p>
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:522
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:521
 msgid "User %1$s must not rename folder %2$s in context %3$s"
 msgstr ""
 
 #. *
 #. * Failed to create folder. Please retry.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:526
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:525
 msgid "Failed to create folder. Please retry."
 msgstr ""
 
 #. *
 #. * Delete cannot be performed because of locked documents in folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:530
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:529
 msgid ""
 "Delete cannot be performed because of locked documents in folder %1$s in "
 "context %2$s."
@@ -10835,12 +10826,12 @@ msgstr ""
 #. *
 #. * Operation may only be performed for context administrator.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:534
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:533
 msgid "Operation may only be performed for context administrator."
 msgstr ""
 
 #. Folder %1$s must not be deleted in context %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:537
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:536
 msgid "Folder %1$s must not be deleted in context %2$s."
 msgstr ""
 
@@ -11047,6 +11038,7 @@ msgstr ""
 #. * An I/O error occurred.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/webdav/WebdavExceptionMessage.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:70
 msgid "An I/O error occurred."
 msgstr ""
 
@@ -11206,7 +11198,6 @@ msgid "Start of SessionStorageService failed."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:63
 msgid "Saving session with sessionId %1$s failed."
 msgstr ""
 
@@ -11215,7 +11206,6 @@ msgid "Lookup for session with sessionId %1$s failed."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:67
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:65
 msgid "Removing session with sessionId %1$s failed."
 msgstr ""
 
@@ -11226,7 +11216,6 @@ msgid "Operation %1$s not supported."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:73
 msgid "Lookup for session with altId %1$s failed"
 msgstr ""
 
@@ -11246,6 +11235,7 @@ msgid "No session found for identifier: %1$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:63
 msgid "Saving session with session identifier %1$s failed."
 msgstr ""
 
@@ -11254,6 +11244,7 @@ msgid "Lookup for session with session identifier %1$s failed."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:65
 msgid "Removing session with session identifier %1$s failed."
 msgstr ""
 
@@ -11274,7 +11265,11 @@ msgid "No sessions found by random token %1$s."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:67
-msgid "No session with sessionId %1$s found."
+msgid "No session with session identifier %1$s found."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:73
+msgid "Lookup for session with public identifier %1$s failed"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:79
@@ -11486,10 +11481,10 @@ msgid "The given value for userSource \"%s\" is not a possible one"
 msgstr ""
 
 #. *
-#. * The parameter "%s" must be a long value but is "%s"
+#. * The parameter "%s" must be numeric, but is "%s"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamhandler.spamassassin/src/com/openexchange/spamhandler/spamassassin/exceptions/SpamhandlerSpamassassinExceptionMessage.java:101
-msgid "The parameter \"%s\" must be a long value but is \"%s\""
+msgid "The parameter \"%s\" must be numeric, but is \"%s\""
 msgstr ""
 
 #. *
@@ -11531,24 +11526,16 @@ msgstr ""
 msgid "Missing parameter %s"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:70
-msgid "Unknown Action: %s"
-msgstr ""
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:72
-msgid "Got JSONException"
+msgid "A JSON error occurred"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:74
-msgid "Missing Field(s): %s"
+msgid "Missing field(s): %s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:76
-msgid "Missing Form Field(s): %s"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:78
-msgid "Got Exception %s"
+msgid "Missing form field(s): %s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:94
@@ -11556,7 +11543,7 @@ msgid "Please ask only for columns the server knows"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:96
-msgid "Unknown Subscription"
+msgid "Unknown subscription"
 msgstr ""
 
 #. Provide well-formed HTML.
@@ -11565,9 +11552,9 @@ msgstr ""
 msgid "Provide well-formed HTML."
 msgstr ""
 
-#. An IOException occurred: %1$s. Was trying to get the service at %2$s.
+#. An I/O error occurred: %1$s. Was trying to get the service at %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:66
-msgid "An IOException occurred: %1$s. Was trying to get the service at %2$s."
+msgid "An I/O error occurred: %1$s. Was trying to get the service at %2$s."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:67
@@ -11577,9 +11564,9 @@ msgstr ""
 msgid "Try again later."
 msgstr ""
 
-#. A HTTPException occurred: %1$s. Was trying to get the service at %2$s.
+#. A HTTP error occurred: %1$s. Was trying to get the service at %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:70
-msgid "A HTTPException occurred: %1$s. Was trying to get the service at %2$s."
+msgid "A HTTP Error occurred: %1$s. Was trying to get the service at %2$s."
 msgstr ""
 
 #. Can only post to external subscription sources.
@@ -11743,10 +11730,6 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "Verify file system and templates."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:70
-msgid "An IOException occurred."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:72
