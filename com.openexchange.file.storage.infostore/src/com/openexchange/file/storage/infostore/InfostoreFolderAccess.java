@@ -188,7 +188,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
     @Override
     public Quota getStorageQuota(final String folderId) throws OXException {
         long limit = infostore.getQuota(session);
-        long usage = Quota.UNLIMITED != limit ? infostore.getUsage(session) : Quota.UNLIMITED;
+        long usage = Quota.UNLIMITED == limit ? Quota.UNLIMITED : infostore.getUsage(session);
         return new Quota(limit, usage, Type.STORAGE);
     }
 
@@ -196,22 +196,21 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
     public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
         if (null == types) {
             return null;
-        } else {
-            Quota[] quotas = new Quota[types.length];
-            for (int i = 0; i < types.length; i++) {
-                switch (types[i]) {
-                case FILE:
-                    quotas[i] = getFileQuota(folder);
-                    break;
-                case STORAGE:
-                    quotas[i] = getStorageQuota(folder);
-                    break;
-                default:
-                    throw new UnsupportedOperationException("unknown type: " + types[i]);
-                }
-            }
-            return quotas;
         }
+        Quota[] quotas = new Quota[types.length];
+        for (int i = 0; i < types.length; i++) {
+            switch (types[i]) {
+            case FILE:
+                quotas[i] = getFileQuota(folder);
+                break;
+            case STORAGE:
+                quotas[i] = getStorageQuota(folder);
+                break;
+            default:
+                throw new UnsupportedOperationException("unknown type: " + types[i]);
+            }
+        }
+        return quotas;
     }
 
     @Override

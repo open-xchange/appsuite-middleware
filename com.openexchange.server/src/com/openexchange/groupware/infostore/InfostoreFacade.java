@@ -433,10 +433,29 @@ public interface InfostoreFacade extends TransactionAware {
      */
     public void setSessionHolder(SessionHolder sessionHolder);
 
+    /**
+     * Gets the quota for specified session.
+     *
+     * @param session The session
+     * @return The quota restriction or <code>-1</code> if unlimited
+     */
     long getQuota(ServerSession session);
 
+    /**
+     * Gets the quota usage for specified session.
+     *
+     * @param session The session
+     * @return The quota usage or <code>-1</code> if unlimited
+     * @throws OXException If quota usage cannot be returned
+     */
     long getUsage(ServerSession session) throws OXException;
 
+    /**
+     * Recalculates quota usage for specified session.
+     *
+     * @param session The session
+     * @throws OXException If recalculation operation fails
+     */
     void recalculateUsage(ServerSession session) throws OXException;
 
 }

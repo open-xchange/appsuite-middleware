@@ -319,4 +319,19 @@ public class SimInfostoreFacade implements InfostoreFacade {
         return null;
     }
 
+    @Override
+    public long getQuota(ServerSession session) {
+        return -1L;
+    }
+
+    @Override
+    public long getUsage(ServerSession session) throws OXException {
+        return -1L;
+    }
+
+    @Override
+    public void recalculateUsage(ServerSession session) throws OXException {
+        // Nothing to do
+    }
+
 }
