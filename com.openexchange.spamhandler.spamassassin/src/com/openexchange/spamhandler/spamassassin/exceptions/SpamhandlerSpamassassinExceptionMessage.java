@@ -96,9 +96,9 @@ public class SpamhandlerSpamassassinExceptionMessage implements LocalizableStrin
     public final static String USERSOURCE_WRONG_MSG = "The given value for userSource \"%s\" is not a possible one";
 
     /**
-     * The parameter "%s" must be a long value but is "%s"
+     * The parameter "%s" must be numeric, but is "%s"
      */
-    public final static String PARAMETER_NO_LONG_MSG = "The parameter \"%s\" must be a long value but is \"%s\"";
+    public final static String PARAMETER_NO_LONG_MSG = "The parameter \"%s\" must be numeric, but is \"%s\"";
 
     /**
      * Spamd returned wrong exit code "%s"

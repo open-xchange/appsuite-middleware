@@ -109,6 +109,9 @@ public enum OXCalendarExceptionCodes implements OXExceptionCode {
      * Can not resolve recurrence position because we got neither the recurring position nor a recurring date position
      */
     UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT(OXCalendarExceptionMessage.UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT_MSG, 38, Category.CATEGORY_ERROR),
+    /**
+     * Missing start date, unable to calculate recurrence.
+     */
     RECURRING_MISSING_START_DATE(OXCalendarExceptionMessage.RECURRING_MISSING_START_DATE_MSG, 39, Category.CATEGORY_ERROR),
     RECURRING_MISSING_DAILY_INTERVAL(OXCalendarExceptionMessage.RECURRING_MISSING_DAILY_INTERVAL_MSG, 40, Category.CATEGORY_USER_INPUT),
     RECURRING_MISSING_WEEKLY_INTERVAL(OXCalendarExceptionMessage.RECURRING_MISSING_WEEKLY_INTERVAL_MSG, 41, Category.CATEGORY_USER_INPUT),
@@ -141,7 +144,13 @@ public enum OXCalendarExceptionCodes implements OXExceptionCode {
     LOAD_PERMISSION_EXCEPTION_5(OXCalendarExceptionMessage.LOAD_PERMISSION_EXCEPTION_5_MSG, 62, Category.CATEGORY_PERMISSION_DENIED),
     LOAD_PERMISSION_EXCEPTION_6(OXCalendarExceptionMessage.LOAD_PERMISSION_EXCEPTION_6_MSG, 63, Category.CATEGORY_PERMISSION_DENIED),
     RECURRING_MISSING_YEARLY_MONTH(OXCalendarExceptionMessage.RECURRING_MISSING_YEARLY_MONTH_MSG, 64, Category.CATEGORY_USER_INPUT),
+    /**
+     * You are trying to create a new recurring appointment from an exception. This is not possible.
+     */
     RECURRING_ALREADY_EXCEPTION(OXCalendarExceptionMessage.RECURRING_ALREADY_EXCEPTION_MSG, 65, Category.CATEGORY_USER_INPUT),
+    /**
+     * You cannot move one instance of a recurring appointment into another folder.
+     */
     RECURRING_EXCEPTION_MOVE_EXCEPTION(OXCalendarExceptionMessage.RECURRING_EXCEPTION_MOVE_EXCEPTION_MSG, 66, Category.CATEGORY_USER_INPUT),
     UPDATE_EXCEPTION(OXCalendarExceptionMessage.UPDATE_EXCEPTION_MSG, 67, Category.CATEGORY_ERROR),
     MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED(OXCalendarExceptionMessage.MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED_MSG, 68, Category.CATEGORY_USER_INPUT),
@@ -252,6 +261,9 @@ public enum OXCalendarExceptionCodes implements OXExceptionCode {
      * Unnecessary recurrence information.
      */
     UNNECESSARY_RECURRENCE_INFORMATION(OXCalendarExceptionMessage.UNNECESSARY_RECURRENCE_INFORMATION_MSG, 97, Category.CATEGORY_USER_INPUT),
+    /**
+     * The recurring appointment has been deleted or is outside of the range of the recurrence.
+     */
     UNABLE_TO_CALCULATE_POSITION(OXCalendarExceptionMessage.UNABLE_TO_CALCULATE_POSITION_MSG, 98, Category.CATEGORY_USER_INPUT),
     CHANGE_EXCEPTION_TO_RECURRENCE(OXCalendarExceptionMessage.CHANGE_EXCEPTION_TO_RECURRENCE_MSG, 99, Category.CATEGORY_USER_INPUT),
     UID_ALREDY_EXISTS(OXCalendarExceptionMessage.UID_ALREDY_EXISTS_MSG, 100, Category.CATEGORY_USER_INPUT),

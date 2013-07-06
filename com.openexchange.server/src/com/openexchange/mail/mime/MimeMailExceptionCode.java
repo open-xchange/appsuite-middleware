@@ -239,7 +239,7 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      */
     QUOTA_EXCEEDED_EXT(MimeMailExceptionMessage.QUOTA_EXCEEDED_EXT_MSG, QUOTA_EXCEEDED.category, QUOTA_EXCEEDED.detailNumber, LogLevel.ERROR),
     /**
-     * A command to mail server failed. Server response: %1$s
+     * A command sent to mail server failed. Server response: %1$s
      */
     COMMAND_FAILED(MimeMailExceptionMessage.COMMAND_FAILED_MSG, CATEGORY_ERROR, 1025),
     /**
@@ -259,7 +259,7 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      */
     PROTOCOL_ERROR(MimeMailExceptionMessage.PROTOCOL_ERROR_MSG, CATEGORY_ERROR, 1027),
     /**
-     * An error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
+     * Protocol error in data sent to to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
      */
     PROTOCOL_ERROR_EXT(MimeMailExceptionMessage.PROTOCOL_ERROR_EXT_MSG, PROTOCOL_ERROR.category, PROTOCOL_ERROR.detailNumber),
     /**

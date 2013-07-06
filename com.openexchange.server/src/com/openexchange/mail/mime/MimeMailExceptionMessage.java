@@ -265,10 +265,8 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
      */
     public final static String QUOTA_EXCEEDED_EXT_MSG = "The quota on mail server \"%1$s\" exceeded with login %2$s (user=%3$s, context=%4$s). Error message: %5$s";
 
-    /**
-     * A command to mail server failed. Server response: %1$s
-     */
-    public final static String COMMAND_FAILED_MSG = "A command to mail server failed. Server response: %1$s.";
+    // A command sent to mail server failed. Server response: %1$s
+    public final static String COMMAND_FAILED_MSG = "A command sent to mail server failed. Server response: %1$s";
 
     /**
      * A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s
@@ -290,10 +288,8 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
      */
     public final static String PROTOCOL_ERROR_MSG = "Error in mail server protocol. Error message: %1$s";
 
-    /**
-     * An error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
-     */
-    public final static String PROTOCOL_ERROR_EXT_MSG = "Error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s";
+    // Protocol error in data sent to to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
+    public final static String PROTOCOL_ERROR_EXT_MSG = "Protocol error in data sent to to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s";
 
     /**
      * Message could not be sent: %1$s

@@ -153,7 +153,7 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
      */
     public static final String UNABLE_TO_CALCULATE_RECURRING_POSITION_NO_INPUT_MSG = "Cannot resolve recurrence position because neither the recurring position nor the recurring date position is known.";
 
-    public static final String RECURRING_MISSING_START_DATE_MSG = "Missing start date, unable to calculate recurring.";
+    public static final String RECURRING_MISSING_START_DATE_MSG = "Missing start date, unable to calculate recurrence.";
 
     public static final String RECURRING_MISSING_DAILY_INTERVAL_MSG = "Missing or wrong interval value: %d";
 
@@ -211,9 +211,9 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
 
     public static final String RECURRING_MISSING_YEARLY_MONTH_MSG = "Missing or wrong month value: %d";
 
-    public static final String RECURRING_ALREADY_EXCEPTION_MSG = "You are trying to create a new recurring from an exception. This is not possible.";
+    public static final String RECURRING_ALREADY_EXCEPTION_MSG = "You are trying to create a new recurring appointment from an exception. This is not possible.";
 
-    public static final String RECURRING_EXCEPTION_MOVE_EXCEPTION_MSG = "You can not move one element of a recurring appointment into another folder.";
+    public static final String RECURRING_EXCEPTION_MOVE_EXCEPTION_MSG = "You cannot move one instance of a recurring appointment into another folder.";
 
     public static final String UPDATE_EXCEPTION_MSG = "A database update exception occurred.";
 
@@ -355,7 +355,7 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
      */
     public static final String UNNECESSARY_RECURRENCE_INFORMATION_MSG = "Unnecessary recurrence information (%1$s) for type %2$s";
 
-    public static final String UNABLE_TO_CALCULATE_POSITION_MSG = "Unable to calculate given position. Seems to be a delete exception or outside range";
+    public static final String UNABLE_TO_CALCULATE_POSITION_MSG = "The recurring appointment has been deleted or is outside of the range of the recurrence.";
 
     public static final String CHANGE_EXCEPTION_TO_RECURRENCE_MSG = "Changing an exception into a series is not supported.";
 
