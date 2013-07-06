@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
+import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.EnumSet;
@@ -186,6 +187,9 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, !saveToDisk);
                 if (mailPart == null) {
                     throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
+                }
+                if (isEmpty(mailPart.getFileName())) {
+                    mailPart.setFileName(generateFilename(sequenceId, mailPart.getContentType().getBaseType()));
                 }
                 if (filter && !saveToDisk && mailPart.getContentType().startsWith("text/htm")) {
                     /*
