@@ -77,20 +77,21 @@ public class OXRequest extends Request {
 
     // ---------------------------- Members ---------------------------- //
 
-    private String XForwardProto = null;
-
-    private int XForwardPort = 0;
-
-    private final boolean isConsiderXForwards = grizzlyConfig.isConsiderXForwards();
-
     public static Request create() {
         final Request request = ThreadCache.takeFromCache(CACHE_IDX);
         if (request != null) {
             return request;
         }
 
-        OXRequest oxRequest = new OXRequest(new OXResponse());
-        return oxRequest;
+        return new OXRequest(new OXResponse());
+    }
+
+    private String XForwardProto = null;
+    private int XForwardPort = 0;
+    private final boolean isConsiderXForwards = grizzlyConfig.isConsiderXForwards();
+
+    protected OXRequest(Response response) {
+        super(response);
     }
 
     @Override
@@ -98,10 +99,6 @@ public class OXRequest extends Request {
         XForwardProto = null;
         XForwardPort = 0;
         super.recycle();
-    }
-
-    protected OXRequest(Response response) {
-        super(response);
     }
 
     /**
