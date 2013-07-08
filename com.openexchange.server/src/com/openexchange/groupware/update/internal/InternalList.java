@@ -662,9 +662,7 @@ public final class InternalList {
         }
 
         // Adds "archive" and "archive_fullname" columns to mail/transport account table
-        if (false) { // TODO: Enable if appropriate
-            list.add(new com.openexchange.groupware.update.tasks.MailAccountAddArchiveTask());
-        }
+        list.add(new com.openexchange.groupware.update.tasks.MailAccountAddArchiveTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

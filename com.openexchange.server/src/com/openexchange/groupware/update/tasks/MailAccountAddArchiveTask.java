@@ -54,6 +54,7 @@ import static com.openexchange.tools.update.Tools.columnExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -99,7 +100,10 @@ public final class MailAccountAddArchiveTask extends UpdateTaskAdapter {
         final int contextId = params.getContextId();
         final Connection con = Database.getNoTimeout(contextId, true);
         PreparedStatement stmt = null;
+        boolean doRollback = false;
         try {
+            Databases.startTransaction(con);
+            doRollback = true;
             if (!columnExists(con, "user_mail_account", "archive")) {
                 stmt = con.prepareStatement("ALTER TABLE user_mail_account ADD COLUMN archive VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
                 stmt.executeUpdate();
@@ -107,14 +111,19 @@ public final class MailAccountAddArchiveTask extends UpdateTaskAdapter {
                 stmt = null;
             }
             if (!columnExists(con, "user_mail_account", "archive_fullname")) {
-                stmt = con.prepareStatement("ALTER TABLE user_transport_account ADD COLUMN archive_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL  DEFAULT ''");
+                stmt = con.prepareStatement("ALTER TABLE user_mail_account ADD COLUMN archive_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
                 stmt.executeUpdate();
                 stmt.close();
                 stmt = null;
             }
+            con.commit();
+            doRollback = false;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (doRollback) {
+                Databases.rollback(con);
+            }
             closeSQLStuff(stmt);
             Database.backNoTimeout(contextId, true, con);
         }

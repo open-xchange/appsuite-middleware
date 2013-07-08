@@ -63,6 +63,7 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.mail.actions.ArchiveRequest;
 import com.openexchange.ajax.mail.actions.CopyRequest;
 import com.openexchange.ajax.mail.actions.CopyResponse;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
@@ -258,6 +259,13 @@ public class MailTestManager {
         cleaningSteps.add(new MailCleaner(copy, client));
         lastResponse = response;
         return copy;
+    }
+
+    /**
+     * Archives a mail.
+     */
+    public void archive(TestMail original) throws OXException, IOException, JSONException {
+        client.execute(new ArchiveRequest(new String[] { original.getId() }, original.getFolder()));
     }
 
     /**
