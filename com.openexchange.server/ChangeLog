@@ -2,6 +2,7 @@
 
  - Fix for bug 27417: Added 'soap-cxf.properties' file to SOAP CXF bundle that provides option "com.openexchange.soap.cxf.baseAddress" to
                       specify a custom base address if it is supposed to differ from default one
+ - Fix for bug 27438: Dropped option for JSON statistics since it has been removed with v7.2.2
 
 * 2013-07-06 - thorben.betten@open-xchange.com
 
