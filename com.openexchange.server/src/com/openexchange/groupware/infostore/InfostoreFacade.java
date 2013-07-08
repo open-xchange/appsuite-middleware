@@ -53,6 +53,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Quota;
+import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
@@ -434,28 +436,21 @@ public interface InfostoreFacade extends TransactionAware {
     public void setSessionHolder(SessionHolder sessionHolder);
 
     /**
-     * Gets the quota for specified session.
+     * Gets the quota restrictions and current usage of {@link Type#FILE} for the supplied session.
      *
      * @param session The session
-     * @return The quota restriction or <code>-1</code> if unlimited
+     * @return The quota of {@link Type#FILE}, or quota with {@link Quota#UNLIMITED} limit if not set
+     * @throws OXException
      */
-    long getQuota(ServerSession session);
+    Quota getFileQuota(ServerSession session) throws OXException;
 
     /**
-     * Gets the quota usage for specified session.
+     * Gets the quota restrictions and current usage of {@link Type#STORAGE} for the supplied session.
      *
      * @param session The session
-     * @return The quota usage or <code>-1</code> if unlimited
-     * @throws OXException If quota usage cannot be returned
+     * @return The quota of {@link Type#STORAGE}, or quota with {@link Quota#UNLIMITED} limit if not set
+     * @throws OXException
      */
-    long getUsage(ServerSession session) throws OXException;
-
-    /**
-     * Recalculates quota usage for specified session.
-     *
-     * @param session The session
-     * @throws OXException If recalculation operation fails
-     */
-    void recalculateUsage(ServerSession session) throws OXException;
+    Quota getStorageQuota(ServerSession session) throws OXException;
 
 }

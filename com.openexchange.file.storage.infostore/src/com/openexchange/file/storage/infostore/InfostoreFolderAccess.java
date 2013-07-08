@@ -64,9 +64,6 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.quota.QuotaService;
-import com.openexchange.quota.QuotaType;
-import com.openexchange.quota.Resource;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -179,17 +176,12 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public Quota getFileQuota(final String folderId) throws OXException {
-        com.openexchange.quota.Quota filesQuota = Services.getService(QuotaService.class).getQuotaFor(Resource.INFOSTORE_FILES, session);
-        long limit = null != filesQuota ? filesQuota.getQuota(QuotaType.AMOUNT) : Quota.UNLIMITED;
-        long usage = Quota.UNLIMITED;//TODO!
-        return new Quota(limit, usage, Type.FILE);
+        return infostore.getFileQuota(session);
     }
 
     @Override
     public Quota getStorageQuota(final String folderId) throws OXException {
-        long limit = infostore.getQuota(session);
-        long usage = Quota.UNLIMITED == limit ? Quota.UNLIMITED : infostore.getUsage(session);
-        return new Quota(limit, usage, Type.STORAGE);
+        return infostore.getStorageQuota(session);
     }
 
     @Override

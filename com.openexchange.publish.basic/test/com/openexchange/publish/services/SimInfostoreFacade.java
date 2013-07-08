@@ -55,6 +55,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Quota;
+import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -320,18 +322,13 @@ public class SimInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public long getQuota(ServerSession session) {
-        return -1L;
+    public Quota getFileQuota(ServerSession session) throws OXException {
+        return Quota.getUnlimitedQuota(Type.FILE);
     }
 
     @Override
-    public long getUsage(ServerSession session) throws OXException {
-        return -1L;
-    }
-
-    @Override
-    public void recalculateUsage(ServerSession session) throws OXException {
-        // Nothing to do
+    public Quota getStorageQuota(ServerSession session) throws OXException {
+        return Quota.getUnlimitedQuota(Type.STORAGE);
     }
 
 }

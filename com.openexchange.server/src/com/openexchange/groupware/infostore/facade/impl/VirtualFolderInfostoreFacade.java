@@ -54,6 +54,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Quota;
+import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -65,7 +67,6 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.quota.Quota;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.session.ServerSession;
@@ -322,18 +323,13 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public long getQuota(ServerSession session) {
-        return Quota.UNLIMITED;
+    public Quota getFileQuota(ServerSession session) throws OXException {
+        return Quota.getUnlimitedQuota(Type.FILE);
     }
 
     @Override
-    public long getUsage(ServerSession session) throws OXException {
-        return Quota.UNLIMITED;
-    }
-
-    @Override
-    public void recalculateUsage(ServerSession session) throws OXException {
-        // Nothing to do.
+    public Quota getStorageQuota(ServerSession session) throws OXException {
+        return Quota.getUnlimitedQuota(Type.STORAGE);
     }
 
 }
