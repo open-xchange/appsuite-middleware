@@ -256,7 +256,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 stateManager.timeOutStaleStates(System.currentTimeMillis());
             }
 
-        }, 60000, 1, TimeUnit.MINUTES);
+        }, 1, 1, TimeUnit.MINUTES);
     }
 
     /**
