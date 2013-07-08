@@ -1,3 +1,8 @@
+* 2013-07-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27417: Added 'soap-cxf.properties' file to SOAP CXF bundle that provides option "com.openexchange.soap.cxf.baseAddress" to
+                      specify a custom base address if it is supposed to differ from default one
+
 * 2013-07-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 27397: Set generated file name if missing to signal non-empty file holder
