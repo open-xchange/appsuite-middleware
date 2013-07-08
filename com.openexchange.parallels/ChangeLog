@@ -14,7 +14,7 @@
     Leave com.openexchange.custom.parallels.branding.suffix unset per default if no branding is used
   - Fixed bug #23450: misleading name for com.openexchange.custom.parallels.branding.fallbackurl
     Renamed to com.openexchange.custom.parallels.branding.fallbackhost
-    
+
 * 2012-02-28 - wolfgang.rosenauer@open-xchange.com
 
   - Fixed bug #19196 : Moved configuration option into property file

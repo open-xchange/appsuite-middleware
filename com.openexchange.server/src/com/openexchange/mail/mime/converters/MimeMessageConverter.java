@@ -531,6 +531,36 @@ public final class MimeMessageConverter {
     }
 
     /**
+     * Gets the multipart from passed content object.
+     *
+     * @param content The content object
+     * @param contentType The content type
+     * @return The appropriate multipart
+     * @throws OXException If content cannot be presented as a multipart
+     */
+    public static Multipart multipartFor(final Object content, final ContentType contentType) throws OXException {
+        if (null == content) {
+            return null;
+        }
+        if (content instanceof Multipart) {
+            return (Multipart) content;
+        }
+        if (content instanceof InputStream) {
+            try {
+                return new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
+            } catch (MessagingException e) {
+                throw MimeMailException.handleMessagingException(e);
+            } catch (IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            }
+        }
+        throw MailExceptionCode.MESSAGING_ERROR.create("Content is not of type javax.mail.Multipart, but " + content.getClass().getName());
+    }
+
+    /**
      * Performs {@link MimeMessage#saveChanges() saveChanges()} on specified message with sanitizing for a possibly corrupt/wrong Content-Type header.
      * <p>
      * Aligns <i>Message-Id</i> header to given host name.
@@ -567,36 +597,6 @@ public final class MimeMessageConverter {
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
-    }
-
-    /**
-     * Gets the multipart from passed content object.
-     *
-     * @param content The content object
-     * @param contentType The content type
-     * @return The appropriate multipart
-     * @throws OXException If content cannot be presented as a multipart
-     */
-    public static Multipart multipartFor(final Object content, final ContentType contentType) throws OXException {
-        if (null == content) {
-            return null;
-        }
-        if (content instanceof Multipart) {
-            return (Multipart) content;
-        }
-        if (content instanceof InputStream) {
-            try {
-                new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
-            } catch (MessagingException e) {
-                throw MimeMailException.handleMessagingException(e);
-            } catch (IOException e) {
-                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-                }
-                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-            }
-        }
-        throw MailExceptionCode.MESSAGING_ERROR.create("Content is not of type javax.mail.Multipart, but " + content.getClass().getName());
     }
 
     /**
@@ -2145,7 +2145,7 @@ public final class MimeMessageConverter {
      */
     public static MailPart convertPart(final byte[] asciiBytes) throws OXException {
         try {
-            return convertPart(new MimeBodyPart(new UnsynchronizedByteArrayInputStream(asciiBytes)));
+            return convertPart(new MimeBodyPart(new UnsynchronizedByteArrayInputStream(asciiBytes)), false);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }

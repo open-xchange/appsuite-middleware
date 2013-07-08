@@ -138,14 +138,14 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      */
     NO_DUPLICATE_FOLDER(OXFolderExceptionMessage.NO_DUPLICATE_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 12),
     /**
-     * Parent folder %1$s does not allow folder's type setting %2$s in context %3$s
+     * Parent folder %1$s does not allow type %2$s in context %3$s
      * <p>
      * Folder's type setting is invalid
      * </p>
      */
     INVALID_TYPE(OXFolderExceptionMessage.INVALID_TYPE_MSG, Category.CATEGORY_ERROR, 13),
     /**
-     * Parent folder %1$s does not allow folder's module setting (%2$s) in context %3$s
+     * Parent folder %1$s does not allow module %2$s in context %3$s
      * <p>
      * Folder's module setting is invalid
      * </p>
@@ -344,6 +344,8 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      */
     NO_SUBFOLDER_MOVE(OXFolderExceptionMessage.NO_SUBFOLDER_MOVE_MSG, Category.CATEGORY_ERROR, 45),
     /**
+     * An unexpected error occurred: %1$s
+     * <p>
      * Inserted for those exception that will turn to an <code>OXException</code> in future
      */
     UNKNOWN_EXCEPTION(OXFolderExceptionMessage.UNKNOWN_EXCEPTION_MSG, Category.CATEGORY_ERROR, 46),
@@ -412,7 +414,7 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      */
     UNKNOWN_ACTION(OXFolderExceptionMessage.UNKNOWN_ACTION_MSG, Category.CATEGORY_ERROR, 62),
     /**
-     * Shared folder %1$s MUST NOT be updated in context %2$s
+     * Shared folder %1$s must not be updated in context %2$s
      */
     NO_SHARED_FOLDER_UPDATE(OXFolderExceptionMessage.NO_SHARED_FOLDER_UPDATE_MSG, Category.CATEGORY_PERMISSION_DENIED, 63),
     /**
@@ -440,8 +442,7 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      */
     NO_SUBFOLDER_BELOW_SHARED_FOLDER(OXFolderExceptionMessage.NO_SUBFOLDER_BELOW_SHARED_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 69),
     /**
-     * User %1$s grants invalid permissions on shared folder %2$s in context %3$s. Only owner of parental shared folder %4$s may be folder
-     * admin
+     * User %1$s granted invalid permissions on shared folder %2$s in context %3$s. Only the owner of the parent shared folder %4$s can administrate the folder.
      */
     INVALID_SHARED_FOLDER_SUBFOLDER_PERMISSION(OXFolderExceptionMessage.INVALID_SHARED_FOLDER_SUBFOLDER_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 70),
     /**

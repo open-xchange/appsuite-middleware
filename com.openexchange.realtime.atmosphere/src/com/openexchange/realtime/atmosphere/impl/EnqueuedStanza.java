@@ -75,6 +75,10 @@ public class EnqueuedStanza implements Comparable<EnqueuedStanza>{
         this.sequenceNumber = sequenceNumber;
     }
     
+    /**
+     * Increment the counter of this enqueued Stanza until the configured maximum count was reached. 
+     * @return true if the counter could be incremented, false if incrementing the counter would exceed the configured limit.
+     */
     public boolean incCounter() {
         synchronized(stanza) {
             count++;

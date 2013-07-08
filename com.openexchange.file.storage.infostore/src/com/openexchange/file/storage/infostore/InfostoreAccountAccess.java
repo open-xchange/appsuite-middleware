@@ -95,7 +95,7 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess {
         if(folders != null) {
             return folders;
         }
-        return folders = new InfostoreFolderAccess(session);
+        return folders = new InfostoreFolderAccess(session, service.getInfostore());
     }
 
     @Override

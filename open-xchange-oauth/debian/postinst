@@ -21,6 +21,48 @@ set -e
 
 PROTECT="facebookoauth.properties linkedinoauth.properties msnoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
 
+postFix() {
+    local version=${1%-*}
+    version=${version//[-.]/}
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    # SoftwareChange_Request-1494
+    pfile=/opt/open-xchange/etc/msnoauth.properties
+    if ! ox_exists_property com.openexchange.oauth.msn $pfile; then
+       if grep -E '^com.openexchange.*REPLACE_THIS_WITH_VALUE_OBTAINED_FROM' $pfile > /dev/null; then
+           ox_set_property com.openexchange.oauth.msn false $pfile
+       else
+           ox_set_property com.openexchange.oauth.msn true $pfile
+       fi
+    fi
+    pfile=/opt/open-xchange/etc/yahoooauth.properties
+    if ! ox_exists_property com.openexchange.oauth.yahoo $pfile; then
+       if grep -E '^com.openexchange.*REPLACE_THIS_WITH_VALUE_OBTAINED_FROM' $pfile > /dev/null; then
+           ox_set_property com.openexchange.oauth.yahoo false $pfile
+       else
+           ox_set_property com.openexchange.oauth.yahoo true $pfile
+       fi
+    fi
+    pfile=/opt/open-xchange/etc/linkedinoauth.properties
+    if ! ox_exists_property com.openexchange.oauth.linkedin $pfile; then
+       if grep -E '^com.openexchange.*REPLACE_THIS_WITH_THE_KEY_FROM' $pfile > /dev/null; then
+           ox_set_property com.openexchange.oauth.linkedin false $pfile
+       else
+           ox_set_property com.openexchange.oauth.linkedin true $pfile
+       fi
+    fi
+    pfile=/opt/open-xchange/etc/facebookoauth.properties
+    if ! ox_exists_property com.openexchange.oauth.facebook $pfile; then
+       if grep -E '^com.openexchange.*INSERT_YOUR_API_KEY_HERE' $pfile > /dev/null; then
+           ox_set_property com.openexchange.oauth.facebook false $pfile
+       else
+           ox_set_property com.openexchange.oauth.facebook true $pfile
+       fi
+    fi
+}
+
 setConfigFilePermissions() {
     for FILE in $PROTECT
     do
@@ -30,6 +72,10 @@ setConfigFilePermissions() {
 
 case "$1" in
     configure)
+        test -n "$2" && {
+            # we are in update mode, run postFix to apply fixes
+            postFix "$2"
+        }
         setConfigFilePermissions
     ;;
 

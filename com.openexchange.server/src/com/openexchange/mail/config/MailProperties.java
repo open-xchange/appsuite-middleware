@@ -928,9 +928,9 @@ public final class MailProperties implements IMailProperties {
     }
 
     /**
-     * Gets if MSISDN addresses are supported or not
-     * 
-     * @return <code>true</code>, if MSISDN addresses are supported. otherwise <code>false</code>
+     * Signals if MSISDN addresses are supported or not.
+     *
+     * @return <code>true</code>, if MSISDN addresses are supported; otherwise <code>false</code>
      */
     public boolean isSupportMsisdnAddresses() {
         return supportMsisdnAddresses;

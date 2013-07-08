@@ -445,7 +445,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
             }
 
             try {
-                return getRMIAccess(identifier, owner);
+                return getCachedRMIAccess(identifier, owner);
             } catch (OXException e) {
                 if (SolrExceptionCodes.CORE_NOT_STARTED.equals(e)) {
                     // Retry
@@ -474,7 +474,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
             SolrCoreTools.incrementCoreCount(hazelcast, elected);
             solrCores.put(identifier.toString(), electedAddress);
 
-            return getRMIAccess(identifier, electedAddress);
+            return getCachedRMIAccess(identifier, electedAddress);
         } catch (InterruptedException e) {
             throw SolrExceptionCodes.DELEGATION_ERROR.create(e);
         } catch (ExecutionException e) {
@@ -518,9 +518,6 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         }
     }
 
-
-    private static ConcurrentMap<String, RMISolrAccessService> rmiCache = new ConcurrentHashMap<String, RMISolrAccessService>();
-
     private SolrAccessServiceRmiWrapper getRMIAccess(SolrCoreIdentifier identifier, String server) throws OXException {
         try {
             ConfigurationService config = Services.getService(ConfigurationService.class);
@@ -541,6 +538,8 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
             throw exception;
         }
     }
+
+    private static ConcurrentMap<String, RMISolrAccessService> rmiCache = new ConcurrentHashMap<String, RMISolrAccessService>();
 
     private SolrAccessServiceRmiWrapper getCachedRMIAccess(SolrCoreIdentifier identifier, String server) throws OXException {
         RMISolrAccessService rmiAccess = rmiCache.get(server);

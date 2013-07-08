@@ -49,10 +49,10 @@
 
 package com.openexchange.groupware.userconfiguration;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
@@ -72,7 +72,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage {
-    
+
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CachingUserConfigurationStorage.class));
 
     private static final String CACHE_REGION_NAME = "UserPermissionBits";
@@ -86,10 +86,10 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
     private volatile Cache cache;
 
     private volatile UserPermissionBitsStorage fallback;
-    
+
     /**
      * Initializes a new {@link CachingUserPermissionBitsStorage}.
-     * @param capabilities 
+     * @param capabilities
      *
      * @throws OXException If an error occurs
      */
@@ -185,7 +185,7 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
             this.cache = null;
         }
     }
-    
+
 
     @Override
     public UserPermissionBits getUserPermissionBits(int userId, Context ctx) throws OXException {
@@ -200,10 +200,10 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
         for(int i = 0; i < users.length; i++) {
             userIds[i] = users[i].getId();
         }
-        
+
         return get(cache, ctx, userIds);
     }
-    
+
     @Override
     public UserPermissionBits[] getUserPermissionBits(Context ctx, int[] userIds) throws OXException {
         if (cache == null) { return getFallback().getUserPermissionBits(ctx, userIds); }
@@ -245,15 +245,15 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
         delegateStorage.saveUserPermissionBits(permissionBits, userId, ctx);
         removeUserPermissionBits(userId, ctx);
     }
-    
+
     private UserPermissionBits[] get(Cache cache, Context ctx, int[] userIds) throws OXException {
         if (userIds.length == 0) {
             return new UserPermissionBits[0];
         }
-        
-        Map<Integer, UserPermissionBits> map = new HashMap<Integer, UserPermissionBits>();
-        List<Integer> toLoad = new ArrayList<Integer>(userIds.length);
-        
+
+        TIntObjectMap<UserPermissionBits> map = new TIntObjectHashMap<UserPermissionBits>(userIds.length);
+        TIntList toLoad = new TIntArrayList(userIds.length);
+
         for (int id : userIds) {
             CacheKey key = getKey(id, ctx, cache);
             Object object = cache.get(key);
@@ -263,37 +263,32 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
                 map.put(id, (UserPermissionBits) object);
             }
         }
-        
+
         for(UserPermissionBits perms: load(cache, ctx, toLoad)) {
             map.put(perms.getUserId(), perms);
         }
-        
-        
+
         UserPermissionBits[] retval = new UserPermissionBits[userIds.length];
-        
+
         for(int i = 0; i < userIds.length; i++) {
             retval[i] = map.get(userIds[i]);
         }
-        
+
         return retval;
-        
+
     }
-    
-    private UserPermissionBits[] load(Cache cache, Context ctx, List<Integer> userIds) throws OXException {
-        int[] userIdsArr = new int[userIds.size()];
-        for(int i = 0; i < userIdsArr.length; i++) {
-            userIdsArr[i] = userIds.get(i);
-        }
-        UserPermissionBits[] perms = delegateStorage.getUserPermissionBits(ctx, userIdsArr);
+
+    private UserPermissionBits[] load(Cache cache, Context ctx, TIntList userIds) throws OXException {
+        UserPermissionBits[] perms = delegateStorage.getUserPermissionBits(ctx, userIds.toArray());
+        cacheWriteLock.lock();
         try {
-            cacheWriteLock.lock();
             for (UserPermissionBits userPermissionBits : perms) {
                 cache.put(getKey(userPermissionBits.getUserId(), ctx, cache), userPermissionBits, false);
             }
         } finally {
             cacheWriteLock.unlock();
         }
-        
+
         return perms;
     }
 

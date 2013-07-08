@@ -5193,6 +5193,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                     }
                     if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
                         MsisdnUtility.addMsisdnAddress(validAddrs, session);
+                        final String address = from.getAddress();
+                        final int pos = address.indexOf('/');
+                        if (pos > 0) {
+                            from.setAddress(address.substring(0, pos));
+                        }
                     }
                     if (!validAddrs.contains(from)) {
                         throw MailExceptionCode.INVALID_SENDER.create(from.toString());

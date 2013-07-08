@@ -64,7 +64,7 @@ public enum FileStorageCodes implements OXExceptionCode {
     IOERROR(FileStorageExceptionMessage.IOERROR_MSG, Category.CATEGORY_SERVICE_DOWN, 3),
     /** May be used to turn the IOException of getInstance into a proper OXException */
     INSTANTIATIONERROR(FileStorageExceptionMessage.INSTANTIATIONERROR_MSG, Category.CATEGORY_SERVICE_DOWN, 4),
-    /** Cannot create directory \"%1$s\" for FileStorage. */
+    /** Cannot create directory "%1$s" in file storage. */
     CREATE_DIR_FAILED(FileStorageExceptionMessage.CREATE_DIR_FAILED_MSG, Category.CATEGORY_CONFIGURATION, 6),
     /** Unsupported encoding. */
     ENCODING(FileStorageExceptionMessage.ENCODING_MSG, Category.CATEGORY_ERROR, 9),
@@ -76,11 +76,11 @@ public enum FileStorageCodes implements OXExceptionCode {
     DEPTH_MISMATCH(FileStorageExceptionMessage.DEPTH_MISMATCH_MSG, Category.CATEGORY_ERROR, 12),
     /** Cannot remove lock file. */
     UNLOCK(FileStorageExceptionMessage.UNLOCK_MSG, Category.CATEGORY_SERVICE_DOWN, 13),
-    /** Cannot create lock file here %1$s. Please check for a stale .lock file, permissions or too long usage of the filestore. */
+    /** Cannot create lock file here %1$s. Please check for a stale .lock file, inappropriate permissions or usage of the file store for too long a time. */
     LOCK(FileStorageExceptionMessage.LOCK_MSG, Category.CATEGORY_SERVICE_DOWN, 14),
-    /** Eliminating the FileStorage failed. */
+    /** Eliminating the file storage failed. */
     NOT_ELIMINATED(FileStorageExceptionMessage.NOT_ELIMINATED_MSG, Category.CATEGORY_SERVICE_DOWN, 16),
-    /** File does not exist in filestore \"%1$s\". Consider running consistency tool. */
+    /** File does not exist in file storage "%1$s". Consider running consistency tool. */
     FILE_NOT_FOUND(FileStorageExceptionMessage.FILE_NOT_FOUND_MSG, Category.CATEGORY_SERVICE_DOWN, 17);
 
     /**

@@ -59,27 +59,16 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class RealtimeExceptionMessages implements LocalizableStrings {
 
-    /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
-    public static final String NO_APPROPRIATE_CHANNEL = "No appropriate channel found for recipient %1$s with payload namespace %2$s";
+    // XMPP
 
-    /** The following needed service is missing: \"%1$s\" */
-    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
-
-    // Unexpected error: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
-
-    /** Invalid ID. Resource identifier is missing. */
-    public static final String INVALID_ID = "Invalid ID. Resource identifier is missing.";
-
-    /** Resource not available. */
-    public static final String RESOURCE_NOT_AVAILABLE_MSG = "Resource not available.";
-    
-    public static final String STANZA_BAD_REQUEST_MSG = "";
+    /** The client has sent a message that is malformed or cannot be processed: %1$s */
+    public static final String STANZA_BAD_REQUEST_MSG = "The client has sent a message that is malformed or cannot be processed: %1$s";
     public static final String STANZA_CONFILCT_MSG = "";
     public static final String STANZA_FEATURE_NOT_IMPLEMENTED_MSG = "";
     public static final String STANZA_FORBIDDEN_MSG = "";
     public static final String STANZA_GONE_MSG = "";
-    public static final String STANZA_INTERNAL_SERVER_ERROR_MSG = "";
+    /** The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error: %1$s */
+    public static final String STANZA_INTERNAL_SERVER_ERROR_MSG = "The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error: %1$s";
     public static final String STANZA_ITEM_NOT_FOUND_MSG = "";
     public static final String STANZA_JID_MALFORMED_MSG = "";
     public static final String STANZA_NOT_ACCEPTABLE_MSG = "";
@@ -97,5 +86,30 @@ public class RealtimeExceptionMessages implements LocalizableStrings {
     public static final String STANZA_SUBSCRIPTION_REQUIRED_MSG = "";
     public static final String STANZA_UNDEFINED_CONDITION_MSG = "";
     public static final String STANZA_UNEXPECTED_REQUEST_MSG = "";
+    
+    // Atmosphere
+    
+    // Generic (start with code 1000)
+    /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
+    public static final String NO_APPROPRIATE_CHANNEL = "No appropriate channel found for recipient %1$s with payload namespace %2$s";
+
+    /** The following needed service is missing: \"%1$s\" */
+    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
+
+    // Unexpected error: %1$s
+    public static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
+
+    /** Invalid ID. Resource identifier is missing. */
+    public static final String INVALID_ID = "Invalid ID. Resource identifier is missing.";
+
+    /** Resource not available. */
+    public static final String RESOURCE_NOT_AVAILABLE_MSG = "Resource not available.";
+    
+    /** Your session is invalid.*/
+    public static final String SESSION_INVALID_MSG = "Your session is invalid.";
+    
+    /** The sent sequence is invalid.*/
+    public static final String SEQUENCE_INVALID_MSG = "The sent sequence is invalid.";
+    
 
 }

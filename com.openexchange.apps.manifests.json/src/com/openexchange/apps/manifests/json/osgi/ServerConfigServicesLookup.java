@@ -50,7 +50,6 @@
 package com.openexchange.apps.manifests.json.osgi;
 
 import java.util.List;
-
 import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.apps.manifests.ServerConfigMatcherService;
 
@@ -60,6 +59,8 @@ import com.openexchange.apps.manifests.ServerConfigMatcherService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ServerConfigServicesLookup {
-	public List<ComputedServerConfigValueService> getComputed();
-	public List<ServerConfigMatcherService> getMatchers();
+
+    public List<ComputedServerConfigValueService> getComputed();
+
+    public List<ServerConfigMatcherService> getMatchers();
 }

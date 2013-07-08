@@ -84,6 +84,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.StringAllocator;
@@ -282,6 +283,19 @@ public class DriveServiceImpl implements DriveService {
             LOG.debug(syncResult);
         }
         return new ArrayList<DriveAction<FileVersion>>(syncResult.getActionsForClient());
+    }
+
+    @Override
+    public Quota[] getQuota(ServerSession session, String rootFolderID) throws OXException {
+        DriveSession driveSession = createSession(session, rootFolderID);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Handling get-quota for root folder '" + rootFolderID + "'");
+        }
+        Quota[] quota = driveSession.getStorage().getQuota();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Got quota for root folder '" + rootFolderID + "': " + quota);
+        }
+        return quota;
     }
 
     private static SyncResult<DirectoryVersion> syncDirectories(DriveSession session, List<? extends DirectoryVersion> originalVersions,

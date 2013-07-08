@@ -59,7 +59,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionContext;
-import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.ajp13.Services;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.HashKeyMap;
@@ -86,7 +86,7 @@ public class HttpSessionWrapper implements HttpSession {
             synchronized (HttpSessionWrapper.class) {
                 tmp = cookieTTL;
                 if (tmp < 0) {
-                    final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
                     if (null == service) {
                         tmp = ConfigTools.parseTimespanSecs("1W");
                     } else {
@@ -142,7 +142,7 @@ public class HttpSessionWrapper implements HttpSession {
         /*
          * Max. inactive interval
          */
-        final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final ConfigurationService service = Services.getService(ConfigurationService.class);
         maxInactiveIntervall = null == service ? 1800 : service.getIntProperty("com.openexchange.servlet.maxInactiveIntervall", 1800); // 30 Minutes
         /*
          * Initialize other stuff

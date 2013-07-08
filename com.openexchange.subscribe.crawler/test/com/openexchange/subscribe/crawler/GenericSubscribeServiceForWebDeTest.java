@@ -75,7 +75,7 @@ public class GenericSubscribeServiceForWebDeTest extends GenericSubscribeService
         crawler.setId("com.openexchange.subscribe.crawler.webde");
         crawler.setCrawlerApiVersion(618);
         crawler.setPriority(3);
-        List<Step> steps = new LinkedList<Step>();
+        List<Step<?, ?>> steps = new LinkedList<Step<?, ?>>();
 
         steps.add(new LoginPageByFormActionReturningStringStep(
             "Log in",

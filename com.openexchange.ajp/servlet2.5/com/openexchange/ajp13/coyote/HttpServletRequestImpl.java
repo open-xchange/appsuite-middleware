@@ -74,7 +74,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import com.openexchange.ajp13.AJPv13Config;
-import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.ajp13.Services;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.servlet.ServletConfigLoader;
@@ -1109,12 +1109,9 @@ public final class HttpServletRequestImpl implements HttpServletRequest, Paramet
             HttpSessionManagement.removeHttpSession(httpSessionId);
         }
         /*
-         * Create a new session
+         * Check whether to create a new session
          */
         if (create) {
-            /*
-             * Create new session
-             */
             session = ((HttpSessionWrapper) HttpSessionManagement.createAndGetHttpSession(httpSessionId));
             session.setNew(true);
             session.setServletContext(getServletContext());
@@ -1135,7 +1132,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest, Paramet
             synchronized (HttpServletResponseImpl.class) {
                 tmp = autologin;
                 if (null == tmp) {
-                    final ConfigurationService configurationService = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
                     tmp = Boolean.valueOf(null != configurationService && configurationService.getBoolProperty("com.openexchange.sessiond.autologin", false));
                     autologin = tmp;
                 }
@@ -1152,7 +1149,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest, Paramet
             synchronized (HttpServletResponseImpl.class) {
                 tmp = maxAge;
                 if (null == tmp) {
-                    final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
                     tmp = Integer.valueOf(ConfigTools.parseTimespanSecs(null == service ?  "1W" : service.getProperty("com.openexchange.cookie.ttl", "1W")));
                     maxAge = tmp;
                 }

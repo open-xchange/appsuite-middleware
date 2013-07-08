@@ -71,6 +71,9 @@ import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.formats.vcard.VCardFileToken;
 import com.openexchange.importexport.formats.vcard.VCardTokenizer;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -94,6 +97,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 public class VCardImporter extends ContactImporter implements OXExceptionConstants {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(VCardImporter.class));
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     @Override
     public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
@@ -195,8 +199,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                     importResult.setDate(new Date(System.currentTimeMillis()));
                     importResult.setException(ImportExportExceptionCodes.UNKNOWN_VCARD_FORMAT.create(chunk.getContent()));
                 } else {
-                    final VersitDefinition.Reader versitReader = def.getReader(new UnsynchronizedByteArrayInputStream(
-                            chunk.getContent()), "UTF-8");
+                    final VersitDefinition.Reader versitReader = def.getReader(new UnsynchronizedByteArrayInputStream(chunk.getContent()), "UTF-8");
                     try {
                         final VersitObject versitObject = def.parse(versitReader);
 
@@ -219,10 +222,13 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                         importResult.setObjectId(String.valueOf(contactObj.getObjectID()));
                         importResult.setDate(contactObj.getLastModified());
                     } catch (final VersitException e) {
-                        LOG.error("cannot parse contact object", e);
+                        LOG.error(generateErrorMessage(e, DEBUG ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
                         importResult.setException(ImportExportExceptionCodes.VCARD_PARSING_PROBLEM.create(e, e.getMessage()));
                     } catch (final ConverterException e) {
-                        LOG.error("cannot convert contact object", e);
+                        LOG.error(generateErrorMessage(e, DEBUG ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
+                        importResult.setException(ImportExportExceptionCodes.VCARD_CONVERSION_PROBLEM.create(e, e.getMessage()));
+                    } catch (final RuntimeException e) {
+                        LOG.error(generateErrorMessage(e, DEBUG ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
                         importResult.setException(ImportExportExceptionCodes.VCARD_CONVERSION_PROBLEM.create(e, e.getMessage()));
                     }
                 }
@@ -244,6 +250,19 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
         }
 
         return list;
+    }
+
+    private String generateErrorMessage(final Exception e, final String vcard) {
+        final StringAllocator sb = new StringAllocator(null != vcard ? 8192 : 128);
+        sb.append("Cannot parse contact object: ").append(e.getMessage());
+        if (null != vcard) {
+            final String sep = Strings.getLineSeparator();
+            sb.append(sep).append("Associated VCard content:").append(sep);
+            for (final String line : vcard.split("\r?\n")) {
+                sb.append(line).append(sep);
+            }
+        }
+        return sb.toString();
     }
 
 }

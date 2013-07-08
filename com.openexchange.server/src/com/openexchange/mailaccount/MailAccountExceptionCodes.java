@@ -149,6 +149,22 @@ public enum MailAccountExceptionCodes implements OXExceptionCode {
      * Could not connect to transport server "%1$s" for login %2$s
      */
     VALIDATE_FAILED_TRANSPORT(MailAccountExceptionStrings.VALIDATE_FAILED_TRANSPORT_MSG, CATEGORY_WARNING, 21),
+    /**
+     * Default port specified for mail protocol "%1$s", but SSL is enabled. Please review if appropriate.
+     */
+    DEFAULT_BUT_SECURE_MAIL(MailAccountExceptionStrings.DEFAULT_BUT_SECURE_MAIL_MSG, CATEGORY_WARNING, 22),
+    /**
+     * Secure port specified for mail protocol "%1$s", but SSL is not enabled. Please review if appropriate.
+     */
+    SECURE_BUT_DEFAULT_MAIL(MailAccountExceptionStrings.SECURE_BUT_DEFAULT_MAIL_MSG, CATEGORY_WARNING, 23),
+    /**
+     * Default port specified for transport protocol "%1$s", but SSL is enabled. Please review if appropriate.
+     */
+    DEFAULT_BUT_SECURE_TRANSPORT(MailAccountExceptionStrings.DEFAULT_BUT_SECURE_TRANSPORT_MSG, CATEGORY_WARNING, 24),
+    /**
+     * Secure port specified for transport protocol "%1$s", but SSL is not enabled. Please review if appropriate.
+     */
+    SECURE_BUT_DEFAULT_TRANSPORT(MailAccountExceptionStrings.SECURE_BUT_DEFAULT_TRANSPORT_MSG, CATEGORY_WARNING, 25),
 
     ;
 

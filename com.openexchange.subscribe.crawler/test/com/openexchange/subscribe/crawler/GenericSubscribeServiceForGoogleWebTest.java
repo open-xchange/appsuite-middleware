@@ -72,7 +72,7 @@ public class GenericSubscribeServiceForGoogleWebTest extends GenericSubscribeSer
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("GoogleMail");
         crawler.setId("com.openexchange.subscribe.crawler.googlemail");
-        List<Step> steps = new LinkedList<Step>();
+        List<Step<?, ?>> steps = new LinkedList<Step<?, ?>>();
 
         steps.add(new LoginPageByFormActionStep(
             "Login to Google Mail",

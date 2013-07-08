@@ -360,6 +360,38 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
     }
 
+    @Override
+    public com.openexchange.file.storage.Quota getFileQuota(ServerSession session) throws OXException {
+        long limit = com.openexchange.file.storage.Quota.UNLIMITED;
+        long usage = com.openexchange.file.storage.Quota.UNLIMITED;
+        QuotaService quotaService = ServerServiceRegistry.getInstance().getService(QuotaService.class);
+        if (null != quotaService) {
+            com.openexchange.quota.Quota quota = quotaService.getQuotaFor(Resource.INFOSTORE_FILES, session);
+            if (null != quota) {
+                limit = quota.getQuota(QuotaType.AMOUNT);
+                if (com.openexchange.file.storage.Quota.UNLIMITED != limit) {
+                    usage = getUsedQuota(session.getContext());
+                }
+            }
+        }
+        return new com.openexchange.file.storage.Quota(limit, usage, com.openexchange.file.storage.Quota.Type.FILE);
+    }
+
+    @Override
+    public com.openexchange.file.storage.Quota getStorageQuota(ServerSession session) throws OXException {
+        long limit = com.openexchange.file.storage.Quota.UNLIMITED;
+        long usage = com.openexchange.file.storage.Quota.UNLIMITED;
+        try {
+            limit = getFileStorage(session.getContext()).getQuota();
+        } catch (OXException e) {
+            LOG.warn("Error getting file storage quota for context " + session.getContextId(), e);
+        }
+        if (com.openexchange.file.storage.Quota.UNLIMITED != limit) {
+            usage = getFileStorage(session.getContext()).getUsage();
+        }
+        return new com.openexchange.file.storage.Quota(limit, usage, com.openexchange.file.storage.Quota.Type.STORAGE);
+    }
+
     private Delta<DocumentMetadata> addLocked(final Delta<DocumentMetadata> delta, final Map<Integer, List<Lock>> locks, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         try {
             return new LockDelta(delta, locks, ctx, user, userConfig);

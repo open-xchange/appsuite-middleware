@@ -127,7 +127,7 @@ public enum TaskExceptionCode implements OXExceptionCode {
     /** Date range in search must contain 2 and not %d values. */
     WRONG_DATE_RANGE(WRONG_DATE_RANGE_MSG, Category.CATEGORY_ERROR, 21),
 
-    /** Cannot decrease number of attachments below zero. */
+    /** Cannot detach more attachments than actually available. */
     WRONG_ATTACHMENT_COUNT(WRONG_ATTACHMENT_COUNT_MSG, Category.CATEGORY_ERROR, 22),
 
     /** You are not allowed to read the contents of folder %1$s (%2$d). */

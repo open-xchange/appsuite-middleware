@@ -134,7 +134,7 @@ public interface SessiondService {
 
     /**
      * Finds the first session of the specified user that matches the give criterion.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param matcher The session matcher
@@ -146,7 +146,8 @@ public interface SessiondService {
      * Get the session object related to the given session identifier.
      *
      * @param sessionId The Session identifier
-     * @return Return the session object or null if no session exists for the given identifier or if the session is expired
+     * @return Returns the session or <code>null</code> if no session exists for the given identifier or if the session is expired
+     * @see SessiondServiceExtended#getSession(String, boolean)
      */
     public Session getSession(String sessionId);
 

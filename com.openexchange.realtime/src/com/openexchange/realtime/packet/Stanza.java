@@ -58,59 +58,71 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ElementPath;
 
 /**
  * {@link Stanza} - Abstract information unit that can be send from one entity to another.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public abstract class Stanza implements Serializable {
 
+    public static final ElementPath ERROR_PATH = new ElementPath("error");
+    
     private static final long serialVersionUID = 1L;
 
     private static final Log LOG = LogFactory.getLog(Stanza.class);
 
     // recipient and sender
-    private ID to, from, sequencePrincipal, onBehalfOf;
+    private volatile ID to;
+    private volatile ID from;
+    private volatile ID sequencePrincipal;
+    private volatile ID onBehalfOf;
 
     // All 3 basic stanza types either have an optional or mandatory id field
     private String id = "";
 
+    /**
+     * The error object for Presence Stanza of type error.
+     */
+    protected RealtimeException error = null;
+
     private String selector = "default";
-    
+
     private long sequenceNumber = -1;
-    
+
     private String tracer; 
+
     private List<String> logEntries = new LinkedList<String>();
 
     // Payloads carried by this Stanza as n-ary trees
-    Map<ElementPath, List<PayloadTree>> payloads;
-    
+    protected volatile Map<ElementPath, List<PayloadTree>> payloads;
+
     /**
      * Initializes a new {@link Stanza}.
      */
     protected Stanza() {
+        super();
         payloads = new ConcurrentHashMap<ElementPath, List<PayloadTree>>();
     }
 
     /**
      * Gets the id
-     * 
+     *
      * @return The id
      */
     public String getId() {
@@ -119,7 +131,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Sets the id
-     * 
+     *
      * @param id The id to set
      */
     public void setId(final String id) {
@@ -128,7 +140,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Get the {@link ID} describing the stanza's recipient.
-     * 
+     *
      * @return null or the ID of the stanza's recipient
      */
     public ID getTo() {
@@ -137,7 +149,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Set the {@link ID} describing the Stanza's recipient.
-     * 
+     *
      * @param to the ID of the stanza's recipient
      */
     public void setTo(final ID to) {
@@ -146,7 +158,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Get the {@link ID} describing the Stanza's sender.
-     * 
+     *
      * @return the {@link ID} describing the Stanza's sender.
      */
     public ID getFrom() {
@@ -155,14 +167,32 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Set the {@link ID} describing the Stanza's sender.
-     * 
+     *
      * @param from the {@link ID} describing the Stanza's sender.
      */
     public void setFrom(final ID from) {
         this.from = from;
     }
-    
-    
+
+    /**
+     * Get the error element describing the error-type Stanza in more detail.
+     * 
+     * @return Null or the OXException representing the error
+     */
+    public RealtimeException getError() {
+        return error;
+    }
+
+    /**
+     * Set the error element describing the error-type Stanza in more detail.
+     * 
+     * @param error The OXException representing the error
+     */
+    public void setError(RealtimeException error) {
+        this.error = error;
+        writeThrough(ERROR_PATH, error);
+    }
+
     /**
      * Sets the onBehalfOf
      *
@@ -171,8 +201,8 @@ public abstract class Stanza implements Serializable {
     public void setOnBehalfOf(ID onBehalfOf) {
         this.onBehalfOf = onBehalfOf;
     }
-    
-    
+
+
     /**
      * Gets the onBehalfOf
      *
@@ -181,8 +211,8 @@ public abstract class Stanza implements Serializable {
     public ID getOnBehalfOf() {
         return onBehalfOf;
     }
-    
-    
+
+
     /**
      * Sets the sequenceNumber
      *
@@ -191,8 +221,8 @@ public abstract class Stanza implements Serializable {
     public void setSequenceNumber(long sequenceNumber) {
         this.sequenceNumber = sequenceNumber;
     }
-    
-    
+
+
     /**
      * Gets the sequenceNumber
      *
@@ -201,8 +231,8 @@ public abstract class Stanza implements Serializable {
     public long getSequenceNumber() {
         return sequenceNumber;
     }
-    
-    
+
+
     /**
      * Sets the sequencePrincipal
      *
@@ -211,8 +241,8 @@ public abstract class Stanza implements Serializable {
     public void setSequencePrincipal(ID sequencePrincipal) {
         this.sequencePrincipal = sequencePrincipal;
     }
-    
-    
+
+
     /**
      * Gets the sequencePrincipal
      *
@@ -224,7 +254,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Get a List of namespaces of the payloads of this Stanza.
-     * 
+     *
      * @return Empty Set or the namespaces of the payloads of this Stanza.
      */
     public Collection<ElementPath> getElementPaths() {
@@ -237,7 +267,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Get all Payloads of this Stanza.
-     * 
+     *
      * @return A List of PayloadTrees.
      */
     public Collection<PayloadTree> getPayloads() {
@@ -251,8 +281,8 @@ public abstract class Stanza implements Serializable {
 
     /**
      * A very common case: Get the single payload contained in this Stanza.
-     * 
-     * @return null if the Stanza doesn't contain a Payload, otherwise the Payload 
+     *
+     * @return null if the Stanza doesn't contain a Payload, otherwise the Payload
      */
     public PayloadElement getPayload() {
         Iterator<List<PayloadTree>> iterator = payloads.values().iterator();
@@ -265,11 +295,11 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Set all Payloads of this Stanza.
-     * 
+     *
      * @param payloadTrees The PayloadTrees forming the Payloads.
      */
     public void setPayloads(Collection<PayloadTree> payloadTrees) {
-        HashMap<ElementPath, List<PayloadTree>> newPayloads = new HashMap<ElementPath, List<PayloadTree>>();
+        Map<ElementPath, List<PayloadTree>> newPayloads = new ConcurrentHashMap<ElementPath, List<PayloadTree>>();
         for (PayloadTree tree : payloadTrees) {
             ElementPath elementPath = tree.getRoot().getElementPath();
             List<PayloadTree> list = newPayloads.get(elementPath);
@@ -284,7 +314,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Add a payload to this Stanza.
-     * 
+     *
      * @param tree The PayloadTreeNoode to add to this Stanza
      * @return true if the PayloadTreeNode could be added to this Stanza
      */
@@ -294,7 +324,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Add a PayloadTree into a Map containing lists of PayloadTrees mapped to their ElementPaths.
-     * 
+     *
      * @param tree The tree to add
      * @param payloadTreeMap The Map containing the trees
      */
@@ -310,7 +340,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Remove a PayloadTree from this Stanza.
-     * 
+     *
      * @param tree The PayloadTree to remove from this Stanza
      */
     public void removePayload(final PayloadTree tree) {
@@ -324,7 +354,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Get a Collection of Payloads that match an ElementPath
-     * 
+     *
      * @param elementPath The Elementpath identifying the Payload
      * @return A Collection of PayloadTrees
      */
@@ -340,7 +370,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Filter the payloads based on a Predicate.
-     * 
+     *
      * @param predicate
      * @return Payloads matching the Predicate or an empty Collection
      */
@@ -356,7 +386,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Return a Map<ElementPath, List<PayloadTree>> containing deep copies of this stanza's payloads.
-     * 
+     *
      * @return a Map<ElementPath, List<PayloadTree>> containing deep copies of this stanza's payloads.
      */
     protected Map<ElementPath, List<PayloadTree>> deepCopyPayloads() {
@@ -372,8 +402,8 @@ public abstract class Stanza implements Serializable {
      * Gets the selector that is used to identify GroupDispatcher instances on the server side.
      * Example: If you join a chatroom or a collaboratively edited document yo may receive messages from this chatroom. Those messages will
      * contain the sender of the message and a selector that idenifies the chatroom that distributed the message to you. Clients have to
-     * choose a selector when joining a chatroom and have to take care of the mapping selector <-> chatroom themselves. 
-     * 
+     * choose a selector when joining a chatroom and have to take care of the mapping selector <-> chatroom themselves.
+     *
      * @return the selector
      */
     public String getSelector() {
@@ -384,26 +414,26 @@ public abstract class Stanza implements Serializable {
      * Sets the selector that is used to identify GroupDispatcher instances on the server side.
      * Example: If you join a chatroom or a collaboratively edited document yo may receive messages from this chatroom. Those messages will
      * contain the sender of the message and a selector that idenifies the chatroom that distributed the message to you. Clients have to
-     * choose a selector when joining a chatroom and have to take care of the mapping selector <-> chatroom themselves. 
-     * 
+     * choose a selector when joining a chatroom and have to take care of the mapping selector <-> chatroom themselves.
+     *
      * @param selector the selector
      */
     public void setSelector(String selector) {
         this.selector = selector;
     }
-    
+
     public void setTracer(String tracer) {
         this.tracer = tracer;
     }
-    
+
     public String getTracer() {
         return tracer;
     }
-    
+
     public boolean traceEnabled() {
         return tracer != null;
     }
-    
+
     public void trace(Object trace) {
         if (traceEnabled()) {
             LOG.info(tracer+": "+trace);
@@ -420,13 +450,13 @@ public abstract class Stanza implements Serializable {
             logEntries.add(w.toString());
         }
     }
-    
+
     public void addLogMessages(List<String> logEntries) {
         this.logEntries.addAll(logEntries);
     }
 
 
-    
+
     public List<String> getLogEntries() {
         return logEntries;
     }
@@ -450,8 +480,43 @@ public abstract class Stanza implements Serializable {
     }
 
     /**
-     * Init default fields from values found in the PayloadTrees of the Stanza.
+     * Write a payload to the PayloadTree identified by the ElementPath. There is only one tree for the default elements which only contains
+     * one node so we can set the data by directly writing to the root node.
      * 
+     * @param path The ElementPath identifying the PayloadTree.
+     * @param data The payload data to write into the root node.
+     */
+    protected void writeThrough(ElementPath path, Object data) {
+        List<PayloadTree> payloadTrees = payloads.get(path);
+        if (payloadTrees == null) {
+            payloadTrees = new ArrayList<PayloadTree>();
+        }
+        if (payloadTrees.size() > 1) {
+            throw new IllegalStateException("Stanza shouldn't contain more than one PayloadTree per basic ElementPath");
+        }
+        PayloadTree tree;
+        if (payloadTrees.isEmpty()) {
+            PayloadElement payloadElement = new PayloadElement(
+                data,
+                data.getClass().getSimpleName(),
+                path.getNamespace(),
+                path.getElement());
+            PayloadTreeNode payloadTreeNode = new PayloadTreeNode(payloadElement);
+            tree = new PayloadTree(payloadTreeNode);
+            addPayload(tree);
+        } else {
+            tree = payloadTrees.get(0);
+            PayloadTreeNode node = tree.getRoot();
+            if (node == null) {
+                throw new IllegalStateException("PayloadTreeNode removed? This shouldn't happen!");
+            }
+            node.setData(data, data.getClass().getSimpleName());
+        }
+
+    }
+    /**
+     * Init default fields from values found in the PayloadTrees of the Stanza.
+     *
      * @throws OXException when the Stanza couldn't be initialized
      */
     public abstract void initializeDefaults() throws OXException;
@@ -472,41 +537,59 @@ public abstract class Stanza implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (!(obj instanceof Stanza))
+        }
+        if (!(obj instanceof Stanza)) {
             return false;
+        }
         Stanza other = (Stanza) obj;
-        if (from == null) {
-            if (other.from != null)
+        final ID thisFrom = from;
+        if (thisFrom == null) {
+            if (other.from != null) {
                 return false;
-        } else if (!from.equals(other.from))
+            }
+        } else if (!thisFrom.equals(other.from)) {
             return false;
-        if (id == null) {
-            if (other.id != null)
+        }
+        final String thisId = id;
+        if (thisId == null) {
+            if (other.id != null) {
                 return false;
-        } else if (!id.equals(other.id))
+            }
+        } else if (!thisId.equals(other.id)) {
             return false;
-        if (payloads == null) {
-            if (other.payloads != null)
+        }
+        final Map<ElementPath, List<PayloadTree>> thisPayloads = payloads;
+        if (thisPayloads == null) {
+            if (other.payloads != null) {
                 return false;
-        } else if (!payloads.equals(other.payloads))
+            }
+        } else if (!thisPayloads.equals(other.payloads)) {
             return false;
-        if (selector == null) {
-            if (other.selector != null)
+        }
+        final String thisSelector = selector;
+        if (thisSelector == null) {
+            if (other.selector != null) {
                 return false;
-        } else if (!selector.equals(other.selector))
+            }
+        } else if (!thisSelector.equals(other.selector)) {
             return false;
-        if (to == null) {
-            if (other.to != null)
+        }
+        final ID thisTo = to;
+        if (thisTo == null) {
+            if (other.selector != null) {
                 return false;
-        } else if (!to.equals(other.to))
+            }
+        } else if (!thisTo.equals(other.selector)) {
             return false;
+        }
         return true;
     }
-    
+
     @Override
     public String toString() {
 

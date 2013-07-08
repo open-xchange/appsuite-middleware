@@ -79,9 +79,9 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
-import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.AJPv13Utility;
 import com.openexchange.ajp13.AjpLongRunningRegistry;
+import com.openexchange.ajp13.Services;
 import com.openexchange.ajp13.coyote.util.ByteChunk;
 import com.openexchange.ajp13.coyote.util.CookieParser;
 import com.openexchange.ajp13.coyote.util.HexUtils;
@@ -482,7 +482,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     }
 
     public void startKeepAlivePing() {
-        final TimerService timer = AJPv13ServiceRegistry.getInstance().getService(TimerService.class);
+        final TimerService timer = Services.getService(TimerService.class);
         if (null == timer) {
             throw new IllegalStateException("Missing timer service!");
         }

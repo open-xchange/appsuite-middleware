@@ -49,10 +49,9 @@
 
 package com.openexchange.realtime.atmosphere.impl.stanza.builder;
 
-import org.apache.commons.logging.Log;
 import org.json.JSONObject;
-import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
@@ -65,8 +64,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class PresenceBuilder extends StanzaBuilder<Presence> {
-
-    private static Log LOG = com.openexchange.log.Log.loggerFor(PresenceBuilder.class);
 
     /**
      * Create a new PresenceBuilder Initializes a new {@link PresenceBuilder}.
@@ -88,7 +85,7 @@ public class PresenceBuilder extends StanzaBuilder<Presence> {
     }
 
     @Override
-    public Presence build() throws OXException {
+    public Presence build() throws RealtimeException {
         basics();
         type();
         return stanza;

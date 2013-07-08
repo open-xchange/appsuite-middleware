@@ -49,6 +49,7 @@
 package com.openexchange.groupware.attach;
 
 import static com.openexchange.java.Autoboxing.I;
+import gnu.trove.map.TIntObjectMap;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
@@ -251,7 +252,7 @@ public class InMemoryAttachmentBase implements AttachmentBase{
     }
 
     @Override
-    public Map<Integer, Date> getNewestCreationDates(Context ctx, int moduleId, int[] attachedIds) {
+    public TIntObjectMap<Date> getNewestCreationDates(Context ctx, int moduleId, int[] attachedIds) {
         throw new UnsupportedOperationException();
     }
 }

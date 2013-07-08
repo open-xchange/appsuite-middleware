@@ -89,6 +89,7 @@ public final class CheckAction extends AbstractSecretRecoveryAction {
         object.put("secretWorks", diagnosis == null);
         if (diagnosis != null) {
             LOG.info("Secrets in session " + req.getSession().getSessionID() + " seem to need migration: " + diagnosis);
+            object.put("secretWorks", false);
             object.put("diagnosis", diagnosis);
         }
         return new AJAXRequestResult(object, "json");

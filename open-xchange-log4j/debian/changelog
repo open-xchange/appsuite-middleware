@@ -4,6 +4,53 @@ open-xchange-log4j (7.4.0-0) UNRELEASED; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Apr 2013 10:28:45 +0200
 
+open-xchange-log4j (7.2.2-7) stable; urgency=low
+
+  * Third candidate for 7.2.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 01 Jul 2013 16:16:29 +0200
+
+open-xchange-log4j (7.2.2-6) stable; urgency=low
+
+  * Second candidate for 7.2.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 28 Jun 2013 13:31:29 +0200
+
+open-xchange-log4j (7.2.2-5) stable; urgency=low
+
+  * Release candidate for 7.2.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 26 Jun 2013 18:54:20 +0200
+
+open-xchange-log4j (7.2.2-4) UNRELEASED; urgency=low
+
+  * Second feature freeze for 7.2.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 21 Jun 2013 16:14:29 +0200
+
+open-xchange-log4j (7.2.2-3) UNRELEASED; urgency=low
+
+  * Feature freeze for 7.2.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 17 Jun 2013 08:36:11 +0200
+
+open-xchange-log4j (7.2.2-2) UNRELEASED; urgency=low
+
+  * First sprint increment for 7.2.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 03 Jun 2013 12:35:44 +0200
+
+open-xchange-log4j (7.2.2-1) UNRELEASED; urgency=low
+
+  * First candidate for 7.2.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 29 May 2013 16:37:35 +0200
+
+open-xchange-log4j (7.2.2-0) UNRELEASED; urgency=low
+
+  * prepare for 7.2.2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 27 May 2013 17:13:27 +0200
 open-xchange-log4j (7.2.1-5) UNRELEASED; urgency=low
 
   * Build for patch 2013-06-11

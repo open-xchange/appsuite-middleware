@@ -95,6 +95,7 @@ import javax.mail.internet.ParseException;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
+import org.apache.commons.logging.Log;
 import org.apache.james.mime4j.io.LineReaderInputStream;
 import org.apache.james.mime4j.io.LineReaderInputStreamAdaptor;
 import org.apache.james.mime4j.stream.DefaultFieldBuilder;
@@ -142,10 +143,9 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
  */
 public final class MimeMessageUtility {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMessageUtility.class));
-
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MimeMessageUtility.class);
     private static final boolean TRACE = LOG.isTraceEnabled();
+    private static final boolean WARN = LOG.isWarnEnabled();
 
     private static final Set<HeaderName> ENCODINGS;
 
@@ -636,6 +636,10 @@ public final class MimeMessageUtility {
             }
             return hasAttachments0(mp);
         }
+        // TODO: Think about special check for multipart/signed
+        /*
+         * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) { if (mp.getCount() > 2) { return true; } return hasAttachments0(mp); }
+         */
         if (mp.getCount() > 1) {
             return true;
         }
@@ -675,6 +679,11 @@ public final class MimeMessageUtility {
                 }
                 return hasAttachments0(bodystructure);
             }
+            // TODO: Think about special check for multipart/signed
+            /*
+             * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(bodystructure.subtype)) { if (bodystructure.bodies.length > 2) { return true; }
+             * return hasAttachments0(bodystructure); }
+             */
             if (bodystructure.bodies.length > 1) {
                 return true;
             }
@@ -1138,6 +1147,10 @@ public final class MimeMessageUtility {
                 ret.add(string);
             }
         }
+        if (tmp.length() > 0) {
+            final String str = tmp.toString();
+            ret.add(str.endsWith(", ") ? str.substring(0, str.length() - 2) : str);
+        }
         return ret;
     }
 
@@ -1297,9 +1310,6 @@ public final class MimeMessageUtility {
         return quotePhrase(personal, true);
     }
 
-    private static final Pattern P_REPL1 = Pattern.compile("\\\\");
-    private static final Pattern P_REPL2 = Pattern.compile("\"");
-
     /**
      * Quotes given phrase if needed.
      *
@@ -1308,6 +1318,21 @@ public final class MimeMessageUtility {
      * @return The quoted phrase
      */
     public static String quotePhrase(final String phrase, final boolean encode) {
+        return quotePhrase(phrase, encode, true);
+    }
+
+    private static final Pattern P_REPL1 = Pattern.compile("\\\\");
+    private static final Pattern P_REPL2 = Pattern.compile("\"");
+
+    /**
+     * Quotes given phrase if needed.
+     *
+     * @param phrase The phrase
+     * @param encode <code>true</code> to encode phrase according to RFC 822 syntax if needed; otherwise <code>false</code>
+     * @param allowNonAscii Whether non-ascci characters need quoting or not
+     * @return The quoted phrase
+     */
+    public static String quotePhrase(final String phrase, final boolean encode, final boolean allowNonAscii) {
         if (null == phrase) {
             return phrase;
         }
@@ -1324,7 +1349,7 @@ public final class MimeMessageUtility {
         boolean needQuoting = false;
         for (int i = 0; !needQuoting && i < len; i++) {
             final char c = phrase.charAt(i);
-            needQuoting = (c == '"' || c == '\\' || (c < 32 && c != '\r' && c != '\n' && c != '\t') || c >= 127 || RFC822.indexOf(c) >= 0);
+            needQuoting = (c == '"' || c == '\\' || (c < 32 && c != '\r' && c != '\n' && c != '\t') || (!allowNonAscii && c >= 127) || RFC822.indexOf(c) >= 0);
         }
         try {
             if (!needQuoting) {
@@ -1931,6 +1956,100 @@ public final class MimeMessageUtility {
             return file;
         } finally {
             Streams.close(in, out);
+        }
+    }
+
+    private static final String HDR_CONTENT_TYPE = MessageHeaders.HDR_CONTENT_TYPE;
+    private static final String PRIMARY_TEXT = "text/";
+
+    /**
+     * Gets the appropriate charset encoding for specified mail part.
+     *
+     * @param mailPart The part
+     * @param contentType The part's Content-Type
+     * @return The appropriate charset
+     * @throws OXException If detecting charset fails
+     */
+    public static String getCharset(final MailPart mailPart, final ContentType contentType) throws OXException {
+        final String charset;
+        if (mailPart.containsHeader(HDR_CONTENT_TYPE)) {
+            String cs = contentType.getCharsetParameter();
+            if (!CharsetDetector.isValid(cs)) {
+                com.openexchange.java.StringAllocator sb = null;
+                if (null != cs) {
+                    sb =
+                        new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
+                    mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
+                }
+                if (contentType.startsWith(PRIMARY_TEXT)) {
+                    cs = CharsetDetector.detectCharset(mailPart.getInputStream());
+                    if ("US-ASCII".equalsIgnoreCase(cs)) {
+                        cs = "ISO-8859-1";
+                    }
+                    if (WARN && null != sb) {
+                        sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
+                        LOG.warn(sb.toString());
+                    }
+                } else {
+                    cs = MailProperties.getInstance().getDefaultMimeCharset();
+                    if (WARN && null != sb) {
+                        sb.append(" Using fallback encoding: \"").append(cs).append('"');
+                        LOG.warn(sb.toString());
+                    }
+                }
+            }
+            charset = cs;
+        } else {
+            if (contentType.startsWith(PRIMARY_TEXT)) {
+                final InputStream inputStream = mailPart.getInputStream();
+                if (null == inputStream) {
+                    charset = MailProperties.getInstance().getDefaultMimeCharset();
+                } else {
+                    charset = CharsetDetector.detectCharset(inputStream);
+                }
+            } else {
+                charset = MailProperties.getInstance().getDefaultMimeCharset();
+            }
+        }
+        return charset;
+    }
+
+    /**
+     * Reads the textual content from specified part.
+     *
+     * @param mailPart The mail part
+     * @param contentType The content type
+     * @return The textual part or <code>null</code> if part does not exist
+     * @throws OXException If reading content fails
+     * @throws IOException If reading content fails with an I/O error
+     */
+    public static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
+        /*
+         * Read content
+         */
+        final String charset = getCharset(mailPart, contentType);
+        try {
+            if (contentType.startsWith("text/htm")) {
+                final String html = MessageUtility.readMailPart(mailPart, charset);
+                return MessageUtility.simpleHtmlDuplicateRemoval(html);
+            }
+            return MessageUtility.readMailPart(mailPart, charset);
+        } catch (final java.io.CharConversionException e) {
+            // Obviously charset was wrong or bogus implementation of character conversion
+            final String fallback = "ISO-8859-1";
+            if (WARN) {
+                LOG.warn(
+                    new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(
+                        charset).append("\". Using fallback charset \"").append(fallback).append("\" instead."),
+                    e);
+            }
+            return MessageUtility.readMailPart(mailPart, fallback);
+        } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                LOG.warn("Mail part removed in the meantime.", e);
+                return null;
+            }
+            throw e;
         }
     }
 

@@ -71,6 +71,10 @@ import com.openexchange.groupware.update.tasks.CreateIcalIdsPrimaryKeyTask;
 import com.openexchange.groupware.update.tasks.CreateIcalPrincipalPrimaryKeyTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnUserAttributesForAliasLookupTask;
+import com.openexchange.groupware.update.tasks.DateExternalCreateForeignKeyUpdateTask;
+import com.openexchange.groupware.update.tasks.DateExternalDropForeignKeyUpdateTask;
+import com.openexchange.groupware.update.tasks.DelDateExternalCreateForeignKeyUpdateTask;
+import com.openexchange.groupware.update.tasks.DelDateExternalDropForeignKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DelDatesMembersPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DelDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DelInfostorePrimaryKeyUpdateTask;
@@ -538,6 +542,12 @@ public final class InternalList {
         // Extends the UID field
         list.add(new com.openexchange.groupware.update.tasks.EnlargeCalendarUid());
 
+        // Sets the changing date once for users with a different defaultSendAddress
+        list.add(new com.openexchange.groupware.update.tasks.ContactAdjustLastModifiedForChangedSenderAddress());
+
+        // Drop foreign key constraints from obsolete tables
+        list.add(new com.openexchange.groupware.update.tasks.HeaderCacheDropFKTask());
+
         // +++++++++++++++++++++++++++++++++ Version 7.4.0 starts here. +++++++++++++++++++++++++++++++++
 
         // Add UUID column to genconf_attributes_strings table
@@ -591,17 +601,23 @@ public final class InternalList {
         //Add folder_id to primary key in del_infostore table
         list.add(new DelInfostorePrimaryKeyUpdateTask());
 
+        //Drop foreign key from dateExternal table
+        list.add(new DateExternalDropForeignKeyUpdateTask());
+
         //Add folder_id to primary key in prg_dates
         list.add(new PrgDatesPrimaryKeyUpdateTask());
+
+        //Create foreign key in dateExternal table
+        list.add(new DateExternalCreateForeignKeyUpdateTask());
+
+        //Drop foreign key from delDateExternal table
+        list.add(new DelDateExternalDropForeignKeyUpdateTask());
 
         //Add folder_id to primary key in del_dates
         list.add(new DelDatesPrimaryKeyUpdateTask());
 
-        //Add folder_id to primary key in prg_dates_members
-        list.add(new PrgDatesMembersPrimaryKeyUpdateTask());
-
-        //Add folder_id to primary key in del_dates_members
-        list.add(new DelDatesMembersPrimaryKeyUpdateTask());
+        //Create foreign key in delDateExternal table
+        list.add(new DelDateExternalCreateForeignKeyUpdateTask());
 
         // Add folder_id to primary key in del_contacts
         list.add(new MakeFolderIdPrimaryForDelContactsTable());
@@ -636,6 +652,12 @@ public final class InternalList {
 
             //Add primary key to user_setting_server table
             list.add(new UserSettingServerAddPrimaryKeyUpdateTask());
+
+            //Add folder_id to primary key in prg_dates_members
+            list.add(new PrgDatesMembersPrimaryKeyUpdateTask());
+
+            //Add folder_id to primary key in del_dates_members
+            list.add(new DelDatesMembersPrimaryKeyUpdateTask());
 
         }
 

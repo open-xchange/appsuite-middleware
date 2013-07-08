@@ -61,7 +61,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -81,6 +80,8 @@ import com.openexchange.log.PropertiesAppendingLogWrapper;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionSecretChecker;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
@@ -213,16 +214,33 @@ public class DispatcherServlet extends SessionServlet {
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
-        ServerSession session = null;
-        boolean sessionParamFound = false;
+        ServerSession session;
+        final boolean sessionParamFound;
         {
             final String sSession = req.getParameter("session");
             if (sSession != null && sSession.length() > 0) {
                 final String sessionId = getSessionId(req);
-                session = getSession(req, sessionId, sessiondService);
+                try {
+                    session = getSession(req, sessionId, sessiondService);
+                } catch (final OXException e) {
+                    if (!SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
+                        throw e;
+                    }
+                    // Got a wrong or missing secret
+                    final String wrongSecret = e.getProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name());
+                    if (!"null".equals(wrongSecret)) {
+                        // No information available or a differing secret
+                        throw e;
+                    }
+                    // Missing secret cookie
+                    session = getSession(hashSource, req, sessionId, sessiondService, new NoSecretCallbackChecker(DISPATCHER.get(), e, getAjaxRequestDataTools()));
+                }
                 verifySession(req, sessiondService, sessionId, session);
                 rememberSession(req, session);
                 sessionParamFound = true;
+            } else {
+                session = null;
+                sessionParamFound = false;
             }
         }
         // Check if associated request allows no session (if no "session" parameter was found)
@@ -235,29 +253,7 @@ public class DispatcherServlet extends SessionServlet {
         }
         // Try public session
         if (!mayOmitSession) {
-            final Cookie[] cookies = req.getCookies();
-            if (cookies != null) {
-                ServerSession simpleSession = null;
-                for (final Cookie cookie : cookies) {
-                    if (Login.PUBLIC_SESSION_NAME.equals(cookie.getName())) {
-                        final String altId = cookie.getValue();
-                        if (null != altId && null != session && altId.equals(session.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
-                            // same session
-                            simpleSession = session;
-                        } else {
-                            // lookup session by alternative id
-                            simpleSession = ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(cookie.getValue()));
-                        }
-                        break;
-                    }
-                }
-                // Check if a simple (aka public) session has been found
-                if (simpleSession != null) {
-                    checkSecret(hashSource, req, simpleSession);
-                    verifySession(req, sessiondService, simpleSession.getSessionID(), simpleSession);
-                    rememberPublicSession(req, simpleSession);
-                }
-            }
+            findPublicSessionId(req, session, sessiondService);
         }
     }
 
@@ -351,7 +347,7 @@ public class DispatcherServlet extends SessionServlet {
             }
             if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
                 final Object[] logArgs = e.getLogArgs();
-                final Object statusMsg = logArgs[1];
+                final Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
                 httpResponse.sendError(((Integer) logArgs[0]).intValue(), null == statusMsg ? null : statusMsg.toString());
                 return;
             }
@@ -457,7 +453,7 @@ public class DispatcherServlet extends SessionServlet {
         boolean first = true;
         ResponseRenderer candidate = null;
         for (final ResponseRenderer renderer : RESPONSE_RENDERERS) {
-            if (renderer.handles(requestData, result) && (first || highest <= renderer.getRanking())) {
+            if ((first || highest <= renderer.getRanking()) && renderer.handles(requestData, result)) {
                 first = false;
                 highest = renderer.getRanking();
                 candidate = renderer;
@@ -481,6 +477,45 @@ public class DispatcherServlet extends SessionServlet {
             builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
         }
         return builder.toString();
+    }
+
+    /**
+     * Helper class.
+     */
+    private static final class NoSecretCallbackChecker implements SessionSecretChecker {
+
+        private static final String PARAM_TOKEN = Session.PARAM_TOKEN;
+
+        private final Dispatcher dispatcher;
+        private final OXException e;
+        private final AJAXRequestDataTools requestDataTools;
+
+        /**
+         * Initializes a new {@link SessionSecretCheckerImplementation}.
+         */
+        protected NoSecretCallbackChecker(final Dispatcher dispatcher, final OXException e, final AJAXRequestDataTools requestDataTools) {
+            super();
+            this.requestDataTools = requestDataTools;
+            this.dispatcher = dispatcher;
+            this.e = e;
+        }
+
+        @Override
+        public void checkSecret(final Session session, final HttpServletRequest req, final String cookieHashSource) throws OXException {
+            final String module = requestDataTools.getModule(PREFIX.get(), req);
+            final String action = requestDataTools.getAction(req);
+            final boolean noSecretCallback = dispatcher.noSecretCallback(module, action);
+            if (!noSecretCallback) {
+                throw e;
+            }
+            final String paramToken = PARAM_TOKEN;
+            final String token = (String) session.getParameter(paramToken);
+            session.setParameter(paramToken, null);
+            if (null == token || !token.equals(req.getParameter(paramToken))) {
+                throw e;
+            }
+            // Token does match for this noSecretCallback-capable request
+        }
     }
 
 }

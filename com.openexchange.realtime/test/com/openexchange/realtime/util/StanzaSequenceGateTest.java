@@ -14,6 +14,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
@@ -183,7 +185,11 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
         assertEquals("Wrong inbox size", BUFFER_SIZE, inbox.size());
 
         Stanza last = createStanza(BUFFER_SIZE + 1);
-        assertFalse("Stanza was stored although buffer was full.", handle(last, last.getTo()));
+        try {
+            handle(last, last.getTo());
+        } catch (RealtimeException re) {
+            assertEquals(RealtimeExceptionCodes.SEQUENCE_INVALID.getNumber(), re.getCode());
+        }
         inbox = inboxes.get(stanza.getSequencePrincipal());
         assertEquals("Wrong threshold", 0L, threshold.get());
         assertNotNull("Inbox has not been created", inbox);

@@ -884,7 +884,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             p.setConfirm(CalendarObject.ACCEPT);
             recColl.checkAndFillIfUserIsUser(cdao, p);
         }
-        if (isInsert && cdao.getParticipants() == null && cdao.getFolderType() == FolderObject.PUBLIC) {
+        if (isInsert && (cdao.getParticipants() == null || cdao.getParticipants().length == 0) && cdao.getFolderType() == FolderObject.PUBLIC) {
             final Participant np[] = new Participant[1];
             final Participant up = new UserParticipant(uid);
             np[0] = up;

@@ -150,7 +150,9 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      * @param text The mail body as plain text
      */
     public void setPlainText(final String text) {
-        if (null == plainText) {
+        if (null == text) {
+            plainText = null;
+        } else if (null == plainText) {
             plainText = new StringBuilder(text);
         } else {
             plainText.setLength(0);

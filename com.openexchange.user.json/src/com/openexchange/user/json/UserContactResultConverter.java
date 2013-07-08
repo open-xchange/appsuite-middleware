@@ -112,7 +112,7 @@ public class UserContactResultConverter implements ResultConverter {
         Object resultObject = result.getResultObject();
         if (null == resultObject) {
 			resultObject = JSONObject.NULL;
-        } else if (GetAction.ACTION.equalsIgnoreCase(requestData.getParameter("action"))) {
+        } else if (GetAction.ACTION.equalsIgnoreCase(requestData.getAction())) {
 			/*
 			 * convert single user contact
 			 */

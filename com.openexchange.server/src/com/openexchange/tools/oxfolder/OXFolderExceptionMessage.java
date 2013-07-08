@@ -144,19 +144,19 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
      */
     public final static String NO_DUPLICATE_FOLDER_MSG = "A duplicate folder exists in parent folder %1$s in context %2$s";
     /**
-     * Parent folder %1$s does not allow folder's type setting %2$s in context %3$s
+     * Parent folder %1$s does not allow type %2$s in context %3$s
      * <p>
      * Folder's type setting is invalid
      * </p>
      */
-    public final static String INVALID_TYPE_MSG = "Parent folder %1$s does not allow folder's type setting %2$s in context %3$s";
+    public final static String INVALID_TYPE_MSG = "Parent folder %1$s does not allow type %2$s in context %3$s";
     /**
-     * Parent folder %1$s does not allow folder's module setting (%2$s) in context %3$s
+     * Parent folder %1$s does not allow module %2$s in context %3$s
      * <p>
      * Folder's module setting is invalid
      * </p>
      */
-    public final static String INVALID_MODULE_MSG = "Parent folder %1$s does not allow folder's module setting (%2$s) in context %3$s";
+    public final static String INVALID_MODULE_MSG = "Parent folder %1$s does not allow module %2$s in context %3$s";
     /**
      * Only one admin permission is allowed on a private folder
      * <p>
@@ -352,7 +352,7 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
     /**
      * Inserted for those exception that will turn to an <code>OXException</code> in future
      */
-    public final static String UNKNOWN_EXCEPTION_MSG = "UNKNOWN EXCEPTION";
+    public final static String UNKNOWN_EXCEPTION_MSG = "An unexpected error occurred: %1$s";
     /**
      * A LDAP error occurred in context %1$s
      */
@@ -418,9 +418,9 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
      */
     public final static String UNKNOWN_ACTION_MSG = "Unknown action: %1$s";
     /**
-     * Shared folder %1$s MUST NOT be updated in context %2$s
+     * Shared folder %1$s must not be updated in context %2$s
      */
-    public final static String NO_SHARED_FOLDER_UPDATE_MSG = "Shared folder %1$s MUST NOT be updated in context %2$s";
+    public final static String NO_SHARED_FOLDER_UPDATE_MSG = "Shared folder %1$s must not be updated in context %2$s";
     /**
      * The attribute %1$s contains too much characters. Current length %3$s is more than allowed length of %2$s characters.
      */
@@ -446,10 +446,9 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
      */
     public final static String NO_SUBFOLDER_BELOW_SHARED_FOLDER_MSG = "No subfolder creation below shared folder %1$s in context %2$s";
     /**
-     * User %1$s grants invalid permissions on shared folder %2$s in context %3$s. Only owner of parental shared folder %4$s may be
-     * folder admin
+     * User %1$s granted invalid permissions on shared folder %2$s in context %3$s. Only the owner of the parent shared folder %4$s can administrate the folder.
      */
-    public final static String INVALID_SHARED_FOLDER_SUBFOLDER_PERMISSION_MSG = "User %1$s grants invalid permissions on shared folder %2$s in context %3$s. Only the owner of parental shared folder %4$s can be the folder admin.";
+    public final static String INVALID_SHARED_FOLDER_SUBFOLDER_PERMISSION_MSG = "User %1$s granted invalid permissions on shared folder %2$s in context %3$s. Only the owner of the parent shared folder %4$s can administrate the folder.";
     /**
      * Owner %1$s of default folder %2$s must keep the folder admin permission
      */

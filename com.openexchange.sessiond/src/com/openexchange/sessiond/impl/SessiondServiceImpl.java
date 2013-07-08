@@ -165,15 +165,23 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public SessionImpl getSession(final String sessionId) {
-        SessionControl sessionControl = SessionHandler.getSession(sessionId);
+        return getSession(sessionId, true);
+    }
+
+    @Override
+    public SessionImpl getSession(final String sessionId, final boolean considerSessionStorage) {
+        if (null == sessionId) {
+            return null;
+        }
+        SessionControl sessionControl = SessionHandler.getSession(sessionId, considerSessionStorage);
         if (null == sessionControl) {
-            // No local session found. Maybe it should be migrated.
+            // No local/distributed session found. Maybe it should be migrated.
             // Look for a cached session must be serialized. Multiple threads can reach simultaneously this code part. The first one
             // migrates the session and the second one will not find a session in the cache.
             migrateLock.lock();
             try {
                 // First look again locally. Maybe another thread already migrated the session while this one waits on the lock.
-                sessionControl = SessionHandler.getSession(sessionId);
+                sessionControl = SessionHandler.getSession(sessionId, false);
                 if (null == sessionControl) {
                     // Migrate session.
                     sessionControl = SessionHandler.getCachedSession(sessionId);
@@ -190,7 +198,18 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
+    public boolean isActive(final String sessionId) {
+        if (null == sessionId) {
+            return false;
+        }
+        return SessionHandler.isActive(sessionId);
+    }
+
+    @Override
     public Session getSessionByAlternativeId(final String altId) {
+        if (null == altId) {
+            return null;
+        }
         final SessionControl sessionControl = SessionHandler.getSessionByAlternativeId(altId);
         if (null == sessionControl) {
             LOG.info("Session not found by alternative identifier. Alternative ID: " + altId);

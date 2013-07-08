@@ -62,13 +62,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
+import com.openexchange.tools.servlet.RateLimitedException;
 import com.openexchange.userconf.UserConfigurationService;
 
 /**
@@ -100,9 +101,14 @@ public class OnlinePublicationServlet extends HttpServlet {
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        // create a new HttpSession if it's missing
-        req.getSession(true);
-        super.service(new CountingHttpServletRequest(req), resp);
+        try {
+            // create a new HttpSession if it's missing
+            req.getSession(true);
+            super.service(new CountingHttpServletRequest(req), resp);
+        } catch (final RateLimitedException e) {
+            resp.setContentType("text/plain; charset=UTF-8");
+            resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
+        }
     }
 
     public static void setContextService(final ContextService service) {

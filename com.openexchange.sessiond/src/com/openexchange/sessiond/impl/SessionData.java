@@ -622,12 +622,11 @@ final class SessionData {
 
     SessionControl getSession(final String sessionId) {
         SessionControl control = null;
-        int i = 0;
         // Read-only access
         rlock.lock();
         try {
             final int size = sessionList.size();
-            for (i = 0; i < size; i++) {
+            for (int i = 0; i < size; i++) {
                 if ((control = sessionList.get(i).getSessionById(sessionId)) != null) {
                     if (i > 0) {
                         // Schedule task to put session into first container and remove from latter one. This requires a write lock.
@@ -653,6 +652,25 @@ final class SessionData {
             }
         } finally {
             rlongTermLock.unlock();
+        }
+        return control;
+    }
+
+    SessionControl optShortTermSession(final String sessionId) {
+        SessionControl control = null;
+        // Read-only access
+        rlock.lock();
+        try {
+            final int size = sessionList.size();
+            for (int i = 0; i < size; i++) {
+                if ((control = sessionList.get(i).getSessionById(sessionId)) != null) {
+                    return control;
+                }
+            }
+        } catch (final IndexOutOfBoundsException e) {
+            // For safety
+        } finally {
+            rlock.unlock();
         }
         return control;
     }

@@ -71,17 +71,19 @@ public class ModuleSet {
 
     public ModuleSet(String moduleStr) {
         super();
-        String[] split = Strings.splitByComma(moduleStr);
-        for (String s : split) {
-            try {
-                Integer module = new Integer(s.trim());
-                if (module.intValue() == Types.ATTACHMENT) {
-                    continue;
-                }
+        if (moduleStr != null) {
+            String[] split = Strings.splitByComma(moduleStr);
+            for (String s : split) {
+                try {
+                    Integer module = new Integer(s.trim());
+                    if (module.intValue() == Types.ATTACHMENT) {
+                        continue;
+                    }
 
-                modules.add(module);
-            } catch (NumberFormatException e) {
-                // ignore
+                    modules.add(module);
+                } catch (NumberFormatException e) {
+                    // ignore
+                }
             }
         }
     }

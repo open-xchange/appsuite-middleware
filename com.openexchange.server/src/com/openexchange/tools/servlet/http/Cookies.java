@@ -56,13 +56,16 @@ import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import com.google.common.net.InternetDomainName;
 import com.openexchange.ajax.Login;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 
@@ -284,7 +287,74 @@ public final class Cookies {
     }
 
     /**
-     * If a hostname is contained in this set, it is a TLD.
+     * Pretty-prints given cookies.
+     *
+     * @param cookies The cookies
+     * @return The string representation
+     */
+    public static String prettyPrint(final Cookie[] cookies) {
+        if (null == cookies) {
+            return "";
+        }
+        final StringAllocator sb = new StringAllocator(cookies.length << 4);
+        final String sep = System.getProperty("line.separator");
+        for (int i = 0; i < cookies.length; i++) {
+            final Cookie cookie = cookies[i];
+            sb.append(i + 1).append(": ").append(cookie.getName());
+            sb.append('=').append(cookie.getValue());
+            sb.append("; version=").append(cookie.getVersion());
+            final int maxAge = cookie.getMaxAge();
+            if (maxAge >= 0) {
+                sb.append("; max-age=").append(maxAge);
+            }
+            final String path = cookie.getPath();
+            if (null != path) {
+                sb.append("; path=").append(path);
+            }
+            final String domain = cookie.getDomain();
+            if (null != domain) {
+                sb.append("; domain=").append(path);
+            }
+            final boolean secure = cookie.getSecure();
+            if (secure) {
+                sb.append("; secure");
+            }
+            sb.append(sep);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Creates a cookie map for given HTTP request.
+     *
+     * @param req The HTTP request
+     * @return The cookie map
+     */
+    public static Map<String, Cookie> cookieMapFor(final HttpServletRequest req) {
+        if (null == req) {
+            return Collections.emptyMap();
+        }
+        @SuppressWarnings("unchecked")
+        Map<String, Cookie> m = (Map<String, Cookie>) req.getAttribute("__cookie.map");
+        if (null != m) {
+            return m;
+        }
+        final Cookie[] cookies = req.getCookies();
+        if (null == cookies) {
+            return Collections.emptyMap();
+        }
+        final int length = cookies.length;
+        m = new LinkedHashMap<String, Cookie>(length);
+        for (int i = 0; i < cookies.length; i++) {
+            final Cookie cookie = cookies[i];
+            m.put(cookie.getName(), cookie);
+        }
+        req.setAttribute("__cookie.map", m);
+        return m;
+    }
+
+    /**
+     * If a host name is contained in this set, it is a TLD.
      */
     private static final Set<String> EXACT = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
         "ac",

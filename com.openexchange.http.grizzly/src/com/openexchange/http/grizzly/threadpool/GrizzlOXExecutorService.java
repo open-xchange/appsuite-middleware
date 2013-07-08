@@ -55,7 +55,7 @@ import java.util.concurrent.TimeUnit;
 import org.glassfish.grizzly.threadpool.GrizzlyExecutorService;
 import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import com.openexchange.http.grizzly.GrizzlyExceptionMessage;
-import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
+import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -78,7 +78,7 @@ public class GrizzlOXExecutorService extends GrizzlyExecutorService {
      */
     public GrizzlOXExecutorService(ThreadPoolConfig config) {
         super(config);
-        ThreadPoolService threadPoolService = GrizzlyServiceRegistry.getInstance().getService(ThreadPoolService.class);
+        ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
         if (threadPoolService == null) {
             throw new IllegalStateException(String.format(
                 GrizzlyExceptionMessage.NEEDED_SERVICE_MISSING_MSG,

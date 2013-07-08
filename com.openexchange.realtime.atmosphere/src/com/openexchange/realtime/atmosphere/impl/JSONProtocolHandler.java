@@ -52,10 +52,10 @@ package com.openexchange.realtime.atmosphere.impl;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.atmosphere.protocol.RTProtocol;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.StanzaSequenceGate;
@@ -84,18 +84,23 @@ public class JSONProtocolHandler {
     
     /**
      * Handles a list of messages, and calls the appropriate protocol messages
+     * 
      * @param constructedId The ID for the client
      * @param serverSession His session
      * @param entry The stateEntry
      * @param stanzas the Stanzas
-     * @param acknowledgements TODO
-     * @throws OXException
+     * @param acknowledgements
+     * @throws RealtimeException 
      */
-    public void handleIncomingMessages(ID constructedId, ServerSession serverSession, StateEntry entry, List<JSONObject> stanzas, List<Long> acknowledgements) throws OXException {
+    public void handleIncomingMessages(ID constructedId, ServerSession serverSession, StateEntry entry, List<JSONObject> stanzas, List<Long> acknowledgements) throws RealtimeException {
         for (JSONObject json : stanzas) {
             if (json.has("type")) {
                 String type = json.optString("type");
-        
+                
+                if (type.equals("nextSequence")) {
+                    protocol.nextSequence(constructedId, json.optInt("seq"), gate);
+                    return;
+                }
                 
                 if (type.equals("ping")) {
                     // PING received
@@ -121,10 +126,11 @@ public class JSONProtocolHandler {
             // Handle regular message
             StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(constructedId, serverSession, json);
             Stanza stanza = stanzaBuilder.build();
+
             if (stanza.traceEnabled()) {
                 stanza.trace("received in backend");
             }
-            
+
             if (acknowledgements == null) {
                 protocol.receivedMessage(stanza, gate, entry.state, entry.created, entry.transmitter);
             } else {

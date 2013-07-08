@@ -83,9 +83,7 @@ public class MSNOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final ConfigurationService config = getService(ConfigurationService.class);
         oauthService = getService(OAuthService.class);
-
         oAuthMetadata = new OAuthServiceMetaDataMSNImpl(getService(DeferringURLService.class));
 
         registerService(OAuthServiceMetaData.class, oAuthMetadata);

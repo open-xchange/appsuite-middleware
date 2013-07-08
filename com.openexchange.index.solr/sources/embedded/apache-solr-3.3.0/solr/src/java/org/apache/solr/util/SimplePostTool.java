@@ -195,7 +195,7 @@ public class SimplePostTool {
       try {
         if(is!=null) is.close();
       } catch (IOException e) {
-        fatal("IOException while closing file: "+ e);
+        fatal("I/O error while closing file: "+ e);
       }
     }
   }
@@ -235,7 +235,7 @@ public class SimplePostTool {
         out = urlc.getOutputStream();
         pipe(data, out);
       } catch (IOException e) {
-        fatal("IOException while posting data: " + e);
+        fatal("I/O error while posting data: " + e);
       } finally {
         try { if(out!=null) out.close(); } catch (IOException x) { /*NOOP*/ }
       }
@@ -250,7 +250,7 @@ public class SimplePostTool {
         in = urlc.getInputStream();
         pipe(in, output);
       } catch (IOException e) {
-        fatal("IOException while reading response: " + e);
+        fatal("I/O error while reading response: " + e);
       } finally {
         try { if(in!=null) in.close(); } catch (IOException x) { /*NOOP*/ }
       }

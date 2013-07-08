@@ -51,12 +51,12 @@ package com.openexchange.groupware.ldap;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
@@ -143,13 +143,13 @@ public class CachingUserStorage extends UserStorage {
             return delegate.getUser(ctx, userIds);
         }
         final Cache cache = cacheService.getCache(REGION_NAME);
-        final Map<Integer, User> map = new HashMap<Integer, User>(userIds.length, 1);
+        final TIntObjectMap<User> map = new TIntObjectHashMap<User>(userIds.length, 1);
         final List<Integer> toLoad = new ArrayList<Integer>(userIds.length);
         final int contextId = ctx.getContextId();
         for (final int userId : userIds) {
             final Object object = cache.get(cacheService.newCacheKey(contextId, userId));
             if (object instanceof User) {
-                map.put(I(userId), (User) object);
+                map.put(userId, (User) object);
             } else {
                 toLoad.add(I(userId));
             }
@@ -157,11 +157,11 @@ public class CachingUserStorage extends UserStorage {
         final User[] loaded = delegate.getUser(ctx, I2i(toLoad));
         for (final User user : loaded) {
             cache.put(cacheService.newCacheKey(contextId, user.getId()), user, false);
-            map.put(I(user.getId()), user);
+            map.put(user.getId(), user);
         }
         final List<User> retval = new ArrayList<User>(userIds.length);
         for (final int userId : userIds) {
-            retval.add(map.get(I(userId)));
+            retval.add(map.get(userId));
         }
         return retval.toArray(new User[retval.size()]);
     }

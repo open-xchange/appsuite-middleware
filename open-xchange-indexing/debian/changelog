@@ -4,6 +4,18 @@ open-xchange-indexing (7.4.0-0) UNRELEASED; urgency=low
 
  -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 15 Apr 2013 10:28:41 +0200
 
+open-xchange-indexing (7.2.0-4) UNRELEASED; urgency=low
+
+  * Second feature freeze for 7.2.2 release
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 21 Jun 2013 16:15:18 +0200
+
+open-xchange-indexing (7.2.0-3) UNRELEASED; urgency=low
+
+  * Feature freeze for 7.2.2 release
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 17 Jun 2013 08:36:56 +0200
+
 open-xchange-indexing (7.2.0-2) UNRELEASED; urgency=low
 
   * Second candidate for 7.2.0 release

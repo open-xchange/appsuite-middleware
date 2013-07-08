@@ -164,6 +164,15 @@ public class Streams {
         if (null == is) {
             return new byte[0];
         }
+        if (is instanceof UnsynchronizedByteArrayInputStream) {
+            final UnsynchronizedByteArrayInputStream ubais = (UnsynchronizedByteArrayInputStream) is;
+            final byte[] buf = ubais.getBuf();
+            final int pos = ubais.getPosition();
+            final int len = ubais.getCount() - pos;
+            final byte[] newbuf = new byte[len];
+            System.arraycopy(buf, pos, newbuf, 0, len);
+            return newbuf;
+        }
         try {
             final ByteArrayOutputStream bos = newByteArrayOutputStream(4096);
             final int buflen = 2048;
@@ -270,6 +279,32 @@ public class Streams {
      */
     public static ByteArrayInputStream newByteArrayInputStream(final byte[] bytes, final int offset, final int length) {
         return new UnsynchronizedByteArrayInputStream(bytes, offset, length);
+    }
+
+    /**
+     * Counts the number of bytes readable from specified input stream.
+     * <p>
+     * The input stream will be closed orderly.
+     *
+     * @param in The input stream
+     * @return The number of bytes
+     * @throws IOException If an I/O error occurs
+     */
+    public static long countInputStream(final InputStream in) throws IOException {
+        if (null == in) {
+            return 0L;
+        }
+        try {
+            final int blen = 2048;
+            final byte[] buf = new byte[blen];
+            long count = 0;
+            for (int read; (read = in.read(buf, 0, blen)) > 0;) {
+                count += read;
+            }
+            return count;
+        } finally {
+            close(in);
+        }
     }
 
     /**

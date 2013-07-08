@@ -83,6 +83,8 @@ import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringBuilderStringer;
+import com.openexchange.java.Stringer;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -157,7 +159,7 @@ public final class HtmlWhitelistFilter {
 
     private final Map<String, Set<String>> styleMap;
 
-    private final StringBuilder cssBuffer;
+    private final Stringer cssBuffer;
 
     private final StringBuilder sb;
 
@@ -171,7 +173,7 @@ public final class HtmlWhitelistFilter {
     public HtmlWhitelistFilter(final Map<String, Map<String, Set<String>>> htmlMap, final Map<String, Set<String>> styleMap) {
         super();
         sb = new StringBuilder(256);
-        cssBuffer = new StringBuilder(256);
+        cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         this.htmlMap = htmlMap;
         this.styleMap = styleMap;
         if (!htmlMap.containsKey("html")) {
@@ -191,7 +193,7 @@ public final class HtmlWhitelistFilter {
     public HtmlWhitelistFilter(final int capacity, final String mapStr) {
         super();
         sb = new StringBuilder(capacity);
-        cssBuffer = new StringBuilder(256);
+        cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         final Map<String, Map<String, Set<String>>> map = parseHTMLMap(mapStr);
         if (!map.containsKey("html")) {
             map.put("html", null);
@@ -212,7 +214,7 @@ public final class HtmlWhitelistFilter {
     private HtmlWhitelistFilter(final int capacity) {
         super();
         sb = new StringBuilder(capacity);
-        cssBuffer = new StringBuilder(256);
+        cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         if (null == staticHTMLMap) {
             loadWhitelist();
         }
@@ -228,7 +230,7 @@ public final class HtmlWhitelistFilter {
             return validated;
         }
         final MatcherReplacer mr = new MatcherReplacer(m, validated);
-        final StringBuilder builder = new StringBuilder(validated.length());
+        final Stringer builder = new StringBuilderStringer(new StringBuilder(validated.length()));
         final StringBuilder tmp = new StringBuilder(8).append("&#");
         do {
             try {

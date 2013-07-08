@@ -60,8 +60,8 @@ import com.openexchange.i18n.LocalizableStrings;
 public class AtmosphereExceptionMessage implements LocalizableStrings {
     /** The mandatory session information is missing. */
     public static final String SESSIONINFO_DIDNT_MATCH_SERVERSESSION_MSG = "The session information didn't match any ServerSession";
-    /** Missing key \"%1$s\" in: \"%2$s\" */
-    public static final String MISSING_KEY_MSG = "Missing key \"%1$s\" in: \"%2$s\"";
+    /** "Obligatory key \"%1$s\" is missing from the Stanza" */
+    public static final String MISSING_KEY_MSG = "Obligatory key \"%1$s\" is missing from the Stanza";
     /** Could not find a builder for the specified element: . \"%1$s\" */
     public static final String MISSING_BUILDER_FOR_ELEMENT_MSG = "Could not find a builder for the given element: . \"%1$s\"";
     /** Error while building Stanza: \"%1$s\" */
@@ -78,8 +78,16 @@ public class AtmosphereExceptionMessage implements LocalizableStrings {
     public static final String OBLIGATORY_ELEMENT_MISSING_MSG = "The following obligatory element is missing: \"%1$s\"";
     /** Malformed Presence Data */
     public static final String PRESENCE_DATA_MALFORMED_MSG = "Malformed Presence Data";
+    /** Malformed Message Data */
+    public static final String MESSAGE_DATA_MALFORMED_MSG = "Malformed Message Data";
+    /** Malformed Iq Data */
+    public static final String IQ_DATA_MALFORMED_MSG = "Malformed Iq Data";
     /** Malformed Presence Element: \"%1$s\" */
     public static final String PRESENCE_DATA_ELEMENT_MALFORMED_MSG = "Malformed Presence Element: \"%1$s\"";
+    /** Malformed Message Element: \"%1$s\" */
+    public static final String MESSAGE_DATA_ELEMENT_MALFORMED_MSG = "Malformed Message Element: \"%1$s\"";
+    /** Malformed IQ Element: \"%1$s\" */
+    public static final String IQ_DATA_ELEMENT_MALFORMED_MSG = "Malformed IQ Element: \"%1$s\"";
     /** Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\" */
     public static final String ILLEGAL_VALUE_MSG = "Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\"";
     /** Malformed POST Data" */

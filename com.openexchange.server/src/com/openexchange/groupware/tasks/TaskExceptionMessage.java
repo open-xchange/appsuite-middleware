@@ -122,8 +122,8 @@ public class TaskExceptionMessage implements LocalizableStrings {
     // Date range in search must contain 2 and not %d values.
     public static final String WRONG_DATE_RANGE_MSG = "Date range in search must contain 2 and not %d values.";
 
-    // Cannot decrease number of attachments below zero.
-    public static final String WRONG_ATTACHMENT_COUNT_MSG = "Cannot decrease number of attachments below zero.";
+    // Cannot detach more attachments than actually available.
+    public static final String WRONG_ATTACHMENT_COUNT_MSG = "Cannot detach more attachments than actually available.";
 
     // You are not allowed to read the contents of folder %1$s (%2$d).
     public static final String NO_READ_PERMISSION_MSG = "You are not allowed to read the contents of folder %1$s (%2$d).";

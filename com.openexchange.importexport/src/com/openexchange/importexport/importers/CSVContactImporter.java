@@ -77,6 +77,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
+import com.openexchange.groupware.generic.FolderUpdaterServiceV2;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.csv.CSVParser;
@@ -177,7 +178,7 @@ public class CSVContactImporter extends AbstractImporter {
                 if (!passesSanityTestForDisplayName(fields)) {
                     throw ImportExportExceptionCodes.NO_FIELD_FOR_NAMING.create();
                 }
-                
+
             } catch (final IOException e) {
                 throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
             } finally {
@@ -210,12 +211,17 @@ public class CSVContactImporter extends AbstractImporter {
         // Insert or update contacts
         final FolderUpdaterRegistry updaterRegistry = ImportExportServices.getUpdaterRegistry();
         final TargetFolderDefinition target = new TargetFolderDefinition(folder, sessObj.getUserId(), sessObj.getContext());
+        final List<OXException> errors = new LinkedList<OXException>();
         {
             final FolderUpdaterService<Contact> folderUpdater = updaterRegistry.getFolderUpdater(target);
             if (folderUpdater == null) {
                 throw ImportExportExceptionCodes.CANNOT_IMPORT.create();
             }
-            folderUpdater.save(contacts, target);
+            if (folderUpdater instanceof FolderUpdaterServiceV2) {
+                ((FolderUpdaterServiceV2<Contact>) folderUpdater).save(contacts, target, errors);
+            } else {
+                folderUpdater.save(contacts, target);
+            }
         }
 
 
@@ -236,7 +242,11 @@ public class CSVContactImporter extends AbstractImporter {
                 results.add(result);
             } else if (notNull && isZero) {
                 final ImportResult notCreated = new ImportResult();
-                notCreated.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(intention.contact));
+                if (errors.isEmpty()) {
+                    notCreated.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(intention.contact));
+                } else {
+                    notCreated.setException(errors.get(0));
+                }
                 results.add(notCreated);
             } else if (intention.result != null) {
                 results.add(intention.result);
@@ -394,7 +404,7 @@ public class CSVContactImporter extends AbstractImporter {
         int highestAmountOfMappedFields = 0;
 
         List<List<String>> retval = null;
-        
+
         for (ContactFieldMapper mapper : getMappers()) {
             String csvStr = transformInputStreamToString(input, mapper.getEncoding(), false);
             final CSVParser csvParser = getCSVParser();

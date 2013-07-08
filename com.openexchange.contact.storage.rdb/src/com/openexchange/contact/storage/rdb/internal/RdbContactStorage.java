@@ -127,13 +127,15 @@ public class RdbContactStorage extends DefaultContactStorage {
     public Contact get(Session session, String folderId, String id, ContactField[] fields) throws OXException {
         int objectID = parse(id);
         int contextID = session.getContextId();
+        int folderID = parse(folderId);
         ConnectionHelper connectionHelper = new ConnectionHelper(session);
         Connection connection = connectionHelper.getReadOnly();
         try {
             /*
              * check fields
              */
-            QueryFields queryFields = new QueryFields(fields);
+            QueryFields queryFields = FolderObject.SYSTEM_LDAP_FOLDER_ID == folderID ?
+                new QueryFields(fields, ContactField.INTERNAL_USERID) : new QueryFields(fields);
             if (false == queryFields.hasContactData()) {
                 return null; // nothing to do
             }
@@ -621,7 +623,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * check fields
              */
-            QueryFields queryFields = new QueryFields(fields, ContactField.OBJECT_ID);
+            QueryFields queryFields = new QueryFields(fields, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID);
             if (false == queryFields.hasContactData()) {
                 return null; // nothing to do
             }
@@ -688,7 +690,8 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * check fields
              */
-            QueryFields queryFields = new QueryFields(fields, ContactField.OBJECT_ID);
+            QueryFields queryFields = FolderObject.SYSTEM_LDAP_FOLDER_ID == parentFolderID ? new QueryFields(fields,
+                ContactField.OBJECT_ID, ContactField.INTERNAL_USERID) : new QueryFields(fields, ContactField.OBJECT_ID);
             if (false == queryFields.hasContactData()) {
                 return null; // nothing to do
             }
@@ -739,7 +742,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * check fields
              */
-            QueryFields queryFields = new QueryFields(fields, ContactField.OBJECT_ID);
+            QueryFields queryFields = new QueryFields(fields, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID);
             if (false == queryFields.hasContactData()) {
                 return null; // nothing to do
             }
@@ -919,4 +922,3 @@ public class RdbContactStorage extends DefaultContactStorage {
     }
 
 }
-

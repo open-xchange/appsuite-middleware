@@ -348,6 +348,8 @@ public final class ImportAction extends AbstractMailAction {
                 final List<MimeMessage> messages = new ArrayList<MimeMessage>(16);
                 final List<MailMessage> mails = new ArrayList<MailMessage>(16);
                 while (keepgoing.get() || !queue.isEmpty()) {
+                    messages.clear();
+                    mails.clear();
                     if (queue.isEmpty()) {
                         // Blocking wait for at least 1 message to arrive.
                         final MimeMessage msg = queue.take();
@@ -363,9 +365,7 @@ public final class ImportAction extends AbstractMailAction {
                         final MailMessage mm = MimeMessageConverter.convertMessage(message);
                         mails.add(mm);
                     }
-                    messages.clear();
                     final String[] ids = mailInterface.importMessages(folder, mails.toArray(new MailMessage[mails.size()]), force);
-                    mails.clear();
                     idList.addAll(Arrays.asList(ids));
                     if (flags > 0) {
                         mailInterface.updateMessageFlags(folder, ids, flags, true);

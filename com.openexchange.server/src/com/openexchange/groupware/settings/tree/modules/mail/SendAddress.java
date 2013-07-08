@@ -49,6 +49,11 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -57,8 +62,10 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.session.Session;
 
 /**
@@ -111,11 +118,32 @@ public class SendAddress implements PreferencesItemService {
                 final String newAlias = setting.getSingleValue().toString();
                 boolean found = false;
                 final String[] aliases = user.getAliases();
-                if (null != aliases) {
-                    for (int i = 0; !found && i < aliases.length; i++) {
-                        found = aliases[i].equals(newAlias);
+                final List<String> allAliases = new ArrayList<String>(aliases.length + 3);
+                if (aliases != null) {
+                    for(String alias: aliases) {
+                        allAliases.add(alias);
                     }
                 }
+                final boolean supportMsisdnAddresses = MailProperties.getInstance().isSupportMsisdnAddresses();
+                if (supportMsisdnAddresses) {
+                    Set<InternetAddress> msisdnAddresses = new HashSet<InternetAddress>();
+                    MsisdnUtility.addMsisdnAddress(msisdnAddresses, session);
+                    for (InternetAddress internetAddress : msisdnAddresses) {
+                        allAliases.add(internetAddress.getAddress());
+                    }
+                }
+                
+                final int pos = newAlias.indexOf('/');
+                String checkAlias = newAlias;
+                if (pos > 0) {
+                    checkAlias = checkAlias.substring(0, pos);
+                }
+                
+                for (String alias: allAliases) {
+                   
+                    found = alias.equals(checkAlias);
+                }
+        
                 if (user.getMail().equals(newAlias)) {
                     found = true;
                 }

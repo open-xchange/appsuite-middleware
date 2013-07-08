@@ -64,6 +64,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
@@ -172,9 +173,8 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
         final long size = referencedPart.getSize();
         if (size > 0 && size <= TransportProperties.getInstance().getReferencedPartLimit()) {
             if (isMail) {
-                final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
-                referencedPart.writeTo(out);
-                data = out.toByteArray();
+                // Consume surrounding part's headers until nested message bytes appears
+                data = Streams.stream2bytes(messageSource(referencedPart));
                 setContentType(MimeTypes.MIME_MESSAGE_RFC822);
                 setContentDisposition(Part.INLINE);
                 setSize(size);
@@ -184,12 +184,11 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
             }
         } else {
             if (isMail) {
-                final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
-                referencedPart.writeTo(out);
-                copy2File(new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+                // Consume surrounding part's headers until nested message bytes appears
+                copy2File(messageSource(referencedPart));
                 setContentType(MimeTypes.MIME_MESSAGE_RFC822);
                 setContentDisposition(Part.INLINE);
-
+                setSize(file.getFile().length());
             } else {
                 copy2File(referencedPart.getInputStream());
                 setHeaders(referencedPart);
@@ -227,15 +226,22 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
         }
     }
 
+    private InputStream messageSource(final MailPart referencedPart) throws OXException {
+        if (referencedPart instanceof MailMessage) {
+            // Copy to ByteArrayOutputStream
+            final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
+            referencedPart.writeTo(out);
+            return Streams.asInputStream(out);
+        }
+        return referencedPart.getInputStream();
+    }
+
     private void copy2ByteArr(final InputStream in) throws IOException {
         try {
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
             final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
-            int len;
-            int totalBytes = 0;
-            while ((len = in.read(bbuf)) > 0) {
-                out.write(bbuf, 0, len);
-                totalBytes += len;
+            for (int read; (read = in.read(bbuf)) > 0;) {
+                out.write(bbuf, 0, read);
             }
             out.flush();
             data = out.toByteArray();

@@ -66,7 +66,7 @@ import com.openexchange.java.Strings;
 
 /**
  * {@link AppsLoadServlet} - Provides App Suite data for loading applciations.
- * 
+ *
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public class AppsLoadServlet extends HttpServlet {
@@ -81,7 +81,7 @@ public class AppsLoadServlet extends HttpServlet {
 
     /**
      * Initializes a new {@link AppsLoadServlet}.
-     * 
+     *
      * @throws IOException
      */
     public AppsLoadServlet(final File root, final File zoneinfo) throws IOException {
@@ -144,6 +144,9 @@ public class AppsLoadServlet extends HttpServlet {
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final String[] modules = Strings.splitByComma(req.getPathInfo());
+        if (null == modules) {
+            return; // no actual files requested
+        }
         final int length = modules.length;
         if (length < 2) {
             return; // no actual files requested
@@ -152,7 +155,7 @@ public class AppsLoadServlet extends HttpServlet {
         resp.setDateHeader("Expires", System.currentTimeMillis() + (long) 3e10); // + almost a year
         final OutputStream out = resp.getOutputStream();
         for (int i = 1; i < length; i++) {
-            final String module = modules[i];
+            final String module = modules[i].replace(' ', '+');
 
             // Module names may only contain letters, digits, '_', '-', '/' and
             // '.', but not "..".
@@ -182,8 +185,9 @@ public class AppsLoadServlet extends HttpServlet {
                 @Override
                 @SuppressWarnings("deprecation")
                 public byte[] filter(ByteArrayOutputStream baos) {
-                    if (format == null)
+                    if (format == null) {
                         return baos.toByteArray();
+                    }
 
                     // Special cases for JavaScript-friendly reading of raw files:
                     // /text;* returns the file as a UTF-8 string

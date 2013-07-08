@@ -131,6 +131,8 @@ public final class MailSearchTest extends AbstractMailTest {
 						null, null, term, FIELDS_ID);
 				for (int i = 0; i < fetchedMails.length; i++) {
 					assertFalse("Mail ID is -1", fetchedMails[i].getMailId() == null);
+					assertTrue("Missing Content-Type", fetchedMails[i].containsContentType());
+                    assertTrue("Unexpected Content-Type", fetchedMails[i].getContentType().startsWith("text/plain"));
 				}
 
 				term = new FlagTerm(MailMessage.FLAG_SEEN, false);
@@ -154,17 +156,8 @@ public final class MailSearchTest extends AbstractMailTest {
 						term, FIELDS_EVEN_MORE);
 				for (int i = 0; i < fetchedMails.length; i++) {
 					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
-					assertTrue("Missing content type", fetchedMails[i].containsContentType());
-					assertTrue("Missing flags", fetchedMails[i].containsFlags());
-					assertTrue("Missing From", fetchedMails[i].containsFrom());
-					assertTrue("Missing To", fetchedMails[i].containsTo());
-					assertTrue("Missing Disposition-Notification-To", fetchedMails[i].containsDispositionNotification());
-					assertTrue("Missing color label", fetchedMails[i].containsColorLabel());
-					assertTrue("Missing headers", fetchedMails[i].containsHeaders());
-					assertTrue("Missing subject", fetchedMails[i].containsSubject());
-					assertTrue("Missing thread level", fetchedMails[i].containsThreadLevel());
 					assertTrue("Missing size", fetchedMails[i].containsSize());
-					assertTrue("Missing priority", fetchedMails[i].containsPriority());
+					assertTrue("Unexpected size", fetchedMails[i].getSize() > 1023);
 				}
 
 				final Map<String, String> map = new HashMap<String, String>(fetchedMails.length);
@@ -206,43 +199,7 @@ public final class MailSearchTest extends AbstractMailTest {
 			}
 	}
 
-	private static final String RFC822_SRC = "Return-Path: <dream-team-bounces@open-xchange.com>\n"
-			+ "Received: from ox.netline-is.de ([unix socket])\n"
-			+ "	by ox (Cyrus v2.2.3) with LMTP; Tue, 08 Apr 2008 10:33:24 +0200\n" + "X-Sieve: CMU Sieve 2.2\n"
-			+ "Received: by ox.netline-is.de (Postfix, from userid 65534)\n"
-			+ "	id B46993DCB9E; Tue,  8 Apr 2008 10:33:23 +0200 (CEST)\n"
-			+ "Received: from netline.de (comfire.netline.de [192.168.32.1])\n"
-			+ "	by ox.netline-is.de (Postfix) with ESMTP id 70E1A3DCB9A\n"
-			+ "	for <thorben@open-xchange.com>; Tue,  8 Apr 2008 10:33:22 +0200 (CEST)\n"
-			+ "Received: from [10.20.30.11] (helo=www.open-xchange.org ident=mail)\n"
-			+ "	by netline.de with esmtp (Exim)\n" + "	id 1Jj95z-0003bM-00\n"
-			+ "	for thorben@open-xchange.com; Tue, 08 Apr 2008 10:22:23 +0200\n"
-			+ "Received: from mail.open-xchange.com ([10.20.30.22] helo=ox.open-xchange.com)\n"
-			+ "	by www.open-xchange.org with esmtp (Exim 3.36 #1 (Debian))\n" + "	id 1Jj9Fo-000709-00\n"
-			+ "	for <thorben@open-xchange.org>; Tue, 08 Apr 2008 10:32:32 +0200\n"
-			+ "Received: by ox.open-xchange.com (Postfix, from userid 76)\n"
-			+ "	id D038132C89D; Tue,  8 Apr 2008 10:32:31 +0200 (CEST)\n"
-			+ "Received: from ox.open-xchange.com ([unix socket])\n"
-			+ "	 by ox.open-xchange.com (Cyrus v2.2.12-Invoca-RPM-2.2.12-8.1.RHEL4) with LMTPA;\n"
-			+ "	 Tue, 08 Apr 2008 10:32:29 +0200\n" + "X-Sieve: CMU Sieve 2.2\n"
-			+ "Received: by ox.open-xchange.com (Postfix, from userid 99)\n"
-			+ "	id B862832C87B; Tue,  8 Apr 2008 10:32:25 +0200 (CEST)\n"
-			+ "Received: from ox.open-xchange.com (localhost.localdomain [127.0.0.1])\n"
-			+ "	by ox.open-xchange.com (Postfix) with ESMTP id C7C6632C60D;\n"
-			+ "	Tue,  8 Apr 2008 10:32:24 +0200 (CEST)\n" + "X-Original-To: dream-team@ox.open-xchange.com\n"
-			+ "Delivered-To: dream-team@ox.open-xchange.com\n"
-			+ "Received: by ox.open-xchange.com (Postfix, from userid 99)\n"
-			+ "	id C263B32C8A3; Tue,  8 Apr 2008 10:32:22 +0200 (CEST)\n"
-			+ "Received: from netline.de (mail.netline-is.de [10.20.30.2])\n"
-			+ "	by ox.open-xchange.com (Postfix) with ESMTP id 5E96D32C87C;\n"
-			+ "	Tue,  8 Apr 2008 10:32:20 +0200 (CEST)\n" + "Received: from [192.168.32.7] (helo=ox.netline-is.de)\n"
-			+ "	by netline.de with esmtp (Exim)\n" + "	id 1Jj95n-0003af-00; Tue, 08 Apr 2008 10:22:11 +0200\n"
-			+ "Received: by ox.netline-is.de (Postfix, from userid 65534)\n"
-			+ "	id 8A38F3DCB91; Tue,  8 Apr 2008 10:33:08 +0200 (CEST)\n"
-			+ "Received: from oxee (unknown [192.168.32.9])\n"
-			+ "	by ox.netline-is.de (Postfix) with ESMTP id 0657B3DCB89;\n"
-			+ "	Tue,  8 Apr 2008 10:33:08 +0200 (CEST)\n" + "Date: Tue, 8 Apr 2008 10:32:18 +0200 (CEST)\n"
-			+ "From: \"Di Lella, Leonardo\" <leonardo.dilella@open-xchange.com>\n"
+	private static final String RFC822_SRC = "From: \"Di Lella, Leonardo\" <leonardo.dilella@open-xchange.com>\n"
 			+ "To: dream-team@open-xchange.com,\n" + "	Holger Achtziger <Holger.Achtziger@open-xchange.com>\n"
 			+ "Message-ID: <32496175.17311207643539009.JavaMail.open-xchange@oxee>\n"
 			+ "In-Reply-To: <47F662C4.5060605@open-xchange.com>\n"
@@ -263,9 +220,6 @@ public final class MailSearchTest extends AbstractMailTest {
 			+ "List-Subscribe: <https://ox.open-xchange.com/mailman/listinfo/dream-team>,\n"
 			+ "	<mailto:dream-team-request@open-xchange.com?subject=subscribe>\n"
 			+ "Sender: dream-team-bounces@open-xchange.com\n" + "Errors-To: dream-team-bounces@open-xchange.com\n"
-			+ "X-Scanner: exiscan *1Jj95z-0003bM-00*HSfWvPhKQvA* http://duncanthrax.net/exiscan/\n"
-			+ "X-Spam-Checker-Version: SpamAssassin 2.64 (2004-01-11) on ox.netline-is.de\n" + "X-Spam-Level: \n"
-			+ "X-Spam-Status: No, hits=-4.2 required=5.0 tests=AWL,BAYES_00,HTML_30_40,\n"
 			+ "	HTML_MESSAGE,HTML_TITLE_EMPTY autolearn=no version=2.64\n" + "\n"
 			+ "------=_Part_932_16478682.1207643538866\n" + "MIME-Version: 1.0\n"
 			+ "Content-Type: text/plain; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n"
@@ -286,17 +240,17 @@ public final class MailSearchTest extends AbstractMailTest {
 			+ "    <meta name=\"generator\"\n"
 			+ "    content=\"HTML Tidy for Java (vers. 26 Sep 2004), see www.w3.org\" />\n" + "\n"
 			+ "    <title></title>\n" + "  </head>\n" + "\n" + "  <body>\n"
-			+ "    Holger Achtziger &lt;Holger.Achtziger@open-xchange.com&gt; hat am\n"
+			+ "    dfgfdgsssssssssssssssssssssssssssssss&gt; hat am\n"
 			+ "    4. April 2008 um 19:17 geschrieben:<br />\n" + "    <br />\n" + "    &gt; Hallo!<br />\n"
 			+ "    <br />\n" + "    Hallo,<br />\n" + "    <br />\n" + "    wie lauten die Randbedingungen ? <br />\n"
-			+ "    <br />\n" + "    1) Wie lange zahlt uns 1&amp;1 den Server (nur einen Jahr?) ?<br />\n"
-			+ "    2) Privat oder nur geschaeftlich einsetzbar ?<br />\n"
-			+ "    3) Was passiert bei einer OX-Kuendigung ?<br />\n" + "    <br />\n" + "    Danke.<br />\n"
+			+ "    <br />\n" + "    1) Wie lange zahlt uns safgggdfag ?<br />\n"
+			+ "    2) PrivasdfASFGDGF einsetzbar sdfSddddddddddd ?<br />\n"
+			+ "    3) Was paFSGADFGADFGDAFG SFADGASGRADdigung ?<br />\n" + "    <br />\n" + "    Danke.<br />\n"
 			+ "    <br />\n" + "\n" + "    <div>\n" + "      --<br />\n" + "      best regards<br />\n"
-			+ "      Leonardo Di Lella<br />\n" + "      <br />\n" + "      Open-Xchange GmbH<br />\n" + "      <a\n"
+			+ "      dfgdfgdfg<br />\n" + "      <br />\n" + "      Open-Xchange GmbH<br />\n" + "      <a\n"
 			+ "      href=\"http://www.open-xchange.com/wiki/index.php?title=User:Ledil\"\n"
 			+ "       target=\"_blank\">http://www.open-xchange.com/wiki/index.php?title=User:Ledil</a><br />\n"
-			+ "      <br />\n" + "      [ledil (irc), leonardo_dilella (skype)]<br />\n"
+			+ "      <br />\n" + "      [ngfgdh (irc), kkkoooo (skyphe)]<br />\n"
 			+ "      0x15208141 | 2829 F2BE 2242 91F0 24EB C0A7 258E F1A2 1520 8141\n" + "    </div>\n" + "  </body>\n"
 			+ "\n" + "</html>\n" + "\n" + "------=_Part_932_16478682.1207643538866--\n" + "\n";
 

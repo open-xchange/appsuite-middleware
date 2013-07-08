@@ -50,30 +50,31 @@
 package com.openexchange.crypto;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
+import com.openexchange.exception.LogLevelAwareOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public enum CryptoErrorMessage implements OXExceptionCode {
+public enum CryptoErrorMessage implements LogLevelAwareOXExceptionCode {
     /**
      * Bad password.
      */
-    BadPassword(CATEGORY_USER_INPUT, 1, CryptoExceptionMessage.BAD_PASSWORD_HELP, CryptoExceptionMessage.BAD_PASSWORD_MSG),
+    BadPassword(CATEGORY_USER_INPUT, 1, CryptoExceptionMessage.BAD_PASSWORD_HELP, CryptoExceptionMessage.BAD_PASSWORD_MSG, LogLevel.ERROR),
     /**
      * Encoding error.
      */
-    EncodingException(CATEGORY_ERROR, 2, CryptoExceptionMessage.ENCODING_ERROR_HELP, CryptoExceptionMessage.ENCODING_ERROR_MSG),
+    EncodingException(CATEGORY_ERROR, 2, CryptoExceptionMessage.ENCODING_ERROR_HELP, CryptoExceptionMessage.ENCODING_ERROR_MSG, LogLevel.ERROR),
     /**
      * Security Exception.
      */
-    SecurityException(CATEGORY_ERROR, 3, CryptoExceptionMessage.SECURITY_EXCEPTION_HELP, CryptoExceptionMessage.SECURITY_EXCEPTION_MSG),
+    SecurityException(CATEGORY_ERROR, 3, CryptoExceptionMessage.SECURITY_EXCEPTION_HELP, CryptoExceptionMessage.SECURITY_EXCEPTION_MSG, LogLevel.ERROR),
     /**
      * Arbitrary byte sequence is missing to generate a secure key.
      */
-    NoSalt(CATEGORY_USER_INPUT, 4, CryptoExceptionMessage.NO_SALT_HELP, CryptoExceptionMessage.NO_SALT_MSG);
+    NoSalt(CATEGORY_USER_INPUT, 4, CryptoExceptionMessage.NO_SALT_HELP, CryptoExceptionMessage.NO_SALT_MSG, LogLevel.ERROR);
 
     private static final String PREFIX = "CRP";
 
@@ -86,24 +87,28 @@ public enum CryptoErrorMessage implements OXExceptionCode {
         return PREFIX;
     }
 
-    private Category category;
+    private final Category category;
+    private final int errorCode;
+    private final String help;
+    private final String message;
+    private final LogLevel logLevel;
 
-    private int errorCode;
-
-    private String help;
-
-    private String message;
-
-    private CryptoErrorMessage(final Category category, final int errorCode, final String help, final String message) {
+    private CryptoErrorMessage(final Category category, final int errorCode, final String help, final String message, final LogLevel logLevel) {
         this.category = category;
         this.errorCode = errorCode;
         this.help = help;
         this.message = message;
+        this.logLevel = logLevel;
     }
 
     @Override
     public String getPrefix() {
         return PREFIX;
+    }
+
+    @Override
+    public LogLevel getLogLevel() {
+        return logLevel;
     }
 
     @Override

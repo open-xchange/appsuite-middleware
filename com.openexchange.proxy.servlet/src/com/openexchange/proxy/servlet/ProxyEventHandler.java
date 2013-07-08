@@ -78,7 +78,9 @@ public final class ProxyEventHandler implements EventHandler {
             if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
                 // A single session was removed
                 final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                ProxyRegistryImpl.getInstance().dropRegistrationsFor(session.getSessionID());
+                if (!session.isTransient()) {
+                    ProxyRegistryImpl.getInstance().dropRegistrationsFor(session.getSessionID());
+                }
             } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
                 // A session container was removed
                 @SuppressWarnings("unchecked") final Map<String, Session> sessionContainer =
@@ -86,7 +88,9 @@ public final class ProxyEventHandler implements EventHandler {
                 // For each session
                 final ProxyRegistryImpl registryImpl = ProxyRegistryImpl.getInstance();
                 for (final Session session : sessionContainer.values()) {
-                    registryImpl.dropRegistrationsFor(session.getSessionID());
+                    if(!session.isTransient()) {
+                        registryImpl.dropRegistrationsFor(session.getSessionID());
+                    }
                 }
             }
         } catch (final Exception e) {

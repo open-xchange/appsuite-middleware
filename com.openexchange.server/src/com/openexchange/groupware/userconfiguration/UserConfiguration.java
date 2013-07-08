@@ -59,6 +59,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -320,13 +321,13 @@ public class UserConfiguration implements Serializable, Cloneable {
     public int hashCode() {
         int hash = 7;
         hash = 31 * hash + userId;
-        for(final String p: capabilities) {
-        	hash = 31 * hash + p.hashCode();
+        for (String p : capabilities) {
+            hash = 31 * hash + p.hashCode();
         }
         if (null != groups) {
             Arrays.sort(groups);
-            for (int i = 0; i < groups.length; i++) {
-                hash = 31 * hash + groups[i];
+            for (int group : groups) {
+                hash = 31 * hash + group;
             }
         }
         if (null != ctx) {
@@ -750,7 +751,7 @@ public class UserConfiguration implements Serializable, Cloneable {
             return true;
         }
 
-        for (final Permission p : Permission.byBits(permissionBit)) {
+        for (Permission p : Permission.byBits(permissionBit)) {
             if (!capabilities.contains(toLowerCase(p.name()))) {
                 return false;
             }
@@ -778,7 +779,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration enabled named permission; otherwise <code>false</code>
      */
     public boolean hasPermission(final String name) {
-    	return getExtendedPermissions().contains(toLowerCase(name));
+        return getExtendedPermissions().contains(toLowerCase(name));
     }
 
     /**
@@ -818,11 +819,11 @@ public class UserConfiguration implements Serializable, Cloneable {
         return new StringBuilder(32).append("UserConfiguration_").append(userId).append('@').append(capabilities.toString()).toString();
     }
 
-	/**
-	 * Gets the extended permissions.
-	 *
-	 * @return The extended permissions
-	 */
+    /**
+     * Gets the extended permissions.
+     *
+     * @return The extended permissions
+     */
     public Set<String> getExtendedPermissions() {
         return capabilities;
     }
@@ -844,16 +845,18 @@ public class UserConfiguration implements Serializable, Cloneable {
                 final String property = PERMISSION_PROPERTY;
                 for (final String scope : configViews.getSearchPath()) {
                     final String permissions = view.property(property, String.class).precedence(scope).get();
-                    if (permissions != null) {
+                    if (permissions != null && permissions.length() > 0) {
                         for (final String permissionModifier : P_SPLIT.split(permissions)) {
-                            final char firstChar = permissionModifier.charAt(0);
-                            if ('-' == firstChar) {
-                                retval.remove(toLowerCase(permissionModifier.substring(1)));
-                            } else {
-                                if ('+' == firstChar) {
-                                    retval.add(toLowerCase(permissionModifier.substring(1)));
+                            if (!isEmpty(permissionModifier)) {
+                                final char firstChar = permissionModifier.charAt(0);
+                                if ('-' == firstChar) {
+                                    retval.remove(toLowerCase(permissionModifier.substring(1)));
                                 } else {
-                                    retval.add(toLowerCase(permissionModifier));
+                                    if ('+' == firstChar) {
+                                        retval.add(toLowerCase(permissionModifier.substring(1)));
+                                    } else {
+                                        retval.add(toLowerCase(permissionModifier));
+                                    }
                                 }
                             }
                         }

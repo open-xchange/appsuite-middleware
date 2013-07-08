@@ -52,21 +52,69 @@ package com.hazelcast.osgi;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.config.ConfigurationService;
 
 /**
  * {@link HzActivator} - The activator for Hazelcast bundle.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HzActivator implements BundleActivator {
 
+    private volatile ServiceTracker<ConfigurationService, ConfigurationService> tracker;
+
+    /**
+     * Initializes a new {@link HzActivator}.
+     */
     public HzActivator() {
         super();
     }
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        // Check if log4j is enabled
+        final ServiceTrackerCustomizer<ConfigurationService, ConfigurationService> customizer = new ServiceTrackerCustomizer<ConfigurationService, ConfigurationService>() {
+
+            @Override
+            public void removedService(ServiceReference<ConfigurationService> reference, ConfigurationService service) {
+                context.ungetService(reference);
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<ConfigurationService> reference, ConfigurationService service) {
+                // Ignore
+            }
+
+            @Override
+            public ConfigurationService addingService(ServiceReference<ConfigurationService> reference) {
+                final ConfigurationService configService = context.getService(reference);
+                final boolean loggingEnabled = configService.getBoolProperty("com.openexchange.hazelcast.logging.enabled", true);
+                if (loggingEnabled) {
+                    checkForLog4j(context);
+                } else {
+                    System.setProperty("hazelcast.logging.type", "none");
+                }
+                return configService;
+            }
+        };
+        final ServiceTracker<ConfigurationService, ConfigurationService> tracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, customizer);
+        this.tracker = tracker;
+        tracker.open();
+    }
+
+    @Override
+    public void stop(final BundleContext context) throws Exception {
+        final ServiceTracker<ConfigurationService, ConfigurationService> tracker =  this.tracker;
+        if (null != tracker) {
+            tracker.close();
+            this.tracker = null;
+        }
+    }
+
+    protected void checkForLog4j(final BundleContext context) {
         boolean hasLog4J = false;
         final Bundle[] bundles = context.getBundles();
         for (int i = 0; !hasLog4J && i < bundles.length; i++) {
@@ -75,11 +123,6 @@ public class HzActivator implements BundleActivator {
         if (hasLog4J) {
             System.setProperty("hazelcast.logging.type", "log4j");
         }
-    }
-
-    @Override
-    public void stop(final BundleContext context) throws Exception {
-        // Ignore
     }
 
 }

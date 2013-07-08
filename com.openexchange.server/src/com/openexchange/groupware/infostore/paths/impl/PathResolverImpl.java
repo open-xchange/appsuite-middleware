@@ -50,6 +50,8 @@
 package com.openexchange.groupware.infostore.paths.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -81,8 +83,8 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PathResolverImpl.class));
 
     private final ThreadLocal<Map<WebdavPath,Resolved>> resolveCache = new ThreadLocal<Map<WebdavPath,Resolved>>();
-    private final ThreadLocal<Map<Integer,WebdavPath>> docPathCache = new ThreadLocal<Map<Integer,WebdavPath>>();
-    private final ThreadLocal<Map<Integer,WebdavPath>> folderPathCache = new ThreadLocal<Map<Integer,WebdavPath>>();
+    private final ThreadLocal<TIntObjectMap<WebdavPath>> docPathCache = new ThreadLocal<TIntObjectMap<WebdavPath>>();
+    private final ThreadLocal<TIntObjectMap<WebdavPath>> folderPathCache = new ThreadLocal<TIntObjectMap<WebdavPath>>();
 
     private final InfostoreFacade database;
     private WebdavFolderAliases aliases;
@@ -105,20 +107,19 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
     @Override
     public WebdavPath getPathForDocument(final int relativeToFolder, final int documentId,
             final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        final Map<Integer, WebdavPath> cache = docPathCache.get();
+        final TIntObjectMap<WebdavPath> cache = docPathCache.get();
         final Map<WebdavPath, Resolved> resCache = resolveCache.get();
-        final Integer key = Integer.valueOf(documentId);
-        if(cache.containsKey(key)) {
-            return relative(relativeToFolder, cache.get(key), ctx, user, userConfig);
+        if(cache.containsKey(documentId)) {
+            return relative(relativeToFolder, cache.get(documentId), ctx, user, userConfig);
         }
 
         final DocumentMetadata dm = database.getDocumentMetadata(documentId, InfostoreFacade.CURRENT_VERSION, ctx, user, userConfig);
         if(dm.getFileName() == null || dm.getFileName().equals("")) {
-            throw InfostoreExceptionCodes.DOCUMENT_CONTAINS_NO_FILE.create(key);
+            throw InfostoreExceptionCodes.DOCUMENT_CONTAINS_NO_FILE.create(Integer.valueOf(documentId));
         }
         final WebdavPath path = getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, (int)dm.getFolderId(),ctx,user,userConfig).dup().append(dm.getFileName());
 
-        cache.put(key, path);
+        cache.put(documentId, path);
         resCache.put(path, new ResolvedImpl(path, documentId, true));
         return relative(relativeToFolder,path, ctx, user, userConfig);
 
@@ -135,10 +136,9 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
         }
 
         final Map<WebdavPath, Resolved> resCache = resolveCache.get();
-        final Map<Integer,WebdavPath> cache = folderPathCache.get();
-        final Integer key = Integer.valueOf(folderId);
-        if(cache.containsKey(key)) {
-            return relative(relativeToFolder, cache.get(key), ctx, user, userConfig);
+        final TIntObjectMap<WebdavPath> cache = folderPathCache.get();
+        if(cache.containsKey(folderId)) {
+            return relative(relativeToFolder, cache.get(folderId), ctx, user, userConfig);
         }
 
         final List<FolderObject> path = new ArrayList<FolderObject>();
@@ -300,8 +300,8 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
         resolveCache.get().remove(url);
         switch(type) {
         case COLLECTION :
-            folderPathCache.get().remove(Integer.valueOf(id));break;
-        case RESOURCE : docPathCache.get().remove(Integer.valueOf(id)); break;
+            folderPathCache.get().remove(id);break;
+        case RESOURCE : docPathCache.get().remove(id); break;
         default : throw new IllegalArgumentException("Unknown Type "+type);
         }
     }
@@ -315,16 +315,16 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
 
     public void clearCache() {
         resolveCache.set(new HashMap<WebdavPath,Resolved>());
-        docPathCache.set(new HashMap<Integer,WebdavPath>());
-        folderPathCache.set(new HashMap<Integer,WebdavPath>());
+        docPathCache.set(new TIntObjectHashMap<WebdavPath>());
+        folderPathCache.set(new TIntObjectHashMap<WebdavPath>());
     }
 
     @Override
     public void startTransaction() throws OXException {
         super.startTransaction();
         resolveCache.set(new HashMap<WebdavPath,Resolved>());
-        docPathCache.set(new HashMap<Integer,WebdavPath>());
-        folderPathCache.set(new HashMap<Integer,WebdavPath>());
+        docPathCache.set(new TIntObjectHashMap<WebdavPath>());
+        folderPathCache.set(new TIntObjectHashMap<WebdavPath>());
     }
 
     /*@Override

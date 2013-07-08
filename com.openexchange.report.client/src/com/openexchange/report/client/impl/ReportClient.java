@@ -169,7 +169,7 @@ public class ReportClient extends AbstractJMXTools {
     }
 
     @Override
-    protected void furtherOptionsHandling(final AdminParser parser, final HashMap<String, String[]> env) {
+    protected void furtherOptionsHandling(final AdminParser parser, final Map<String, String[]> env) {
         try {
             final String combi = (String) parser.getOptionValue(this.showcombi);
             if (null != combi) {

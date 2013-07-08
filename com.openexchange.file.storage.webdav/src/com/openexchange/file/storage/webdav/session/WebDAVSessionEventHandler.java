@@ -80,7 +80,7 @@ public final class WebDAVSessionEventHandler implements EventHandler {
             if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
                 // A single session was removed
                 final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                if (WebDAVHttpClientRegistry.getInstance().removeClientIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
+                if (!session.isTransient() && WebDAVHttpClientRegistry.getInstance().removeClientIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
                     LOG.debug(new StringBuilder("WebDAV session removed for user ").append(session.getUserId()).append(" in context ").append(
                         session.getContextId()).toString());
                 }
@@ -90,7 +90,7 @@ public final class WebDAVSessionEventHandler implements EventHandler {
                     (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
                 // For each session
                 for (final Session session : sessionContainer.values()) {
-                    if (WebDAVHttpClientRegistry.getInstance().removeClientIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
+                    if (!session.isTransient() && WebDAVHttpClientRegistry.getInstance().removeClientIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
                         LOG.debug(new StringBuilder("WebDAV session removed for user ").append(session.getUserId()).append(" in context ").append(
                             session.getContextId()).toString());
                     }

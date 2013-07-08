@@ -52,6 +52,7 @@ package com.openexchange.drive.internal;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import com.openexchange.tools.io.IOTools;
 
 /**
  * {@link PartialInputStream}
@@ -74,7 +75,7 @@ public class PartialInputStream extends FilterInputStream {
     public PartialInputStream(InputStream in, long offset, long length) throws IOException {
         super(in);
         this.length = length;
-        this.skip(offset);
+        IOTools.reallyBloodySkip(this, offset);
         this.bytesRead = 0;
     }
 

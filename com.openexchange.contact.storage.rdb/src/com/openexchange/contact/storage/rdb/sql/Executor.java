@@ -61,7 +61,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -131,7 +130,7 @@ public class Executor {
 
     /**
      *  Gets the number of records in a folder.
-     *  
+     *
      * @param connection The db connection to use
      * @param table The database table to query
      * @param contextID The context ID
@@ -154,7 +153,7 @@ public class Executor {
                 .append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=? AND ")
                 .append(Mappers.CONTACT.get(ContactField.CREATED_BY).getColumnLabel()).append("=?;");
         }
-        
+
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
         try {
@@ -195,7 +194,7 @@ public class Executor {
             stmt.setInt(1, contextID);
             stmt.setInt(2, objectID);
             resultSet = logExecuteQuery(stmt);
-            return resultSet.next() ? Mappers.CONTACT.fromResultSet(resultSet, fields) : null;
+            return new ContactReader(contextID, connection, resultSet).readContact(fields);
         } finally {
             closeSQLStuff(resultSet, stmt);
         }
@@ -310,7 +309,6 @@ public class Executor {
         PreparedStatement stmt = null;
         int parameterIndex = 1;
         ResultSet resultSet = null;
-        List<Contact> contacts = new LinkedList<Contact>();
         try {
             stmt = connection.prepareStatement(stringAllocator.toString());
             stmt.setInt(parameterIndex++, contextID);
@@ -327,10 +325,7 @@ public class Executor {
              * execute and read out results
              */
             resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                contacts.add(Mappers.CONTACT.fromResultSet(resultSet, fields));
-            }
-            return contacts;
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields);
         } finally {
             closeSQLStuff(resultSet, stmt);
         }
@@ -390,7 +385,6 @@ public class Executor {
         PreparedStatement stmt = null;
         int parameterIndex = 1;
         ResultSet resultSet = null;
-        List<Contact> contacts = new ArrayList<Contact>();
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
             stmt.setInt(parameterIndex++, contextID);
@@ -400,10 +394,7 @@ public class Executor {
              * execute and read out results
              */
             resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                contacts.add(Mappers.CONTACT.fromResultSet(resultSet, fields));
-            }
-            return contacts;
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields);
         } finally {
             closeSQLStuff(resultSet, stmt);
         }
@@ -430,7 +421,6 @@ public class Executor {
         PreparedStatement stmt = null;
         int parameterIndex = 1;
         ResultSet resultSet = null;
-        List<Contact> contacts = new ArrayList<Contact>();
         try {
             stmt = connection.prepareStatement(stringBuilder.toString());
            	adapter.setParameters(stmt, parameterIndex);
@@ -438,10 +428,7 @@ public class Executor {
              * execute and read out results
              */
             resultSet = logExecuteQuery(stmt);
-            while (resultSet.next()) {
-                contacts.add(Mappers.CONTACT.fromResultSet(resultSet, fields));
-            }
-            return contacts;
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields);
         } finally {
             closeSQLStuff(resultSet, stmt);
         }

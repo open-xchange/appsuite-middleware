@@ -85,6 +85,8 @@ import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.StringBuilderStringer;
+import com.openexchange.java.Stringer;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 
@@ -184,7 +186,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     private boolean isCss;
 
-    private final StringBuilder cssBuffer;
+    private final Stringer cssBuffer;
 
     /**
      * Used to track all subsequent elements of a tag that ought to be removed completely.
@@ -216,7 +218,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     public FilterJerichoHandler(final int capacity) {
         super();
         urlBuilder = new StringBuilder(256);
-        cssBuffer = new StringBuilder(256);
+        cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         htmlBuilder = new StringBuilder(capacity);
         attrBuilder = new StringBuilder(128);
         if (null == staticHTMLMap) {
@@ -232,7 +234,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     public FilterJerichoHandler(final int capacity, final String mapStr) {
         super();
         urlBuilder = new StringBuilder(256);
-        cssBuffer = new StringBuilder(256);
+        cssBuffer = new StringBuilderStringer(new StringBuilder(256));
         htmlBuilder = new StringBuilder(capacity);
         attrBuilder = new StringBuilder(128);
         final Map<String, Map<String, Set<String>>> map = parseHTMLMap(mapStr);
@@ -495,10 +497,6 @@ public final class FilterJerichoHandler implements JerichoHandler {
         return (HTMLElementName.SCRIPT == check || check.startsWith("w:") || check.startsWith("o:"));
     }
 
-    private static final String CID = "cid:";
-
-    private static final Pattern PATTERN_FILENAME = Pattern.compile("([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)");
-
     /**
      * Adds tag occurring in white list to HTML result.
      *
@@ -556,7 +554,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                             attrBuilder.append(' ').append(attr).append("=\"\"");
                             imageURLFound = true;
                         } else if (dropExternalImages && (HTMLElementName.IMG == tagName || HTMLElementName.INPUT == tagName) && "src".equals(attr)) {
-                            if (val.regionMatches(true, 0, CID, 0, 4) || PATTERN_FILENAME.matcher(val).matches()) {
+                            if (isInlineImage(val)) {
                                 // Allow inline images
                                 attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
                             } else {
@@ -583,7 +581,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                                         attrBuilder.append(' ').append(attr).append("=\"\"");
                                         imageURLFound = true;
                                     } else if (dropExternalImages && (HTMLElementName.IMG == tagName || HTMLElementName.INPUT == tagName) && "src".equals(attr)) {
-                                        if (val.regionMatches(true, 0, CID, 0, 4) || PATTERN_FILENAME.matcher(val).matches()) {
+                                        if (isInlineImage(val)) {
                                             // Allow inline images
                                             attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
                                         } else {
@@ -617,6 +615,19 @@ public final class FilterJerichoHandler implements JerichoHandler {
         }
         htmlBuilder.append('>');
     }
+
+    // --------------------------------- Image check --------------------------------------- //
+
+    private static final String CID = "cid:";
+    private static final String DATA_BASE64 = "data:;base64,";
+    private static final Pattern PATTERN_FILENAME = Pattern.compile("([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)");
+
+    private boolean isInlineImage(final String val) {
+        final String tmp = toLowerCase(val);
+        return tmp.startsWith(CID) || tmp.startsWith(DATA_BASE64) || PATTERN_FILENAME.matcher(tmp).matches();
+    }
+
+    // ----------------------------------------------------------------------------------- //
 
     private static final Pattern SPLIT_WORDS = Pattern.compile(" +");
 

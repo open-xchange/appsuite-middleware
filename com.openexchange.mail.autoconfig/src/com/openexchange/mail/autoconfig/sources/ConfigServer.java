@@ -111,7 +111,14 @@ public class ConfigServer extends AbstractConfigSource {
                     return null;
                 }
             }
-        } catch (final HttpException e) {
+
+            ClientConfig clientConfig = new AutoconfigParser().getConfig(getMethod.getResponseBodyAsStream());
+
+            Autoconfig autoconfig = getBestConfiguration(clientConfig, emailDomain);
+            replaceUsername(autoconfig, emailLocalPart, emailDomain);
+            return autoconfig;
+
+        } catch (HttpException e) {
             LOG.warn("Could not retrieve config XML.", e);
         } catch (final java.net.UnknownHostException e) {
             // Obviously that host does not exist
@@ -119,20 +126,7 @@ public class ConfigServer extends AbstractConfigSource {
         } catch (final IOException e) {
             LOG.warn("Could not retrieve config XML.", e);
         }
-
-        // Parse response
-        try {
-        	final AutoconfigParser parser = new AutoconfigParser(getMethod.getResponseBodyAsStream());
-        	final ClientConfig clientConfig = parser.getConfig();
-
-        	final Autoconfig autoconfig = getBestConfiguration(clientConfig, emailDomain);
-        	replaceUsername(autoconfig, emailLocalPart, emailDomain);
-        	return autoconfig;
-
-        } catch (final IOException e) {
-        	LOG.warn("Could not retrieve config XML.", e);
-        	return null;
-        }
+        return null;
     }
 }
 

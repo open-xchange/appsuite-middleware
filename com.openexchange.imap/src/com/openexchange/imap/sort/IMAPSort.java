@@ -97,6 +97,86 @@ public final class IMAPSort {
     }
 
     /**
+     * Attempts to perform a IMAP-based sort.
+     *
+     * @param imapFolder The IMAP folder
+     * @param filter The optional filter
+     * @param sortField The sort field
+     * @param orderDir The sort order
+     * @param imapConfig The IMAP configuration
+     * @return The IMAP-sorted sequence number or <code>null</code> if unable to do IMAP sort
+     * @throws MessagingException If sort attempt fails horribly
+     */
+    public static int[] sortMessages(final IMAPFolder imapFolder, final int[] filter, final MailSortField sortField, final OrderDirection orderDir, final IMAPConfig imapConfig) throws MessagingException {
+        final MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;
+        final int messageCount = imapFolder.getMessageCount();
+        if (messageCount <= 0) {
+            return new int[0];
+        }
+        final int size = filter == null ? messageCount : filter.length;
+        if (imapConfig.isImapSort() || (imapConfig.getCapabilities().hasSort() && (size >= MailProperties.getInstance().getMailFetchLimit()))) {
+            try {
+                // Get IMAP sort criteria
+                final String sortCriteria = getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC);
+                if (null != sortCriteria) {
+                    final int[] seqNums;
+                    {
+                        // Do IMAP sort
+                        final long start = System.currentTimeMillis();
+                        seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, filter);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP sort took ").append((System.currentTimeMillis() - start)).append("msec").toString());
+                        }
+                    }
+                    if ((seqNums == null) || (seqNums.length == 0)) {
+                        return new int[0];
+                    }
+                    return seqNums;
+                }
+            } catch (final FolderClosedException e) {
+                /*
+                 * Caused by a protocol error such as a socket error. No retry in this case.
+                 */
+                throw e;
+            } catch (final StoreClosedException e) {
+                /*
+                 * Caused by a protocol error such as a socket error. No retry in this case.
+                 */
+                throw e;
+            } catch (final MessagingException e) {
+                if (e.getNextException() instanceof ProtocolException) {
+                    final ProtocolException protocolException = (ProtocolException) e.getNextException();
+                    final Response response = protocolException.getResponse();
+                    if (response != null && response.isBYE()) {
+                        /*
+                         * The BYE response is always untagged, and indicates that the server is about to close the connection.
+                         */
+                        throw new StoreClosedException(imapFolder.getStore(), protocolException.getMessage());
+                    }
+                    final Throwable cause = protocolException.getCause();
+                    if (cause instanceof StoreClosedException) {
+                        /*
+                         * Connection is down. No retry.
+                         */
+                        throw ((StoreClosedException) cause);
+                    } else if (cause instanceof FolderClosedException) {
+                        /*
+                         * Connection is down. No retry.
+                         */
+                        throw ((FolderClosedException) cause);
+                    }
+                }
+                if (LOG.isWarnEnabled()) {
+                    final OXException imapException = IMAPException.create(IMAPException.Code.IMAP_SORT_FAILED, e, e.getMessage());
+                    LOG.warn(imapException.getMessage(), imapException);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Sorts messages located in given IMAP folder.
      *
      * @param imapFolder The IMAP folder
@@ -133,8 +213,7 @@ public final class IMAPSort {
                         seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, filter);
                         mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP sort took ").append(
-                                (System.currentTimeMillis() - start)).append("msec").toString());
+                            LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP sort took ").append((System.currentTimeMillis() - start)).append("msec").toString());
                         }
                     }
                     if ((seqNums == null) || (seqNums.length == 0)) {
@@ -143,19 +222,11 @@ public final class IMAPSort {
                     final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), imapConfig.getIMAPProperties().isFastFetch());
                     final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
                     final long start = System.currentTimeMillis();
-                    msgs =
-                        new MessageFetchIMAPCommand(
-                            imapFolder,
-                            imapConfig.getImapCapabilities().hasIMAP4rev1(),
-                            seqNums,
-                            fetchProfile,
-                            false,
-                            true,
-                            body).doCommand();
+                    msgs = new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), seqNums, fetchProfile, false, true, body).doCommand();
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP fetch for ").append(seqNums.length).append(
-                            " messages took ").append((System.currentTimeMillis() - start)).append("msec").toString());
+                        LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP fetch for ").append(seqNums.length).append(" messages took ").append(
+                            (System.currentTimeMillis() - start)).append("msec").toString());
                     }
                     if ((msgs == null) || (msgs.length == 0)) {
                         return EMPTY_MSGS;

@@ -71,7 +71,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * An ID describes a valid sender or recipient of a {@link Stanza}. It consists of an optional channel, a mandatory user name and mandatory
  * context name and an optional resource. Resources are arbitrary Strings that allow the user to specify how he is currently connected to
  * the service (e.g. one resource per client) and by that enable multiple logins from different machines and locations.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -80,18 +80,14 @@ public class ID implements Serializable {
 
     private static final long serialVersionUID = -5237507998711320109L;
 
-    private static ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>> listeners = new ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>>();
+    private static final ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>> LISTENERS = new ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>>();
 
-    private static ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>> locks = new ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>>();
+    private static final ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>> LOCKS = new ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>>();
 
     private String protocol;
-
     private String user;
-
     private String context;
-
     private String resource;
-
     private String component;
 
     /**
@@ -121,7 +117,7 @@ public class ID implements Serializable {
 
     /**
      * Initializes a new {@link ID} by a String with the syntax "xmpp://user@context/resource".
-     * 
+     *
      * @param id String with the syntax "xmpp://user@context/resource".
      * @throws IllegalArgumentException if the id doesn't follow the syntax convention.
      */
@@ -142,7 +138,7 @@ public class ID implements Serializable {
 
     /**
      * Initializes a new {@link ID} without a component.
-     * 
+     *
      * @param protocol The protocol of the ID, ox, xmpp ...
      * @param user The user represented by this ID
      * @param context The context of the user represented by this ID
@@ -155,7 +151,7 @@ public class ID implements Serializable {
 
     /**
      * Initializes a new {@link ID}.
-     * 
+     *
      * @param protocol The protocol of the ID, ox, xmpp ...
      * @param component The component of the id (to address Files and so on)
      * @param user The user represented by this ID
@@ -351,7 +347,7 @@ public class ID implements Serializable {
 
     /**
      * Strip protocol and resource from this id so that it only contains user@context information.
-     * 
+     *
      * @return
      */
     public ID toGeneralForm() {
@@ -361,7 +357,7 @@ public class ID implements Serializable {
     /**
      * Gets a value indicating whether this ID is in general form or not, i.e. if it only contains the mandatory parts and no protocol or
      * concrete resource name.
-     * 
+     *
      * @return <code>true</code> if the ID is in general form, <code>false</code>, otherwise
      */
     public boolean isGeneralForm() {
@@ -389,7 +385,7 @@ public class ID implements Serializable {
 
     /**
      * Execute the event handler when the event happens, but only once
-     * 
+     *
      * @param event
      * @param handler
      */
@@ -408,7 +404,7 @@ public class ID implements Serializable {
      * Remove all event handlers for this ID
      */
     public void clearListeners() {
-        listeners.remove(this);
+        LISTENERS.remove(this);
     }
 
     /**
@@ -431,12 +427,12 @@ public class ID implements Serializable {
         trigger(event, source, new HashMap<String, Object>());
     }
 
-    
+
     private List<IDEventHandler> handlerList(String event) {
-        ConcurrentHashMap<String, List<IDEventHandler>> events = listeners.get(this);
+        ConcurrentHashMap<String, List<IDEventHandler>> events = LISTENERS.get(this);
         if (events == null) {
             events = new ConcurrentHashMap<String, List<IDEventHandler>>();
-            listeners.put(this, events);
+            LISTENERS.put(this, events);
         }
 
         List<IDEventHandler> list = events.get(event);
@@ -449,7 +445,7 @@ public class ID implements Serializable {
         return list;
 
     }
-    
+
     private class OneOf implements IDEventHandler {
 
         IDEventHandler delegate;
@@ -465,40 +461,40 @@ public class ID implements Serializable {
             id.off(event, this);
         }
     }
-    
+
     public void clearLocks() {
-        locks.remove(this);
+        LOCKS.remove(this);
     }
-    
+
     public void lock(String scope) {
         getLock(scope).lock();
     }
-    
+
     public void unlock(String scope) {
         getLock(scope).unlock();
     }
-    
+
     public Lock getLock(String scope) {
-        ConcurrentHashMap<String, Lock> locksPerId = locks.get(this);
+        ConcurrentHashMap<String, Lock> locksPerId = LOCKS.get(this);
         if (locksPerId == null) {
             locksPerId = new ConcurrentHashMap<String, Lock>();
-            ConcurrentHashMap<String, Lock> meantime = locks.putIfAbsent(this, locksPerId);
+            ConcurrentHashMap<String, Lock> meantime = LOCKS.putIfAbsent(this, locksPerId);
             locksPerId = (meantime != null) ?  meantime : locksPerId;
         }
-        
+
         Lock lock = locksPerId.get(scope);
         if (lock == null) {
             lock = new ReentrantLock();
             Lock l = locksPerId.putIfAbsent(scope, lock);
             lock = (l != null) ? l : lock;
         }
-        
+
         return lock;
     }
-    
+
     /**
-     * 
-     * {@link Events} is a collection of event constants to be used with {@link ID#trigger(String, Object)} and {@link ID#on(String, IDEventHandler)} 
+     *
+     * {@link Events} is a collection of event constants to be used with {@link ID#trigger(String, Object)} and {@link ID#on(String, IDEventHandler)}
      *
      * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
      */

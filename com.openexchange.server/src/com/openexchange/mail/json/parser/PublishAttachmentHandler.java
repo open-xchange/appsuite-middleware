@@ -386,24 +386,25 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
     private ComposedMailMessage generateInternalVersion(final ComposedMailMessage source, final Context ctx, final List<LinkAndNamePair> links, final boolean appendLinksAsAttachment, final Date elapsedDate, final Locale locale) throws OXException {
         final ComposedMailMessage internalVersion = copyOf(source, ctx);
         final TextBodyMailPart textPart = this.textPart.copy();
+        textPart.setPlainText(null);
         final StringHelper stringHelper = StringHelper.valueOf(locale);
         if (appendLinksAsAttachment) {
             // Apply text part as it is
             internalVersion.setBodyPart(textPart);
             // Generate text for attachment
             final com.openexchange.java.StringAllocator textBuilder = new com.openexchange.java.StringAllocator(256 * links.size());
-            textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br />");
+            textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br>");
             appendLinks(links, textBuilder);
             internalVersion.addEnclosedPart(createLinksAttachment(textBuilder.toString()));
         } else {
             final String text = (String) textPart.getContent();
             final com.openexchange.java.StringAllocator textBuilder = new com.openexchange.java.StringAllocator(text.length() + 512);
-            textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br />");
+            textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br>");
             appendLinks(links, textBuilder);
             if (elapsedDate != null) {
                 textBuilder.append(
                     htmlFormat(PATTERN_DATE.matcher(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_APPENDIX)).replaceFirst(
-                        DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br /><br />");
+                        DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br><br>");
             }
             textBuilder.append(text);
             textPart.setText(textBuilder.toString());
@@ -421,6 +422,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 externalVersion.addEnclosedPart(attachment);
             }
         } else {
+            textPart.setPlainText(null);
             Locale locale = TransportProperties.getInstance().getExternalRecipientsLocale();
             if (null == locale) {
                 locale = getSessionUserLocale();
@@ -431,18 +433,18 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                 externalVersion.setBodyPart(textPart);
                 // Generate text for attachment
                 final com.openexchange.java.StringAllocator textBuilder = new com.openexchange.java.StringAllocator(256 * links.size());
-                textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br />");
+                textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br>");
                 appendLinks(links, textBuilder);
                 externalVersion.addEnclosedPart(createLinksAttachment(textBuilder.toString()));
             } else {
                 final String text = (String) textPart.getContent();
                 final com.openexchange.java.StringAllocator textBuilder = new com.openexchange.java.StringAllocator(text.length() + 512);
-                textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br />");
+                textBuilder.append(htmlFormat(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_PREFIX))).append("<br>");
                 appendLinks(links, textBuilder);
                 if (elapsedDate != null) {
                     textBuilder.append(
                         htmlFormat(PATTERN_DATE.matcher(stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENTS_APPENDIX)).replaceFirst(
-                            DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br /><br />");
+                            DateFormat.getDateInstance(DateFormat.LONG, locale).format(elapsedDate)))).append("<br><br>");
                 }
                 textBuilder.append(text);
                 textPart.setText(textBuilder.toString());
@@ -682,9 +684,9 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             textBuilder.append("<a href=").append(quot).append(link).append(quot).append('>');
             final String name = pair.name;
             if (null != name && name.length() > 0) {
-                textBuilder.append(name).append("</a><br />");
+                textBuilder.append(name).append("</a><br>");
             } else {
-                textBuilder.append(link).append("</a><br />");
+                textBuilder.append(link).append("</a><br>");
             }
         }
     } // End of appendLinks()

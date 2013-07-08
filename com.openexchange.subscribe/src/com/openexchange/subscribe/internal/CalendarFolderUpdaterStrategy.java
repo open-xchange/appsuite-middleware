@@ -172,8 +172,18 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
     @Override
     public Object startSession(final TargetFolderDefinition target) throws OXException {
         final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
-        userInfo.put(SQL_INTERFACE, new CalendarSql(new TargetFolderSession(target)));
+        CalendarSql calendarSql = new CalendarSql(new TargetFolderSession(target));
+        userInfo.put(SQL_INTERFACE, calendarSql);
         userInfo.put(TARGET, target);
+        // Clear Folder
+        
+        try {
+            calendarSql.deleteAppointmentsInFolder(target.getFolderIdAsInt());
+        } catch (SQLException e) {
+            
+        }
+        
+        
         return userInfo;
     }
 

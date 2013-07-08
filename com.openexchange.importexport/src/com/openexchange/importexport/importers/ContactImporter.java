@@ -69,7 +69,7 @@ import com.openexchange.session.Session;
  */
 public abstract class ContactImporter extends AbstractImporter {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactImporter.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactImporter.class));
 
     /**
      * Defines the maximum number of implicit retries in case of truncation errors.

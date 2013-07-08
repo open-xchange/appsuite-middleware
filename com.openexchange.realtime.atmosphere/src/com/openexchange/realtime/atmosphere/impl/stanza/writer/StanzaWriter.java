@@ -94,7 +94,7 @@ public class StanzaWriter {
             }
             return object;
         } catch (JSONException x) {
-            throw OXException.general("JSONException " + x.toString());
+            throw OXException.general("JSON error: " + x.toString());
         }
     }
 
@@ -106,12 +106,12 @@ public class StanzaWriter {
             object.put("to", stanza.getTo().toString());
         }
         object.put("selector", stanza.getSelector());
-        
+
         String id = stanza.getId();
         if (id != null && !id.isEmpty()) {
             object.put("id", id);
         }
-        
+
         String tracer = stanza.getTracer();
         if (tracer != null) {
             object.put("tracer", tracer);
@@ -121,7 +121,7 @@ public class StanzaWriter {
             }
             object.put("log", arr);
         }
-        
+
         if (stanza.getSequenceNumber() > -1) {
             object.put("seq", stanza.getSequenceNumber());
         }

@@ -75,7 +75,7 @@ import com.openexchange.realtime.client.room.chinese.ChineseRoomFactory;
 
 /**
  * {@link RealtimeGroupChatClientCLT}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class RealtimeGroupChatClientCLT {
@@ -136,7 +136,7 @@ public class RealtimeGroupChatClientCLT {
                             String data = payloads.getString("data");
                             System.out.println(from.substring(5, from.length()).split("/")[0] + ": " + data);
                         } catch (JSONException e) {
-                            System.err.println("JSONException: " + e.getMessage());
+                            System.err.println("JSON error: " + e.getMessage());
                         }
                     }
                 });
@@ -160,7 +160,7 @@ public class RealtimeGroupChatClientCLT {
             System.exit(3);
         } catch (InterruptedException e) { //
         } catch (IOException e) {
-            System.err.println("IOException:");
+            System.err.println("I/O error:");
             e.printStackTrace();
             System.exit(4);
         }

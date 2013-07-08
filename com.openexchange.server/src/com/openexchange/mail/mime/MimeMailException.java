@@ -84,8 +84,7 @@ import com.sun.mail.smtp.SMTPSendFailedException;
  */
 public class MimeMailException extends OXException {
 
-    private static final transient org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMailException.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMailException.class));
 
     private static final long serialVersionUID = -3401580182929349354L;
 
@@ -318,7 +317,7 @@ public class MimeMailException extends OXException {
             final Exception nextException = e.getNextException();
             if (nextException == null) {
                 if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_QUOTA) != -1) {
-                    return MimeMailExceptionCode.QUOTA_EXCEEDED.create(e, EMPTY_ARGS);
+                    return MimeMailExceptionCode.QUOTA_EXCEEDED.create(e, getInfo(skipTag(e.getMessage())));
                 } else if ("Unable to load BODYSTRUCTURE".equals(e.getMessage())) {
                     return MimeMailExceptionCode.MESSAGE_NOT_DISPLAYED.create(e, EMPTY_ARGS);
                 }
@@ -392,14 +391,39 @@ public class MimeMailException extends OXException {
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()),
-                        appendInfo(nextException.getMessage(), folder));
+                        appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
                 }
-                return MimeMailExceptionCode.QUOTA_EXCEEDED.create(e, appendInfo(nextException.getMessage(), folder));
+                return MimeMailExceptionCode.QUOTA_EXCEEDED.create(e, appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
             } else if (nextException instanceof com.sun.mail.iap.CommandFailedException) {
-                Category category = MimeMailExceptionCode.PROCESSING_ERROR.getCategory();
-                if (toLowerCase(e.getMessage()).indexOf("[inuse]") >= 0) {
-                    category = CATEGORY_USER_INPUT;
+                // Check for in-use error
+                final String msg = toLowerCase(nextException.getMessage());
+                if (isInUseException(msg)) {
+                    // Too many sessions in use
+                    if (null != mailConfig && null != session) {
+                        return MimeMailExceptionCode.IN_USE_ERROR_EXT.create(
+                            e,
+                            mailConfig.getServer(),
+                            mailConfig.getLogin(),
+                            Integer.valueOf(session.getUserId()),
+                            Integer.valueOf(session.getContextId()),
+                            appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
+                    }
+                    return MimeMailExceptionCode.IN_USE_ERROR.create(e, appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
                 }
+                if (isOverQuotaException(msg)) {
+                    // Over quota
+                    if (null != mailConfig && null != session) {
+                        return MimeMailExceptionCode.QUOTA_EXCEEDED_EXT.create(
+                            e,
+                            mailConfig.getServer(),
+                            mailConfig.getLogin(),
+                            Integer.valueOf(session.getUserId()),
+                            Integer.valueOf(session.getContextId()),
+                            appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
+                    }
+                    return MimeMailExceptionCode.QUOTA_EXCEEDED.create(e, appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
+                }
+                // Regular processing error cause by arbitrary CommandFailedException
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.PROCESSING_ERROR_WE_EXT.create(
                         e,
@@ -407,9 +431,9 @@ public class MimeMailException extends OXException {
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()),
-                        appendInfo(skipTag(nextException.getMessage()), folder)).setCategory(category);
+                        appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
                 }
-                return MimeMailExceptionCode.PROCESSING_ERROR_WE.create(e, appendInfo(skipTag(nextException.getMessage()), folder)).setCategory(category);
+                return MimeMailExceptionCode.PROCESSING_ERROR_WE.create(e, appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
             } else if (nextException instanceof com.sun.mail.iap.BadCommandException) {
                 Category category = MimeMailExceptionCode.PROCESSING_ERROR.getCategory();
                 if (toLowerCase(e.getMessage()).indexOf("[inuse]") >= 0) {
@@ -452,7 +476,7 @@ public class MimeMailException extends OXException {
                 }
                 return MimeMailExceptionCode.IO_ERROR.create(nextException, appendInfo(nextException.getMessage(), folder));
             } else if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_QUOTA) != -1) {
-                return MimeMailExceptionCode.QUOTA_EXCEEDED.create(e, EMPTY_ARGS);
+                return MimeMailExceptionCode.QUOTA_EXCEEDED.create(e, getInfo(skipTag(e.getMessage())));
             }
             /*
              * Default case
@@ -490,6 +514,14 @@ public class MimeMailException extends OXException {
         return sb.toString();
     }
 
+    private static String getInfo(final String info) {
+        if (null == info) {
+            return info;
+        }
+        final int pos = toLowerCase(info).indexOf("error message: ");
+        return pos < 0 ? info : info.substring(pos + 15);
+    }
+
     private static final Pattern PATTERN_TAG = Pattern.compile("A[0-9]+ (.+)");
 
     private static String skipTag(final String serverResponse) {
@@ -512,6 +544,46 @@ public class MimeMailException extends OXException {
             return clazz.cast(exception);
         }
         return exception instanceof MessagingException ? lookupNested((MessagingException) exception, clazz) : null;
+    }
+
+    /**
+     * Checks for possible over-quota error.
+     */
+    public static boolean isOverQuotaException(final MessagingException e) {
+        if (null == e) {
+            return false;
+        }
+        return isOverQuotaException(toLowerCase(e.getMessage()));
+    }
+
+    /**
+     * Checks for possible over-quota error.
+     */
+    public static boolean isOverQuotaException(final String msg) {
+        if (null == msg) {
+            return false;
+        }
+        return (msg.indexOf("quota") >= 0 || msg.indexOf("limit") >= 0);
+    }
+
+    /**
+     * Checks for possible in-use error.
+     */
+    public static boolean isInUseException(final MessagingException e) {
+        if (null == e) {
+            return false;
+        }
+        return isInUseException(toLowerCase(e.getMessage()));
+    }
+
+    /**
+     * Checks for possible in-use error.
+     */
+    public static boolean isInUseException(final String msg) {
+        if (null == msg) {
+            return false;
+        }
+        return (toLowerCase(msg).indexOf("[inuse]") >= 0);
     }
 
     /** ASCII-wise to lower-case */

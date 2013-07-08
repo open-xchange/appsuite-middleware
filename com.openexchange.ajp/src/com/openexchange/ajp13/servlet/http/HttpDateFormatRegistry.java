@@ -58,7 +58,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentMap;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
-import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.ajp13.Services;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.tools.TimeZoneUtils;
 
@@ -151,7 +151,7 @@ public final class HttpDateFormatRegistry {
         /*
          * Taken from org.apache.commons.httpclient.cookie.NetscapeDraftSpec
          */
-        final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final ConfigurationService service = Services.getService(ConfigurationService.class);
         final class Helper {
             String getPattern(final String name, final String defaultPattern) {
                 if (null == service) {
@@ -236,7 +236,7 @@ public final class HttpDateFormatRegistry {
             synchronized (netscapeDateFormat) {
                 tmp = netscapeZeroMaxAgeExpires;
                 if (null == tmp) {
-                    final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
                     final boolean b = service.getBoolProperty("com.openexchange.ajp.cookie.enableExactZeroMaxAge", true);
                     /*
                      * expires=Sat, 01-Jan-2000 00:00:00 GMT
@@ -277,7 +277,7 @@ public final class HttpDateFormatRegistry {
             synchronized (msieDateFormat) {
                 tmp = msie8ZeroMaxAgeExpires;
                 if (null == tmp) {
-                    final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
                     final boolean b = service.getBoolProperty("com.openexchange.ajp.cookie.enableExactZeroMaxAge", true);
                     /*
                      * expires=Sat, 01-Jan-2000 00:00:00 GMT

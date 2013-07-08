@@ -838,10 +838,11 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
+        final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
             final List<MailAccount> accounts = getAccounts();
             final MailFields mfs = new MailFields(fields);
-            mfs.add(MailField.getField(sortField.getField()));
+            mfs.add(MailField.getField(effectiveSortField.getField()));
             final MailField[] checkedFields = mfs.toArray();
             // Create completion service for simultaneous access
             final int length = accounts.size();
@@ -911,7 +912,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                         completionService.getDuration()).append("msec."));
                 }
                 // Sort them
-                final MailMessageComparator c = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale());
+                final MailMessageComparator c = new MailMessageComparator(effectiveSortField, OrderDirection.DESC.equals(order), getLocale());
                 Collections.sort(messages, c);
                 // Return as array
                 if (null == indexRange) {
@@ -949,7 +950,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             mailAccess.connect();
             // Get account's messages
             final MailMessage[] mails =
-                mailAccess.getMessageStorage().searchMessages(fa.getFullname(), indexRange, sortField, order, searchTerm, fields);
+                mailAccess.getMessageStorage().searchMessages(fa.getFullname(), indexRange, effectiveSortField, order, searchTerm, fields);
             final int unifiedAccountId = this.access.getAccountId();
             for (final MailMessage mail : mails) {
                 mail.setFolder(fullName);

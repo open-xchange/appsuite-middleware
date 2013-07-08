@@ -101,7 +101,7 @@ public class MailSecretRecoveryActivator extends HousekeepingActivator {
         registerService(EncryptedItemCleanUpService.class, new EncryptedItemCleanUpService() {
 
             @Override
-            public void cleanUpEncryptedItems(String secret, ServerSession session) throws OXException {
+            public void cleanUpEncryptedItems(final String secret, final ServerSession session) throws OXException {
                 mailAccountStorage.cleanUp(secret, session);
             }
 

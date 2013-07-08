@@ -85,10 +85,11 @@ public class LoginPageByFormActionRegexStep extends AbstractStep<HtmlPage, Objec
     private Page loginPage;
 
     public LoginPageByFormActionRegexStep() {
-
+        super();
     }
 
     public LoginPageByFormActionRegexStep(final String description, final String url, final String username, final String password, final String actionOfLoginForm, final String nameOfUserField, final String nameOfPasswordField, final String linkAvailableAfterLogin, final int numberOfForm, final String baseUrl) {
+        super();
         this.description = description;
         this.url = url;
         this.username = username;

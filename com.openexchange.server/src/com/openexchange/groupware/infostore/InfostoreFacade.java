@@ -1,6 +1,5 @@
 /*
  *
-
  *    OPEN-XCHANGE legal information
  *
  *    All intellectual property rights in the Software are protected by
@@ -29,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,6 +53,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Quota;
+import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
@@ -433,5 +434,23 @@ public interface InfostoreFacade extends TransactionAware {
      * @param sessionHolder The session holder
      */
     public void setSessionHolder(SessionHolder sessionHolder);
+
+    /**
+     * Gets the quota restrictions and current usage of {@link Type#FILE} for the supplied session.
+     *
+     * @param session The session
+     * @return The quota of {@link Type#FILE}, or quota with {@link Quota#UNLIMITED} limit if not set
+     * @throws OXException
+     */
+    Quota getFileQuota(ServerSession session) throws OXException;
+
+    /**
+     * Gets the quota restrictions and current usage of {@link Type#STORAGE} for the supplied session.
+     *
+     * @param session The session
+     * @return The quota of {@link Type#STORAGE}, or quota with {@link Quota#UNLIMITED} limit if not set
+     * @throws OXException
+     */
+    Quota getStorageQuota(ServerSession session) throws OXException;
 
 }

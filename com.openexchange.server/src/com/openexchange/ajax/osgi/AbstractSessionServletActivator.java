@@ -60,6 +60,7 @@ import javax.servlet.http.HttpServlet;
 import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.SessionServlet;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig.Property;
 
@@ -140,6 +141,7 @@ public abstract class AbstractSessionServletActivator extends AbstractServletAct
         final Set<Class<?>> neededServices = new HashSet<Class<?>>();
         neededServices.add(HttpService.class);
         neededServices.add(ConfigurationService.class);
+        neededServices.add(CapabilityService.class);
         /*
          * Additional needed services
          */

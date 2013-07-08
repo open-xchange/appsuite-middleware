@@ -55,6 +55,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Quota;
+import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -317,6 +319,16 @@ public class SimInfostoreFacade implements InfostoreFacade {
     public Map<Long, Long> getSequenceNumbers(List<Long> folderIds, boolean versionsOnly, Context ctx, User user, UserConfiguration userConfig) throws OXException {
         // Nothing to do
         return null;
+    }
+
+    @Override
+    public Quota getFileQuota(ServerSession session) throws OXException {
+        return Quota.getUnlimitedQuota(Type.FILE);
+    }
+
+    @Override
+    public Quota getStorageQuota(ServerSession session) throws OXException {
+        return Quota.getUnlimitedQuota(Type.STORAGE);
     }
 
 }

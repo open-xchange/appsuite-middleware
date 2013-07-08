@@ -50,13 +50,13 @@
 package com.openexchange.calendar;
 
 import static com.openexchange.java.Autoboxing.I;
+import gnu.trove.map.TIntObjectMap;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.calendar.storage.ParticipantStorage;
@@ -296,7 +296,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
 
     private static void setAttachmentLastModified(final Context ctx, final Connection readcon, final List<CalendarDataObject> list, final int[] arr) {
         final AttachmentBase attachmentBase = Attachments.getInstance(new SimpleDBProvider(readcon, null));
-        final Map<Integer, Date> dates;
+        final TIntObjectMap<Date> dates;
         try {
             dates = attachmentBase.getNewestCreationDates(ctx, Types.APPOINTMENT, arr);
         } catch (final OXException e) {
@@ -304,7 +304,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
             return;
         }
         for (final CalendarDataObject cdao : list) {
-            final Date date = dates.get(I(cdao.getObjectID()));
+            final Date date = dates.get(cdao.getObjectID());
             if (null != date) {
                 cdao.setLastModifiedOfNewestAttachment(date);
             }

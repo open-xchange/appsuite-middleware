@@ -67,12 +67,13 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
 
     public DriveActionFactory() {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(1);
+        actions = new ConcurrentHashMap<String, AJAXActionService>(10);
         actions.put("syncfolders", new SyncFoldersAction());
         actions.put("syncfiles", new SyncFilesAction());
         actions.put("upload", new UploadAction());
         actions.put("download", new DownloadAction());
         actions.put("listen", new ListenAction());
+        actions.put("quota", new QuotaAction());
     }
 
     @Override

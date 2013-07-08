@@ -49,12 +49,12 @@
 
 package com.openexchange.tools.oxfolder.treeconsistency;
 
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
@@ -107,7 +107,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
              * Remove system permissions from previous parent
              */
             final FolderObject folder = getFolderFromMaster(folderId);
-            final Map<Integer, ToDoPermission> toRemove = new HashMap<Integer, ToDoPermission>();
+            final TIntObjectMap<ToDoPermission> toRemove = new TIntObjectHashMap<ToDoPermission>();
             final List<OCLPermission> permissions = folder.getPermissions();
             for (final OCLPermission perm : removedPerms) {
                 final OCLPermission removedPerm = perm;
@@ -137,10 +137,9 @@ public final class CheckPermissionOnRemove extends CheckPermission {
      * @param lastModified The last-modified time stamp
      * @throws OXException If checking for possible non-visible subfolders fails
      */
-    public void checkPermissionsOnDelete(final int parent, final int deletedId, final OCLPermission[] formerPerms, final long lastModified)
-            throws OXException {
+    public void checkPermissionsOnDelete(final int parent, final int deletedId, final OCLPermission[] formerPerms, final long lastModified) throws OXException {
         try {
-            final Map<Integer, ToDoPermission> toRemove = new HashMap<Integer, ToDoPermission>();
+            final TIntObjectMap<ToDoPermission> toRemove = new TIntObjectHashMap<ToDoPermission>();
             for (final OCLPermission formerPerm : formerPerms) {
                 hasVisibleSibling(parent, deletedId, parent, formerPerm.getEntity(), formerPerm.isGroupPermission(), toRemove);
             }
@@ -153,7 +152,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
     }
 
     private void hasVisibleSibling(final int parent, final int exclude, final int origin, final int entity, final boolean isGroup,
-            final Map<Integer, ToDoPermission> toRemove) throws OXException, OXException, SQLException {
+            final TIntObjectMap<ToDoPermission> toRemove) throws OXException, OXException, SQLException {
         if (parent < FolderObject.MIN_FOLDER_ID) {
             /*
              * Stop recursive check
@@ -172,11 +171,10 @@ public final class CheckPermissionOnRemove extends CheckPermission {
                 return;
             }
         }
-        final Integer key = Integer.valueOf(parent);
-        ToDoPermission todo = toRemove.get(key);
+        ToDoPermission todo = toRemove.get(parent);
         if (todo == null) {
             todo = new ToDoPermission(parent);
-            toRemove.put(key, todo);
+            toRemove.put(parent, todo);
         }
         if (isGroup) {
             todo.addGroup(entity);
@@ -217,17 +215,16 @@ public final class CheckPermissionOnRemove extends CheckPermission {
      * @throws OXException If a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
-    private void removeSystemPermissions(final long lastModified, final Map<Integer, ToDoPermission> toRemove) throws OXException,
-            SQLException {
-        final int size2 = toRemove.size();
-        final Iterator<Map.Entry<Integer, ToDoPermission>> iter2 = toRemove.entrySet().iterator();
-        for (int i = 0; i < size2; i++) {
-            final Map.Entry<Integer, ToDoPermission> entry = iter2.next();
-            final int fid = entry.getKey().intValue();
+    private void removeSystemPermissions(final long lastModified, final TIntObjectMap<ToDoPermission> toRemove) throws OXException, SQLException {
+        final TIntObjectIterator<ToDoPermission> iterator = toRemove.iterator();
+        for ( int i = toRemove.size(); i-- > 0; ) {
+            iterator.advance();
+            final int fid = iterator.key();
             /*
              * Delete read permissions
              */
-            final int[] users = entry.getValue().getUsers();
+            final ToDoPermission toDoPermission = iterator.value();
+            final int[] users = toDoPermission.getUsers();
             for (final int user : users) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Auto-Delete system-folder-read permission for user "
@@ -235,7 +232,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
                 }
                 deleteSystemFolderReadPermission(fid, user);
             }
-            final int[] groups = entry.getValue().getGroups();
+            final int[] groups = toDoPermission.getGroups();
             for (final int group : groups) {
                 if (LOG.isDebugEnabled()) {
                     try {

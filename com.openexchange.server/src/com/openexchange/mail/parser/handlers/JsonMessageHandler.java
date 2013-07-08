@@ -80,6 +80,8 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
+import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -127,69 +129,62 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final class PlainTextContent {
 
         final String id;
-
         final String contentType;
-
         final String content;
 
-        public PlainTextContent(final String id, final String contentType, final String content) {
+        PlainTextContent(final String id, final String contentType, final String content) {
             super();
             this.id = id;
             this.contentType = contentType;
             this.content = content;
         }
 
-    }
+        @Override
+        public String toString() {
+            final StringBuilder builder = new StringBuilder(256);
+            builder.append("PlainTextContent [");
+            if (id != null) {
+                builder.append("id=").append(id).append(", ");
+            }
+            if (contentType != null) {
+                builder.append("contentType=").append(contentType).append(", ");
+            }
+            if (content != null) {
+                builder.append("content=").append(content);
+            }
+            builder.append("]");
+            return builder.toString();
+        }
+    } // End of class PlainTextContent
 
     private final Session session;
-
     private final Context ctx;
-
     private final LinkedList<String> multiparts;
-
     private TimeZone timeZone;
-
     private final UserSettingMail usm;
-
     private final DisplayMode displayMode;
-
     private final int accountId;
-
     private final MailPath mailPath;
-
     private final JSONObject jsonObject;
 
     // private Html2TextConverter converter;
 
     private JSONArray attachmentsArr;
-
     private JSONArray nestedMsgsArr;
-
     private boolean isAlternative;
-
     private String altId;
-
     private boolean textAppended;
-
     private boolean textWasEmpty;
-
     private final boolean[] modified;
-
     private PlainTextContent plainText;
-
     private String tokenFolder;
-
     private String tokenMailId;
-
     private final boolean token;
-
     private final int ttlMillis;
-
     private final boolean embedded;
-
     private boolean attachHTMLAlternativePart;
-
     private boolean includePlainText;
+    private boolean exactLength;
 
     /**
      * Initializes a new {@link JsonMessageHandler}
@@ -293,10 +288,21 @@ public final class JsonMessageHandler implements MailMessageHandler {
     }
 
     /**
+     * Sets whether to set the exact length of mail parts.
+     *
+     * @param exactLength <code>true</code> to set the exact length of mail parts; otherwise use mail system's size estimation
+     * @return This {@link JsonMessageHandler} with new behavior applied
+     */
+    public JsonMessageHandler setExactLength(final boolean exactLength) {
+        this.exactLength = exactLength;
+        return this;
+    }
+
+    /**
      * Sets whether the HTML part of a <i>multipart/alternative</i> content shall be attached.
      *
      * @param attachHTMLAlternativePart Whether the HTML part of a <i>multipart/alternative</i> content shall be attached
-     * @return The {@link JsonMessageHandler} with new behavior applied
+     * @return This {@link JsonMessageHandler} with new behavior applied
      */
     public JsonMessageHandler setAttachHTMLAlternativePart(final boolean attachHTMLAlternativePart) {
         this.attachHTMLAlternativePart = attachHTMLAlternativePart;
@@ -307,7 +313,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * Sets whether to include raw plain-text in generated JSON object.
      *
      * @param includePlainText <code>true</code> to include raw plain-text; otherwise <code>false</code>
-     * @return The {@link JsonMessageHandler} with new behavior applied
+     * @return This {@link JsonMessageHandler} with new behavior applied
      */
     public JsonMessageHandler setIncludePlainText(final boolean includePlainText) {
         this.includePlainText = includePlainText;
@@ -371,7 +377,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     @Override
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
         try {
-            final JSONObject jsonObject = new JSONObject();
+            final JSONObject jsonObject = new JSONObject(8);
             /*
              * Sequence ID
              */
@@ -395,7 +401,16 @@ public final class JsonMessageHandler implements MailMessageHandler {
             /*
              * Size
              */
-            if (part.containsSize()) {
+            boolean checkSize = true;
+            if (exactLength) {
+                try {
+                    jsonObject.put(MailJSONField.SIZE.getKey(), Streams.countInputStream(part.getInputStream()));
+                    checkSize = false;
+                } catch (final Exception e) {
+                    // Failed counting part's content
+                }
+            }
+            if (checkSize && part.containsSize()) {
                 jsonObject.put(MailJSONField.SIZE.getKey(), part.getSize());
             }
             /*
@@ -405,8 +420,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
             /*
              * Content-ID
              */
-            if (part.containsContentId() && part.getContentId() != null) {
-                jsonObject.put(MailJSONField.CID.getKey(), part.getContentId());
+            if (part.containsContentId()) {
+                final String contentId = part.getContentId();
+                if (contentId != null) {
+                    jsonObject.put(MailJSONField.CID.getKey(), contentId);
+                }
             }
             /*
              * Content-Type
@@ -619,6 +637,29 @@ public final class JsonMessageHandler implements MailMessageHandler {
             if (isAlternative) {
                 if (DisplayMode.DISPLAY.equals(displayMode)) {
                     /*
+                     * Check if previously appended text part was empty
+                     */
+                    if (textWasEmpty) {
+                        if (usm.isDisplayHtmlInlineContent()) {
+                            final JSONObject jsonObject = asDisplayHtml(id, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
+                            if (includePlainText) {
+                                try {
+                                    final String plainText = html2text(htmlContent);
+                                    jsonObject.put("plain_text", plainText);
+                                } catch (final JSONException e) {
+                                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                                }
+                            }
+                        } else {
+                            try {
+                                asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, DisplayMode.DISPLAY.equals(displayMode));
+                                getAttachmentsArr().remove(0);
+                            } catch (final JSONException e) {
+                                throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                            }
+                        }
+                    }
+                    /*
                      * Add HTML alternative part as attachment
                      */
                     if (attachHTMLAlternativePart) {
@@ -652,18 +693,26 @@ public final class JsonMessageHandler implements MailMessageHandler {
              */
             if (DisplayMode.MODIFYABLE.getMode() <= displayMode.getMode()) {
                 if (usm.isDisplayHtmlInlineContent()) {
-                    final JSONObject jsonObject =
-                        asDisplayHtml(id, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
-                    if (includePlainText) {
-                        try {
-                            /*
-                             * Try to convert the given HTML to regular text
-                             */
-                            final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                            final String plainText = htmlService.html2text(htmlContent, true);
-                            jsonObject.put("plain_text", plainText);
-                        } catch (final JSONException e) {
-                            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                    /*
+                     * Check if HTML is empty or has an empty body section
+                     */
+                    if ((isEmpty(htmlContent) || (htmlContent.length() < 1024 && isEmpty(html2text(htmlContent)))) && plainText != null) {
+                        /*
+                         * No text present
+                         */
+                        asRawContent(plainText.id, plainText.contentType, plainText.content);
+                    } else {
+                        final JSONObject jsonObject = asDisplayHtml(id, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
+                        if (includePlainText) {
+                            try {
+                                /*
+                                 * Try to convert the given HTML to regular text
+                                 */
+                                final String plainText = html2text(htmlContent);
+                                jsonObject.put("plain_text", plainText);
+                            } catch (final JSONException e) {
+                                throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                            }
                         }
                     }
                 } else {
@@ -828,7 +877,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     }
                 }
             } else {
-                final String content = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
+                final String content = isEmpty(plainTextContentArg) ? "" : HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
                 final JSONObject textObject = asPlainText(id, contentType.getBaseType(), content);
                 if (includePlainText) {
                     textObject.put("plain_text", plainTextContentArg);
@@ -1028,6 +1077,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             msgHandler.attachHTMLAlternativePart = attachHTMLAlternativePart;
             msgHandler.tokenFolder = tokenFolder;
             msgHandler.tokenMailId = tokenMailId;
+            msgHandler.exactLength = exactLength;
             new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
             final JSONObject nestedObject = msgHandler.getJSONObject();
             /*
@@ -1199,7 +1249,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             return true;
         }
         try {
-            final JSONArray userFlagsArr = new JSONArray();
+            final JSONArray userFlagsArr = new JSONArray(userFlags.length);
             for (final String userFlag : userFlags) {
                 if (MailMessage.isColorLabel(userFlag)) {
                     jsonObject.put(MailJSONField.COLOR_LABEL.getKey(), MailMessage.getColorLabelIntValue(userFlag));
@@ -1249,7 +1299,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     private JSONObject asAttachment(final String id, final String baseContentType, final int len, final String fileName, final String optContent) throws OXException {
         try {
-            final JSONObject jsonObject = new JSONObject();
+            final JSONObject jsonObject = new JSONObject(8);
             jsonObject.put(MailListField.ID.getKey(), id);
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
             jsonObject.put(MailJSONField.SIZE.getKey(), len);
@@ -1277,7 +1327,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     private void asRawContent(final String id, final String baseContentType, final String content) throws OXException {
         try {
-            final JSONObject jsonObject = new JSONObject();
+            final JSONObject jsonObject = new JSONObject(6);
             jsonObject.put(MailListField.ID.getKey(), id);
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
             jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
@@ -1291,7 +1341,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     private JSONObject asDisplayHtml(final String id, final String baseContentType, final String htmlContent, final String charset) throws OXException {
         try {
-            final JSONObject jsonObject = new JSONObject();
+            final JSONObject jsonObject = new JSONObject(6);
             jsonObject.put(MailListField.ID.getKey(), id);
             final String content = HtmlProcessing.formatHTMLForDisplay(htmlContent, charset, session, mailPath, usm, modified, displayMode, embedded);
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
@@ -1307,7 +1357,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     private JSONObject asDisplayText(final String id, final String baseContentType, final String htmlContent, final String fileName, final boolean addAttachment) throws OXException {
         try {
-            final JSONObject jsonObject = new JSONObject();
+            final JSONObject jsonObject = new JSONObject(6);
             jsonObject.put(MailListField.ID.getKey(), id);
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), MimeTypes.MIME_TEXT_PLAIN);
             /*
@@ -1315,8 +1365,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
              */
             final String content;
             {
-                final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                final String plainText = htmlService.html2text(htmlContent, true);
+                final String plainText = html2text(htmlContent);
                 if (includePlainText) {
                     jsonObject.put("plain_text", plainText);
                 }
@@ -1330,7 +1379,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 /*
                  * Create attachment object for original HTML content
                  */
-                final JSONObject originalVersion = new JSONObject();
+                final JSONObject originalVersion = new JSONObject(6);
                 originalVersion.put(MailListField.ID.getKey(), id);
                 originalVersion.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
                 originalVersion.put(MailJSONField.DISPOSITION.getKey(), Part.ATTACHMENT);
@@ -1351,7 +1400,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     private JSONObject asPlainText(final String id, final String baseContentType, final String content) throws OXException {
         try {
-            final JSONObject jsonObject = new JSONObject();
+            final JSONObject jsonObject = new JSONObject(6);
             jsonObject.put(MailListField.ID.getKey(), id);
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
@@ -1363,4 +1412,23 @@ public final class JsonMessageHandler implements MailMessageHandler {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
+
+    private String html2text(final String htmlContent) {
+        final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+        return null == htmlService ? null : htmlService.html2text(htmlContent, true);
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
 }

@@ -49,10 +49,10 @@
 
 package com.openexchange.mail.messagestorage;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import javax.activation.DataHandler;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -301,7 +301,12 @@ public final class MailGetTest extends MessageStorageTest {
                 assertFalse("Missing mail ID", fetchedMails[i].getMailId() == null);
                 assertTrue("Missing content type", fetchedMails[i].containsContentType());
                 assertTrue("Missing flags", fetchedMails[i].containsFlags());
-                assertTrue("Message must contain attachment information but signal no attachment", fetchedMails[i].containsHasAttachment() && !fetchedMails[i].hasAttachment());
+                assertTrue("Message must contain attachment information", fetchedMails[i].containsHasAttachment());
+                if (fetchedMails[i].getContentType().startsWith("multipart/")) {
+                    assertTrue("Message is of type '"+fetchedMails[i].getContentType()+"' but signals no attachment", fetchedMails[i].hasAttachment());
+                } else {
+                    assertTrue("Message is not of type multipart/*, but signals to hold attachments", !fetchedMails[i].hasAttachment());
+                }
             }
 
         } finally {
@@ -312,11 +317,16 @@ public final class MailGetTest extends MessageStorageTest {
     public void testMailGetBrokenContentTypeGet() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", new MailMessage[]{new TestMailMessage()});
         try {
-            final MailMessage fetchedMails = mailAccess.getMessageStorage().getMessage("INBOX", uids[0], true);
-            assertFalse("Missing mail ID", fetchedMails.getMailId() == null);
-            assertTrue("Missing content type", fetchedMails.containsContentType());
-            assertTrue("Missing flags", fetchedMails.containsFlags());
-            assertTrue("Message must contain attachment information but signal no attachment", fetchedMails.containsHasAttachment() && !fetchedMails.hasAttachment());
+            final MailMessage fetchedMail = mailAccess.getMessageStorage().getMessage("INBOX", uids[0], true);
+            assertFalse("Missing mail ID", fetchedMail.getMailId() == null);
+            assertTrue("Missing content type", fetchedMail.containsContentType());
+            assertTrue("Missing flags", fetchedMail.containsFlags());
+            assertTrue("Message must contain attachment information", fetchedMail.containsHasAttachment());
+            if (fetchedMail.getContentType().startsWith("multipart/")) {
+                assertTrue("Message is of type '"+fetchedMail.getContentType()+"' but signals no attachment", fetchedMail.hasAttachment());
+            } else {
+                assertTrue("Message is not of type multipart/*, but signals to hold attachments", !fetchedMail.hasAttachment());
+            }
 
         } finally {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);

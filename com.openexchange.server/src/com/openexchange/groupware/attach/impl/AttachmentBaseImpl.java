@@ -62,10 +62,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.activation.FileTypeMap;
@@ -1171,11 +1169,11 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     @Override
     public Date getNewestCreationDate(final Context ctx, final int moduleId, final int attachedId) throws OXException {
-        return getNewestCreationDates(ctx, moduleId, new int[] { attachedId }).get(I(attachedId));
+        return getNewestCreationDates(ctx, moduleId, new int[] { attachedId }).get(attachedId);
     }
 
     @Override
-    public Map<Integer, Date> getNewestCreationDates(final Context ctx, final int moduleId, final int[] attachedIds) throws OXException {
+    public TIntObjectMap<Date> getNewestCreationDates(final Context ctx, final int moduleId, final int[] attachedIds) throws OXException {
         final Connection con = getReadConnection(ctx);
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -1188,9 +1186,9 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 stmt.setInt(pos++, attachedId);
             }
             result = stmt.executeQuery();
-            final Map<Integer, Date> retval = new HashMap<Integer, Date>();
+            final TIntObjectMap<Date> retval = new TIntObjectHashMap<Date>();
             while (result.next()) {
-                retval.put(I(result.getInt(1)), new Date(result.getLong(2)));
+                retval.put(result.getInt(1), new Date(result.getLong(2)));
             }
             return retval;
         } catch (final SQLException e) {

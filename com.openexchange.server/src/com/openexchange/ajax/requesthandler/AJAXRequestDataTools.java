@@ -321,16 +321,34 @@ public class AJAXRequestDataTools {
         "on")));
 
     /**
-     * Parses denoted <tt>boolean</tt> value from specified <tt>String</tt> parameter.
+     * Parses denoted <tt>boolean</tt> value from specified <tt>String</tt> parameter value.
      * <p>
      * <code>true</code> if given value is not <code>null</code> and equals ignore-case to one of the values "true", "yes", "y", "on", or
      * "1".
      *
-     * @param parameter The parameter
+     * @param parameter The parameter value
      * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
      */
     public static boolean parseBoolParameter(final String parameter) {
         return (null != parameter) && BOOL_VALS.contains(toLowerCase(parameter.trim()));
+    }
+
+    /**
+     * Parses denoted <tt>int</tt> value from specified <tt>String</tt> parameter.
+     *
+     * @param parameter The parameter value
+     * @param defaultInt The default <tt>int</tt> to return if absent or unparseable
+     * @return The parsed <tt>int</tt> value or <tt>defaultInt</tt>
+     */
+    public static int parseIntParameter(final String parameter, final int defaultInt) {
+        if (null == parameter) {
+            return defaultInt;
+        }
+        try {
+            return Integer.parseInt(parameter);
+        } catch (final NumberFormatException e) {
+            return defaultInt;
+        }
     }
 
     /**

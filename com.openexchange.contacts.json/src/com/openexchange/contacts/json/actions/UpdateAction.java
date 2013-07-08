@@ -117,7 +117,9 @@ public class UpdateAction extends ContactAction {
 		}
 
         if (containsImage) {
-        	RequestTools.setImageData(request, contact);
+            if (!json.has("image1") || !isEmpty(json.opt("image1").toString())) {
+                RequestTools.setImageData(request, contact);
+            }
         } else if (null != imageBase64) {
             try {
                 final byte[] image1 = Base64.decodeBase64(imageBase64);

@@ -53,6 +53,8 @@ import java.io.InputStream;
 import java.util.List;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Quota;
+import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -122,6 +124,17 @@ public interface DriveService {
      */
     IFileHolder download(ServerSession session, String rootFolderID, String path, FileVersion fileVersion, long offset, long length)
         throws OXException;
+
+    /**
+     * Gets the quota limits and current usage for the storage the supplied root folder belongs to. This includes both restrictions on
+     * the number of allowed files and the size of the files in bytes. If there's no limit, {@link Quota#UNLIMITED} is returned.
+     *
+     * @param session The session
+     * @param rootFolderID The identifier of the referenced root folder on the server
+     * @return An array of size 2, where the first element holds the quota of {@link Type#FILE}, and the second of {@link Type#STORAGE}
+     * @throws OXException
+     */
+    Quota[] getQuota(ServerSession session, String rootFolderID) throws OXException;
 
 }
 

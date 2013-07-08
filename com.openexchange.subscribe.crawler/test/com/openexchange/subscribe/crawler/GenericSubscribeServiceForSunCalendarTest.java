@@ -78,7 +78,7 @@ public class GenericSubscribeServiceForSunCalendarTest extends GenericSubscribeS
 
 
 
-        ArrayList<Step> steps = new ArrayList<Step>();
+        ArrayList<Step<?, ?>> steps = new ArrayList<Step<?, ?>>();
 
         LoginPageByFormActionRegexVerifiedByStringStep loginStep = new LoginPageByFormActionRegexVerifiedByStringStep();
         loginStep.setUrl("https://uwc1.us.es:444/uwc/auth");

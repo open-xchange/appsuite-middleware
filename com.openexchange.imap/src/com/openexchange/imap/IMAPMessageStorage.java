@@ -81,6 +81,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.mail.FetchProfile;
@@ -95,6 +97,7 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.StoreClosedException;
+import javax.mail.UIDFolder;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
@@ -107,6 +110,7 @@ import org.jsoup.safety.Whitelist;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.imap.OperationKey.Type;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.cache.RightsCache;
@@ -168,7 +172,6 @@ import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -180,6 +183,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.textxtraction.TextXtractService;
@@ -849,20 +853,27 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             try {
                 final MailPart part = IMAPCommandsCollection.getPart(imapFolder, msgUID, sequenceId, false);
                 if (null != part) {
-                    return part;
+                    // Appropriate part found -- check for special content
+                    final ContentType contentType = part.getContentType();
+                    if (!isTNEFMimeType(contentType) && !isUUEncoded(part, contentType)) {
+                        return part;
+                    }
                 }
+            } catch (final IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND.create(e, Long.valueOf(msgUID), fullName);
+                }
+                // Ignore
             } catch (final Exception e) {
                 // Ignore
             }
             /*
              * Regular look-up
              */
-            final IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
-            if (null == msg) {
+            final MailMessage mail = getMessageLong(fullName, msgUID, false);
+            if (null == mail) {
                 throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(msgUID), fullName);
             }
-            msg.setUID(msgUID);
-            final MimeMailMessage mail = new MimeMailMessage(msg);
             final MailPartHandler handler = new MailPartHandler(sequenceId);
             new MailMessageParser().parseMailMessage(mail, handler);
             if (handler.getMailPart() == null) {
@@ -877,6 +888,21 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
+    }
+
+    private static boolean isTNEFMimeType(final ContentType contentType) {
+        // note that application/ms-tnefx was also observed in the wild
+        return contentType != null && (contentType.startsWith("application/ms-tnef") || contentType.startsWith("application/vnd.ms-tnef"));
+    }
+
+    private static boolean isUUEncoded(final MailPart part, final ContentType contentType) throws OXException, IOException {
+        if (null == part) {
+            return false;
+        }
+        if (!contentType.startsWith("text/plain")) {
+            return false;
+        }
+        return new UUEncodedMultiPart(MimeMessageUtility.readContent(part, contentType)).isUUEncoded();
     }
 
     @Override
@@ -1217,6 +1243,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
+    private static final FetchProfile FETCH_PROFILE_ENVELOPE_UID = new FetchProfile() {
+
+        // Unnamed block
+        {
+            add(FetchProfile.Item.ENVELOPE);
+            add(UIDFolder.FetchProfileItem.UID);
+        }
+    };
+
     @Override
     public MailMessage[] searchMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] mailFields) throws OXException {
         try {
@@ -1256,7 +1291,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     effectiveSortField = sortField;
                 }
             }
-            usedFields.add(null == effectiveSortField ? MailField.RECEIVED_DATE : MailField.toField(effectiveSortField.getListField()));
+            usedFields.add(MailField.toField(effectiveSortField.getListField()));
             /*
              * Shall a search be performed?
              */
@@ -1266,11 +1301,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 if (!IMAPSessionStorageAccess.hasSessionStorage(accountId, imapFolder, session)) {
                     IMAPSessionStorageAccess.fillSessionStorage(accountId, imapFolder, session);
                 }
+
+                final boolean throwInUse = false; // Fake an [INUSE] error
+                if (throwInUse) {
+                    final CommandFailedException cfe = new CommandFailedException("NO [INUSE] Mailbox already in use");
+                    throw new MessagingException(cfe.getMessage(), cfe);
+                }
+
                 /*
                  * Check if an all-fetch can be performed to only obtain UIDs of all folder's messages: FETCH 1: (UID)
                  */
                 final MailFields mfs = new MailFields(mailFields);
-                if (((null == effectiveSortField) || MailSortField.RECEIVED_DATE.equals(effectiveSortField)) && onlyLowCostFields(mfs)) {
+                if (MailSortField.RECEIVED_DATE.equals(effectiveSortField) && onlyLowCostFields(mfs)) {
                     final MailMessage[] mailMessages = performLowCostFetch(fullName, mfs, order, indexRange);
                     imapFolderStorage.updateCacheIfDiffer(fullName, mailMessages.length);
                     return mailMessages;
@@ -1288,19 +1330,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     return EMPTY_RETVAL;
                 }
             }
-            MailMessage[] mails = null;
-            Message[] msgs = IMAPSort.sortMessages(imapFolder, usedFields, filter, effectiveSortField, order, getLocale(), imapConfig);
-            if (null != msgs) {
+            int[] sortSeqNums = IMAPSort.sortMessages(imapFolder, filter, effectiveSortField, order, imapConfig);
+            if (null != sortSeqNums) {
                 /*
                  * Sort was performed on IMAP server
                  */
                 if (indexRange != null) {
                     final int fromIndex = indexRange.start;
                     int toIndex = indexRange.end;
-                    if (msgs.length == 0) {
+                    if (sortSeqNums.length == 0) {
                         return EMPTY_RETVAL;
                     }
-                    if ((fromIndex) > msgs.length) {
+                    if ((fromIndex) > sortSeqNums.length) {
                         /*
                          * Return empty iterator if start is out of range
                          */
@@ -1309,110 +1350,155 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     /*
                      * Reset end index if out of range
                      */
-                    if (toIndex >= msgs.length) {
-                        toIndex = msgs.length;
+                    if (toIndex >= sortSeqNums.length) {
+                        toIndex = sortSeqNums.length;
                     }
-                    final Message[] tmp = msgs;
+                    final int[] tmp = sortSeqNums;
                     final int retvalLength = toIndex - fromIndex;
-                    msgs = new Message[retvalLength];
-                    System.arraycopy(tmp, fromIndex, msgs, 0, retvalLength);
+                    sortSeqNums = new int[retvalLength];
+                    System.arraycopy(tmp, fromIndex, sortSeqNums, 0, retvalLength);
                 }
-                mails =
-                    convert2Mails(msgs, usedFields.toArray(), usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL));
-                if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
-                    setAccountInfo(mails);
-                }
-            } else {
                 /*
-                 * Do application sort
+                 * Fetch (possibly) filtered and sorted sequence numbers
                  */
-                final int size = filter == null ? imapFolder.getMessageCount() : filter.length;
-                final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), getIMAPProperties().isFastFetch());
                 final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
-                if (DEBUG) {
-                    final long start = System.currentTimeMillis();
-                    if (filter == null) {
-                        msgs =
-                            new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
-                    } else {
-                        msgs =
-                            new MessageFetchIMAPCommand(
-                                imapFolder,
-                                imapConfig.getImapCapabilities().hasIMAP4rev1(),
-                                filter,
-                                fetchProfile,
-                                false,
-                                false,
-                                body).doCommand();
-                    }
-                    final long time = System.currentTimeMillis() - start;
-                    LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP fetch for ").append(size).append(" messages took ").append(time).append(
-                        "msec").toString());
-                } else {
-                    if (filter == null) {
-                        msgs =
-                            new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
-                    } else {
-                        msgs =
-                            new MessageFetchIMAPCommand(
-                                imapFolder,
-                                imapConfig.getImapCapabilities().hasIMAP4rev1(),
-                                filter,
-                                fetchProfile,
-                                false,
-                                false,
-                                body).doCommand();
-                    }
-                }
-                if ((msgs == null) || (msgs.length == 0)) {
-                    return new MailMessage[0];
-                }
-                mails = convert2Mails(msgs, usedFields.toArray(), body);
-                if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
-                    setAccountInfo(mails);
-                }
-                /*
-                 * Perform sort on temporary list
-                 */
-                {
-                    final int length = mails.length;
-                    final List<MailMessage> msgList = new ArrayList<MailMessage>(length);
-                    for (int i = 0; i < length; i++) {
-                        final MailMessage tmp = mails[i];
-                        if (null != tmp) {
-                            msgList.add(tmp);
+                if (body) {
+                    final List<MailMessage> list = new ArrayList<MailMessage>(sortSeqNums.length);
+                    final Message[] messages = imapFolder.getMessages(sortSeqNums);
+                    imapFolder.fetch(messages, FETCH_PROFILE_ENVELOPE_UID);
+                    NextMessage: for (final Message msg : messages) {
+                        if (msg != null && !msg.isExpunged()) {
+                            final IMAPMessage imapMessage = (IMAPMessage) msg;
+                            final long msgUID = imapFolder.getUID(msg);
+                            imapMessage.setUID(msgUID);
+                            imapMessage.setPeek(true);
+                            final MailMessage mail;
+                            try {
+                                mail = MimeMessageConverter.convertMessage(imapMessage, false);
+                                mail.setFolder(fullName);
+                                mail.setMailId(Long.toString(msgUID));
+                                mail.setUnreadMessages(IMAPCommandsCollection.getUnread(imapFolder));
+                            } catch (final OXException e) {
+                                if (MimeMailExceptionCode.MESSAGE_REMOVED.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.equals(e)) {
+                                    /*
+                                     * Obviously message was removed in the meantime
+                                     */
+                                    continue NextMessage;
+                                }
+                                /*
+                                 * Check for generic messaging error
+                                 */
+                                if (MimeMailExceptionCode.MESSAGING_ERROR.equals(e)) {
+                                    /*-
+                                     * Detected generic messaging error. This most likely hints to a severe JavaMail problem.
+                                     *
+                                     * Perform some debug logs for traceability...
+                                     */
+                                    if (DEBUG) {
+                                        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
+                                        sb.append("Generic messaging error occurred for mail \"").append(msgUID).append("\" in folder \"");
+                                        sb.append(fullName).append("\" with login \"").append(imapConfig.getLogin()).append("\" on server \"");
+                                        sb.append(imapConfig.getServer()).append("\" (user=").append(session.getUserId());
+                                        sb.append(", context=").append(session.getContextId()).append("): ").append(e.getMessage());
+                                        LOG.debug(sb.toString(), e);
+                                    }
+                                }
+                                throw e;
+                            } catch (final java.lang.IndexOutOfBoundsException e) {
+                                /*
+                                 * Obviously message was removed in the meantime
+                                 */
+                                continue NextMessage;
+                            }
+                            list.add(mail);
                         }
-                    }
-                    Collections.sort(msgList, new MailMessageComparator(effectiveSortField, order == OrderDirection.DESC, getLocale()));
-                    mails = msgList.toArray(new MailMessage[0]);
+                    } // for (final Message msg : messages)
+                    return setAccountInfo(list.toArray(new MailMessage[0]));
+                } // if (body)
+                // Body content not requested
+                final boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
+                final FetchProfile fetchProfile = getFetchProfile(mailFields, getIMAPProperties().isFastFetch());
+                final MailMessageFetchIMAPCommand command = new MailMessageFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, sortSeqNums, fetchProfile);
+
+                final long start = System.currentTimeMillis();
+                final MailMessage[] tmp = command.doCommand();
+                final long time = System.currentTimeMillis() - start;
+                mailInterfaceMonitor.addUseTime(time);
+
+                return setAccountInfo(tmp);
+            }
+            /*
+             * Do application sort
+             */
+            final int size = filter == null ? imapFolder.getMessageCount() : filter.length;
+            final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), getIMAPProperties().isFastFetch());
+            final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
+            final Message[] msgs;
+            if (DEBUG) {
+                final long start = System.currentTimeMillis();
+                if (filter == null) {
+                    msgs = new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
+                } else {
+                    msgs = new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), filter, fetchProfile, false, false, body).doCommand();
                 }
-                /*
-                 * Get proper sub-array if an index range is specified
-                 */
-                if (indexRange != null) {
-                    final int fromIndex = indexRange.start;
-                    int toIndex = indexRange.end;
-                    if ((mails == null) || (msgs.length == 0)) {
-                        return EMPTY_RETVAL;
-                    }
-                    if ((fromIndex) > mails.length) {
-                        /*
-                         * Return empty iterator if start is out of range
-                         */
-                        return EMPTY_RETVAL;
-                    }
-                    /*
-                     * Reset end index if out of range
-                     */
-                    if (toIndex >= mails.length) {
-                        toIndex = mails.length;
-                    }
-                    final MailMessage[] tmp = mails;
-                    final int retvalLength = toIndex - fromIndex;
-                    mails = new MailMessage[retvalLength];
-                    System.arraycopy(tmp, fromIndex, mails, 0, retvalLength);
+                final long time = System.currentTimeMillis() - start;
+                LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP fetch for ").append(size).append(" messages took ").append(time).append("msec").toString());
+            } else {
+                if (filter == null) {
+                    msgs = new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
+                } else {
+                    msgs = new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), filter, fetchProfile, false, false, body).doCommand();
                 }
             }
+            if ((msgs == null) || (msgs.length == 0)) {
+                return new MailMessage[0];
+            }
+            MailMessage[] mails = convert2Mails(msgs, usedFields.toArray(), body);
+            if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
+                setAccountInfo(mails);
+            }
+            /*
+             * Perform sort on temporary list
+             */
+            {
+                final int length = mails.length;
+                final List<MailMessage> msgList = new ArrayList<MailMessage>(length);
+                for (int i = 0; i < length; i++) {
+                    final MailMessage tmp = mails[i];
+                    if (null != tmp) {
+                        msgList.add(tmp);
+                    }
+                }
+                Collections.sort(msgList, new MailMessageComparator(effectiveSortField, order == OrderDirection.DESC, getLocale()));
+                mails = msgList.toArray(new MailMessage[0]);
+            }
+            /*
+             * Get proper sub-array if an index range is specified
+             */
+            if (indexRange != null) {
+                final int fromIndex = indexRange.start;
+                int toIndex = indexRange.end;
+                if ((mails == null) || (msgs.length == 0)) {
+                    return EMPTY_RETVAL;
+                }
+                if ((fromIndex) > mails.length) {
+                    /*
+                     * Return empty iterator if start is out of range
+                     */
+                    return EMPTY_RETVAL;
+                }
+                /*
+                 * Reset end index if out of range
+                 */
+                if (toIndex >= mails.length) {
+                    toIndex = mails.length;
+                }
+                final MailMessage[] tmp = mails;
+                final int retvalLength = toIndex - fromIndex;
+                mails = new MailMessage[retvalLength];
+                System.arraycopy(tmp, fromIndex, mails, 0, retvalLength);
+            }
+
             return mails;
         } catch (final MessagingException e) {
             if (ImapUtility.isInvalidMessageset(e)) {
@@ -2160,26 +2246,37 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             } catch (final MessagingException e) {
                 throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
             }
-            imapFolderStorage.removeFromCache(fullName);
-            if (hardDelete || usm.isHardDeleteMsgs()) {
-                blockwiseDeletion(msgUIDs, false, null);
-                notifyIMAPFolderModification(fullName);
-                return;
-            }
-            final String trashFullname = imapAccess.getFolderStorage().getTrashFolder();
-            if (null == trashFullname) {
-                // TODO: Bug#8992 -> What to do if trash folder is null
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("\n\tDefault trash folder is not set: aborting delete operation");
+            /*
+             * Set marker
+             */
+            final OperationKey opKey = new OperationKey(Type.MSG_DELETE, accountId, new Object[] { fullName });
+            final boolean marked = setMarker(opKey);
+            try {
+                imapFolderStorage.removeFromCache(fullName);
+                if (hardDelete || usm.isHardDeleteMsgs()) {
+                    blockwiseDeletion(msgUIDs, false, null);
+                    notifyIMAPFolderModification(fullName);
+                    return;
                 }
-                throw IMAPException.create(IMAPException.Code.MISSING_DEFAULT_FOLDER_NAME, imapConfig, session, "trash");
+                final String trashFullname = imapAccess.getFolderStorage().getTrashFolder();
+                if (null == trashFullname) {
+                    // TODO: Bug#8992 -> What to do if trash folder is null
+                    if (LOG.isErrorEnabled()) {
+                        LOG.error("\n\tDefault trash folder is not set: aborting delete operation");
+                    }
+                    throw IMAPException.create(IMAPException.Code.MISSING_DEFAULT_FOLDER_NAME, imapConfig, session, "trash");
+                }
+                final boolean backup = (!isSubfolderOf(fullName, trashFullname, getSeparator(imapFolder)));
+                blockwiseDeletion(msgUIDs, backup, backup ? trashFullname : null);
+                if (IMAPSessionStorageAccess.isEnabled()) {
+                    IMAPSessionStorageAccess.removeDeletedSessionData(msgUIDs, accountId, session, fullName);
+                }
+                notifyIMAPFolderModification(fullName);
+            } finally {
+                if (marked) {
+                    unsetMarker(opKey);
+                }
             }
-            final boolean backup = (!isSubfolderOf(fullName, trashFullname, getSeparator(imapFolder)));
-            blockwiseDeletion(msgUIDs, backup, backup ? trashFullname : null);
-            if (IMAPSessionStorageAccess.isEnabled()) {
-                IMAPSessionStorageAccess.removeDeletedSessionData(msgUIDs, accountId, session, fullName);
-            }
-            notifyIMAPFolderModification(fullName);
         } catch (final MessagingException e) {
             throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
@@ -2415,86 +2512,96 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
             }
             /*
-             * Copy operation
+             * Set marker
              */
-            final long[] result = new long[mailIds.length];
-            final int blockSize = getIMAPProperties().getBlockSize();
-            final StringBuilder debug = DEBUG ? new StringBuilder(128) : null;
-            int offset = 0;
-            final long[] remain;
-            if (blockSize > 0 && mailIds.length > blockSize) {
+            final OperationKey opKey = new OperationKey(Type.MSG_COPY, accountId, new Object[] { sourceFullName, destFullName });
+            final boolean marked = setMarker(opKey);
+            try {
                 /*
-                 * Block-wise deletion
+                 * Copy operation
                  */
-                final long[] tmp = new long[blockSize];
-                for (int len = mailIds.length; len > blockSize; len -= blockSize) {
-                    System.arraycopy(mailIds, offset, tmp, 0, tmp.length);
-                    final long[] uids = copyOrMoveByUID(move, fast, destFullName, tmp, debug);
+                final long[] result = new long[mailIds.length];
+                final int blockSize = getIMAPProperties().getBlockSize();
+                final StringBuilder debug = DEBUG ? new StringBuilder(128) : null;
+                int offset = 0;
+                final long[] remain;
+                if (blockSize > 0 && mailIds.length > blockSize) {
                     /*
-                     * Append UIDs
+                     * Block-wise deletion
                      */
-                    System.arraycopy(uids, 0, result, offset, uids.length);
-                    offset += blockSize;
+                    final long[] tmp = new long[blockSize];
+                    for (int len = mailIds.length; len > blockSize; len -= blockSize) {
+                        System.arraycopy(mailIds, offset, tmp, 0, tmp.length);
+                        final long[] uids = copyOrMoveByUID(move, fast, destFullName, tmp, debug);
+                        /*
+                         * Append UIDs
+                         */
+                        System.arraycopy(uids, 0, result, offset, uids.length);
+                        offset += blockSize;
+                    }
+                    remain = new long[mailIds.length - offset];
+                    System.arraycopy(mailIds, offset, remain, 0, remain.length);
+                } else {
+                    remain = mailIds;
                 }
-                remain = new long[mailIds.length - offset];
-                System.arraycopy(mailIds, offset, remain, 0, remain.length);
-            } else {
-                remain = mailIds;
-            }
-            final long[] uids = copyOrMoveByUID(move, fast, destFullName, remain, debug);
-            System.arraycopy(uids, 0, result, offset, uids.length);
-            if (move) {
-                /*
-                 * Force folder cache update through a close
-                 */
-                imapFolder.close(false);
-                resetIMAPFolder();
-            }
-            final String draftFullname = imapAccess.getFolderStorage().getDraftsFolder();
-            if (destFullName.equals(draftFullname)) {
-                /*
-                 * A copy/move to drafts folder. Ensure to set \Draft flag.
-                 */
-                final IMAPFolder destFolder = setAndOpenFolder(destFullName, READ_WRITE);
-                try {
-                    if (destFolder.getMessageCount() > 0) {
+                final long[] uids = copyOrMoveByUID(move, fast, destFullName, remain, debug);
+                System.arraycopy(uids, 0, result, offset, uids.length);
+                if (move) {
+                    /*
+                     * Force folder cache update through a close
+                     */
+                    imapFolder.close(false);
+                    resetIMAPFolder();
+                }
+                final String draftFullname = imapAccess.getFolderStorage().getDraftsFolder();
+                if (destFullName.equals(draftFullname)) {
+                    /*
+                     * A copy/move to drafts folder. Ensure to set \Draft flag.
+                     */
+                    final IMAPFolder destFolder = setAndOpenFolder(destFullName, READ_WRITE);
+                    try {
+                        if (destFolder.getMessageCount() > 0) {
+                            if (DEBUG) {
+                                final long start = System.currentTimeMillis();
+                                new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, true, true).doCommand();
+                                final long time = System.currentTimeMillis() - start;
+                                LOG.debug(new com.openexchange.java.StringAllocator(128).append("A copy/move to default drafts folder => All messages' \\Draft flag in ").append(
+                                    destFullName).append(" set in ").append(time).append(STR_MSEC).toString());
+                            } else {
+                                new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, true, true).doCommand();
+                            }
+                        }
+                    } finally {
+                        destFolder.close(false);
+                    }
+                } else if (sourceFullName.equals(draftFullname)) {
+                    /*
+                     * A copy/move from drafts folder. Ensure to unset \Draft flag.
+                     */
+                    final IMAPFolder destFolder = setAndOpenFolder(destFullName, READ_WRITE);
+                    try {
                         if (DEBUG) {
                             final long start = System.currentTimeMillis();
-                            new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, true, true).doCommand();
+                            new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, false, true).doCommand();
                             final long time = System.currentTimeMillis() - start;
-                            LOG.debug(new com.openexchange.java.StringAllocator(128).append(
-                                "A copy/move to default drafts folder => All messages' \\Draft flag in ").append(destFullName).append(
-                                " set in ").append(time).append(STR_MSEC).toString());
+                            LOG.debug(new com.openexchange.java.StringAllocator(128).append("A copy/move from default drafts folder => All messages' \\Draft flag in ").append(
+                                destFullName).append(" unset in ").append(time).append(STR_MSEC).toString());
                         } else {
-                            new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, true, true).doCommand();
+                            new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, false, true).doCommand();
                         }
+                    } finally {
+                        destFolder.close(false);
                     }
-                } finally {
-                    destFolder.close(false);
                 }
-            } else if (sourceFullName.equals(draftFullname)) {
-                /*
-                 * A copy/move from drafts folder. Ensure to unset \Draft flag.
-                 */
-                final IMAPFolder destFolder = setAndOpenFolder(destFullName, READ_WRITE);
-                try {
-                    if (DEBUG) {
-                        final long start = System.currentTimeMillis();
-                        new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, false, true).doCommand();
-                        final long time = System.currentTimeMillis() - start;
-                        LOG.debug(new com.openexchange.java.StringAllocator(128).append("A copy/move from default drafts folder => All messages' \\Draft flag in ").append(
-                            destFullName).append(" unset in ").append(time).append(STR_MSEC).toString());
-                    } else {
-                        new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, false, true).doCommand();
-                    }
-                } finally {
-                    destFolder.close(false);
+                if (move && IMAPSessionStorageAccess.isEnabled()) {
+                    IMAPSessionStorageAccess.removeDeletedSessionData(mailIds, accountId, session, sourceFullName);
+                }
+                return result;
+            } finally {
+                if (marked) {
+                    unsetMarker(opKey);
                 }
             }
-            if (move && IMAPSessionStorageAccess.isEnabled()) {
-                IMAPSessionStorageAccess.removeDeletedSessionData(mailIds, accountId, session, sourceFullName);
-            }
-            return result;
         } catch (final MessagingException e) {
             throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", sourceFullName));
         } catch (final RuntimeException e) {
@@ -2659,88 +2766,96 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             } catch (final MessagingException e) {
                 throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
             }
-            imapFolderStorage.removeFromCache(destFullName);
-            /*
-             * Drop special "x-original-headers" header
-             */
-            for (final MailMessage mail : mailMessages) {
-                mail.removeHeader("x-original-headers");
-            }
-            /*
-             * Convert messages to JavaMail message objects
-             */
-            msgs = new Message[length];
-            msgs[0] = MimeMessageConverter.convertMailMessage(mailMessages[0], MimeMessageConverter.BEHAVIOR_CLONE);
-            for (int i = 1; i < length; i++) {
-                msgs[i] = MimeMessageConverter.convertMailMessage(mailMessages[i], MimeMessageConverter.BEHAVIOR_CLONE | MimeMessageConverter.BEHAVIOR_STREAM2FILE);
-            }
-            /*
-             * Check if destination folder supports user flags
-             */
-            final boolean supportsUserFlags = UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId);
-            if (!supportsUserFlags) {
-                /*
-                 * Remove all user flags from messages before appending to folder
-                 */
-                for (final Message message : msgs) {
-                    removeUserFlagsFromMessage(message);
-                }
-            }
-            /*
-             * Mark first message for later lookup
-             */
-            final String hash = randomUUID();
-            msgs[0].setHeader(MessageHeaders.HDR_X_OX_MARKER, fold(13, hash));
-            /*
-             * ... and append them to folder
-             */
-            long[] retval = new long[0];
-            final boolean hasUIDPlus = imapConfig.getImapCapabilities().hasUIDPlus();
+            final OperationKey opKey = new OperationKey(Type.MSG_APPEND, accountId, new Object[] { destFullName });
+            final boolean marked = setMarker(opKey);
             try {
-                if (hasUIDPlus) {
-                    // Perform append expecting APPENUID response code
-                    retval = checkAndConvertAppendUID(imapFolder.appendUIDMessages(msgs));
+                imapFolderStorage.removeFromCache(destFullName);
+                /*
+                 * Drop special "x-original-headers" header
+                 */
+                for (final MailMessage mail : mailMessages) {
+                    mail.removeHeader("x-original-headers");
+                }
+                /*
+                 * Convert messages to JavaMail message objects
+                 */
+                msgs = new Message[length];
+                msgs[0] = MimeMessageConverter.convertMailMessage(mailMessages[0], MimeMessageConverter.BEHAVIOR_CLONE);
+                for (int i = 1; i < length; i++) {
+                    msgs[i] = MimeMessageConverter.convertMailMessage(mailMessages[i], MimeMessageConverter.BEHAVIOR_CLONE | MimeMessageConverter.BEHAVIOR_STREAM2FILE);
+                }
+                /*
+                 * Check if destination folder supports user flags
+                 */
+                final boolean supportsUserFlags = UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId);
+                if (!supportsUserFlags) {
+                    /*
+                     * Remove all user flags from messages before appending to folder
+                     */
+                    for (final Message message : msgs) {
+                        removeUserFlagsFromMessage(message);
+                    }
+                }
+                /*
+                 * Mark first message for later lookup
+                 */
+                final String hash = randomUUID();
+                msgs[0].setHeader(MessageHeaders.HDR_X_OX_MARKER, fold(13, hash));
+                /*
+                 * ... and append them to folder
+                 */
+                long[] retval = new long[0];
+                final boolean hasUIDPlus = imapConfig.getImapCapabilities().hasUIDPlus();
+                try {
+                    if (hasUIDPlus) {
+                        // Perform append expecting APPENUID response code
+                        retval = checkAndConvertAppendUID(imapFolder.appendUIDMessages(msgs));
+                    } else {
+                        // Perform simple append
+                        imapFolder.appendMessages(msgs);
+                    }
+                } catch (final MessagingException e) {
+                    final Exception nextException = e.getNextException();
+                    if (nextException instanceof com.sun.mail.iap.CommandFailedException) {
+                        throw IMAPException.create(IMAPException.Code.INVALID_MESSAGE, imapConfig, session, e, new Object[0]);
+                    }
+                    throw e;
+                }
+                if (retval.length > 0) {
+                    /*
+                     * Close affected IMAP folder to ensure consistency regarding IMAFolder's internal cache.
+                     */
+                    notifyIMAPFolderModification(destFullName);
+                    return retval;
+                }
+                /*-
+                 * OK, go the long way:
+                 * 1. Find the marker in folder's messages
+                 * 2. Get the UIDs from found message's position
+                 */
+                if (hasUIDPlus && LOG.isWarnEnabled()) {
+                    /*
+                     * Missing UID information in APPENDUID response
+                     */
+                    LOG.warn("Missing UID information in APPENDUID response");
+                }
+                retval = new long[msgs.length];
+                final long[] uids = IMAPCommandsCollection.findMarker(hash, retval.length, imapFolder);
+                if (uids.length == 0) {
+                    Arrays.fill(retval, -1L);
                 } else {
-                    // Perform simple append
-                    imapFolder.appendMessages(msgs);
+                    System.arraycopy(uids, 0, retval, 0, uids.length);
                 }
-            } catch (final MessagingException e) {
-                final Exception nextException = e.getNextException();
-                if (nextException instanceof com.sun.mail.iap.CommandFailedException) {
-                    throw IMAPException.create(IMAPException.Code.INVALID_MESSAGE, imapConfig, session, e, new Object[0]);
-                }
-                throw e;
-            }
-            if (retval.length > 0) {
                 /*
                  * Close affected IMAP folder to ensure consistency regarding IMAFolder's internal cache.
                  */
                 notifyIMAPFolderModification(destFullName);
                 return retval;
+            } finally {
+                if (marked) {
+                    unsetMarker(opKey);
+                }
             }
-            /*-
-             * OK, go the long way:
-             * 1. Find the marker in folder's messages
-             * 2. Get the UIDs from found message's position
-             */
-            if (hasUIDPlus && LOG.isWarnEnabled()) {
-                /*
-                 * Missing UID information in APPENDUID response
-                 */
-                LOG.warn("Missing UID information in APPENDUID response");
-            }
-            retval = new long[msgs.length];
-            final long[] uids = IMAPCommandsCollection.findMarker(hash, retval.length, imapFolder);
-            if (uids.length == 0) {
-                Arrays.fill(retval, -1L);
-            } else {
-                System.arraycopy(uids, 0, retval, 0, uids.length);
-            }
-            /*
-             * Close affected IMAP folder to ensure consistency regarding IMAFolder's internal cache.
-             */
-            notifyIMAPFolderModification(destFullName);
-            return retval;
         } catch (final MessagingException e) {
             if (DEBUG) {
                 final Exception next = e.getNextException();
@@ -2786,111 +2901,118 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
             }
-            /*
-             * Remove non user-alterable system flags
-             */
-            imapFolderStorage.removeFromCache(fullName);
-            int flags = flagsArg;
-            flags &= ~MailMessage.FLAG_RECENT;
-            flags &= ~MailMessage.FLAG_USER;
-            /*
-             * Set new flags...
-             */
-            final Rights myRights = imapConfig.isSupportsACLs() ? RightsCache.getCachedRights(imapFolder, true, session, accountId) : null;
-            final Flags affectedFlags = new Flags();
-            boolean applyFlags = false;
-            if (((flags & MailMessage.FLAG_ANSWERED) > 0)) {
-                if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
-                    throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
-                }
-                affectedFlags.add(Flags.Flag.ANSWERED);
-                applyFlags = true;
-            }
-            if (((flags & MailMessage.FLAG_DELETED) > 0)) {
-                if (imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(myRights)) {
-                    throw IMAPException.create(IMAPException.Code.NO_DELETE_ACCESS, imapConfig, session, imapFolder.getFullName());
-                }
-                affectedFlags.add(DELETED);
-                applyFlags = true;
-            }
-            if (((flags & MailMessage.FLAG_DRAFT) > 0)) {
-                if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
-                    throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
-                }
-                affectedFlags.add(DRAFT);
-                applyFlags = true;
-            }
-            if (((flags & MailMessage.FLAG_FLAGGED) > 0)) {
-                if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
-                    throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
-                }
-                affectedFlags.add(Flags.Flag.FLAGGED);
-                applyFlags = true;
-            }
-            if (((flags & MailMessage.FLAG_SEEN) > 0)) {
-                if (imapConfig.isSupportsACLs() && !aclExtension.canKeepSeen(myRights)) {
-                    throw IMAPException.create(IMAPException.Code.NO_KEEP_SEEN_ACCESS, imapConfig, session, imapFolder.getFullName());
-                }
-                affectedFlags.add(Flags.Flag.SEEN);
-                applyFlags = true;
-            }
-            /*
-             * Check for forwarded flag (supported through user flags)
-             */
-            Boolean supportsUserFlags = null;
-            if (((flags & MailMessage.FLAG_FORWARDED) > 0)) {
-                supportsUserFlags = Boolean.valueOf(UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId));
-                if (supportsUserFlags.booleanValue()) {
-                    if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
-                        throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
-                    }
-                    affectedFlags.add(MailMessage.USER_FORWARDED);
-                    applyFlags = true;
-                } else if (DEBUG) {
-                    LOG.debug(new com.openexchange.java.StringAllocator().append("IMAP server ").append(imapConfig.getImapServerSocketAddress()).append(
-                        " does not support user flags. Skipping forwarded flag."));
-                }
-            }
-            /*
-             * Check for read acknowledgment flag (supported through user flags)
-             */
-            if (((flags & MailMessage.FLAG_READ_ACK) > 0)) {
-                if (null == supportsUserFlags) {
-                    supportsUserFlags = Boolean.valueOf(UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId));
-                }
-                if (supportsUserFlags.booleanValue()) {
-                    if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
-                        throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
-                    }
-                    affectedFlags.add(MailMessage.USER_READ_ACK);
-                    applyFlags = true;
-                } else if (DEBUG) {
-                    LOG.debug(new com.openexchange.java.StringAllocator().append("IMAP server ").append(imapConfig.getImapServerSocketAddress()).append(
-                        " does not support user flags. Skipping read-ack flag."));
-                }
-            }
-            if (applyFlags) {
-                if (DEBUG) {
-                    final long start = System.currentTimeMillis();
-                    new FlagsIMAPCommand(imapFolder, msgUIDs, affectedFlags, set, true, false).doCommand();
-                    final long time = System.currentTimeMillis() - start;
-                    LOG.debug(new StringBuilder(128).append("Flags applied to ").append(msgUIDs.length).append(" messages in ").append(time).append(
-                        STR_MSEC).toString());
-                } else {
-                    new FlagsIMAPCommand(imapFolder, msgUIDs, affectedFlags, set, true, false).doCommand();
-                }
-            }
-            /*
-             * Check for spam action
-             */
-            if (usm.isSpamEnabled() && ((flags & MailMessage.FLAG_SPAM) > 0)) {
-                handleSpamByUID(msgUIDs, set, true, fullName, READ_WRITE);
-            } else {
+            final OperationKey opKey = new OperationKey(Type.MSG_FLAGS_UPDATE, accountId, new Object[] { fullName });
+            final boolean marked = setMarker(opKey);
+            try {
                 /*
-                 * Force JavaMail's cache update through folder closure
+                 * Remove non user-alterable system flags
                  */
-                imapFolder.close(false);
-                resetIMAPFolder();
+                imapFolderStorage.removeFromCache(fullName);
+                int flags = flagsArg;
+                flags &= ~MailMessage.FLAG_RECENT;
+                flags &= ~MailMessage.FLAG_USER;
+                /*
+                 * Set new flags...
+                 */
+                final Rights myRights = imapConfig.isSupportsACLs() ? RightsCache.getCachedRights(imapFolder, true, session, accountId) : null;
+                final Flags affectedFlags = new Flags();
+                boolean applyFlags = false;
+                if (((flags & MailMessage.FLAG_ANSWERED) > 0)) {
+                    if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
+                        throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                    }
+                    affectedFlags.add(Flags.Flag.ANSWERED);
+                    applyFlags = true;
+                }
+                if (((flags & MailMessage.FLAG_DELETED) > 0)) {
+                    if (imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(myRights)) {
+                        throw IMAPException.create(IMAPException.Code.NO_DELETE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                    }
+                    affectedFlags.add(DELETED);
+                    applyFlags = true;
+                }
+                if (((flags & MailMessage.FLAG_DRAFT) > 0)) {
+                    if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
+                        throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                    }
+                    affectedFlags.add(DRAFT);
+                    applyFlags = true;
+                }
+                if (((flags & MailMessage.FLAG_FLAGGED) > 0)) {
+                    if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
+                        throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                    }
+                    affectedFlags.add(Flags.Flag.FLAGGED);
+                    applyFlags = true;
+                }
+                if (((flags & MailMessage.FLAG_SEEN) > 0)) {
+                    if (imapConfig.isSupportsACLs() && !aclExtension.canKeepSeen(myRights)) {
+                        throw IMAPException.create(IMAPException.Code.NO_KEEP_SEEN_ACCESS, imapConfig, session, imapFolder.getFullName());
+                    }
+                    affectedFlags.add(Flags.Flag.SEEN);
+                    applyFlags = true;
+                }
+                /*
+                 * Check for forwarded flag (supported through user flags)
+                 */
+                Boolean supportsUserFlags = null;
+                if (((flags & MailMessage.FLAG_FORWARDED) > 0)) {
+                    supportsUserFlags = Boolean.valueOf(UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId));
+                    if (supportsUserFlags.booleanValue()) {
+                        if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
+                            throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                        }
+                        affectedFlags.add(MailMessage.USER_FORWARDED);
+                        applyFlags = true;
+                    } else if (DEBUG) {
+                        LOG.debug(new com.openexchange.java.StringAllocator().append("IMAP server ").append(imapConfig.getImapServerSocketAddress()).append(
+                            " does not support user flags. Skipping forwarded flag."));
+                    }
+                }
+                /*
+                 * Check for read acknowledgment flag (supported through user flags)
+                 */
+                if (((flags & MailMessage.FLAG_READ_ACK) > 0)) {
+                    if (null == supportsUserFlags) {
+                        supportsUserFlags = Boolean.valueOf(UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId));
+                    }
+                    if (supportsUserFlags.booleanValue()) {
+                        if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
+                            throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                        }
+                        affectedFlags.add(MailMessage.USER_READ_ACK);
+                        applyFlags = true;
+                    } else if (DEBUG) {
+                        LOG.debug(new com.openexchange.java.StringAllocator().append("IMAP server ").append(imapConfig.getImapServerSocketAddress()).append(
+                            " does not support user flags. Skipping read-ack flag."));
+                    }
+                }
+                if (applyFlags) {
+                    if (DEBUG) {
+                        final long start = System.currentTimeMillis();
+                        new FlagsIMAPCommand(imapFolder, msgUIDs, affectedFlags, set, true, false).doCommand();
+                        final long time = System.currentTimeMillis() - start;
+                        LOG.debug(new StringBuilder(128).append("Flags applied to ").append(msgUIDs.length).append(" messages in ").append(time).append(STR_MSEC).toString());
+                    } else {
+                        new FlagsIMAPCommand(imapFolder, msgUIDs, affectedFlags, set, true, false).doCommand();
+                    }
+                }
+                /*
+                 * Check for spam action
+                 */
+                if (usm.isSpamEnabled() && ((flags & MailMessage.FLAG_SPAM) > 0)) {
+                    handleSpamByUID(msgUIDs, set, true, fullName, READ_WRITE);
+                } else {
+                    /*
+                     * Force JavaMail's cache update through folder closure
+                     */
+                    imapFolder.close(false);
+                    resetIMAPFolder();
+                }
+            } finally {
+                if (marked) {
+                    unsetMarker(opKey);
+                }
             }
         } catch (final MessagingException e) {
             throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
@@ -2915,111 +3037,119 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
             }
-            /*
-             * Remove non user-alterable system flags
-             */
-            imapFolderStorage.removeFromCache(fullName);
-            int flags = flagsArg;
-            flags &= ~MailMessage.FLAG_RECENT;
-            flags &= ~MailMessage.FLAG_USER;
-            /*
-             * Set new flags...
-             */
-            final Rights myRights = imapConfig.isSupportsACLs() ? RightsCache.getCachedRights(imapFolder, true, session, accountId) : null;
-            final Flags affectedFlags = new Flags();
-            boolean applyFlags = false;
-            if (((flags & MailMessage.FLAG_ANSWERED) > 0)) {
-                if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
-                    throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
-                }
-                affectedFlags.add(Flags.Flag.ANSWERED);
-                applyFlags = true;
-            }
-            if (((flags & MailMessage.FLAG_DELETED) > 0)) {
-                if (imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(myRights)) {
-                    throw IMAPException.create(IMAPException.Code.NO_DELETE_ACCESS, imapConfig, session, imapFolder.getFullName());
-                }
-                affectedFlags.add(DELETED);
-                applyFlags = true;
-            }
-            if (((flags & MailMessage.FLAG_DRAFT) > 0)) {
-                if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
-                    throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
-                }
-                affectedFlags.add(DRAFT);
-                applyFlags = true;
-            }
-            if (((flags & MailMessage.FLAG_FLAGGED) > 0)) {
-                if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
-                    throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
-                }
-                affectedFlags.add(Flags.Flag.FLAGGED);
-                applyFlags = true;
-            }
-            if (((flags & MailMessage.FLAG_SEEN) > 0)) {
-                if (imapConfig.isSupportsACLs() && !aclExtension.canKeepSeen(myRights)) {
-                    throw IMAPException.create(IMAPException.Code.NO_KEEP_SEEN_ACCESS, imapConfig, session, imapFolder.getFullName());
-                }
-                affectedFlags.add(Flags.Flag.SEEN);
-                applyFlags = true;
-            }
-            /*
-             * Check for forwarded flag (supported through user flags)
-             */
-            Boolean supportsUserFlags = null;
-            if (((flags & MailMessage.FLAG_FORWARDED) > 0)) {
-                supportsUserFlags = Boolean.valueOf(UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId));
-                if (supportsUserFlags.booleanValue()) {
-                    if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
-                        throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
-                    }
-                    affectedFlags.add(MailMessage.USER_FORWARDED);
-                    applyFlags = true;
-                } else if (DEBUG) {
-                    LOG.debug(new com.openexchange.java.StringAllocator().append("IMAP server ").append(imapConfig.getImapServerSocketAddress()).append(
-                        " does not support user flags. Skipping forwarded flag."));
-                }
-            }
-            /*
-             * Check for read acknowledgment flag (supported through user flags)
-             */
-            if (((flags & MailMessage.FLAG_READ_ACK) > 0)) {
-                if (null == supportsUserFlags) {
-                    supportsUserFlags = Boolean.valueOf(UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId));
-                }
-                if (supportsUserFlags.booleanValue()) {
-                    if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
-                        throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
-                    }
-                    affectedFlags.add(MailMessage.USER_READ_ACK);
-                    applyFlags = true;
-                } else if (DEBUG) {
-                    LOG.debug(new com.openexchange.java.StringAllocator().append("IMAP server ").append(imapConfig.getImapServerSocketAddress()).append(
-                        " does not support user flags. Skipping read-ack flag."));
-                }
-            }
-            if (applyFlags) {
-                if (DEBUG) {
-                    final long start = System.currentTimeMillis();
-                    new FlagsIMAPCommand(imapFolder, affectedFlags, set, true).doCommand();
-                    final long time = System.currentTimeMillis() - start;
-                    LOG.debug(new com.openexchange.java.StringAllocator(128).append("Flags applied to all messages in ").append(time).append(STR_MSEC).toString());
-                } else {
-                    new FlagsIMAPCommand(imapFolder, affectedFlags, set, true).doCommand();
-                }
-            }
-            /*
-             * Check for spam action
-             */
-            if (usm.isSpamEnabled() && ((flags & MailMessage.FLAG_SPAM) > 0)) {
-                final long[] uids = IMAPCommandsCollection.getUIDs(imapFolder);
-                handleSpamByUID(uids, set, true, fullName, READ_WRITE);
-            } else {
+            final OperationKey opKey = new OperationKey(Type.MSG_FLAGS_UPDATE, accountId, new Object[] { fullName });
+            final boolean marked = setMarker(opKey);
+            try {
                 /*
-                 * Force JavaMail's cache update through folder closure
+                 * Remove non user-alterable system flags
                  */
-                imapFolder.close(false);
-                resetIMAPFolder();
+                imapFolderStorage.removeFromCache(fullName);
+                int flags = flagsArg;
+                flags &= ~MailMessage.FLAG_RECENT;
+                flags &= ~MailMessage.FLAG_USER;
+                /*
+                 * Set new flags...
+                 */
+                final Rights myRights = imapConfig.isSupportsACLs() ? RightsCache.getCachedRights(imapFolder, true, session, accountId) : null;
+                final Flags affectedFlags = new Flags();
+                boolean applyFlags = false;
+                if (((flags & MailMessage.FLAG_ANSWERED) > 0)) {
+                    if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
+                        throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                    }
+                    affectedFlags.add(Flags.Flag.ANSWERED);
+                    applyFlags = true;
+                }
+                if (((flags & MailMessage.FLAG_DELETED) > 0)) {
+                    if (imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(myRights)) {
+                        throw IMAPException.create(IMAPException.Code.NO_DELETE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                    }
+                    affectedFlags.add(DELETED);
+                    applyFlags = true;
+                }
+                if (((flags & MailMessage.FLAG_DRAFT) > 0)) {
+                    if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
+                        throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                    }
+                    affectedFlags.add(DRAFT);
+                    applyFlags = true;
+                }
+                if (((flags & MailMessage.FLAG_FLAGGED) > 0)) {
+                    if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
+                        throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                    }
+                    affectedFlags.add(Flags.Flag.FLAGGED);
+                    applyFlags = true;
+                }
+                if (((flags & MailMessage.FLAG_SEEN) > 0)) {
+                    if (imapConfig.isSupportsACLs() && !aclExtension.canKeepSeen(myRights)) {
+                        throw IMAPException.create(IMAPException.Code.NO_KEEP_SEEN_ACCESS, imapConfig, session, imapFolder.getFullName());
+                    }
+                    affectedFlags.add(Flags.Flag.SEEN);
+                    applyFlags = true;
+                }
+                /*
+                 * Check for forwarded flag (supported through user flags)
+                 */
+                Boolean supportsUserFlags = null;
+                if (((flags & MailMessage.FLAG_FORWARDED) > 0)) {
+                    supportsUserFlags = Boolean.valueOf(UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId));
+                    if (supportsUserFlags.booleanValue()) {
+                        if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
+                            throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                        }
+                        affectedFlags.add(MailMessage.USER_FORWARDED);
+                        applyFlags = true;
+                    } else if (DEBUG) {
+                        LOG.debug(new com.openexchange.java.StringAllocator().append("IMAP server ").append(imapConfig.getImapServerSocketAddress()).append(
+                            " does not support user flags. Skipping forwarded flag."));
+                    }
+                }
+                /*
+                 * Check for read acknowledgment flag (supported through user flags)
+                 */
+                if (((flags & MailMessage.FLAG_READ_ACK) > 0)) {
+                    if (null == supportsUserFlags) {
+                        supportsUserFlags = Boolean.valueOf(UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId));
+                    }
+                    if (supportsUserFlags.booleanValue()) {
+                        if (imapConfig.isSupportsACLs() && !aclExtension.canWrite(myRights)) {
+                            throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                        }
+                        affectedFlags.add(MailMessage.USER_READ_ACK);
+                        applyFlags = true;
+                    } else if (DEBUG) {
+                        LOG.debug(new com.openexchange.java.StringAllocator().append("IMAP server ").append(imapConfig.getImapServerSocketAddress()).append(
+                            " does not support user flags. Skipping read-ack flag."));
+                    }
+                }
+                if (applyFlags) {
+                    if (DEBUG) {
+                        final long start = System.currentTimeMillis();
+                        new FlagsIMAPCommand(imapFolder, affectedFlags, set, true).doCommand();
+                        final long time = System.currentTimeMillis() - start;
+                        LOG.debug(new com.openexchange.java.StringAllocator(128).append("Flags applied to all messages in ").append(time).append(STR_MSEC).toString());
+                    } else {
+                        new FlagsIMAPCommand(imapFolder, affectedFlags, set, true).doCommand();
+                    }
+                }
+                /*
+                 * Check for spam action
+                 */
+                if (usm.isSpamEnabled() && ((flags & MailMessage.FLAG_SPAM) > 0)) {
+                    final long[] uids = IMAPCommandsCollection.getUIDs(imapFolder);
+                    handleSpamByUID(uids, set, true, fullName, READ_WRITE);
+                } else {
+                    /*
+                     * Force JavaMail's cache update through folder closure
+                     */
+                    imapFolder.close(false);
+                    resetIMAPFolder();
+                }
+            } finally {
+                if (marked) {
+                    unsetMarker(opKey);
+                }
             }
         } catch (final MessagingException e) {
             throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
@@ -3072,27 +3202,35 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     "\" does not support user-defined flags. Update of color flag ignored."));
                 return;
             }
-            /*
-             * Remove all old color label flag(s) and set new color label flag
-             */
-            imapFolderStorage.removeFromCache(fullName);
-            long start = DEBUG ? System.currentTimeMillis() : 0L;
-            IMAPCommandsCollection.clearAllColorLabels(imapFolder, msgUIDs);
-            if (DEBUG) {
-                LOG.debug(new com.openexchange.java.StringAllocator(128).append("All color flags cleared from ").append(msgUIDs.length).append(" messages in ").append(
-                    (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+            final OperationKey opKey = new OperationKey(Type.MSG_LABEL_UPDATE, accountId, new Object[] { fullName });
+            final boolean marked = setMarker(opKey);
+            try {
+                /*
+                 * Remove all old color label flag(s) and set new color label flag
+                 */
+                imapFolderStorage.removeFromCache(fullName);
+                long start = DEBUG ? System.currentTimeMillis() : 0L;
+                IMAPCommandsCollection.clearAllColorLabels(imapFolder, msgUIDs);
+                if (DEBUG) {
+                    LOG.debug(new com.openexchange.java.StringAllocator(128).append("All color flags cleared from ").append(msgUIDs.length).append(" messages in ").append(
+                        (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+                }
+                start = DEBUG ? System.currentTimeMillis() : 0L;
+                IMAPCommandsCollection.setColorLabel(imapFolder, msgUIDs, MailMessage.getColorLabelStringValue(colorLabel));
+                if (DEBUG) {
+                    LOG.debug(new com.openexchange.java.StringAllocator(128).append("All color flags set in ").append(msgUIDs.length).append(" messages in ").append(
+                        (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+                }
+                /*
+                 * Force JavaMail's cache update through folder closure
+                 */
+                imapFolder.close(false);
+                resetIMAPFolder();
+            } finally {
+                if (marked) {
+                    unsetMarker(opKey);
+                }
             }
-            start = DEBUG ? System.currentTimeMillis() : 0L;
-            IMAPCommandsCollection.setColorLabel(imapFolder, msgUIDs, MailMessage.getColorLabelStringValue(colorLabel));
-            if (DEBUG) {
-                LOG.debug(new com.openexchange.java.StringAllocator(128).append("All color flags set in ").append(msgUIDs.length).append(" messages in ").append(
-                    (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
-            }
-            /*
-             * Force JavaMail's cache update through folder closure
-             */
-            imapFolder.close(false);
-            resetIMAPFolder();
         } catch (final MessagingException e) {
             throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
@@ -3144,27 +3282,35 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     "\" does not support user-defined flags. Update of color flag ignored."));
                 return;
             }
-            /*
-             * Remove all old color label flag(s) and set new color label flag
-             */
-            imapFolderStorage.removeFromCache(fullName);
-            long start = DEBUG ? System.currentTimeMillis() : 0L;
-            IMAPCommandsCollection.clearAllColorLabels(imapFolder, null);
-            if (DEBUG) {
-                LOG.debug(new com.openexchange.java.StringAllocator(128).append("All color flags cleared from all messages in ").append(
-                    (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
+            final OperationKey opKey = new OperationKey(Type.MSG_LABEL_UPDATE, accountId, new Object[] { fullName });
+            final boolean marked = setMarker(opKey);
+            try {
+                /*
+                 * Remove all old color label flag(s) and set new color label flag
+                 */
+                imapFolderStorage.removeFromCache(fullName);
+                long start = DEBUG ? System.currentTimeMillis() : 0L;
+                IMAPCommandsCollection.clearAllColorLabels(imapFolder, null);
+                if (DEBUG) {
+                    LOG.debug(new com.openexchange.java.StringAllocator(128).append("All color flags cleared from all messages in ").append((System.currentTimeMillis() - start)).append(
+                        STR_MSEC).toString());
+                }
+                start = DEBUG ? System.currentTimeMillis() : 0L;
+                IMAPCommandsCollection.setColorLabel(imapFolder, null, MailMessage.getColorLabelStringValue(colorLabel));
+                if (DEBUG) {
+                    LOG.debug(new com.openexchange.java.StringAllocator(128).append("All color flags set in all messages in ").append((System.currentTimeMillis() - start)).append(
+                        STR_MSEC).toString());
+                }
+                /*
+                 * Force JavaMail's cache update through folder closure
+                 */
+                imapFolder.close(false);
+                resetIMAPFolder();
+            } finally {
+                if (marked) {
+                    unsetMarker(opKey);
+                }
             }
-            start = DEBUG ? System.currentTimeMillis() : 0L;
-            IMAPCommandsCollection.setColorLabel(imapFolder, null, MailMessage.getColorLabelStringValue(colorLabel));
-            if (DEBUG) {
-                LOG.debug(new com.openexchange.java.StringAllocator(128).append("All color flags set in all messages in ").append(
-                    (System.currentTimeMillis() - start)).append(STR_MSEC).toString());
-            }
-            /*
-             * Force JavaMail's cache update through folder closure
-             */
-            imapFolder.close(false);
-            resetIMAPFolder();
         } catch (final MessagingException e) {
             throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
@@ -3281,6 +3427,41 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * +++++++++++++++++ Helper methods +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
+
+    private static final String IMAP_OPERATIONS = "__imap-operations".intern();
+
+    private void unsetMarker(final OperationKey key) {
+        @SuppressWarnings("unchecked") final ConcurrentMap<OperationKey, Object> map = (ConcurrentMap<OperationKey, Object>) session.getParameter(IMAP_OPERATIONS);
+        if (null != map) {
+            map.remove(key);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean setMarker(final OperationKey key) throws OXException {
+        if (session instanceof PutIfAbsent) {
+            final PutIfAbsent session = (PutIfAbsent) this.session;
+            ConcurrentMap<OperationKey, Object> map = (ConcurrentMap<OperationKey, Object>) session.getParameter(IMAP_OPERATIONS);
+            if (null == map) {
+                final ConcurrentMap<OperationKey, Object> newMap = new ConcurrentHashMap<OperationKey, Object>(16);
+                map = (ConcurrentMap<OperationKey, Object>) session.setParameterIfAbsent(IMAP_OPERATIONS, newMap);
+                if (null == map) {
+                    map = newMap;
+                }
+            }
+            if (null != map.putIfAbsent(key, OperationKey.PRESENT)) {
+                // In use...
+                throw MimeMailExceptionCode.IN_USE_ERROR_EXT.create(
+                    imapConfig.getServer(),
+                    imapConfig.getLogin(),
+                    Integer.valueOf(session.getUserId()),
+                    Integer.valueOf(session.getContextId()),
+                    MimeMailException.appendInfo("Mailbox is currently in use.", imapFolder));
+            }
+            return true;
+        }
+        return false;
+    }
 
     private static final MailFields MAILFIELDS_DEFAULT = new MailFields(MailField.ID, MailField.FOLDER_ID);
 

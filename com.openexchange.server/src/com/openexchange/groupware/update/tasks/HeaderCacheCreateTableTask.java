@@ -91,8 +91,7 @@ public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl im
         " id VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
         " uuid BINARY(16) NOT NULL," +
         " PRIMARY KEY (cid, user, account, fullname, id)," +
-        " INDEX (cid, user, uuid)," +
-        " FOREIGN KEY (cid, user) REFERENCES user (cid, id)" +
+        " INDEX (cid, user, uuid)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
@@ -106,8 +105,7 @@ public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl im
         " rfc822Size bigint(64) UNSIGNED NOT NULL," +
         " userFlags VARCHAR(1024) collate utf8_unicode_ci default NULL," +
         " headers BLOB," +
-        " PRIMARY KEY (cid, user, uuid)," +
-        " FOREIGN KEY (cid, user, uuid) REFERENCES mailUUID (cid, user, uuid)" +
+        " PRIMARY KEY (cid, user, uuid)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 

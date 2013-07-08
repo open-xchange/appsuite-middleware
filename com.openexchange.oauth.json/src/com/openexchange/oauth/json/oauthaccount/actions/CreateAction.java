@@ -54,6 +54,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -80,6 +81,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "oauth_verfifier", description = "The verifier string which confirms that user granted access."),
     @Parameter(name = "displayName", description = "The display name for the new account.")
 }, responseDescription = "A JSON object describing the newly created OAuth account as specified in OAuth account data.")
+@DispatcherNotes(noSecretCallback = true)
 public final class CreateAction extends
 AbstractOAuthTokenAction {
 

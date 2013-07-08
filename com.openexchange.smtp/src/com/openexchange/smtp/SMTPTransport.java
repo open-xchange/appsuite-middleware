@@ -100,6 +100,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
@@ -310,7 +311,7 @@ public final class SMTPTransport extends MailTransport {
         }
         throw MailExceptionCode.UNEXPECTED_ERROR.create(cause, cause.getMessage());
     }
-    
+
     private long getMaxMailSize() throws OXException {
         ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
 
@@ -326,7 +327,7 @@ public final class SMTPTransport extends MailTransport {
                 }
             }
         }
-        
+
         return -1;
     }
 
@@ -337,8 +338,8 @@ public final class SMTPTransport extends MailTransport {
                     final Properties smtpProps = SMTPSessionProperties.getDefaultSessionProperties();
                     smtpProps.put("mail.smtp.class", JavaSMTPTransport.class.getName());
                     smtpProps.put("com.openexchange.mail.maxMailSize", Long.toString(getMaxMailSize()));
-                    
-                    
+
+
                     final SMTPConfig smtpConfig = getTransportConfig0();
                     /*
                      * Set properties
@@ -450,7 +451,7 @@ public final class SMTPTransport extends MailTransport {
                     smtpSession.addProvider(new Provider(
                         Provider.Type.TRANSPORT,
                         "smtp",
-                        "com.sun.mail.smtp.JavaSMTPTransport",
+                        JavaSMTPTransport.class.getName(),
                         "Open-Xchange, Inc.",
                         "7.2.2"));
                 }
@@ -836,6 +837,7 @@ public final class SMTPTransport extends MailTransport {
     }
 
     private void transport(final MimeMessage smtpMessage, final Address[] recipients, Transport transport, final SMTPConfig smtpConfig) throws OXException {
+        prepareAddresses(recipients);
         try {
             transport.sendMessage(smtpMessage, recipients);
         } catch (final MessagingException e) {
@@ -893,6 +895,22 @@ public final class SMTPTransport extends MailTransport {
             }
         }
         return tmpPass;
+    }
+
+    private void prepareAddresses(final Address[] addresses) {
+        final int length = addresses.length;
+        final StringBuilder tmp = new StringBuilder(32);
+        for (int i = 0; i < length; i++) {
+            final InternetAddress address = (InternetAddress) addresses[i];
+            final String sAddress = address.getAddress();
+            if (MsisdnCheck.checkMsisdn(sAddress)) {
+                final int pos = sAddress.indexOf('/');
+                if (pos < 0) {
+                    tmp.setLength(0);
+                    address.setAddress(tmp.append(sAddress).append("/TYPE=PLMN").toString());
+                }
+            }
+        }
     }
 
     @Override

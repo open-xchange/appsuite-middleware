@@ -57,7 +57,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import com.openexchange.ajp13.AJPv13RequestHandler;
-import com.openexchange.ajp13.AJPv13ServiceRegistry;
+import com.openexchange.ajp13.Services;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.servlet.ServletConfigLoader;
 import com.openexchange.ajp13.servlet.ServletRequestWrapper;
@@ -335,7 +335,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 
     private static void configureCookie(final Cookie jsessionIdCookie) {
         jsessionIdCookie.setPath(DEFAULT_PATH);
-        final ConfigurationService configurationService = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
         /*
          * Check if auto-login is enabled
          */

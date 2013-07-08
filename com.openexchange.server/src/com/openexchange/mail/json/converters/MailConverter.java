@@ -303,7 +303,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final JSONArray jChildMessages = new JSONArray(mails.size());
         if (writeThreadAsObjects) {
             for (final MailMessage child : mails) {
-                final JSONObject jChild = new JSONObject();
+                final JSONObject jChild = new JSONObject(writers.length);
                 accountID = child.getAccountId();
                 for (int j = 0; j < writers.length; j++) {
                     writers[j].writeField(jChild, child, 0, true, accountID, userId, contextId, optTimeZone);
@@ -385,7 +385,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             final int contextId = session.getContextId();
             for (final MailMessage mail : mails) {
                 if (mail != null) {
-                    final JSONArray ja = new JSONArray();
+                    final JSONArray ja = new JSONArray(writers.length);
                     final int accountID = mail.getAccountId();
                     for (int j = 0; j < writers.length; j++) {
                         writers[j].writeField(ja, mail, 0, false, accountID, userId, contextId, timeZone);
@@ -431,7 +431,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
              */
             if (("thread".equalsIgnoreCase(sort))) {
                 for (final MailMessage mail : mails) {
-                    final JSONArray ja = new JSONArray();
+                    final JSONArray ja = new JSONArray(writers.length);
                     if (mail != null) {
                         final int accountId = mail.getAccountId();
                         for (final MailFieldWriter writer : writers) {
@@ -446,7 +446,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                  * Get iterator
                  */
                 for (final MailMessage mail : mails) {
-                    final JSONArray ja = new JSONArray();
+                    final JSONArray ja = new JSONArray(writers.length);
                     if (mail != null) {
                         final int accountId = mail.getAccountId();
                         for (final MailFieldWriter writer : writers) {
@@ -554,6 +554,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
         final MailServletInterface mailInterface = getMailInterface(requestData, session);
         final List<OXException> warnings = new ArrayList<OXException>(2);
+        final boolean exactLength = AJAXRequestDataTools.parseBoolParameter(requestData.getParameter("exact_length"));
         final JSONObject jMail;
         try {
             jMail = MessageWriter.writeMailMessage(
@@ -567,7 +568,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 token,
                 ttlMillis,
                 mimeFilter,
-                timeZone);
+                timeZone,
+                exactLength);
         } catch (final OXException e) {
             if (MailExceptionCode.MESSAGING_ERROR.equals(e)) {
                 final Throwable cause = e.getCause();

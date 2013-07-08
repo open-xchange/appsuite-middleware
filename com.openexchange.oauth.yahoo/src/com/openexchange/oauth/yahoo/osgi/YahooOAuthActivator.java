@@ -100,12 +100,8 @@ public class YahooOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final ConfigurationService config = getService(ConfigurationService.class);
         oauthService = getService(OAuthService.class);
-
-        oAuthMetaData =
-            new OAuthServiceMetaDataYahooImpl(getService(DeferringURLService.class));
-
+        oAuthMetaData = new OAuthServiceMetaDataYahooImpl(getService(DeferringURLService.class));
         registerService(OAuthServiceMetaData.class, oAuthMetaData);
         LOG.info("OAuthServiceMetaData for Yahoo was started");
 

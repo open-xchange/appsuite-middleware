@@ -291,6 +291,9 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                 }
 
                 private void handleDroppedSession(final Session session) {
+                    if (session.isTransient()) {
+                        return;
+                    }
                     final SessiondService sessiondService = getService(SessiondService.class);
                     final int contextId = session.getContextId();
                     if (null == sessiondService.getAnyActiveSessionForUser(session.getUserId(), contextId)) {

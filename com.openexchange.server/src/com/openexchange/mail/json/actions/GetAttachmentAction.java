@@ -49,12 +49,12 @@
 
 package com.openexchange.mail.json.actions;
 
+import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -180,12 +180,16 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             if (sequenceId == null && imageContentId == null) {
                 throw MailExceptionCode.MISSING_PARAM.create(new com.openexchange.java.StringAllocator().append(PARAMETER_MAILATTCHMENT).append(" | ").append(PARAMETER_MAILCID).toString());
             }
+            long size = -1L; /* mail system does not provide exact size */
             final MailPart mailPart;
             final IFileHolder.InputStreamClosure isClosure;
             if (imageContentId == null) {
                 mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, !saveToDisk);
                 if (mailPart == null) {
                     throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
+                }
+                if (isEmpty(mailPart.getFileName())) {
+                    mailPart.setFileName(generateFilename(sequenceId, mailPart.getContentType().getBaseType()));
                 }
                 if (filter && !saveToDisk && mailPart.getContentType().startsWith("text/htm")) {
                     /*
@@ -200,6 +204,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                         bytes = sanitizeHtml(htmlContent, htmlService).getBytes(Charsets.forName(cs));
                         contentType.setCharsetParameter(cs);
                     }
+                    size = bytes.length;
                     isClosure = new IFileHolder.InputStreamClosure() {
 
                         @Override
@@ -208,6 +213,10 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                         }
                     };
                 } else {
+                    final boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
+                    if (exactLength) {
+                        size = Streams.countInputStream(mailPart.getInputStream());
+                    }
                     isClosure = new IFileHolder.InputStreamClosure() {
 
                         @Override
@@ -220,6 +229,10 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 mailPart = mailInterface.getMessageImage(folderPath, uid, imageContentId);
                 if (mailPart == null) {
                     throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
+                }
+                final boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
+                if (exactLength) {
+                    size = Streams.countInputStream(mailPart.getInputStream());
                 }
                 isClosure = new IFileHolder.InputStreamClosure() {
 
@@ -239,11 +252,11 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
              */
             final FileHolder fileHolder;
             if (saveToDisk) {
-                fileHolder = new FileHolder(isClosure, -1 /* mail system does not provide exact size */, MIME_APPL_OCTET, mailPart.getFileName());
+                fileHolder = new FileHolder(isClosure, size, MIME_APPL_OCTET, mailPart.getFileName());
                 fileHolder.setDelivery("download");
                 req.getRequest().putParameter(PARAMETER_DELIVERY, "download");
             } else {
-                fileHolder = new FileHolder(isClosure, -1 /* mail system does not provide exact size */, mailPart.getContentType().toString(), mailPart.getFileName());
+                fileHolder = new FileHolder(isClosure, size, mailPart.getContentType().toString(), mailPart.getFileName());
             }
             final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             /*

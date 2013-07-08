@@ -143,8 +143,8 @@ public class ISPDB extends AbstractConfigSource {
                 LOG.info("Could not retrieve config XML. Return code was: " + httpCode);
                 return null;
             }
-            AutoconfigParser parser = new AutoconfigParser(getMethod.getResponseBodyAsStream());
-            ClientConfig clientConfig = parser.getConfig();
+
+            ClientConfig clientConfig = new AutoconfigParser().getConfig(getMethod.getResponseBodyAsStream());
 
             Autoconfig autoconfig = getBestConfiguration(clientConfig, emailDomain);
             replaceUsername(autoconfig, emailLocalPart, emailDomain);

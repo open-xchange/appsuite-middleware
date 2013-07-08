@@ -3,11 +3,11 @@ Bundle-ManifestVersion: 2
 Bundle-Activator: com.hazelcast.osgi.HzActivator
 Bundle-Name: Hazelcast library
 Bundle-SymbolicName: com.hazelcast
-Bundle-Version: 7.2.0
+Bundle-Version: 7.2.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BuddyPolicy: registered
-Bundle-ClassPath: lib/hazelcast-2.5.jar,
+Bundle-ClassPath: lib/hazelcast-2.6.jar,
  .
 Export-Package: com.hazelcast.cluster,
  com.hazelcast.config,
@@ -36,7 +36,8 @@ Export-Package: com.hazelcast.cluster,
  com.hazelcast.security,
  com.hazelcast.util,
  com.hazelcast.util.concurrent
-Import-Package: javax.crypto,
+Import-Package: com.openexchange.config,
+ javax.crypto,
  javax.crypto.interfaces,
  javax.crypto.spec,
  javax.management,
@@ -50,6 +51,7 @@ Import-Package: javax.crypto,
  javax.xml.transform.stream,
  javax.xml.xpath,
  org.osgi.framework,
+ org.osgi.util.tracker,
  org.w3c.dom,
  org.w3c.dom.css,
  org.w3c.dom.events,

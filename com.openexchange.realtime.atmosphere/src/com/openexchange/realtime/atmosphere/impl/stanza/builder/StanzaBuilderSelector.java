@@ -51,8 +51,10 @@ package com.openexchange.realtime.atmosphere.impl.stanza.builder;
 
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionMessage;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
+import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.tools.session.ServerSession;
@@ -82,13 +84,13 @@ public class StanzaBuilderSelector {
      * @throws OXException if the JSONObject doesn't contain a <code>element</code> key specifying the Stanza or no adequate
      *             StanzaBuilder can be found
      */
-    public static StanzaBuilder<? extends Stanza> getBuilder(ID from, ServerSession session, JSONObject json) throws OXException {
+    public static StanzaBuilder<? extends Stanza> getBuilder(ID from, ServerSession session, JSONObject json) throws RealtimeException {
         if (json == null) {
             throw new IllegalArgumentException();
         }
         String element = json.optString("element");
         if (element == null) {
-            throw AtmosphereExceptionCode.MISSING_KEY.create("element");
+            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(AtmosphereExceptionMessage.MISSING_KEY_MSG);
         }
         if (element.equalsIgnoreCase("iq")) {
             return new IQBuilder(from, json, session);
@@ -97,7 +99,7 @@ public class StanzaBuilderSelector {
         } else if (element.equalsIgnoreCase("presence")) {
             return new PresenceBuilder(from, json, session);
         } else {
-            throw AtmosphereExceptionCode.MISSING_BUILDER_FOR_ELEMENT.create(element);
+            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(AtmosphereExceptionMessage.MISSING_BUILDER_FOR_ELEMENT_MSG);
         }
     }
 }

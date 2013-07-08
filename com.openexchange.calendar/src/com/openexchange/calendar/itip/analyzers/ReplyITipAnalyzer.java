@@ -189,9 +189,32 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 		} else if (message.getMethod() == ITipMethod.COUNTER){
 			analysis.recommendActions(ITipAction.UPDATE, ITipAction.DECLINECOUNTER);
 		} else {
-			analysis.recommendAction(ITipAction.UPDATE);
+		    if (containsChangesForUpdate(analysis)) {
+		        analysis.recommendAction(ITipAction.UPDATE);
+		    }
 		}
 		return analysis;
+	}
+	
+	private boolean containsChangesForUpdate(ITipAnalysis analysis) {
+	    if (analysis.getChanges() == null || analysis.getChanges().size() == 0) { 
+	        return false;
+	    }
+	    
+	    for (ITipChange change : analysis.getChanges()) {
+	        if (change.getDiff() == null) {
+	            continue;
+	        }
+	        
+	        if (change.getDiff().getUpdates() == null) {
+	            continue;
+	        }
+	        
+	        if (change.getDiff().getUpdates().size() != 0) {
+	            return true;
+	        }
+	    }
+	    return false;
 	}
 
 	private void describeReplyDiff(final ITipMessage message, final ITipChange change, final TypeWrapper wrapper,
