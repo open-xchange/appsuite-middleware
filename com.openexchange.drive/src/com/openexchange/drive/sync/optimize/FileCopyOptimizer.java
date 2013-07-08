@@ -176,21 +176,28 @@ public class FileCopyOptimizer extends FileActionOptimizer {
     private static Map<String, ServerFileVersion> getMatchingFileVersions(DriveSession session, List<String> checksums) throws OXException {
         Map<String, ServerFileVersion> matchingFileVersions = new HashMap<String, ServerFileVersion>();
         List<FileChecksum> checksumsToInvalidate = new ArrayList<FileChecksum>();
-        Map<String, List<FileChecksum>> matchingFileChecksums = session.getChecksumStore().getMatchingFileChecksums(checksums);
-        for (List<FileChecksum> matchingChecksums : matchingFileChecksums.values()) {
+        Map<String, List<FileChecksum>> storedFileChecksums = session.getChecksumStore().getMatchingFileChecksums(checksums);
+        for (List<FileChecksum> storedChecksums : storedFileChecksums.values()) {
             File matchingFile = null;
-            for (FileChecksum matchingChecksum : matchingChecksums) {
+            for (FileChecksum storedChecksum : storedChecksums) {
                 try {
-                    matchingFile = session.getStorage().getFile(matchingChecksum.getFileID().toUniqueID());
+                    matchingFile = session.getStorage().getFile(storedChecksum.getFileID().toUniqueID(), storedChecksum.getVersion());
                 } catch (OXException e) {
                     LOG.debug("Error accessing file referenced by checksum store: " + e.getMessage());
                     if (indicatesInvalidation(e)) {
-                        checksumsToInvalidate.add(matchingChecksum);
+                        checksumsToInvalidate.add(storedChecksum);
                     }
                 }
                 if (null != matchingFile) {
-                    matchingFileVersions.put(matchingChecksum.getChecksum(), new ServerFileVersion(matchingFile, matchingChecksum));
-                    break;
+                    /*
+                     * check if sequence number / version still valid
+                     */
+                    if (matches(storedChecksum, matchingFile)) {
+                        matchingFileVersions.put(storedChecksum.getChecksum(), new ServerFileVersion(matchingFile, storedChecksum));
+                        break;
+                    } else {
+                        checksumsToInvalidate.add(storedChecksum);
+                    }
                 }
             }
         }
@@ -198,6 +205,16 @@ public class FileCopyOptimizer extends FileActionOptimizer {
             session.getChecksumStore().removeFileChecksums(checksumsToInvalidate);
         }
         return matchingFileVersions;
+    }
+
+    private static boolean matches(FileChecksum checksum, File file) {
+        if (null == checksum) {
+            return null == file;
+        } else if (null != file) {
+            return checksum.getSequenceNumber() == file.getSequenceNumber() &&
+                null == checksum.getVersion() ? null == file.getVersion() : checksum.getVersion().equals(file.getVersion());
+        }
+        return false;
     }
 
 }
