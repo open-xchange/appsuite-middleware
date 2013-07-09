@@ -46,6 +46,12 @@ open-xchange-audit (7.2.2-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 27 May 2013 17:13:51 +0200
 
+open-xchange-audit (7.2.1-6) stable; urgency=low
+
+  * Build for patch 2013-06-27
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 03 Jul 2013 16:58:02 +0200
+
 open-xchange-audit (7.2.1-5) unstable; urgency=low
 
   * Build for patch 2013-06-11
