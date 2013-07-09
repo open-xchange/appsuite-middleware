@@ -1,3 +1,9 @@
+open-xchange-realtime-core (7.2.1-6) stable; urgency=low
+
+  * Build for patch 2013-06-27
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 03 Jul 2013 16:58:40 +0200
+
 open-xchange-realtime-core (7.2.1-5) UNRELEASED; urgency=low
 
   * Build for patch 2013-06-11
