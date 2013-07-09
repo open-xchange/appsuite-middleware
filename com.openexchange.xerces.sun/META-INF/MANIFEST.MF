@@ -7,7 +7,8 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: lib/xerces.jar
 Eclipse-BuddyPolicy: registered
-Export-Package: org.apache.xerces.impl,
+Export-Package: org.apache.xerces.dom,
+ org.apache.xerces.impl,
  org.apache.xerces.jaxp,
  org.apache.xerces.jaxp.datatype,
  org.apache.xerces.jaxp.validation,
