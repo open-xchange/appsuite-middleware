@@ -68,10 +68,28 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * An ID describes a valid sender or recipient of a {@link Stanza}. It consists of an optional channel, a mandatory user name and mandatory
- * context name and an optional resource. Resources are arbitrary Strings that allow the user to specify how he is currently connected to
- * the service (e.g. one resource per client) and by that enable multiple logins from different machines and locations.
- *
+ * An ID describes a valid sender or recipient of a {@link Stanza}. 
+ * 
+ * An ID has the following form: [protocol].[component]://[user]@[context]/[resource]:
+ * <ol>
+ *   <li><b>protocol</b>: specifies the protocol that the entity behind this ID uses to connect to the OX.</li>
+ *   <li><b>component</b> (optional): corresponds to a specific backend service that registered itself for this component name</li>
+ *   <li><b>user</b>: specifies the name of the entity we want to address</li>
+ *   <li><b>context</b>: specifies the context of the entity we want to address</li>
+ *   <li><b>resource</b>: is an unique identifier used to distinguish between multiple instances/connections of the same entitiy</li>
+ * </ol>
+ * 
+ * <h4>Examples:</h4>
+ * <ol>
+ *   <li><b>ox://francisco.laguna@premium/20d39asd9da93249f009d</b>: we want to address the user francisco.laguna in the context premium.
+ *       The user is connected via the ox channel that is used between the browser and the backend and has the identifier
+ *       20d39asd9da93249f009d (tab/window/browser)</li>
+ *   <li><b>synthetic.office://operations@premium/66499.62446</b>: The "synthetic" protocol declares that the entity is synthetic and has no
+ *       counterpart in the real world (a bot, a room, general programm construct) instead of a user. The backendservice addressed with this
+ *       ID is office. The entity addressed is operations@premium and the resource identifies document via folder.document notation</li>
+ *   <li><b>call://356c4ad6a4af46948f9703217a1f5a2d@internal</b>:</li>
+ * </ol>
+
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -85,10 +103,10 @@ public class ID implements Serializable {
     private static final ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>> LOCKS = new ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>>();
 
     private String protocol;
+    private String component;
     private String user;
     private String context;
     private String resource;
-    private String component;
 
     /**
      * Pattern to match IDs consisting of protocol, user, context and resource e.g. xmpp://user@context/notebook
@@ -332,7 +350,10 @@ public class ID implements Serializable {
             needSep = true;
         }
         if (component != null) {
-            b.append(".").append(component);
+            if(protocol != null) {
+                b.append(".");
+            }
+            b.append(component);
             needSep = true;
         }
         if (needSep) {

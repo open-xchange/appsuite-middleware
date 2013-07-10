@@ -49,9 +49,11 @@
 
 package com.openexchange.realtime.hazelcast.directory;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -194,8 +196,8 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         IDMap<Resource> remove2 = remove(toRemove);
         Assert.assertEquals("Wrong size", 2, remove2.size());
         
-        MultiMap<ID,ID> idMapping = getIDMapping();
-        IMap<ID, HazelcastResource> resources = getResourceMap();
+        MultiMap<String,String> idMapping = getIDMapping();
+        IMap<String, Map<String, Serializable>> resources = getResourceMap();
         Assert.assertEquals("Id mapping not empty", 0, idMapping.size());
         Assert.assertEquals("Resources not empty", 0, resources.size());
     }
@@ -242,8 +244,8 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         IDMap<Resource> removed2 = remove(id4);
         Assert.assertEquals("Wrong size", 1, removed2.size());
         
-        MultiMap<ID,ID> idMapping = getIDMapping();
-        IMap<ID, HazelcastResource> resources = getResourceMap();
+        MultiMap<String,String> idMapping = getIDMapping();
+        IMap<String, Map<String, Serializable>> resources = getResourceMap();
         Assert.assertEquals("Id mapping not empty", 0, idMapping.size());
         Assert.assertEquals("Resources not empty", 0, resources.size());
     }
