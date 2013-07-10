@@ -9,6 +9,8 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.hazelcast.config,
  com.hazelcast.core,
+ com.hazelcast.impl,
+ com.hazelcast.nio,
  com.openexchange.exception,
  com.openexchange.hazelcast.configuration,
  com.openexchange.java,

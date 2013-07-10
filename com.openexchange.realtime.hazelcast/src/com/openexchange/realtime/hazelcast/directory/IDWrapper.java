@@ -47,33 +47,33 @@
  *
  */
 
-package com.openexchange.realtime.exception;
+package com.openexchange.realtime.hazelcast.directory;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import com.openexchange.exception.OXException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.realtime.packet.ID;
 
 
 /**
- * {@link ExceptionTest}
+ * {@link IDWrapper} - Helper class to map/unmap IDs from and to String
+ * hazelcast.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class ExceptionTest {
-    
-    @Before
-    public void setUp() throws Exception {
-    }
+public class IDWrapper {
 
-    @After
-    public void tearDown() throws Exception {
-    }
-
-    @Test
-    public void testTransformation() throws Exception {
-        RealtimeException realtimeException = RealtimeExceptionFactory.getInstance().create(RealtimeExceptionCodes.SESSION_INVALID);
-        RealtimeException atmosphereException = realtimeException.toAtmosphereException();
-        RealtimeException xmppException = realtimeException.toXMPPException();
+    /**
+     * Transform a Collection of IDs to a Set of Strings
+     * @param ids the collection of IDs
+     * @return the collection of Strings representing the IDs
+     */
+    public static Set<String> idsToStringSet(Collection<ID> ids) {
+        Set<String> stringList = new HashSet<String>(ids.size());
+        
+        for (ID id : ids) {
+            stringList.add(id.toString());
+        }
+        return stringList;
     }
 }

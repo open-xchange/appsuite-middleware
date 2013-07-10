@@ -105,6 +105,18 @@ public class HazelcastResource extends AbstractResource implements Resource {
         super(presence, timestamp);
         this.routingInfo = HazelcastAccess.getLocalMember();
     }
+    
+    /**
+     * Initializes a new {@link HazelcastResource} with a Presence state, a given timestamp and the routing infos of the local hazelcast
+     * member.
+     * 
+     * @param state The presence state
+     * @param timestamp The timestamp
+     */
+    public HazelcastResource(Presence presence, Date timestamp, Member routingInfo) {
+        super(presence, timestamp);
+        this.routingInfo = routingInfo;
+    }
 
     /**
      * Initializes a new {@link HazelcastResource} from an existing {@link Resource}. During initialization it discards existing routing

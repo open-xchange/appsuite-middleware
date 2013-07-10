@@ -265,7 +265,7 @@ public class Strings {
      * Checks for an empty string.
      *
      * @param string The string
-     * @return <code>true</code> if empty; else <code>false</code>
+     * @return <code>true</code> if input is null or empty; else <code>false</code>
      */
     public static boolean isEmpty(final String string) {
         if (null == string) {
@@ -274,7 +274,7 @@ public class Strings {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
+            isWhitespace = isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }
