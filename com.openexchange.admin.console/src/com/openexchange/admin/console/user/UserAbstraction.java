@@ -3515,7 +3515,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
 
     protected final OXUserInterface getUserInterface() throws NotBoundException, MalformedURLException, RemoteException {
-        return (OXUserInterface) Naming.lookup(RMI_HOSTNAME + OXUserInterface.RMI_NAME);
+        return (OXUserInterface) Naming.lookup("rmi://192.168.32.191:1099/" + OXUserInterface.RMI_NAME);
+//        return (OXUserInterface) Naming.lookup(RMI_HOSTNAME + OXUserInterface.RMI_NAME);
     }
 
     @Override
