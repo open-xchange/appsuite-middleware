@@ -2,7 +2,6 @@
 package com.openexchange.realtime.util;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -19,7 +18,6 @@ import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.StanzaSequenceGate.StanzaWithCustomAction;
 
 public class StanzaSequenceGateTest extends StanzaSequenceGate {
 

@@ -66,7 +66,6 @@ import org.junit.Test;
 import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.LifecycleService;
-import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
@@ -80,7 +79,7 @@ import com.openexchange.realtime.packet.PresenceState;
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class HazelcastResourceTest extends AbstractHazelcastResourceTest {
+public class HazelcastResourceTest {
 
     private ID marensID;
 

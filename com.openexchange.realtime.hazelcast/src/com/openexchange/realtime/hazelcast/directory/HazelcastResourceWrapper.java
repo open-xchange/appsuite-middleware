@@ -50,26 +50,17 @@
 package com.openexchange.realtime.hazelcast.directory;
 
 import java.io.Serializable;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import org.json.JSONObject;
 import com.hazelcast.core.Member;
 import com.hazelcast.impl.MemberImpl;
 import com.hazelcast.impl.NodeType;
 import com.hazelcast.nio.Address;
-import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
 import com.openexchange.realtime.exception.RealtimeException;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.hazelcast.Services;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
-import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.packet.Presence.Type;
 import com.openexchange.realtime.packet.PresenceState;
 
