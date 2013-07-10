@@ -42,5 +42,5 @@ Import-Package: com.openexchange.ajax,
  org.osgi.framework
 Export-Package: com.openexchange.templating
 Bundle-ClassPath: com.openexchange.templating.jar,
- lib/freemarker.jar,
+ lib/freemarker-2.3.20.jar,
  .
