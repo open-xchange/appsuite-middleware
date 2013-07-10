@@ -56,7 +56,7 @@ Export-Package: com.openexchange.xml.jdom,
  org.springframework.core
 Bundle-ClassPath: com.openexchange.xml.jar,
  lib/org.dynamicjava.stax-api-1.0.jar,
- lib/jdom-2.0.3.jar,
+ lib/jdom-2.0.5.jar,
  lib/spring-beans_1.2.7.jar,
  lib/spring-core_1.2.7.jar,
  lib/stax-1.2.0.jar,
