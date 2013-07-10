@@ -1840,9 +1840,9 @@ public final class IMAPCommandsCollection {
                             final int[] ni = new int[limit];
                             System.arraycopy(tmp, 0, ni, 0, limit);
                             newMsgSeqNums = ni;
-                        } catch (final OXException e) {
-                            throw wrapException(e, null);
                         } catch (final MessagingException e) {
+                            throw wrapException(e, null);
+                        } catch (final RuntimeException e) {
                             throw wrapException(e, null);
                         }
                     } else {

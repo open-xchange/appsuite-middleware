@@ -95,6 +95,7 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.StoreClosedException;
+import javax.mail.UIDFolder;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
@@ -1217,6 +1218,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
+    private static final FetchProfile FETCH_PROFILE_ENVELOPE_UID = new FetchProfile() {
+
+        // Unnamed block
+        {
+            add(FetchProfile.Item.ENVELOPE);
+            add(UIDFolder.FetchProfileItem.UID);
+        }
+    };
+
     @Override
     public MailMessage[] searchMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] mailFields) throws OXException {
         try {
@@ -1256,7 +1266,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     effectiveSortField = sortField;
                 }
             }
-            usedFields.add(null == effectiveSortField ? MailField.RECEIVED_DATE : MailField.toField(effectiveSortField.getListField()));
+            usedFields.add(MailField.toField(effectiveSortField.getListField()));
             /*
              * Shall a search be performed?
              */
@@ -1270,7 +1280,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Check if an all-fetch can be performed to only obtain UIDs of all folder's messages: FETCH 1: (UID)
                  */
                 final MailFields mfs = new MailFields(mailFields);
-                if (((null == effectiveSortField) || MailSortField.RECEIVED_DATE.equals(effectiveSortField)) && onlyLowCostFields(mfs)) {
+                if (MailSortField.RECEIVED_DATE.equals(effectiveSortField) && onlyLowCostFields(mfs)) {
                     final MailMessage[] mailMessages = performLowCostFetch(fullName, mfs, order, indexRange);
                     imapFolderStorage.updateCacheIfDiffer(fullName, mailMessages.length);
                     return mailMessages;
@@ -1288,19 +1298,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     return EMPTY_RETVAL;
                 }
             }
-            MailMessage[] mails = null;
-            Message[] msgs = IMAPSort.sortMessages(imapFolder, usedFields, filter, effectiveSortField, order, getLocale(), imapConfig);
-            if (null != msgs) {
+            int[] sortSeqNums = IMAPSort.sortMessages(imapFolder, filter, effectiveSortField, order, imapConfig);
+            if (null != sortSeqNums) {
                 /*
                  * Sort was performed on IMAP server
                  */
                 if (indexRange != null) {
                     final int fromIndex = indexRange.start;
                     int toIndex = indexRange.end;
-                    if (msgs.length == 0) {
+                    if (sortSeqNums.length == 0) {
                         return EMPTY_RETVAL;
                     }
-                    if ((fromIndex) > msgs.length) {
+                    if ((fromIndex) > sortSeqNums.length) {
                         /*
                          * Return empty iterator if start is out of range
                          */
@@ -1309,110 +1318,155 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     /*
                      * Reset end index if out of range
                      */
-                    if (toIndex >= msgs.length) {
-                        toIndex = msgs.length;
+                    if (toIndex >= sortSeqNums.length) {
+                        toIndex = sortSeqNums.length;
                     }
-                    final Message[] tmp = msgs;
+                    final int[] tmp = sortSeqNums;
                     final int retvalLength = toIndex - fromIndex;
-                    msgs = new Message[retvalLength];
-                    System.arraycopy(tmp, fromIndex, msgs, 0, retvalLength);
+                    sortSeqNums = new int[retvalLength];
+                    System.arraycopy(tmp, fromIndex, sortSeqNums, 0, retvalLength);
                 }
-                mails =
-                    convert2Mails(msgs, usedFields.toArray(), usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL));
-                if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
-                    setAccountInfo(mails);
-                }
-            } else {
                 /*
-                 * Do application sort
+                 * Fetch (possibly) filtered and sorted sequence numbers
                  */
-                final int size = filter == null ? imapFolder.getMessageCount() : filter.length;
-                final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), getIMAPProperties().isFastFetch());
                 final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
-                if (DEBUG) {
-                    final long start = System.currentTimeMillis();
-                    if (filter == null) {
-                        msgs =
-                            new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
-                    } else {
-                        msgs =
-                            new MessageFetchIMAPCommand(
-                                imapFolder,
-                                imapConfig.getImapCapabilities().hasIMAP4rev1(),
-                                filter,
-                                fetchProfile,
-                                false,
-                                false,
-                                body).doCommand();
-                    }
-                    final long time = System.currentTimeMillis() - start;
-                    LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP fetch for ").append(size).append(" messages took ").append(time).append(
-                        "msec").toString());
-                } else {
-                    if (filter == null) {
-                        msgs =
-                            new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
-                    } else {
-                        msgs =
-                            new MessageFetchIMAPCommand(
-                                imapFolder,
-                                imapConfig.getImapCapabilities().hasIMAP4rev1(),
-                                filter,
-                                fetchProfile,
-                                false,
-                                false,
-                                body).doCommand();
-                    }
-                }
-                if ((msgs == null) || (msgs.length == 0)) {
-                    return new MailMessage[0];
-                }
-                mails = convert2Mails(msgs, usedFields.toArray(), body);
-                if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
-                    setAccountInfo(mails);
-                }
-                /*
-                 * Perform sort on temporary list
-                 */
-                {
-                    final int length = mails.length;
-                    final List<MailMessage> msgList = new ArrayList<MailMessage>(length);
-                    for (int i = 0; i < length; i++) {
-                        final MailMessage tmp = mails[i];
-                        if (null != tmp) {
-                            msgList.add(tmp);
+                if (body) {
+                    final List<MailMessage> list = new ArrayList<MailMessage>(sortSeqNums.length);
+                    final Message[] messages = imapFolder.getMessages(sortSeqNums);
+                    imapFolder.fetch(messages, FETCH_PROFILE_ENVELOPE_UID);
+                    NextMessage: for (final Message msg : messages) {
+                        if (msg != null && !msg.isExpunged()) {
+                            final IMAPMessage imapMessage = (IMAPMessage) msg;
+                            final long msgUID = imapFolder.getUID(msg);
+                            imapMessage.setUID(msgUID);
+                            imapMessage.setPeek(true);
+                            final MailMessage mail;
+                            try {
+                                mail = MimeMessageConverter.convertMessage(imapMessage, false);
+                                mail.setFolder(fullName);
+                                mail.setMailId(Long.toString(msgUID));
+                                mail.setUnreadMessages(IMAPCommandsCollection.getUnread(imapFolder));
+                            } catch (final OXException e) {
+                                if (MimeMailExceptionCode.MESSAGE_REMOVED.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.equals(e)) {
+                                    /*
+                                     * Obviously message was removed in the meantime
+                                     */
+                                    continue NextMessage;
+                                }
+                                /*
+                                 * Check for generic messaging error
+                                 */
+                                if (MimeMailExceptionCode.MESSAGING_ERROR.equals(e)) {
+                                    /*-
+                                     * Detected generic messaging error. This most likely hints to a severe JavaMail problem.
+                                     *
+                                     * Perform some debug logs for traceability...
+                                     */
+                                    if (DEBUG) {
+                                        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
+                                        sb.append("Generic messaging error occurred for mail \"").append(msgUID).append("\" in folder \"");
+                                        sb.append(fullName).append("\" with login \"").append(imapConfig.getLogin()).append("\" on server \"");
+                                        sb.append(imapConfig.getServer()).append("\" (user=").append(session.getUserId());
+                                        sb.append(", context=").append(session.getContextId()).append("): ").append(e.getMessage());
+                                        LOG.debug(sb.toString(), e);
+                                    }
+                                }
+                                throw e;
+                            } catch (final java.lang.IndexOutOfBoundsException e) {
+                                /*
+                                 * Obviously message was removed in the meantime
+                                 */
+                                continue NextMessage;
+                            }
+                            list.add(mail);
                         }
-                    }
-                    Collections.sort(msgList, new MailMessageComparator(effectiveSortField, order == OrderDirection.DESC, getLocale()));
-                    mails = msgList.toArray(new MailMessage[0]);
+                    } // for (final Message msg : messages)
+                    return setAccountInfo(list.toArray(new MailMessage[0]));
+                } // if (body)
+                // Body content not requested
+                final boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
+                final FetchProfile fetchProfile = getFetchProfile(mailFields, getIMAPProperties().isFastFetch());
+                final MailMessageFetchIMAPCommand command = new MailMessageFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, sortSeqNums, fetchProfile);
+
+                final long start = System.currentTimeMillis();
+                final MailMessage[] tmp = command.doCommand();
+                final long time = System.currentTimeMillis() - start;
+                mailInterfaceMonitor.addUseTime(time);
+
+                return setAccountInfo(tmp);
+            }
+            /*
+             * Do application sort
+             */
+            final int size = filter == null ? imapFolder.getMessageCount() : filter.length;
+            final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), getIMAPProperties().isFastFetch());
+            final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
+            final Message[] msgs;
+            if (DEBUG) {
+                final long start = System.currentTimeMillis();
+                if (filter == null) {
+                    msgs = new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
+                } else {
+                    msgs = new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), filter, fetchProfile, false, false, body).doCommand();
                 }
-                /*
-                 * Get proper sub-array if an index range is specified
-                 */
-                if (indexRange != null) {
-                    final int fromIndex = indexRange.start;
-                    int toIndex = indexRange.end;
-                    if ((mails == null) || (msgs.length == 0)) {
-                        return EMPTY_RETVAL;
-                    }
-                    if ((fromIndex) > mails.length) {
-                        /*
-                         * Return empty iterator if start is out of range
-                         */
-                        return EMPTY_RETVAL;
-                    }
-                    /*
-                     * Reset end index if out of range
-                     */
-                    if (toIndex >= mails.length) {
-                        toIndex = mails.length;
-                    }
-                    final MailMessage[] tmp = mails;
-                    final int retvalLength = toIndex - fromIndex;
-                    mails = new MailMessage[retvalLength];
-                    System.arraycopy(tmp, fromIndex, mails, 0, retvalLength);
+                final long time = System.currentTimeMillis() - start;
+                LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP fetch for ").append(size).append(" messages took ").append(time).append("msec").toString());
+            } else {
+                if (filter == null) {
+                    msgs = new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile, size, body).doCommand();
+                } else {
+                    msgs = new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), filter, fetchProfile, false, false, body).doCommand();
                 }
             }
+            if ((msgs == null) || (msgs.length == 0)) {
+                return new MailMessage[0];
+            }
+            MailMessage[] mails = convert2Mails(msgs, usedFields.toArray(), body);
+            if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
+                setAccountInfo(mails);
+            }
+            /*
+             * Perform sort on temporary list
+             */
+            {
+                final int length = mails.length;
+                final List<MailMessage> msgList = new ArrayList<MailMessage>(length);
+                for (int i = 0; i < length; i++) {
+                    final MailMessage tmp = mails[i];
+                    if (null != tmp) {
+                        msgList.add(tmp);
+                    }
+                }
+                Collections.sort(msgList, new MailMessageComparator(effectiveSortField, order == OrderDirection.DESC, getLocale()));
+                mails = msgList.toArray(new MailMessage[0]);
+            }
+            /*
+             * Get proper sub-array if an index range is specified
+             */
+            if (indexRange != null) {
+                final int fromIndex = indexRange.start;
+                int toIndex = indexRange.end;
+                if ((mails == null) || (msgs.length == 0)) {
+                    return EMPTY_RETVAL;
+                }
+                if ((fromIndex) > mails.length) {
+                    /*
+                     * Return empty iterator if start is out of range
+                     */
+                    return EMPTY_RETVAL;
+                }
+                /*
+                 * Reset end index if out of range
+                 */
+                if (toIndex >= mails.length) {
+                    toIndex = mails.length;
+                }
+                final MailMessage[] tmp = mails;
+                final int retvalLength = toIndex - fromIndex;
+                mails = new MailMessage[retvalLength];
+                System.arraycopy(tmp, fromIndex, mails, 0, retvalLength);
+            }
+
             return mails;
         } catch (final MessagingException e) {
             if (ImapUtility.isInvalidMessageset(e)) {
