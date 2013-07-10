@@ -57,9 +57,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.realtime.packet.IDComponentsParser.IDComponents;
 import com.openexchange.realtime.util.IdLookup;
 import com.openexchange.realtime.util.IdLookup.UserAndContext;
 import com.openexchange.sessiond.impl.SessionObject;
@@ -109,20 +109,19 @@ public class ID implements Serializable {
     private String resource;
 
     /**
-     * Pattern to match IDs consisting of protocol, user, context and resource e.g. xmpp://user@context/notebook
+     * Initializes a new {@link ID}.
+     * 
+     * @param id the given String representation of an ID
+     * @param defaultContext the default context to use if the string representation doesn't contain one
+     * @throws IllegalArgumentException if no ID could be created from the given String 
      */
-    private static final Pattern PATTERN = Pattern.compile("(?:(\\w+?)(\\.\\w+)?://)?([^@/]+)@?([^/]+)?/?(.*)");
-
     public ID(final String id, String defaultContext) {
-        final Matcher matcher = PATTERN.matcher(id);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException("Could not parse id: " + id + ". User and context are obligatory for ID creation.");
-        }
-        protocol = matcher.group(1);
-        component = matcher.group(2);
-        user = matcher.group(3);
-        context = matcher.group(4);
-        resource = matcher.group(5);
+        IDComponents idComponents = IDComponentsParser.parse(id);
+        protocol = idComponents.protocol;
+        component = idComponents.component;
+        user = idComponents.user;
+        context = idComponents.context;
+        resource = idComponents.resource;
 
         if (context == null) {
             context = defaultContext;
@@ -134,21 +133,18 @@ public class ID implements Serializable {
     }
 
     /**
-     * Initializes a new {@link ID} by a String with the syntax "xmpp://user@context/resource".
-     *
-     * @param id String with the syntax "xmpp://user@context/resource".
-     * @throws IllegalArgumentException if the id doesn't follow the syntax convention.
+     * Initializes a new {@link ID}.
+     * 
+     * @param id the given String representation of an ID
+     * @throws IllegalArgumentException if no ID could be created from the given String
      */
     public ID(final String id) {
-        final Matcher matcher = PATTERN.matcher(id);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException("Could not parse id: " + id + ". User and context are obligatory for ID creation.");
-        }
-        protocol = matcher.group(1);
-        component = matcher.group(2);
-        user = matcher.group(3);
-        context = matcher.group(4);
-        resource = matcher.group(5);
+        IDComponents idComponents = IDComponentsParser.parse(id);
+        protocol = idComponents.protocol;
+        component = idComponents.component;
+        user = idComponents.user;
+        context = idComponents.context;
+        resource = idComponents.resource;
 
         sanitize();
         validate();
@@ -188,40 +184,22 @@ public class ID implements Serializable {
         validate();
     }
 
-    /*
+    /**
      * Check optional id components for emtpy strings and sanitize by setting to null or default values.
      */
     private void sanitize() {
-        if (protocol != null && isEmpty(protocol)) {
+        if (Strings.isEmpty(protocol)) {
             protocol = null;
         }
 
-        if (resource != null && isEmpty(resource)) {
+        if (Strings.isEmpty(resource)) {
             resource = null;
         }
 
-        if (component != null) {
-            if (isEmpty(component)) {
+        if (Strings.isEmpty(component)) {
                 component = null;
-            } else {
-                if (component.startsWith(".")) {
-                    component = component.substring(1);
-                }
-            }
         }
 
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     /*

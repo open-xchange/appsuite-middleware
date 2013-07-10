@@ -49,12 +49,11 @@
 
 package com.openexchange.realtime.packet;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.concurrent.locks.Lock;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.realtime.packet.ID;
 
 
 /**
@@ -64,22 +63,16 @@ import com.openexchange.realtime.packet.ID;
  */
 public class IDTest {
 
-    @Before
-    public void setUp() throws Exception {
-    }
-
-    @After
-    public void tearDown() throws Exception {
-    }
-
     @Test
     public void testIDString() {
-        ID newID = new ID("ox.component://user@context/resource");
+        ID newID = new ID("ox.some.component://some.user@context/resource");
         assertEquals("ox",newID.getProtocol());
-        assertEquals("component", newID.getComponent());
-        assertEquals("user",newID.getUser());
+        assertEquals("some.component", newID.getComponent());
+        assertEquals("some.user",newID.getUser());
         assertEquals("context",newID.getContext());
         assertEquals("resource",newID.getResource());
+        ID clonedID = new ID(newID.toString());
+        assertEquals(newID, clonedID);
     }
     
     @Test
@@ -92,6 +85,8 @@ public class IDTest {
         assertEquals("premium",realEntity.getContext());
         assertEquals("66499.62446",realEntity.getResource());
         assertEquals(original, realEntity.toString());
+        ID clonedID = new ID(realEntity.toString());
+        assertEquals(realEntity, clonedID);
     }
     
     @Test
@@ -99,10 +94,10 @@ public class IDTest {
         String original = "synthetic.office://operations@premium/66499.62446";
         ID syntheticEntity = new ID(original);
         assertEquals("office://operations@premium", syntheticEntity.toGeneralForm().toString());
+        ID clonedID = new ID(syntheticEntity.toString());
+        assertEquals(syntheticEntity, clonedID);
     }
     
-    //
-    //user=ox.some.component
     @Test
     public void testStringConstructor() {
         String idString = "ox.some.component://some.body@context/762d2d9b-a949-418a-ac11-645a5b05038f";
@@ -111,6 +106,8 @@ public class IDTest {
         assertEquals("some.body", id.getUser());
         assertEquals("context", id.getContext());
         assertEquals("762d2d9b-a949-418a-ac11-645a5b05038f", id.getResource());
+        ID clonedID = new ID(id.toString());
+        assertEquals(id, clonedID);
     }
     
     @Test
@@ -123,6 +120,8 @@ public class IDTest {
         assertEquals("premium",realEntity.getContext());
         assertEquals("20d39asd9da93249f009d",realEntity.getResource());
         assertEquals(original, realEntity.toString());
+        ID clonedID = new ID(realEntity.toString());
+        assertEquals(realEntity, clonedID);
     }
     
     @Test
@@ -130,6 +129,8 @@ public class IDTest {
         String original = "ox://francisco.laguna@premium/20d39asd9da93249f009d";
         ID realEntity = new ID(original);
         assertEquals("francisco.laguna@premium", realEntity.toGeneralForm().toString());
+        ID clonedID = new ID(realEntity.toString());
+        assertEquals(realEntity, clonedID);
     }
     
     @Test
@@ -142,6 +143,8 @@ public class IDTest {
         assertEquals("internal",callEntity.getContext());
         assertNull(callEntity.getResource());
         assertEquals(original, callEntity.toString());
+        ID clonedID = new ID(callEntity.toString());
+        assertEquals(callEntity, clonedID);
     }
 
     @Test
@@ -152,6 +155,8 @@ public class IDTest {
         assertEquals("user",newID.getUser());
         assertEquals("context",newID.getContext());
         assertEquals("resource",newID.getResource());
+        ID clonedID = new ID(newID.toString());
+        assertEquals(newID, clonedID);
     }
 
     @Test
@@ -161,6 +166,8 @@ public class IDTest {
         assertEquals("user",newID.getUser());
         assertEquals("context",newID.getContext());
         assertNull(newID.getResource());
+        ID clonedID = new ID(newID.toString());
+        assertEquals(newID, clonedID);
     }
 
     /**

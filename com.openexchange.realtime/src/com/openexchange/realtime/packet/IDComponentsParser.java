@@ -77,9 +77,6 @@ public class IDComponentsParser {
      * @param id the given String representation of an ID
      * @return the IDComponent
      */
-    // user@context
-    // ox://francisco.laguna@premium/20d39asd9da93249f009d
-    // ox.some.component://some.body@context/762d2d9b-a949-418a-ac11-645a5b05038f
     public static IDComponents parse(String id) {
 
         IDComponents components = new IDComponents();
@@ -104,8 +101,13 @@ public class IDComponentsParser {
     private static void parseProtocolAndComponent(IDComponents components, String input) {
         Validate.notNull(components, "Missing obligatory parameter components");
         Validate.notEmpty(input, "Missing obligatory parameter input");
-        if (input.contains(".")) {
 
+        if (input.contains(".")) {
+            String[] protocolAndComponent = input.split("\\.", 2);
+            components.protocol = protocolAndComponent[0];
+            components.component = protocolAndComponent[1];
+        } else {
+            components.protocol=input;
         }
     }
 
@@ -113,7 +115,7 @@ public class IDComponentsParser {
      * Parse user, context and resource from a string
      * 
      * @param components the components data structure to fill during parsing
-     * @param input the string representation of user, context and resource user@context[/resource]
+     * @param input the string representation of user, context and resource user[@context[/resource]]
      * @return the filled IDComponents
      */
     private static void parseUserContextAndResource(IDComponents components, String input) {
@@ -136,23 +138,23 @@ public class IDComponentsParser {
     /**
      * Parese user and contest from a string
      * @param components the components data structure to fill during parsing
-     * @param input the string representation of user and context formatted as user@context
+     * @param input the string representation of user and context formatted as user[@context]
      */
     private static void parseUserAndContext(IDComponents components, String input) {
         Validate.notNull(components, "Missing obligatory parameter components");
         Validate.notEmpty(input, "Missing obligatory parameter input");
 
-        if (!input.contains("@")) {
-            throw new IllegalStateException("Input must have the form user@context");
-        }
-
         String user, context;
-        String[] userAndContextSplit = input.split("@");
-        user = userAndContextSplit[0];
-        context = userAndContextSplit[1];
+        if (input.contains("@")) {
+            String[] userAndContextSplit = input.split("@");
+            user = userAndContextSplit[0];
+            context = userAndContextSplit[1];
 
-        components.user = user;
-        components.context = context;
+            components.user = user;
+            components.context = context;
+        } else {
+            components.user = input;
+        }
     }
 
 }
