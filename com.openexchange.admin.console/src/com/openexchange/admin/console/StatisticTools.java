@@ -212,8 +212,6 @@ public class StatisticTools extends AbstractJMXTools {
 
     private CLIOption usmSessionStats = null;
 
-    private CLIOption jsonStats = null;
-
     private CLIOption clusterStats = null;
 
     private CLIOption grizzlyStats = null;
@@ -284,14 +282,6 @@ public class StatisticTools extends AbstractJMXTools {
                 if (0 == count) {
                     final MBeanServerConnection initConnection = initConnection(admin, env);
                     System.out.print(getStats(initConnection, "com.openexchange.usm.session", "name", "USMSessionInformation"));
-
-                    count++;
-                }
-            }
-            if (null != parser.getOptionValue(this.jsonStats)) {
-                if (0 == count) {
-                    final MBeanServerConnection initConnection = initConnection(admin, env);
-                    System.out.print(getStats(initConnection, "org.json", "name", "JSONMBean"));
 
                     count++;
                 }
@@ -385,17 +375,6 @@ public class StatisticTools extends AbstractJMXTools {
                             final MBeanServerConnection initConnection = initConnection(admin, env);
                             final StringPrintStream out = StringPrintStream.newInstance(1024);
                             showSysThreadingData(initConnection, out);
-                            return out.toString();
-                        }
-                    };
-                    completionService.submit(task);
-                    task = new Callable<String>() {
-
-                        @Override
-                        public String call() throws Exception {
-                            final MBeanServerConnection initConnection = initConnection(admin, env);
-                            final StringPrintStream out = StringPrintStream.newInstance(1024);
-                            out.print(getStats(initConnection, "org.json", "name", "JSONMBean"));
                             return out.toString();
                         }
                     };
@@ -661,7 +640,6 @@ public class StatisticTools extends AbstractJMXTools {
             "shows the statistics of the USM session container",
             false,
             NeededQuadState.notneeded);
-        this.jsonStats = setShortLongOpt(parser, 'j', "jsonstats", "shows the JSON statistics", false, NeededQuadState.notneeded);
         this.clusterStats = setShortLongOpt(parser, 'c', "clusterstats", "shows the cluster statistics", false, NeededQuadState.notneeded);
         this.grizzlyStats = setShortLongOpt(parser, 'g', "grizzlystats", "shows the grizzly statistics", false, NeededQuadState.notneeded);
         this.memorythreadstats = setShortLongOpt(parser, OPT_MEMORY_THREADS_STATS_SHORT, OPT_MEMORY_THREADS_STATS_LONG, "shows memory usage of threads", false, NeededQuadState.notneeded);
@@ -886,7 +864,7 @@ public class StatisticTools extends AbstractJMXTools {
     /**
      * {@link GrizzlyMBean} Enum of MBeans we are interested in. Each containing the ObjectName and the attributes to query.
      *
-     * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
+     * @author <a href="mailto:marc .arens@open-xchange.com">Marc Arens</a>
      */
     private enum GrizzlyMBean {
         HTTPCODECFILTER("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=HttpCodecFilter,name=HttpCodecFilter", new String[] {
