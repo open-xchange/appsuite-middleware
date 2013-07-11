@@ -207,10 +207,14 @@ public class AppsLoadServlet extends HttpServlet {
             if (data == null) {
                 int len = module.length() - 3;
                 String moduleName = module;
-                if (format == null && ".js".equals(module.substring(len))) {
+                if (format == null && len > 0 && ".js".equals(module.substring(len))) {
                     moduleName = module.substring(0, len);
                 }
-                data = ("define('" + escapeName(moduleName) + "', function () {\n    throw new Error(\"Could not read '" + escapeName(name) + "'\");\n});\n").getBytes(Charsets.UTF_8);
+                name = escapeName(name);
+                data = ("define('" + escapeName(moduleName) + "', function () {\n" +
+                        "    if (ox.debug) console.log(\"Could not read '" + name + "'\");\n" +
+                		"    throw new Error(\"Could not read '" + name + "'\");\n" +
+        				"});\n").getBytes(Charsets.UTF_8);
             }
 
             out.write(data);
