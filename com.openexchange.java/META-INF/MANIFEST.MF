@@ -25,4 +25,5 @@ Export-Package: com.damienmiller,
  com.openexchange.java,
  com.openexchange.java.forkjoin,
  com.openexchange.java.misc,
- com.openexchange.java.util
+ com.openexchange.java.util,
+ it.geosolutions.imageio.stream.eraf

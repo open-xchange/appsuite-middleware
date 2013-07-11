@@ -49,12 +49,12 @@
 
 package com.openexchange.tools.file;
 
-import com.openexchange.exception.OXException;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tx.AbstractActionTest;
 import com.openexchange.tools.file.internal.LocalFileStorageFactory;
 import com.openexchange.tx.UndoableAction;
@@ -95,19 +95,17 @@ public class SaveFileActionTest extends AbstractActionTest {
 	@Override
 	protected UndoableAction getAction() throws Exception {
 		storage = FileStorage.getInstance(tempFile.toURI());
-		saveFile = new SaveFileAction();
-		saveFile.setStorage(storage);
-		saveFile.setIn(new ByteArrayInputStream(content.getBytes(com.openexchange.java.Charsets.UTF_8)));
+		saveFile = new SaveFileAction(storage, new ByteArrayInputStream(content.getBytes(com.openexchange.java.Charsets.UTF_8)), 0);
 		return saveFile;
 	}
 
 	@Override
 	protected void verifyPerformed() throws Exception {
-		assertTrue(null != saveFile.getId());
+		assertTrue(null != saveFile.getFileStorageID());
 		InputStream in = null;
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
-			in = new BufferedInputStream(storage.getFile(saveFile.getId()));
+			in = new BufferedInputStream(storage.getFile(saveFile.getFileStorageID()));
 			int b = 0;
 			while((b = in.read()) != -1) {
 				out.write(b);
@@ -125,7 +123,7 @@ public class SaveFileActionTest extends AbstractActionTest {
 	@Override
 	protected void verifyUndone() throws Exception {
 		try {
-			storage.getFile(saveFile.getId());
+			storage.getFile(saveFile.getFileStorageID());
 			fail("Expected Exception");
 		} catch (final OXException x) {
 			assertTrue(true);

@@ -82,13 +82,14 @@ import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
+import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FileStreamHandler;
 import com.openexchange.file.storage.composition.FileStreamHandlerRegistry;
 import com.openexchange.file.storage.composition.FolderID;
-import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
+import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 import com.openexchange.file.storage.composition.IDBasedSequenceNumberProvider;
 import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.results.Delta;
@@ -110,7 +111,7 @@ import com.openexchange.tx.TransactionException;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class AbstractCompositingIDBasedFileAccess extends AbstractService<Transaction> implements IDBasedIgnorableVersionFileAccess, IDBasedSequenceNumberProvider {
+public abstract class AbstractCompositingIDBasedFileAccess extends AbstractService<Transaction> implements IDBasedRandomFileAccess, IDBasedSequenceNumberProvider {
 
     private static final AtomicReference<FileStreamHandlerRegistry> HANDLER_REGISTRY = new AtomicReference<FileStreamHandlerRegistry>();
 
@@ -614,8 +615,39 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     }
 
     @Override
+    public InputStream getDocument(String id, String version, long offset, long length) throws OXException {
+        FileID fileID = new FileID(id);
+        FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
+        if (false == FileStorageRandomFileAccess.class.isInstance(fileAccess)) {
+            throw new UnsupportedOperationException("FileStorageRandomFileAccess required");
+        }
+        return ((FileStorageRandomFileAccess)fileAccess).getDocument(fileID.getFolderId(), fileID.getFileId(), version, offset, length);
+    }
+
+    @Override
+    public void saveDocument(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns,
+        final long offset) throws OXException {
+        save(document, data, sequenceNumber, modifiedColumns, new FileAccessDelegation() {
+
+            @Override
+            public void call(FileStorageFileAccess fileAccess) throws OXException {
+                if (false == FileStorageRandomFileAccess.class.isInstance(fileAccess)) {
+                    throw new UnsupportedOperationException("FileStorageRandomFileAccess required");
+                }
+                ((FileStorageRandomFileAccess)fileAccess).saveDocument(document, data, sequenceNumber, modifiedColumns, offset);
+            }
+
+        });
+    }
+
+    @Override
     public boolean supportsIgnorableVersion(final String serviceId, final String accountId) throws OXException {
         return (getFileAccess(serviceId, accountId) instanceof FileStorageIgnorableVersionFileAccess);
+    }
+
+    @Override
+    public boolean supportsRandomFileAccess(final String serviceId, final String accountId) throws OXException {
+        return FileStorageRandomFileAccess.class.isInstance(getFileAccess(serviceId, accountId));
     }
 
     @Override

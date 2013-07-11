@@ -74,16 +74,15 @@ public interface FileStorageRandomFileAccess extends FileStorageIgnorableVersion
     InputStream getDocument(String folderId, String id, String version, long offset, long length) throws OXException;
 
     /**
-     * Save file metadata and content.
+     * Save file metadata and content. Since the actual version is modified, the version number is not increased.
      *
      * @param document The metadata to save
      * @param data The binary content
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
      * @param modifiedColumns The fields to save. All other fields will be ignored
-     * @param ignoreVersion Whether a new version is supposed to be set if binary content is available; or <code>true</code> to keep version as is
      * @param offset The start offset in bytes where to append the data to the document, must be equal to the actual document's length
      * @throws OXException If operation fails
      */
-    void saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns, boolean ignoreVersion, long offset) throws OXException;
+    void saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns, long offset) throws OXException;
 
 }

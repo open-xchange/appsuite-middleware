@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,72 +50,58 @@
 package com.openexchange.tools.file;
 
 import java.io.InputStream;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import jonelo.jacksum.util.Service;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
-import com.openexchange.tx.AbstractUndoable;
-import com.openexchange.tx.UndoableAction;
 
-public class SaveFileAction extends AbstractUndoable implements UndoableAction {
+/**
+ * {@link SaveFileAction}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class SaveFileAction extends FileStreamAction {
 
-    protected FileStorage storage;
+    private String fileStorageID;
 
-    private InputStream in;
+    /**
+     * Initializes a new {@link SaveFileAction}.
+     *
+     * @param storage The storage to save the stream to
+     * @param data The input stream
+     * @param sizeHint A size hint about the expected stream length in bytes, or <code>-1</code> if unknown
+     */
+    public SaveFileAction(FileStorage storage, InputStream data, long sizeHint) {
+        this(storage, data, sizeHint, true);
+    }
 
-    private String id;
-
-    private String md5;
-
-    public SaveFileAction() {
-        super();
+    /**
+     * Initializes a new {@link SaveFileAction}.
+     *
+     * @param storage The storage to save the stream to
+     * @param data The input stream
+     * @param sizeHint A size hint about the expected stream length in bytes, or <code>-1</code> if unknown
+     * @param calculateChecksum <code>true</code> to calculate a checksum for the saved data, <code>false</code>, otherwise
+     */
+    public SaveFileAction(FileStorage storage, InputStream data, long sizeHint, boolean calculateChecksum) {
+        super(storage, data, sizeHint, calculateChecksum);
     }
 
     @Override
-    protected void undoAction() throws OXException {
-        storage.deleteFile(id);
+    public String getFileStorageID() {
+        return fileStorageID;
     }
 
     @Override
-    public void perform() throws OXException {
-        DigestInputStream digestStream = null;
-        try {
-            digestStream = new DigestInputStream(in, MessageDigest.getInstance("MD5"));
-        } catch (NoSuchAlgorithmException e) {
-            // okay, save without checksum instead
-        }
-        if (null != digestStream) {
-            try {
-                id = saveFile(digestStream);
-                md5 = Service.format(digestStream.getMessageDigest().digest());
-            } finally {
-                Streams.close(digestStream);
-            }
-        } else {
-            id = saveFile(in);
-        }
+    protected void store(FileStorage storage, InputStream stream) throws OXException {
+        fileStorageID = storage.saveNewFile(stream);
     }
 
-    protected String saveFile(InputStream stream) throws OXException {
-        return storage.saveNewFile(in);
+    @Override
+    protected void store(QuotaFileStorage storage, InputStream stream, long sizeHint) throws OXException {
+        fileStorageID = storage.saveNewFile(stream, sizeHint);
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public String getMd5() {
-        return md5;
-    }
-
-    public void setIn(final InputStream in) {
-        this.in = in;
-    }
-
-    public void setStorage(final FileStorage storage) {
-        this.storage = storage;
+    @Override
+    protected void undo(FileStorage storage) throws OXException {
+        storage.deleteFile(fileStorageID);
     }
 
 }

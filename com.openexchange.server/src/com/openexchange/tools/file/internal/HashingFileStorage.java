@@ -52,23 +52,16 @@ package com.openexchange.tools.file.internal;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
-import javax.activation.MimetypesFileTypeMap;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageCodes;
 
 /**
@@ -76,44 +69,10 @@ import com.openexchange.tools.file.external.FileStorageCodes;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class HashingFileStorage implements FileStorage {
+public class HashingFileStorage extends DefaultFileStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HashingFileStorage.class));
-
-    private final File storage;
-
-    public HashingFileStorage(final File storage) {
-        this.storage = storage;
-    }
-
-    protected File file(final String identifier) {
-        return new File(storage, identifier);
-    }
-
-    @Override
-    public boolean deleteFile(final String identifier) throws OXException {
-        return file(identifier).delete();
-    }
-
-    @Override
-    public Set<String> deleteFiles(final String[] identifiers) throws OXException {
-        final Set<String> notDeleted = new HashSet<String>();
-        for (final String identifier : identifiers) {
-            if (!deleteFile(identifier)) {
-                notDeleted.add(identifier);
-            }
-        }
-
-        return notDeleted;
-    }
-
-    @Override
-    public InputStream getFile(final String name) throws OXException {
-        try {
-            return new BufferedInputStream(new FileInputStream(file(name)));
-        } catch (final FileNotFoundException e) {
-            throw FileStorageCodes.FILE_NOT_FOUND.create(name);
-        }
+    public HashingFileStorage(File storage) {
+        super(storage);
     }
 
     @Override
@@ -131,17 +90,6 @@ public class HashingFileStorage implements FileStorage {
 
         });
         return files;
-    }
-
-    @Override
-    public long getFileSize(final String name) throws OXException {
-        return file(name).length();
-    }
-
-    @Override
-    public String getMimeType(final String name) throws OXException {
-        final MimetypesFileTypeMap map = new MimetypesFileTypeMap();
-        return map.getContentType(file(name));
     }
 
     @Override

@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.groupware.contexts.Context;
@@ -453,4 +454,31 @@ public interface InfostoreFacade extends TransactionAware {
      */
     Quota getStorageQuota(ServerSession session) throws OXException;
 
+    /**
+     * Loads (part of) a document's content.
+     *
+     * @param id The ID of the document
+     * @param version The version of the document. Pass {@link FileStorageFileAccess#CURRENT_VERSION} for the current version.
+     * @param offset The start offset in bytes to read from the document, or <code>0</code> to start from the beginning
+     * @param length The number of bytes to read from the document, or <code>-1</code> to read the stream until the end
+     * @param ctx The context
+     * @param user The user
+     * @param userConfig the user configuration
+     * @return An input stream for the content
+     * @throws OXException
+     */
+    InputStream getDocument(int id, int version, long offset, long length, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+
+    /**
+     * Save file metadata and content. Since the actual version is modified, the version number is not increased.
+     *
+     * @param document The metadata to save
+     * @param data The binary content
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
+     * @param modifiedColumns The fields to save. All other fields will be ignored
+     * @param offset The start offset in bytes where to append the data to the document, must be equal to the actual document's length
+     * @param session The session
+     * @throws OXException If operation fails
+     */
+    void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, long offset, ServerSession session) throws OXException;
 }

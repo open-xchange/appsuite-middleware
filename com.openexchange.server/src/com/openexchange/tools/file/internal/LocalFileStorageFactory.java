@@ -51,7 +51,6 @@ package com.openexchange.tools.file.internal;
 
 import java.net.URI;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.file.external.FileStorageCodes;
 import com.openexchange.tools.file.external.FileStorageFactory;
 
 public class LocalFileStorageFactory implements FileStorageFactory {
@@ -62,11 +61,7 @@ public class LocalFileStorageFactory implements FileStorageFactory {
 
     @Override
     public LocalFileStorage getFileStorage(final URI uri) throws OXException {
-        try {
-            return new LocalFileStorage(uri);
-        } catch (final OXException e) {
-            throw FileStorageCodes.INSTANTIATIONERROR.create(e, uri);
-        }
+        return new LocalFileStorage(uri);
     }
 
     @Override

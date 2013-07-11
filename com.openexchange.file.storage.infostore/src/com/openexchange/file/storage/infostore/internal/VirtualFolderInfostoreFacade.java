@@ -114,6 +114,12 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
+    public InputStream getDocument(int id, int version, long offset, long length, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+        virtualFolder();
+        return null;
+    }
+
+    @Override
     public DocumentMetadata getDocumentMetadata(final int id, final int version,
             final Context ctx, final User user, final UserConfiguration userConfig)
             throws OXException {
@@ -199,6 +205,11 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 
     @Override
     public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession session) throws OXException {
+        virtualFolder();
+    }
+
+    @Override
+    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, long offset, ServerSession session) throws OXException {
         virtualFolder();
     }
 

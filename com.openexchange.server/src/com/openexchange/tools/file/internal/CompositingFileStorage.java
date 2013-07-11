@@ -193,6 +193,24 @@ public class CompositingFileStorage implements FileStorage {
         return true;
     }
 
+    @Override
+    public long appendToFile(InputStream file, String name, long offset) throws OXException {
+        PreparedName prepared = prepareName(name);
+        return prepared.fs.appendToFile(file, prepared.name, offset);
+    }
+
+    @Override
+    public void setFileLength(long length, String name) throws OXException {
+        PreparedName prepared = prepareName(name);
+        prepared.fs.setFileLength(length, prepared.name);
+    }
+
+    @Override
+    public InputStream getFile(String name, long offset, long length) throws OXException {
+        PreparedName prepared = prepareName(name);
+        return prepared.fs.getFile(prepared.name, offset, length);
+    }
+
     public void addStore(FileStorage fs) {
         standardFS = fs;
     }
