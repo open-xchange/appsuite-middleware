@@ -1,3 +1,8 @@
+* 2013-07-11 - marcus.klein@open-xchange.com/jan.bauerdick@open-xchange.com
+
+ - Fix for bug 19817: Initializing the transaction counter for the replication monitor as early as possible no normal groupware login
+   process. This prevents reading not existing columns from the slave by redirecting the connections to the master.
+
 * 2013-07-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 27417: Added 'soap-cxf.properties' file to SOAP CXF bundle that provides option "com.openexchange.soap.cxf.baseAddress" to

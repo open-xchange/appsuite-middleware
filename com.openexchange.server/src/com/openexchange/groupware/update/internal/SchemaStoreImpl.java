@@ -102,17 +102,17 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     @Override
-    public SchemaUpdateState getSchema(final int poolId, final String schemaName) throws OXException {
+    protected SchemaUpdateState getSchema(int poolId, String schemaName, Connection con) throws OXException {
         SchemaUpdateState retval;
         if (null == cache) {
-            retval = loadSchema(poolId, schemaName);
+            retval = loadSchema(con);
         } else {
             final CacheKey key = cache.newCacheKey(poolId, schemaName);
             cacheLock.lock();
             try {
                 retval = (SchemaUpdateState) cache.get(key);
                 if (null == retval) {
-                    retval = loadSchema(poolId, schemaName);
+                    retval = loadSchema(con);
                     try {
                         cache.putSafe(key, retval);
                     } catch (final OXException e) {
@@ -126,8 +126,7 @@ public class SchemaStoreImpl extends SchemaStore {
         return retval;
     }
 
-    private static SchemaUpdateState loadSchema(final int poolId, final String schemaName) throws OXException {
-        final Connection con = Database.get(poolId, schemaName);
+    private static SchemaUpdateState loadSchema(Connection con) throws OXException {
         final SchemaUpdateState retval;
         try {
             con.setAutoCommit(false);
@@ -142,7 +141,6 @@ public class SchemaStoreImpl extends SchemaStore {
             throw e;
         } finally {
             autocommit(con);
-            Database.back(poolId, con);
         }
         return retval;
     }
