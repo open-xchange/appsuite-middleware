@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.infostore;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -98,6 +99,8 @@ public class FieldMapping {
     }
 
     public static Metadata[] getMatching(List<File.Field> fields) {
+        fields = new ArrayList<File.Field>(fields);
+        fields.remove(File.Field.META); 
         Metadata[] retval = new Metadata[fields.size()];
         for(int i = 0; i < retval.length; i++) {
             retval[i] = getMatching(fields.get(i));
