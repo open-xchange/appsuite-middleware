@@ -320,7 +320,6 @@ public class ICal4JParser implements ICalParser {
             if (converter.hasProperty(vevent)) {
                 converter.parse(index, vevent, appointment, tz, ctx, warnings);
             }
-            converter.verify(index, appointment, warnings);
         }
 
         /*
