@@ -61,6 +61,8 @@ done
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Thu Jul 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-07-10
 * Wed Jul 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-06-27
 * Mon Jul 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
