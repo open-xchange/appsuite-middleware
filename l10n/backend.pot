@@ -7831,6 +7831,10 @@ msgstr ""
 msgid "File name contains illegal characters."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:129
+msgid "New file versions can't be saved with an offset."
+msgstr ""
+
 #. *
 #. * A property from the ldap.properties file is missing.
 #.
