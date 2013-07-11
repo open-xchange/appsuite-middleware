@@ -215,6 +215,12 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1518
+pfile=/opt/open-xchange/etc/mail.properties
+if ! ox_exists_property com.openexchange.mail.hideDetailsForDefaultAccount $pfile; then
+    ox_set_property com.openexchange.mail.hideDetailsForDefaultAccount false $pfile
+fi
+
 # SoftwareChange_Request-1497
 pfile=/opt/open-xchange/etc/hazelcast.properties
 if ! ox_exists_property com.openexchange.hazelcast.logging.enabled $pfile; then
