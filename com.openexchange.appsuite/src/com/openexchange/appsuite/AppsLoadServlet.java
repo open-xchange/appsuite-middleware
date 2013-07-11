@@ -66,7 +66,7 @@ import com.openexchange.java.Strings;
 
 /**
  * {@link AppsLoadServlet} - Provides App Suite data for loading applciations.
- *
+ * 
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public class AppsLoadServlet extends HttpServlet {
@@ -81,12 +81,12 @@ public class AppsLoadServlet extends HttpServlet {
 
     /**
      * Initializes a new {@link AppsLoadServlet}.
-     *
+     * 
      * @throws IOException
      */
-    public AppsLoadServlet(final File root, final File zoneinfo) throws IOException {
+    public AppsLoadServlet(final File[] roots, final File zoneinfo) throws IOException {
         super();
-        appCache = new FileCache(root);
+        appCache = new FileCache(roots);
         tzCache = new FileCache(zoneinfo);
     }
 
