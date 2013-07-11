@@ -54,6 +54,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
@@ -66,7 +67,16 @@ import com.openexchange.java.Streams;
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public class FileCache {
-
+    
+    private static byte[] SUFFIX;
+    static {
+        try {
+            SUFFIX = "\n/*:oxsep:*/\n".getBytes("ascii");
+        } catch (UnsupportedEncodingException e) {
+            SUFFIX = "\n/*:oxsep:*/\n".getBytes();
+        }
+    }
+    
     private static Log LOG = com.openexchange.log.Log.loggerFor(FileCache.class);
 
     public interface Filter {
@@ -111,7 +121,14 @@ public class FileCache {
                     baos.write(buf, 0, read);
                 }
                 baos.flush(); // no-op
-                data = filter == null ? baos.toByteArray() : filter.filter(baos);
+                byte[] filtered = filter == null ? baos.toByteArray() : filter.filter(baos);
+                
+                
+                data = new byte[filtered.length + SUFFIX.length];
+                
+                System.arraycopy(filtered, 0, data, 0, filtered.length);
+                System.arraycopy(SUFFIX, 0, data, data.length - SUFFIX.length, SUFFIX.length);
+                
             } catch (final IOException e) {
                 LOG.debug("Could not read from '" + path + "'");
                 data = null;
