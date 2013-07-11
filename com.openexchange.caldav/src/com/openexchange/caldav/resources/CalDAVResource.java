@@ -87,7 +87,7 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
 
     protected abstract String generateICal() throws OXException;
 
-    protected abstract void move(String targetFolderID) throws OXException;
+    protected abstract void move(CalDAVFolderCollection<T> target) throws OXException;
 
     protected String getICalFile() throws WebdavProtocolException {
         if (null == this.iCalFile) {
@@ -174,7 +174,7 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
             throw protocolException(e, HttpServletResponse.SC_FORBIDDEN);
         }
         try {
-            this.move(targetCollection.getFolder().getID());
+            this.move(targetCollection);
         } catch (OXException e) {
             if (handle(e)) {
                 return move(dest, noroot, overwrite);
