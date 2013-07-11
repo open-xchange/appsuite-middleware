@@ -34,6 +34,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-dataretention-csv"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-dataretrieval"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-dav"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-drive"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-eas-provisioning"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-eas-provisioning-mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-eas-provisioning-sms"/>
