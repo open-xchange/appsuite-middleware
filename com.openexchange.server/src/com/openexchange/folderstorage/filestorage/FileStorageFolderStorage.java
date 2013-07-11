@@ -96,7 +96,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link FileStorageFolderStorage} - The file storage folder storage.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FileStorageFolderStorage implements FolderStorage {
@@ -599,13 +599,12 @@ public final class FileStorageFolderStorage implements FolderStorage {
                     // Check for duplicate
                     check4DuplicateFolder(folderAccess, newParent, null == newName ? oldName : newName);
                     // Copy
-                    final String destFullname =
-                        fullCopy(
-                            folderAccess,
-                            id,
-                            newParent,
-                            storageParameters.getUserId(),
-                            p.getCapabilities().contains(FileStorageFolder.CAPABILITY_PERMISSIONS));
+                    final String destFullname = fullCopy(
+                        folderAccess,
+                        id,
+                        newParent,
+                        storageParameters.getUserId(),
+                        p.getCapabilities().contains(FileStorageFolder.CAPABILITY_PERMISSIONS));
                     // Delete source
                     folderAccess.deleteFolder(id, true);
                     // Perform other updates

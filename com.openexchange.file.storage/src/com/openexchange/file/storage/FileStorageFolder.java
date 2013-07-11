@@ -214,4 +214,9 @@ public interface FileStorageFolder extends FileStorageConstants {
      */
     Map<String, Object> getProperties();
 
+    /**
+     * Gets dynamic metadata
+     */
+    Map<String, Object> getMeta();
+
 }

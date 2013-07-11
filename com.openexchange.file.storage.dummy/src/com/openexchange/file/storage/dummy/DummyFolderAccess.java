@@ -68,6 +68,7 @@ public class DummyFolderAccess extends AbstractFileStorageFolderAccess {
 
     @Override
     public FileStorageFolder getFolder(String folderId) throws OXException {
+        System.out.println("GET FOLDER: " + folderId);
         if (folderId.equals(getRootFolder().getId())) {
             return getRootFolder();
         }
@@ -76,24 +77,25 @@ public class DummyFolderAccess extends AbstractFileStorageFolderAccess {
 
     @Override
     public FileStorageFolder getPersonalFolder() throws OXException {
-        return null;
+        System.out.println("GET PERSONAL FOLDER");
+        return getRootFolder();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageFolderAccess#getPublicFolders()
-     */
     @Override
     public FileStorageFolder[] getPublicFolders() throws OXException {
+        System.out.println("GET PUBLIC FOLDERS");
         return new FileStorageFolder[0];
     }
 
     @Override
     public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
+        System.out.println("GET SUBFOLDERS: " + parentIdentifier+ ", " + all);
         return new FileStorageFolder[0];
     }
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
+        System.out.println("GET ROOT FOLDER");
         return RootFolder.getRootFolder();
     }
 

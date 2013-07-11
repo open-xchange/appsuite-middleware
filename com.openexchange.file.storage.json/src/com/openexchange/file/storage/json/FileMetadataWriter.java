@@ -152,7 +152,7 @@ public class FileMetadataWriter {
             switch (field) {
             case CATEGORIES:
                 return handleCategories((String) value);
-            case DYNAMIC_PROPERTIES:
+            case META:
                 try {
                     if (value == null) {
                         return null;

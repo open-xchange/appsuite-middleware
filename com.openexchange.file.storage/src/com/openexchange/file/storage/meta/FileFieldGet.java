@@ -175,8 +175,8 @@ public class FileFieldGet extends AbstractFileFieldSwitcher {
     }
 
     @Override
-    public Object dynamicProperties(Object... args) {
-        return md( args ).getDynamicProperties();
+    public Object meta(Object... args) {
+        return md( args ).getMeta();
     }
 
 }

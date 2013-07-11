@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.dummy;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.file.storage.AbstractRootFolder;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -64,7 +66,6 @@ public class RootFolder extends AbstractRootFolder {
     private static final AtomicReference<RootFolder> INSTANCE = new AtomicReference<RootFolder>();
     
     private RootFolder(){
-        
     }
     
     public static FileStorageFolder getRootFolder() {
@@ -84,6 +85,16 @@ public class RootFolder extends AbstractRootFolder {
     @Override
     public int getFileCount() {
         return 20;
+    }
+    
+    private static final Map<String, Object> METADATA = new HashMap<String, Object>(){{
+        put("greeting", "hello");
+        put("greetee", "world");
+    }};
+    
+    @Override
+    public Map<String, Object> getMeta() {
+        return METADATA;
     }
 
 }

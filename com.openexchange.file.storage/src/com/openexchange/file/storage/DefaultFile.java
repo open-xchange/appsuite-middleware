@@ -105,7 +105,7 @@ public class DefaultFile extends AbstractFile {
 
     private boolean isCurrentVersion;
     
-    private Map<String, Object> dynamicProperties;
+    private Map<String, Object> dynamicProperties = new HashMap<String, Object>();
 
     private static final String DEFAULT_TYPE = "application/octet-stream";
 
@@ -379,12 +379,12 @@ public class DefaultFile extends AbstractFile {
     }
     
     @Override
-    public void setDynamicProperties(Map<String, Object> properties) {
+    public void setMeta(Map<String, Object> properties) {
         this.dynamicProperties = properties;
     }
     
     @Override
-    public Map<String, Object> getDynamicProperties() {
+    public Map<String, Object> getMeta() {
         return dynamicProperties;
     }
 

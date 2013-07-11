@@ -344,13 +344,13 @@ public class InfostoreFile extends AbstractFile implements File {
 
 
     @Override
-    public Map<String, Object> getDynamicProperties() {
+    public Map<String, Object> getMeta() {
         return null;
     }
 
 
     @Override
-    public void setDynamicProperties(Map<String, Object> properties) {
+    public void setMeta(Map<String, Object> properties) {
         
     }
 

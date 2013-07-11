@@ -153,7 +153,7 @@ public class FileMetadataParser implements FileMetadataParserService{
                 }
                 return categories((JSONArray) val);
             }
-            case DYNAMIC_PROPERTIES:
+            case META:
                 if (value == null || value == JSONObject.NULL) {
                     return null;
                 }

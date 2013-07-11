@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.internal;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import com.openexchange.folderstorage.ContentType;
@@ -496,6 +497,16 @@ public final class UserizedFolderImpl implements UserizedFolder {
             }
         }
         return map;
+    }
+    
+    @Override
+    public Map<String, Object> getMeta() {
+        return folder.getMeta();
+    }
+    
+    @Override
+    public void setMeta(Map<String, Object> meta) {
+        folder.setMeta(meta);
     }
 
 }

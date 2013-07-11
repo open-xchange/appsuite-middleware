@@ -236,8 +236,8 @@ public class IDManglingFile implements File {
     }
     
     @Override
-    public Map<String, Object> getDynamicProperties() {
-        return file.getDynamicProperties();
+    public Map<String, Object> getMeta() {
+        return file.getMeta();
     }
 
     @Override
@@ -341,8 +341,8 @@ public class IDManglingFile implements File {
     }
     
     @Override
-    public void setDynamicProperties(Map<String, Object> properties) {
-        file.setDynamicProperties(properties);
+    public void setMeta(Map<String, Object> properties) {
+        file.setMeta(properties);
     }
 
 }

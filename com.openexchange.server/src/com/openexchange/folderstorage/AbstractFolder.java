@@ -51,7 +51,9 @@ package com.openexchange.folderstorage;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * {@link AbstractFolder} - An abstract folder.
@@ -109,6 +111,18 @@ public abstract class AbstractFolder implements Folder, Serializable {
     protected boolean deefault;
 
     protected int defaultType;
+    
+    protected Map<String, Object> meta = new HashMap<String, Object>();
+
+    
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
+    }
 
     /**
      * Initializes an empty {@link AbstractFolder}.
