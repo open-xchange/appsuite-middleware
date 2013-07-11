@@ -54,6 +54,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -71,6 +72,7 @@ import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandlers;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.index.MailUUID;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.FromTerm;
@@ -328,6 +330,48 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
         IndexResult<MailMessage> result2 = indexAccess.query(query2, null);
         assertTrue("Wrong result size.", result2.getNumFound() == 1);
         checkResult(m2, result2.getResults().get(0).getObject());
+    }
+
+    @Test
+    public void testDocumentCountWithFullAndEmptyResultSets() throws Exception {
+        assertNotNull("IndexFacadeService was null.", indexFacade);
+        IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, user.getId(), context.getId());
+
+        MailMessage m1 = TestMails.toMailMessage(TestMails.MAIL1);
+        m1.setMailId(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
+        m1.setFolder("INBOX");
+        m1.setAccountId(0);
+        indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m1));
+
+        MailMessage m2 = TestMails.toMailMessage(TestMails.MAIL1);
+        m2.setMailId(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
+        m2.setFolder("INBOX");
+        m2.setAccountId(0);
+        indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m2));
+
+        MailMessage m3 = TestMails.toMailMessage(TestMails.MAIL1);
+        m3.setMailId(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
+        m3.setFolder("INBOX");
+        m3.setAccountId(0);
+        indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m3));
+
+        final Set<MailIndexField> fields = EnumSet.noneOf(MailIndexField.class);
+        Collections.addAll(fields, MailIndexField.ID, MailIndexField.ACCOUNT, MailIndexField.FULL_NAME);
+        QueryParameters.Builder builder = new QueryParameters.Builder()
+            .setHandler(SearchHandlers.ALL_REQUEST)
+            .setOffset(0)
+            .setLength(0)
+            .setAccountFolders(Collections.singleton(new AccountFolders("0", Collections.singleton("INBOX"))));
+        QueryParameters countQuery = builder.build();
+        IndexResult<MailMessage> result = indexAccess.query(countQuery, fields);
+        assertTrue("Wrong result size.", result.getNumFound() == 3);
+        assertTrue("Wrong number of documents.", result.getResults().size() == 0);
+
+        builder.setLength(Integer.MAX_VALUE);
+        QueryParameters retreiveQuery = builder.build();
+        result = indexAccess.query(retreiveQuery, fields);
+        assertTrue("Wrong result size.", result.getNumFound() == 3);
+        assertTrue("Wrong number of documents.", result.getResults().size() == 3);
     }
 
     private void checkResult(MailMessage expected, MailMessage actual) {
