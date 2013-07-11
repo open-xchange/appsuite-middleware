@@ -132,7 +132,7 @@ public class RTProtocol {
         }
 
         try {
-            if (parseElement(element)) {
+            if (analyzeElement(element)) {
                 if (seq < 0) {
                     return true;
                 }
@@ -231,16 +231,13 @@ public class RTProtocol {
     }
 
     /**
-     * Parse an element from the server.
+     * Analyze a message from the server.
      * @param element the element to parse
-     * @return false if the message should not be handled further because it only contains protocol overhead.
+     * @return <code>false</code> if the message should not be handled further because it only contains protocol overhead.
      * @throws JSONException
      */
-    private boolean parseElement(JSONObject element) throws JSONException {
+    private boolean analyzeElement(JSONObject element) throws JSONException {
         if (isMessage(element) && element.has("payloads")) {
-            /*
-             * This might be a pong. We have to look for it in the payload tree.
-             */
             JSONArray payloads = element.getJSONArray("payloads");
             for (int j = 0; j < payloads.length(); j++) {
                 JSONObject payload = payloads.getJSONObject(j);
@@ -253,6 +250,17 @@ public class RTProtocol {
                     sequenceGenerator.reset();
                     if (payloads.length() == 1) {
                         return false;
+                    }
+                } else if (isError(payload)) {
+                    if (payload.hasAndNotNull("data")) {
+                        JSONObject data = payload.getJSONObject("data");
+                        if (data.hasAndNotNull("code") && data.getInt("code") == 1005) {
+                            // session invalid
+                            callback.onSessionInvalid();
+                            if (payloads.length() == 1) {
+                                return false;
+                            }
+                        }
                     }
                 }
             }
@@ -272,6 +280,10 @@ public class RTProtocol {
 
     private boolean isPong(JSONObject payload) throws JSONException {
         return isProtocolPayload(payload) && payload.get("element").equals("pong");
+    }
+
+    private boolean isError(JSONObject payload) throws JSONException {
+        return payload.hasAndNotNull("element") && payload.get("element").equals("error");
     }
 
     private boolean isNextSequence(JSONObject payload) throws JSONException {
