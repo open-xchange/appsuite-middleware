@@ -56,6 +56,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -79,17 +80,17 @@ import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
  * {@link SmalSessionEventHandler}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SmalSessionEventHandler implements EventHandler {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SmalSessionEventHandler.class);
-    
+
     private static final int MAX_OFFSET = 60000 * 5;
-    
+
     private static final long JOB_TIMEOUT = 7 * 24 * 60 * 60000;
-    
+
     private static final int PROGRESSION_RATE = 10;
 
     private static final long START_INTERVAL = 60000 * 60;
@@ -111,7 +112,7 @@ public class SmalSessionEventHandler implements EventHandler {
                 if (session.isTransient()) {
                     return;
                 }
-                
+
                 int contextId = session.getContextId();
                 int userId = session.getUserId();
                 if (!isIndexingPermitted(contextId, userId)) {
@@ -128,7 +129,7 @@ public class SmalSessionEventHandler implements EventHandler {
                     LOG.warn("Could not handle session event.", e);
                     return;
                 }
-                
+
                 Map<Integer, Set<MailFolder>> allFolders = IndexableFoldersCalculator.calculatePrivateMailFolders(
                     session,
                     storageService);
@@ -138,7 +139,7 @@ public class SmalSessionEventHandler implements EventHandler {
             LOG.warn("Error while triggering mail indexing jobs.", e);
         }
     }
-    
+
     private boolean isIndexingPermitted(int contextId, int userId) throws OXException {
         ConfigViewFactory config = SmalServiceLookup.getServiceStatic(ConfigViewFactory.class);
         ConfigView view = config.getView(userId, contextId);
@@ -151,6 +152,8 @@ public class SmalSessionEventHandler implements EventHandler {
         int contextId = session.getContextId();
         int userId = session.getUserId();
         Random random = new Random();
+        ConfigurationService configurationService = SmalServiceLookup.getServiceStatic(ConfigurationService.class);
+        boolean useOffset = configurationService.getBoolProperty("com.openexchange.mail.smal.useOffset", true);
         for (Integer accountId : allFolders.keySet()) {
             MailAccount account = storageService.getMailAccount(accountId.intValue(), userId, contextId);
             Set<MailFolder> folders = allFolders.get(accountId);
@@ -162,7 +165,11 @@ public class SmalSessionEventHandler implements EventHandler {
                 account.getMailServer());
 
             for (MailFolder folder : folders) {
-                int offset = random.nextInt(MAX_OFFSET);
+                int offset = 0;
+                if (useOffset) {
+                    offset = random.nextInt(MAX_OFFSET);
+                }
+
                 int priority;
                 if (account.isDefaultAccount() && folder.isInbox()) {
                     priority = 15;
@@ -184,12 +191,15 @@ public class SmalSessionEventHandler implements EventHandler {
                     .password(decryptedPW)
                     .folder(folder.getFullname())
                     .build();
-                
+
                 Date startDate = new Date(System.currentTimeMillis() + offset);
                 indexingService.scheduleJobWithProgressiveInterval(jobInfo, startDate, JOB_TIMEOUT, START_INTERVAL, PROGRESSION_RATE, priority, updateOnly);
             }
 
-            int offset = random.nextInt(MAX_OFFSET);
+            int offset = 0;
+            if (useOffset) {
+                offset = random.nextInt(MAX_OFFSET);
+            }
             Date startDate = new Date(System.currentTimeMillis() + offset);
             JobInfo checkDeletedJobInfo = MailJobInfo.newBuilder(CheckForDeletedFoldersJob.class)
                 .accountId(account.getId())
