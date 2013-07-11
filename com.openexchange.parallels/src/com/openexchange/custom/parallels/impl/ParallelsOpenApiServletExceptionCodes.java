@@ -64,7 +64,7 @@ public enum ParallelsOpenApiServletExceptionCodes implements OXExceptionCode {
     /**
      * A openapi  interface error occurred. action: \"%1$s\" ,response: \"%2$s\"
      */
-    OPENAPI_COMMUNICATION_ERROR("An OpenAPI interface error occurred. action: \"%1$s\" ,response: \"%2$s\" " , Category.CATEGORY_ERROR, 1),
+    OPENAPI_COMMUNICATION_ERROR("An OpenAPI interface error occurred. Details: \"%1$s\" " , Category.CATEGORY_ERROR, 1),
     
     HTTP_COMMUNICATION_ERROR("OpenAPI communication error detected. Details: \"%1$s\"" , Category.CATEGORY_ERROR, 1);
 
@@ -100,7 +100,7 @@ public enum ParallelsOpenApiServletExceptionCodes implements OXExceptionCode {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
-    private static final String PREFIX = "CUSTOM_STRATO_SMS_MESSAGING";
+    private static final String PREFIX = "PARALLELS_OPENAPI";
     
     @Override
     public String getPrefix() {
@@ -108,34 +108,33 @@ public enum ParallelsOpenApiServletExceptionCodes implements OXExceptionCode {
     }
     
     /**
-     * Creates an {@link OXException} instance using this error code.
-     * 
-     * @return The newly created {@link OXException} instance.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @return The newly created {@link OXException} instance
      */
     public OXException create() {
-        return create(new Object[0]);
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
     }
 
     /**
-     * Creates an {@link OXException} instance using this error code.
-     * 
-     * @param logArguments The arguments for log message.
-     * @return The newly created {@link OXException} instance.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... logArguments) {
-        return create(null, logArguments);
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
     /**
-     * Creates an {@link OXException} instance using this error code.
-     * 
-     * @param cause The initial cause for {@link OXException}
-     * @param arguments The arguments for message.
-     * @return The newly created {@link OXException} instance.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... arguments) {
-        return OXExceptionFactory.getInstance().create(this, cause, arguments);
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
-
     
 }

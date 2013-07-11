@@ -481,6 +481,8 @@ public final class UserConfiguration implements Serializable, Cloneable {
      */
     private volatile Set<String> extendedPermissions;
 
+    private boolean ignoreExtendedPermissions;
+
     /**
      * Initializes a new {@link UserConfiguration}.
      *
@@ -491,6 +493,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      */
     public UserConfiguration(final int permissionBits, final int userId, final int[] groups, final Context ctx) {
         super();
+        this.ignoreExtendedPermissions = false;
         this.permissionBits = permissionBits;
         this.userId = userId;
         if (null == groups) {
@@ -1246,11 +1249,14 @@ public final class UserConfiguration implements Serializable, Cloneable {
             // According to previous implementation:
             //  (permissionBits & permission) == permission
             return true;
-        }
-        final Set<String> extendedPermissions = getExtendedPermissions();
-        for (final Permission p : Permission.byBits(permissionBit, false)) {
-            if (!extendedPermissions.contains(toLowerCase(p.name()))) {
-                return false;
+        } else if (ignoreExtendedPermissions) {
+            return (permissionBits & permissionBit) == permissionBit;
+        } else {
+            final Set<String> extendedPermissions = getExtendedPermissions();
+            for (final Permission p : Permission.byBits(permissionBit, false)) {
+                if (!extendedPermissions.contains(toLowerCase(p.name()))) {
+                    return false;
+                }
             }
         }
         return true;
@@ -1422,6 +1428,26 @@ public final class UserConfiguration implements Serializable, Cloneable {
             isWhitespace = Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    /**
+     * Gets a value indicating whether extended permissions should be considered or not.
+     *
+     * @return <code>true</code> if extended permissions are ignored, <code>false</code>, otherwise
+     */
+    public boolean isIgnoreExtendedPermissions() {
+        return ignoreExtendedPermissions;
+    }
+
+    /**
+     * Configures whether extended permissions should be considered or not. Setting the value to <code>false</code> might (only) be useful
+     * to get a view to the plain module access combinations as read from the database, ignoring all extended permissions with their
+     * dynamic nature.
+     *
+     * @param ignore <code>true</code> if extended permissions should be ignored, <code>false</code>, otherwise
+     */
+    public void setIgnoreExtendedPermissions(boolean ignore) {
+        this.ignoreExtendedPermissions = ignore;
     }
 
 }

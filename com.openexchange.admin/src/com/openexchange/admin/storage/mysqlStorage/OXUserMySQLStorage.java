@@ -2485,6 +2485,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             read_ox_con = cache.getConnectionForContext(ctx.getId().intValue());
             final int[] all_groups_of_user = getGroupsForUser(ctx, user_id, read_ox_con);
             final UserConfiguration user = RdbUserConfigurationStorage.adminLoadUserConfiguration(user_id, all_groups_of_user, true, ctx.getId().intValue(), read_ox_con);
+            user.setIgnoreExtendedPermissions(true); // get module access as read from the database
 
             final UserModuleAccess acc = new UserModuleAccess();
 
