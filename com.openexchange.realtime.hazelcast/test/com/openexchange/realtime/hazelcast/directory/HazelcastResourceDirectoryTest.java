@@ -84,6 +84,11 @@ import com.openexchange.realtime.util.IDMap;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
+    
+    public HazelcastResourceDirectoryTest() {
+        super("","");
+    }
+    
     private static ExecutorService executorService;
     private static Random random;
     
@@ -105,7 +110,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
     @After
     public void after() throws Exception {
         getIDMapping().clear();
-        getResourceMap().clear();
+        getResourceMapping().clear();
     }
     
     @Test
@@ -197,7 +202,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Assert.assertEquals("Wrong size", 2, remove2.size());
         
         MultiMap<String,String> idMapping = getIDMapping();
-        IMap<String, Map<String, Serializable>> resources = getResourceMap();
+        IMap<String, Map<String, Serializable>> resources = getResourceMapping();
         Assert.assertEquals("Id mapping not empty", 0, idMapping.size());
         Assert.assertEquals("Resources not empty", 0, resources.size());
     }
@@ -245,7 +250,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Assert.assertEquals("Wrong size", 1, removed2.size());
         
         MultiMap<String,String> idMapping = getIDMapping();
-        IMap<String, Map<String, Serializable>> resources = getResourceMap();
+        IMap<String, Map<String, Serializable>> resources = getResourceMapping();
         Assert.assertEquals("Id mapping not empty", 0, idMapping.size());
         Assert.assertEquals("Resources not empty", 0, resources.size());
     }
