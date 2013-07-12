@@ -16,7 +16,7 @@ public class IDComponentsParserTest {
         assertNull(idComponents.context);
         assertNull(idComponents.resource);
     }
-    
+
     @Test
     public void testUserAndContext() {
         IDComponents idComponents = IDComponentsParser.parse("marc.arens@premium");
@@ -26,7 +26,7 @@ public class IDComponentsParserTest {
         assertEquals("premium", idComponents.context);
         assertNull(idComponents.resource);
     }
-    
+
     @Test
     public void testUserContextAndResource() {
         IDComponents idComponents = IDComponentsParser.parse("marc.arens@premium/20d39asd9da93249f009d");
@@ -36,17 +36,17 @@ public class IDComponentsParserTest {
         assertEquals("premium", idComponents.context);
         assertEquals("20d39asd9da93249f009d", idComponents.resource);
     }
-    
+
     @Test
     public void testProtocolUserContextAndResource() {
-        IDComponents idComponents = IDComponentsParser.parse("ox://marc.arens@premium/20d39asd9da93249f009d");
+        IDComponents idComponents = IDComponentsParser.parse("ox://marc.arens@premium/20d39asd9da9/3249f009d");
         assertEquals("ox", idComponents.protocol);
         assertNull(idComponents.component);
         assertEquals("marc.arens", idComponents.user);
         assertEquals("premium", idComponents.context);
-        assertEquals("20d39asd9da93249f009d", idComponents.resource);
+        assertEquals("20d39asd9da9/3249f009d", idComponents.resource);
     }
-    
+
     @Test
     public void testProtocolComponentUserContextAndResource() {
         IDComponents idComponents = IDComponentsParser.parse("ox.some.component://marc.arens@premium/20d39asd9da93249f009d");
