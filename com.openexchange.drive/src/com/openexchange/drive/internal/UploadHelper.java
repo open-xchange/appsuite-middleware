@@ -69,9 +69,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
+import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
@@ -96,7 +96,7 @@ public class UploadHelper {
     }
 
     public File perform(final String path, final FileVersion originalVersion, final FileVersion newVersion, final InputStream uploadStream,
-        final String contentType, final long offset, long totalLength) throws OXException {
+        final String contentType, final long offset, final long totalLength) throws OXException {
         /*
          * save data
          */
@@ -104,7 +104,7 @@ public class UploadHelper {
 
             @Override
             public Entry<File, String> call() throws OXException {
-                return upload(newVersion, uploadStream, contentType, offset);
+                return upload(newVersion, uploadStream, contentType, offset, totalLength);
             }
         });
         String checksum = uploadEntry.getValue();
@@ -114,14 +114,18 @@ public class UploadHelper {
          */
         if (-1 == totalLength || uploadFile.getFileSize() >= totalLength) {
             /*
-             * validate checksum if available
+             * validate checksum
              */
-            if (null != checksum && false == checksum.equals(newVersion.getChecksum())) {
+            if (null == checksum) {
+                checksum = ChecksumProvider.getChecksum(session, uploadFile).getChecksum();
+            }
+            if (false == checksum.equals(newVersion.getChecksum())) {
                 throw DriveExceptionCodes.UPLOADED_FILE_CHECKSUM_ERROR.create(checksum, newVersion.getName(), newVersion.getChecksum());
             }
             /*
              * save document at target path/name
              */
+            uploadFile.setFileMD5Sum(checksum);
             return session.getStorage().wrapInTransaction(new StorageOperation<File>() {
 
                 @Override
@@ -143,12 +147,11 @@ public class UploadHelper {
         }
     }
 
-    private Entry<File, String> upload(FileVersion newVersion, InputStream uploadStream, String contentType, long offset) throws OXException {
+    private Entry<File, String> upload(FileVersion newVersion, InputStream uploadStream, String contentType, long offset, long totalLength) throws OXException {
         /*
          * get/create upload file
          */
         File uploadFile = getUploadFile(newVersion.getChecksum(), true);
-        uploadFile.setFileMIMEType(contentType);
         /*
          * check current offset
          */
@@ -160,18 +163,21 @@ public class UploadHelper {
          */
         String checksum = null;
         IDBasedFileAccess fileAccess = session.getStorage().getFileAccess();
-        List<Field> modifiedFields = Arrays.asList(File.Field.FILE_SIZE, File.Field.FILE_MIMETYPE);
+        List<Field> modifiedFields = Arrays.asList(File.Field.FILE_SIZE, File.Field.FILE_MIMETYPE, File.Field.VERSION_COMMENT);
+        uploadFile.setVersionComment(getComment());
+        uploadFile.setFileMIMEType(contentType);
+        uploadFile.setFileSize(totalLength - offset);
         if (0 == offset) {
             /*
              * write initial file data, setting the first version number
              */
             checksum = saveDocumentAndChecksum(uploadFile, uploadStream, uploadFile.getSequenceNumber(), modifiedFields, false);
-        } else if (FileStorageRandomFileAccess.class.isInstance(fileAccess)) {
+        } else if (session.getStorage().isRandomFileAccess()) {
             /*
-             * append file data via random file access, preferably not incrementing the version number
+             * append file data via random file access (not incrementing the version number)
              */
-            ((FileStorageRandomFileAccess)fileAccess).saveDocument(
-                uploadFile, uploadStream, uploadFile.getSequenceNumber(), modifiedFields, false, offset);
+            ((IDBasedRandomFileAccess)fileAccess).saveDocument(
+                uploadFile, uploadStream, uploadFile.getSequenceNumber(), modifiedFields, offset);
         } else {
             /*
              * work around filestore limitation and append file data via temporary managed file
@@ -207,7 +213,7 @@ public class UploadHelper {
         try {
             digestStream = new DigestInputStream(inputStream, MessageDigest.getInstance("MD5"));
             IDBasedFileAccess fileAccess = session.getStorage().getFileAccess();
-            if (ignoreVersion && IDBasedIgnorableVersionFileAccess.class.isInstance(fileAccess)) {
+            if (ignoreVersion && session.getStorage().isIgnorableVersionFileAccess()) {
                 ((IDBasedIgnorableVersionFileAccess)fileAccess).saveDocument(file, digestStream, sequenceNumber, modifiedFields, true);
             } else {
                 fileAccess.saveDocument(file, digestStream, sequenceNumber, modifiedFields);
@@ -241,6 +247,10 @@ public class UploadHelper {
         }
 //        return uploadFile;
         return null == uploadFile ? null : new DefaultFile(uploadFile);//TODO: necessary due to ID interchanging when passing to file accesses
+    }
+
+    private String getComment() {
+        return "Uploaded with OX Drive (" + session.getServerSession().getClient() + ")";
     }
 
     private static String getUploadFilename(String checksum) {

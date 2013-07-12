@@ -80,13 +80,22 @@ public class Activator extends HousekeepingActivator {
         if (property == null) {
             throw new BundleException("Missing property: com.openexchange.apps.path", BundleException.ACTIVATOR_ERROR);
         }
-        File path = new File(property);
-        File apps = new File(path, "apps");
+        String[] paths = property.split(":");
+        File[] apps = new File[paths.length];
+        int i = 0;
+        for (String path : paths) {
+            apps[i++] = new File(new File(path), "apps");
+        }
         File zoneinfo = new File(config.getProperty("com.openexchange.apps.tzdata", "/usr/share/zoneinfo/"));
         HttpService service = getService(HttpService.class);
         service.registerServlet(prefix + "apps/load", new AppsLoadServlet(apps, zoneinfo), null, null);
 
         final Log logger = com.openexchange.log.Log.loggerFor(Activator.class);
-        logger.info("Servlet path \"apps/load\" successfully registered with \"apps\"=" + apps.getPath() + " and \"zoneinfo\"=" + zoneinfo.getPath());
+        StringBuilder sb = new StringBuilder();
+        for (File app : apps) {
+            sb.append(':');
+            sb.append(app.getPath());
+        }
+        logger.info("Servlet path \"apps/load\" successfully registered with \"apps\"=" + sb.substring(1) + " and \"zoneinfo\"=" + zoneinfo.getPath());
     }
 }

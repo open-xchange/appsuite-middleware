@@ -156,9 +156,9 @@ public interface File {
 
     int getNumberOfVersions();
 
-    Map<String, Object> getDynamicProperties();
+    Map<String, Object> getMeta();
 
-    void setDynamicProperties(Map<String, Object> properties);
+    void setMeta(Map<String, Object> properties);
 
     File dup();
 
@@ -211,7 +211,7 @@ public interface File {
         COLOR_LABEL("color_label", 102),
         LAST_MODIFIED_UTC("last_modified_utc", 6),
         NUMBER_OF_VERSIONS("number_of_versions", 711),
-        DYNAMIC_PROPERTIES("dynamicProperties", 712);
+        META("meta", 23);
 
         private final int number;
 
@@ -278,8 +278,8 @@ public interface File {
                 return switcher.lastModifiedUtc(args);
             case NUMBER_OF_VERSIONS:
                 return switcher.numberOfVersions(args);
-            case DYNAMIC_PROPERTIES:
-                return switcher.dynamicProperties(args);
+            case META:
+                return switcher.meta(args);
             default:
                 throw new IllegalArgumentException("Don't know field: " + getName());
             }

@@ -274,8 +274,8 @@ public class FileFieldHandling {
         }
         
         @Override
-        public Object dynamicProperties(Object... args) {
-            return handler.handle(Field.DYNAMIC_PROPERTIES, args);
+        public Object meta(Object... args) {
+            return handler.handle(Field.META, args);
         }
     }
 }

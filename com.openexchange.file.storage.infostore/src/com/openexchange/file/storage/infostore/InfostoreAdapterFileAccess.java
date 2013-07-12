@@ -63,7 +63,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
+import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.infostore.internal.VirtualFolderInfostoreFacade;
 import com.openexchange.groupware.container.FolderObject;
@@ -83,7 +83,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFileAccess, FileStorageSequenceNumberProvider {
+public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, FileStorageSequenceNumberProvider {
 
     private static final InfostoreFacade VIRTUAL_INFOSTORE = new VirtualFolderInfostoreFacade();
     private static final Set<Long> VIRTUAL_FOLDERS;
@@ -136,6 +136,16 @@ public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFi
     public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
         try {
             return getInfostore(folderId).getDocument(ID(id), null == version ? -1 : Integer.parseInt(version), ctx, user, userConfig);
+        } catch (final NumberFormatException e) {
+            throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
+        }
+    }
+
+    @Override
+    public InputStream getDocument(String folderId, String id, String version, long offset, long length) throws OXException {
+        try {
+            return getInfostore(folderId).getDocument(
+                ID(id), null == version ? -1 : Integer.parseInt(version), offset, length, ctx, user, userConfig);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
@@ -245,6 +255,20 @@ public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFi
             sequenceNumber,
             FieldMapping.getMatching(modifiedFields),
             ignoreVersion,
+            sessionObj);
+    }
+
+    @Override
+    public void saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields, long offset) throws OXException {
+        if (modifiedFields.contains(Field.URL)) {
+            checkUrl(file);
+        }
+        getInfostore(file.getFolderId()).saveDocument(
+            new FileMetadata(file),
+            data,
+            sequenceNumber,
+            FieldMapping.getMatching(modifiedFields),
+            offset,
             sessionObj);
     }
 

@@ -331,4 +331,15 @@ public class SimInfostoreFacade implements InfostoreFacade {
         return Quota.getUnlimitedQuota(Type.STORAGE);
     }
 
+    @Override
+    public InputStream getDocument(int id, int version, long offset, long length, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, long offset, ServerSession session) throws OXException {
+        // Nothing to do
+    }
+
 }

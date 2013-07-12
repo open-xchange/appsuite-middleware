@@ -66,7 +66,7 @@ import com.openexchange.java.Strings;
 
 /**
  * {@link AppsLoadServlet} - Provides App Suite data for loading applciations.
- *
+ * 
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public class AppsLoadServlet extends HttpServlet {
@@ -81,12 +81,12 @@ public class AppsLoadServlet extends HttpServlet {
 
     /**
      * Initializes a new {@link AppsLoadServlet}.
-     *
+     * 
      * @throws IOException
      */
-    public AppsLoadServlet(final File root, final File zoneinfo) throws IOException {
+    public AppsLoadServlet(final File[] roots, final File zoneinfo) throws IOException {
         super();
-        appCache = new FileCache(root);
+        appCache = new FileCache(roots);
         tzCache = new FileCache(zoneinfo);
     }
 
@@ -207,10 +207,14 @@ public class AppsLoadServlet extends HttpServlet {
             if (data == null) {
                 int len = module.length() - 3;
                 String moduleName = module;
-                if (format == null && ".js".equals(module.substring(len))) {
+                if (format == null && len > 0 && ".js".equals(module.substring(len))) {
                     moduleName = module.substring(0, len);
                 }
-                data = ("define('" + escapeName(moduleName) + "', function () {\n    throw new Error(\"Could not read '" + escapeName(name) + "'\");\n});\n").getBytes(Charsets.UTF_8);
+                name = escapeName(name);
+                data = ("define('" + escapeName(moduleName) + "', function () {\n" +
+                        "    if (ox.debug) console.log(\"Could not read '" + name + "'\");\n" +
+                		"    throw new Error(\"Could not read '" + name + "'\");\n" +
+        				"});\n").getBytes(Charsets.UTF_8);
             }
 
             out.write(data);

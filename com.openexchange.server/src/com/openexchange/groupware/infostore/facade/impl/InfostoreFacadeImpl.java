@@ -140,9 +140,10 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.collections.Injector;
+import com.openexchange.tools.file.AppendFileAction;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.SaveFileWithQuotaAction;
+import com.openexchange.tools.file.SaveFileAction;
 import com.openexchange.tools.iterator.CombinedSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -254,19 +255,24 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public InputStream getDocument(final int id, final int version, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        return getDocument(id, version, 0L, -1L, ctx, user, userConfig);
+    }
+
+    @Override
+    public InputStream getDocument(int id, int version, long offset, long length, Context ctx, User user, UserConfiguration userConfig) throws OXException {
         final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, ctx, user, userConfig);
         if (!infoPerm.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
         final DocumentMetadata dm = load(id, version, ctx);
         final FileStorage fs = getFileStorage(ctx);
-        try {
-            if (dm.getFilestoreLocation() == null) {
-                return Streams.newByteArrayInputStream(new byte[0]);
-            }
+        if (dm.getFilestoreLocation() == null) {
+            return Streams.newByteArrayInputStream(new byte[0]);
+        }
+        if (0 == offset && -1 == length) {
             return fs.getFile(dm.getFilestoreLocation());
-        } catch (final OXException e) {
-            throw e;
+        } else {
+            return fs.getFile(dm.getFilestoreLocation(), offset, length);
         }
     }
 
@@ -629,20 +635,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 perform(createVersionAction, true);
 
                 if (data != null) {
-                    final SaveFileWithQuotaAction saveFile = new SaveFileWithQuotaAction();
-                    final QuotaFileStorage qfs = getFileStorage(context);
-                    saveFile.setStorage(qfs);
-                    saveFile.setSizeHint(document.getFileSize());
-                    saveFile.setIn(data);
-
+                    SaveFileAction saveFile = new SaveFileAction(getFileStorage(context), data, document.getFileSize());
                     perform(saveFile, false);
-
                     document.setVersion(1);
-                    document.setFilestoreLocation(saveFile.getId());
-                    document.setFileMD5Sum(saveFile.getMd5());
-                    if (document.getFileSize() == 0) {
-                        document.setFileSize(qfs.getFileSize(saveFile.getId()));
-                    }
+                    document.setFilestoreLocation(saveFile.getFileStorageID());
+                    document.setFileMD5Sum(saveFile.getChecksum());
+                    document.setFileSize(saveFile.getByteCount());
 
                     createVersionAction = new CreateVersionAction();
                     createVersionAction.setContext(context);
@@ -651,7 +649,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     createVersionAction.setQueryCatalog(QUERIES);
 
                     perform(createVersionAction, true);
-
                 }
 
                 indexDocument(context, session.getUserId(), document.getId(), -1L, wasCreation);
@@ -822,6 +819,18 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final boolean ignoreVersion, final ServerSession session) throws OXException {
+        saveDocument(document, data, sequenceNumber, modifiedColumns, false, -1L, session);
+    }
+
+    @Override
+    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, long offset, ServerSession session) throws OXException {
+        saveDocument(document, data, sequenceNumber, modifiedColumns, true, offset, session);
+    }
+
+    private void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, long offset, ServerSession session) throws OXException {
+        if (0 < offset && (NEW == document.getId() || false == ignoreVersion)) {
+            throw InfostoreExceptionCodes.NO_OFFSET_FOR_NEW_VERSIONS.create();
+        }
         if (document.getId() == NEW) {
             saveDocument(document, data, sequenceNumber, session);
             indexDocument(session.getContext(), session.getUserId(), document.getId(), -1L, true);
@@ -929,17 +938,23 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 modifiedCols = updatedCols.toArray(new Metadata[updatedCols.size()]);
 
                 if (data != null) {
-
-                    final SaveFileWithQuotaAction saveFile = new SaveFileWithQuotaAction();
-                    final QuotaFileStorage qfs = getFileStorage(context);
-                    saveFile.setStorage(qfs);
-                    saveFile.setSizeHint(document.getFileSize());
-                    saveFile.setIn(data);
-                    perform(saveFile, false);
-                    document.setFilestoreLocation(saveFile.getId());
-
-                    if (document.getFileSize() == 0) {
-                        document.setFileSize(qfs.getFileSize(saveFile.getId()));
+                    QuotaFileStorage qfs = getFileStorage(context);
+                    if (0 < offset) {
+                        AppendFileAction appendFile = new AppendFileAction(
+                            qfs, data, oldDocument.getFilestoreLocation(), document.getFileSize(), offset);
+                        perform(appendFile, false);
+                        document.setFilestoreLocation(oldDocument.getFilestoreLocation());
+                        document.setFileSize(appendFile.getByteCount() + offset);
+                        document.setFileMD5Sum(null); // invalidate due to append-operation
+                        updatedCols.addAll(Arrays.asList(Metadata.FILE_MD5SUM_LITERAL, Metadata.FILE_SIZE_LITERAL));
+                    } else {
+                        SaveFileAction saveFile = new SaveFileAction(qfs, data, document.getFileSize());
+                        perform(saveFile, false);
+                        document.setFilestoreLocation(saveFile.getFileStorageID());
+                        document.setFileSize(saveFile.getByteCount());
+                        document.setFileMD5Sum(saveFile.getChecksum());
+                        updatedCols.addAll(Arrays.asList(
+                            Metadata.FILE_MD5SUM_LITERAL, Metadata.FILE_SIZE_LITERAL, Metadata.FILESTORE_LOCATION_LITERAL));
                     }
 
                     final GetSwitch get = new GetSwitch(oldDocument);
@@ -971,8 +986,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                         updateVersionAction.setModified(updatedCols.toArray(new Metadata[updatedCols.size()]));
                         updateVersionAction.setTimestamp(sequenceNumber);
 
-                        // Remove old file "version"
-                        removeFile(context, oldDocument.getFilestoreLocation());
+                        // Remove old file "version" if not appended
+                        if (0 >= offset) {
+                            removeFile(context, oldDocument.getFilestoreLocation());
+                        }
 
                         action = updateVersionAction;
                     } else {

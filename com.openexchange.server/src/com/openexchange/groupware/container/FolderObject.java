@@ -56,6 +56,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -332,6 +333,8 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     protected String fullName;
 
     protected boolean b_fullName;
+
+    private Map<String, Object> meta;
 
     /**
      * Initializes a new {@link FolderObject}
@@ -1668,6 +1671,14 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             FolderObject.SYSTEM_MODULE,
             true,
             FolderObject.SYSTEM_TYPE);
+    }
+
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
+    }
+    
+    public Map<String, Object> getMeta() {
+        return meta;
     }
 
 }

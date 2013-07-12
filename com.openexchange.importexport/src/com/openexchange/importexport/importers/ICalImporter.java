@@ -378,6 +378,15 @@ public class ICalImporter extends AbstractImporter {
 				appointmentObj.setContext(session.getContext());
 				appointmentObj.setParentFolderID(appointmentFolderId);
 				appointmentObj.setIgnoreConflicts(true);
+				OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
+				FolderObject folder = folderAccess.getFolderObject(appointmentFolderId);
+				if (folder.getType() == FolderObject.PUBLIC) {
+				    if (appointmentObj.getParticipants() != null && appointmentObj.getParticipants().length > 0 && appointmentObj.getPrivateFlag()) {
+				        appointmentObj.removeParticipants();
+			            warnings.add(new ConversionWarning(index, ConversionWarning.Code.PRIVATE_APPOINTMENTS_HAVE_NO_PARTICIPANTS));
+			            appointmentObj.setPrivateFlag(false);
+			        }
+				}
 				if (suppressNotification) {
 					appointmentObj.setNotification(false);
 				}

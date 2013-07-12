@@ -59,7 +59,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -885,5 +884,4 @@ public class UserConfiguration implements Serializable, Cloneable {
         }
         return builder.toString();
     }
-
 }

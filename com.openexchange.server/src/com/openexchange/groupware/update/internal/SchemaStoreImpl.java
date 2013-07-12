@@ -102,17 +102,17 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     @Override
-    public SchemaUpdateState getSchema(final int poolId, final String schemaName) throws OXException {
+    protected SchemaUpdateState getSchema(int poolId, String schemaName, Connection con) throws OXException {
         SchemaUpdateState retval;
         if (null == cache) {
-            retval = loadSchema(poolId, schemaName);
+            retval = loadSchema(con);
         } else {
             final CacheKey key = cache.newCacheKey(poolId, schemaName);
             cacheLock.lock();
             try {
                 retval = (SchemaUpdateState) cache.get(key);
                 if (null == retval) {
-                    retval = loadSchema(poolId, schemaName);
+                    retval = loadSchema(con);
                     try {
                         cache.putSafe(key, retval);
                     } catch (final OXException e) {
@@ -126,8 +126,7 @@ public class SchemaStoreImpl extends SchemaStore {
         return retval;
     }
 
-    private static SchemaUpdateState loadSchema(final int poolId, final String schemaName) throws OXException {
-        final Connection con = Database.get(poolId, schemaName);
+    private static SchemaUpdateState loadSchema(Connection con) throws OXException {
         final SchemaUpdateState retval;
         try {
             con.setAutoCommit(false);
@@ -142,7 +141,6 @@ public class SchemaStoreImpl extends SchemaStore {
             throw e;
         } finally {
             autocommit(con);
-            Database.back(poolId, con);
         }
         return retval;
     }
@@ -189,7 +187,7 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private void lockSchemaDB(final Schema schema, final int contextId, final boolean background) throws OXException {
+    private static void lockSchemaDB(final Schema schema, final int contextId, final boolean background) throws OXException {
         final Connection con = Database.get(contextId, true);
         try {
             con.setAutoCommit(false); // BEGIN
@@ -337,7 +335,7 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private void unlockSchemaDB(final Schema schema, final int contextId, final boolean background) throws OXException {
+    private static void unlockSchemaDB(final Schema schema, final int contextId, final boolean background) throws OXException {
         final Connection con = Database.get(contextId, true);
         try {
             // End of update process, so unlock schema
@@ -543,7 +541,7 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private void addExecutedTask(final Connection con, final String taskName, final boolean success) throws OXException {
+    private static void addExecutedTask(final Connection con, final String taskName, final boolean success) throws OXException {
         try {
             if (hasUUID(con)) {
                 addExecutedTaskUUID(con, taskName, success);
@@ -555,7 +553,7 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private void addExecutedTaskNoUUID(Connection con, String taskName, boolean success) throws OXException {
+    private static void addExecutedTaskNoUUID(Connection con, String taskName, boolean success) throws OXException {
         boolean update = false;
         for (final ExecutedTask executed : readUpdateTasks(con)) {
             if (taskName.equals(executed.getTaskName())) {
@@ -583,7 +581,7 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private void addExecutedTaskUUID(Connection con, String taskName, boolean success) throws OXException {
+    private static void addExecutedTaskUUID(Connection con, String taskName, boolean success) throws OXException {
         boolean update = false;
         for (final ExecutedTask executed : readUpdateTasks(con)) {
             if (taskName.equals(executed.getTaskName())) {

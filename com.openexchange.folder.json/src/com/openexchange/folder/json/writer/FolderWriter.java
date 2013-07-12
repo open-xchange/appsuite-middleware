@@ -60,12 +60,14 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 import com.openexchange.ajax.customizer.folder.BulkFolderField;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.FolderFieldRegistry;
@@ -444,6 +446,14 @@ public final class FolderWriter {
                 final int caps = folder.getCapabilities();
                 jsonPutter.put(FolderField.CAPABILITIES.getName(), -1 == caps ? JSONObject.NULL : Integer.valueOf(caps));
             }
+        });
+        m.put(FolderField.META.getColumn(), new FolderFieldWriter() {
+            @Override
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+                Map<String, Object> meta =  folder.getMeta();
+                jsonPutter.put(FolderField.META.getName(), JSONCoercion.coerceToJSON(meta));
+            }
+            
         });
         STATIC_WRITERS_MAP = m;
 

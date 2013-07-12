@@ -458,4 +458,14 @@ public final class VirtualFolder implements ParameterizedFolder {
         return Collections.unmodifiableMap(properties);
     }
 
+    public void setMeta(Map<String, Object> meta) {
+        realFolder.setMeta(meta);
+    }
+
+    public Map<String, Object> getMeta() {
+        return realFolder.getMeta();
+    }
+    
+    
+
 }

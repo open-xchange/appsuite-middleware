@@ -95,7 +95,6 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.SaveFileAction;
-import com.openexchange.tools.file.SaveFileWithQuotaAction;
 import com.openexchange.tools.file.external.QuotaFileStorageExceptionCodes;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -560,19 +559,11 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     }
 
     private String saveFile(final InputStream data, final AttachmentMetadata attachment, final Context ctx) throws OXException, OXException {
-        final QuotaFileStorage fs = getFileStorage(ctx);
-        SaveFileAction action = null;
-        final SaveFileWithQuotaAction a = new SaveFileWithQuotaAction();
-        a.setIn(data);
-        a.setSizeHint(attachment.getFilesize());
-        a.setStorage(fs);
-        action = a;
+        SaveFileAction action = new SaveFileAction(getFileStorage(ctx), data, attachment.getFilesize(), false);
         action.perform();
         addUndoable(action);
-
-        attachment.setFilesize(fs.getFileSize(action.getId())); // Definitive!
-
-        return action.getId();
+        attachment.setFilesize(action.getByteCount());
+        return action.getFileStorageID();
     }
 
     private List<String> getFiles(final int[] ids, final Context ctx) throws OXException {

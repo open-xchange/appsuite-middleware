@@ -1036,7 +1036,7 @@ public class StatisticTools extends AbstractJMXTools {
     /**
      * {@link GrizzlyMBean} Enum of MBeans we are interested in. Each containing the ObjectName and the attributes to query.
      *
-     * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
+     * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
      */
     private enum GrizzlyMBean {
         HTTPCODECFILTER("org.glassfish.grizzly:pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=HttpCodecFilter,name=HttpCodecFilter", new String[] {

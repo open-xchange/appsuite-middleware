@@ -399,7 +399,7 @@ public class DefaultDispatcher implements Dispatcher {
         if (null == ret) {
             final AJAXActionServiceFactory factory = lookupFactory(module);
             if (factory == null) {
-                ret = Boolean.FALSE;
+                return Boolean.FALSE;
             } else {
                 final DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
                 ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.noSession());

@@ -62,7 +62,6 @@ import com.openexchange.mail.autoconfig.AutoconfigService;
 import com.openexchange.mail.autoconfig.sources.ConfigServer;
 import com.openexchange.mail.autoconfig.sources.ConfigSource;
 import com.openexchange.mail.autoconfig.sources.ConfigurationFile;
-import com.openexchange.mail.autoconfig.sources.Database;
 import com.openexchange.mail.autoconfig.sources.Guess;
 import com.openexchange.mail.autoconfig.sources.ISPDB;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -77,15 +76,13 @@ public class AutoconfigServiceImpl implements AutoconfigService {
 
     private final List<ConfigSource> sources;
 
-    // private final ServiceLookup services;
-
     public AutoconfigServiceImpl(final ServiceLookup services) {
-        // this.services = services;
         sources = new LinkedList<ConfigSource>();
         sources.add(new ConfigurationFile(services));
         sources.add(new ConfigServer());
         sources.add(new ISPDB(services));
-        sources.add(new Database(services));
+        // Deactivated because of Bug 27473
+        // sources.add(new Database(services));
         sources.add(new Guess());
     }
 

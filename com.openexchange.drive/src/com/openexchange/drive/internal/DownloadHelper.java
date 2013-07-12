@@ -126,7 +126,7 @@ public class DownloadHelper {
             /*
              * offset or maximum length is requested, get partial stream
              */
-            if (IDBasedRandomFileAccess.class.isInstance(fileAccess)) {
+            if (session.getStorage().isRandomFileAccess()) {
                 inputStream = ((IDBasedRandomFileAccess)fileAccess).getDocument(file.getId(), file.getVersion(), offset, length);
             } else {
                 try {

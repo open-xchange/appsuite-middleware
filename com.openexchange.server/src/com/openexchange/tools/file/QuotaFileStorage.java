@@ -138,12 +138,31 @@ public final class QuotaFileStorage extends FileStorage {
     }
 
     public String saveNewFile(final InputStream file, final long sizeHint) throws OXException {
-        // TODO use sizeHint to faster break on over quota
-        return qfs.saveNewFile(file);
+        return qfs.saveNewFile(file, sizeHint);
+    }
+
+    public long appendToFile(InputStream file, String name, long offset, long sizeHint) throws OXException {
+        return qfs.appendToFile(file, name, offset, sizeHint);
     }
 
     @Override
     public void close() {
         qfs = null;
     }
+
+    @Override
+    public long appendToFile(InputStream file, String name, long offset) throws OXException {
+        return qfs.appendToFile(file, name, offset);
+    }
+
+    @Override
+    public void setFileLength(long length, String name) throws OXException {
+        qfs.setFileLength(length, name);
+    }
+
+    @Override
+    public InputStream getFile(String name, long offset, long length) throws OXException {
+        return qfs.getFile(name, offset, length);
+    }
+
 }

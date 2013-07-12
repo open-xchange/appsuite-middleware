@@ -212,6 +212,12 @@ public class IDManglingFolder implements FileStorageFolder {
     public Map<String, Object> getProperties() {
         return delegate.getProperties();
     }
+    
+    
+
+    public Map<String, Object> getMeta() {
+        return delegate.getMeta();
+    }
 
     @Override
     public String toString() {

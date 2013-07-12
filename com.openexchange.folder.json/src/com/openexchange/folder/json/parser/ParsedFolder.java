@@ -50,7 +50,9 @@
 package com.openexchange.folder.json.parser;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.Permission;
@@ -110,6 +112,8 @@ public final class ParsedFolder implements Folder {
     protected int bits;
 
     protected String newId;
+    
+    protected Map<String, Object> meta = new HashMap<String, Object>();
 
     /**
      * Initializes an empty {@link ParsedFolder}.
@@ -417,5 +421,17 @@ public final class ParsedFolder implements Folder {
     public void setNewID(final String newId) {
         this.newId = newId;
     }
+
+    @Override
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    @Override
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
+    }
+    
+    
 
 }

@@ -56,7 +56,6 @@ import com.openexchange.data.conversion.ical.ical4j.internal.appointment.ChangeE
 import com.openexchange.data.conversion.ical.ical4j.internal.appointment.DeleteExceptions;
 import com.openexchange.data.conversion.ical.ical4j.internal.appointment.IgnoreConflicts;
 import com.openexchange.data.conversion.ical.ical4j.internal.appointment.Location;
-import com.openexchange.data.conversion.ical.ical4j.internal.appointment.PrivateAppointmentsHaveNoParticipants;
 import com.openexchange.data.conversion.ical.ical4j.internal.appointment.RequireEndDate;
 import com.openexchange.data.conversion.ical.ical4j.internal.appointment.RequireStartDate;
 import com.openexchange.data.conversion.ical.ical4j.internal.appointment.Transparency;
@@ -155,7 +154,6 @@ public final class AppointmentConverters {
     static {
         verifyingStart.setVerifier(new RequireStartDate());
         verifyingDuration.setVerifier(new RequireEndDate());
-        participants.setVerifier(new PrivateAppointmentsHaveNoParticipants());
 
         ALL = getAll();
         REQUEST = getRequest();

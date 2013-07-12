@@ -52,6 +52,7 @@ package com.openexchange.folderstorage;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * {@link Folder} - A folder.
@@ -440,7 +441,17 @@ public interface Folder extends Serializable, Cloneable {
      * @param bits The bits to set
      */
     void setBits(final int bits);
+    
+    /**
+     * Sets dynamic metadata
+     */
+    void setMeta(Map<String, Object> meta);
 
+    /**
+     * Gets dynamic metadata
+     */
+    Map<String, Object> getMeta();
+    
     /**
      * Creates and returns a copy of this object.
      *

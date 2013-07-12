@@ -124,6 +124,8 @@ public final class FolderParser {
                     folder.setPermissions(parsePermission(permissions));
                 }
             }
+            
+            folder.setMeta(fsFolder.getMeta());
 
             return folder;
         } catch (final RuntimeException e) {

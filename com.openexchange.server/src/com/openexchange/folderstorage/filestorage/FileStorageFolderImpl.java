@@ -146,6 +146,7 @@ public final class FileStorageFolderImpl extends AbstractFolder {
         } else {
             cacheable = !fsFolder.isDefaultFolder();
         }
+        meta = fsFolder.getMeta();
     }
 
     @Override

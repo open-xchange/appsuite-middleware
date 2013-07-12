@@ -83,7 +83,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
-import org.apache.commons.io.output.NullOutputStream;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
 import com.openexchange.config.cascade.ConfigProperty;
@@ -98,7 +97,6 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
-import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.log.LogProperties;
@@ -938,6 +936,14 @@ public final class SMTPTransport extends MailTransport {
                         throw SMTPExceptionCode.RECIPIENT_NOT_ALLOWED.create(internetAddress.toUnicodeString());
                     }
                 }
+            }
+        }
+        for (final Address address : recipients) {
+            final InternetAddress internetAddress = (InternetAddress) address;
+            final String sAddress = internetAddress.getAddress();
+            if (MsisdnCheck.checkMsisdn(sAddress) && sAddress.indexOf('/') < 0) {
+                // Detected a MSISDN address that misses "/TYPE=" appendix necessary for the MTA
+                internetAddress.setAddress(sAddress + "/TYPE=PLMN");
             }
         }
     }

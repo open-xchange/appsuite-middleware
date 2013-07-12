@@ -83,6 +83,8 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
+import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
+import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 import com.openexchange.file.storage.composition.IDBasedSequenceNumberProvider;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -190,6 +192,7 @@ public class DriveStorage {
         File copiedFile = new DefaultFile(targetFile);
         copiedFile.setLastModified(new Date());
         copiedFile.setFileSize(sourceFile.getFileSize());
+        copiedFile.setFileMD5Sum(sourceFile.getFileMD5Sum());
         if (LOG.isDebugEnabled()) {
             LOG.debug(this.toString() + "cp " + combine(getPath(sourceFile.getFolderId()), sourceFile.getFileName()) + " " +
                 combine(getPath(copiedFile.getFolderId()), copiedFile.getFileName()));
@@ -394,16 +397,6 @@ public class DriveStorage {
         }
         getFolderAccess().deleteFolder(folder.getId());
         return folder.getId();
-    }
-
-    /**
-     * Gets a value whether folder sequence numbers are supported by the underlying storage or not.
-     *
-     * @return <code>true</code> if sequence numbers are supported, <code>false</code>, otherwise
-     * @throws OXException
-     */
-    public boolean supportsFolderSequenceNumbers() throws OXException {
-        return IDBasedSequenceNumberProvider.class.isInstance(getFileAccess());
     }
 
     /**
@@ -648,6 +641,40 @@ public class DriveStorage {
             fileAccess = factory.createAccess(session.getServerSession());
         }
         return fileAccess;
+    }
+
+    /**
+     * Gets a value indicating if the underlying storage allows to perform random access file operations or not.
+     *
+     * @return <code>true</code> if random file access is supported, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    public boolean isRandomFileAccess() throws OXException {
+        return IDBasedFileAccess.class.isInstance(getFileAccess()) &&
+            ((IDBasedRandomFileAccess)getFileAccess()).supportsRandomFileAccess(rootFolderID.getService(), rootFolderID.getAccountId());
+    }
+
+    /**
+     * Gets a value indicating if the underlying storage allows to ignore versions when updating or not.
+     *
+     * @return <code>true</code> if ignorable versions are supported, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    public boolean isIgnorableVersionFileAccess() throws OXException {
+        return IDBasedIgnorableVersionFileAccess.class.isInstance(getFileAccess()) &&
+            ((IDBasedIgnorableVersionFileAccess)getFileAccess())
+            .supportsIgnorableVersion(rootFolderID.getService(), rootFolderID.getAccountId());
+    }
+
+    /**
+     * Gets a value indicating whether folder sequence numbers are supported by the underlying storage or not.
+     *
+     * @return <code>true</code> if sequence numbers are supported, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    public boolean supportsFolderSequenceNumbers() throws OXException {
+        return IDBasedSequenceNumberProvider.class.isInstance(getFileAccess()) &&
+            ((IDBasedSequenceNumberProvider)getFileAccess()).supportsSequenceNumbers(rootFolderID.toUniqueID());
     }
 
     @Override
