@@ -104,7 +104,7 @@ public class StanzaMatcher extends BaseMatcher<Stanza> {
                 return false;
             }
         } else {
-            if (!payload.equals(s.getPayload())) {
+            if (!payload.equals(s.getPayload().getData())) {
                 return false;
             }
         }
