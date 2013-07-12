@@ -396,26 +396,37 @@ public class ICalImporter extends AbstractImporter {
 					final boolean isMaster = appointmentObj.containsUid() && !pos2Master.containsKey(index);
 					final boolean isChange = appointmentObj.containsUid() && pos2Master.containsKey(index);
 					final Date changeDate = new Date(Long.MAX_VALUE);
-					final Integer masterID = master2id.get(pos2Master.get(index));
+					Appointment[] conflicts = null;
 					if(isChange){
-						appointmentObj.setRecurrenceID(masterID);
-						appointmentObj.removeUid();
-						if(appointmentObj.containsRecurrenceDatePosition()) {
-                            appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getRecurrenceDatePosition()));
-                        } else {
-                            appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getStartDate()));
-                        }
+					    final Integer masterPos = pos2Master.get(index);
+	                    final Integer masterID = master2id.get(masterPos.intValue());
+					    if (masterID == null) {
+	                        /*
+	                         * In this case the current appointment is a change exception but the corresponding master
+	                         * could not be inserted before. As the result list already contains an error message for the
+	                         * master, we simply skip this one without generating an import result.
+	                         */
+	                        continue;
+	                    } else {
+	                        appointmentObj.setRecurrenceID(masterID);
+	                        appointmentObj.removeUid();
+	                        if(appointmentObj.containsRecurrenceDatePosition()) {
+	                            appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getRecurrenceDatePosition()));
+	                        } else {
+	                            appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getStartDate()));
+	                        }
+
+	                        appointmentObj.setObjectID(masterID);
+	                        conflicts = appointmentInterface.updateAppointmentObject(appointmentObj, appointmentFolderId, changeDate);
+	                    }
+					} else {
+					    conflicts = appointmentInterface.insertAppointmentObject(appointmentObj);
 					}
-					final Appointment[] conflicts;
-					if(isChange){
-						appointmentObj.setObjectID(masterID);
-						conflicts = appointmentInterface.updateAppointmentObject(appointmentObj, appointmentFolderId, changeDate);
-					}  else {
-						conflicts = appointmentInterface.insertAppointmentObject(appointmentObj);
-					}
+
 					if(isMaster) {
                         master2id.put(index, appointmentObj.getObjectID());
                     }
+
 					if (conflicts == null || conflicts.length == 0) {
 						importResult.setObjectId(String
 								.valueOf(appointmentObj.getObjectID()));

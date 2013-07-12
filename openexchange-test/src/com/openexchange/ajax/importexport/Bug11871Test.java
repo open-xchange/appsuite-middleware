@@ -89,7 +89,7 @@ public final class Bug11871Test extends AbstractAJAXSession {
         final AJAXClient myClient = getClient();
         final int folderId = myClient.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = myClient.getValues().getTimeZone();
-        final FolderObject folder = Create.createPrivateFolder("Bug 11871 test folder",
+        final FolderObject folder = Create.createPrivateFolder("Bug 11871 test folder " + System.currentTimeMillis(),
             FolderObject.CALENDAR, myClient.getValues().getUserId());
         {
             folder.setParentFolderID(folderId);
