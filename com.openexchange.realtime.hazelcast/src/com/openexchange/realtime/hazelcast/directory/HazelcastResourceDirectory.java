@@ -56,12 +56,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
+import com.hazelcast.config.Config;
+import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.MultiMap;
 import com.hazelcast.core.Transaction;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.realtime.directory.DefaultResourceDirectory;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
@@ -81,12 +86,23 @@ import com.openexchange.realtime.util.IDMap;
 public class HazelcastResourceDirectory extends DefaultResourceDirectory {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastResourceDirectory.class);
-
-    /** Mapping of general IDs to full IDs e.q marc.arens@premium <-> ox://marc.arens@premuim/random. */
-    private static final String ID_MAP = "rtIDMapping-0";
+    
+    /** Mapping of general IDs to full IDs e.g marc.arens@premium <-> ox://marc.arens@premuim/random. */
+    private final String id_map;
 
     /** Mapping of full IDs to the Resource e.g. ox://marc.arens@premuim/random <-> ResourceMap */
-    private static final String RESOURCE_MAP = "rtResourceDirectory-0";
+    private final String resource_map;
+
+    /**
+     * Initializes a new {@link HazelcastResourceDirectory}.
+     * @param id_map the name of the apping of general IDs to full IDs e.g marc.arens@premium <-> ox://marc.arens@premuim/random
+     * @param resource_map the name of the mapping of full IDs to the Resource e.g. ox://marc.arens@premuim/random <-> ResourceMap
+     */
+    public HazelcastResourceDirectory(String id_map, String resource_map) {
+        super();
+        this.id_map = id_map;
+        this.resource_map = resource_map;
+    }
 
     @Override
     public IDMap<Resource> get(ID id) throws OXException {
@@ -95,7 +111,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
             MultiMap<String, String> idMapping = getIDMapping();
             Collection<String> concreteIds = idMapping.get(id.toString());
             if (concreteIds != null && !concreteIds.isEmpty()) {
-                IMap<String, Map<String,Serializable>> allResources = getResourceMap();
+                IMap<String, Map<String,Serializable>> allResources = getResourceMapping();
                 Map<String, Map<String, Serializable>> resources = allResources.getAll(new HashSet<String>(concreteIds));
                 if (resources != null) {
                     for (Entry<String, Map<String, Serializable>> entry : resources.entrySet()) {
@@ -106,7 +122,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
                 }
             }
         } else {
-            IMap<String,Map<String,Serializable>> allResources = getResourceMap();
+            IMap<String,Map<String,Serializable>> allResources = getResourceMapping();
             Map<String, Serializable> resourceMap = allResources.get(id.toString());
             HazelcastResource resource = HazelcastResourceWrapper.unwrap(resourceMap);
             if (resource != null) {
@@ -136,7 +152,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
         }
 
         if (!resourceIds.isEmpty()) {
-            IMap<String,Map<String,Serializable>> allResources = getResourceMap();
+            IMap<String,Map<String,Serializable>> allResources = getResourceMapping();
             Map<String, Map<String, Serializable>> matchingResources = allResources.getAll(IDWrapper.idsToStringSet(resourceIds));
             if (matchingResources != null) {
                 for (Entry<String, Map<String, Serializable>> entry : matchingResources.entrySet()) {
@@ -160,7 +176,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
                 MultiMap<String, String> idMapping = getIDMapping();
                 Collection<String> concreteIds = idMapping.get(id.toString());
                 if (concreteIds != null && !concreteIds.isEmpty()) {
-                    IMap<String, Map<String,Serializable>> allResources = getResourceMap();
+                    IMap<String, Map<String,Serializable>> allResources = getResourceMapping();
                     Map<String, Map<String, Serializable>> resources = allResources.getAll(new HashSet<String>(concreteIds));
                     if (resources != null) {
                         for (Entry<String, Map<String, Serializable>> entry : resources.entrySet()) {
@@ -190,7 +206,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
         }
 
         MultiMap<String, String> idMapping = getIDMapping();
-        IMap<String, Map<String, Serializable>> allResources = getResourceMap();
+        IMap<String, Map<String, Serializable>> allResources = getResourceMapping();
         Transaction tx = newTransaction();
         tx.begin();
         try {
@@ -231,7 +247,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
     protected IDMap<Resource> doRemove(ID id) throws OXException {
         IDMap<Resource> removedResources = new IDMap<Resource>();
         MultiMap<String, String> idMapping = getIDMapping();
-        IMap<String, Map<String,Serializable>> allResources = getResourceMap();
+        IMap<String, Map<String,Serializable>> allResources = getResourceMapping();
         if (id.isGeneralForm()) {
             Transaction tx = newTransaction();
             tx.begin();
@@ -281,7 +297,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
         HazelcastResource hazelcastResource = new HazelcastResource(resource);
 
         MultiMap<String, String> idMapping = getIDMapping();
-        IMap<String, Map<String,Serializable>> allResources = getResourceMap();
+        IMap<String, Map<String,Serializable>> allResources = getResourceMapping();
         HazelcastResource previousResource = null;
         Transaction tx = newTransaction();
         if (LOG.isDebugEnabled()) {
@@ -401,11 +417,11 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
      * Get the mapping of general IDs to full IDs e.g. marc.arens@premium <-> ox://marc.arens@premuim/random.
      * 
      * @return the map used for mapping general IDs to full IDs.
-     * @throws OXException
+     * @throws OXException if the HazelcastInstance is missing. 
      */
-    protected static MultiMap<String, String> getIDMapping() throws OXException {
-        HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
-        return hazelcast.getMultiMap(ID_MAP);
+    protected MultiMap<String, String> getIDMapping() throws OXException {
+            HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
+            return hazelcast.getMultiMap(id_map);
     }
 
     /**
@@ -414,9 +430,9 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
      * @return the map used for mapping full IDs to ResourceMaps.
      * @throws OXException if the map couldn't be fetched from hazelcast
      */
-    protected static IMap<String, Map<String, Serializable>> getResourceMap() throws OXException {
+    protected IMap<String, Map<String, Serializable>> getResourceMapping() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
-        return hazelcast.getMap(RESOURCE_MAP);
+        return hazelcast.getMap(resource_map);
     }
 
     protected static Transaction newTransaction() throws OXException {

@@ -77,8 +77,8 @@ import com.openexchange.mail.dataobjects.ContentAwareMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailUUID;
 import com.openexchange.mail.parser.MailMessageParser;
+import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.service.indexing.IndexingJob;
-import com.openexchange.service.indexing.impl.internal.Services;
 
 
 /**
@@ -301,7 +301,7 @@ public abstract class AbstractMailJob implements IndexingJob {
 
     protected void closeIndexAccess(IndexAccess<?> indexAccess) throws OXException {
         if (indexAccess != null) {
-            IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
+            IndexFacadeService indexFacade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
             indexFacade.releaseIndexAccess(indexAccess);
         }
     }

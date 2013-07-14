@@ -54,6 +54,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
@@ -66,18 +67,27 @@ import com.openexchange.java.Streams;
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public class FileCache {
-
+    
+    private static byte[] SUFFIX;
+    static {
+        try {
+            SUFFIX = "\n/*:oxsep:*/\n".getBytes("ascii");
+        } catch (UnsupportedEncodingException e) {
+            SUFFIX = "\n/*:oxsep:*/\n".getBytes();
+        }
+    }
+    
     private static Log LOG = com.openexchange.log.Log.loggerFor(FileCache.class);
 
     public interface Filter {
 
         String resolve(String path);
-        
+
         byte[] filter(ByteArrayOutputStream baos);
     }
 
     private class CacheEntry {
-        
+
         private final File path;
 
         private long timestamp = Long.MIN_VALUE;
@@ -89,10 +99,6 @@ public class FileCache {
         }
 
         public byte[] getData(Filter filter) {
-            if (!path.isFile()) {
-                LOG.debug("Could not find '" + path + "'");
-                return null;
-            }
             long current = path.lastModified();
             if (current == timestamp) {
                 return data;
@@ -111,7 +117,14 @@ public class FileCache {
                     baos.write(buf, 0, read);
                 }
                 baos.flush(); // no-op
-                data = filter == null ? baos.toByteArray() : filter.filter(baos);
+                byte[] filtered = filter == null ? baos.toByteArray() : filter.filter(baos);
+                
+                
+                data = new byte[filtered.length + SUFFIX.length];
+                
+                System.arraycopy(filtered, 0, data, 0, filtered.length);
+                System.arraycopy(SUFFIX, 0, data, data.length - SUFFIX.length, SUFFIX.length);
+                
             } catch (final IOException e) {
                 LOG.debug("Could not read from '" + path + "'");
                 data = null;
@@ -125,13 +138,21 @@ public class FileCache {
 
     private final Map<String, CacheEntry> cache = new ConcurrentHashMap<String, CacheEntry>();
 
-    private final File root;
+    private final File[] roots;
 
-    private final String prefix;
+    private final String[] prefixes;
 
     public FileCache(File root) throws IOException {
-        this.root = root;
-        this.prefix = root.getCanonicalPath() + File.separatorChar;
+        this(new File[] { root });
+    }
+
+    public FileCache(File[] roots) throws IOException {
+        this.roots = roots;
+        this.prefixes = new String[roots.length];
+        int i = 0;
+        for (File root : roots) {
+            prefixes[i++] = root.getCanonicalPath() + File.separatorChar;
+        }
     }
 
     /**
@@ -142,20 +163,34 @@ public class FileCache {
      * @return The file contents as a byte array, or null if the file does not exist or is not a normal file.
      */
     public byte[] get(String path, Filter filter) {
-        File f = new File(this.root, filter == null ? path : filter.resolve(path));
-        try {
-            if (!f.getCanonicalPath().startsWith(this.prefix)) {
-                return null;
+        path = filter == null ? path : filter.resolve(path);
+        for (int i = 0; i < roots.length; i++) {
+            File f = new File(roots[i], path);
+            try {
+                if (!f.getCanonicalPath().startsWith(prefixes[i])) {
+                    continue;
+                }
+            } catch (IOException e) {
+                continue;
             }
-        } catch (IOException e) {
-            return null;
+            if (f.isFile()) {
+                CacheEntry entry = cache.get(f);
+                if (entry == null) {
+                    entry = new CacheEntry(f);
+                    cache.put(path, entry);
+                }
+                return entry.getData(filter);
+            }
         }
-        CacheEntry entry = cache.get(f);
-        if (entry == null) {
-            entry = new CacheEntry(f);
-            cache.put(path, entry);
+        StringBuilder sb = new StringBuilder("Could not find '");
+        sb.append(new File(roots[0], path));
+        for (int i = 1; i < roots.length; i++) {
+            sb.append("'\n            or '");
+            sb.append(new File(roots[i], path));
         }
-        return entry.getData(filter);
+        sb.append('\'');
+        LOG.debug(sb.toString());
+        return null;
     }
 
     /**

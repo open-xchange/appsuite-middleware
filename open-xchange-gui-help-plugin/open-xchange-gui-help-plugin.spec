@@ -6,7 +6,7 @@ BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  java-devel >= 1.6.0
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 8
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -45,6 +45,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc settin
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Thu Jul 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-07-10
 * Wed Jul 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-06-27
 * Mon Jul 01 2013 Marcus Klein <marcus.klein@open-xchange.com>

@@ -64,7 +64,7 @@ public class MutableUserConfiguration extends UserConfiguration {
     public MutableUserConfiguration(Set<String> capabilities, int userId, int[] groups, Context ctx) {
         super(capabilities, userId, groups, ctx);
     }
-    
+
     /**
      * Enables/Disables web mail access in user configuration.
      *
@@ -206,7 +206,7 @@ public class MutableUserConfiguration extends UserConfiguration {
     public void setDeniedPortal(final boolean deniedPortal) {
         setPermission(deniedPortal, DENIED_PORTAL);
     }
-    
+
     /**
      * Set enableFullPublicFolderAccess.
      *
@@ -327,14 +327,16 @@ public class MutableUserConfiguration extends UserConfiguration {
     }
 
     private void setPermission(final boolean enable, final int permission) {
-        List<Permission> byBits = Permission.byBits(permission);
-        for (Permission p : byBits) {
-            capabilities.add(p.name().toLowerCase());
+        if (enable) {
+            List<Permission> byBits = Permission.byBits(permission);
+            for (Permission p : byBits) {
+                capabilities.add(p.name().toLowerCase());
+            }
         }
     }
 
 
-    
+
     public static int getPermissionBits(Set<String> capabilities) {
         // TODO Auto-generated method stub
         return 0;

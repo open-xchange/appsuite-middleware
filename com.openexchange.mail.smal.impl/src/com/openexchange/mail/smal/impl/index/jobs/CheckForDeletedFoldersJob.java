@@ -85,7 +85,6 @@ import com.openexchange.mail.smal.impl.index.IndexableFoldersCalculator;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
-import com.openexchange.service.indexing.impl.internal.Services;
 
 
 /**
@@ -109,7 +108,7 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
             }
 
             checkJobInfo();
-            IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
+            IndexFacadeService indexFacade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
             final IndexAccess<MailMessage> mailIndex = indexFacade.acquireIndexAccess(Types.EMAIL, info.userId, info.contextId);
             final IndexAccess<Attachment> attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, info.userId, info.contextId);
             FakeSession fakeSession = new FakeSession(info.primaryPassword, info.userId, info.contextId);
@@ -121,36 +120,8 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
                     fullNames.add(folder.getFullname());
                 }
 
-                AccountFolders accountFolders = new AccountFolders(String.valueOf(info.accountId), fullNames);
-                QueryParameters withFolders = new QueryParameters.Builder()
-                    .setAccountFolders(Collections.singleton(accountFolders))
-                    .setHandler(SearchHandlers.ALL_REQUEST)
-                    .build();
-
-                QueryParameters withoutFolders = new QueryParameters.Builder()
-                    .setAccountFolders(Collections.singleton(new AccountFolders(String.valueOf(info.accountId))))
-                    .setHandler(SearchHandlers.ALL_REQUEST)
-                    .build();
-
-                Set<MailIndexField> fields = EnumSet.noneOf(MailIndexField.class);
-                Collections.addAll(fields, MailIndexField.ID, MailIndexField.ACCOUNT, MailIndexField.FULL_NAME);
-                IndexResult<MailMessage> mailsInFolders = mailIndex.query(withFolders, fields);
-                IndexResult<MailMessage> allMails = mailIndex.query(withoutFolders, fields);
-
-                Set<MailUUID> uuidsInFolders = new HashSet<MailUUID>();
-                for (IndexDocument<MailMessage> document : mailsInFolders.getResults()) {
-                    MailMessage message = document.getObject();
-                    MailUUID uuid = MailUUID.newUUID(info.contextId, info.userId, message);
-                    uuidsInFolders.add(uuid);
-                }
-
-                final Set<MailUUID> allUUIDs = new HashSet<MailUUID>();
-                for (IndexDocument<MailMessage> document : allMails.getResults()) {
-                    MailMessage message = document.getObject();
-                    MailUUID uuid = MailUUID.newUUID(info.contextId, info.userId, message);
-                    allUUIDs.add(uuid);
-                }
-
+                Set<MailUUID> uuidsInFolders = getMailUUIDs(mailIndex, info.contextId, info.userId, new AccountFolders(String.valueOf(info.accountId), fullNames));
+                Set<MailUUID> allUUIDs = getMailUUIDs(mailIndex, info.contextId, info.userId, new AccountFolders(String.valueOf(info.accountId)));
                 if (allUUIDs.removeAll(uuidsInFolders)) {
                     if (allUUIDs.isEmpty()) {
                         return;
@@ -248,7 +219,7 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
                 if (e.getCategory().equals(Category.CATEGORY_TRY_AGAIN)
                     && e.getCode() == 2058) {
                     LOG.warn("Could not connect mail access for job " + info + ". Rescheduling job to run again in 60 seconds.");
-                    IndexingService indexingService = Services.getService(IndexingService.class);
+                    IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
                     indexingService.scheduleJob(false, info, new Date(System.currentTimeMillis() + 60000), -1L, IndexingService.DEFAULT_PRIORITY);
                     return;
                 }
@@ -266,6 +237,55 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
         } catch (Exception e) {
             throw new OXException(e);
         }
+    }
+
+    private Set<MailUUID> getMailUUIDs(final IndexAccess<MailMessage> mailIndex, final int contextId, final int userId, final AccountFolders accountFolders) throws OXException {
+        final QueryParameters.Builder countBuilder = new QueryParameters.Builder()
+            .setAccountFolders(Collections.singleton(accountFolders))
+            .setHandler(SearchHandlers.ALL_REQUEST)
+            .setOffset(0)
+            .setLength(0);
+
+        final Set<MailIndexField> fields = EnumSet.noneOf(MailIndexField.class);
+        Collections.addAll(fields, MailIndexField.ID, MailIndexField.ACCOUNT, MailIndexField.FULL_NAME);
+        final long numFound = mailIndex.query(countBuilder.build(), fields).getNumFound();
+        final Set<MailUUID> uuids = new HashSet<MailUUID>();
+        ChunkPerformer.perform(new Performable() {
+            @Override
+            public int perform(int off, int len) throws OXException {
+                QueryParameters params = countBuilder
+                    .setOffset(off)
+                    .setLength(len)
+                    .build();
+
+                IndexResult<MailMessage> mailsInFolders = mailIndex.query(params, fields);
+                List<IndexDocument<MailMessage>> results = mailsInFolders.getResults();
+                for (IndexDocument<MailMessage> document : results) {
+                    MailMessage message = document.getObject();
+                    MailUUID uuid = MailUUID.newUUID(contextId, userId, message);
+                    uuids.add(uuid);
+                }
+
+                return results.size();
+            }
+
+            @Override
+            public int getLength() {
+                return (int) numFound;
+            }
+
+            @Override
+            public int getInitialOffset() {
+                return 0;
+            }
+
+            @Override
+            public int getChunkSize() {
+                return CHUNK_SIZE;
+            }
+        });
+
+        return uuids;
     }
 
     private void checkJobInfo() {

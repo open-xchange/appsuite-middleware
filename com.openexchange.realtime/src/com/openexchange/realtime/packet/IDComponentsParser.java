@@ -125,7 +125,7 @@ public class IDComponentsParser {
         String resource;
 
         if (input.contains("/")) {
-            String[] split = input.split("/");
+            String[] split = input.split("/", 2);
             String userAndContext = split[0];
             resource = split[1];
             components.resource = resource;
@@ -136,7 +136,7 @@ public class IDComponentsParser {
     }
 
     /**
-     * Parese user and contest from a string
+     * Parse user and context from a string
      * @param components the components data structure to fill during parsing
      * @param input the string representation of user and context formatted as user[@context]
      */
