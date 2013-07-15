@@ -1,3 +1,9 @@
+open-xchange-cluster-discovery-static (7.2.0-10) UNRELEASED; urgency=low
+
+  * Build for patch 2013-07-18
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 15 Jul 2013 09:37:28 +0200
+
 open-xchange-cluster-discovery-static (7.2.0-9) UNRELEASED; urgency=low
 
   * Build for patch 2013-05-22

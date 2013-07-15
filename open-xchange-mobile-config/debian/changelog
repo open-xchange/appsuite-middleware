@@ -1,3 +1,9 @@
+open-xchange-mobile-config (7.2.0-10) UNRELEASED; urgency=low
+
+  * Build for patch 2013-07-18
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Mon, 15 Jul 2013 09:37:50 +0200
+
 open-xchange-mobile-config (7.2.0-9) UNRELEASED; urgency=low
 
   * Build for patch 2013-05-22
