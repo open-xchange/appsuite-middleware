@@ -75,6 +75,7 @@ import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 
 /**
  * {@link UploadHelper}
@@ -250,7 +251,8 @@ public class UploadHelper {
     }
 
     private String getComment() {
-        return "Uploaded with OX Drive (" + session.getServerSession().getClient() + ")";
+        String device = Strings.isEmpty(session.getDeviceName()) ? session.getServerSession().getClient() : session.getDeviceName();
+        return "Uploaded with OX Drive (" + device + ")";
     }
 
     private static String getUploadFilename(String checksum) {

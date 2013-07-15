@@ -52,6 +52,7 @@ package com.openexchange.drive.sync;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -60,6 +61,51 @@ import java.util.regex.Pattern;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class RenameTools {
+
+    /**
+     * Finds an alternative filename for the supplied conflicting name, considering the given set of already used filenames.
+     *
+     * @param conflictingName The conflicting name
+     * @param usedFilenames The used filenames that can't be used
+     * @param deviceName The device name to incorporate when generating the alternative name, or <code>null</code> to ignore
+     * @return An alternative name
+     */
+    public static String findAlternativeName(String conflictingName, Set<String> usedFilenames, String deviceName) {
+        if (Strings.isEmpty(deviceName)) {
+            return findAlternativeName(conflictingName, usedFilenames);
+        }
+        FileName fileName = new FileName(conflictingName);
+        String name = fileName.getName();
+        Pattern regex = Pattern.compile("\\(" + Pattern.quote(deviceName) + "(\\s\\d+)?\\)\\z");
+        String alternativeName;
+        do {
+            Matcher matcher = regex.matcher(name);
+            if (false == matcher.find()) {
+                /*
+                 * append new initial device name
+                 */
+                name += " (" + deviceName + ')';
+            } else if (0 == matcher.groupCount() || 0 < matcher.groupCount() && Strings.isEmpty(matcher.group(1))) {
+                /*
+                 * append new initial sequence number
+                 */
+                name = name.substring(0, matcher.start()) + '(' + deviceName + " 1)";
+            } else {
+                /*
+                 * incremented existing sequence number
+                 */
+                int number = 0;
+                try {
+                    number = Integer.valueOf(matcher.group(1).trim()).intValue();
+                } catch (NumberFormatException e) {
+                    // should not get here
+                }
+                name = name.substring(0, matcher.start()) + '(' + deviceName + ' ' + String.valueOf(1 + number) + ')';
+            }
+            alternativeName = name + fileName.getExtension();
+        } while (null != usedFilenames && usedFilenames.contains(alternativeName));
+        return alternativeName;
+    }
 
     /**
      * Finds an alternative filename for the supplied conflicting name, considering the given set of already used filenames.
@@ -106,6 +152,21 @@ public class RenameTools {
     public static String findRandomAlternativeName(String conflictingName) {
         FileName fileName = new FileName(conflictingName);
         return fileName.getName() + ' ' + System.currentTimeMillis() + fileName.getExtension();
+    }
+
+    /**
+     * Constructs an alternative filename for the supplied conflicting name by appending the current system time.
+     *
+     * @param conflictingName The conflicting name
+     * @param deviceName The device name to incorporate when generating the alternative name, or <code>null</code> to ignore
+     * @return An alternative name
+     */
+    public static String findRandomAlternativeName(String conflictingName, String deviceName) {
+        if (Strings.isEmpty(deviceName)) {
+            return findRandomAlternativeName(conflictingName);
+        }
+        FileName fileName = new FileName(conflictingName);
+        return fileName.getName() + " (" + deviceName + ' ' + System.currentTimeMillis() + ')' + fileName.getExtension();
     }
 
     private static final class FileName {

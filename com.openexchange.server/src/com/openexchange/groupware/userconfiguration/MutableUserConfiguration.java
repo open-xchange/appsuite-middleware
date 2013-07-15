@@ -327,15 +327,17 @@ public class MutableUserConfiguration extends UserConfiguration {
     }
 
     private void setPermission(final boolean enable, final int permission) {
+        List<Permission> byBits = Permission.byBits(permission);
         if (enable) {
-            List<Permission> byBits = Permission.byBits(permission);
             for (Permission p : byBits) {
                 capabilities.add(p.name().toLowerCase());
             }
+        } else {
+            for (Permission p : byBits) {
+                capabilities.remove(p.name().toLowerCase());
+            }
         }
     }
-
-
 
     public static int getPermissionBits(Set<String> capabilities) {
         // TODO Auto-generated method stub

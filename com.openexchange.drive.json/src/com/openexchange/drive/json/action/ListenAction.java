@@ -77,7 +77,7 @@ import com.openexchange.tools.session.ServerSession;
 public class ListenAction extends AbstractDriveAction {
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, final ServerSession session) throws OXException {
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, final ServerSession session) throws OXException {
         /*
          * get request data
          */

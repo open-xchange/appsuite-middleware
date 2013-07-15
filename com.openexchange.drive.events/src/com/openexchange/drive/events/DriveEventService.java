@@ -56,9 +56,9 @@ package com.openexchange.drive.events;
  */
 public interface DriveEventService {
 
-    void registerListener(DriveEventListener listener, String rootFolderID, int contextID);
+    void registerPublisher(DriveEventPublisher publisher);
 
-    void unregisterListener(DriveEventListener listener, String rootFolderID, int contextID);
+    void unregisterPublisher(DriveEventPublisher publisher);
 
 }
 

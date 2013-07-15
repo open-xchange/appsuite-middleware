@@ -66,6 +66,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.importers.CSVContactImporter;
+import com.openexchange.importexport.importers.TestCSVContactImporter;
 
 public class Bug8681forCSV extends AbstractContactTest {
 
@@ -83,8 +84,8 @@ public class Bug8681forCSV extends AbstractContactTest {
     }
 
     @Test
-    public void testOurCSV() throws OXException, OXException, OXException {
-        imp = new CSVContactImporter();
+    public void testOurCSV() throws Exception {
+        imp = new TestCSVContactImporter();
         folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "bug8681 for csv");
 
         final UserConfigurationStorage original = UserConfigurationStorage.getInstance();
@@ -113,8 +114,8 @@ public class Bug8681forCSV extends AbstractContactTest {
     }
 
     @Test
-    public void testOutlookCSV() throws OXException, OXException {
-        imp = new CSVContactImporter();
+    public void testOutlookCSV() throws Exception {
+        imp = new TestCSVContactImporter();
         folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "bug8681 for Outlook CSV");
 
         final UserConfigurationStorage original = UserConfigurationStorage.getInstance();

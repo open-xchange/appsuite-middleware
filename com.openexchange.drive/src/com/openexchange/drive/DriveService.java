@@ -71,7 +71,7 @@ public interface DriveService {
      * @param session The session
      * @param rootFolderID The identifier of the referenced root folder on the server
      * @param originalVersions A list of directory versions previously known by the client
-     * @param clientVersions A The current list of client directory versions
+     * @param clientVersions The current list of client directory versions
      * @return A list of resulting actions to execute on the client afterwards
      * @throws OXException
      */
@@ -85,7 +85,7 @@ public interface DriveService {
      * @param rootFolderID The identifier of the referenced root folder on the server
      * @param path The path to the synchronized folder, relative to the root folder
      * @param originalVersions A list of file versions previously known by the client
-     * @param clientVersions A The current list of client file versions
+     * @param clientVersions The current list of client file versions
      * @return A list of resulting actions to execute on the client afterwards
      * @throws OXException
      */

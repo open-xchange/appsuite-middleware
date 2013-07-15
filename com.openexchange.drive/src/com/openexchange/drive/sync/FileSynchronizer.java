@@ -147,7 +147,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 /*
                  * not allowed, keep both client- and server versions, let client first rename it's file...
                  */
-                FileVersion renamedVersion = getRenamedVersion(comparison.getClientVersion());
+                FileVersion renamedVersion = getRenamedVersion(session, comparison.getClientVersion());
                 result.addActionForClient(new EditFileAction(comparison.getClientVersion(), renamedVersion, comparison, path));
                 /*
                  * ... then mark that file as error (without quarantine)...
@@ -165,7 +165,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 /*
                  * not allowed, let client first rename it's file and mark as error with quarantine flag...
                  */
-                FileVersion renamedVersion = getRenamedVersion(comparison.getClientVersion());
+                FileVersion renamedVersion = getRenamedVersion(session, comparison.getClientVersion());
                 result.addActionForClient(new EditFileAction(comparison.getClientVersion(), renamedVersion, comparison, path));
                 result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), renamedVersion, comparison,
                     path, DriveExceptionCodes.NO_MODIFY_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path), true));
@@ -221,7 +221,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 /*
                  * keep both client- and server versions, let client first rename it's file...
                  */
-                FileVersion renamedVersion = getRenamedVersion(comparison.getClientVersion());
+                FileVersion renamedVersion = getRenamedVersion(session, comparison.getClientVersion());
                 result.addActionForClient(new EditFileAction(comparison.getClientVersion(), renamedVersion, comparison, path));
                 /*
                  * ... then upload it if possible...
@@ -277,8 +277,8 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
         }
     }
 
-    protected FileVersion getRenamedVersion(FileVersion conflictingVersion) {
-        String alternativeName = RenameTools.findAlternativeName(conflictingVersion.getName(), usedFilenames);
+    protected FileVersion getRenamedVersion(DriveSession session, FileVersion conflictingVersion) {
+        String alternativeName = RenameTools.findAlternativeName(conflictingVersion.getName(), usedFilenames, session.getDeviceName());
         if (null != usedFilenames) {
             usedFilenames.add(alternativeName);
         }

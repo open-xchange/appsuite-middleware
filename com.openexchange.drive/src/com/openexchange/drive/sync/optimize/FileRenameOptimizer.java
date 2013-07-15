@@ -174,7 +174,7 @@ Actions for client:
                         /*
                          * merge into corresponding rename actions for server
                          */
-                        FileVersion renamedVersion = getRenamedVersion(clientAction.getVersion());
+                        FileVersion renamedVersion = getRenamedVersion(session, clientAction.getVersion());
                         optimizedActionsForServer.add(new EditFileAction(clientActionServerVersion, renamedVersion, null, path, 1));
                         optimizedActionsForServer.add(new EditFileAction(matchingActionServerVersion, clientActionServerVersion, null, path, 2));
                         optimizedActionsForServer.add(new EditFileAction(renamedVersion, matchingActionServerVersion, null, path, 3));
@@ -227,8 +227,8 @@ Actions for client:
         return optimizedList;
     }
 
-    private FileVersion getRenamedVersion(FileVersion conflictingVersion) {
-        String alternativeName = RenameTools.findAlternativeName(conflictingVersion.getName(), usedFilenames);
+    private FileVersion getRenamedVersion(DriveSession session, FileVersion conflictingVersion) {
+        String alternativeName = RenameTools.findAlternativeName(conflictingVersion.getName(), usedFilenames, session.getDeviceName());
         if (null != usedFilenames) {
             usedFilenames.add(alternativeName);
         }

@@ -130,4 +130,14 @@ public class DriveSession {
         }
     }
 
+    /**
+     * Gets the device name as supplied by the client.
+     *
+     * @return The device name, or <code>null</code> if not set
+     */
+    public String getDeviceName() {
+        Object parameter = getServerSession().getParameter("com.openexchange.drive.device");
+        return null != parameter && String.class.isInstance(parameter) ? (String)parameter : null;
+    }
+
 }

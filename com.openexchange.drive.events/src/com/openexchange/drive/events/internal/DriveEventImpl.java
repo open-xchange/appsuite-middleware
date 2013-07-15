@@ -50,6 +50,7 @@
 package com.openexchange.drive.events.internal;
 
 import java.util.List;
+import java.util.Set;
 import org.osgi.service.event.Event;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
@@ -64,11 +65,18 @@ public class DriveEventImpl implements DriveEvent {
 
     private final List<DriveAction<? extends DriveVersion>> actions;
     private final Event event;
+    private final int contextID;
+    private final String sessionID;
+    private final Set<String> folderIDs;
 
-    public DriveEventImpl(List<DriveAction<? extends DriveVersion>> actions, Event event) {
+
+    public DriveEventImpl(int contextID, String sessionID, Set<String> folderIDs, Event event, List<DriveAction<? extends DriveVersion>> actions) {
         super();
         this.actions = actions;
         this.event = event;
+        this.contextID = contextID;
+        this.sessionID = sessionID;
+        this.folderIDs = folderIDs;
     }
 
     @Override
@@ -79,6 +87,21 @@ public class DriveEventImpl implements DriveEvent {
     @Override
     public Event getEvent() {
         return event;
+    }
+
+    @Override
+    public int getContextID() {
+        return contextID;
+    }
+
+    @Override
+    public Set<String> getFolderIDs() {
+        return folderIDs;
+    }
+
+    @Override
+    public String getSessionID() {
+        return sessionID;
     }
 
 }

@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Drive Events Bundle for GCM
+Bundle-SymbolicName: com.openexchange.drive.events.gcm
+Bundle-Version: 7.4.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Activator: com.openexchange.drive.events.gcm.osgi.GCMActivator
+Bundle-ClassPath: .,
+ lib/json_simple-1.1.jar
+Import-Package: com.openexchange.ajax,
+ com.openexchange.config,
+ com.openexchange.configuration,
+ com.openexchange.drive.events,
+ com.openexchange.drive.events.subscribe,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ org.apache.commons.logging,
+ org.osgi.framework

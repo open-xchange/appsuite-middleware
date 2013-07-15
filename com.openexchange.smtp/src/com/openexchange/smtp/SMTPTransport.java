@@ -938,12 +938,15 @@ public final class SMTPTransport extends MailTransport {
                 }
             }
         }
-        for (final Address address : recipients) {
-            final InternetAddress internetAddress = (InternetAddress) address;
-            final String sAddress = internetAddress.getAddress();
-            if (MsisdnCheck.checkMsisdn(sAddress) && sAddress.indexOf('/') < 0) {
-                // Detected a MSISDN address that misses "/TYPE=" appendix necessary for the MTA
-                internetAddress.setAddress(sAddress + "/TYPE=PLMN");
+        if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
+            InternetAddress internetAddress;
+            for (final Address address : recipients) {
+                internetAddress = (InternetAddress) address;
+                final String sAddress = internetAddress.getAddress();
+                if (MsisdnCheck.checkMsisdn(sAddress) && sAddress.indexOf('/') < 0) {
+                    // Detected a MSISDN address that misses "/TYPE=" appendix necessary for the MTA
+                    internetAddress.setAddress(sAddress + "/TYPE=PLMN");
+                }
             }
         }
     }

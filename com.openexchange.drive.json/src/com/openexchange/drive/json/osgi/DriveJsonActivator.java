@@ -54,7 +54,9 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.events.DriveEventService;
+import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.json.action.DriveActionFactory;
+import com.openexchange.drive.json.internal.ListenerRegistrar;
 import com.openexchange.drive.json.internal.Services;
 
 /**
@@ -75,7 +77,7 @@ public class DriveJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveService.class, DriveEventService.class, ConfigurationService.class };
+        return new Class<?>[] { DriveService.class, DriveEventService.class, ConfigurationService.class, DriveSubscriptionStore.class };
     }
 
     @Override
@@ -83,11 +85,13 @@ public class DriveJsonActivator extends AJAXModuleActivator {
         LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
         Services.set(this);
         registerModule(new DriveActionFactory(), "drive");
+        getService(DriveEventService.class).registerPublisher(ListenerRegistrar.getInstance());
     }
 
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
+        getService(DriveEventService.class).unregisterPublisher(ListenerRegistrar.getInstance());
         Services.set(null);
         super.stopBundle();
     }
