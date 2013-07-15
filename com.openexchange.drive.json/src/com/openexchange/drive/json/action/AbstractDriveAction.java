@@ -51,9 +51,12 @@ package com.openexchange.drive.json.action;
 
 import java.util.Locale;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link AbstractDriveAction}
@@ -71,6 +74,23 @@ public abstract class AbstractDriveAction implements AJAXActionService {
             }
         }
         return null != locale ? locale : Locale.US;
+    }
+
+    protected abstract AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException;
+
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        /*
+         * extract device name information if present
+         */
+        String device = requestData.getParameter("device");
+        if (false == Strings.isEmpty(device)) {
+            session.setParameter("com.openexchange.drive.device", device);
+        }
+        /*
+         * perform
+         */
+        return doPerform(requestData, session);
     }
 
 }

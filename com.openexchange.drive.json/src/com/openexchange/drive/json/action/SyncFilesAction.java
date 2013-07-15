@@ -65,7 +65,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link SyncFilesAction}
  *
@@ -74,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 public class SyncFilesAction extends AbstractDriveAction {
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException {
         /*
          * get request data
          */
