@@ -92,15 +92,17 @@ public class TestServlet extends HttpServlet {
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         resp.setStatus(HttpServletResponse.SC_OK);
         // Uncomment to test long-running task
-
+        /*-
+         *
         try {
-            final int millis = 360000;
-            System.out.println("Going asleep for " + millis + " millis...");
-            Thread.sleep(millis);
-            System.out.println("... and now continues processing.");
+           System.out.println("Going asleep...");
+           Thread.sleep(100000);
+           System.out.println("... and now continues processing.");
         } catch (final InterruptedException e) {
-            e.printStackTrace();
+           e.printStackTrace();
         }
+         *
+         */
 
         final StringBuilder page = new StringBuilder();
         page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
