@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Drive Events Bundle for APN
+Bundle-SymbolicName: com.openexchange.drive.events.apn
+Bundle-Version: 7.4.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Activator: com.openexchange.drive.events.apn.osgi.APNDriveEventsActivator
+Bundle-ClassPath: .,
+ lib/bcprov-jdk15-146.jar,
+ lib/JavaPNS_2.2.jar
+Import-Package: com.openexchange.ajax,
+ com.openexchange.config,
+ com.openexchange.configuration,
+ com.openexchange.drive.events,
+ com.openexchange.drive.events.subscribe,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ org.apache.commons.logging,
+ org.apache.log4j,
+ org.osgi.framework

@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.drive.json.osgi.DriveJsonActivator
 Bundle-ClassPath: .
 Import-Package: com.google.common.cache,
+ com.google.common.collect,
  com.openexchange.ajax.container,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
@@ -18,6 +19,7 @@ Import-Package: com.google.common.cache,
  com.openexchange.documentation.annotations,
  com.openexchange.drive,
  com.openexchange.drive.events,
+ com.openexchange.drive.events.subscribe,
  com.openexchange.exception,
  com.openexchange.file.storage,
  com.openexchange.groupware.ldap,

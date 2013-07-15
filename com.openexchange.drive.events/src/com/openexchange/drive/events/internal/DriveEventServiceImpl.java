@@ -56,17 +56,17 @@ import static com.openexchange.file.storage.FileStorageEventConstants.PARENT_FOL
 import static com.openexchange.file.storage.FileStorageEventConstants.SERVICE;
 import static com.openexchange.file.storage.FileStorageEventConstants.SESSION;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
-import com.openexchange.drive.events.DriveEventListener;
+import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
@@ -85,11 +85,17 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveEventServiceImpl.class);
 
-    private final ConcurrentMap<String, List<DriveEventListener>> driveListeners;
+    private static final List<DriveAction<? extends DriveVersion>> SYNC_DIRECTORIES_ACTION;
+    static {
+        SYNC_DIRECTORIES_ACTION = new ArrayList<DriveAction<? extends DriveVersion>>(1);
+        SYNC_DIRECTORIES_ACTION.add(new SyncDirectoriesAction());
+    }
+
+    private final List<DriveEventPublisher> publishers;
 
     public DriveEventServiceImpl() {
         super();
-        this.driveListeners = new ConcurrentHashMap<String, List<DriveEventListener>>();
+        this.publishers = new CopyOnWriteArrayList<DriveEventPublisher>();
     }
 
     private static boolean check(Event event) {
@@ -117,43 +123,58 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
         Session session = (Session)event.getProperty(SESSION);
         String service = (String)event.getProperty(SERVICE);
         String accountID = (String)event.getProperty(ACCOUNT_ID);
-        Set<FolderID> folderIDs = new HashSet<FolderID>();
+        Set<String> folderIDs = new HashSet<String>();
         if (event.containsProperty(FOLDER_PATH)) {
             /*
              * prefer folder path if available from event
              */
-            String[] path = (String[])event.getProperty(FOLDER_PATH);
-            for (String uniqueID : path) {
-                folderIDs.add(new FolderID(uniqueID));
-            }
+            folderIDs.addAll(Arrays.asList((String[])event.getProperty(FOLDER_PATH)));
         } else {
             /*
              * determine folder path manually starting with parent/or folder itself
              */
             if (event.containsProperty(PARENT_FOLDER_ID)) {
-                FolderID parentFolderID = new FolderID(service, accountID, (String)event.getProperty(PARENT_FOLDER_ID));
+                String parentFolderID = new FolderID(service, accountID, (String)event.getProperty(PARENT_FOLDER_ID)).toUniqueID();
                 folderIDs.add(parentFolderID);
                 folderIDs.addAll(resolveToRoot(parentFolderID, session));
             } else if (event.containsProperty(FOLDER_ID)) {
-                FolderID folderID = new FolderID(service, accountID, (String)event.getProperty(FOLDER_ID));
+                String folderID = new FolderID(service, accountID, (String)event.getProperty(FOLDER_ID)).toUniqueID();
                 folderIDs.add(folderID);
                 folderIDs.addAll(resolveToRoot(folderID, session));
             }
         }
-        if (0 < folderIDs.size()) {
-            for (FolderID folderID : folderIDs) {
-                notifyListeners(session.getContextId(), folderID.toUniqueID(), event);
+        if (null != folderIDs && 0 < folderIDs.size()) {
+            DriveEvent driveEvent = new DriveEventImpl(
+                session.getContextId(), session.getSessionID(), folderIDs, event, SYNC_DIRECTORIES_ACTION);
+            for (DriveEventPublisher publisher : publishers) {
+                publisher.publish(driveEvent);
             }
         }
     }
 
-    private static List<FolderID> resolveToRoot(FolderID folderID, Session session) {
-        List<FolderID> folderIDs = new ArrayList<FolderID>();
+//    private static List<FolderID> resolveToRoot(FolderID folderID, Session session) {
+//        List<FolderID> folderIDs = new ArrayList<FolderID>();
+//        try {
+//            IDBasedFolderAccess folderAccess = DriveEventServiceLookup.getService(IDBasedFolderAccessFactory.class).createAccess(session);
+//            FileStorageFolder[] path2DefaultFolder = folderAccess.getPath2DefaultFolder(folderID.toUniqueID());
+//            for (FileStorageFolder folder : path2DefaultFolder) {
+//                folderIDs.add(new FolderID(folder.getId()));
+//            }
+//        } catch (OXException e) {
+//            if (LOG.isDebugEnabled()) {
+//                LOG.debug("Error resolving path to rootfolder from event", e);
+//            }
+//        }
+//        return folderIDs;
+//    }
+
+    private static List<String> resolveToRoot(String folderID, Session session) {
+        List<String> folderIDs = new ArrayList<String>();
         try {
             IDBasedFolderAccess folderAccess = DriveEventServiceLookup.getService(IDBasedFolderAccessFactory.class).createAccess(session);
-            FileStorageFolder[] path2DefaultFolder = folderAccess.getPath2DefaultFolder(folderID.toUniqueID());
+            FileStorageFolder[] path2DefaultFolder = folderAccess.getPath2DefaultFolder(folderID);
             for (FileStorageFolder folder : path2DefaultFolder) {
-                folderIDs.add(new FolderID(folder.getId()));
+                folderIDs.add(folder.getId());
             }
         } catch (OXException e) {
             if (LOG.isDebugEnabled()) {
@@ -163,45 +184,42 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
         return folderIDs;
     }
 
-    private void notifyListeners(int contextID, String folderID, Event event) {
-        List<DriveEventListener> listeners = getListeners(contextID, folderID, false);
-        if (null != listeners && 0 < listeners.size()) {
-            for (DriveEventListener listener : listeners) {
-                SyncDirectoriesAction syncDirectoriesAction = new SyncDirectoriesAction();
-                List<DriveAction<? extends DriveVersion>> actions = new ArrayList<DriveAction<? extends DriveVersion>>(1);
-                actions.add(syncDirectoriesAction);
-                listener.onEvent(new DriveEventImpl(actions, event));
-            }
-        }
-    }
+//    private void notifyListeners(int contextID, String folderID, Event event) {
+//        List<DriveEventListener> listeners = getListeners(contextID, folderID, false);
+//        if (null != listeners && 0 < listeners.size()) {
+//            for (DriveEventListener listener : listeners) {
+//                SyncDirectoriesAction syncDirectoriesAction = new SyncDirectoriesAction();
+//                List<DriveAction<? extends DriveVersion>> actions = new ArrayList<DriveAction<? extends DriveVersion>>(1);
+//                actions.add(syncDirectoriesAction);
+//                listener.onEvent(new DriveEventImpl(actions, event));
+//            }
+//        }
+//    }
+//
+//    private List<DriveEventListener> getListeners(int contextID, String folderID, boolean createIfNeeded) {
+//        String key = folderID + "@" + contextID;
+//        List<DriveEventListener> listeners = driveListeners.get(key);
+//        if (null == listeners && createIfNeeded) {
+//            listeners = new CopyOnWriteArrayList<DriveEventListener>();
+//            List<DriveEventListener> exitingListeners = driveListeners.putIfAbsent(key, listeners);
+//            if (null != exitingListeners) {
+//                return exitingListeners;
+//            }
+//        }
+//        return listeners;
+//    }
 
-    private List<DriveEventListener> getListeners(int contextID, String folderID, boolean createIfNeeded) {
-        String key = folderID + "@" + contextID;
-        List<DriveEventListener> listeners = driveListeners.get(key);
-        if (null == listeners && createIfNeeded) {
-            listeners = new CopyOnWriteArrayList<DriveEventListener>();
-            List<DriveEventListener> exitingListeners = driveListeners.putIfAbsent(key, listeners);
-            if (null != exitingListeners) {
-                return exitingListeners;
-            }
+    @Override
+    public void registerPublisher(DriveEventPublisher publisher) {
+        if (publishers.add(publisher) && LOG.isDebugEnabled()) {
+            LOG.debug("Added drive event publisher: " + publisher);
         }
-        return listeners;
     }
 
     @Override
-    public void registerListener(DriveEventListener listener, String rootFolderID, int contextID) {
-        if (getListeners(contextID, rootFolderID, true).add(listener) && LOG.isDebugEnabled()) {
-            LOG.debug("Added drive listener for folder '" + rootFolderID + "': " + listener);
-        }
-    }
-
-    @Override
-    public void unregisterListener(DriveEventListener listener, String rootFolderID, int contextID) {
-        List<DriveEventListener> folderListeners = getListeners(contextID, rootFolderID, false);
-        if (null != folderListeners && folderListeners.remove(listener)) {
-            LOG.debug("Removed drive listener for folder '" + rootFolderID + "': " + listener);
-        } else {
-            LOG.warn("Listener not found, unable to unregister drive listener for folder '" + rootFolderID + "': " + listener);
+    public void unregisterPublisher(DriveEventPublisher publisher) {
+        if (publishers.remove(publisher) && LOG.isDebugEnabled()) {
+            LOG.debug("Removed drive event publisher: " + publisher);
         }
     }
 

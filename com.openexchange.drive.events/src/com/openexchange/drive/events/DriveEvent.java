@@ -50,6 +50,7 @@
 package com.openexchange.drive.events;
 
 import java.util.List;
+import java.util.Set;
 import org.osgi.service.event.Event;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
@@ -63,6 +64,12 @@ import com.openexchange.drive.DriveVersion;
 public interface DriveEvent {
 
     List<DriveAction<? extends DriveVersion>> getActions();
+
+    int getContextID();
+
+    Set<String> getFolderIDs();
+
+    String getSessionID();
 
     Event getEvent();
 

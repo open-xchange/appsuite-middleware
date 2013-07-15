@@ -55,7 +55,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import com.openexchange.drive.events.DriveEvent;
-import com.openexchange.drive.events.DriveEventListener;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.session.Session;
 
@@ -64,7 +63,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class LongPollingListener implements DriveEventListener {
+public class LongPollingListener {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(LongPollingListener.class);
 
@@ -88,7 +87,6 @@ public class LongPollingListener implements DriveEventListener {
         this.hasEvent = this.lock.newCondition();
     }
 
-    @Override
     public void onEvent(DriveEvent event) {
         if (false == isInteresting(event)) {
             LOG.debug("Skipping uninteresting event: " + event);
