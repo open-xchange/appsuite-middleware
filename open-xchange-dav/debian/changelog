@@ -1,3 +1,9 @@
+open-xchange-dav (7.0.2-12) unstable; urgency=low
+
+  * Second build for patch  2013-07-18
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Mon, 15 Jul 2013 10:00:21 +0200
+
 open-xchange-dav (7.0.2-11) unstable; urgency=low
 
   * Second build for patch 2013-05-28
