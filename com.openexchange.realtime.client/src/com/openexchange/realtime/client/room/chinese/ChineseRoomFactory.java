@@ -53,7 +53,7 @@ import com.openexchange.realtime.client.RTConnection;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.impl.room.chinese.ChineseRoom;
 import com.openexchange.realtime.client.room.RTRoom;
-import com.openexchange.realtime.client.room.RTRoomFacory;
+import com.openexchange.realtime.client.room.RTRoomFactory;
 
 
 /**
@@ -61,7 +61,7 @@ import com.openexchange.realtime.client.room.RTRoomFacory;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ChineseRoomFactory implements RTRoomFacory {
+public class ChineseRoomFactory implements RTRoomFactory {
 
     @Override
     public RTRoom newRoom(RTConnection connection) throws RTException {

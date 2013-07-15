@@ -54,11 +54,11 @@ import com.openexchange.realtime.client.RTException;
 
 
 /**
- * {@link RTRoomFacory}
+ * {@link RTRoomFactory}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface RTRoomFacory {
+public interface RTRoomFactory {
 
     RTRoom newRoom(RTConnection connection) throws RTException;
 

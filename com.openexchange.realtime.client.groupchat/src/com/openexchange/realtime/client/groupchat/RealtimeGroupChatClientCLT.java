@@ -70,7 +70,7 @@ import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
 import com.openexchange.realtime.client.room.RTRoom;
-import com.openexchange.realtime.client.room.RTRoomFacory;
+import com.openexchange.realtime.client.room.RTRoomFactory;
 import com.openexchange.realtime.client.room.chinese.ChineseRoomFactory;
 
 /**
@@ -124,7 +124,7 @@ public class RealtimeGroupChatClientCLT {
                     .setSecure(false)
                     .build();
                 connection = RTConnectionFactory.getInstance().newConnection(properties);
-                RTRoomFacory roomFactory = new ChineseRoomFactory();
+                RTRoomFactory roomFactory = new ChineseRoomFactory();
                 room = roomFactory.newRoom(connection);
                 room.join(new ID("synthetic.china://room1"), new RTMessageHandler() {
                     @Override
