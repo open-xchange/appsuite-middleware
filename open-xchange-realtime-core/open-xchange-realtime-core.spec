@@ -45,6 +45,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %dir /opt/open-xchange/etc/
 %config(noreplace) /opt/open-xchange/etc/hazelcast/rtResourceDirectory.properties
 %config(noreplace) /opt/open-xchange/etc/hazelcast/rtStanzaStorage.properties
+%config(noreplace) /opt/open-xchange/etc/hazelcast/rtIDMapping.properties
 
 %changelog
 * Thu Jul 11 2013 Marcus Klein <marcus.klein@open-xchange.com>

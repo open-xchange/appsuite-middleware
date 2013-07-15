@@ -1,2 +1,3 @@
 opt/open-xchange/etc/hazelcast/rtResourceDirectory.properties
 opt/open-xchange/etc/hazelcast/rtStanzaStorage.properties
+opt/open-xchange/etc/hazelcast/rtIDMapping.properties
