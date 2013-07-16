@@ -197,22 +197,8 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * check for not allowed changes
 		 */
-		final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
-		if (delta.containsContextId() && delta.getContextId() > 0) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsObjectID() && delta.getObjectID() > 0) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-        } else if (delta.containsInternalUserId() && delta.getInternalUserId() > 0) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsUid() && false == Tools.isEmpty(storedContact.getUid())) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsCreatedBy()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsCreationDate()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsPrivateFlag() && delta.getPrivateFlag() && storedContact.getModifiedBy() != userID) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		}
+		Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
+		Check.readOnlyFields(userID, storedContact, delta);
 		/*
 		 * prepare update
 		 */
@@ -316,24 +302,11 @@ public class ContactServiceImpl extends DefaultContactService {
 		/*
 		 * check for not allowed changes
 		 */
-		final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
-		if (delta.containsContextId() && delta.getContextId() > 0) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-        } else if (delta.containsObjectID() && delta.getObjectID() > 0) {
+		Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
+        Check.readOnlyFields(userID, storedContact, delta);
+        if (delta.containsParentFolderID()) {
             throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-        } else if (delta.containsInternalUserId() && delta.getInternalUserId() > 0) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsUid() && false == Tools.isEmpty(storedContact.getUid())) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsCreatedBy()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsCreationDate()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsParentFolderID()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		} else if (delta.containsPrivateFlag() && delta.getPrivateFlag() && storedContact.getModifiedBy() != userID) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-		}
+        }
 		/*
 		 * prepare update
 		 */
@@ -420,22 +393,9 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * check for not allowed changes
          */
-        final Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
-        if (delta.containsContextId() && delta.getContextId() > 0) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-        } else if (delta.containsObjectID() && delta.getObjectID() > 0) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-        } else if (delta.containsInternalUserId() && delta.getInternalUserId() > 0) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-        } else if (delta.containsUid() && false == Tools.isEmpty(storedContact.getUid())) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-        } else if (delta.containsCreatedBy()) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-        } else if (delta.containsCreationDate()) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-        } else if (delta.containsParentFolderID()) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
-        } else if (delta.containsPrivateFlag() && delta.getPrivateFlag() && storedContact.getModifiedBy() != userID) {
+        Contact delta = ContactMapper.getInstance().getDifferences(storedContact, contact);
+        Check.readOnlyFields(userID, storedContact, delta);
+        if (delta.containsParentFolderID()) {
             throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(Integer.valueOf(parse(objectID)), Integer.valueOf(contextID));
         }
         /*
