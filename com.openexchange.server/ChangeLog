@@ -1,3 +1,7 @@
+* 2013-07-16 - marc.arens@open-xchange.com
+
+ - Fix for bug 27469: Stop checking aliases as soon as a valid match was found
+   
 * 2013-07-11 - marcus.klein@open-xchange.com/jan.bauerdick@open-xchange.com
 
  - Fix for bug 19817: Initializing the transaction counter for the replication monitor as early as possible no normal groupware login
