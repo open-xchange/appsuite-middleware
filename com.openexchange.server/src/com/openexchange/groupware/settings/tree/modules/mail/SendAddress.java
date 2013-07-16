@@ -51,6 +51,7 @@ package com.openexchange.groupware.settings.tree.modules.mail;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
@@ -138,12 +139,13 @@ public class SendAddress implements PreferencesItemService {
                 if (pos > 0) {
                     checkAlias = checkAlias.substring(0, pos);
                 }
-                
-                for (String alias: allAliases) {
-                   
-                    found = alias.equals(checkAlias);
+
+                Iterator<String> aliasIterator = allAliases.iterator();
+                while(!found && aliasIterator.hasNext()) {
+                    String nextAlias = aliasIterator.next();
+                    found = nextAlias.equals(checkAlias);
                 }
-        
+
                 if (user.getMail().equals(newAlias)) {
                     found = true;
                 }
