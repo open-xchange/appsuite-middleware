@@ -84,6 +84,7 @@ import com.openexchange.tools.sql.DBUtils;
 public class RdbChecksumStore implements ChecksumStore {
 
     private static final int DELETE_CHUNK_SIZE = 50;
+    private static final int INSERT_CHUNK_SIZE = 50;
 
     private final int contextID;
     private final DatabaseService databaseService;
@@ -112,20 +113,47 @@ public class RdbChecksumStore implements ChecksumStore {
 
     @Override
     public FileChecksum insertFileChecksum(FileChecksum fileChecksum) throws OXException {
-        return insertFileChecksums(Arrays.asList(new FileChecksum[] { fileChecksum })).get(0);
+        if (null != fileChecksum.getUuid()) {
+            throw new IllegalArgumentException("New file checksums must not contain an UUID");
+        }
+        Connection connection = databaseService.getWritable(contextID);
+        try {
+            fileChecksum.setUuid(newUid());
+            if (0 == insertFileChecksum(connection, contextID, fileChecksum)) {
+                throw DriveExceptionCodes.DB_ERROR.create("File checksum not added: " + fileChecksum);
+            }
+        } catch (SQLException e) {
+            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            databaseService.backWritable(contextID, connection);
+        }
+        return fileChecksum;
     }
 
     @Override
     public List<FileChecksum> insertFileChecksums(List<FileChecksum> fileChecksums) throws OXException {
         Connection connection = databaseService.getWritable(contextID);
         try {
-            for (FileChecksum fileChecksum : fileChecksums) {
-                if (null != fileChecksum.getUuid()) {
-                    throw new IllegalArgumentException("New file checksums must not contain an UUID");
+            for (int i = 0; i < fileChecksums.size(); i += INSERT_CHUNK_SIZE) {
+                /*
+                 * prepare chunk
+                 */
+                int length = Math.min(fileChecksums.size(), i + INSERT_CHUNK_SIZE) - i;
+                FileChecksum[] checksums = new FileChecksum[length];
+                for (int j = 0; j < length; j++) {
+                    FileChecksum checksum = fileChecksums.get(i + j);
+                    if (null != checksum.getUuid()) {
+                        throw new IllegalArgumentException("New file checksums must not contain an UUID");
+                    }
+                    checksum.setUuid(newUid());
+                    checksums[j] = checksum;
                 }
-                fileChecksum.setUuid(newUid());
-                if (0 == insertFileChecksum(connection, contextID, fileChecksum)) {
-                    throw DriveExceptionCodes.DB_ERROR.create("File checksum not added: " + fileChecksum);
+                /*
+                 * insert chunk
+                 */
+                int inserted = insertFileChecksums(connection, contextID, checksums);
+                if (checksums.length != inserted) {
+                    throw DriveExceptionCodes.DB_ERROR.create(String.valueOf(checksums.length - inserted) + " file checksums not inserted");
                 }
             }
         } catch (SQLException e) {
@@ -405,6 +433,26 @@ public class RdbChecksumStore implements ChecksumStore {
             stmt.setString(5, fileChecksum.getVersion());
             stmt.setLong(6, fileChecksum.getSequenceNumber());
             stmt.setString(7, fileChecksum.getChecksum());
+            return SQL.logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static int insertFileChecksums(Connection connection, int cid, FileChecksum[] fileChecksums) throws SQLException, OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.INSERT_FILE_CHECKSUMS_STMT(fileChecksums.length));
+            int parameterIndex = 1;
+            for (FileChecksum fileChecksum : fileChecksums) {
+                stmt.setString(parameterIndex++, fileChecksum.getUuid());
+                stmt.setInt(parameterIndex++, cid);
+                stmt.setString(parameterIndex++, escapeFolder(fileChecksum.getFileID()));
+                stmt.setString(parameterIndex++, escapeFile(fileChecksum.getFileID()));
+                stmt.setString(parameterIndex++, fileChecksum.getVersion());
+                stmt.setLong(parameterIndex++, fileChecksum.getSequenceNumber());
+                stmt.setString(parameterIndex++, fileChecksum.getChecksum());
+            }
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);

@@ -279,7 +279,12 @@ public class ChecksumProvider {
 
     private static FileChecksum find(Collection<? extends FileChecksum> checksums, File file) {
         for (FileChecksum checksum : checksums) {
-            if (checksum.getFileID().equals(new FileID(file.getId())) &&
+            // TODO: check
+            String fileID = checksum.getFileID().toUniqueID();
+            String folderID = new FolderID(
+                checksum.getFileID().getService(), checksum.getFileID().getAccountId(), checksum.getFileID().getFolderId()).toUniqueID();
+            if (fileID.equals(file.getId()) && folderID.equals(file.getFolderId()) &&
+//            if (checksum.getFileID().equals(new FileID(file.getId())) &&
                 (null == checksum.getVersion() ? null == file.getVersion() : checksum.getVersion().equals(file.getVersion())) &&
                 checksum.getSequenceNumber() == file.getSequenceNumber()) {
                 return checksum;

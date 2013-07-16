@@ -126,6 +126,19 @@ public class SQL {
         return allocator.toString();
     }
 
+    public static final String INSERT_FILE_CHECKSUMS_STMT(int count) {
+        StringAllocator allocator = new StringAllocator();
+        allocator.append("INSERT INTO fileChecksums (uuid,cid,folder,file,version,sequence,checksum) ");
+        if (0 < count) {
+            allocator.append("VALUES (UNHEX(?),?,REVERSE(?),REVERSE(?),?,?,UNHEX(?))");
+        }
+        for (int i = 1; i < count; i++) {
+            allocator.append(",(UNHEX(?),?,REVERSE(?),REVERSE(?),?,?,UNHEX(?))");
+        }
+        allocator.append(';');
+        return allocator.toString();
+    }
+
     public static final String DELETE_FILE_CHECKSUMS_IN_FOLDER_STMT =
         "DELETE FROM fileChecksums " +
         "WHERE cid=? AND folder=REVERSE(?);";
