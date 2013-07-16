@@ -49,10 +49,12 @@
 
 package com.openexchange.realtime.atmosphere.impl;
 
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Message;
+import com.openexchange.realtime.packet.Stanza;
 import static org.junit.Assert.*;
 
 /**
@@ -119,6 +121,33 @@ public class RTClientStateTest {
         
         assertTrue(state.getStanzasToSend().contains(unsequenced));
         assertTrue(state.getStanzasToSend().contains(sequenced));
+    }
+    
+    @Test
+    public void theStanzasToSendShouldBeSortedByTheirSequenceNumbers() {
+        Message unsequenced = new Message();
+        state.enqueue(unsequenced);
+
+
+        Message sequenced = new Message();
+        sequenced.setSequenceNumber(23);
+        sequenced.setTracer("first");
+        state.enqueue(sequenced);
+
+        Message sequenced2 = new Message();
+        sequenced2.setSequenceNumber(24);
+        sequenced2.setTracer("second");
+        state.enqueue(sequenced2);
+        
+        
+        List<Stanza> stanzasToSend = state.getStanzasToSend();
+        for (Stanza stanza : stanzasToSend) {
+            System.out.println(stanza.getTracer());
+        }
+        assertEquals(unsequenced, stanzasToSend.get(0));
+        assertEquals("first", stanzasToSend.get(1).getTracer());
+        assertEquals("second", stanzasToSend.get(2).getTracer());
+        
     }
     
     @Test
