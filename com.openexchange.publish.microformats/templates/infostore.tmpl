@@ -6,7 +6,7 @@
 	<#elseif (value > 1024)>
 		${(value/1024)?round}&nbsp;KB
 	<#else>
-		${value}&#8239;Bytes
+		${value}&nbsp;Bytes
 	</#if>
 </#macro>
 
@@ -76,7 +76,7 @@
 					<#if infoitem.description?? >
 					<br />
 					<div class="desc ox_comment">
-						${infoitem.description!""}
+						${htmlService.htmlFormat(infoitem.description!"")}
 					</div>
 					</#if>
 					<div class="oxmf-information ox_infoitem" id="infoitem_${infostore?seq_index_of(infoitem)}">
@@ -86,7 +86,7 @@
 		                <span class="ox_creationDate">${timeFormat.format(infoitem.creationDate)}</span>
 		                <span class="ox_lastModified">${timeFormat.format(infoitem.lastModified)}</span>
 		                <span class="ox_tags">${infoitem.categories!""}</span>
-		                <span class="ox_comment">${infoitem.description!""}</span>
+		                <span class="ox_comment">${htmlService.htmlFormat(infoitem.description!"")}</span>
 		                <span class="ox_fileName">${infoitem.fileName!""}</span>
 		                <span class="ox_fileSize">${infoitem.fileSize!""}</span>
 		                <span class="ox_MIMEType">${infoitem.fileMIMEType!""}</span>
