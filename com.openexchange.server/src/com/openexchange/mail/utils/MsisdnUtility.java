@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
 
 /**
  * Utility class to check and handle actions if MSISDN is enabled
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.2.2
  */
@@ -73,7 +73,7 @@ public class MsisdnUtility {
     /**
      * logger
      */
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MsisdnUtility.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MsisdnUtility.class);
 
     /**
      * Prevent instantiation of a new {@link MsisdnUtility}.
@@ -84,13 +84,13 @@ public class MsisdnUtility {
 
     /**
      * Adds the MSISDN number to the given address set.
-     * 
+     *
      * @param addresses - current address set to add the MSISDN number into
      * @param session - session to get the current contact and receive the number.
      */
     public static void addMsisdnAddress(Set<InternetAddress> addresses, Session session) {
         final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
-        final int contactId = user.getContactId();
+        final int contactId = null == user ? -1 : user.getContactId();
 
         if (contactId > 0) {
             final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
@@ -106,13 +106,15 @@ public class MsisdnUtility {
                             addresses.add(new QuotedInternetAddress(MsisdnCheck.cleanup(number)));
                         } catch (final Exception e) {
                             // Ignore invalid number
-                            e.printStackTrace();
+                            LOG.debug("Ignoring invalid number: " + number, e);
                         }
                     }
                 } catch (final Exception e) {
                     LOG.warn("Could not check for valid MSISDN numbers.", e);
                 }
             }
-        }
+        } // End of if statement
+
     }
+
 }

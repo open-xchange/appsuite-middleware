@@ -118,49 +118,52 @@ public class SendAddress implements PreferencesItemService {
             public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                 final String newAlias = setting.getSingleValue().toString();
                 boolean found = false;
-                final String[] aliases = user.getAliases();
-                final List<String> allAliases = new ArrayList<String>(aliases.length + 3);
-                if (aliases != null) {
-                    for(String alias: aliases) {
-                        allAliases.add(alias);
+
+                final List<String> allAliases;
+                {
+                    final String[] aliases = user.getAliases();
+                    if (aliases == null) {
+                        allAliases = new ArrayList<String>(4);
+                    } else {
+                        allAliases = new ArrayList<String>(aliases.length + 3);
+                        for (String alias: aliases) {
+                            allAliases.add(alias);
+                        }
                     }
                 }
-                final boolean supportMsisdnAddresses = MailProperties.getInstance().isSupportMsisdnAddresses();
-                if (supportMsisdnAddresses) {
-                    Set<InternetAddress> msisdnAddresses = new HashSet<InternetAddress>();
+
+                if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
+                    Set<InternetAddress> msisdnAddresses = new HashSet<InternetAddress>(6);
                     MsisdnUtility.addMsisdnAddress(msisdnAddresses, session);
                     for (InternetAddress internetAddress : msisdnAddresses) {
                         allAliases.add(internetAddress.getAddress());
                     }
                 }
-                
-                final int pos = newAlias.indexOf('/');
-                String checkAlias = newAlias;
-                if (pos > 0) {
-                    checkAlias = checkAlias.substring(0, pos);
+
+                found = (user.getMail().equals(newAlias));
+
+                if (!found) {
+                    String checkAlias = newAlias;
+                    final int pos = newAlias.indexOf('/');
+                    if (pos > 0) {
+                        checkAlias = checkAlias.substring(0, pos);
+                    }
+
+                    final Iterator<String> aliasIterator = allAliases.iterator();
+                    for (int i = allAliases.size(); !found && i-- > 0;) {
+                        found = checkAlias.equals(aliasIterator.next());
+                    }
                 }
 
-                Iterator<String> aliasIterator = allAliases.iterator();
-                while(!found && aliasIterator.hasNext()) {
-                    String nextAlias = aliasIterator.next();
-                    found = nextAlias.equals(checkAlias);
-                }
-
-                if (user.getMail().equals(newAlias)) {
-                    found = true;
-                }
                 if (!found) {
                     throw SettingExceptionCodes.INVALID_VALUE.create(newAlias, setting.getName());
                 }
+
                 final UserSettingMailStorage storage = UserSettingMailStorage.getInstance();
                 final UserSettingMail settings = storage.getUserSettingMail(user.getId(), ctx);
                 if (null != settings) {
                     settings.setSendAddr(newAlias);
-                    try {
-                        storage.saveUserSettingMail(settings, user.getId(), ctx);
-                    } catch (final OXException e) {
-                        throw e;
-                    }
+                    storage.saveUserSettingMail(settings, user.getId(), ctx);
                 }
             }
 
