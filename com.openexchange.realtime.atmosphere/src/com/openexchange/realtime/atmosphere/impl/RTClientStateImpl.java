@@ -49,6 +49,8 @@
 
 package com.openexchange.realtime.atmosphere.impl;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -126,6 +128,16 @@ public class RTClientStateImpl implements RTClientState {
                 list.add(es.stanza);
             }
             list.addAll(nonsequenceStanzas);
+            
+            Collections.sort(list, new Comparator<Stanza>() {
+
+                @Override
+                public int compare(Stanza s1, Stanza s2) {
+                    return (int) (s1.getSequenceNumber() - s2.getSequenceNumber());
+                }
+                
+            });
+            
             return list;
         } finally {
             unlock();
