@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,20 @@
  *
  */
 
-package com.openexchange.drive.json.action;
-
-import java.util.Locale;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveService;
-import com.openexchange.drive.json.internal.Services;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.Strings;
-import com.openexchange.tools.session.ServerSession;
+package com.openexchange.drive;
 
 /**
- * {@link AbstractDriveAction}
+ * {@link DirectoryMetadata}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class AbstractDriveAction implements AJAXActionService {
+public interface DirectoryMetadata extends DirectoryVersion {
 
-    protected Locale getLocale(ServerSession session) {
-        Locale locale = null;
-        if (null != session) {
-            User user = session.getUser();
-            if (null != user) {
-                locale = user.getLocale();
-            }
-        }
-        return null != locale ? locale : Locale.US;
-    }
-
-    protected DriveService getDriveService() throws OXException {
-        return Services.getService(DriveService.class, true);
-    }
-
-    protected abstract AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException;
-
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        /*
-         * extract device name information if present
-         */
-        String device = requestData.getParameter("device");
-        if (false == Strings.isEmpty(device)) {
-            session.setParameter("com.openexchange.drive.device", device);
-        }
-        /*
-         * perform
-         */
-        return doPerform(requestData, session);
-    }
+    /**
+     * Gets a direct link to the directory
+     *
+     * @return The direct link
+     */
+    String getDirectLink();
 
 }

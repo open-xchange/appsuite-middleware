@@ -65,7 +65,6 @@ import com.openexchange.exception.OXException;
  * Directory version hosting the represented userized folder.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @param <V>
  */
 public class ServerDirectoryVersion implements DirectoryVersion {
 

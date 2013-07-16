@@ -49,61 +49,77 @@
 
 package com.openexchange.drive.json.action;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveQuota;
+import com.openexchange.drive.FileMetadata;
+import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.json.json.JsonFileMetadata;
+import com.openexchange.drive.json.json.JsonFileVersion;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.Quota;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link QuotaAction}
+ * {@link FileMetadataAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class QuotaAction extends AbstractDriveAction {
+public class FileMetadataAction extends AbstractDriveAction {
 
     @Override
     public AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        /*
-         * get request data
-         */
-        String rootFolderID = requestData.getParameter("root");
-        if (Strings.isEmpty(rootFolderID)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
-        }
-        /*
-         * determine quota
-         */
-        DriveQuota quota = getDriveService().getQuota(session, rootFolderID);
-        /*
-         * return json result
-         */
         try {
-            JSONObject jsonObject = new JSONObject();
-            if (null != quota) {
-                JSONArray jsonArray = new JSONArray(2);
-                if (null != quota.getQuota()) {
-                    for (Quota q : quota.getQuota()) {
-                        if (Quota.UNLIMITED != q.getLimit()) {
-                            JSONObject jsonQuota = new JSONObject();
-                            jsonQuota.put("limit", q.getLimit());
-                            jsonQuota.put("use", q.getUsage());
-                            jsonQuota.put("type", String.valueOf(q.getType()).toLowerCase());
-                            jsonArray.put(jsonQuota);
-                        }
-                    }
-                }
-                jsonObject.put("quota", jsonArray);
-                jsonObject.put("manageLink", quota.getManageLink());
+            /*
+             * get parameters
+             */
+            String rootFolderID = requestData.getParameter("root");
+            if (Strings.isEmpty(rootFolderID)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
             }
-            return new AJAXRequestResult(jsonObject, "json");
+            String path = requestData.getParameter("path");
+            if (Strings.isEmpty(path)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
+            }
+            Object data = requestData.getData();
+            if (null != data) {
+                /*
+                 * get requested versions from body
+                 */
+                if (false == JSONArray.class.isInstance(data)) {
+                    throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+                }
+                List<FileVersion> fileVersions = JsonFileVersion.deserialize((JSONArray)data);
+                List<FileMetadata> fileMetadata = getDriveService().getFileMetadata(session, rootFolderID, path, fileVersions);
+                return new AJAXRequestResult(JsonFileMetadata.serialize(fileMetadata), "json");
+            } else if (requestData.containsParameter("name")) {
+                /*
+                 * get requested version from url
+                 */
+                String name = requestData.getParameter("name");
+                if (Strings.isEmpty(name)) {
+                    throw AjaxExceptionCodes.MISSING_PARAMETER.create("name");
+                }
+                String checksum = requestData.getParameter("checksum");
+                if (Strings.isEmpty(checksum)) {
+                    throw AjaxExceptionCodes.MISSING_PARAMETER.create("checksum");
+                }
+                List<FileVersion> fileVersions = new ArrayList<FileVersion>(1);
+                fileVersions.add(new JsonFileVersion(checksum, name));
+                FileMetadata fileMetadata = getDriveService().getFileMetadata(session, rootFolderID, path, fileVersions).get(0);
+                return new AJAXRequestResult(JsonFileMetadata.serialize(fileMetadata), "json");
+            } else {
+                /*
+                 * get all available metadata
+                 */
+                List<FileMetadata> fileMetadata = getDriveService().getFileMetadata(session, rootFolderID, path, null);
+                return new AJAXRequestResult(JsonFileMetadata.serialize(fileMetadata), "json");
+            }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

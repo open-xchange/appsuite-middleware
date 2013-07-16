@@ -460,7 +460,11 @@ public class DriveStorage {
     }
 
     public File findFileByName(String path, final String name) throws OXException {
-        return Filter.find(getFilesIterator(getFolderID(path), name), new FileNameFilter() {
+        return findFileByName(path, name, DriveConstants.FILE_FIELDS);
+    }
+
+    public File findFileByName(String path, final String name, List<Field> fields) throws OXException {
+        return Filter.find(getFilesIterator(getFolderID(path), name, fields), new FileNameFilter() {
 
             @Override
             protected boolean accept(String fileName) throws OXException {
@@ -506,11 +510,15 @@ public class DriveStorage {
     }
 
     private SearchIterator<File> getFilesIterator(String folderID, String pattern) throws OXException {
+        return getFilesIterator(folderID, pattern, DriveConstants.FILE_FIELDS);
+    }
+
+    private SearchIterator<File> getFilesIterator(String folderID, String pattern, List<Field> fields) throws OXException {
         if (null != pattern) {
-            return getFileAccess().search(pattern, DriveConstants.FILE_FIELDS, folderID, null, SortDirection.DEFAULT,
+            return getFileAccess().search(pattern, fields, folderID, null, SortDirection.DEFAULT,
                 FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
         } else {
-            return getFileAccess().getDocuments(folderID, DriveConstants.FILE_FIELDS, null, SortDirection.DEFAULT).results();
+            return getFileAccess().getDocuments(folderID, fields, null, SortDirection.DEFAULT).results();
         }
     }
 

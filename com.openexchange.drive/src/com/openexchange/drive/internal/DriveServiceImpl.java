@@ -51,14 +51,18 @@ package com.openexchange.drive.internal;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.drive.DirectoryMetadata;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.DriveQuota;
 import com.openexchange.drive.DriveService;
+import com.openexchange.drive.FileMetadata;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
 import com.openexchange.drive.actions.DownloadFileAction;
@@ -286,16 +290,70 @@ public class DriveServiceImpl implements DriveService {
     }
 
     @Override
-    public Quota[] getQuota(ServerSession session, String rootFolderID) throws OXException {
-        DriveSession driveSession = createSession(session, rootFolderID);
+    public DriveQuota getQuota(ServerSession session, String rootFolderID) throws OXException {
+        final DriveSession driveSession = createSession(session, rootFolderID);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Handling get-quota for root folder '" + rootFolderID + "'");
         }
-        Quota[] quota = driveSession.getStorage().getQuota();
+        final Quota[] quota = driveSession.getStorage().getQuota();
         if (LOG.isDebugEnabled()) {
             LOG.debug("Got quota for root folder '" + rootFolderID + "': " + quota);
         }
-        return quota;
+        return new DriveQuota() {
+
+            @Override
+            public Quota[] getQuota() {
+                return quota;
+            }
+
+            @Override
+            public String getManageLink() {
+                return new DirectLinkGenerator(driveSession).getQuotaLink();
+            }
+        };
+    }
+
+    @Override
+    public List<FileMetadata> getFileMetadata(ServerSession session, String rootFolderID, String path, List<FileVersion> fileVersions) throws OXException {
+        DriveSession driveSession = createSession(session, rootFolderID);
+        List<FileMetadata> fileMetadata = new ArrayList<FileMetadata>();
+        if (null == fileVersions) {
+            List<ServerFileVersion> serverFiles = getServerFiles(driveSession, path);
+            for (ServerFileVersion fileVersion : serverFiles) {
+                fileMetadata.add(new DefaultFileMetadata(driveSession, fileVersion));
+            }
+        } else if (1 == fileVersions.size()) {
+            ServerFileVersion fileVersion = ServerFileVersion.valueOf(fileVersions.get(0), path, driveSession);
+            fileMetadata.add(new DefaultFileMetadata(driveSession, fileVersion));
+        } else {
+            List<ServerFileVersion> serverFiles = getServerFiles(driveSession, path);
+            for (FileVersion requestedVersion : fileVersions) {
+                ServerFileVersion matchingVersion = null;
+                for (ServerFileVersion serverFileVersion : serverFiles) {
+                    if (serverFileVersion.getName().equals(requestedVersion.getName()) &&
+                        serverFileVersion.getChecksum().equals(requestedVersion.getChecksum())) {
+                        matchingVersion = serverFileVersion;
+                        break;
+                    }
+                }
+                if (null == matchingVersion) {
+                    throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(requestedVersion.getName(), requestedVersion.getChecksum(), path);
+                }
+                fileMetadata.add(new DefaultFileMetadata(driveSession, matchingVersion));
+            }
+        }
+        return fileMetadata;
+    }
+
+    @Override
+    public DirectoryMetadata getDirectoryMetadata(ServerSession session, String rootFolderID, String path) throws OXException {
+        DriveSession driveSession = createSession(session, rootFolderID);
+        String folderID = driveSession.getStorage().getFolderID(path);
+        List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(driveSession, Arrays.asList(new String[] { folderID }));
+        if (null == checksums || 0 == checksums.size()) {
+            throw DriveExceptionCodes.PATH_NOT_FOUND.create(path);
+        }
+        return new DefaultDirectoryMetadata(driveSession, new ServerDirectoryVersion(path, checksums.get(0)));
     }
 
     private static SyncResult<DirectoryVersion> syncDirectories(DriveSession session, List<? extends DirectoryVersion> originalVersions,

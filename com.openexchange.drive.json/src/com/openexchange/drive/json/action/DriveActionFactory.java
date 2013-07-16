@@ -76,6 +76,8 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
         actions.put("quota", new QuotaAction());
         actions.put("subscribe", new SubscribeAction());
         actions.put("unsubscribe", new UnsubscribeAction());
+        actions.put("fileMetadata", new FileMetadataAction());
+        actions.put("directoryMetadata", new DirectoryMetadataAction());
     }
 
     @Override

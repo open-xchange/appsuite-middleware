@@ -49,54 +49,49 @@
 
 package com.openexchange.drive.json.action;
 
-import java.util.Locale;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
+import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveService;
-import com.openexchange.drive.json.internal.Services;
+import com.openexchange.drive.DirectoryMetadata;
+import com.openexchange.drive.json.json.JsonDirectoryMetadata;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link AbstractDriveAction}
+ * {@link DirectoryMetadataAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class AbstractDriveAction implements AJAXActionService {
-
-    protected Locale getLocale(ServerSession session) {
-        Locale locale = null;
-        if (null != session) {
-            User user = session.getUser();
-            if (null != user) {
-                locale = user.getLocale();
-            }
-        }
-        return null != locale ? locale : Locale.US;
-    }
-
-    protected DriveService getDriveService() throws OXException {
-        return Services.getService(DriveService.class, true);
-    }
-
-    protected abstract AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException;
+public class DirectoryMetadataAction extends AbstractDriveAction {
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException {
         /*
-         * extract device name information if present
+         * get parameters
          */
-        String device = requestData.getParameter("device");
-        if (false == Strings.isEmpty(device)) {
-            session.setParameter("com.openexchange.drive.device", device);
+        String rootFolderID = requestData.getParameter("root");
+        if (Strings.isEmpty(rootFolderID)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
+        }
+        String path = requestData.getParameter("path");
+        if (Strings.isEmpty(path)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
         }
         /*
-         * perform
+         * get metadata
          */
-        return doPerform(requestData, session);
+        DirectoryMetadata directoryMetadata = getDriveService().getDirectoryMetadata(session, rootFolderID, path);
+        /*
+         * return json result
+         */
+        try {
+            return new AJAXRequestResult(JsonDirectoryMetadata.serialize(directoryMetadata), "json");
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
     }
 
 }

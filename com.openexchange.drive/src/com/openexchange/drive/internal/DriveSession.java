@@ -70,6 +70,7 @@ public class DriveSession {
     private ChecksumStore checksumStore;
     private final String rootFolderID;
     private DriveStorage storage;
+    private DirectLinkGenerator linkGenerator;
 
     /**
      * Initializes a new {@link DriveSession}.
@@ -138,6 +139,13 @@ public class DriveSession {
     public String getDeviceName() {
         Object parameter = getServerSession().getParameter("com.openexchange.drive.device");
         return null != parameter && String.class.isInstance(parameter) ? (String)parameter : null;
+    }
+
+    public DirectLinkGenerator getLinkGenerator() {
+        if (null == this.linkGenerator) {
+            linkGenerator = new DirectLinkGenerator(this);
+        }
+        return linkGenerator;
     }
 
 }

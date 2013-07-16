@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,31 @@
  *
  */
 
-package com.openexchange.drive.json.action;
+package com.openexchange.drive;
 
-import java.util.Locale;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveService;
-import com.openexchange.drive.json.internal.Services;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.Strings;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.file.storage.Quota;
+import com.openexchange.file.storage.Quota.Type;
+
 
 /**
- * {@link AbstractDriveAction}
+ * {@link DriveQuota}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class AbstractDriveAction implements AJAXActionService {
+public interface DriveQuota {
 
-    protected Locale getLocale(ServerSession session) {
-        Locale locale = null;
-        if (null != session) {
-            User user = session.getUser();
-            if (null != user) {
-                locale = user.getLocale();
-            }
-        }
-        return null != locale ? locale : Locale.US;
-    }
+    /**
+     * Gets the direct link to manage the user's quota
+     *
+     * @return The direct link
+     */
+    String getManageLink();
 
-    protected DriveService getDriveService() throws OXException {
-        return Services.getService(DriveService.class, true);
-    }
-
-    protected abstract AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException;
-
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        /*
-         * extract device name information if present
-         */
-        String device = requestData.getParameter("device");
-        if (false == Strings.isEmpty(device)) {
-            session.setParameter("com.openexchange.drive.device", device);
-        }
-        /*
-         * perform
-         */
-        return doPerform(requestData, session);
-    }
+    /**
+     * Gets the current quota information.
+     *
+     * @return An array of size 2, where the first element holds the quota of {@link Type#FILE}, and the second of {@link Type#STORAGE}
+     */
+    Quota[] getQuota();
 
 }

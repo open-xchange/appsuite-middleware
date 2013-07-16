@@ -47,56 +47,36 @@
  *
  */
 
-package com.openexchange.drive.json.action;
+package com.openexchange.drive.json.json;
 
-import java.util.Locale;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveService;
-import com.openexchange.drive.json.internal.Services;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.Strings;
-import com.openexchange.tools.session.ServerSession;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.drive.FileMetadata;
+
 
 /**
- * {@link AbstractDriveAction}
+ * {@link JsonFileMetadata}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class AbstractDriveAction implements AJAXActionService {
+public class JsonFileMetadata {
 
-    protected Locale getLocale(ServerSession session) {
-        Locale locale = null;
-        if (null != session) {
-            User user = session.getUser();
-            if (null != user) {
-                locale = user.getLocale();
-            }
+    public static JSONArray serialize(List<FileMetadata> fileMetadata) throws JSONException {
+        JSONArray jsonArray = new JSONArray(fileMetadata.size());
+        for (FileMetadata metadata : fileMetadata) {
+            jsonArray.put(serialize(metadata));
         }
-        return null != locale ? locale : Locale.US;
+        return jsonArray;
     }
 
-    protected DriveService getDriveService() throws OXException {
-        return Services.getService(DriveService.class, true);
-    }
-
-    protected abstract AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException;
-
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        /*
-         * extract device name information if present
-         */
-        String device = requestData.getParameter("device");
-        if (false == Strings.isEmpty(device)) {
-            session.setParameter("com.openexchange.drive.device", device);
-        }
-        /*
-         * perform
-         */
-        return doPerform(requestData, session);
+    public static JSONObject serialize(FileMetadata metadata) throws JSONException {
+        JSONObject jsonObject = new JSONObject(3);
+        jsonObject.put("name", metadata.getName());
+        jsonObject.put("checksum", metadata.getChecksum());
+        jsonObject.put("directLink", metadata.getDirectLink());
+        return jsonObject;
     }
 
 }

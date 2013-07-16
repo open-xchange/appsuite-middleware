@@ -54,7 +54,6 @@ import java.util.List;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Quota;
-import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -131,10 +130,34 @@ public interface DriveService {
      *
      * @param session The session
      * @param rootFolderID The identifier of the referenced root folder on the server
-     * @return An array of size 2, where the first element holds the quota of {@link Type#FILE}, and the second of {@link Type#STORAGE}
+     * @return The quota
      * @throws OXException
      */
-    Quota[] getQuota(ServerSession session, String rootFolderID) throws OXException;
+    DriveQuota getQuota(ServerSession session, String rootFolderID) throws OXException;
+
+    /**
+     * Gets file metadata for the supplied file versions
+     *
+     * @param session The session
+     * @param rootFolderID The identifier of the referenced root folder on the server
+     * @param path The path to the file's parent folder, relative to the root folder
+     * @param fileVersions A list of file versions to get the metadata for, or <code>null</code> to get metadata for all files in the
+     *        denoted directory
+     * @return The available file metadata
+     * @throws OXException
+     */
+    List<FileMetadata> getFileMetadata(ServerSession session, String rootFolderID, String path, List<FileVersion> fileVersions) throws OXException;
+
+    /**
+     * Gets directory metadata for the supplied directory
+     *
+     * @param session The session
+     * @param rootFolderID The identifier of the referenced root folder on the server
+     * @param path The path to the folder, relative to the root folder
+     * @return The directory metadata
+     * @throws OXException
+     */
+    DirectoryMetadata getDirectoryMetadata(ServerSession session, String rootFolderID, String path) throws OXException;
 
 }
 
