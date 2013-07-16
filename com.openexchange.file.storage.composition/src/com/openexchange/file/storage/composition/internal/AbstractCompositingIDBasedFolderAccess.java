@@ -133,6 +133,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
     public FileStorageFolder getFolder(String folderId) throws OXException {
         FolderID folderID = new FolderID(folderId);
         FileStorageFolder folder = getFolderAccess(folderID).getFolder(folderID.getFolderId());
+        System.out.println(folderId + ": " + folder);
         return withUniqueID(folder, folderID.getService(), folderID.getAccountId());
     }
 
@@ -324,6 +325,9 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
             if (null != rootFolder) {
                 folders.add(IDManglingFolder.withUniqueID(rootFolder, accountAccess.getService().getId(), accountAccess.getAccountId()));
             }
+        }
+        for (FileStorageFolder f : folders) {
+            System.out.println("ID: " + f.getId());
         }
         return folders.toArray(new FileStorageFolder[folders.size()]);
     }
