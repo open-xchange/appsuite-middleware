@@ -49,59 +49,46 @@
 
 package com.openexchange.drive.json.action;
 
-import java.util.Locale;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveService;
-import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
-import com.openexchange.drive.json.internal.Services;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link AbstractDriveAction}
+ * {@link UpdateTokenAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class AbstractDriveAction implements AJAXActionService {
-
-    protected Locale getLocale(ServerSession session) {
-        Locale locale = null;
-        if (null != session) {
-            User user = session.getUser();
-            if (null != user) {
-                locale = user.getLocale();
-            }
-        }
-        return null != locale ? locale : Locale.US;
-    }
-
-    protected DriveService getDriveService() throws OXException {
-        return Services.getService(DriveService.class, true);
-    }
-
-    protected DriveSubscriptionStore getSubscriptionStore() throws OXException {
-        return Services.getService(DriveSubscriptionStore.class, true);
-    }
-
-    protected abstract AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException;
+public class UpdateTokenAction extends AbstractDriveAction {
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException {
         /*
-         * extract device name information if present
+         * get parameters
          */
-        String device = requestData.getParameter("device");
-        if (false == Strings.isEmpty(device)) {
-            session.setParameter("com.openexchange.drive.device", device);
+        String token = requestData.getParameter("token");
+        if (Strings.isEmpty(token)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("token");
+        }
+        String newToken = requestData.getParameter("newToken");
+        if (Strings.isEmpty(newToken)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("newToken");
+        }
+        String serviceID = requestData.getParameter("service");
+        if (Strings.isEmpty(serviceID)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("service");
         }
         /*
-         * perform
+         * update token
          */
-        return doPerform(requestData, session);
+        getSubscriptionStore().updateToken(serviceID, session.getContextId(), token, newToken);
+        /*
+         * return empty json result to indicate success
+         */
+        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
     }
 
 }

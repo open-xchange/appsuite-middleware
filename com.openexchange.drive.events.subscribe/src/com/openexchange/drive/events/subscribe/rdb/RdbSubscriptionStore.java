@@ -118,9 +118,16 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
 
     }
 
-    public void updateRegistration(String serviceID, String oldRegistrationID, String newRegistrationID) {
-
-
+    @Override
+    public int updateToken(String serviceID, int contextID, String oldToken, String newToken) throws OXException {
+        Connection connection = databaseService.getWritable(contextID);
+        try {
+            return updateToken(connection, contextID, serviceID, oldToken, newToken);
+        } catch (SQLException e) {
+            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            databaseService.backWritable(contextID, connection);
+        }
     }
 
     @Override
@@ -148,6 +155,20 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             stmt.setString(3, subscription.getServiceID());
             stmt.setString(4, subscription.getToken());
             stmt.setString(5, SQL.escape(subscription.getRootFolderID()));
+            return SQL.logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static int updateToken(Connection connection, int cid, String service, String oldToken, String newToken) throws SQLException, OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.UPDATE_TOKEN_STMT);
+            stmt.setString(1, newToken);
+            stmt.setInt(2, cid);
+            stmt.setString(3, service);
+            stmt.setString(4, oldToken);
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);

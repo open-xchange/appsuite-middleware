@@ -92,6 +92,10 @@ public class SQL {
         "DELETE FROM driveEventSubscriptions " +
         "WHERE cid=? AND service=? AND token=? AND folder=?;";
 
+    public static final String UPDATE_TOKEN_STMT =
+        "UPDATE driveEventSubscriptions SET token=? " +
+        "WHERE cid=? AND service=? AND token=?;";
+
     public static final String DELETE_SUBSCRIPTIONS_IN_CONTEXT_STMT =
         "DELETE FROM driveEventSubscriptions " +
         "WHERE cid=?;";
