@@ -2,6 +2,10 @@
 
  - Fix for bug 27468: Log USS-0009 error code in log file although associated category "USER_INPUT" implies not to do so
 
+* 2013-07-16 - marc.arens@open-xchange.com
+
+ - Fix for bug 27469: Stop checking aliases as soon as a valid match was found
+
 * 2013-07-11 - marcus.klein@open-xchange.com/jan.bauerdick@open-xchange.com
 
  - Fix for bug 19817: Initializing the transaction counter for the replication monitor as early as possible no normal groupware login
