@@ -99,6 +99,15 @@ public class AppsLoadServlet extends HttpServlet {
         "\\\\f", "\\\\r", "\\\\x0e", "\\\\x0f", "\\\\x10", "\\\\x11", "\\\\x12", "\\\\x13", "\\\\x14", "\\\\x15", "\\\\x16", "\\\\x17",
         "\\\\x18", "\\\\x19", "\\\\x1a", "\\\\x1b", "\\\\x1c", "\\\\x1d", "\\\\x1e", "\\\\x1f" };
 
+    private static byte[] SUFFIX;
+    static {
+        try {
+            SUFFIX = "\n/*:oxsep:*/\n".getBytes(Charsets.UTF_8_NAME);
+        } catch (UnsupportedEncodingException e) {
+            SUFFIX = "\n/*:oxsep:*/\n".getBytes();
+        }
+    }
+
     private static void escape(final CharSequence s, final StringBuffer sb) {
         final Matcher e = escapeRE.matcher(s);
         while (e.find()) {
@@ -218,6 +227,7 @@ public class AppsLoadServlet extends HttpServlet {
             }
 
             out.write(data);
+            out.write(SUFFIX);
             out.flush();
         }
     }
