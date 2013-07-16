@@ -82,30 +82,34 @@ public class ContactHandler {
 
         ContactService contactService = SubscriptionServiceRegistry.getInstance().getService(ContactService.class);
 
-        for(final Contact updatedContact: updatedContacts){
+        for (final Contact updatedContact : updatedContacts) {
             final SearchIterator<Contact> existingContacts = contactService.getAllContacts(session, String.valueOf(folderId));
             boolean foundMatch = false;
-            while( existingContacts.hasNext() && ! foundMatch ){
+            while (!foundMatch && existingContacts.hasNext()) {
                 Contact existingContact = null;
                 try {
                     existingContact = existingContacts.next();
                 } catch (final SearchIteratorException e) {
-                    e.printStackTrace();
+                    LOG.error(e.getMessage(), e);
                 }
-                if( existingContact == null) {
+                if (existingContact == null) {
                     continue;
                 }
-                if( isSame(existingContact, updatedContact)){
+                if (isSame(existingContact, updatedContact)) {
                     foundMatch = true;
-                    updatedContact.setObjectID( existingContact.getObjectID() );
-                    contactService.updateContact(session, String.valueOf(folderId),
-                        String.valueOf(existingContact.getObjectID()), updatedContact, new Date());
+                    updatedContact.setObjectID(existingContact.getObjectID());
+                    contactService.updateContact(
+                        session,
+                        String.valueOf(folderId),
+                        String.valueOf(existingContact.getObjectID()),
+                        updatedContact,
+                        new Date());
                 }
             }
-            if(foundMatch) {
+            if (foundMatch) {
                 continue;
             }
-            updatedContact.setParentFolderID( folderId );
+            updatedContact.setParentFolderID(folderId);
             try {
                 contactService.createContact(session, String.valueOf(folderId), updatedContact);
             } catch (final OXException x) {

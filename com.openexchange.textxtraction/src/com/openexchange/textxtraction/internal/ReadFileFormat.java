@@ -73,7 +73,7 @@ import com.openexchange.java.Streams;
  */
 public class ReadFileFormat {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ReadFileFormat.class);
+    static final Log LOG = com.openexchange.log.Log.loggerFor(ReadFileFormat.class);
 
     private final StringBuilder sb;
 
@@ -158,8 +158,8 @@ public class ReadFileFormat {
                         }
                     }
                 }
-            } catch (final Exception ex) {
-                ex.printStackTrace();
+            } catch (final Exception e) {
+                LOG.error(e.getMessage(), e);
                 return;
             }
         }

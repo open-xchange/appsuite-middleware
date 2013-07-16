@@ -65,18 +65,18 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link DistributedFileServlet}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class DistributedFileServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
-    private ManagedFileManagement fileManagement;
+    private final ManagedFileManagement fileManagement;
 
-    private int port;
+    private final int port;
 
     public static final String PATH = "distributedFiles";
 
@@ -109,7 +109,7 @@ public class DistributedFileServlet extends HttpServlet {
                 outStream.write(bytesRead);
             }
         } catch (OXException e) {
-            e.printStackTrace();
+            com.openexchange.log.Log.loggerFor(DistributedFileServlet.class).error(e.getMessage(), e);
         } finally {
             inStream.close();
             outStream.close();
@@ -133,7 +133,7 @@ public class DistributedFileServlet extends HttpServlet {
         try {
             fileManagement.getByID(id);
         } catch (OXException e) {
-            e.printStackTrace();
+            com.openexchange.log.Log.loggerFor(DistributedFileServlet.class).error(e.getMessage(), e);
         }
     }
 
@@ -149,7 +149,7 @@ public class DistributedFileServlet extends HttpServlet {
         try {
             fileManagement.removeByID(id);
         } catch (OXException e) {
-            e.printStackTrace();
+            com.openexchange.log.Log.loggerFor(DistributedFileServlet.class).error(e.getMessage(), e);
         }
     }
 }

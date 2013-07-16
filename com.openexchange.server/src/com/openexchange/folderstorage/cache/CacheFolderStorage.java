@@ -1636,19 +1636,19 @@ public final class CacheFolderStorage implements FolderStorage {
         }
         final boolean started = storage.startTransaction(storageParameters, readWrite);
         try {
-            final Folder folder = storage.getFolder(treeId, folderId, storageType, storageParameters);            
+            final Folder folder = storage.getFolder(treeId, folderId, storageType, storageParameters);
             if (started) {
                 storage.commitTransaction(storageParameters);
             }
             return folder;
         } catch (final OXException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             if (started) {
                 storage.rollback(storageParameters);
             }
             throw e;
         } catch (final Exception e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             if (started) {
                 storage.rollback(storageParameters);
             }

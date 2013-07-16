@@ -164,7 +164,7 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
                 try {
                     contact.setBirthday(DATE.parse(map.get(OXMF_PREFIX + "birthday")));
                 } catch (ParseException e) {
-                    e.printStackTrace();
+                    LOG.error(e.getMessage(), e);
                 }
             }
         }
@@ -188,7 +188,7 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
                 try {
                     contact.setAnniversary(DATE.parse(map.get(OXMF_PREFIX + "anniversary")));
                 } catch (ParseException e) {
-                    e.printStackTrace();
+                    LOG.error(e.getMessage(), e);
                 }
             }
         }

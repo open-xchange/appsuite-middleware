@@ -10,10 +10,12 @@ Import-Package: com.openexchange.config,
  com.openexchange.dispatcher,
  com.openexchange.exception,
  com.openexchange.filemanagement,
+ com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,
  javax.servlet,
- javax.servlet.http;version="2.5.0",
+ javax.servlet.http,
+ org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.http
 Bundle-ActivationPolicy: lazy

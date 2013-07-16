@@ -83,7 +83,7 @@ import com.openexchange.log.LogFactory;
 
 /**
  * {@link ICal4JITipParser}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ICal4JITipParser extends ICal4JParser implements ITipParser {
@@ -145,7 +145,7 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
                     }
 
                 } catch (ConversionError conversionError) {
-                    conversionError.printStackTrace();
+                    LOG.error(conversionError.getMessage(), conversionError);
                     errors.add(conversionError);
                 }
             }
