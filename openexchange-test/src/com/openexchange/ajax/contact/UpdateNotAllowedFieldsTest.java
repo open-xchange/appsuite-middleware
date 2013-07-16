@@ -43,7 +43,7 @@ public class UpdateNotAllowedFieldsTest extends AbstractManagedContactTest {
             Contact updatedContact = tryToUpdate(contact.getObjectID(), contact.getParentFolderID(), contact.getLastModified().getTime(), changedObjectID, Category.CATEGORY_PERMISSION_DENIED);
             assertEquals("object ID was changed", contact.getObjectID(), updatedContact.getObjectID());
             changedObjectID.setObjectID(0);
-            updatedContact = tryToUpdate(contact.getObjectID(), contact.getParentFolderID(), updatedContact.getLastModified().getTime(), changedObjectID, Category.CATEGORY_PERMISSION_DENIED);
+            updatedContact = tryToUpdate(contact.getObjectID(), contact.getParentFolderID(), updatedContact.getLastModified().getTime(), changedObjectID, null);
             assertEquals("object ID was changed", contact.getObjectID(), updatedContact.getObjectID());
             changedObjectID.setObjectID(8794);
             changedObjectID.setParentFolderID(getClient().getValues().getPrivateContactFolder());
@@ -75,10 +75,10 @@ public class UpdateNotAllowedFieldsTest extends AbstractManagedContactTest {
             Contact updatedContact = tryToUpdate(contact.getObjectID(), contact.getParentFolderID(), contact.getLastModified().getTime(), changedUID, Category.CATEGORY_PERMISSION_DENIED);
             assertEquals("UID was changed", contact.getUid(), updatedContact.getUid());
             changedUID.setUid(null);
-            updatedContact = tryToUpdate(contact.getObjectID(), contact.getParentFolderID(), updatedContact.getLastModified().getTime(), changedUID, Category.CATEGORY_PERMISSION_DENIED);
+            updatedContact = tryToUpdate(contact.getObjectID(), contact.getParentFolderID(), updatedContact.getLastModified().getTime(), changedUID, null);
             assertEquals("UID was changed", contact.getUid(), updatedContact.getUid());
             changedUID.setUid("");
-            updatedContact = tryToUpdate(contact.getObjectID(), contact.getParentFolderID(), updatedContact.getLastModified().getTime(), changedUID, Category.CATEGORY_PERMISSION_DENIED);
+            updatedContact = tryToUpdate(contact.getObjectID(), contact.getParentFolderID(), updatedContact.getLastModified().getTime(), changedUID, null);
             assertEquals("UID was changed", contact.getUid(), updatedContact.getUid());
             changedUID.setUid(UUID.randomUUID().toString());
             changedUID.setParentFolderID(getClient().getValues().getPrivateContactFolder());
