@@ -1,3 +1,9 @@
+open-xchange-messaging-sms (7.4.0-0) unstable; urgency=low
+
+  * prepare for 7.4.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 16 Jul 2013 15:16:01 +0200
+
 open-xchange-messaging-sms (7.4.0-0) UNRELEASED; urgency=low
 
   * prepare for 7.4.0

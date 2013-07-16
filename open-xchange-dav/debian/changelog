@@ -1,3 +1,9 @@
+open-xchange-dav (7.4.0-0) unstable; urgency=low
+
+  * prepare for 7.4.0
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Tue, 16 Jul 2013 15:15:40 +0200
+
 open-xchange-dav (7.4.0-0) UNRELEASED; urgency=low
 
   * prepare for 7.4.0

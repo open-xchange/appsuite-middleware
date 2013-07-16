@@ -1,3 +1,9 @@
+open-xchange-authorization-standard (7.4.0-0) unstable; urgency=low
+
+  * prepare for 7.4.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 16 Jul 2013 15:15:27 +0200
+
 open-xchange-authorization-standard (7.4.0-0) UNRELEASED; urgency=low
 
   * prepare for 7.4.0

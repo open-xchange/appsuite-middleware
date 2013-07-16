@@ -1,3 +1,9 @@
+open-xchange-passwordchange-script (7.4.0-0) unstable; urgency=low
+
+  * prepare for 7.4.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 16 Jul 2013 15:16:09 +0200
+
 open-xchange-passwordchange-script (7.4.0-0) UNRELEASED; urgency=low
 
   * prepare for 7.4.0

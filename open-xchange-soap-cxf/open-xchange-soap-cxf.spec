@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 8
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -48,10 +48,10 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Jul 16 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.4.0
 * Thu Jul 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-10
-* Wed Jul 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-06-27
 * Mon Jul 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Third candidate for 7.2.2 release
 * Fri Jun 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -74,8 +74,6 @@ First sprint increment for 7.2.2 release
 First candidate for 7.2.2 release
 * Tue May 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second build for patch 2013-05-28
-* Tue May 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Second build for patch 2013-05-28
 * Mon May 27 2013 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.2.2
 * Thu May 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -87,8 +85,6 @@ Build for patch 2013-05-22
 * Wed May 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-05-22
 * Wed May 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-05-10
-* Wed May 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.2.1 release
 * Wed May 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-05-10
@@ -98,7 +94,7 @@ Build for patch 2013-05-09
 Build for patch 2013-05-09
 * Mon May 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-05-09
-* Mon May 13 2013 Marcus Klein <marcus.kleni@open-xchange.com>
+* Mon May 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-05-09
 * Mon May 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-05-09
@@ -109,6 +105,8 @@ Build for patch 2013-04-17
 * Mon Apr 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.2.1 release
 * Mon Apr 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.4.0
+* Mon Apr 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.2.1
 * Fri Apr 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-12
@@ -117,10 +115,8 @@ Fourth candidate for 7.2.0 release
 * Tue Apr 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Third candidate for 7.2.0 release
 * Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-04-04
-* Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.2.0 release
-* Tue Apr 02 2013 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-04
 * Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-04
@@ -143,10 +139,8 @@ Third release candidate for 6.22.2/7.0.2
 * Thu Mar 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 6.22.2/7.0.2
 * Mon Mar 04 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-03-08
-* Mon Mar 04 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-03-07
-* Mon Mar 04 2013 Marcus Klein <marcus.kleni@open-xchange.com>
+* Mon Mar 04 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-03-08
 * Fri Mar 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-03-07

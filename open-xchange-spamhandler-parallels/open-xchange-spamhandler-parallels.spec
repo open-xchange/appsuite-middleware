@@ -8,7 +8,7 @@ BuildRequires:  open-xchange-spamhandler-spamassassin >= @OXVERSION@
 BuildRequires:  open-xchange-parallels >= @OXVERSION@
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 8
+%define         ox_release 0
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -49,6 +49,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/bundles/*
 
 %changelog
+* Tue Jul 16 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.4.0
 * Thu Jul 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-10
 * Wed Jul 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -71,8 +73,6 @@ Build for patch 2013-06-20
 First sprint increment for 7.2.2 release
 * Wed May 29 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.2.2 release
-* Tue May 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Second build for patch 2013-05-28
 * Tue May 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second build for patch 2013-05-28
 * Mon May 27 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -104,6 +104,8 @@ Build for patch 2013-04-17
 * Mon Apr 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.2.1 release
 * Mon Apr 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.4.0
+* Mon Apr 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.2.1
 * Fri Apr 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-12
@@ -111,8 +113,6 @@ Build for patch 2013-04-12
 Fourth candidate for 7.2.0 release
 * Tue Apr 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Third candidate for 7.2.0 release
-* Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-04-04
 * Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.2.0 release
 * Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
