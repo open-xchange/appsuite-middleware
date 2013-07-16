@@ -102,10 +102,12 @@ public interface DriveSubscriptionStore {
      * Updates the registration ID for a device.
      *
      * @param serviceID The service ID
-     * @param oldRegistrationID The old registration ID
-     * @param newRegistrationID The new registration ID
+     * @param contextID The context ID
+     * @param oldToken The old registration token
+     * @param newToken The new registration token
+     * @return The number of updated registrations
      */
-//    void updateRegistration(String serviceID, String oldRegistrationID, String newRegistrationID);
+    int updateToken(String serviceID, int contextID, String oldToken, String newToken) throws OXException;
 
     /**
      * Gets the subscriptions of all devices registered to one of the supplied root folder IDs
