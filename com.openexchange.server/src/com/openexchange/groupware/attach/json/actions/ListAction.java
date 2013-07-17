@@ -108,7 +108,7 @@ public final class ListAction extends AbstractAttachmentAction {
             final int attachedId = requireNumber(requestData, AJAXServlet.PARAMETER_ATTACHEDID);
             final int moduleId = requireNumber(requestData, AJAXServlet.PARAMETER_MODULE);
 
-            final JSONArray idsArray = (JSONArray) requestData.getData();
+            final JSONArray idsArray = (JSONArray) requestData.requireData();
 
             final int[] ids = new int[idsArray.length()];
             for (int i = 0; i < idsArray.length(); i++) {

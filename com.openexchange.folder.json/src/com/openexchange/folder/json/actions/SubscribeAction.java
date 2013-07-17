@@ -116,7 +116,7 @@ public final class SubscribeAction extends AbstractFolderAction {
             /*
              * Parse JSON object
              */
-            final JSONArray jArray = (JSONArray) request.getData();
+            final JSONArray jArray = (JSONArray) request.requireData();
             final int len = jArray.length();
             if (0 == len) {
                 return new AJAXRequestResult();

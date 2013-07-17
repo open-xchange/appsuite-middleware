@@ -63,6 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.impl.JSONProtocolHandler;
 import com.openexchange.realtime.atmosphere.impl.StateEntry;
 import com.openexchange.realtime.atmosphere.impl.StateManager;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -123,8 +124,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class SendAction extends RTAction  {
 
-    private JSONProtocolHandler protocolHandler;
-    private StateManager stateManager;
+    private final JSONProtocolHandler protocolHandler;
+    private final StateManager stateManager;
 
     public SendAction(ServiceLookup services, StateManager stateManager, JSONProtocolHandler protocolHandler) {
         this.stateManager = stateManager;
@@ -133,9 +134,9 @@ public class SendAction extends RTAction  {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        Object data = request.getData();
+        Object data = request.requireData();
 
-        List<JSONObject> objects = null;
+        final List<JSONObject> objects;
         if (data instanceof JSONArray) {
             JSONArray array = (JSONArray) data;
             objects = new ArrayList<JSONObject>(array.length());
@@ -148,22 +149,24 @@ public class SendAction extends RTAction  {
             }
         } else if (data instanceof JSONObject) {
             objects = Arrays.asList((JSONObject) data);
+        } else {
+            throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create("Missing request body");
         }
-        
+
         ID id = constructID(request, session);
-        
+
         StateEntry entry = stateManager.retrieveState(id);
-        
+
         List<Long> acknowledgements = new ArrayList<Long>(objects.size());
-        
+
         protocolHandler.handleIncomingMessages(id, session, entry, objects, acknowledgements);
-        
+
         Map<String, Object> r = new HashMap<String, Object>();
         r.put("acknowledgements", acknowledgements);
-        
+
         return new AJAXRequestResult(r, "native");
     }
 
-    
+
 
 }

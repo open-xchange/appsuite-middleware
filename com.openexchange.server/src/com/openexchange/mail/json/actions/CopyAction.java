@@ -95,7 +95,7 @@ public final class CopyAction extends AbstractMailAction {
              */
             final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
             final String sourceFolder = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-            final String destFolder = ((JSONObject) req.getRequest().getData()).getString(FolderChildFields.FOLDER_ID);
+            final String destFolder = ((JSONObject) req.getRequest().requireData()).getString(FolderChildFields.FOLDER_ID);
             /*
              * Get mail interface
              */

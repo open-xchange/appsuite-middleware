@@ -119,7 +119,7 @@ public final class SearchAction extends AbstractMailAction {
             String stz = req.getParameter(Mail.PARAMETER_TIMEZONE);
             final TimeZone timeZone = isEmpty(stz) ? null : TimeZoneUtils.getTimeZone(stz.trim());
             stz = null;
-            final JSONValue searchValue = (JSONValue) req.getRequest().getData();
+            final JSONValue searchValue = (JSONValue) req.getRequest().requireData();
             /*
              * Get mail interface
              */

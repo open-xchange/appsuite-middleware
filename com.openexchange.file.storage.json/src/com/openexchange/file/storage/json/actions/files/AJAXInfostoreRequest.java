@@ -428,7 +428,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         if (versions != null) {
             return versions;
         }
-        final JSONArray body = (JSONArray) data.getData();
+        final JSONArray body = (JSONArray) data.requireData();
 
         try {
             versions = new String[body.length()];
@@ -503,7 +503,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 return;
             }
             // Initialize
-            final JSONArray array = (JSONArray) data.getData();
+            final JSONArray array = (JSONArray) data.requireData();
             final int length = array.length();
             final List<String> ids = new ArrayList<String>(length);
             this.ids = ids;

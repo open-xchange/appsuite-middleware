@@ -76,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ListAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -88,7 +88,7 @@ public final class ListAction extends JSlobAction {
 
     /**
      * Initializes a new {@link ListAction}.
-     * 
+     *
      * @param services The service look-up
      */
     public ListAction(final ServiceLookup services, final Map<String, JSlobAction> actions) {
@@ -103,7 +103,7 @@ public final class ListAction extends JSlobAction {
                 serviceId = DEFAULT_SERVICE_ID;
             }
             final JSlobService jslobService = getJSlobService(serviceId);
-            final JSONArray ids = (JSONArray) jslobRequest.getRequestData().getData();
+            final JSONArray ids = (JSONArray) jslobRequest.getRequestData().requireData();
             final int length = ids.length();
             // Check length
             if (length <= 1) {

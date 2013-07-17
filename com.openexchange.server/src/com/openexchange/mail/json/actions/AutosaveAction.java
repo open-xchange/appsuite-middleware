@@ -92,7 +92,7 @@ public final class AutosaveAction extends AbstractMailAction {
             String msgIdentifier = null;
             final List<OXException> warnings = new ArrayList<OXException>();
             {
-                final JSONObject jsonMailObj = (JSONObject) req.getRequest().getData();
+                final JSONObject jsonMailObj = (JSONObject) req.getRequest().requireData();
                 /*
                  * Parse with default account's transport provider
                  */

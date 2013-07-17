@@ -73,8 +73,7 @@ public class PollRequest {
 	}
 
 	public Poll getPoll() throws OXException {
-		final JSONObject bodyObj = (JSONObject) request.getData();
-		return PARSER.parse(bodyObj);
+		return PARSER.parse((JSONObject) request.requireData());
 	}
 
 	public int getId() throws OXException {

@@ -102,7 +102,7 @@ public class ListAction extends TaskAction {
 
         final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
         final int[] columnsToLoad = removeVirtualColumns(columns);
-        final JSONArray jData = (JSONArray) req.getRequest().getData();
+        final JSONArray jData = (JSONArray) req.getRequest().requireData();
         final int[][] objectIdAndFolderId = new int[jData.length()][2];
         for (int a = 0; a < objectIdAndFolderId.length; a++) {
             final JSONObject jObject = jData.getJSONObject(a);

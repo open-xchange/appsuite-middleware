@@ -83,7 +83,8 @@ public final class DeleteAction extends AbstractOAuthAJAXActionService {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        if (request.getData() instanceof JSONObject) {
+        final Object data = request.getData();
+        if (data instanceof JSONObject) {
             /*
              * Parse parameters
              */
@@ -96,8 +97,8 @@ public final class DeleteAction extends AbstractOAuthAJAXActionService {
              */
             final OAuthService oAuthService = getOAuthService();
             oAuthService.deleteAccount(Tools.getUnsignedInteger(accountId), session.getUserId(), session.getContextId());
-        } else if(request.getData() instanceof JSONArray) {
-            JSONArray jsonArray = (JSONArray) request.getData();
+        } else if(data instanceof JSONArray) {
+            JSONArray jsonArray = (JSONArray) data;
             for (int i = 0; i < jsonArray.length(); i++) {
                 try {
                 JSONObject json = jsonArray.getJSONObject(i);
@@ -114,7 +115,7 @@ public final class DeleteAction extends AbstractOAuthAJAXActionService {
                     throw AjaxExceptionCodes.JSON_ERROR.create(e);
                 }
             }
-        } else if (request.getData() == null) {
+        } else if (data == null) {
         	request.require("id");
         	int id = request.getParameter("id", int.class).intValue();
         	final OAuthService oAuthService = getOAuthService();

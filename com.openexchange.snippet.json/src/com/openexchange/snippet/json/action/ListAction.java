@@ -89,7 +89,7 @@ public final class ListAction extends SnippetAction {
 
     @Override
     protected AJAXRequestResult perform(final SnippetRequest snippetRequest) throws OXException, JSONException {
-        final JSONArray ids = (JSONArray) snippetRequest.getRequestData().getData();
+        final JSONArray ids = (JSONArray) snippetRequest.getRequestData().requireData();
         final int length = ids.length();
         final List<Snippet> snippets = new ArrayList<Snippet>(length);
 

@@ -462,15 +462,14 @@ public class ContactRequest {
     }
 
     public JSONObject getContactJSON(final boolean isUpload) throws OXException {
-        if (isUpload) {
-            final String jsonField = request.getUploadEvent().getFormField("json");
-            try {
-                return new JSONObject(jsonField);
-            } catch (final JSONException e) {
-                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, jsonField);
-            }
-        } else {
-            return (JSONObject) request.getData();
+        if (!isUpload) {
+            return (JSONObject) request.requireData();
+        }
+        final String jsonField = request.getUploadEvent().getFormField("json");
+        try {
+            return new JSONObject(jsonField);
+        } catch (final JSONException e) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, jsonField);
         }
     }
 
@@ -495,7 +494,7 @@ public class ContactRequest {
     }
 
     public int[] getUserIds() throws OXException {
-        final JSONArray json = (JSONArray) request.getData();
+        final JSONArray json = (JSONArray) request.requireData();
         final int userIdArray[] = new int[json.length()];
         for (int i = 0; i < userIdArray.length; i++) {
             try {
@@ -509,7 +508,7 @@ public class ContactRequest {
     }
 
     public int getFolderFromJSON() throws OXException {
-        final JSONObject json = (JSONObject) request.getData();
+        final JSONObject json = (JSONObject) request.requireData();
         try {
             return json.getInt("folder_id");
         } catch (final JSONException e) {

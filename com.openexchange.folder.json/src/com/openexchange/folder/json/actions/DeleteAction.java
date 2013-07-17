@@ -118,7 +118,7 @@ public final class DeleteAction extends AbstractFolderAction {
         /*
          * Compose JSON array with id
          */
-        final JSONArray jsonArray = (JSONArray) request.getData();
+        final JSONArray jsonArray = (JSONArray) request.requireData();
         final int len = jsonArray.length();
         /*
          * Delete

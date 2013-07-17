@@ -55,21 +55,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.LogRecord;
 import org.apache.commons.logging.Log;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.impl.JSONProtocolHandler;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
-import com.openexchange.realtime.atmosphere.protocol.RTProtocol;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.packet.GenericError;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.CustomGateAction;
@@ -119,9 +115,9 @@ import com.openexchange.tools.session.ServerSession;
 public class QueryAction extends RTAction {
 
     private final static Log LOG = com.openexchange.log.Log.loggerFor(QueryAction.class);
-    private ServiceLookup services;
-    private StanzaSequenceGate gate;
-    
+    private final ServiceLookup services;
+    private final StanzaSequenceGate gate;
+
     /**
      * Initializes a new {@link QueryAction}.
      * @param services
@@ -135,22 +131,22 @@ public class QueryAction extends RTAction {
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, ServerSession session) throws OXException {
         ID id = constructID(request, session);
-        
-        StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(id, session, (JSONObject) request.getData());
-        
+
+        StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(id, session, (JSONObject) request.requireData());
+
         Stanza stanza = stanzaBuilder.build();
         if (stanza.traceEnabled()) {
             stanza.trace("received in backend");
         }
-        
+
         stanza.setOnBehalfOf(id);
         stanza.setFrom(id);
-        
+
         stanza.transformPayloadsToInternal();
         stanza.initializeDefaults();
-        
+
         final Map<String, Object> values = new HashMap<String, Object>();
-        
+
         final Lock sendLock = new ReentrantLock();
         try {
             sendLock.lock();
@@ -159,7 +155,7 @@ public class QueryAction extends RTAction {
 
                 @Override
                 public void handle(final Stanza stanza, ID recipient) {
-                    
+
                     try {
                         values.put("answer", services.getService(MessageDispatcher.class).sendSynchronously(stanza, request.isSet("timeout") ? request.getIntParameter("timeout") : 50, TimeUnit.SECONDS));
                     } catch (OXException e) {
@@ -173,9 +169,9 @@ public class QueryAction extends RTAction {
                         sendLock.unlock();
                     }
                 }
-                
+
             });
-            
+
             if (!values.containsKey("done")) {
                 handled.await(request.isSet("timeout") ? request.getIntParameter("timeout") : 30, TimeUnit.SECONDS);
             }
@@ -195,7 +191,7 @@ public class QueryAction extends RTAction {
         } finally {
             sendLock.unlock();
         }
-        
+
         return new AJAXRequestResult(new StanzaWriter().write((Stanza)values.get("answer")), "json");
     }
 

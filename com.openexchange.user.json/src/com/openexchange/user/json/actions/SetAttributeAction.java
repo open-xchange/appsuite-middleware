@@ -105,7 +105,7 @@ public final class SetAttributeAction extends AbstractUserAction {
             /*
              * Parse attribute JSON object
              */
-            final JSONObject jData = (JSONObject) request.getData();
+            final JSONObject jData = (JSONObject) request.requireData();
             // Check if we are allowed to overwrite an existing attribute.
             final String name = jData.getString("name");
             final Context context = session.getContext();
