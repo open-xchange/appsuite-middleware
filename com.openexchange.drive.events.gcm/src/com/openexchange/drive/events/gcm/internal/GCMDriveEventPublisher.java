@@ -111,6 +111,7 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
 
     private static Message getMessage(DriveEvent event) {
         return new Message.Builder()
+            .collapseKey("TRIGGER_SYNC")
             .addData("alert", "TRIGGER_SYNC")
             .addData("data", "{\"action\":\"sync\"}")
             .addData("folders", event.getFolderIDs().toString())

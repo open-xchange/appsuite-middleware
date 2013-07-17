@@ -84,9 +84,23 @@ public class SQL {
         ") ENGINE=InnoDB DEFAULT CHARSET=ascii;";
     }
 
+    // no UNIQUE constraint possible due to combined length of required columns
     public static final String INSERT_SUBSCRIPTION_STMT =
         "INSERT INTO driveEventSubscriptions (uuid,cid,service,token,folder) " +
-        "VALUES (UNHEX(?),?,?,?,REVERSE(?));";
+        "SELECT UNHEX(?),?,?,?,REVERSE(?) FROM DUAL WHERE NOT EXISTS " +
+        "(SELECT uuid FROM driveEventSubscriptions WHERE cid=? AND service=? AND token=? AND folder=REVERSE(?));";
+
+
+//        "VALUES (UNHEX(?),?,?,?,REVERSE(?));";
+
+
+//        INSERT INTO driveEventSubscriptions (uuid,cid,service,token,folder)
+//    SELECT UNHEX('8e60a72b560849ec819321bb918855af'),424242669,'apn','28919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677',REVERSE('65841')
+//    FROM dual WHERE NOT EXISTS
+//        (SELECT uuid FROM driveEventSubscriptions
+//        WHERE cid=424242669 AND service='apn' AND token='28919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677' AND folder=REVERSE('65841'))
+
+
 
     public static final String DELETE_SUBSCRIPTION_STMT =
         "DELETE FROM driveEventSubscriptions " +
