@@ -51,7 +51,6 @@ package com.openexchange.drive.events;
 
 import java.util.List;
 import java.util.Set;
-import org.osgi.service.event.Event;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
 
@@ -63,14 +62,25 @@ import com.openexchange.drive.DriveVersion;
  */
 public interface DriveEvent {
 
+    /**
+     * Gets the consecutive actions to be executed by the client.
+     *
+     * @return The client actions
+     */
     List<DriveAction<? extends DriveVersion>> getActions();
 
+    /**
+     * Gets the context ID.
+     *
+     * @return The context ID
+     */
     int getContextID();
 
+    /**
+     * Gets the IDs of all affected folders.
+     *
+     * @return The folder IDs
+     */
     Set<String> getFolderIDs();
-
-    String getSessionID();
-
-    Event getEvent();
 
 }

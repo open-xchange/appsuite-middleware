@@ -51,7 +51,6 @@ package com.openexchange.drive.events.internal;
 
 import java.util.List;
 import java.util.Set;
-import org.osgi.service.event.Event;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.events.DriveEvent;
@@ -63,30 +62,22 @@ import com.openexchange.drive.events.DriveEvent;
  */
 public class DriveEventImpl implements DriveEvent {
 
-    private final List<DriveAction<? extends DriveVersion>> actions;
-    private final Event event;
     private final int contextID;
-    private final String sessionID;
     private final Set<String> folderIDs;
+    private final List<DriveAction<? extends DriveVersion>> actions;
 
-
-    public DriveEventImpl(int contextID, String sessionID, Set<String> folderIDs, Event event, List<DriveAction<? extends DriveVersion>> actions) {
+    /**
+     * Initializes a new {@link DriveEventImpl}.
+     *
+     * @param contextID the context ID
+     * @param folderIDs The affected folder IDs
+     * @param actions The client actions to execute
+     */
+    public DriveEventImpl(int contextID, Set<String> folderIDs, List<DriveAction<? extends DriveVersion>> actions) {
         super();
-        this.actions = actions;
-        this.event = event;
         this.contextID = contextID;
-        this.sessionID = sessionID;
         this.folderIDs = folderIDs;
-    }
-
-    @Override
-    public List<DriveAction<? extends DriveVersion>> getActions() {
-        return actions;
-    }
-
-    @Override
-    public Event getEvent() {
-        return event;
+        this.actions = actions;
     }
 
     @Override
@@ -100,8 +91,13 @@ public class DriveEventImpl implements DriveEvent {
     }
 
     @Override
-    public String getSessionID() {
-        return sessionID;
+    public List<DriveAction<? extends DriveVersion>> getActions() {
+        return actions;
+    }
+
+    @Override
+    public String toString() {
+        return "DriveEvent [contextID=" + contextID + ", folderIDs=" + folderIDs + "]";
     }
 
 }

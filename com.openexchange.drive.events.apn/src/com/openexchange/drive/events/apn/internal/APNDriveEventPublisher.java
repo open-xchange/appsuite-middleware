@@ -94,16 +94,14 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
             LOG.error("unable to get subscriptions for service " + SERIVCE_ID, e);
         }
         if (null != subscriptions && 0 < subscriptions.size()) {
-            List<PayloadPerDevice> payloads = getPayloads(subscriptions);
+            List<PayloadPerDevice> payloads = getPayloads(event, subscriptions);
             PushedNotifications notifications = null;
             try {
                 notifications = Push.payloads(access.getKeystore(), access.getPassword(), access.isProduction(), payloads);
             } catch (CommunicationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOG.warn("error submitting push notifications", e);
             } catch (KeystoreException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOG.warn("error submitting push notifications", e);
             }
             if (LOG.isDebugEnabled() && null != notifications) {
                 for (PushedNotification notification : notifications) {
@@ -113,14 +111,15 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
         }
     }
 
-    private static List<PayloadPerDevice> getPayloads(List<Subscription> subscriptions) {
+    private static List<PayloadPerDevice> getPayloads(DriveEvent event, List<Subscription> subscriptions) {
         List<PayloadPerDevice> payloads = new ArrayList<PayloadPerDevice>(subscriptions.size());
         for (Subscription subscription : subscriptions) {
             try {
                 PushNotificationPayload payload = new PushNotificationPayload();
-                payload.addAlert("SYNC for root folder: " + subscription.getRootFolderID());
-                payload.addBadge(1);
                 payload.addCustomDictionary("root", subscription.getRootFolderID());
+                payload.addCustomDictionary("data", "{\"action\":\"sync\"}");
+                payload.addCustomDictionary("folders", event.getFolderIDs().toString());
+                payload.addAlert("TRIGGER_SYNC");
                 payloads.add(new PayloadPerDevice(payload, subscription.getToken()));
             } catch (JSONException e) {
                 LOG.warn("error constructing payload", e);

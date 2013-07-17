@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.drive.events.osgi.DriveEventsActivator
 Bundle-ClassPath: .
 Import-Package: com.openexchange.ajax.container,
+ com.openexchange.config,
  com.openexchange.drive,
  com.openexchange.exception,
  com.openexchange.file.storage,
@@ -28,6 +29,7 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.server,
  com.openexchange.server.impl,
  com.openexchange.session,
+ com.openexchange.timer,
  com.openexchange.tools.iterator,
  com.openexchange.tools.session,
  com.openexchange.tools.sql,
