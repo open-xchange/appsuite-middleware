@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core
 BuildRequires:  java-devel >= 1.6.0
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -61,6 +61,8 @@ fi
 %doc com.openexchange.spamhandler.cloudmark/ChangeLog
 
 %changelog
+* Wed Jul 17 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+First release candidate for 7.4.0
 * Tue Jul 16 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 prepare for 7.4.0
 * Thu Jul 11 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>

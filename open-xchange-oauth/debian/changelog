@@ -1,3 +1,9 @@
+open-xchange-oauth (7.4.0-1) stable; urgency=low
+
+  * First release candidate for 7.4.0
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Wed, 17 Jul 2013 10:19:43 +0200
+
 open-xchange-oauth (7.4.0-0) unstable; urgency=low
 
   * prepare for 7.4.0

@@ -1,3 +1,9 @@
+open-xchange-munin-scripts (7.4.0-1) stable; urgency=low
+
+  * First release candidate for 7.4.0
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 17 Jul 2013 10:20:05 +0200
+
 open-xchange-munin-scripts (7.4.0-0) unstable; urgency=low
 
   * prepare for 7.4.0

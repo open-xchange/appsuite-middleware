@@ -10,7 +10,7 @@ BuildRequires:  open-xchange-oauth
 BuildRequires:  open-xchange-xerces
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 0
+%define         ox_release 1
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -84,6 +84,8 @@ fi
 %dir /opt/open-xchange/etc/
 
 %changelog
+* Wed Jul 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.4.0
 * Tue Jul 16 2013 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.4.0
 * Thu Jul 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
