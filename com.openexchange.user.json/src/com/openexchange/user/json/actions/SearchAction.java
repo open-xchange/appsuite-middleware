@@ -123,7 +123,7 @@ public final class SearchAction extends AbstractUserAction {
         final int orderBy = parseIntParameter(AJAXServlet.PARAMETER_SORT, request);
         final Order order = OrderFields.parse(request.getParameter(AJAXServlet.PARAMETER_ORDER));
         final String collation = request.getParameter(AJAXServlet.PARAMETER_COLLATION);
-        final JSONObject jData = (JSONObject) request.getData();
+        final JSONObject jData = (JSONObject) request.requireData();
         /*
          * Contact search object
          */
