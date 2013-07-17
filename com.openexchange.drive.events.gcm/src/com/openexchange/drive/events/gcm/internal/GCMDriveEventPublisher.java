@@ -110,7 +110,11 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
     }
 
     private static Message getMessage(DriveEvent event) {
-        return new Message.Builder().addData("folders", event.getFolderIDs().toString()).build();
+        return new Message.Builder()
+            .addData("alert", "TRIGGER_SYNC")
+            .addData("data", "{\"action\":\"sync\"}")
+            .addData("folders", event.getFolderIDs().toString())
+        .build();
     }
 
     private static List<String> getRegIDs(List<Subscription> subscriptions) {
