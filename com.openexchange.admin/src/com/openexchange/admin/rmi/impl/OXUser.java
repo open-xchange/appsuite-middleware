@@ -1195,7 +1195,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     /**
-     * checking for some requirements when changing exisiting user data
+     * checking for some requirements when changing existing user data
      *
      * @param ctx
      * @param newuser
