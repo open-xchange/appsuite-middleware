@@ -87,7 +87,7 @@ public class ListSubscriptionAction extends AbstractSubscribeAction {
 	@Override
 	public AJAXRequestResult perform(SubscribeRequest subscribeRequest)
 			throws OXException {
-		final JSONArray ids = (JSONArray) subscribeRequest.getRequestData().getData();
+		final JSONArray ids = (JSONArray) subscribeRequest.getRequestData().requireData();
 		final JSONObject parameters = new JSONObject(subscribeRequest.getRequestData().getParameters());
         final Context context = subscribeRequest.getServerSession().getContext();
         final List<Subscription> subscriptions = new ArrayList<Subscription>(ids.length());

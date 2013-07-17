@@ -99,7 +99,7 @@ public final class DeleteAction extends AbstractMailAction {
              * Read in parameters
              */
             final boolean hardDelete = "1".equals(req.getParameter(AJAXServlet.PARAMETER_HARDDELETE));
-            final JSONArray jsonIDs = (JSONArray) req.getRequest().getData();
+            final JSONArray jsonIDs = (JSONArray) req.getRequest().requireData();
             /*
              * Get mail interface
              */

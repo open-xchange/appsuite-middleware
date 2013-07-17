@@ -283,7 +283,7 @@ public final class NewAction extends AbstractMailAction {
         final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
         final PutNewMailData data;
         {
-            final MimeMessage message = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(Charsets.toAsciiBytes((String) req.getRequest().getData())));
+            final MimeMessage message = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(Charsets.toAsciiBytes((String) req.getRequest().requireData())));
             message.removeHeader("x-original-headers");
             final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
             final InternetAddress fromAddress;

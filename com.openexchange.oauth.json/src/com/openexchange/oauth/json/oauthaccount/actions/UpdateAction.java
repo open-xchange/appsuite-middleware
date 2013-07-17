@@ -95,7 +95,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
              * Parse parameters
              */
             final String accountId = request.getParameter("id");
-            final JSONObject data = (JSONObject) request.getData();
+            final JSONObject data = (JSONObject) request.requireData();
             final int id;
             if (null == accountId) {
                 if (!data.has(AccountField.ID.getName())) {

@@ -124,7 +124,7 @@ public final class UpdateAction extends JSlobAction {
         {
             final AJAXRequestData requestData = jslobRequest.getRequestData();
             final String serlvetRequestURI = requestData.getSerlvetRequestURI();
-            final Object data = requestData.getData();
+            final Object data = requestData.requireData();
             if (!isEmpty(serlvetRequestURI)) {
                 /*
                  * Update by request path

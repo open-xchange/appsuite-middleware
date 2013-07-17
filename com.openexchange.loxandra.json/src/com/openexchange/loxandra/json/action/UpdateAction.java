@@ -81,12 +81,9 @@ public class UpdateAction extends AbstractAction {
 		super(serviceLookup);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
-	 */
 	@Override
 	public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-		JSONObject jsonData = (JSONObject) requestData.getData();
+		JSONObject jsonData = (JSONObject) requestData.requireData();
 		EAVContactParser parser = new EAVContactParser();
 		final EAVContact c = parser.parse(jsonData);
 		getContactService().getEAVContactService().updateContact(c);

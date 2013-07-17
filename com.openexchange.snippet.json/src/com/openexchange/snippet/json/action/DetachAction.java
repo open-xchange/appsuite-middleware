@@ -95,7 +95,7 @@ public final class DetachAction extends SnippetAction {
         final SnippetService snippetService = getSnippetService();
 
         final DefaultSnippet snippet = new DefaultSnippet().setId(id);
-        final JSONArray jsonAttachments = (JSONArray) snippetRequest.getRequestData().getData();
+        final JSONArray jsonAttachments = (JSONArray) snippetRequest.getRequestData().requireData();
         int length = jsonAttachments.length();
         final List<Attachment> attachments = new ArrayList<Attachment>(length);
         for (int i = 0; i < length; i++) {

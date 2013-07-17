@@ -80,7 +80,7 @@ public class DeleteSubscriptionAction  extends AbstractSubscribeAction {
 			throws OXException {
 
 		try {
-			JSONArray ids = (JSONArray) subscribeRequest.getRequestData().getData();
+			JSONArray ids = (JSONArray) subscribeRequest.getRequestData().requireData();
 			final Context context = subscribeRequest.getServerSession().getContext();
 	        for (int i = 0, size = ids.length(); i < size; i++) {
 	            final int id = ids.getInt(i);

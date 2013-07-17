@@ -102,7 +102,7 @@ public abstract class AbstractSubscribeAction extends
 
 	protected Subscription getSubscription(final AJAXRequestData requestData, final ServerSession session, final String secret)
 			throws JSONException, OXException {
-			    final JSONObject object = (JSONObject) requestData.getData();
+			    final JSONObject object = (JSONObject) requestData.requireData();
 			    final Subscription subscription = new SubscriptionJSONParser(getDiscovery(session)).parse(object);
 			    subscription.setContext(session.getContext());
 			    subscription.setUserId(session.getUserId());

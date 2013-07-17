@@ -107,7 +107,7 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
                 final String parameterId = AJAXServlet.PARAMETER_ID;
                 final String sIds = req.getParameter(parameterId);
                 if (null == sIds) {
-                    final JSONArray jArray = (JSONArray) req.getRequest().getData();
+                    final JSONArray jArray = (JSONArray) req.getRequest().requireData();
                     final int length = jArray.length();
                     ids = new String[length];
                     for (int i = 0; i < length; i++) {
