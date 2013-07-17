@@ -1,6 +1,7 @@
 * 2013-07-17 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 27554: Removed unneeded System.out.println
+ - Fix for bug 26913: Update task to delete redundant keys & removed them from table definitions
 
 * 2013-07-17 - thorben.betten@open-xchange.com
 
