@@ -97,6 +97,7 @@ import com.openexchange.groupware.update.tasks.PrgDatesMembersPrimaryKeyUpdateTa
 import com.openexchange.groupware.update.tasks.PrgDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddUuidUpdateTask;
+import com.openexchange.groupware.update.tasks.RemoveRedundantKeysForBug26913UpdateTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
@@ -621,6 +622,9 @@ public final class InternalList {
 
         // Add folder_id to primary key in del_contacts
         list.add(new MakeFolderIdPrimaryForDelContactsTable());
+        
+        // Remove redundant keys (see bug 26913)
+        list.add(new RemoveRedundantKeysForBug26913UpdateTask());
 
         // Add synthetic primary keys to tables without natural key if full primary key support is enabled
         final FullPrimaryKeySupportService fullPrimaryKeySupportService = ServerServiceRegistry.getInstance().getService(FullPrimaryKeySupportService.class);

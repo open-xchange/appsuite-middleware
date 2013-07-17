@@ -92,7 +92,6 @@ public final class Tables {
                " refId VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
                " lastModified BIGINT(64) NOT NULL," +
                " PRIMARY KEY (cid, user, id)," +
-               " INDEX `indexUser` (cid, user)," +
                " INDEX `indexShared` (cid, shared)," +
                " INDEX `indexRefType` (cid, user, id, refType)" +
                ") ENGINE=InnoDB";
