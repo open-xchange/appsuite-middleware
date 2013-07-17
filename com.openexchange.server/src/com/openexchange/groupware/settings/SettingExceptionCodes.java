@@ -50,14 +50,15 @@
 package com.openexchange.groupware.settings;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
+import com.openexchange.exception.LogLevelAwareOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * The error codes for settings.
  */
-public enum SettingExceptionCodes implements OXExceptionCode {
+public enum SettingExceptionCodes implements LogLevelAwareOXExceptionCode {
     /** Cannot get connection to database. */
     NO_CONNECTION(SettingExceptionMessage.NO_CONNECTION_MSG, Category.CATEGORY_SERVICE_DOWN, 1),
     /** An SQL problem occures while reading information from the config database. */
@@ -73,7 +74,7 @@ public enum SettingExceptionCodes implements OXExceptionCode {
     /** Problem while initialising configuration tree. */
     INIT(SettingExceptionMessage.INIT_MSG, Category.CATEGORY_ERROR, 8),
     /** Invalid value %s written to setting %s. */
-    INVALID_VALUE(SettingExceptionMessage.INVALID_VALUE_MSG, Category.CATEGORY_USER_INPUT, 9),
+    INVALID_VALUE(SettingExceptionMessage.INVALID_VALUE_MSG, Category.CATEGORY_USER_INPUT, 9, LogLevel.ERROR),
     /** Found duplicate database identifier %d. Not adding preferences item. */
     DUPLICATE_ID(SettingExceptionMessage.DUPLICATE_ID_MSG, Category.CATEGORY_ERROR, 10),
     /** Found duplicate path %s. */
@@ -86,15 +87,24 @@ public enum SettingExceptionCodes implements OXExceptionCode {
     MAX_RETRY(SettingExceptionMessage.MAX_RETRY_MSG, Category.CATEGORY_TRY_AGAIN, 15);
 
     private final String message;
-
     private final Category category;
-
     private final int detailNumber;
+    private final LogLevel logLevel;
 
     private SettingExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this(message, category, detailNumber, null);
+    }
+
+    private SettingExceptionCodes(final String message, final Category category, final int detailNumber, final LogLevel logLevel) {
         this.message = message;
         this.category = category;
         this.detailNumber = detailNumber;
+        this.logLevel = logLevel;
+    }
+
+    @Override
+    public LogLevel getLogLevel() {
+        return logLevel;
     }
 
     @Override
