@@ -155,6 +155,10 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             stmt.setString(3, subscription.getServiceID());
             stmt.setString(4, subscription.getToken());
             stmt.setString(5, SQL.escape(subscription.getRootFolderID()));
+            stmt.setInt(6, subscription.getContextID());
+            stmt.setString(7, subscription.getServiceID());
+            stmt.setString(8, subscription.getToken());
+            stmt.setString(9, SQL.escape(subscription.getRootFolderID()));
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);

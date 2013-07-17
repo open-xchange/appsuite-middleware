@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.json.action;
 
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
@@ -89,9 +90,9 @@ public class UnsubscribeAction extends AbstractDriveAction {
         DriveSubscriptionStore subscriptionStore = Services.getService(DriveSubscriptionStore.class, true);
         subscriptionStore.unsubscribe(serviceID, token, session.getContextId(), rootFolderID);
         /*
-         * return empty json result to indicate success
+         * return empty json object to indicate success
          */
-        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+        return new AJAXRequestResult(new JSONObject(0), "json");
     }
 
 }
