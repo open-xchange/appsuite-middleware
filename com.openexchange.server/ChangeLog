@@ -1,3 +1,7 @@
+* 2013-07-17 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 27554: Removed unneeded System.out.println
+
 * 2013-07-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 27468: Log USS-0009 error code in log file although associated category "USER_INPUT" implies not to do so
