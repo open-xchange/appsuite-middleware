@@ -86,8 +86,7 @@ public final class PreviewCacheCreateTableService extends AbstractCreateTableImp
             " fileType VARCHAR(32) CHARACTER SET latin1 DEFAULT NULL," +
             " data BLOB," +
             " PRIMARY KEY (cid, user, id)," +
-            " INDEX `globaldocument` (cid, id)," +
-            " INDEX `user` (cid, user)" +
+            " INDEX `globaldocument` (cid, id)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
     }
 
