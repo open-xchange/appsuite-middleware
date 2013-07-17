@@ -47,57 +47,20 @@
  *
  */
 
-package com.openexchange.mailaccount;
+package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.exception.OXException;
-
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link AttributeSwitch}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link ArchiveResponse}
  *
  */
-public interface AttributeSwitch {
-    public Object id();
-    public Object login();
-    public Object password();
-    public Object mailURL() throws OXException;
-    public Object transportURL() throws OXException;
-    public Object name();
-    public Object primaryAddress();
-    public Object personal();
-    public Object spamHandler();
-    public Object trash();
-    public Object archive();
-    public Object sent();
-    public Object drafts();
-    public Object spam();
-    public Object confirmedSpam();
-    public Object confirmedHam();
-    public Object mailServer();
-    public Object mailPort();
-    public Object mailProtocol();
-    public Object mailSecure();
-    public Object transportServer();
-    public Object transportPort();
-    public Object transportProtocol();
-    public Object transportSecure();
-    public Object transportLogin();
-    public Object transportPassword();
-    public Object unifiedINBOXEnabled();
-    public Object trashFullname();
-    public Object archiveFullname();
-    public Object sentFullname();
-    public Object draftsFullname();
-    public Object spamFullname();
-    public Object confirmedSpamFullname();
-    public Object confirmedHamFullname();
-    public Object pop3RefreshRate();
-    public Object pop3ExpungeOnQuit();
-    public Object pop3DeleteWriteThrough();
-    public Object pop3Storage();
-    public Object pop3Path();
-    public Object addresses();
-    public Object replyTo();
+public class ArchiveResponse extends AbstractAJAXResponse {
+
+	protected ArchiveResponse(Response response) {
+		super(response);
+
+	}
+
 }

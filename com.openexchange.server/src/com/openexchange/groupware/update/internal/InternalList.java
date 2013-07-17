@@ -588,34 +588,34 @@ public final class InternalList {
 
         //Add UUID column to user_setting_server table
         list.add(new UserSettingServerAddUuidUpdateTask());
-        
+
         //Drop foreign key from infostore_document table
         list.add(new InfostoreDocumentDropForeignKeyUpdateTask());
-        
+
         //Add folder_id to primary key in infostore table
         list.add(new InfostorePrimaryKeyUpdateTask());
-        
+
         //Add foreign key to infostore_document_table
         list.add(new InfostoreDocumentCreateForeignKeyUpdateTask());
 
         //Add folder_id to primary key in del_infostore table
         list.add(new DelInfostorePrimaryKeyUpdateTask());
-        
+
         //Drop foreign key from dateExternal table
         list.add(new DateExternalDropForeignKeyUpdateTask());
 
         //Add folder_id to primary key in prg_dates
         list.add(new PrgDatesPrimaryKeyUpdateTask());
-        
+
         //Create foreign key in dateExternal table
         list.add(new DateExternalCreateForeignKeyUpdateTask());
-        
+
         //Drop foreign key from delDateExternal table
         list.add(new DelDateExternalDropForeignKeyUpdateTask());
-        
+
         //Add folder_id to primary key in del_dates
         list.add(new DelDatesPrimaryKeyUpdateTask());
-        
+
         //Create foreign key in delDateExternal table
         list.add(new DelDateExternalCreateForeignKeyUpdateTask());
 
@@ -652,14 +652,17 @@ public final class InternalList {
 
             //Add primary key to user_setting_server table
             list.add(new UserSettingServerAddPrimaryKeyUpdateTask());
-            
+
             //Add folder_id to primary key in prg_dates_members
             list.add(new PrgDatesMembersPrimaryKeyUpdateTask());
-            
+
             //Add folder_id to primary key in del_dates_members
             list.add(new DelDatesMembersPrimaryKeyUpdateTask());
 
         }
+
+        // Adds "archive" and "archive_fullname" columns to mail/transport account table
+        list.add(new com.openexchange.groupware.update.tasks.MailAccountAddArchiveTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

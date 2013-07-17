@@ -115,6 +115,8 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     protected String trash;
 
+    protected String archive;
+
     protected String sent;
 
     protected String drafts;
@@ -132,6 +134,8 @@ public abstract class AbstractMailAccount implements MailAccount {
     protected boolean unifiedINBOXEnabled;
 
     protected String trashFullname;
+
+    protected String archiveFullname;
 
     protected String sentFullname;
 
@@ -335,6 +339,11 @@ public abstract class AbstractMailAccount implements MailAccount {
     }
 
     @Override
+    public String getArchive() {
+        return archive;
+    }
+
+    @Override
     public String getTrash() {
         return trash;
     }
@@ -361,6 +370,15 @@ public abstract class AbstractMailAccount implements MailAccount {
      */
     public void setTrash(final String trash) {
         this.trash = trash;
+    }
+
+    /**
+     * Sets the default archive folder's name.
+     *
+     * @param trash The default archive folder's name
+     */
+    public void setArchive(String archive) {
+        this.archive = archive;
     }
 
     /**
@@ -677,12 +695,26 @@ public abstract class AbstractMailAccount implements MailAccount {
     }
 
     /**
-     * Sets the trash fullname
+     * Sets the trash full name
      *
-     * @param trashFullname The trash fullname to set
+     * @param trashFullname The trash full name to set
      */
     public void setTrashFullname(final String trashFullname) {
         this.trashFullname = trashFullname;
+    }
+
+    @Override
+    public String getArchiveFullname() {
+        return archiveFullname;
+    }
+
+    /**
+     * Sets the archive full name
+     *
+     * @param trashFullname The archive full name to set
+     */
+    public void setArchiveFullname(String archiveFullname) {
+        this.archiveFullname = archiveFullname;
     }
 
     @Override
@@ -691,9 +723,9 @@ public abstract class AbstractMailAccount implements MailAccount {
     }
 
     /**
-     * Sets the sent fullname
+     * Sets the sent full name
      *
-     * @param sentFullname The sent fullname to set
+     * @param sentFullname The sent full name to set
      */
     public void setSentFullname(final String sentFullname) {
         this.sentFullname = sentFullname;
@@ -705,9 +737,9 @@ public abstract class AbstractMailAccount implements MailAccount {
     }
 
     /**
-     * Sets the drafts fullname
+     * Sets the drafts full name
      *
-     * @param draftsFullname The drafts fullname to set
+     * @param draftsFullname The drafts full name to set
      */
     public void setDraftsFullname(final String draftsFullname) {
         this.draftsFullname = draftsFullname;
@@ -719,9 +751,9 @@ public abstract class AbstractMailAccount implements MailAccount {
     }
 
     /**
-     * Sets the spam fullname
+     * Sets the spam full name
      *
-     * @param spamFullname The spam fullname to set
+     * @param spamFullname The spam full name to set
      */
     public void setSpamFullname(final String spamFullname) {
         this.spamFullname = spamFullname;
@@ -733,9 +765,9 @@ public abstract class AbstractMailAccount implements MailAccount {
     }
 
     /**
-     * Sets the confirmed-spam fullname
+     * Sets the confirmed-spam full name
      *
-     * @param confirmedSpamFullname The confirmed-spam fullname to set
+     * @param confirmedSpamFullname The confirmed-spam full name to set
      */
     public void setConfirmedSpamFullname(final String confirmedSpamFullname) {
         this.confirmedSpamFullname = confirmedSpamFullname;
@@ -747,9 +779,9 @@ public abstract class AbstractMailAccount implements MailAccount {
     }
 
     /**
-     * Sets the confirmed-ham fullname
+     * Sets the confirmed-ham full name
      *
-     * @param confirmedHamFullname The confirmed-ham fullname to set
+     * @param confirmedHamFullname The confirmed-ham full name to set
      */
     public void setConfirmedHamFullname(final String confirmedHamFullname) {
         this.confirmedHamFullname = confirmedHamFullname;

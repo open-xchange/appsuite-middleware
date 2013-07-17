@@ -50,12 +50,11 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.update.Tools.columnExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedList;
-import java.util.List;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -64,16 +63,15 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link MailAccountMigrateReplyToTask} - Migrate "replyTo" information from properties table to account tables.
+ * {@link MailAccountAddArchiveTask} - Adds "archive" and "archive_fullname" columns to mail/transport account table.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccountMigrateReplyToTask extends UpdateTaskAdapter {
+public final class MailAccountAddArchiveTask extends UpdateTaskAdapter {
 
-    public MailAccountMigrateReplyToTask() {
+    public MailAccountAddArchiveTask() {
         super();
     }
 
@@ -94,78 +92,40 @@ public final class MailAccountMigrateReplyToTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] {
-            GlobalAddressBookPermissionsResolverTask.class.getName(), MailAccountAddReplyToTask.class.getName() };
+        return new String[] { MailAccountCreateTablesTask.class.getName() };
     }
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         final Connection con = Database.getNoTimeout(contextId, true);
-        boolean committed = false;
-        try {
-            con.setAutoCommit(false); // BEGIN
-            process("user_mail_account", con);
-            process("user_transport_account", con);
-            con.commit(); // COMMIT
-            committed = true;
-        } catch (final SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (!committed) {
-                DBUtils.rollback(con);
-            }
-            DBUtils.autocommit(con);
-            Database.backNoTimeout(contextId, true, con);
-        }
-    }
-
-    private void process(final String tableName, final Connection con) throws OXException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
+        boolean doRollback = false;
         try {
-            stmt = con.prepareStatement("SELECT cid, user, id, value FROM "+tableName+"_properties WHERE name = ?");
-            stmt.setString(1, "replyto");
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                class Prop {
-
-                    int context;
-                    int user;
-                    int id;
-                    String value;
-
-                    Prop(final ResultSet rs) throws SQLException {
-                        super();
-                        this.context = rs.getInt(1);
-                        this.user = rs.getInt(2);
-                        this.id = rs.getInt(3);
-                        this.value = rs.getString(4);
-                    }
-                } // End of class Prop
-                final List<Prop> props = new LinkedList<Prop>();
-                do {
-                    props.add(new Prop(rs));
-                } while (rs.next());
-                closeSQLStuff(rs, stmt);
-                rs = null;
-
-                stmt = con.prepareStatement("UPDATE "+tableName+" SET replyTo = ? WHERE cid = ? AND user = ? AND id = ?");
-                int pos;
-                for (final Prop prop : props) {
-                    pos = 1;
-                    stmt.setString(pos++, prop.value);
-                    stmt.setInt(pos++, prop.context);
-                    stmt.setInt(pos++, prop.user);
-                    stmt.setInt(pos, prop.id);
-                    stmt.addBatch();
-                }
-                stmt.executeBatch();
+            Databases.startTransaction(con);
+            doRollback = true;
+            if (!columnExists(con, "user_mail_account", "archive")) {
+                stmt = con.prepareStatement("ALTER TABLE user_mail_account ADD COLUMN archive VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
+                stmt.executeUpdate();
+                stmt.close();
+                stmt = null;
             }
+            if (!columnExists(con, "user_mail_account", "archive_fullname")) {
+                stmt = con.prepareStatement("ALTER TABLE user_mail_account ADD COLUMN archive_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
+                stmt.executeUpdate();
+                stmt.close();
+                stmt = null;
+            }
+            con.commit();
+            doRollback = false;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(rs, stmt);
+            if (doRollback) {
+                Databases.rollback(con);
+            }
+            closeSQLStuff(stmt);
+            Database.backNoTimeout(contextId, true, con);
         }
     }
 }

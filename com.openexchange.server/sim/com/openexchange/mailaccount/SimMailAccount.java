@@ -363,4 +363,14 @@ public class SimMailAccount implements MailAccount {
         return false;
     }
 
+    @Override
+    public String getArchive() {
+        return null;
+    }
+
+    @Override
+    public String getArchiveFullname() {
+        return null;
+    }
+
 }

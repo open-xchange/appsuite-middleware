@@ -101,11 +101,9 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         return UpdateTaskPriority.HIGH.priority;
     }
 
-    private static final String[] DEPENDENCIES = { MailAccountCreateTablesTask.class.getName() };
-
     @Override
     public String[] getDependencies() {
-        return DEPENDENCIES;
+        return new String[] { MailAccountCreateTablesTask.class.getName() };
     }
 
     @Override

@@ -47,57 +47,65 @@
  *
  */
 
-package com.openexchange.mailaccount;
+package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.exception.OXException;
-
+import java.util.LinkedList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link AttributeSwitch}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link ArchiveRequest}
  *
  */
-public interface AttributeSwitch {
-    public Object id();
-    public Object login();
-    public Object password();
-    public Object mailURL() throws OXException;
-    public Object transportURL() throws OXException;
-    public Object name();
-    public Object primaryAddress();
-    public Object personal();
-    public Object spamHandler();
-    public Object trash();
-    public Object archive();
-    public Object sent();
-    public Object drafts();
-    public Object spam();
-    public Object confirmedSpam();
-    public Object confirmedHam();
-    public Object mailServer();
-    public Object mailPort();
-    public Object mailProtocol();
-    public Object mailSecure();
-    public Object transportServer();
-    public Object transportPort();
-    public Object transportProtocol();
-    public Object transportSecure();
-    public Object transportLogin();
-    public Object transportPassword();
-    public Object unifiedINBOXEnabled();
-    public Object trashFullname();
-    public Object archiveFullname();
-    public Object sentFullname();
-    public Object draftsFullname();
-    public Object spamFullname();
-    public Object confirmedSpamFullname();
-    public Object confirmedHamFullname();
-    public Object pop3RefreshRate();
-    public Object pop3ExpungeOnQuit();
-    public Object pop3DeleteWriteThrough();
-    public Object pop3Storage();
-    public Object pop3Path();
-    public Object addresses();
-    public Object replyTo();
+public class ArchiveRequest extends AbstractMailRequest<ArchiveResponse> {
+
+	private final String sourceFolderID;
+	private final boolean failOnError = true;
+    private final String[] mailIDs;
+
+    public ArchiveRequest(String[] mailIDs, String sourceFolderID){
+    	this.mailIDs = mailIDs;
+    	this.sourceFolderID = sourceFolderID;
+    }
+
+	@Override
+    public Object getBody() throws JSONException {
+	    int length = mailIDs.length;
+	    JSONArray jso = new JSONArray(length);
+	    for (int i = 0; i < length; i++) {
+            jso.put(mailIDs[i]);
+        }
+        return jso;
+	}
+
+	@Override
+    public Method getMethod() {
+		return Method.PUT;
+	}
+
+	@Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
+		List<Parameter> list = new LinkedList<Parameter>();
+
+        list.add(new Parameter(Mail.PARAMETER_ACTION, "archive"));
+        list.add(new Parameter(Mail.PARAMETER_FOLDERID, sourceFolderID));
+
+        return list.toArray(new Parameter[list.size()]);
+	}
+
+	@Override
+    public AbstractAJAXParser<? extends ArchiveResponse> getParser() {
+		return new AbstractAJAXParser<ArchiveResponse>(failOnError) {
+
+            @Override
+            protected ArchiveResponse createResponse(final Response response) throws JSONException {
+                return new ArchiveResponse(response);
+            }
+        };
+	}
+
 }

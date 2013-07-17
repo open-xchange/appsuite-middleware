@@ -98,6 +98,8 @@ public interface MailAccountFields {
 
     public static final String TRASH = "trash";
 
+    public static final String ARCHIVE = "archive";
+
     public static final String SENT = "sent";
 
     public static final String DRAFTS = "drafts";
@@ -111,6 +113,8 @@ public interface MailAccountFields {
     public static final String UNIFIED_INBOX_ENABLED = "unified_inbox_enabled";
 
     public static final String TRASH_FULLNAME = "trash_fullname";
+
+    public static final String ARCHIVE_FULLNAME = "archive_fullname";
 
     public static final String SENT_FULLNAME = "sent_fullname";
 

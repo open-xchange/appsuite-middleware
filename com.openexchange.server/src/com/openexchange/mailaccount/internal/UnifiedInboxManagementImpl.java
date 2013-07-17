@@ -136,6 +136,7 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
             // No transport settings
             mailAccountDescription.setTransportServer((String) null);
             mailAccountDescription.setTrash("trash");
+            mailAccountDescription.setArchive("archive");
             // Create it
             if (null == con) {
                 storageService.insertMailAccount(mailAccountDescription, userId, ctx, null);
