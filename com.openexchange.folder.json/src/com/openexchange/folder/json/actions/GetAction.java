@@ -112,7 +112,6 @@ public final class GetAction extends AbstractFolderAction {
          * Request subfolders from folder service
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        System.out.println("TOPMOST: " + folderId);
         final UserizedFolder folder =
             folderService.getFolder(
                 treeId,
