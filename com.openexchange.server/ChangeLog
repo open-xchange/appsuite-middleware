@@ -1,3 +1,7 @@
+* 2013-07-17 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 27554: Removed unneeded System.out.println
+
 * 2013-07-11 - marcus.klein@open-xchange.com/jan.bauerdick@open-xchange.com
 
  - Fix for bug 19817: Initializing the transaction counter for the replication monitor as early as possible no normal groupware login
