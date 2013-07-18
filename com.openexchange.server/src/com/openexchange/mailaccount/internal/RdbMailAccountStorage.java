@@ -983,7 +983,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     private static final EnumSet<Attribute> PRIMARY_EDITABLE = EnumSet.of(
         Attribute.UNIFIED_INBOX_ENABLED_LITERAL,
         Attribute.PERSONAL_LITERAL,
-        Attribute.REPLY_TO_LITERAL);
+        Attribute.REPLY_TO_LITERAL,
+        Attribute.ARCHIVE_LITERAL,
+        Attribute.ARCHIVE_FULLNAME_LITERAL);
 
     @Override
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final Session session, final Connection con, final boolean changePrimary) throws OXException {
@@ -1003,7 +1005,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             final boolean containsUnifiedInbox = attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
             final boolean containsPersonal = attributes.contains(Attribute.PERSONAL_LITERAL);
             final boolean containsReplyTo = attributes.contains(Attribute.REPLY_TO_LITERAL);
-            if (!containsUnifiedInbox && !containsPersonal && !containsReplyTo) {
+            final boolean containsArchive = attributes.contains(Attribute.ARCHIVE_LITERAL);
+            final boolean containsArchiveFullName = attributes.contains(Attribute.ARCHIVE_FULLNAME_LITERAL);
+            if (!containsUnifiedInbox && !containsPersonal && !containsReplyTo && !containsArchive && !containsArchiveFullName) {
                 /*
                  * Another attribute must not be changed
                  */
@@ -1063,6 +1067,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                  * OK, update reply-to string.
                  */
                 updateReplyTo(mailAccount.getReplyTo(), MailAccount.DEFAULT_ID, user, cid, con);
+            }
+            if (containsArchive) {
+                updateArchive(mailAccount.getArchive(), MailAccount.DEFAULT_ID, user, cid, con);
+            }
+            if (containsArchiveFullName) {
+                updateArchiveFullName(mailAccount.getArchiveFullname(), MailAccount.DEFAULT_ID, user, cid, con);
             }
         } else {
             /*
@@ -1148,10 +1158,23 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             } else {
                                 stmt.setString(pos++, replyTo);
                             }
+                        } else if (Attribute.ARCHIVE_LITERAL == attribute) {
+                            final String s = mailAccount.getArchive();
+                            if (isEmpty(s)) {
+                                stmt.setString(pos++, "");
+                            } else {
+                                stmt.setString(pos++, s);
+                            }
+                        } else if (Attribute.ARCHIVE_FULLNAME_LITERAL == attribute) {
+                            final String s = mailAccount.getArchiveFullname();
+                            if (isEmpty(s)) {
+                                stmt.setString(pos++, "");
+                            } else {
+                                stmt.setString(pos++, MailFolderUtility.prepareMailFolderParam(s).getFullname());
+                            }
                         } else if (DEFAULT.contains(attribute)) {
                             if (DEFAULT_FULL_NAMES.contains(attribute)) {
-                                final String fullName =
-                                    null == value ? "" : MailFolderUtility.prepareMailFolderParam((String) value).getFullname();
+                                final String fullName = null == value ? "" : MailFolderUtility.prepareMailFolderParam((String) value).getFullname();
                                 stmt.setString(pos++, fullName);
                             } else {
                                 if (null == value) {
@@ -1419,6 +1442,48 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setNull(pos++, TYPE_VARCHAR);
             } else {
                 stmt.setString(pos++, replyTo);
+            }
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, id);
+            stmt.setInt(pos++, user);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    private void updateArchive(final String archive, final int id, final int user, final int cid, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE user_mail_account SET archive = ? WHERE cid = ? AND id = ? AND user = ?");
+            int pos = 1;
+            if (null == archive) {
+                stmt.setNull(pos++, TYPE_VARCHAR);
+            } else {
+                stmt.setString(pos++, archive);
+            }
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, id);
+            stmt.setInt(pos++, user);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    private void updateArchiveFullName(final String archiveFullName, final int id, final int user, final int cid, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE user_mail_account SET archive_fullname = ? WHERE cid = ? AND id = ? AND user = ?");
+            int pos = 1;
+            if (null == archiveFullName) {
+                stmt.setNull(pos++, TYPE_VARCHAR);
+            } else {
+                stmt.setString(pos++, archiveFullName);
             }
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, id);

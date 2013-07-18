@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
+import java.util.EnumSet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -72,11 +73,15 @@ import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -128,23 +133,42 @@ public final class ArchiveAction extends AbstractMailAction {
             String archiveName;
             if (isEmpty(archiveFullname)) {
                 archiveName = mailAccount.getArchive();
+                boolean updateAccount = false;
                 if (isEmpty(archiveName)) {
                     if (!AJAXRequestDataTools.parseBoolParameter(req.getParameter("useDefaultName"))) {
                         final String i18nArchive = StringHelper.valueOf(session.getUser().getLocale()).getString(MailStrings.ARCHIVE);
                         throw MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(i18nArchive);
                     }
                     // Select default name for archive folder
-                    archiveName = MailStrings.DEFAULT_ARCHIVE;
+                    archiveName = StringHelper.valueOf(session.getUser().getLocale()).getString(MailStrings.DEFAULT_ARCHIVE);
+                    updateAccount = true;
                 }
-                final String trashFullName = mailAccess.getFolderStorage().getTrashFolder();
-                final String inbox = "INBOX";
-                if (trashFullName.startsWith(inbox)) {
-                    final char separator = mailAccess.getFolderStorage().getFolder(inbox).getSeparator();
-                    archiveFullname = new StringAllocator(inbox).append(separator).append(archiveName).toString();
-                    parentFullName = inbox;
-                } else {
+                final String prefix = mailAccess.getFolderStorage().getDefaultFolderPrefix();
+                if (isEmpty(prefix)) {
                     archiveFullname = archiveName;
                     parentFullName = MailFolder.DEFAULT_FOLDER_ID;
+                } else {
+                    archiveFullname = new StringAllocator(prefix).append(archiveName).toString();
+                    final char separator = mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
+                    parentFullName = prefix.substring(0, prefix.lastIndexOf(separator));
+                }
+                // Update mail account
+                if (updateAccount) {
+                    final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                    if (null != mass) {
+                        final String af = archiveFullname;
+                        ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
+
+                            @Override
+                            public Void call() throws Exception {
+                                final MailAccountDescription mad = new MailAccountDescription();
+                                mad.setId(accountId);
+                                mad.setArchiveFullname(af);
+                                mass.updateMailAccount(mad, EnumSet.of(Attribute.ARCHIVE_FULLNAME_LITERAL), session.getUserId(), session.getContextId(), session);
+                                return null;
+                            }
+                        });
+                    }
                 }
             } else {
                 final char separator = mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
