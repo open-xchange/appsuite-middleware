@@ -72,6 +72,7 @@ import com.openexchange.java.Strings;
  */
 public class GCMDriveEventPublisher implements DriveEventPublisher {
 
+    private static final int MULTICAST_LIMIT = 1000;
     private static final String SERIVCE_ID = "gcm";
     private static final Log LOG = com.openexchange.log.Log.loggerFor(GCMDriveEventPublisher.class);
 
@@ -91,34 +92,42 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
         List<Subscription> subscriptions = null;
         try {
             subscriptions = Services.getService(DriveSubscriptionStore.class, true).getSubscriptions(
-                SERIVCE_ID, event.getContextID(), event.getFolderIDs());
+                event.getContextID(), SERIVCE_ID, event.getFolderIDs());
         } catch (OXException e) {
             LOG.error("unable to get subscriptions for service " + SERIVCE_ID, e);
         }
         if (null != subscriptions && 0 < subscriptions.size()) {
-            List<String> regIDs = getRegIDs(subscriptions); //TODO: split - multicast limit is 1000?
-            MulticastResult result = null;
-            try {
-                result = sender.sendNoRetry(getMessage(event), regIDs);
-            } catch (IOException e) {
-                LOG.warn("error publishing drive event", e);
-            }
-            if (null != result && LOG.isDebugEnabled()) {
-                LOG.debug(result);
+            for (int i = 0; i < subscriptions.size(); i += MULTICAST_LIMIT) {
+                /*
+                 * prepare chunk
+                 */
+                int length = Math.min(subscriptions.size(), i + MULTICAST_LIMIT) - i;
+                List<String> tokens = new ArrayList<String>(length);
+                for (int j = 0; j < length; j++) {
+                    tokens.add(subscriptions.get(i + j).getToken());
+                }
+                /*
+                 * send chunk
+                 */
+                MulticastResult result = null;
+                try {
+                    result = sender.sendNoRetry(getMessage(event), tokens);
+                } catch (IOException e) {
+                    LOG.warn("error publishing drive event", e);
+                }
+                if (null != result && LOG.isDebugEnabled()) {
+                    LOG.debug(result);
+                }
             }
         }
     }
 
     private static Message getMessage(DriveEvent event) {
-        return new Message.Builder().addData("folders", event.getFolderIDs().toString()).build();
-    }
-
-    private static List<String> getRegIDs(List<Subscription> subscriptions) {
-        List<String> regIDs = new ArrayList<String>(subscriptions.size());
-        for (Subscription subscription : subscriptions) {
-            regIDs.add(subscription.getToken());
-        }
-        return regIDs;
+        return new Message.Builder()
+            .collapseKey("TRIGGER_SYNC")
+            .addData("action", "sync")
+//            .addData("folders", event.getFolderIDs().toString())
+        .build();
     }
 
     private static String getKey() throws OXException {

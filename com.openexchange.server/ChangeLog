@@ -1,3 +1,7 @@
+* 2013-07-18 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 27579: Check if connection leads to configdb
+
 * 2013-07-17 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 27554: Removed unneeded System.out.println

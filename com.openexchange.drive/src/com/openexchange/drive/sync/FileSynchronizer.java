@@ -102,9 +102,26 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
             result.addActionForClient(new RemoveFileAction(comparison.getClientVersion(), comparison, path));
             break;
         case MODIFIED:
+            if (comparison.getServerVersion().getChecksum().equalsIgnoreCase(comparison.getClientVersion().getChecksum()) &&
+                comparison.getServerVersion().getName().equalsIgnoreCase(comparison.getClientVersion().getName()) &&
+                false == comparison.getServerVersion().getName().equals(comparison.getClientVersion().getName())) {
+                /*
+                 * just renamed on server, let client edit the file
+                 */
+                result.addActionForClient(new EditFileAction(
+                    comparison.getClientVersion(), comparison.getServerVersion(), comparison, path));
+            } else {
+                /*
+                 * modified on server, let client download the file
+                 */
+                File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
+                result.addActionForClient(new DownloadFileAction(
+                    comparison.getClientVersion(), comparison.getServerVersion(), comparison, path, serverFile.getFileSize(), serverFile.getFileMIMEType()));
+            }
+            break;
         case NEW:
             /*
-             * new/modified on server, let client download the file
+             * new on server, let client download the file
              */
             File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
             result.addActionForClient(new DownloadFileAction(
@@ -138,11 +155,21 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
             break;
         case MODIFIED:
             if (mayModify(comparison.getServerVersion())) {
-                /*
-                 * let client upload the modified file
-                 */
-                result.addActionForClient(new UploadFileAction(comparison.getServerVersion(), comparison.getClientVersion(), comparison,
-                    path, getUploadOffset(path, comparison.getClientVersion())));
+                if (comparison.getClientVersion().getChecksum().equalsIgnoreCase(comparison.getServerVersion().getChecksum()) &&
+                    comparison.getClientVersion().getName().equalsIgnoreCase(comparison.getServerVersion().getName()) &&
+                    false == comparison.getClientVersion().getName().equals(comparison.getServerVersion().getName())) {
+                    /*
+                     * just renamed on client, let server edit the file, acknowledge rename to client
+                     */
+                    result.addActionForServer(new EditFileAction(comparison.getServerVersion(), comparison.getClientVersion(), comparison, path));
+                    result.addActionForClient(new AcknowledgeFileAction(comparison.getOriginalVersion(), comparison.getClientVersion(), comparison, path));
+                } else {
+                    /*
+                     * modified on client, let client upload the modified file
+                     */
+                    result.addActionForClient(new UploadFileAction(comparison.getServerVersion(), comparison.getClientVersion(), comparison,
+                        path, getUploadOffset(path, comparison.getClientVersion())));
+                }
             } else if (mayCreate()) {
                 /*
                  * not allowed, keep both client- and server versions, let client first rename it's file...
@@ -217,6 +244,14 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  * same file version, let client update it's metadata
                  */
                 result.addActionForClient(new AcknowledgeFileAction(comparison.getOriginalVersion(), comparison.getClientVersion(), comparison, path));
+            } else if (comparison.getClientVersion().getChecksum().equalsIgnoreCase(comparison.getServerVersion().getChecksum()) &&
+                comparison.getClientVersion().getName().equalsIgnoreCase(comparison.getServerVersion().getName()) &&
+                false == comparison.getClientVersion().getName().equals(comparison.getServerVersion().getName())) {
+                /*
+                 * same file version with different case, server wins
+                 */
+                result.addActionForClient(new EditFileAction(
+                    comparison.getClientVersion(), comparison.getServerVersion(), comparison, path));
             } else {
                 /*
                  * keep both client- and server versions, let client first rename it's file...

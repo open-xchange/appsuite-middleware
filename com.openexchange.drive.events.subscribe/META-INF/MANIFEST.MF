@@ -19,6 +19,7 @@ Import-Package: com.openexchange.database,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,
+ com.openexchange.session,
  com.openexchange.tools.sql,
  org.apache.commons.logging,
  org.osgi.framework

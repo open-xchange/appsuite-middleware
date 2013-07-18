@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.json.action;
 
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -84,11 +85,11 @@ public class UpdateTokenAction extends AbstractDriveAction {
         /*
          * update token
          */
-        getSubscriptionStore().updateToken(serviceID, session.getContextId(), token, newToken);
+        getSubscriptionStore().updateToken(session, serviceID, token, newToken);
         /*
-         * return empty json result to indicate success
+         * return empty json object to indicate success
          */
-        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+        return new AJAXRequestResult(new JSONObject(0), "json");
     }
 
 }

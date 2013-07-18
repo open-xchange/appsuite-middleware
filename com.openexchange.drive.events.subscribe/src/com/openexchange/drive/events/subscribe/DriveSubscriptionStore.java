@@ -52,6 +52,7 @@ package com.openexchange.drive.events.subscribe;
 import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link DriveSubscriptionStore}
@@ -63,60 +64,45 @@ public interface DriveSubscriptionStore {
     /**
      * Add a subscription for the device with given registration ID to the specified root folder ID.
      *
+     * @param session The session
      * @param serviceID The service ID
      * @param token The device's registration token
-     * @param contextID The context ID
      * @param rootFolderID The root folder ID
      * @return The new subscription
      * @throws OXException
      */
-    Subscription subscribe(String serviceID, String token, int contextID, String rootFolderID) throws OXException;
+    Subscription subscribe(Session session, String serviceID, String token, String rootFolderID) throws OXException;
 
     /**
      * Removes a subscription for the device with given registration ID to the specified root folder ID.
      *
+     * @param session The session
      * @param serviceID The service ID
      * @param token The device's registration token
      * @param contextID The context ID
      * @param rootFolderID The root folder ID
      */
-    boolean unsubscribe(String serviceID, String token, int contextID, String rootFolderID) throws OXException;
-
-    /**
-     * Registers a new device on the server.
-     *
-     * @param serviceID The service ID
-     * @param registrationID The device's registration ID
-     */
-//    void register(String serviceID, String registrationID);
-
-    /**
-     * Unregisters a device from the server.
-     *
-     * @param serviceID The service ID
-     * @param registrationID The device's registration ID
-     */
-//    void unregister(String serviceID, String registrationID);
+    boolean unsubscribe(Session session, String serviceID, String token, String rootFolderID) throws OXException;
 
     /**
      * Updates the registration ID for a device.
      *
+     * @param session The session
      * @param serviceID The service ID
-     * @param contextID The context ID
      * @param oldToken The old registration token
      * @param newToken The new registration token
      * @return The number of updated registrations
      */
-    int updateToken(String serviceID, int contextID, String oldToken, String newToken) throws OXException;
+    int updateToken(Session session, String serviceID, String oldToken, String newToken) throws OXException;
 
     /**
      * Gets the subscriptions of all devices registered to one of the supplied root folder IDs
      *
-     * @param serviceID The service ID
      * @param contextID The context ID
+     * @param serviceID The service ID
      * @param rootFolderIDs The root folder IDs
      * @return The subscribers
      */
-    List<Subscription> getSubscriptions(String serviceID, int contextID, Collection<String> rootFolderIDs) throws OXException;
+    List<Subscription> getSubscriptions(int contextID, String serviceID, Collection<String> rootFolderIDs) throws OXException;
 
 }
