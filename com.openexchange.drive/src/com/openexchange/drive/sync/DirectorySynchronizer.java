@@ -53,6 +53,7 @@ import java.util.Collection;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.actions.AcknowledgeDirectoryAction;
+import com.openexchange.drive.actions.EditDirectoryAction;
 import com.openexchange.drive.actions.ErrorDirectoryAction;
 import com.openexchange.drive.actions.RemoveDirectoryAction;
 import com.openexchange.drive.actions.SyncDirectoryAction;
@@ -86,9 +87,23 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion>{
             result.addActionForClient(new RemoveDirectoryAction(comparison.getClientVersion(), comparison));
             break;
         case MODIFIED:
+            if (comparison.getServerVersion().getPath().equalsIgnoreCase(comparison.getClientVersion().getPath()) &&
+                false == comparison.getServerVersion().getPath().equals(comparison.getClientVersion().getPath())) {
+                /*
+                 * renamed on server, let client edit the directory first
+                 */
+                result.addActionForClient(new EditDirectoryAction(comparison.getClientVersion(), comparison.getServerVersion(), comparison));
+            }
+            if (false == comparison.getServerVersion().getChecksum().equalsIgnoreCase(comparison.getClientVersion().getChecksum())) {
+                /*
+                 * modified on server, let client synchronize the folder
+                 */
+                result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison));
+            }
+            break;
         case NEW:
             /*
-             * new/modified on server, let client synchronize the folder
+             * new on server, let client synchronize the folder
              */
             result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison));
             break;
@@ -132,10 +147,19 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion>{
             }
             break;
         case MODIFIED:
-            /*
-             * modified on client, let client synchronize the directory
-             */
-            result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
+            if (comparison.getClientVersion().getPath().equalsIgnoreCase(comparison.getServerVersion().getPath()) &&
+                false == comparison.getClientVersion().getPath().equals(comparison.getServerVersion().getPath())) {
+                /*
+                 * renamed on client, let server edit the directory
+                 */
+                result.addActionForServer(new EditDirectoryAction(comparison.getServerVersion(), comparison.getClientVersion(), comparison));
+            }
+            if (false == comparison.getClientVersion().getChecksum().equalsIgnoreCase(comparison.getServerVersion().getChecksum())) {
+                /*
+                 * modified on client, let client synchronize the directory
+                 */
+                result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
+            }
             break;
         default:
             break;
@@ -160,10 +184,19 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion>{
                  */
                 result.addActionForClient(new AcknowledgeDirectoryAction(comparison.getOriginalVersion(), comparison.getClientVersion(), comparison));
             } else {
-                /*
-                 * different contents, let client synchronize the directory
-                 */
-                result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
+                if (comparison.getClientVersion().getPath().equalsIgnoreCase(comparison.getServerVersion().getPath()) &&
+                    false == comparison.getClientVersion().getPath().equals(comparison.getServerVersion().getPath())) {
+                    /*
+                     * same directory version with different case, server wins
+                     */
+                    result.addActionForClient(new EditDirectoryAction(comparison.getClientVersion(), comparison.getServerVersion(), comparison));
+                }
+                if (false == comparison.getClientVersion().getChecksum().equalsIgnoreCase(comparison.getServerVersion().getChecksum())) {
+                    /*
+                     * different contents, let client synchronize the directory
+                     */
+                    result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison));
+                }
             }
         } else if (Change.DELETED == comparison.getClientChange() && (Change.MODIFIED == comparison.getServerChange() || Change.NEW == comparison.getServerChange())) {
             /*
