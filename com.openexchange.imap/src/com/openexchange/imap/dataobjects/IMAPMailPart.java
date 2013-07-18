@@ -55,6 +55,8 @@ import java.util.Enumeration;
 import javax.activation.DataHandler;
 import javax.mail.MessagingException;
 import javax.mail.Part;
+import javax.mail.event.ConnectionEvent;
+import javax.mail.event.ConnectionListener;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParameterList;
 import com.openexchange.exception.OXException;
@@ -70,6 +72,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.sun.mail.iap.ByteArray;
+import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPInputStream;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
@@ -79,12 +82,13 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPMailPart extends MailPart implements MimeRawSource {
+public final class IMAPMailPart extends MailPart implements MimeRawSource, ConnectionListener {
 
     private static final long serialVersionUID = 6469037985453175593L;
 
-    private final InputStreamProvider inProvider;
+    private InputStreamProvider inProvider;
     private final BODYSTRUCTURE body;
+    private final String fullName;
 
     /**
      * Initializes a new {@link IMAPMailPart}.
@@ -93,12 +97,13 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource {
      * @param body The body structure information
      * @throws IOException If an I/O error occurs
      */
-    public IMAPMailPart(final ByteArray byteArray, final BODYSTRUCTURE body) throws IOException {
+    public IMAPMailPart(final ByteArray byteArray, final BODYSTRUCTURE body, final String fullName) throws IOException {
         super();
         final ThresholdInputStreamProvider inProvider = new ThresholdInputStreamProvider();
         inProvider.write(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount());
         this.inProvider = inProvider;
         this.body = body;
+        this.fullName = fullName;
     }
 
     /**
@@ -109,7 +114,7 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource {
      * @param peek Whether to peek (<code>\Seen</code> flag not set) or not
      * @param body The body structure information
      */
-    public IMAPMailPart(final IMAPMessage msg, final String sectionId, final boolean peek, final BODYSTRUCTURE body) {
+    public IMAPMailPart(final IMAPMessage msg, final String sectionId, final boolean peek, final BODYSTRUCTURE body, final String fullName) {
         super();
         inProvider = new InputStreamProvider() {
 
@@ -119,6 +124,7 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource {
             }
         };
         this.body = body;
+        this.fullName = fullName;
     }
 
     @Override
@@ -128,7 +134,16 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource {
 
     @Override
     public void loadContent() throws OXException {
-        // Nope
+        final InputStreamProvider inp = this.inProvider;
+        if (!(inp instanceof ThresholdInputStreamProvider)) {
+            try {
+                final ThresholdInputStreamProvider tisp = new ThresholdInputStreamProvider();
+                tisp.write(inp.getInputStream());
+                this.inProvider = tisp;
+            } catch (final IOException e) {
+                throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
     }
 
     @Override
@@ -259,6 +274,32 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource {
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
         }
         return builder.toString();
+    }
+
+    @Override
+    public void opened(ConnectionEvent e) {
+        // Ignore
+    }
+
+    @Override
+    public void disconnected(ConnectionEvent e) {
+        // Ignore
+    }
+
+    @Override
+    public void closed(ConnectionEvent e) {
+        final Object source = e.getSource();
+        if (source instanceof IMAPFolder) {
+            final IMAPFolder imapFolder = (IMAPFolder) source;
+            if (fullName.equals(imapFolder.getFullName())) {
+                try {
+                    loadContent();
+                } catch (final OXException x) {
+                    // Ignore
+                }
+            }
+
+        }
     }
 
 }
