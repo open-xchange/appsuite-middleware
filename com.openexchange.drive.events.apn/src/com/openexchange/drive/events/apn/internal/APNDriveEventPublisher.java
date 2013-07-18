@@ -89,7 +89,7 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
         List<Subscription> subscriptions = null;
         try {
             subscriptions = Services.getService(DriveSubscriptionStore.class, true).getSubscriptions(
-                SERIVCE_ID, event.getContextID(), event.getFolderIDs());
+                event.getContextID(), SERIVCE_ID, event.getFolderIDs());
         } catch (OXException e) {
             LOG.error("unable to get subscriptions for service " + SERIVCE_ID, e);
         }
@@ -116,11 +116,12 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
         for (Subscription subscription : subscriptions) {
             try {
                 PushNotificationPayload payload = new PushNotificationPayload();
+                payload.addCustomAlertLocKey("TRIGGER_SYNC");
+                payload.addCustomAlertActionLocKey("OK");
                 payload.addCustomDictionary("root", subscription.getRootFolderID());
-                payload.addCustomDictionary("data", "{\"action\":\"sync\"}");
-                payload.addCustomDictionary("folders", event.getFolderIDs().toString());
-                payload.addAlert("TRIGGER_SYNC");
-                payloads.add(new PayloadPerDevice(payload, subscription.getToken()));
+                payload.addCustomDictionary("action", "sync");
+//                payload.addCustomDictionary("folders", event.getFolderIDs().toString());
+                payloads.add(new PayloadPerDevice(payload, subscription.getToken().replace('a', 'b')));
             } catch (JSONException e) {
                 LOG.warn("error constructing payload", e);
             } catch (InvalidDeviceTokenFormatException e) {
