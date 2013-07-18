@@ -65,6 +65,8 @@ ln -sf ../etc/init.d/open-xchange %{buildroot}/sbin/rcopen-xchange
 First release candidate for 7.4.0
 * Tue Jul 16 2013 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.4.0
+* Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-07-18
 * Thu Jul 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-10
 * Wed Jul 03 2013 Marcus Klein <marcus.klein@open-xchange.com>

@@ -57,6 +57,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc malpol
 First release candidate for 7.4.0
 * Tue Jul 16 2013 Carsten Hoeger <choeger@open-xchange.com>
 prepare for 7.4.0
+* Mon Jul 15 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-07-18
 * Thu Jul 11 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-07-10
 * Mon Jul 01 2013 Carsten Hoeger <choeger@open-xchange.com>
