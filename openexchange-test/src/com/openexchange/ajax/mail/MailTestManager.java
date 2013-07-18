@@ -265,7 +265,10 @@ public class MailTestManager {
      * Archives a mail.
      */
     public void archive(TestMail original) throws OXException, IOException, JSONException {
-        client.execute(new ArchiveRequest(new String[] { original.getId() }, original.getFolder()));
+        final ArchiveRequest archiveRequest = new ArchiveRequest(new String[] { original.getId() }, original.getFolder());
+        archiveRequest.setCreateIfAbsent(true);
+        archiveRequest.setUseDefaultName(true);
+        client.execute(archiveRequest);
     }
 
     /**

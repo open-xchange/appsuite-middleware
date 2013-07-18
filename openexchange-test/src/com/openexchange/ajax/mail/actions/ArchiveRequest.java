@@ -66,10 +66,30 @@ public class ArchiveRequest extends AbstractMailRequest<ArchiveResponse> {
 	private final String sourceFolderID;
 	private final boolean failOnError = true;
     private final String[] mailIDs;
+    private Boolean useDefaultName;
+    private Boolean createIfAbsent;
 
     public ArchiveRequest(String[] mailIDs, String sourceFolderID){
     	this.mailIDs = mailIDs;
     	this.sourceFolderID = sourceFolderID;
+    }
+
+    /**
+     * Sets the createIfAbsent
+     *
+     * @param createIfAbsent The createIfAbsent to set
+     */
+    public void setCreateIfAbsent(boolean createIfAbsent) {
+        this.createIfAbsent = Boolean.valueOf(createIfAbsent);
+    }
+
+    /**
+     * Sets the useDefaultName
+     *
+     * @param useDefaultName The useDefaultName to set
+     */
+    public void setUseDefaultName(boolean useDefaultName) {
+        this.useDefaultName = Boolean.valueOf(useDefaultName);
     }
 
 	@Override
@@ -93,6 +113,12 @@ public class ArchiveRequest extends AbstractMailRequest<ArchiveResponse> {
 
         list.add(new Parameter(Mail.PARAMETER_ACTION, "archive"));
         list.add(new Parameter(Mail.PARAMETER_FOLDERID, sourceFolderID));
+        if (null != useDefaultName) {
+            list.add(new Parameter("useDefaultName", useDefaultName.toString()));
+        }
+        if (null != createIfAbsent) {
+            list.add(new Parameter("createIfAbsent", createIfAbsent.toString()));
+        }
 
         return list.toArray(new Parameter[list.size()]);
 	}
