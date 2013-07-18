@@ -2747,7 +2747,7 @@ public final class IMAPCommandsCollection {
                         if (null == message) {
                             return null;
                         }
-                        return toMailPart((IMAPMessage) message, sectionId, peek, bid.bodystructure);
+                        return toMailPart((IMAPMessage) message, sectionId, peek, bid.bodystructure, imapFolder.getFullName());
                     } catch (final Exception e) {
                         // Ignore
                     }
@@ -2769,7 +2769,7 @@ public final class IMAPCommandsCollection {
                     byteArray = rd.getByteArray();
                 }
 
-                return toMailPart(byteArray, bid.bodystructure);
+                return toMailPart(byteArray, bid.bodystructure, imapFolder.getFullName());
             }
         }));
     }
@@ -2900,7 +2900,7 @@ public final class IMAPCommandsCollection {
                         if (null == message) {
                             return null;
                         }
-                        return toMailPart((IMAPMessage) message, bid.sectionId, peek, bid.bodystructure);
+                        return toMailPart((IMAPMessage) message, bid.sectionId, peek, bid.bodystructure, imapFolder.getFullName());
                     } catch (final Exception e) {
                         // Ignore
                     }
@@ -2922,7 +2922,7 @@ public final class IMAPCommandsCollection {
                     byteArray = rd.getByteArray();
                 }
 
-                return toMailPart(byteArray, bid.bodystructure);
+                return toMailPart(byteArray, bid.bodystructure, imapFolder.getFullName());
             }
 
         }));
@@ -2979,9 +2979,9 @@ public final class IMAPCommandsCollection {
         return null;
     }
 
-    protected static MailPart toMailPart(final IMAPMessage msg, final String sectionId, final boolean peek, final BODYSTRUCTURE bodystructure) throws ProtocolException {
+    protected static MailPart toMailPart(final IMAPMessage msg, final String sectionId, final boolean peek, final BODYSTRUCTURE bodystructure, final String fullName) throws ProtocolException {
         try {
-            final IMAPMailPart ret = new IMAPMailPart(msg, sectionId, peek, bodystructure);
+            final IMAPMailPart ret = new IMAPMailPart(msg, sectionId, peek, bodystructure, fullName);
             ret.applyBodyStructure(bodystructure);
             return ret;
         } catch (final RuntimeException e) {
@@ -2989,9 +2989,9 @@ public final class IMAPCommandsCollection {
         }
     }
 
-    protected static MailPart toMailPart(final ByteArray byteArray, final BODYSTRUCTURE bodystructure) throws ProtocolException {
+    protected static MailPart toMailPart(final ByteArray byteArray, final BODYSTRUCTURE bodystructure, final String fullName) throws ProtocolException {
         try {
-            final IMAPMailPart ret = new IMAPMailPart(byteArray, bodystructure);
+            final IMAPMailPart ret = new IMAPMailPart(byteArray, bodystructure, fullName);
             ret.applyBodyStructure(bodystructure);
             return ret;
         } catch (final IOException e) {
