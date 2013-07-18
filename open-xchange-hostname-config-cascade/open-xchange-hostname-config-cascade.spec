@@ -56,6 +56,8 @@ Build for patch 2013-07-18
 Second build for patch  2013-07-18
 * Fri Jul 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-18
+* Fri Jul 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-07-18
 * Thu Jul 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-10
 * Wed Jul 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
