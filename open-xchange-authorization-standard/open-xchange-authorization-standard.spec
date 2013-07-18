@@ -55,6 +55,8 @@ prepare for 7.4.0
 Build for patch 2013-07-18
 * Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second build for patch  2013-07-18
+* Fri Jul 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-07-18
 * Thu Jul 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-10
 * Mon Jul 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
