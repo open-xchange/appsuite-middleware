@@ -121,7 +121,7 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
                 payload.addCustomDictionary("root", subscription.getRootFolderID());
                 payload.addCustomDictionary("action", "sync");
 //                payload.addCustomDictionary("folders", event.getFolderIDs().toString());
-                payloads.add(new PayloadPerDevice(payload, subscription.getToken().replace('a', 'b')));
+                payloads.add(new PayloadPerDevice(payload, subscription.getToken()));
             } catch (JSONException e) {
                 LOG.warn("error constructing payload", e);
             } catch (InvalidDeviceTokenFormatException e) {
