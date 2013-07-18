@@ -539,12 +539,35 @@ public enum MailExceptionCode implements OXExceptionCode {
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      *
+     * @param category The optional category
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Category category, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, category, (Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @param category The optional category
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Category category, final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, category, cause, args);
     }
 
     // --------------------------------------------------------------------------------------- //

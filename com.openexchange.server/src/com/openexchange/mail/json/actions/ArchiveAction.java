@@ -58,6 +58,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.i18n.tools.StringHelper;
@@ -137,7 +138,7 @@ public final class ArchiveAction extends AbstractMailAction {
                 if (isEmpty(archiveName)) {
                     if (!AJAXRequestDataTools.parseBoolParameter(req.getParameter("useDefaultName"))) {
                         final String i18nArchive = StringHelper.valueOf(session.getUser().getLocale()).getString(MailStrings.ARCHIVE);
-                        throw MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(i18nArchive);
+                        throw MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(Category.CATEGORY_USER_INPUT, i18nArchive);
                     }
                     // Select default name for archive folder
                     archiveName = StringHelper.valueOf(session.getUser().getLocale()).getString(MailStrings.DEFAULT_ARCHIVE);

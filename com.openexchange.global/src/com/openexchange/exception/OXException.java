@@ -774,9 +774,12 @@ public class OXException extends Exception implements OXExceptionConstants {
     public OXException setCategory(final Category category) {
         if (null != category) {
             categories.clear();
+            /*-
+             *
             if (EnumType.TRY_AGAIN.equals(category.getType()) && OXExceptionStrings.MESSAGE.equals(displayMessage)) {
                 displayMessage = OXExceptionStrings.MESSAGE_RETRY;
             }
+            */
             categories.add(category);
         }
         return this;
