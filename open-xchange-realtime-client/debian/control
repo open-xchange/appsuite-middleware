@@ -1,7 +1,7 @@
 Source: open-xchange-realtime-client
 Section: web
 Priority: optional
-Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
+Maintainer: Steffen Templin <steffen.templin@open-xchange.com>
 Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@)
 Standards-Version: 3.8.4
 Homepage: http://www.open-xchange.com
@@ -9,4 +9,4 @@ Homepage: http://www.open-xchange.com
 Package: open-xchange-realtime-client
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
-Description: Common realtime framework component bundles
+Description: A client library for the realtime component
