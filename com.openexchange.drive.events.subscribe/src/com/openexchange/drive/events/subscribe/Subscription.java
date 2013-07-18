@@ -61,18 +61,20 @@ public class Subscription {
     private String serviceID;
     private String token;
     private int contextID;
+    private int userID;
     private String rootFolderID;
 
     public Subscription() {
         super();
     }
 
-    public Subscription(String uuid, String serviceID, String token, int contextID, String rootFolderID) {
+    public Subscription(String uuid, int contextID, int userID, String serviceID, String token, String rootFolderID) {
         super();
         this.uuid = uuid;
         this.serviceID = serviceID;
         this.token = token;
         this.contextID = contextID;
+        this.userID = userID;
         this.rootFolderID = rootFolderID;
     }
 
@@ -164,6 +166,24 @@ public class Subscription {
      */
     public void setRootFolderID(String rootFolderID) {
         this.rootFolderID = rootFolderID;
+    }
+
+    /**
+     * Gets the userID
+     *
+     * @return The userID
+     */
+    public int getUserID() {
+        return userID;
+    }
+
+    /**
+     * Sets the userID
+     *
+     * @param userID The userID to set
+     */
+    public void setUserID(int userID) {
+        this.userID = userID;
     }
 
 }

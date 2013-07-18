@@ -75,6 +75,19 @@ public class DriveEventSubscriptionsDeleteListener implements DeleteListener {
             } catch (Exception e) {
                 throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
             }
+        } else if (DeleteEvent.TYPE_USER == event.getType()) {
+            try {
+                if (event.getContext().getMailadmin() == event.getId()) {
+                    // delete all subscriptions for context in case mailadmin is deleted
+                    deleteSubscriptions(writeCon, event.getContext().getContextId());
+                } else {
+                    deleteSubscriptions(writeCon, event.getContext().getContextId(), event.getId());
+                }
+            } catch (SQLException e) {
+                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } catch (Exception e) {
+                throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
+            }
         }
     }
 
@@ -83,6 +96,18 @@ public class DriveEventSubscriptionsDeleteListener implements DeleteListener {
         try {
             stmt = connection.prepareStatement(SQL.DELETE_SUBSCRIPTIONS_IN_CONTEXT_STMT);
             stmt.setInt(1, cid);
+            return SQL.logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static int deleteSubscriptions(Connection connection, int cid, int user) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.DELETE_SUBSCRIPTIONS_FOR_USER_STMT);
+            stmt.setInt(1, cid);
+            stmt.setInt(2, cid);
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);

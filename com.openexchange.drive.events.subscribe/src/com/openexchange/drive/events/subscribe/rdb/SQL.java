@@ -76,6 +76,7 @@ public class SQL {
         return "CREATE TABLE driveEventSubscriptions (" +
             "uuid BINARY(16) NOT NULL," +
             "cid INT4 UNSIGNED NOT NULL," +
+            "user INT4 UNSIGNED NOT NULL," +
             "service VARCHAR(64) NOT NULL," +
             "token VARCHAR(255) NOT NULL," +
             "folder VARCHAR(512)," +
@@ -86,36 +87,32 @@ public class SQL {
 
     // no UNIQUE constraint possible due to combined length of required columns
     public static final String INSERT_SUBSCRIPTION_STMT =
-        "INSERT INTO driveEventSubscriptions (uuid,cid,service,token,folder) " +
-        "SELECT UNHEX(?),?,?,?,REVERSE(?) FROM DUAL WHERE NOT EXISTS " +
-        "(SELECT uuid FROM driveEventSubscriptions WHERE cid=? AND service=? AND token=? AND folder=REVERSE(?));";
-
-
-//        "VALUES (UNHEX(?),?,?,?,REVERSE(?));";
-
-
-//        INSERT INTO driveEventSubscriptions (uuid,cid,service,token,folder)
-//    SELECT UNHEX('8e60a72b560849ec819321bb918855af'),424242669,'apn','28919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677',REVERSE('65841')
-//    FROM dual WHERE NOT EXISTS
-//        (SELECT uuid FROM driveEventSubscriptions
-//        WHERE cid=424242669 AND service='apn' AND token='28919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677' AND folder=REVERSE('65841'))
-
-
+        "INSERT INTO driveEventSubscriptions (uuid,cid,user,service,token,folder) " +
+        "SELECT UNHEX(?),?,?,?,?,REVERSE(?) FROM DUAL WHERE NOT EXISTS " +
+        "(SELECT uuid FROM driveEventSubscriptions WHERE cid=? AND user=? AND service=? AND token=? AND folder=REVERSE(?));";
 
     public static final String DELETE_SUBSCRIPTION_STMT =
         "DELETE FROM driveEventSubscriptions " +
-        "WHERE cid=? AND service=? AND token=? AND folder=?;";
+        "WHERE cid=? AND user=? AND service=? AND token=? AND folder=?;";
 
     public static final String UPDATE_TOKEN_STMT =
         "UPDATE driveEventSubscriptions SET token=? " +
-        "WHERE cid=? AND service=? AND token=?;";
+        "WHERE cid=? AND user=? AND service=? AND token=?;";
 
     public static final String DELETE_SUBSCRIPTIONS_IN_CONTEXT_STMT =
         "DELETE FROM driveEventSubscriptions " +
         "WHERE cid=?;";
 
+    public static final String DELETE_SUBSCRIPTIONS_FOR_USER_STMT =
+        "DELETE FROM driveEventSubscriptions " +
+        "WHERE cid=? AND user=?;";
+
+    public static final String SELECT_SUBSCRIPTION_UUID_STMT =
+        "SELECT LOWER(HEX(uuid)) FROM driveEventSubscriptions " +
+        "WHERE cid=? AND user=? AND service=? AND token=? AND folder=REVERSE(?);";
+
     /**
-     * SELECT LOWER(HEX(uuid)),token,REVERSE(folder) FROM driveEventSubscriptions
+     * SELECT LOWER(HEX(uuid)),user,token,REVERSE(folder) FROM driveEventSubscriptions
      * WHERE cid=? AND service=? AND REVERSE(folder) IN (...);"
      */
     public static final String SELECT_SUBSCRIPTIONS_STMT(Collection<String> rootFolderIDs) throws OXException {
@@ -123,7 +120,7 @@ public class SQL {
             throw new IllegalArgumentException("folderIDs");
         }
         StringAllocator allocator = new StringAllocator();
-        allocator.append("SELECT LOWER(HEX(uuid)),token,REVERSE(folder) FROM driveEventSubscriptions ");
+        allocator.append("SELECT LOWER(HEX(uuid)),user,token,REVERSE(folder) FROM driveEventSubscriptions ");
         allocator.append("WHERE cid=? AND service=? AND REVERSE(folder)");
         Iterator<String> iterator = rootFolderIDs.iterator();
         if (1 == rootFolderIDs.size()) {

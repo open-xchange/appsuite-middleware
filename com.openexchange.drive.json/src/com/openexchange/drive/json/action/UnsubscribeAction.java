@@ -88,7 +88,7 @@ public class UnsubscribeAction extends AbstractDriveAction {
          * add subscription
          */
         DriveSubscriptionStore subscriptionStore = Services.getService(DriveSubscriptionStore.class, true);
-        subscriptionStore.unsubscribe(serviceID, token, session.getContextId(), rootFolderID);
+        subscriptionStore.unsubscribe(session, serviceID, token, rootFolderID);
         /*
          * return empty json object to indicate success
          */
