@@ -59,10 +59,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.pooling.PoolingException;
 
 /**
@@ -238,6 +238,10 @@ public final class ReplicationMonitor {
     }
 
     private static long readTransaction(final Connection con, final int ctxId) throws OXException {
+        // If ctxId is 0, the connection leads to configdb, which does not have a replication monitor.
+        if (ctxId == 0) {
+            return 0;
+        }
         PreparedStatement stmt = null;
         ResultSet result = null;
         final long retval;
