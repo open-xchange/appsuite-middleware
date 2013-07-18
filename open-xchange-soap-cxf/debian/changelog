@@ -88,6 +88,12 @@ open-xchange-soap-cxf (7.2.1-0) UNRELEASED; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Apr 2013 10:23:06 +0200
 
+open-xchange-soap-cxf (7.2.0-10) UNRELEASED; urgency=low
+
+  * Build for patch 2013-07-18
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Jul 2013 09:38:05 +0200
+
 open-xchange-soap-cxf (7.2.0-9) UNRELEASED; urgency=low
 
   * Build for patch 2013-05-22

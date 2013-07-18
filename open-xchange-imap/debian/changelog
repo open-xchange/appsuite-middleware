@@ -94,6 +94,12 @@ open-xchange-imap (7.2.1-0) UNRELEASED; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Apr 2013 10:22:38 +0200
 
+open-xchange-imap (7.2.0-11) UNRELEASED; urgency=low
+
+  * Build for patch 2013-07-18
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Jul 2013 09:37:44 +0200
+
 open-xchange-imap (7.2.0-10) UNRELEASED; urgency=low
 
   * Build for patch 2013-05-22
