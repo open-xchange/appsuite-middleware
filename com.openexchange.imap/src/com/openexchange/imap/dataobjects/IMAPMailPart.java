@@ -277,28 +277,30 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
     }
 
     @Override
-    public void opened(ConnectionEvent e) {
+    public void opened(final ConnectionEvent e) {
         // Ignore
     }
 
     @Override
-    public void disconnected(ConnectionEvent e) {
+    public void disconnected(final ConnectionEvent e) {
         // Ignore
     }
 
     @Override
-    public void closed(ConnectionEvent e) {
-        final Object source = e.getSource();
-        if (source instanceof IMAPFolder) {
-            final IMAPFolder imapFolder = (IMAPFolder) source;
-            if (fullName.equals(imapFolder.getFullName())) {
-                try {
-                    loadContent();
-                } catch (final OXException x) {
-                    // Ignore
+    public void closed(final ConnectionEvent e) {
+        if (ConnectionEvent.CLOSED == e.getType()) {
+            final Object source = e.getSource();
+            if (source instanceof IMAPFolder) {
+                final IMAPFolder imapFolder = (IMAPFolder) source;
+                if (fullName.equals(imapFolder.getFullName())) {
+                    try {
+                        loadContent();
+                    } catch (final OXException x) {
+                        // Ignore
+                    }
                 }
-            }
 
+            }
         }
     }
 
