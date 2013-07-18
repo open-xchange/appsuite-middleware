@@ -876,10 +876,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             final MailPartHandler handler = new MailPartHandler(sequenceId);
             new MailMessageParser().parseMailMessage(mail, handler);
-            if (handler.getMailPart() == null) {
+            final MailPart mailPart = handler.getMailPart();
+            if (mailPart == null) {
                 throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(sequenceId, Long.valueOf(msgUID), fullName);
             }
-            return handler.getMailPart();
+            return mailPart;
         } catch (final MessagingException e) {
             if (ImapUtility.isInvalidMessageset(e)) {
                 return null;
