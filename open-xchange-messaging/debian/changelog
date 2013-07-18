@@ -1,3 +1,9 @@
+open-xchange-messaging (7.0.2-12) unstable; urgency=low
+
+  * Second build for patch  2013-07-18
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Jul 2013 10:00:36 +0200
+
 open-xchange-messaging (7.0.2-11) unstable; urgency=low
 
   * Second build for patch 2013-05-28
