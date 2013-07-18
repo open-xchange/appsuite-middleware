@@ -22,7 +22,6 @@
  *    Any modifications to this package must retain all copyright notices
  *    of the original copyright holder(s) for the original code used.
  *
- *    After any such modifications, the original and derivative code shall remain
  *    under the copyright of the copyright holder(s) and/or original author(s)per
  *    the Attribution and Assignment Agreement that can be located at
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
@@ -55,21 +54,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.LogRecord;
 import org.apache.commons.logging.Log;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.impl.JSONProtocolHandler;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
-import com.openexchange.realtime.atmosphere.protocol.RTProtocol;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.packet.GenericError;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.CustomGateAction;
