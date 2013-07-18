@@ -1,3 +1,9 @@
+open-xchange-sessionstorage-hazelcast (7.2.1-7) stable; urgency=low
+
+  * Build for patch 2013-07-18
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 12 Jul 2013 18:13:26 +0200
+
 open-xchange-sessionstorage-hazelcast (7.2.1-6) stable; urgency=low
 
   * Build for patch 2013-06-27

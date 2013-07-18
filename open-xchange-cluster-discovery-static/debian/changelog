@@ -1,3 +1,9 @@
+open-xchange-cluster-discovery-static (7.2.1-7) stable; urgency=low
+
+  * Build for patch 2013-07-18
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 12 Jul 2013 18:12:53 +0200
+
 open-xchange-cluster-discovery-static (7.2.1-6) stable; urgency=low
 
   * Build for patch 2013-06-27
