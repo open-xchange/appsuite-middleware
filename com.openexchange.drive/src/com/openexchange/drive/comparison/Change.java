@@ -49,7 +49,9 @@
 
 package com.openexchange.drive.comparison;
 
+import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveVersion;
+import com.openexchange.drive.FileVersion;
 
 
 /**
@@ -94,11 +96,27 @@ public enum Change {
             return Change.DELETED;
         } else if (null == originalVersion) {
             return Change.NEW;
-        } else if (false == equalsByChecksum(originalVersion, currentVersion)) {
+        } else if (false == equalsByChecksum(originalVersion, currentVersion) ||
+            false == equalsByName(originalVersion, currentVersion)) {
             return Change.MODIFIED;
         } else {
             return Change.NONE;
         }
+    }
+
+    private static boolean equalsByName(DriveVersion v1, DriveVersion v2) {
+        String name1;
+        String name2;
+        if (FileVersion.class.isInstance(v1) && FileVersion.class.isInstance(v2)) {
+            name1 = ((FileVersion)v1).getName();
+            name2 = ((FileVersion)v2).getName();
+        } else if (DirectoryVersion.class.isInstance(v1) && DirectoryVersion.class.isInstance(v2)) {
+            name1 = ((DirectoryVersion)v1).getPath();
+            name2 = ((DirectoryVersion)v2).getPath();
+        } else {
+            throw new UnsupportedOperationException("incompatible drive versions");
+        }
+        return null == name1 ? null == name2 : name1.equals(name2);
     }
 
     private static boolean equalsByChecksum(DriveVersion v1, DriveVersion v2) {

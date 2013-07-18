@@ -84,7 +84,7 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
      */
     public VersionMapper(Collection<? extends T> originalVersions, Collection<? extends T> clientVersions, Collection<? extends T> serverVersions) {
         super();
-        this.map = new TreeMap<String, ThreeWayComparison<T>>();
+        this.map = new TreeMap<String, ThreeWayComparison<T>>(String.CASE_INSENSITIVE_ORDER);
         if (null == originalVersions) {
             this.originalVersions = Collections.emptyList();
         } else {

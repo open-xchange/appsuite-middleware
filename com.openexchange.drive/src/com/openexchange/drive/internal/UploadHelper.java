@@ -134,6 +134,10 @@ public class UploadHelper {
                     if (null != originalVersion) {
                         File originalFile = session.getStorage().findFileByName(path, originalVersion.getName());
                         if (null != originalFile && ChecksumProvider.matches(session, originalFile, originalVersion.getChecksum())) {
+                            if (null != originalFile.getTitle() && originalFile.getTitle().equals(originalFile.getFileName())) {
+                                originalFile.setTitle(newVersion.getName());
+                            }
+                            originalFile.setFileName(newVersion.getName());
                             return session.getStorage().moveFile(uploadFile, originalFile);
                         }
                     }
