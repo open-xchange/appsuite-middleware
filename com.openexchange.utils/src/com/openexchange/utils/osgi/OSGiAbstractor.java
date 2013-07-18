@@ -422,7 +422,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
     }
 
     void checkStarted() {
-        if (null != registry && registry.size() >= requiredService && null != registrations && registrations.size() == registeredServiceImplementations) {
+        if (((null != registry && registry.size() >= requiredService) || null == registry) && null != registrations && registrations.size() == registeredServiceImplementations) {
             started.set(true);
         } else {
             started.set(false);
