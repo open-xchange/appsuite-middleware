@@ -236,6 +236,26 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
             throw new RTException("The given string was not a valid JSON message.", e);
         }
     }
+    
+    /**
+     * A convenience method for handling incoming messages. The message
+     * will pass the {@link RTProtocol} and will be delivered immediately
+     * if it doesn't contain a sequence number and the given {@link RTMessageHandler}
+     * is not <code>null</code>.
+     *
+     * @param message The received message.
+     * @param Whether the PONG timeout should be reset or not
+     */
+    protected void onReceive(JSONObject message, boolean resetPongTimeout) throws RTException {
+        if (resetPongTimeout) {
+            protocol.resetPongTimeout();
+        }
+
+        RTMessageHandler handlerForSelector = getHandlerForSelector(message);
+        if (protocol.handleIncoming(message) && handlerForSelector != null) {
+            handlerForSelector.onMessage(message);
+        }
+    }
 
     protected void registerHandler0(String selector, RTMessageHandler messageHandler) throws RTException {
         if (messageHandlers.putIfAbsent(selector, messageHandler) != null) {

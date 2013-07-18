@@ -119,9 +119,9 @@ import com.openexchange.tools.session.ServerSession;
 public class QueryAction extends RTAction {
 
     private final static Log LOG = com.openexchange.log.Log.loggerFor(QueryAction.class);
-    private ServiceLookup services;
-    private StanzaSequenceGate gate;
-    
+    private final ServiceLookup services;
+    private final StanzaSequenceGate gate;
+
     /**
      * Initializes a new {@link QueryAction}.
      * @param services
@@ -135,22 +135,22 @@ public class QueryAction extends RTAction {
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, ServerSession session) throws OXException {
         ID id = constructID(request, session);
-        
-        StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(id, session, (JSONObject) request.getData());
-        
+
+        StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(id, session, (JSONObject) request.requireData());
+
         Stanza stanza = stanzaBuilder.build();
         if (stanza.traceEnabled()) {
             stanza.trace("received in backend");
         }
-        
+
         stanza.setOnBehalfOf(id);
         stanza.setFrom(id);
-        
+
         stanza.transformPayloadsToInternal();
         stanza.initializeDefaults();
-        
+
         final Map<String, Object> values = new HashMap<String, Object>();
-        
+
         final Lock sendLock = new ReentrantLock();
         try {
             sendLock.lock();
@@ -159,7 +159,7 @@ public class QueryAction extends RTAction {
 
                 @Override
                 public void handle(final Stanza stanza, ID recipient) {
-                    
+
                     try {
                         values.put("answer", services.getService(MessageDispatcher.class).sendSynchronously(stanza, request.isSet("timeout") ? request.getIntParameter("timeout") : 50, TimeUnit.SECONDS));
                     } catch (OXException e) {
@@ -173,9 +173,9 @@ public class QueryAction extends RTAction {
                         sendLock.unlock();
                     }
                 }
-                
+
             });
-            
+
             if (!values.containsKey("done")) {
                 handled.await(request.isSet("timeout") ? request.getIntParameter("timeout") : 30, TimeUnit.SECONDS);
             }
@@ -195,8 +195,17 @@ public class QueryAction extends RTAction {
         } finally {
             sendLock.unlock();
         }
-        
-        return new AJAXRequestResult(new StanzaWriter().write((Stanza)values.get("answer")), "json");
+        Object answer = values.get("answer");
+        if(answer == null || !Stanza.class.isInstance(answer)) {
+            RealtimeException realtimeException = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create("Request didn't yield any response.");
+            LOG.error(realtimeException);
+            stanza.setError(realtimeException);
+            return new AJAXRequestResult(new StanzaWriter().write(stanza), "json");
+        }
+        Stanza answerStanza = (Stanza)answer;
+        //Set the recipient to the client that originally sent the request
+        answerStanza.setTo(id);
+        return new AJAXRequestResult(new StanzaWriter().write(answerStanza), "json");
     }
 
 }

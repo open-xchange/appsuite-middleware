@@ -58,10 +58,12 @@ import org.atmosphere.wasync.Socket;
 import org.atmosphere.wasync.impl.AtmosphereClient;
 import org.atmosphere.wasync.impl.AtmosphereRequest.AtmosphereRequestBuilder;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.base.Strings;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.ListenableFuture;
 import com.ning.http.client.Request;
@@ -363,8 +365,23 @@ public class MixedModeRTConnection extends AbstractRTConnection {
             if(response.getStatusCode()!= 200) {
                 throw new RTException("Expected a HTTP status code but got: " + response.getStatusCode());
             }
-
-            onReceive(response.getResponseBody(), false);
+            //the ox http api wraps the response stanzas into a data : {} object, try to unwrap
+            String responseBody = response.getResponseBody();
+            if(!Strings.isNullOrEmpty(responseBody)) {
+                try {
+                    JSONObject body = new JSONObject(responseBody);
+                    Object data = body.opt("data");
+                    if(data != null) {
+                        JSONObject jsonData = (JSONObject)data;
+                        onReceive(jsonData , false);
+                    } else {
+                        onReceive(responseBody , false);
+                    }
+                } catch (JSONException e) {
+                    LOG.error("Response wasn't valid JSON: {}", responseBody);
+                    throw new RTException("Response wasn't valid JSON");
+                }
+            }
         } catch (Exception e) {
             LOG.error("Exception while executing send request.", e);
             throw new RTException("Exception while executing send request.", e);
