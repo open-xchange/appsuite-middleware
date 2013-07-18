@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Client
 Bundle-SymbolicName: com.openexchange.realtime.client
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 7.4.0
 Bundle-ClassPath: client.jar,
  lib/async-http-client-1.7.17.jar,
  lib/wasync-1.0.0-SNAPSHOT.jar
