@@ -1032,7 +1032,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     throw new InvalidDataException("Username and userid missing.");
                 }
                 // ok , try to get the username by id or username
-                if (username == null) {
+                if (username == null && null != userid) {
                     usr.setName(tool.getUsernameByUserID(ctx, userid.intValue()));
                 }
 
