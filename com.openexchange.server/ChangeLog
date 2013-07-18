@@ -1,6 +1,7 @@
 * 2013-07-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 27232: Reconnect if mail part's folder has been closed in the meantime
+ - Fix for bug 27641: Lowered log level for charset auto-detection triggered by invalid charset name
 
 * 2013-07-18 - jan.bauerdick@open-xchange.com
 
