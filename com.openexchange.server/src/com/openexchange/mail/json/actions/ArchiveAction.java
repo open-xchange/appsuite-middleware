@@ -150,8 +150,7 @@ public final class ArchiveAction extends AbstractMailAction {
                     parentFullName = MailFolder.DEFAULT_FOLDER_ID;
                 } else {
                     archiveFullname = new StringAllocator(prefix).append(archiveName).toString();
-                    final char separator = prefix.charAt(prefix.length() - 1);
-                    parentFullName = prefix.substring(0, prefix.lastIndexOf(separator));
+                    parentFullName = prefix.substring(0, prefix.length() - 1);
                 }
                 // Update mail account
                 if (updateAccount) {
