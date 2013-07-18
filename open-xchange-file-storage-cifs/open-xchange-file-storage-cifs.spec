@@ -48,7 +48,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %changelog
 * Mon Jul 15 2013 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2013-07-18
+Second build for patch  2013-07-18
 * Thu Jul 11 2013 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2013-07-10
 * Mon Jul 01 2013 Thorben Betten <thorben.betten@open-xchange.com>

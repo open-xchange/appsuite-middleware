@@ -154,6 +154,12 @@ open-xchange-ajp (7.2.0-0) UNRELEASED; urgency=low
 
  -- Marc Arens <marc.arens@open-xchange.com>  Fri, 15 Mar 2013 13:32:33 +0100
 
+open-xchange-ajp (7.0.2-12) unstable; urgency=low
+
+  * Second build for patch  2013-07-18
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Mon, 15 Jul 2013 10:00:03 +0200
+
 open-xchange-ajp (7.0.2-11) unstable; urgency=low
 
   * Second build for patch 2013-05-28
