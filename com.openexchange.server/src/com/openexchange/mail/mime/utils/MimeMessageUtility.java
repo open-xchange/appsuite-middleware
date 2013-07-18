@@ -145,6 +145,7 @@ public final class MimeMessageUtility {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(MimeMessageUtility.class);
     private static final boolean TRACE = LOG.isTraceEnabled();
+    private static final boolean DEBUG = LOG.isDebugEnabled();
     private static final boolean WARN = LOG.isWarnEnabled();
 
     private static final Set<HeaderName> ENCODINGS;
@@ -1977,8 +1978,7 @@ public final class MimeMessageUtility {
             if (!CharsetDetector.isValid(cs)) {
                 com.openexchange.java.StringAllocator sb = null;
                 if (null != cs) {
-                    sb =
-                        new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
+                    sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
                     mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
                 }
                 if (contentType.startsWith(PRIMARY_TEXT)) {
@@ -1986,13 +1986,13 @@ public final class MimeMessageUtility {
                     if ("US-ASCII".equalsIgnoreCase(cs)) {
                         cs = "ISO-8859-1";
                     }
-                    if (WARN && null != sb) {
+                    if (DEBUG && null != sb) {
                         sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
                         LOG.warn(sb.toString());
                     }
                 } else {
                     cs = MailProperties.getInstance().getDefaultMimeCharset();
-                    if (WARN && null != sb) {
+                    if (DEBUG && null != sb) {
                         sb.append(" Using fallback encoding: \"").append(cs).append('"');
                         LOG.warn(sb.toString());
                     }
