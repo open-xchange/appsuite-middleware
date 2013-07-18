@@ -1,3 +1,7 @@
+* 2013-07-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27232: Reconnect if mail part's folder has been closed in the meantime
+
 * 2013-07-18 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 27579: Check if connection leads to configdb
