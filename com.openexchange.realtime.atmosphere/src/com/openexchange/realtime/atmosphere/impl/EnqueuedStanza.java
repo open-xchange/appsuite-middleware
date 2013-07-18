@@ -59,7 +59,7 @@ import com.openexchange.realtime.packet.Stanza;
  */
 public class EnqueuedStanza implements Comparable<EnqueuedStanza>{
     
-    static final int INFINITY = 100;
+    static final int INFINITY = Integer.MAX_VALUE;
     
     public Stanza stanza;
     public long sequenceNumber;

@@ -160,22 +160,22 @@ public class RTClientStateTest {
         assertTrue(state.getNonsequenceStanzas().isEmpty());
     }
     
-    @Test
-    public void aPurgeRunShouldCleanOutSequencedStanzasAfterOneHundredAttempts() {
-        Message sequenced = new Message();
-        sequenced.setSequenceNumber(0);
-        state.enqueue(sequenced);
-        
-        state.purge();
-        
-        assertEquals(state.getResendBuffer().get(0l).stanza, sequenced);
-        
-        for (int i = 0; i < 100; i++) {
-            state.purge();
-        }
-        
-        assertTrue(state.getResendBuffer().isEmpty());
-    }
+//    @Test
+//    public void aPurgeRunShouldCleanOutSequencedStanzasAfterOneHundredAttempts() {
+//        Message sequenced = new Message();
+//        sequenced.setSequenceNumber(0);
+//        state.enqueue(sequenced);
+//        
+//        state.purge();
+//        
+//        assertEquals(state.getResendBuffer().get(0l).stanza, sequenced);
+//        
+//        for (int i = 0; i < 100; i++) {
+//            state.purge();
+//        }
+//        
+//        assertTrue(state.getResendBuffer().isEmpty());
+//    }
     
     @Test
     public void receivingAnAcknowledgementShouldRemoveTheStanzaFromTheResendBuffer() {
@@ -199,12 +199,12 @@ public class RTClientStateTest {
     }
     
     @Test
-    public void theStateShouldExpireAfterTwoMinutes() {
+    public void theStateShouldExpireAfterThirtyMinutes() {
         state.touch();
         long now = state.getLastSeen();
         
-        assertFalse(state.isTimedOut(now + 59000));
-        assertTrue(state.isTimedOut(now + 120001));
+        assertFalse(state.isTimedOut(now + (30 * 60 * 60 * 1000) - 1));
+        assertTrue(state.isTimedOut(now + (30 * 60 * 60 * 1000) + 1));
         
     }
 
