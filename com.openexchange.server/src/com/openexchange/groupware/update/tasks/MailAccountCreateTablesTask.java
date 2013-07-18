@@ -100,6 +100,7 @@ public class MailAccountCreateTablesTask implements UpdateTask {
             "spam VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
             "confirmed_spam VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
             "confirmed_ham VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+            "archive VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT ''" +
             "unified_inbox TINYINT unsigned default 0," +
             "trash_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
             "sent_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
@@ -107,6 +108,7 @@ public class MailAccountCreateTablesTask implements UpdateTask {
             "spam_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
             "confirmed_spam_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
             "confirmed_ham_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+            "archive_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT ''" +
             "PRIMARY KEY  (cid, id, user)," +
             "INDEX (cid, user)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
