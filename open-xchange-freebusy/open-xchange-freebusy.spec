@@ -51,6 +51,8 @@ First release candidate for 7.4.0
 prepare for 7.4.0
 * Mon Jul 15 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2013-07-18
+* Mon Jul 15 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Second build for patch  2013-07-18
 * Thu Jul 11 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2013-07-10
 * Wed Jul 03 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>

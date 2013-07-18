@@ -75,6 +75,7 @@ open-xchange-admin-autocontextid (7.2.1-6) stable; urgency=low
   * Build for patch 2013-06-27
 
  -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 03 Jul 2013 16:57:54 +0200
+
 open-xchange-admin-autocontextid (7.2.1-5) UNRELEASED; urgency=low
 
   * Build for patch 2013-06-11
@@ -176,6 +177,12 @@ open-xchange-admin-autocontextid (7.2.0-0) UNRELEASED; urgency=low
   * prepare for 7.2.0
 
  -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 15 Mar 2013 13:32:22 +0100
+
+open-xchange-admin-autocontextid (7.0.2-12) unstable; urgency=low
+
+  * Second build for patch  2013-07-18
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Mon, 15 Jul 2013 09:59:56 +0200
 
 open-xchange-admin-autocontextid (7.0.2-11) unstable; urgency=low
 
