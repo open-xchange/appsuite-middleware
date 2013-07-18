@@ -55,6 +55,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -67,8 +68,6 @@ import com.openexchange.groupware.update.UpdateTask;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountCreateTablesTask implements UpdateTask {
-
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountCreateTablesTask.class));
 
     @Override
     public int addedWithVersion() {
@@ -170,8 +169,9 @@ public class MailAccountCreateTablesTask implements UpdateTask {
         createTable("user_mail_account_properties", getCreateMailAccountProperties(), contextId);
         createTable("user_transport_account", getCreateTransportAccount(), contextId);
         createTable("user_transport_account_properties", getCreateTransportAccountProperties(), contextId);
-        if (LOG.isInfoEnabled()) {
-            LOG.info("UpdateTask 'MailAccountCreateTablesTask' successfully performed!");
+        final Log log = com.openexchange.log.Log.loggerFor(MailAccountCreateTablesTask.class);
+        if (log.isInfoEnabled()) {
+            log.info("UpdateTask 'MailAccountCreateTablesTask' successfully performed!");
         }
     }
 
