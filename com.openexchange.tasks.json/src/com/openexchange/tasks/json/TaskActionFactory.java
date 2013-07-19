@@ -78,7 +78,7 @@ import com.openexchange.tasks.json.actions.UpdatesAction;
 @Module(name = "tasks", description = "Provides access to task information.")
 public class TaskActionFactory implements AJAXActionServiceFactory {
 
-    private static final Map<String, TaskAction> actions = new ConcurrentHashMap<String, TaskAction>(10);
+    private final Map<String, TaskAction> actions = new ConcurrentHashMap<String, TaskAction>(10);
 
     /**
      * Initializes a new {@link TaskActionFactory}.
