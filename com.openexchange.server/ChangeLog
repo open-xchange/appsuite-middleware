@@ -2,6 +2,7 @@
 
  - Fix for bug 27539: Sanitize Content-Type header if 'javax.mail.internet.MimeMessage.saveChanges()' fails
  - Fix for bug 27645: Chunk-wise copy/move of messages from one account to another
+ - Fix for bug 27639: Ignore trailing non-LDH characters on IDN-to-ACE conversion
 
 * 2013-07-18 - thorben.betten@open-xchange.com
 
