@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Client
 Bundle-SymbolicName: com.openexchange.realtime.client
 Bundle-Version: 7.4.0
-Bundle-ClassPath: client.jar,
+Bundle-ClassPath: .,
  lib/async-http-client-1.7.17.jar,
  lib/wasync-1.0.0-SNAPSHOT.jar
 Import-Package: com.google.common.annotations,
@@ -29,3 +29,5 @@ Export-Package: com.openexchange.realtime.client,
  com.openexchange.realtime.client.room,
  com.openexchange.realtime.client.room.chinese,
  com.openexchange.realtime.client.room.loadtest
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+
