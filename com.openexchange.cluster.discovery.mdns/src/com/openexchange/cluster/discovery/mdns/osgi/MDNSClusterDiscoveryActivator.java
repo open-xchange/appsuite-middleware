@@ -49,22 +49,13 @@
 
 package com.openexchange.cluster.discovery.mdns.osgi;
 
-import java.net.InetAddress;
 import java.util.Dictionary;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.hazelcast.config.Join;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
-import com.openexchange.cluster.discovery.ClusterListener;
-import com.openexchange.cluster.discovery.ClusterMember;
 import com.openexchange.cluster.discovery.mdns.MDNSClusterDiscoveryService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.mdns.MDNSService;
-import com.openexchange.mdns.MDNSServiceEntry;
-import com.openexchange.mdns.MDNSServiceListener;
+import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -76,66 +67,9 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
 
     static final Log LOG = com.openexchange.log.Log.loggerFor(MDNSClusterDiscoveryActivator.class);
 
-    private final class ClusterAwareMdnsServiceListener implements MDNSServiceListener {
-
-        private final String serviceId;
-        private final MDNSClusterDiscoveryService service;
-
-        protected ClusterAwareMdnsServiceListener(final String serviceId, final MDNSClusterDiscoveryService service) {
-            super();
-            this.service = service;
-            this.serviceId = serviceId;
-        }
-
-        @Override
-        public void onServiceRemoved(final String serviceId, final MDNSServiceEntry entry) {
-            LOG.debug("Removed: " + entry);
-            if (this.serviceId.equals(serviceId)) {
-                /*
-                 * Notify listeners
-                 */
-                for (final ClusterListener listener : service.getListeners()) {
-                    for (final InetAddress inetAddress : entry.getAddresses()) {
-                        listener.removed(ClusterMember.valueOf(inetAddress, entry.getPort()));
-                        LOG.info("Notified ClusterListener '" + listener.getClass().getName() + "' about disappeared Open-Xchange node: " + inetAddress);
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void onServiceAdded(final String serviceId, final MDNSServiceEntry entry) {
-            LOG.debug("Added: " + entry);
-            if (this.serviceId.equals(serviceId)) {
-                /*
-                 * Notify listeners
-                 */
-                for (final ClusterListener listener : service.getListeners()) {
-                    for (final InetAddress inetAddress : entry.getAddresses()) {
-                        listener.added(ClusterMember.valueOf(inetAddress, entry.getPort()));
-                        LOG.info("Notified ClusterListener '" + listener.getClass().getName() + "' about appeared Open-Xchange node: " + inetAddress);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Reference for RegisteringListener.
-     */
-    protected final AtomicReference<ClusterAwareMdnsServiceListener> registeringListenerRef;
-
-    /**
-     * Initializes a new {@link MDNSClusterDiscoveryActivator}.
-     */
-    public MDNSClusterDiscoveryActivator() {
-        super();
-        registeringListenerRef = new AtomicReference<ClusterAwareMdnsServiceListener>();
-    }
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return new  Class<?>[] { ConfigurationService.class };
+        return new  Class<?>[] { ConfigurationService.class, HazelcastConfigurationService.class };
     }
 
     @Override
@@ -150,44 +84,11 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final BundleContext context = this.context;
-        // Form service ID from cluster name
-        final String serviceID = getService(ConfigurationService.class).getProperty("com.openexchange.cluster.name");
-        if (null == serviceID || 0 == serviceID.trim().length()) {
-            throw new BundleException(
-                "Cluster name is mandatory. Please set a valid identifier through property \"com.openexchange.cluster.name\".",
-                BundleException.ACTIVATOR_ERROR);
-        } else if ("ox".equalsIgnoreCase(serviceID)) {
-            LOG.warn("\n\tThe configuration value for \"com.openexchange.cluster.name\" has not been changed from it's default value " + "\"ox\". Please do so to make this warning disappear.\n");
-        }
-        LOG.info("Cluster Discovery will track services with ID \"" + serviceID + "\".");
-        // Create service instance
-        final MDNSClusterDiscoveryService mdnsClusterDiscoveryService = new MDNSClusterDiscoveryService(serviceID, context);
-        rememberTracker(mdnsClusterDiscoveryService);
-        // Tracker for MDNSService
-        track(MDNSService.class, new ServiceTrackerCustomizer<MDNSService, MDNSService>() {
-
-            @Override
-            public MDNSService addingService(final ServiceReference<MDNSService> reference) {
-                final MDNSService service = context.getService(reference);
-                mdnsClusterDiscoveryService.setMDNSService(service);
-                service.addListener(new ClusterAwareMdnsServiceListener(serviceID, mdnsClusterDiscoveryService));
-                return service;
-            }
-
-            @Override
-            public void modifiedService(final ServiceReference<MDNSService> reference, final MDNSService service) {
-                // Ignore
-            }
-
-            @Override
-            public void removedService(final ServiceReference<MDNSService> reference, final MDNSService service) {
-                context.ungetService(reference);
-            }
-        });
-        openTrackers();
-        // Register MDNS-based ClusterDiscoveryService
-        registerService(ClusterDiscoveryService.class, mdnsClusterDiscoveryService);
+        com.hazelcast.config.Config config = getService(HazelcastConfigurationService.class).getConfig();
+        Join join = config.getNetworkConfig().getJoin();
+        join.getMulticastConfig().setEnabled(true);
+        join.getTcpIpConfig().setEnabled(false);
+        registerService(ClusterDiscoveryService.class, new MDNSClusterDiscoveryService(context));
     }
 
 }
