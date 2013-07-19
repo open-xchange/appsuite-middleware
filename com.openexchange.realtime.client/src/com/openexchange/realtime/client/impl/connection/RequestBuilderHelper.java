@@ -59,7 +59,7 @@ import com.openexchange.realtime.client.impl.config.ConfigurationProvider;
 
 /**
  * {@link RequestBuilderHelper} Utility to create preconfigured {@link RequestBuilders} for realtime request.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class RequestBuilderHelper {
@@ -67,7 +67,7 @@ public class RequestBuilderHelper {
     /**
      * Create a new RequestBuilder for realtime "send" requests. Host, Path, Method, Content-Type- and Cookie-header are already set based
      * on values found in {@link Constants} or overwritten via {@link ConfigurationProvider}.
-     * 
+     *
      * @return the preconfigured RequestBuilder that can be enhanced with the request body
      */
     public static RequestBuilder newSendRequest(final RTConnectionProperties connectionProperties, final RTSession state) {
@@ -83,7 +83,7 @@ public class RequestBuilderHelper {
     /**
      * Create a new RequestBuilder for realtime "query" requests. Host, Path, Method, Content-Type- and Cookie-header are already set based
      * on values found in {@link Constants} or overwritten via {@link ConfigurationProvider}.
-     * 
+     *
      * @return the preconfigured RequestBuilder that can be enhanced with the request body
      */
     public static RequestBuilder newQueryRequest(final RTConnectionProperties connectionProperties, final RTSession state) {
@@ -148,14 +148,14 @@ public class RequestBuilderHelper {
 
     /**
      * Creates a new {@link RequestBuilder}
-     * 
+     *
      * @param atmosphereClient - {@link AtmosphereClient} for that a {@link RequestBuilder} should be created for.
      * @param connectionProperties - {@link RTConnectionProperties} with the connection information to route the request.
      * @param userState - {@link RTSession} with the user information to use the existing connection
      * @return {@link RequestBuilder} to build an atmosphere request
      */
     public static org.atmosphere.wasync.RequestBuilder<AtmosphereRequestBuilder> newAtmosphereRequestBuilder(AtmosphereClient atmosphereClient, RTConnectionProperties connectionProperties, RTSession userState) {
-        final org.atmosphere.wasync.RequestBuilder<AtmosphereRequestBuilder> requestBuilder = atmosphereClient.newRequestBuilder(AtmosphereRequestBuilder.class);
+        final org.atmosphere.wasync.RequestBuilder<AtmosphereRequestBuilder> requestBuilder = atmosphereClient.newRequestBuilder();
         requestBuilder.method(org.atmosphere.wasync.Request.METHOD.GET);
         requestBuilder.uri(buildUrl(ConfigurationProvider.getInstance().getAtmospherePath(), connectionProperties));
         requestBuilder.transport(org.atmosphere.wasync.Request.TRANSPORT.LONG_POLLING);

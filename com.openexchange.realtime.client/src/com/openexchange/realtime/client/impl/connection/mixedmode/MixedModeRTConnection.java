@@ -54,9 +54,8 @@ import java.util.concurrent.TimeUnit;
 import org.atmosphere.wasync.Decoder;
 import org.atmosphere.wasync.Encoder;
 import org.atmosphere.wasync.Event;
-import org.atmosphere.wasync.Socket;
 import org.atmosphere.wasync.impl.AtmosphereClient;
-import org.atmosphere.wasync.impl.AtmosphereRequest.AtmosphereRequestBuilder;
+import org.atmosphere.wasync.impl.DefaultOptions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,7 +73,6 @@ import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
 import com.openexchange.realtime.client.impl.connection.AbstractRTConnection;
 import com.openexchange.realtime.client.impl.connection.Constants;
-import com.openexchange.realtime.client.impl.connection.RTProtocol;
 import com.openexchange.realtime.client.impl.connection.RequestBuilderHelper;
 import com.openexchange.realtime.client.impl.connection.SequenceGenerator;
 
@@ -207,8 +205,38 @@ public class MixedModeRTConnection extends AbstractRTConnection {
 
     @Override
     protected void reconnect() throws RTException {
-        request = this.createAtmosphereRequest();
-        socket = this.createSocket();
+        if (socket != null) {
+            socket.close();
+        }
+
+        request = RequestBuilderHelper.newAtmosphereRequestBuilder(atmosphereClient, connectionProperties, getOXSession())
+            .encoder(new Encoder<JSONObject, String>() {
+                @Override
+                public String encode(final JSONObject jsonObject) {
+                    return jsonObject.toString();
+                }
+            })
+
+            .decoder(new Decoder<String, JSONObject>() {
+                @Override
+                public JSONObject decode(final Event event, String received) {
+                    if (event.equals(Event.MESSAGE)) {
+                        LOG.debug("Received message in atmosphere channel: " + received);
+                        try {
+                            onReceive(received, true);
+                        } catch (RTException rtException) {
+                            LOG.error("Error in handling the incoming object.", rtException);
+                        }
+                    }
+
+                    return new JSONObject();
+                }
+            })
+            .build();
+
+        socket = atmosphereClient.create(
+            (DefaultOptions) atmosphereClient.newOptionsBuilder().runtime(asyncHttpClient, true).reconnect(true).build()
+        );
         try {
             socket.open(request);
         } catch (IOException e) {
@@ -327,14 +355,14 @@ public class MixedModeRTConnection extends AbstractRTConnection {
     }
 
     private void fireQueryRequest(JSONValue jsonValue) throws RTException {
-        RequestBuilder queryRequestBuilder = RequestBuilderHelper.newQueryRequest(connectionProperties, session);
+        RequestBuilder queryRequestBuilder = RequestBuilderHelper.newQueryRequest(connectionProperties, getOXSession());
         queryRequestBuilder.setBody(jsonValue.toString());
         Request request = queryRequestBuilder.build();
         fireSynchronousRequest(request);
     }
 
     private void fireSendRequest(JSONValue jsonValue) throws RTException {
-        RequestBuilder builder = RequestBuilderHelper.newSendRequest(connectionProperties, session);
+        RequestBuilder builder = RequestBuilderHelper.newSendRequest(connectionProperties, getOXSession());
         builder.setBody(jsonValue.toString());
         Request request = builder.build();
         fireSynchronousRequest(request);
@@ -381,48 +409,5 @@ public class MixedModeRTConnection extends AbstractRTConnection {
         } catch (IOException ioException) {
             LOG.info("Unable to fire ping request. Try again with the next iteration");
         }
-    }
-
-    /**
-     * Creates a {@link Request} to send a message. It also delegates all received messages to the {@link RTProtocol}.
-     *
-     * @return {@link Request}
-     */
-    private org.atmosphere.wasync.Request createAtmosphereRequest() {
-        org.atmosphere.wasync.RequestBuilder<AtmosphereRequestBuilder> requestBuilder = RequestBuilderHelper.newAtmosphereRequestBuilder(this.atmosphereClient, connectionProperties, session);
-        requestBuilder.encoder(new Encoder<JSONObject, String>() {
-            @Override
-            public String encode(final JSONObject jsonObject) {
-                return jsonObject.toString();
-            }
-        });
-        requestBuilder.decoder(new Decoder<String, JSONObject>() {
-
-            @Override
-            public JSONObject decode(final Event event, String received) {
-
-                if (event.equals(Event.MESSAGE)) {
-                    LOG.debug("Received message in atmosphere channel: " + received);
-                    try {
-                        onReceive(received, true);
-                    } catch (RTException rtException) {
-                        LOG.error("Error in handling the incoming object.", rtException);
-                    }
-                }
-
-                return new JSONObject();
-            }
-        });
-        return requestBuilder.build();
-    }
-
-    /**
-     * Creates the socket required for the connection.
-     *
-     * @return {@link Socket} the socket for the new connections
-     */
-    private Socket createSocket() {
-        final Socket lSocket = atmosphereClient.create();
-        return lSocket;
     }
 }

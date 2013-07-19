@@ -89,7 +89,7 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     protected RTProtocol protocol;
 
-    protected RTSession session;
+    protected AtomicReference<RTSession> sessionRef;
 
 
     protected AbstractRTConnection() {
@@ -103,6 +103,7 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
         messageHandlers = new ConcurrentHashMap<String, RTMessageHandler>();
         resendBuffer = new ResendBuffer(this);
         protocol = new RTProtocol(this);
+        sessionRef = new AtomicReference<RTSession>();
         login(messageHandler);
         reconnect();
     }
@@ -122,6 +123,7 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     @Override
     public RTSession getOXSession() {
+        RTSession session = sessionRef.get();
         if (session == null) {
             throw new IllegalStateException("The connection has not been successfully established.");
         }
@@ -217,26 +219,26 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
             registerHandler0(ConfigurationProvider.getInstance().getDefaultSelector(), messageHandler);
         }
 
-        session = Login.doLogin(
+        sessionRef.set(Login.doLogin(
             connectionProperties.getSecure(),
             connectionProperties.getHost(),
             connectionProperties.getPort(),
             connectionProperties.getUser(),
-            connectionProperties.getPassword());
+            connectionProperties.getPassword()));
     }
 
     /**
      * Destroys the active user session and performs a logout on the server.
      */
     protected void logout() {
-        if (session != null) {
+        if (sessionRef != null) {
             try {
-                Login.doLogout(session, connectionProperties.getSecure(), connectionProperties.getHost(), connectionProperties.getPort());
+                Login.doLogout(sessionRef.get(), connectionProperties.getSecure(), connectionProperties.getHost(), connectionProperties.getPort());
             } catch (RTException e) {
                 LOG.warn("Error during logout request.", e);
             }
 
-            session = null;
+            sessionRef = null;
         }
     }
 

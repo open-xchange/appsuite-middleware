@@ -65,7 +65,7 @@ import com.openexchange.realtime.client.room.RTRoom;
 
 /**
  * Basic implementation of {@link RTRoom} that should be used as base for group chats.
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
@@ -104,7 +104,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
 
     /**
      * Initializes a new {@link AbstractRoomImpl}.
-     * 
+     *
      * @param rtUser - {@link RTUser} that will interact with the room.
      * @param rtConnectionProperties - {@link RTConnectionProperties} related to the user.
      */
@@ -149,7 +149,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
 
     /**
      * Creates the join object that will be send to the given room and address.
-     * 
+     *
      * @return {@link JSONValue} with the data to join a room.
      * @throws JSONException
      */
@@ -177,7 +177,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
 
     /**
      * Creates the say object that will be send into a room.
-     * 
+     *
      * @param message - {@link JSONArray} with the payloads to send to the room
      * @return {@link JSONValue} with the complete message to send to the room
      * @throws JSONException
@@ -198,6 +198,10 @@ public abstract class AbstractRoomImpl implements RTRoom {
             this.send(leave);
 
             this.connection.unregisterHandler(this.roomName);
+            this.pingTimer.cancel();
+            this.pingTimerTask.cancel();
+            this.pingTimer = null;
+            this.pingTimerTask = null;
         } catch (Exception exception) {
             throw new RTException(exception);
         }
@@ -205,7 +209,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
 
     /**
      * Creates the leave object that will be send to leave the room.
-     * 
+     *
      * @param message - {@link JSONValue} with the message to say into a room
      * @return {@link JSONValue} with the data to say something into a room.
      * @throws JSONException
@@ -216,7 +220,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
 
     /**
      * Sends the object and resets the ping timer
-     * 
+     *
      * @param objectToSend - {@link JSONValue} with the data to send to the server and deal with join/say/leave
      */
     protected void send(JSONValue objectToSend) throws RTException {
@@ -250,7 +254,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
 
     /**
      * Sets the rtConnection
-     * 
+     *
      * @param rtConnection The rtConnection to set
      */
     protected void setRtConnection(RTConnection rtConnection) {
@@ -259,7 +263,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
 
     /**
      * Gets the rtMessageHandler
-     * 
+     *
      * @return The rtMessageHandler
      */
     protected RTMessageHandler getRtMessageHandler() {
@@ -268,7 +272,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
 
     /**
      * Gets the toAddress
-     * 
+     *
      * @return The toAddress
      */
     protected String getToAddress() {
@@ -277,7 +281,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
 
     /**
      * Gets the pingTimer
-     * 
+     *
      * @return The pingTimer
      */
     protected Timer getPingTimer() {

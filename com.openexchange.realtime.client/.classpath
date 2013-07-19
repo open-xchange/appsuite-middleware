@@ -5,7 +5,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/async-http-client-1.7.17.jar" sourcepath="sources/async-http-client-1.7.17-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
-	<classpathentry kind="lib" path="lib/wasync-1.0.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/wasync-1.0.0-SNAPSHOT.jar" sourcepath="sources/wasync"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-jcl-1.7.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
