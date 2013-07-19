@@ -95,8 +95,13 @@ public final class IDNA {
             if (pos == length - 1) {
                 return idnAddress;
             }
-            return new StringBuilder(length + 8).append(idnAddress.substring(0, pos)).append('@').append(
-                gnu.inet.encoding.IDNA.toASCII(idnAddress.substring(pos + 1), true)).toString();
+            final StringBuilder sb = new StringBuilder(length + 8).append(idnAddress.substring(0, pos)).append('@');
+            if (idnAddress.endsWith(">")) {
+                sb.append(gnu.inet.encoding.IDNA.toASCII(idnAddress.substring(pos + 1, idnAddress.length() - 1), true)).append('>');
+            } else {
+                sb.append(gnu.inet.encoding.IDNA.toASCII(idnAddress.substring(pos + 1), true));
+            }
+            return sb.toString();
         } catch (final gnu.inet.encoding.IDNAException e) {
             throw new AddressException(new StringBuilder(e.getMessage()).append(": ").append(idnAddress).toString());
         }
