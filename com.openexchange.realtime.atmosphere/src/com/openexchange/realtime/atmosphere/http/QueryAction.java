@@ -48,6 +48,7 @@
 
 package com.openexchange.realtime.atmosphere.http;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -180,11 +181,11 @@ public class QueryAction extends RTAction {
             }
         //gate.handle e.g. nextSequence
         } catch (RealtimeException e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
             throw e;
             //Condition.await
         } catch (InterruptedException e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
             RealtimeException re = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(e, e.getMessage());
             throw re;
         } finally {
@@ -193,13 +194,23 @@ public class QueryAction extends RTAction {
         Object answer = values.get("answer");
         if(answer == null || !Stanza.class.isInstance(answer)) {
             RealtimeException realtimeException = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create("Request didn't yield any response.");
-            LOG.error(realtimeException);
+            LOG.error(realtimeException.getMessage(), realtimeException);
             stanza.setError(realtimeException);
+            stanza.transformPayloads("json");
             return new AJAXRequestResult(new StanzaWriter().write(stanza), "json");
         }
         Stanza answerStanza = (Stanza)answer;
         //Set the recipient to the client that originally sent the request
         answerStanza.setTo(id);
+
+        long sequenceNumber = stanza.getSequenceNumber();
+        if (sequenceNumber >= 0) {
+            services.getService(MessageDispatcher.class).send(answerStanza);
+            Map<String, Object> r = new HashMap<String, Object>();
+            r.put("acknowledgements", Collections.singletonList(sequenceNumber));
+            return new AJAXRequestResult(r, "native");
+        }
+
         return new AJAXRequestResult(new StanzaWriter().write(answerStanza), "json");
     }
 
