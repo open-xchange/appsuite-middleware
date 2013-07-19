@@ -63,39 +63,4 @@ while (<SHOWRUNTIME>) {
         print "http-codec-error-count.value $val\n";
         next;
     }
-
-    if ( $_ =~ /HttpServerFilter,current-suspended-request-count/) {
-        s/.*\=//;
-        $val=$_+0;
-        print "current-suspended-request-count.value $val\n";
-        next;
-    }
-    
-    if ( $_ =~ /HttpServerFilter,requests-cancelled-count/) {
-        s/.*\=//;
-        $val=$_+0;
-        print "requests-cancelled-count.value $val\n";
-        next;
-    }
-    
-    if ( $_ =~ /HttpServerFilter,requests-completed-count/) {
-        s/.*\=//;
-        $val=$_+0;
-        print "requests-completed-count.value $val\n";
-        next;
-    }
-
-    if ( $_ =~ /HttpServerFilter,requests-received-count/) {
-        s/.*\=//;
-        $val=$_+0;
-        print "requests-received-count.value $val\n";
-        next;
-    }
-    
-    if ( $_ =~ /HttpServerFilter,requests-timed-out-count/) {
-        s/.*\=//;
-        $val=$_+0;
-        print "requests-timed-out-count.value $val\n";
-        next;
-    }
 }
