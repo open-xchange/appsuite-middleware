@@ -69,6 +69,10 @@ import com.openexchange.drive.sync.SyncResult;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderID;
 
 
 /**
@@ -177,9 +181,44 @@ public class FileCopyOptimizer extends FileActionOptimizer {
         Map<String, ServerFileVersion> matchingFileVersions = new HashMap<String, ServerFileVersion>();
         List<FileChecksum> checksumsToInvalidate = new ArrayList<FileChecksum>();
         Map<String, List<FileChecksum>> storedFileChecksums = session.getChecksumStore().getMatchingFileChecksums(checksums);
+        Map<FolderID, Integer> folderPermissions = new HashMap<FolderID, Integer>();
         for (List<FileChecksum> storedChecksums : storedFileChecksums.values()) {
             File matchingFile = null;
             for (FileChecksum storedChecksum : storedChecksums) {
+                FileID fileID = storedChecksum.getFileID();
+                /*
+                 * try to get parent folder permissions
+                 */
+                FolderID folderID = new FolderID(fileID.getService(), fileID.getAccountId(),fileID.getFolderId());
+                Integer readPermissions = null;
+                if (false == folderPermissions.containsKey(folderID)) {
+                    FileStorageFolder folder = null;
+                    try {
+                        folder = session.getStorage().getFolderAccess().getFolder(folderID.toUniqueID());
+                        if (null != folder) {
+                            readPermissions = Integer.valueOf(folder.getOwnPermission().getReadPermission());
+                        }
+                    } catch (OXException e) {
+                        LOG.debug("Error accessing folder referenced by checksum store: " + e.getMessage());
+                        if (false == indicatesInvalidation(e)) {
+                            // mark not accessible
+                            readPermissions = Integer.valueOf(FileStoragePermission.NO_PERMISSIONS);
+                        }
+                    }
+                    folderPermissions.put(folderID, readPermissions); // may be null (folder not found)
+                } else {
+                    readPermissions = folderPermissions.get(folderID);
+                }
+                if (null == readPermissions) {
+                    checksumsToInvalidate.add(storedChecksum);
+                    continue;
+                }
+                if (FileStoragePermission.NO_PERMISSIONS == readPermissions.intValue()) {
+                    continue;
+                }
+                /*
+                 * try to get matching file
+                 */
                 try {
                     matchingFile = session.getStorage().getFile(storedChecksum.getFileID().toUniqueID(), storedChecksum.getVersion());
                 } catch (OXException e) {

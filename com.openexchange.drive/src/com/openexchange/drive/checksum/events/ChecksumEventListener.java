@@ -95,14 +95,15 @@ public class ChecksumEventListener implements EventHandler {
     @Override
     public void handleEvent(Event event) {
         try {
+            Session session = FileStorageEventHelper.extractSession(event);
+            if (null == session || isDriveSession(session)) {
+                // skip
+            }
             if (LOG.isDebugEnabled()) {
                 LOG.debug(FileStorageEventHelper.createDebugMessage("event", event));
             }
             String topic = event.getTopic();
-            Session session = FileStorageEventHelper.extractSession(event);
-            if (null == session || isDriveSession(session)) {
-                // skip
-            } else if (DELETE_TOPIC.equals(topic) || UPDATE_TOPIC.equals(topic)) {
+            if (DELETE_TOPIC.equals(topic) || UPDATE_TOPIC.equals(topic)) {
                 FileID fileID = new FileID(
                     FileStorageEventHelper.extractService(event),
                     FileStorageEventHelper.extractAccountId(event),
