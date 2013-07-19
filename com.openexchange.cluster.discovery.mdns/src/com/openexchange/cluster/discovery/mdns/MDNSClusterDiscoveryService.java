@@ -49,17 +49,11 @@
 
 package com.openexchange.cluster.discovery.mdns;
 
-import java.net.InetAddress;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import com.openexchange.cluster.discovery.AbstractClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterMember;
-import com.openexchange.exception.OXException;
-import com.openexchange.mdns.MDNSService;
-import com.openexchange.mdns.MDNSServiceEntry;
 
 /**
  * {@link MDNSClusterDiscoveryService}
@@ -68,46 +62,18 @@ import com.openexchange.mdns.MDNSServiceEntry;
  */
 public final class MDNSClusterDiscoveryService extends AbstractClusterDiscoveryService {
 
-    private final String serviceId;
-    private final AtomicReference<MDNSService> serviceRef;
-
     /**
      * Initializes a new {@link MDNSClusterDiscoveryService}.
      *
      * @param serviceId
      */
-    public MDNSClusterDiscoveryService(final String serviceId, final BundleContext context) {
+    public MDNSClusterDiscoveryService(BundleContext context) {
         super(context);
-        this.serviceId = serviceId;
-        this.serviceRef = new AtomicReference<MDNSService>();
     }
 
-    /**
-     * Sets the {@link MDNSService} instance
-     *
-     * @param mdnsService The {@link MDNSService} instance
-     */
-    public void setMDNSService(final MDNSService mdnsService) {
-        serviceRef.set(mdnsService);
-    }
 
     @Override
     public List<ClusterMember> getNodes() {
-        final MDNSService mdnsService = serviceRef.get();
-        if (null != mdnsService) {
-            try {
-                final List<ClusterMember> addrs = new LinkedList<ClusterMember>();
-                for (final MDNSServiceEntry mdnsServiceEntry : mdnsService.listByService(serviceId)) {
-                    final int port = mdnsServiceEntry.getPort();
-                    for (final InetAddress inetAddress : mdnsServiceEntry.getAddresses()) {
-                        addrs.add(ClusterMember.valueOf(inetAddress, port));
-                    }
-                }
-                return addrs;
-            } catch (final OXException e) {
-                com.openexchange.log.Log.loggerFor(MDNSClusterDiscoveryService.class).error(e.getMessage(), e);
-            }
-        }
         return Collections.emptyList();
     }
 

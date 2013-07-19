@@ -5,12 +5,15 @@ Bundle-SymbolicName: com.openexchange.cluster.discovery.mdns
 Bundle-Version: 7.4.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.cluster.discovery,
+Import-Package: com.hazelcast.config,
+ com.hazelcast.core,
+ com.hazelcast.impl,
+ com.openexchange.cluster.discovery,
  com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.exception,
+ com.openexchange.hazelcast.configuration,
  com.openexchange.log,
- com.openexchange.mdns,
  com.openexchange.osgi,
  org.apache.commons.logging,
  org.osgi.framework,
