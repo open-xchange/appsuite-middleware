@@ -51,7 +51,7 @@ package com.openexchange.cluster.discovery.mdns.osgi;
 
 import java.util.Dictionary;
 import org.apache.commons.logging.Log;
-import com.hazelcast.config.Join;
+import com.hazelcast.config.MulticastConfig;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.mdns.MDNSClusterDiscoveryService;
 import com.openexchange.config.ConfigurationService;
@@ -84,10 +84,14 @@ public final class MDNSClusterDiscoveryActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        LOG.info("Starting bundle: com.openexchange.cluster.discovery.mdns");
+        ConfigurationService configService = getService(ConfigurationService.class);
+        String multicastGroup = configService.getProperty("com.openexchange.mdns.multicastGroup", "224.2.2.3");
+        int multicastPort = configService.getIntProperty("com.openexchange.mdns.multicastPort", 54327);
         com.hazelcast.config.Config config = getService(HazelcastConfigurationService.class).getConfig();
-        Join join = config.getNetworkConfig().getJoin();
-        join.getMulticastConfig().setEnabled(true);
-        join.getTcpIpConfig().setEnabled(false);
+        MulticastConfig multicastConfig = config.getNetworkConfig().getJoin().getMulticastConfig();
+        multicastConfig.setEnabled(true).setMulticastPort(multicastPort).setMulticastGroup(multicastGroup);
+        config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(false);
         registerService(ClusterDiscoveryService.class, new MDNSClusterDiscoveryService(context));
     }
 
