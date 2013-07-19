@@ -448,9 +448,7 @@ public final class MimeReply {
                     if (originalMsg instanceof MimeMailMessage) {
                         nested = MimeMessageConverter.convertMessage(((MimeMailMessage) originalMsg).getMimeMessage());
                     } else {
-                        final ByteArrayOutputStream tmp = Streams.newByteArrayOutputStream((int) originalMsg.getSize());
-                        originalMsg.writeTo(tmp);
-                        nested = MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), Streams.asInputStream(tmp)));
+                        nested = MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), MimeMessageUtility.getStreamFromMailPart(originalMsg)));
                     }
                     nested.setMsgref(originalMsg.getMailPath());
                     compositeMail.addAdditionalParts(new NestedMessageMailPart(nested));

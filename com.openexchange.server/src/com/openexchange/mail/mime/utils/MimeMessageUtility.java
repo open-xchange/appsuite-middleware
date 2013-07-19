@@ -59,6 +59,8 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
@@ -143,7 +145,7 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
  */
 public final class MimeMessageUtility {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MimeMessageUtility.class);
+    static final Log LOG = com.openexchange.log.Log.loggerFor(MimeMessageUtility.class);
     private static final boolean TRACE = LOG.isTraceEnabled();
     private static final boolean DEBUG = LOG.isDebugEnabled();
     private static final boolean WARN = LOG.isWarnEnabled();
@@ -2065,6 +2067,67 @@ public final class MimeMessageUtility {
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
         }
         return builder.toString();
+    }
+
+    /**
+     * Gets the stream of specified part's raw data.
+     *
+     * @param part Either a message or a body part
+     * @return The stream of specified part's raw data (with the optional empty starting line omitted)
+     * @throws IOException If an I/O error occurs
+     */
+    public static InputStream getStreamFromPart(final Part part) throws IOException {
+        final PipedOutputStream pos = new PipedOutputStream();
+        final PipedInputStream pin = new PipedInputStream(pos);
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    part.writeTo(pos);
+                } catch (final Exception e) {
+                    // Ignore
+                    LOG.warn("Error while writing part to stream", e);
+                } finally {
+                    Streams.close(pos);
+                }
+            }
+        }, "MimeMessageUtility.getStreamFromPart").start();
+        return pin;
+    }
+
+    /**
+     * Gets the stream of specified part's raw data.
+     *
+     * @param part Either a message or a body part
+     * @return The stream of specified part's raw data (with the optional empty starting line omitted)
+     * @throws OXException If an I/O error occurs
+     */
+    public static InputStream getStreamFromMailPart(final MailPart part) throws OXException {
+        try {
+            final PipedOutputStream pos = new PipedOutputStream();
+            final PipedInputStream pin = new PipedInputStream(pos);
+            new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        part.writeTo(pos);
+                    } catch (final Exception e) {
+                        // Ignore
+                        LOG.warn("Error while writing part to stream", e);
+                    } finally {
+                        Streams.close(pos);
+                    }
+                }
+            }, "MimeMessageUtility.getStreamFromMailPart").start();
+            return pin;
+        } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
     }
 
 }

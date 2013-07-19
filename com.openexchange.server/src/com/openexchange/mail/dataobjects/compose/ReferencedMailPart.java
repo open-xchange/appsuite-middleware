@@ -74,6 +74,7 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
 import com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvider;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -229,9 +230,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
     private InputStream messageSource(final MailPart referencedPart) throws OXException {
         if (referencedPart instanceof MailMessage) {
             // Copy to ByteArrayOutputStream
-            final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
-            referencedPart.writeTo(out);
-            return Streams.asInputStream(out);
+            return MimeMessageUtility.getStreamFromMailPart(referencedPart);
         }
         return referencedPart.getInputStream();
     }

@@ -50,7 +50,6 @@
 package com.openexchange.mail.mime.processing;
 
 import static com.openexchange.mail.mime.filler.MimeMessageFiller.setReplyHeaders;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
@@ -78,7 +77,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
@@ -517,12 +515,7 @@ public final class MimeForward {
             if (originalMsg instanceof MimeMailMessage) {
                 nested = MimeMessageConverter.convertMessage(((MimeMailMessage) originalMsg).getMimeMessage());
             } else {
-                final ByteArrayOutputStream tmp = Streams.newByteArrayOutputStream((int) originalMsg.getSize());
-                originalMsg.writeTo(tmp);
-                nested =
-                    MimeMessageConverter.convertMessage(new MimeMessage(
-                        MimeDefaultSession.getDefaultSession(),
-                        Streams.asInputStream(tmp)));
+                nested = MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), MimeMessageUtility.getStreamFromMailPart(originalMsg)));
             }
             nested.setMsgref(originalMsg.getMailPath());
             compositeMail.addAdditionalParts(new NestedMessageMailPart(nested));
