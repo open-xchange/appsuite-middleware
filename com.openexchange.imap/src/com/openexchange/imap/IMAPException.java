@@ -1018,11 +1018,8 @@ public final class IMAPException extends OXException {
                 if (DISPLAYABLE.contains(category.getType())) {
                     ret = new OXException(detailNumber, message, cause, args).setLogMessage(message, args);
                 } else {
-                    ret = new OXException(
-                        detailNumber,
-                        Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
-                        cause,
-                        new Object[0]).setLogMessage(message, args);
+                    final String displayMessage = Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE;
+                    ret = new OXException(detailNumber, displayMessage, cause, new Object[0]).setLogMessage(message, args);
                 }
             }
             return ret.addCategory(category).setPrefix(PREFIX);
@@ -1088,29 +1085,29 @@ public final class IMAPException extends OXException {
                 }
             }
         }
-        final IMAPCode imapCode = code.getImapCode();
-        if (null != imapConfig && null != session) {
-            final IMAPCode extendedCode = IMAPCode.getExtendedCode(imapCode);
-            if (null == extendedCode) {
-                return code.create(cause, messageArgs);
-            }
-            final Object[] newArgs;
-            int k;
-            if (null == messageArgs) {
-                newArgs = new Object[EXT_LENGTH];
-                k = 0;
-            } else {
-                newArgs = new Object[messageArgs.length + EXT_LENGTH];
-                System.arraycopy(messageArgs, 0, newArgs, 0, messageArgs.length);
-                k = messageArgs.length;
-            }
-            newArgs[k++] = imapConfig.getServer();
-            newArgs[k++] = imapConfig.getLogin();
-            newArgs[k++] = Integer.valueOf(session.getUserId());
-            newArgs[k++] = Integer.valueOf(session.getContextId());
-            return extendedCode.create(cause, newArgs);
+        if (null == imapConfig || null == session) {
+            return code.create(cause, messageArgs);
         }
-        return code.create(cause, messageArgs);
+        final IMAPCode imapCode = code.getImapCode();
+        final IMAPCode extendedCode = IMAPCode.getExtendedCode(imapCode);
+        if (null == extendedCode) {
+            return code.create(cause, messageArgs);
+        }
+        final Object[] newArgs;
+        int k;
+        if (null == messageArgs) {
+            newArgs = new Object[EXT_LENGTH];
+            k = 0;
+        } else {
+            newArgs = new Object[messageArgs.length + EXT_LENGTH];
+            System.arraycopy(messageArgs, 0, newArgs, 0, messageArgs.length);
+            k = messageArgs.length;
+        }
+        newArgs[k++] = imapConfig.getServer();
+        newArgs[k++] = imapConfig.getLogin();
+        newArgs[k++] = Integer.valueOf(session.getUserId());
+        newArgs[k++] = Integer.valueOf(session.getContextId());
+        return extendedCode.create(cause, newArgs);
     }
 
     /**
