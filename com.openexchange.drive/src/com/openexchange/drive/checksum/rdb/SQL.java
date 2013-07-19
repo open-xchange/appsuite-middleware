@@ -112,17 +112,22 @@ public class SQL {
         "UPDATE fileChecksums SET folder=REVERSE(?) " +
         "WHERE cid=? AND folder=REVERSE(?);";
 
-    /** DELETE FROM checksums WHERE uuid IN (...);" */
+    /** DELETE FROM checksums WHERE cid=? AND uuid IN (...);" */
     public static final String DELETE_FILE_CHECKSUMS_STMT(String[] uuids) {
+        if (null == uuids || 0 == uuids.length) {
+            throw new IllegalArgumentException("uuids");
+        }
         StringAllocator allocator = new StringAllocator();
-        allocator.append("DELETE FROM fileChecksums WHERE cid=? AND uuid IN (");
-        if (0 < uuids.length) {
-            allocator.append("UNHEX('").append(uuids[0]).append("')");
+        allocator.append("DELETE FROM fileChecksums WHERE cid=? AND uuid");
+        if (1 == uuids.length) {
+            allocator.append("=UNHEX('").append(uuids[0]).append("');");
+        } else {
+            allocator.append(" IN (UNHEX('").append(uuids[0]).append("')");
+            for (int i = 1; i < uuids.length; i++) {
+                allocator.append(",UNHEX('").append(uuids[i]).append("')");
+            }
+            allocator.append(");");
         }
-        for (int i = 1; i < uuids.length; i++) {
-            allocator.append(",UNHEX('").append(uuids[0]).append("')");
-        }
-        allocator.append(");");
         return allocator.toString();
     }
 
@@ -190,7 +195,6 @@ public class SQL {
         }
         StringAllocator allocator = new StringAllocator();
         allocator.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,LOWER(HEX(checksum)) FROM directoryChecksums ");
-
         allocator.append("WHERE cid=? AND REVERSE(folder)");
         if (1 == folderIDs.length) {
             allocator.append("='").append(escapeFolder(folderIDs[0])).append("';");
