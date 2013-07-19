@@ -58,6 +58,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
+import org.apache.commons.lang.Validate;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
@@ -81,7 +82,7 @@ import com.openexchange.tokenlogin.TokenLoginService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TokenLoginServiceImpl implements TokenLoginService {
+public class TokenLoginServiceImpl implements TokenLoginService {
 
     private volatile String hzMapName;
     private final ConcurrentMap<String, String> token2sessionId;
@@ -93,6 +94,8 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
      */
     public TokenLoginServiceImpl(final int maxIdleTime, final ConfigurationService configService) throws OXException {
         super();
+        Validate.notNull(configService);
+
         final IdleExpirationPolicy evictionPolicy = new IdleExpirationPolicy(maxIdleTime);
         token2sessionId = new ConcurrentLinkedHashMap<String, String>(1024, 0.75f, 16, Integer.MAX_VALUE, evictionPolicy);
         sessionId2token = new ConcurrentLinkedHashMap<String, String>(1024, 0.75f, 16, Integer.MAX_VALUE, evictionPolicy);
@@ -102,7 +105,7 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
 
     // -------------------------------------------------------------------------------------------------------- //
 
-    private Map<String, TokenLoginSecret> initSecrets(final File secretsFile) throws OXException {
+    protected Map<String, TokenLoginSecret> initSecrets(final File secretsFile) throws OXException {
         if (null == secretsFile) {
             return Collections.emptyMap();
         }
@@ -112,7 +115,7 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
             final Map<String, TokenLoginSecret> map = new LinkedHashMap<String, TokenLoginSecret>(16);
             String line;
             while ((line = reader.readLine()) != null) {
-                if (!isEmpty(line)) {
+                if (!Strings.isEmpty(line)) {
                     line = line.trim();
                     if (!line.startsWith("#") && !line.startsWith("!")) {
                         // Parse secret + parameters
@@ -148,12 +151,12 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     private void parseParameter(final String param, final Map<String, Object> params) {
-        if (!isEmpty(param)) {
+        if (!Strings.isEmpty(param)) {
             final int pos = param.indexOf('=');
             if (pos < 0) {
                 params.put(param, Boolean.TRUE);
             } else {
-                final String value = unquote(param.substring(pos + 1).trim());
+                final String value = Strings.unquote(param.substring(pos + 1).trim());
                 if ("true".equalsIgnoreCase(value)) {
                     params.put(param.substring(0, pos).trim(), Boolean.TRUE);
                 } else if ("false".equalsIgnoreCase(value)) {
@@ -179,7 +182,7 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
 
     @Override
     public TokenLoginSecret getTokenLoginSecret(final String secret) {
-        return isEmpty(secret) ? null : secrets.get(secret);
+        return Strings.isEmpty(secret) ? null : secrets.get(secret);
     }
 
     // -------------------------------------------------------------------------------------------------------- //
@@ -224,6 +227,8 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
 
     @Override
     public String acquireToken(final Session session) throws OXException {
+        Validate.notNull(session);
+
         // Only one token per session
         final String sessionId = session.getSessionID();
         String token = sessionId2token.get(sessionId);
@@ -241,7 +246,7 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
 
     @Override
     public Session redeemToken(final String token, final String appSecret, final String optClientId, final String optAuthId, final String optHash) throws OXException {
-        final TokenLoginSecret tokenLoginSecret = isEmpty(appSecret) ? null : getTokenLoginSecret(appSecret);
+        final TokenLoginSecret tokenLoginSecret = Strings.isEmpty(appSecret) ? null : getTokenLoginSecret(appSecret);
         if (null == tokenLoginSecret) {
             throw TokenLoginExceptionCodes.TOKEN_REDEEM_DENIED.create();
         }
@@ -282,11 +287,11 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
         parameter.setContext(contextService.getContext(session.getContextId()));
         parameter.setUserLoginInfo(session.getLoginName()).setTransient(session.isTransient());
         // Client identifier
-        parameter.setClient(isEmpty(optClientId) ? session.getClient() : optClientId);
+        parameter.setClient(Strings.isEmpty(optClientId) ? session.getClient() : optClientId);
         // Authentication identifier
-        parameter.setAuthId(isEmpty(optAuthId) ? session.getAuthId() : optAuthId);
+        parameter.setAuthId(Strings.isEmpty(optAuthId) ? session.getAuthId() : optAuthId);
         // Hash value
-        parameter.setHash(isEmpty(optHash) ? session.getHash() : optHash);
+        parameter.setHash(Strings.isEmpty(optHash) ? session.getHash() : optHash);
         // Add & return session
         return sessiondService.addSession(parameter);
     }
@@ -297,32 +302,12 @@ public final class TokenLoginServiceImpl implements TokenLoginService {
      * @param session The session
      */
     public void removeTokenFor(final Session session) {
+        Validate.notNull(session);
+
         final String token = sessionId2token.remove(session.getSessionID());
         if (null != token) {
             token2sessionId.remove(token);
             removeFromHzMap(token);
         }
     }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
-    /** Removes single or double quotes from a string if its quoted. */
-    private static String unquote(final String s) {
-        if (!isEmpty(s) && ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")))) {
-            return s.substring(1, s.length() - 1);
-        }
-        return s;
-    }
-
 }

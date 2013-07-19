@@ -82,7 +82,7 @@ import com.openexchange.tokenlogin.impl.TokenLoginServiceImpl;
 public final class TokenLoginActivator extends HousekeepingActivator {
 
     /** The logger */
-    static final Log LOG = com.openexchange.log.Log.loggerFor(TokenLoginActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(TokenLoginActivator.class);
 
     /**
      * Initializes a new {@link TokenLoginActivator}.
@@ -205,17 +205,12 @@ public final class TokenLoginActivator extends HousekeepingActivator {
         Services.setServiceLookup(null);
     }
 
-    @Override
-    public <S> boolean addService(final Class<S> clazz, final S service) {
-        return super.addService(clazz, service);
-    }
-
-    @Override
-    public <S> boolean removeService(final Class<? extends S> clazz) {
-        return super.removeService(clazz);
-    }
-
-    String discoverHzMapName(final Config config) throws IllegalStateException {
+    /**
+     * @param config
+     * @return
+     * @throws IllegalStateException
+     */
+    private String discoverHzMapName(final Config config) throws IllegalStateException {
         final Map<String, MapConfig> mapConfigs = config.getMapConfigs();
         if (null != mapConfigs && !mapConfigs.isEmpty()) {
             for (final String mapName : mapConfigs.keySet()) {

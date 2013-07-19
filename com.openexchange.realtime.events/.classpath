@@ -5,7 +5,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
-	<classpathentry kind="lib" path="/com.openexchange.test/lib/junit-4.6.jar" sourcepath="/com.openexchange.test/lib/src/junit-4.6-source.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.test/lib/junit-4.11.jar" sourcepath="/com.openexchange.test/lib/src/junit-4.11-source.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.test/lib/junit-addons-1.4.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.test/lib/mockito-all-1.9.5.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.test/lib/objenesis-1.2.jar"/>

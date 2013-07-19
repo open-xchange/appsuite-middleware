@@ -124,7 +124,7 @@ public class TestServlet extends HttpServlet {
             }
             page.append("<br>");
         }
-        page.append("</p><p>The content: ").append(saneScriptTags(getBody(req)));
+        page.append("</p><p>The content: ").append(saneScriptTags(this.getBody(req)));
         page.append("</p></body>\n</html>");
         resp.setContentType("text/html; charset=UTF-8");
         final byte[] output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
@@ -177,7 +177,7 @@ public class TestServlet extends HttpServlet {
             }
             page.append("<br>");
         }
-        page.append("</p><p>The content: ").append(saneScriptTags(getBody(req)));
+        page.append("</p><p>The content: ").append(saneScriptTags(this.getBody(req)));
         page.append("</p></body>\n</html>");
         resp.setContentType("text/html; charset=UTF-8");
         final byte[] output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
@@ -192,7 +192,7 @@ public class TestServlet extends HttpServlet {
      * @return a string with the complete body.
      * @throws IOException if an error occurs while reading the body.
      */
-    public static String getBody(final HttpServletRequest req) throws IOException {
+    public String getBody(final HttpServletRequest req) throws IOException {
         InputStreamReader isr = null;
         try {
             int count = 0;
