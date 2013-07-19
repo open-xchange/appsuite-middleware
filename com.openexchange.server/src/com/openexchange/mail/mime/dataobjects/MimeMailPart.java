@@ -55,6 +55,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
 import javax.activation.DataHandler;
@@ -93,7 +95,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     private static final long serialVersionUID = -1142595512657302179L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMailPart.class));
+    static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMailPart.class));
 
     /**
      * The max. in-memory size in bytes.
@@ -777,12 +779,25 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @param part Either a message or a body part
      * @return The stream of specified part's raw data (with the optional empty starting line omitted)
      * @throws IOException If an I/O error occurs
-     * @throws MessagingException If a messaging error occurs
      */
-    private static InputStream getStreamFromPart(final Part part) throws IOException, MessagingException {
-        final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(4096);
-        part.writeTo(out);
-        return stripEmptyStartingLine(Streams.asInputStream(out));
+    private static InputStream getStreamFromPart(final Part part) throws IOException {
+        final PipedOutputStream pos = new PipedOutputStream();
+        final PipedInputStream pin = new PipedInputStream(pos);
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    part.writeTo(pos);
+                } catch (final Exception e) {
+                    // Ignore
+                    LOG.warn("Error while writing part to stream", e);
+                } finally {
+                    Streams.close(pos);
+                }
+            }
+        }, "MimeMailPart.getStreamFromPart").start();
+        return stripEmptyStartingLine(pin);
     }
 
     /**
@@ -791,12 +806,25 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @param multipart A multipart object
      * @return The stream of specified multipart's raw data (with the optional empty starting line omitted)
      * @throws IOException If an I/O error occurs
-     * @throws MessagingException If a messaging error occurs
      */
-    private static InputStream getStreamFromMultipart(final Multipart multipart) throws IOException, MessagingException {
-        final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(4096);
-        multipart.writeTo(out);
-        return stripEmptyStartingLine(Streams.asInputStream(out));
+    private static InputStream getStreamFromMultipart(final Multipart multipart) throws IOException {
+        final PipedOutputStream pos = new PipedOutputStream();
+        final PipedInputStream pin = new PipedInputStream(pos);
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    multipart.writeTo(pos);
+                } catch (final Exception e) {
+                    // Ignore
+                    LOG.warn("Error while writing part to stream", e);
+                } finally {
+                    Streams.close(pos);
+                }
+            }
+        }, "MimeMailPart.getStreamFromMultipart").start();
+        return stripEmptyStartingLine(pin);
     }
 
     /**
@@ -901,7 +929,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                             /*
                              * If size is less than or equal to 1MB, use the in-memory implementation
                              */
-                            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size);
+                            final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(size);
                             part.writeTo(out);
                             multipart = new MIMEMultipartWrapper(new MIMEMultipartMailPart(getContentType(), out.toByteArray()));
                             this.multipart = multipart;
