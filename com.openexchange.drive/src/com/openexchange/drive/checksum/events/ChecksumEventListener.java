@@ -98,6 +98,7 @@ public class ChecksumEventListener implements EventHandler {
             Session session = FileStorageEventHelper.extractSession(event);
             if (null == session || isDriveSession(session)) {
                 // skip
+                return;
             }
             if (LOG.isDebugEnabled()) {
                 LOG.debug(FileStorageEventHelper.createDebugMessage("event", event));
