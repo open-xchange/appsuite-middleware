@@ -53,7 +53,7 @@ import org.json.JSONValue;
 
 /**
  * A {@link RTConnection} is the interface for establishing RT connections to post and receive {@link Stanza}s.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public interface RTConnection {
@@ -93,7 +93,6 @@ public interface RTConnection {
 
     /**
      * Sends a message to the server. This method must be used for reliable delivery.
-     * The call returns after the message was successfully delivered.
      *
      * @param message The message.
      * @throws RTException

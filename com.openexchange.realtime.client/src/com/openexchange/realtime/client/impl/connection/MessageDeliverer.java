@@ -50,7 +50,7 @@
 package com.openexchange.realtime.client.impl.connection;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.slf4j.Logger;
@@ -68,7 +68,7 @@ public class MessageDeliverer implements Runnable {
 
     private final static Logger LOG = LoggerFactory.getLogger(MessageDeliverer.class);
 
-    private final ConcurrentHashMap<String, RTMessageHandler> messageHandlers;
+    private final ConcurrentMap<String, RTMessageHandler> messageHandlers;
 
     private final SequenceGate gate;
 
@@ -77,15 +77,12 @@ public class MessageDeliverer implements Runnable {
      * @param messageHandler
      * @param gate
      */
-    public MessageDeliverer(ConcurrentHashMap<String, RTMessageHandler> messageHandlers) {
+    public MessageDeliverer(ConcurrentMap<String, RTMessageHandler> messageHandlers) {
         super();
         this.messageHandlers = messageHandlers;
         gate = new SequenceGate();
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Runnable#run()
-     */
     @Override
     public void run() {
         while (true) {

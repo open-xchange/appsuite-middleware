@@ -51,7 +51,10 @@ package com.openexchange.realtime.client.impl.connection;
 
 import java.io.StringReader;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang.Validate;
 import org.json.JSONArray;
@@ -69,7 +72,7 @@ import com.openexchange.realtime.client.impl.config.ConfigurationProvider;
 
 /**
  * {@link AbstractRTConnection}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class AbstractRTConnection implements RTConnection, RTProtocolCallback {
@@ -80,7 +83,9 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     protected AtomicReference<Thread> delivererRef;
 
-    protected ConcurrentHashMap<String, RTMessageHandler> messageHandlers;
+    protected ConcurrentMap<String, RTMessageHandler> messageHandlers;
+
+    protected ResendBuffer resendBuffer;
 
     protected RTProtocol protocol;
 
@@ -96,13 +101,15 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
         this.connectionProperties = connectionProperties;
         delivererRef = new AtomicReference<Thread>();
         messageHandlers = new ConcurrentHashMap<String, RTMessageHandler>();
+        resendBuffer = new ResendBuffer(this);
         protocol = new RTProtocol(this);
         login(messageHandler);
         reconnect();
     }
 
-    protected abstract void reconnect() throws RTException;
-
+    /*
+     * RTConnection overrides
+     */
     @Override
     public void registerHandler(String selector, RTMessageHandler messageHandler) throws RTException {
         registerHandler0(selector, messageHandler);
@@ -122,6 +129,45 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
         return session;
     }
 
+    @Override
+    public void send(JSONValue message) throws RTException {
+        if(message.isArray()) {
+            Map<Long, JSONObject> addSequence = protocol.addSequence(message.toArray());
+            for (Entry<Long, JSONObject> entry : addSequence.entrySet()) {
+                resendBuffer.put(entry.getKey(), entry.getValue());
+            }
+        } else if (message.isObject()){
+            Map<Long, JSONObject> addSequence = protocol.addSequence(message.toObject());
+            Entry<Long, JSONObject> entry = addSequence.entrySet().iterator().next();
+            resendBuffer.put(entry.getKey(), entry.getValue());
+        } else {
+            throw new RTException("jsonValue must be either JSONArray or JSONObject");
+        }
+        protocol.resetPingTimeout();
+    }
+
+    @Override
+    public void post(JSONValue message) throws RTException {
+        doSend(message);
+        protocol.resetPingTimeout();
+    }
+
+    @Override
+    public void close() throws RTException {
+        protocol.release();
+        Thread deliverer = delivererRef.get();
+        if (deliverer != null) {
+            deliverer.interrupt();
+            delivererRef.compareAndSet(deliverer, null);
+        }
+
+        resendBuffer.stop();
+        logout();
+    }
+
+    /*
+     * RTProtocolCallback overrides
+     */
     @Override
     public void onTimeout() {
         try {
@@ -144,17 +190,20 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
     }
 
     @Override
-    public void close() throws RTException {
-        protocol.release();
-        Thread deliverer = delivererRef.get();
-        if (deliverer != null) {
-            deliverer.interrupt();
-            delivererRef.compareAndSet(deliverer, null);
-        }
-
-        logout();
+    public void onAck(long seq) {
+        resendBuffer.remove(seq);
     }
 
+    /*
+     * Abstract methods
+     */
+    protected abstract void reconnect() throws RTException;
+
+    protected abstract void doSend(JSONValue message) throws RTException;
+
+    /*
+     * Convenience methods
+     */
     /**
      * A convenience method for creating a valid OX session and registering a message handler
      * for the default selector.
@@ -236,7 +285,7 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
             throw new RTException("The given string was not a valid JSON message.", e);
         }
     }
-    
+
     /**
      * A convenience method for handling incoming messages. The message
      * will pass the {@link RTProtocol} and will be delivered immediately

@@ -49,51 +49,79 @@
 
 package com.openexchange.realtime.client.impl.connection;
 
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.TimeUnit;
+import junit.framework.Assert;
 import org.json.JSONObject;
-import com.openexchange.realtime.client.RTConnection;
+import org.json.JSONValue;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
+import com.openexchange.realtime.client.RTMessageHandler;
+import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
 
 
 /**
- * A {@link RTProtocolCallback} is used to realize a bidirectional communication between
- * a {@link RTConnection} and the {@link RTProtocol}. It is meant to be implemented by
- * concrete {@link RTProtocol} implementations.
+ * {@link ResendBufferTest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface RTProtocolCallback {
+public class ResendBufferTest extends AbstractRTConnection {
 
-    /**
-     * The protocol is handling a message containing a sequence number. In these cases the
-     * received message must be acknowledged. The according message has already been prepared
-     * and needs to be sent now by the connection.
-     *
-     * @param ack The ACK message.
-     */
-    void sendACK(JSONObject ack) throws RTException;
+    private int resendCount = 0;
 
-    /**
-     * Clients have to send PINGs regularly to let the server know that they are still alive.
-     * The protocol does the necessary PING handling and prepares the according messages. These
-     * need to be sent to the server then.
-     *
-     * @param ping The PING message.
-     */
-    void sendPing(JSONObject ping) throws RTException;
+    private CyclicBarrier barrier = new CyclicBarrier(2);
 
-    /**
-     * Server did not send a pong message for more than 120 seconds.
-     */
-    void onTimeout();
+    @Before
+    public void setUp() throws RTException {
+        init(RTConnectionProperties.newBuilder("steffen.templin@premium", "secret", "ce9a19d9-b6ec-bbdf-741e-22123110db07")
+            .setConnectionType(RTConnectionType.LONG_POLLING)
+            .setHost("host")
+            .setPort(1234)
+            .setSecure(false)
+            .build(), null);
+    }
 
-    /**
-     * The server sent a message that indicated an invalid session.
-     */
-    void onSessionInvalid();
+    @Test
+    public void testResendingMessage() throws Exception {
+        JSONObject message = new JSONObject("{message:\"Hello World!\"}");
+        send(message);
+        barrier.await(1, TimeUnit.SECONDS);
+        Assert.assertEquals("Wrong resend count", 1, resendCount);
+        barrier.reset();
+        barrier.await(3, TimeUnit.SECONDS);
+        Assert.assertEquals("Wrong resend count", 2, resendCount);
+        JSONObject acks = new JSONObject("{\"acknowledgements\":[0]}");
+        onReceive(acks, true);
+        Thread.sleep(6001L);
+        Assert.assertEquals("Wrong resend count", 2, resendCount);
+    }
 
-    /**
-     * An incoming message was an acknowledgement for the given sequence number.
-     */
-    void onAck(long seq);
+    @Override
+    protected void doSend(JSONValue message) throws RTException {
+        try {
+            resendCount++;
+            barrier.await();
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (BrokenBarrierException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
+    @Override
+    public void sendACK(JSONObject ack) throws RTException {}
+
+    @Override
+    public void sendPing(JSONObject ping) throws RTException {}
+
+    @Override
+    protected void reconnect() throws RTException {}
+
+    @Override
+    protected void login(RTMessageHandler messageHandler) throws RTException {}
 }

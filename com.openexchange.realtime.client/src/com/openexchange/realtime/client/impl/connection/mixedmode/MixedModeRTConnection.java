@@ -81,9 +81,9 @@ import com.openexchange.realtime.client.impl.connection.SequenceGenerator;
 /**
  * {@link MixedModeRTConnection} This Connection class is needed to communicate with the realtime interfaces of our backend after the
  * refactoring in 05.13.
- * 
+ *
  * It's a mixed mode connection because we use two different types of communication here.
- * 
+ *
  * <ol>
  * <li> Synchronous calls to the api/rt interface
  *   <ol>
@@ -179,7 +179,7 @@ import com.openexchange.realtime.client.impl.connection.SequenceGenerator;
  *     <li> Receive message from the server e.g. from Chatrooms that you are a member of via a long running GET
  *   <ol>
  * </ol>
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class MixedModeRTConnection extends AbstractRTConnection {
@@ -219,31 +219,13 @@ public class MixedModeRTConnection extends AbstractRTConnection {
     /* atmosphere ping pong
      * {"type": "ping", "commit": true }
      * [{"selector":"default","element":"message","payloads":[{"element":"pong","data":"1","namespace":"atmosphere"}],"from":"ox://marc.arens@premium/68ef1855-242c-cbc4-b7aa-0b2c9738b6bb"}]
-     * 
+     *
      * group ping
      * [{"element":"message","to":"synthetic.china://room1","payloads":[{"element":"ping","namespace":"group","data":1}]}]
      * {"data":{"acknowledgements":[]}}
      */
     @Override
-    public void post(JSONValue value) throws RTException {
-        doPost(value);
-    }
-
-    @Override
-    public void send(JSONValue jsonValue) throws RTException {
-        JSONValue sequencedPayload = null;
-        if(jsonValue.isArray()) {
-            sequencedPayload = protocol.addSequence(jsonValue.toArray());
-        } else if (jsonValue.isObject()){
-            sequencedPayload = protocol.addSequence(jsonValue.toObject());
-        } else {
-            throw new RTException("jsonValue must be either JSONArray or JSONObject");
-        }
-        doPost(sequencedPayload);
-        protocol.resetPingTimeout();
-    }
-
-    private void doPost(JSONValue message) throws RTException {
+    protected void doSend(JSONValue message) throws RTException {
         if(isQueryAction(message)) {
             fireQueryRequest(message);
         } else if(isSendAction(message)) {
@@ -390,7 +372,7 @@ public class MixedModeRTConnection extends AbstractRTConnection {
 
     /**
      * Send asynchronous messages to the server.
-     * 
+     *
      * @param jsonValue - JSONValue with the JSON which should be sent to the server
      */
     private void fireAtmosphereRequest(JSONValue jsonValue) {
@@ -403,7 +385,7 @@ public class MixedModeRTConnection extends AbstractRTConnection {
 
     /**
      * Creates a {@link Request} to send a message. It also delegates all received messages to the {@link RTProtocol}.
-     * 
+     *
      * @return {@link Request}
      */
     private org.atmosphere.wasync.Request createAtmosphereRequest() {
@@ -436,7 +418,7 @@ public class MixedModeRTConnection extends AbstractRTConnection {
 
     /**
      * Creates the socket required for the connection.
-     * 
+     *
      * @return {@link Socket} the socket for the new connections
      */
     private Socket createSocket() {

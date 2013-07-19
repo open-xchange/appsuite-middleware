@@ -49,51 +49,91 @@
 
 package com.openexchange.realtime.client.impl.connection;
 
-import org.json.JSONObject;
-import com.openexchange.realtime.client.RTConnection;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import org.json.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.realtime.client.RTException;
 
 
 /**
- * A {@link RTProtocolCallback} is used to realize a bidirectional communication between
- * a {@link RTConnection} and the {@link RTProtocol}. It is meant to be implemented by
- * concrete {@link RTProtocol} implementations.
+ * {@link ResendBuffer}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface RTProtocolCallback {
+public class ResendBuffer {
 
-    /**
-     * The protocol is handling a message containing a sequence number. In these cases the
-     * received message must be acknowledged. The according message has already been prepared
-     * and needs to be sent now by the connection.
-     *
-     * @param ack The ACK message.
-     */
-    void sendACK(JSONObject ack) throws RTException;
+    private static final Logger LOG = LoggerFactory.getLogger(ResendBuffer.class);
 
-    /**
-     * Clients have to send PINGs regularly to let the server know that they are still alive.
-     * The protocol does the necessary PING handling and prepares the according messages. These
-     * need to be sent to the server then.
-     *
-     * @param ping The PING message.
-     */
-    void sendPing(JSONObject ping) throws RTException;
+    private static final int RESEND_LIMIT = 100;
 
-    /**
-     * Server did not send a pong message for more than 120 seconds.
-     */
-    void onTimeout();
+    private final ConcurrentMap<Long, ResendTask> activeTimers;
 
-    /**
-     * The server sent a message that indicated an invalid session.
-     */
-    void onSessionInvalid();
+    private final AbstractRTConnection connection;
 
-    /**
-     * An incoming message was an acknowledgement for the given sequence number.
-     */
-    void onAck(long seq);
+    private final Timer timer;
+
+    public ResendBuffer(AbstractRTConnection connection) {
+        super();
+        this.connection = connection;
+        timer = new Timer();
+        activeTimers = new ConcurrentHashMap<Long, ResendTask>();
+    }
+
+    public void put(long seq, JSONValue message) {
+        ResendTask task = new ResendTask(connection, seq, message);
+        timer.scheduleAtFixedRate(task, 0L, 3000L);
+        activeTimers.put(seq, task);
+    }
+
+    public void remove(long seq) {
+        ResendTask task = activeTimers.remove(seq);
+        if (task != null) {
+            task.cancel();
+            timer.purge();
+        }
+    }
+
+    public void stop() {
+        timer.cancel();
+    }
+
+    private static final class ResendTask extends TimerTask {
+
+        private final AbstractRTConnection connection;
+
+        private final long seq;
+
+        private final JSONValue message;
+
+        private int resendCount;
+
+        public ResendTask(AbstractRTConnection connection, long seq, JSONValue message) {
+            super();
+            this.connection = connection;
+            this.seq = seq;
+            this.message = message;
+            resendCount = 0;
+        }
+
+        @Override
+        public void run() {
+            try {
+                if (resendCount == RESEND_LIMIT) {
+                    LOG.error("Could not send message " + seq + " after " + RESEND_LIMIT + " tries.");
+                    cancel();
+                }
+
+                connection.doSend(message);
+                resendCount++;
+            } catch (RTException e) {
+                LOG.warn("Error while sending message " + seq + ". Resend count is: " + resendCount, e);
+            }
+        }
+
+    }
 
 }

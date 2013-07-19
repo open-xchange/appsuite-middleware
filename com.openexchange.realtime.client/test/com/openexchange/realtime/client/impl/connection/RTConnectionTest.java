@@ -65,7 +65,7 @@ import com.openexchange.realtime.client.impl.config.ConfigurationProvider;
 
 /**
  * {@link RTConnectionTest}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class RTConnectionTest extends AbstractRTConnection implements RTMessageHandler {
@@ -167,19 +167,22 @@ public class RTConnectionTest extends AbstractRTConnection implements RTMessageH
         lastPing = ping;
     }
 
-    @Override
-    public void post(JSONValue message) throws RTException {}
-
-    @Override
-    public void send(JSONValue message) throws RTException {}
-
     /* (non-Javadoc)
      * @see com.openexchange.realtime.client.impl.connection.AbstractRTConnection#reconnect()
      */
     @Override
     protected void reconnect() throws RTException {
         // TODO Auto-generated method stub
-        
+
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.realtime.client.impl.connection.AbstractRTConnection#doSend(org.json.JSONValue)
+     */
+    @Override
+    protected void doSend(JSONValue message) throws RTException {
+        // TODO Auto-generated method stub
+
     }
 
 }
