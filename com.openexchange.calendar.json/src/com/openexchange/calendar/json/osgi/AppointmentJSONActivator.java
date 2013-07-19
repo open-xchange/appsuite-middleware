@@ -52,7 +52,9 @@ package com.openexchange.calendar.json.osgi;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.converters.AppointmentIcalResultConverter;
 import com.openexchange.calendar.json.converters.AppointmentResultConverter;
+import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.user.UserService;
@@ -64,7 +66,7 @@ import com.openexchange.user.UserService;
  */
 public class AppointmentJSONActivator extends AJAXModuleActivator {
 
-    private static final Class<?>[] NEEDED = new Class[] { UserService.class, CalendarCollectionService.class, AppointmentSqlFactoryService.class };
+    private static final Class<?>[] NEEDED = new Class[] { UserService.class, CalendarCollectionService.class, AppointmentSqlFactoryService.class, ICalEmitter.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -78,6 +80,7 @@ public class AppointmentJSONActivator extends AJAXModuleActivator {
 //        registerService(TargetService.class, new ModifyThroughDependant(), props);
         registerModule(new AppointmentActionFactory(this), "calendar");
         registerService(ResultConverter.class, new AppointmentResultConverter(this));
+        registerService(ResultConverter.class, new AppointmentIcalResultConverter(this));
     }
 
 }
