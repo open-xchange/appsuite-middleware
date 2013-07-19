@@ -83,6 +83,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.idn.IDNA;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -108,11 +109,10 @@ import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -583,44 +583,70 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         session);
                 }
             }
-            // Fetch messages from source folder
-            final MailMessage[] messages = mailAccess.getMessageStorage().getMessages(sourceFullname, msgUIDs, FIELDS_FULL);
-            // Append them to destination folder
-            final String[] maildIds = destAccess.getMessageStorage().appendMessages(destFullname, messages);
-            // Delete source messages if a move shall be performed
-            if (move) {
-                mailAccess.getMessageStorage().deleteMessages(sourceFullname, messages2ids(messages), true);
-                postEvent(sourceAccountId, sourceFullname, true);
+            // Chunk wise copy
+            final int chunkSize;
+            {
+                final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                chunkSize = null == service ? 50 : service.getIntProperty("com.openexchange.mail.externalChunkSize", 50);
             }
-            /*
-             * Restore \Seen flags
-             */
-            if (null != flagInfo) {
-                final List<String> list = new ArrayList<String>(maildIds.length >> 1);
-                for (int i = 0; i < maildIds.length; i++) {
-                    if (!flagInfo[i].isSeen()) {
-                        list.add(maildIds[i]);
+            // Iterate chunks
+            final int length = msgUIDs.length;
+            final List<String> retval = new ArrayList<String>(length);
+            for (int start = 0; start < length;) {
+                int end = start + chunkSize;
+                final String[] ids;
+                {
+                    final int len;
+                    if (end > length) {
+                        end = length;
+                        len = end - start;
+                    } else {
+                        len = chunkSize;
                     }
+                    ids = new String[len];
+                    System.arraycopy(msgUIDs, start, ids, 0, len);
                 }
-                destAccess.getMessageStorage().updateMessageFlags(
-                    destFullname,
-                    list.toArray(new String[list.size()]),
-                    MailMessage.FLAG_SEEN,
-                    false);
-            }
-            postEvent(destAccountId, destFullname, true);
-            try {
+                // Fetch messages from source folder
+                final MailMessage[] messages = mailAccess.getMessageStorage().getMessages(sourceFullname, ids, FIELDS_FULL);
+                // Append them to destination folder
+                final String[] destIds = destAccess.getMessageStorage().appendMessages(destFullname, messages);
+                // Delete source messages if a move shall be performed
                 if (move) {
-                    /*
-                     * Update message cache
-                     */
-                    MailMessageCache.getInstance().removeFolderMessages(sourceAccountId, sourceFullname, session.getUserId(), contextId);
+                    mailAccess.getMessageStorage().deleteMessages(sourceFullname, messages2ids(messages), true);
+                    postEvent(sourceAccountId, sourceFullname, true);
                 }
-                MailMessageCache.getInstance().removeFolderMessages(destAccountId, destFullname, session.getUserId(), contextId);
-            } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                // Restore \Seen flags
+                if (null != flagInfo) {
+                    final List<String> list = new ArrayList<String>(destIds.length >> 1);
+                    for (int i = 0; i < destIds.length; i++) {
+                        if (!flagInfo[i].isSeen()) {
+                            list.add(destIds[i]);
+                        }
+                    }
+                    destAccess.getMessageStorage().updateMessageFlags(
+                        destFullname,
+                        list.toArray(new String[list.size()]),
+                        MailMessage.FLAG_SEEN,
+                        false);
+                }
+                postEvent(destAccountId, destFullname, true);
+                try {
+                    if (move) {
+                        /*
+                         * Update message cache
+                         */
+                        MailMessageCache.getInstance().removeFolderMessages(sourceAccountId, sourceFullname, session.getUserId(), contextId);
+                    }
+                    MailMessageCache.getInstance().removeFolderMessages(destAccountId, destFullname, session.getUserId(), contextId);
+                } catch (final OXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+                // Prepare for next iteration
+                retval.addAll(Arrays.asList(destIds));
+                start = end;
             }
-            return maildIds;
+            // Return destination identifiers
+            return retval.toArray(new String[0]);
         } finally {
             destAccess.close(true);
         }
