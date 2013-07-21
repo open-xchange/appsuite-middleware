@@ -54,6 +54,11 @@ import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.URLName;
@@ -68,6 +73,26 @@ import com.sun.mail.util.PropUtil;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class JavaIMAPStore extends IMAPStore {
+
+    private static final AtomicInteger C = new AtomicInteger();
+
+    /** The login semaphore */
+    private static final ConcurrentMap<URLName, Semaphore> loginSemaphores = new ConcurrentHashMap<URLName, Semaphore>(16);
+
+    private static Semaphore initLoginSemaphore(final URLName url, final int permits) {
+        if (permits <= 0) {
+            return null;
+        }
+        Semaphore s = loginSemaphores.get(url);
+        if (null == s) {
+            Semaphore ns = new Semaphore(permits);
+            s = loginSemaphores.putIfAbsent(url, ns);
+            if (null == s) {
+                s = ns;
+            }
+        }
+        return s;
+    }
 
     /** Whether SASL is enabled. */
     private final boolean enableSASL;
@@ -86,6 +111,16 @@ public class JavaIMAPStore extends IMAPStore {
 
     /** Proxy auth user */
     private String proxyAuthUser;
+
+    /** The login timeout */
+    private final long loginSemaphoreTimeoutMillis;
+
+    /** The max. number of concurrent connected stores */
+    private final int maxNumConnections;
+
+    /** The login semaphore */
+    private volatile Semaphore semaphore;
+
 
     /**
      * Initializes a new {@link JavaIMAPStore}.
@@ -130,6 +165,14 @@ public class JavaIMAPStore extends IMAPStore {
                 proxyAuthUser = s;
             }
         }
+        final int maxNumConnections = PropUtil.getIntSessionProperty(session, "mail.imap.maxNumConnections", 0);
+        this.maxNumConnections = maxNumConnections;
+        if (maxNumConnections <= 0) {
+            loginSemaphoreTimeoutMillis = -1L;
+        } else {
+            final int millis = PropUtil.getIntSessionProperty(session, "mail.imap.loginSemaphoreTimeoutMillis", 20000);
+            loginSemaphoreTimeoutMillis = millis <= 0 ? 20000 : millis;
+        }
     }
 
     /**
@@ -144,6 +187,23 @@ public class JavaIMAPStore extends IMAPStore {
 
     @Override
     protected void login(final IMAPProtocol p, final String u, final String pw) throws ProtocolException {
+        final Semaphore semaphore = initLoginSemaphore(new URLName("imap", p.getHost(), p.getPort(), null, u, pw), maxNumConnections);
+        if (null != semaphore) {
+            this.semaphore = semaphore;
+            try {
+                if (!semaphore.tryAcquire(loginSemaphoreTimeoutMillis, TimeUnit.MILLISECONDS)) {
+                    // No permit acquired in time
+                    throw new ProtocolException("Max. number of connections exceeded. Try again later.");
+                }
+                logger.fine("JavaIMAPStore login: permitted.");
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new ProtocolException("Interrupted", e);
+            }
+        }
+
+        System.out.println(C.incrementAndGet());
+
         if (enableSASL && null != kerberosSubject) {
             // Do Kerberos authentication
             final String authzid;
@@ -172,13 +232,26 @@ public class JavaIMAPStore extends IMAPStore {
         }
     }
 
+    @Override
+    protected void logout(final IMAPProtocol protocol) throws ProtocolException {
+        try {
+            super.logout(protocol);
+        } finally {
+            C.decrementAndGet();
+            final Semaphore semaphore = this.semaphore;
+            if (null != semaphore) {
+                semaphore.release();
+            }
+        }
+    }
+
     private static void handlePrivilegedActionException(final PrivilegedActionException e) throws ProtocolException {
         if (null == e) {
             return;
         }
         final Exception cause = e.getException();
         if (null == cause) {
-            throw new ProtocolException(e.getMessage());
+            throw new ProtocolException(e.getMessage(), e);
         }
         if (cause instanceof ProtocolException) {
             throw (ProtocolException) cause;
