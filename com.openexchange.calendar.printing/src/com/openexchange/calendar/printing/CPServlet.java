@@ -190,14 +190,15 @@ public class CPServlet extends PermissionServlet {
             modifyCalendar(cal, params);
 
             final Partitioner partitioner = new Partitioner(params, cal, session.getContext(), appointmentSql, calendarTools);
-            final List<Day> perDayList = partitioner.partition(idList);
+            final List<Day> perDayList = partitioner.partition(idList, session.getUserId());
 
             final List<CPAppointment> expandedAppointments = tool.expandAppointements(
                 idList,
                 params.getStart(),
                 params.getEnd(),
                 appointmentSql,
-                calendarTools);
+                calendarTools,
+                session.getUserId());
 
             tool.sort(expandedAppointments);
 

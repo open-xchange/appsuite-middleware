@@ -64,6 +64,7 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.UserParticipant;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -118,13 +119,13 @@ public class CPTool extends WeekAndDayCalculator {
     /**
      * Expands all appointments in a list using their recurrence information for a certain given timeframe
      */
-    public List<CPAppointment> expandAppointements(final List<Appointment> compressedAppointments, final Date start, final Date end, final AppointmentSQLInterface appointmentSql, final CalendarCollectionService calendarTools) throws OXException, SQLException {
+    public List<CPAppointment> expandAppointements(final List<Appointment> compressedAppointments, final Date start, final Date end, final AppointmentSQLInterface appointmentSql, final CalendarCollectionService calendarTools, int userId) throws OXException, SQLException {
         final List<CPAppointment> expandedAppointments = new LinkedList<CPAppointment>();
         for (final Appointment appointment : compressedAppointments) {
             final Appointment temp = appointmentSql.getObjectById(appointment.getObjectID(), appointment.getParentFolderID());
             final List<Appointment> split = splitIntoSingleDays(temp);
             for (final Appointment temp2 : split) {
-                expandedAppointments.addAll(expandRecurrence(temp2, start, end, calendarTools));
+                expandedAppointments.addAll(expandRecurrence(temp2, start, end, calendarTools, userId));
             }
         }
         return expandedAppointments;
@@ -178,7 +179,10 @@ public class CPTool extends WeekAndDayCalculator {
     /**
      * Takes an appointment and interprets its recurrence information to find all occurrences between start and end date.
      */
-    public List<CPAppointment> expandRecurrence(final Appointment appointment, final Date start, final Date end, final CalendarCollectionService calendarTools) throws OXException {
+    public List<CPAppointment> expandRecurrence(final Appointment appointment, final Date start, final Date end, final CalendarCollectionService calendarTools, int userId) throws OXException {
+        if (hasDeclined(appointment, userId)) {
+            return Collections.<CPAppointment>emptyList();
+        }
         final RecurringResultsInterface recurrences = calendarTools.calculateRecurring(appointment, start.getTime(), end.getTime(), 0);
         final List<CPAppointment> all = new LinkedList<CPAppointment>();
         if (recurrences == null) {
@@ -193,8 +197,19 @@ public class CPTool extends WeekAndDayCalculator {
             temp.setStartDate(new Date(recurringResult.getStart()));
             temp.setEndDate(new Date(recurringResult.getEnd()));
             temp.setOriginal(appointment);
+            
             all.add(temp);
         }
         return all;
+    }
+
+    public static boolean hasDeclined(Appointment appointment, int userId) {
+        UserParticipant[] users = appointment.getUsers();
+        for (UserParticipant userParticipant : users) {
+            if (userParticipant.getIdentifier() == userId && userParticipant.getConfirm() == Appointment.DECLINE) {
+                return true;
+            }
+        }
+        return false;
     }
 }
