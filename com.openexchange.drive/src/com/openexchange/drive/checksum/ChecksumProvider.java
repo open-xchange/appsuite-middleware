@@ -208,7 +208,7 @@ public class ChecksumProvider {
         List<File> files = session.getStorage().getFilesInFolder(folderID.toUniqueID());
         if (null == files || 0 == files.size()) {
             return DriveConstants.EMPTY_MD5;
-        } else if (0 < files.size()) {
+        } else if (1 < files.size()) {
             Collections.sort(files, FILENAME_COMPARATOR);
         }
         MD md5 = session.newMD5();
@@ -310,7 +310,7 @@ public class ChecksumProvider {
             byte[] fileName2 = o2.getFileName().getBytes(Charsets.UTF_8);
             int minLength = Math.min(fileName1.length, fileName2.length);
             for (int i = 0; i < minLength; i++) {
-                int result = fileName1[i] - fileName2[i];
+                int result = (fileName1[i] & 0xFF) - (fileName2[i] & 0xFF);
                 if (result != 0) {
                     return result;
                 }

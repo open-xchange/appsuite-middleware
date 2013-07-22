@@ -49,58 +49,51 @@
 
 package com.openexchange.drive.sync.optimize;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.actions.AbstractAction;
+import com.openexchange.drive.actions.AcknowledgeDirectoryAction;
 import com.openexchange.drive.actions.EditDirectoryAction;
+import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
+import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.drive.sync.SyncResult;
 
 
 /**
- * {@link DirectoryOrderOptimizer}
+ * {@link EmptyDirectoryOptimizer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DirectoryOrderOptimizer extends DirectoryActionOptimizer {
+public class EmptyDirectoryOptimizer extends DirectoryActionOptimizer {
 
-    public DirectoryOrderOptimizer(VersionMapper<DirectoryVersion> mapper) {
+    public EmptyDirectoryOptimizer(VersionMapper<DirectoryVersion> mapper) {
         super(mapper);
     }
 
     @Override
     public SyncResult<DirectoryVersion> optimize(DriveSession session, SyncResult<DirectoryVersion> result) {
-        List<AbstractAction<DirectoryVersion>> actionsForClient = result.getActionsForClient();
-        List<AbstractAction<DirectoryVersion>> actionsForServer = result.getActionsForServer();
-        Collections.sort(actionsForClient);
-        Collections.sort(actionsForServer);
-        actionsForClient = propagateRenames(actionsForClient);
-        actionsForServer = propagateRenames(actionsForServer);
-        return new SyncResult<DirectoryVersion>(actionsForServer, actionsForClient);
-    }
-
-    private static List<AbstractAction<DirectoryVersion>> propagateRenames(List<AbstractAction<DirectoryVersion>> actions) {
+        List<AbstractAction<DirectoryVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForClient());
+        List<AbstractAction<DirectoryVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForServer());
         /*
-         * propagate previous rename operations
+         * check for client SYNC of new directories
          */
-        for (int i = 0; i < actions.size(); i++) {
-            if (Action.EDIT.equals(actions.get(i).getAction()) && null != actions.get(i).getVersion() && null != actions.get(i).getNewVersion()) {
-                String oldPath = actions.get(i).getVersion().getPath();
-                String newPath = actions.get(i).getNewVersion().getPath();
-                for (int j = i + 1; j < actions.size(); j++) {
-                    if (Action.EDIT.equals(actions.get(j).getAction()) &&
-                        actions.get(j).getVersion().getPath().startsWith(oldPath +'/')) {
-                        String newOldPath = newPath + actions.get(j).getVersion().getPath().substring(oldPath.length());
-                        DirectoryVersion modifiedOldVersion = new SimpleDirectoryVersion(newOldPath, actions.get(j).getVersion().getChecksum());
-                        actions.set(j, new EditDirectoryAction(modifiedOldVersion, actions.get(j).getNewVersion(), actions.get(j).getComparison()));
-                    }
-                }
+        for (AbstractAction<DirectoryVersion> clientAction : result.getActionsForClient()) {
+            if (Action.SYNC.equals(clientAction.getAction()) && clientAction.wasCausedBy(Change.NEW, Change.NONE) &&
+                null != clientAction.getVersion() && DriveConstants.EMPTY_MD5.equals(clientAction.getVersion().getChecksum())) {
+                optimizedActionsForClient.remove(clientAction);
+                optimizedActionsForClient.add(new AcknowledgeDirectoryAction(null, clientAction.getVersion(), null));
+                optimizedActionsForServer.add(new EditDirectoryAction(clientAction.getVersion(), null, null));
             }
         }
-        return actions;
+        /*
+         * return new sync results
+         */
+        return new SyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient);
+
     }
 
 }

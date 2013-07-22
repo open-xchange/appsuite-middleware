@@ -86,6 +86,7 @@ import com.openexchange.drive.sync.optimize.OptimizingDirectorySynchronizer;
 import com.openexchange.drive.sync.optimize.OptimizingFileSynchronizer;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.Quota;
@@ -404,6 +405,14 @@ public class DriveServiceImpl implements DriveService {
         switch (action.getAction()) {
         case EDIT:
             /*
+             * check for new, empty folder tht simply can be created on server
+             */
+            if (null == action.getNewVersion() && null != action.getVersion() &&
+                DriveConstants.EMPTY_MD5.equals(action.getVersion().getChecksum())) {
+                session.getStorage().getFolderID(action.getVersion().getPath(), true);
+                return;
+            }
+            /*
              * edit folder name and/or path
              */
             String folderID = session.getStorage().getFolderID(action.getVersion().getPath());
@@ -471,6 +480,26 @@ public class DriveServiceImpl implements DriveService {
             break;
         case DOWNLOAD:
             /*
+             * check for empty file that simply can be 'touched'
+             */
+            if (null == action.getVersion() && DriveConstants.EMPTY_MD5.equals(action.getNewVersion().getChecksum())) {
+                File metadata = new DefaultFile();
+                metadata.setFileSize(0);
+                metadata.setFileMD5Sum(DriveConstants.EMPTY_MD5);
+                metadata.setVersion("1");
+                metadata.setVersionComment(session.getStorage().getVersionComment());
+                File createdFile = session.getStorage().createFile(path, action.getNewVersion().getName(), metadata);
+                FileID fileID = new FileID(createdFile.getId());
+                FolderID folderID = new FolderID(createdFile.getFolderId());
+                if (null == fileID.getFolderId()) {
+                    // TODO: check
+                    fileID.setFolderId(folderID.getFolderId());
+                }
+                session.getChecksumStore().insertFileChecksum(fileID, createdFile.getVersion(),
+                    createdFile.getSequenceNumber(), DriveConstants.EMPTY_MD5);
+                return;
+            }
+            /*
              * check source and target files
              */
             ServerFileVersion sourceVersion = (ServerFileVersion)action.getParameters().get("sourceVersion");
@@ -509,7 +538,6 @@ public class DriveServiceImpl implements DriveService {
                     // TODO: check
                     fileID.setFolderId(folderID.getFolderId());
                 }
-
                 fileChecksum.setFileID(fileID);
                 fileChecksum.setVersion(movedFile.getVersion());
                 fileChecksum.setSequenceNumber(movedFile.getSequenceNumber());
