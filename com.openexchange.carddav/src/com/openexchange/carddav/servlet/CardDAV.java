@@ -216,17 +216,6 @@ public class CardDAV extends OXServlet {
         return true; // Check this
     }
 
-    @Override
-    protected void decrementRequests() {
-        // Nothing to do
-    }
-
-    @Override
-    protected void incrementRequests() {
-        // Nothing to do
-    }
-
-
     private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();
 
     @Override

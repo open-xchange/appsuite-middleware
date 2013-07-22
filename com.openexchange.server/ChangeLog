@@ -1,6 +1,7 @@
 * 2013-07-22 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 27663: Always include ORDER BY columns in SELECT clause when using UNION SELECTs 
+ - Fix for bug 27496: Increment and decrement "NumberOfWebDAVUserConnections" when processing WebDAV requests 
 
 * 2013-07-22 - thorben.betten@open-xchange.com
 
