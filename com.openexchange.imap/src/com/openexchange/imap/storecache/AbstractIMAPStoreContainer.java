@@ -47,11 +47,12 @@
  *
  */
 
-package com.openexchange.imap;
+package com.openexchange.imap.storecache;
 
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import org.apache.commons.logging.Log;
+import com.openexchange.imap.IMAPValidity;
 import com.openexchange.log.LogFactory;
 import com.sun.mail.imap.IMAPStore;
 

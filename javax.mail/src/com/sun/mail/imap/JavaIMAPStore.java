@@ -58,7 +58,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.URLName;
@@ -73,8 +72,6 @@ import com.sun.mail.util.PropUtil;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class JavaIMAPStore extends IMAPStore {
-
-    private static final AtomicInteger C = new AtomicInteger();
 
     /** The login semaphore */
     private static final ConcurrentMap<URLName, Semaphore> loginSemaphores = new ConcurrentHashMap<URLName, Semaphore>(16);
@@ -120,6 +117,9 @@ public class JavaIMAPStore extends IMAPStore {
 
     /** The login semaphore */
     private volatile Semaphore semaphore;
+
+    /** The account identifier */
+    private int accountId;
 
 
     /**
@@ -169,9 +169,11 @@ public class JavaIMAPStore extends IMAPStore {
         this.maxNumConnections = maxNumConnections;
         if (maxNumConnections <= 0) {
             loginSemaphoreTimeoutMillis = -1L;
+            accountId = -1;
         } else {
             final int millis = PropUtil.getIntSessionProperty(session, "mail.imap.loginSemaphoreTimeoutMillis", 20000);
             loginSemaphoreTimeoutMillis = millis <= 0 ? 20000 : millis;
+            accountId = PropUtil.getIntSessionProperty(session, "mail.imap.accountId", 0);
         }
     }
 
@@ -187,7 +189,12 @@ public class JavaIMAPStore extends IMAPStore {
 
     @Override
     protected void login(final IMAPProtocol p, final String u, final String pw) throws ProtocolException {
-        final Semaphore semaphore = initLoginSemaphore(new URLName("imap", p.getHost(), p.getPort(), null, u, pw), maxNumConnections);
+        /*-
+         * Get semaphore (if enabled)
+         * 
+         * - Include account identifier for account-wise login tracking
+         */
+        final Semaphore semaphore = initLoginSemaphore(new URLName("imap", p.getHost(), p.getPort(), /*Integer.toString(accountId)*/null, u, pw), maxNumConnections);
         if (null != semaphore) {
             this.semaphore = semaphore;
             try {
@@ -201,9 +208,9 @@ public class JavaIMAPStore extends IMAPStore {
                 throw new ProtocolException("Interrupted", e);
             }
         }
-
-        System.out.println(C.incrementAndGet());
-
+        /*
+         * Auth stuff
+         */
         if (enableSASL && null != kerberosSubject) {
             // Do Kerberos authentication
             final String authzid;
@@ -237,7 +244,6 @@ public class JavaIMAPStore extends IMAPStore {
         try {
             super.logout(protocol);
         } finally {
-            C.decrementAndGet();
             final Semaphore semaphore = this.semaphore;
             if (null != semaphore) {
                 semaphore.release();

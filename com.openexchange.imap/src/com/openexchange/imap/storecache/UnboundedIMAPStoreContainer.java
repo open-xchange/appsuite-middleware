@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap;
+package com.openexchange.imap.storecache;
 
 import java.util.AbstractQueue;
 import java.util.Collection;
@@ -59,6 +59,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.mail.MessagingException;
+import com.openexchange.imap.IMAPValidity;
 import com.sun.mail.imap.IMAPStore;
 
 
@@ -72,11 +73,8 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     private final InheritedPriorityBlockingQueue queue;
 
     protected final String server;
-
     protected final int port;
-
     protected final String login;
-
     protected final String pw;
 
     /**
