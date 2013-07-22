@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.ja_JP\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-06-18 13:35+0900\n"
+"PO-Revision-Date: 2013-07-19 17:05+0900\n"
 "Last-Translator: \n"
 "Language-Team:  <ja@li.org>\n"
 "Language: \n"
@@ -2755,13 +2755,13 @@ msgstr "[利用できません]"
 
 #. The default message displayed to user.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:66
-msgid "A severe error occurred."
-msgstr "深刻なエラーが発生しました。"
+msgid "An error occurred inside the Open-Xchange server which prevented it from fulfilling the request."
+msgstr "Open-Xchange サーバにエラーが発生したため、リクエストを実行できませんでした。"
 
-#. The default message displayed to user.
+#. The default message displayed to user when a re-try is recommended
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:69
-msgid "An error occurred. Please try again later."
-msgstr "エラーが発生しました。後でもう一度やり直してください。"
+msgid "A temporary error occurred inside the Open-Xchange server which prevented it from fulfilling the request.. Please try again later."
+msgstr "Open-Xchange サーバに一時エラーが発生したため、リクエストを実行できませんでした。後でもう一度やり直してください。"
 
 #. The general message for a conflicting update operation.
 #. The object has been changed in the meantime.
@@ -3015,7 +3015,7 @@ msgstr "Grizzly サーバを起動できませんでした。"
 #. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
 msgstr "次の必要なサービスが見つかりません: \"%1$s\""
 
@@ -3308,6 +3308,11 @@ msgstr "アップロードされたファイルには内容が含まれていま
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:158
 msgid "Something went wrong reading from specified file. Please try again."
 msgstr "指定されたファイルの読み取り中に不明なエラーが発生しました。もう一度やり直してください。"
+
+#. Could not create: %s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:161
+msgid "Could not create: %s"
+msgstr "次を作成できませんでした: %s"
 
 #. No IndexAccess implementation was found for module %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index.solr/src/com/openexchange/index/solr/SolrIndexExceptionMessages.java:70
@@ -4112,6 +4117,11 @@ msgstr "データベース接続を取得できません。"
 msgid "No permission to modify resources in context %1$s"
 msgstr "コンテキスト %1$s のリソースを変更する権限がありません。"
 
+#. Cannot change password: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:104
+msgid "Cannot change password: %1$s"
+msgstr "次のパスワードは変更できません: %1$s"
+
 #. *
 #. * Invalid locale string: %1$s
 #.
@@ -4882,10 +4892,10 @@ msgstr "割当量を超過しました。新規アイテムを作成するため
 msgid "The session information didn't match any ServerSession"
 msgstr "セッション情報はいずれの ServerSession とも一致しませんでした。"
 
-#. * Missing key \"%1$s\" in: \"%2$s\"
+#. * "Obligatory key \"%1$s\" is missing from the Stanza"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:64
-msgid "Missing key \"%1$s\" in: \"%2$s\""
-msgstr "\"%2$s\" にキー \"%1$s\" が見つかりません。"
+msgid "Obligatory key \"%1$s\" is missing from the Stanza"
+msgstr "スタンザに必須キー \"%1$s\" が見つかりません。"
 
 #. * Could not find a builder for the specified element: . \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:66
@@ -4927,18 +4937,38 @@ msgstr "次の必須フィールドが見つかりません: \"%1$s\""
 msgid "Malformed Presence Data"
 msgstr "存在データのフォーマットが無効です。"
 
-#. * Malformed Presence Element: \"%1$s\"
+#. * Malformed Message Data
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:82
+msgid "Malformed Message Data"
+msgstr "メッセージ データのフォーマットが無効です。"
+
+#. * Malformed Iq Data
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:84
+msgid "Malformed Iq Data"
+msgstr "IQ データのフォーマットが無効です。"
+
+#. * Malformed Presence Element: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:86
 msgid "Malformed Presence Element: \"%1$s\""
 msgstr "次の存在要素のフォーマットが無効です: \"%1$s\""
 
+#. * Malformed Message Element: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:88
+msgid "Malformed Message Element: \"%1$s\""
+msgstr "次のメッセージ要素のフォーマットが無効です: \"%1$s\""
+
+#. * Malformed IQ Element: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:90
+msgid "Malformed IQ Element: \"%1$s\""
+msgstr "次の IQ 要素のフォーマットが無効です: \"%1$s\""
+
 #. * Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:92
 msgid "Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\""
 msgstr "次の場所にあるキー \"%1$s\" の値 \"%1$s\" が無効です: \"%3$s\""
 
 #. * Malformed POST Data"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:94
 msgid "Malformed POST Data"
 msgstr "POST データのフォーマットが無効です。"
 
@@ -4967,7 +4997,7 @@ msgstr "次のチャネルが不明です: %1$s"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:100
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:151
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:120
@@ -4992,25 +5022,41 @@ msgstr "コンテキスト ID が無効です。次のコンテキストが見�
 #. Generic (start with code 1000)
 #. * No appropriate channel found for recipient %1$s with payload namespace %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:94
 msgid "No appropriate channel found for recipient %1$s with payload namespace %2$s"
 msgstr "ペイロード名前空間 %2$s を使用している宛先 %1$s に適切なチャネルが見つかりません。"
 
 #. * Invalid ID. Resource identifier is missing.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:103
 msgid "Invalid ID. Resource identifier is missing."
 msgstr "ID が無効です。リソースの識別子が見つかりません。"
 
+#. XMPP
+#. * The client has sent a message that is malformed or cannot be processed: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:65
+msgid "The client has sent a message that is malformed or cannot be processed: %1$s"
+msgstr "クライアントが送信した次のメッセージはフォーマットが無効か、処理できません: %1$s"
+
+#. * The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:71
+msgid "The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error: %1$s"
+msgstr "サーバの構成が誤っているか、定義されていない次の内部サーバ エラーが発生したため、サーバはスタンザを処理できませんでした: %1$s"
+
 #. * Resource not available.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:103
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:106
 msgid "Resource not available."
 msgstr "リソースは利用できません。"
 
-#. * You session is invlaid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:106
+#. * Your session is invalid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:109
 msgid "Your session is invalid."
 msgstr "セッションが無効です。"
+
+#. * The sent sequence is invalid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:112
+msgid "The sent sequence is invalid."
+msgstr "送信されたシーケンスは無効です。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rmi/src/com/openexchange/rmi/exceptions/OXRMIExceptionMessage.java:62
 msgid "Start of RMI service failed."
@@ -6081,8 +6127,8 @@ msgid "Unable to pick up a connection from the DBPool"
 msgstr "DBPool から接続を取得できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:97
-msgid "Some data entered exceeded the field limit. Please shorten the value for \"%1$s\" (current: %2$s, limit: %3$s) and try again."
-msgstr "入力したいくつかのデータは、フィールドの制限を超えています。 \"%1$s\" (現在の文字数: %2$s、文字数制限: %3$s) の値を短くして、もう一度やり直してください。"
+msgid "Some data entered exceeded the field limit. Please shorten the value for \"%1$s\" (limit: %2$s, current: %3$s) and try again."
+msgstr "入力したいくつかのデータは、フィールドの制限を超えています。 \"%1$s\" (文字数制限: %2$s、現在の文字数: %3$s) の値を短くして、もう一度やり直してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:99
 msgid "The image you tried to attach is not a valid picture. It may be broken or is not a valid file."
@@ -13794,6 +13840,15 @@ msgstr "UTC (協定世界時)"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "ズールー"
+
+#~ msgid "A severe error occurred."
+#~ msgstr "深刻なエラーが発生しました。"
+
+#~ msgid "An error occurred. Please try again later."
+#~ msgstr "エラーが発生しました。後でもう一度やり直してください。"
+
+#~ msgid "Missing key \"%1$s\" in: \"%2$s\""
+#~ msgstr "\"%2$s\" にキー \"%1$s\" が見つかりません。"
 
 #~ msgid "The following needed service is missing: %1$s"
 #~ msgstr "次の必要なサービスが見つかりません: %1$s"
