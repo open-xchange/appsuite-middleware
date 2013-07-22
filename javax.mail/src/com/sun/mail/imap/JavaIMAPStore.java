@@ -62,6 +62,7 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.URLName;
 import javax.security.auth.Subject;
+import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.util.PropUtil;
@@ -200,7 +201,7 @@ public class JavaIMAPStore extends IMAPStore {
             try {
                 if (!semaphore.tryAcquire(loginSemaphoreTimeoutMillis, TimeUnit.MILLISECONDS)) {
                     // No permit acquired in time
-                    throw new ProtocolException("Max. number of connections exceeded. Try again later.");
+                    throw new ConnectQuotaExceededException("Max. number of connections exceeded. Try again later.");
                 }
                 logger.fine("JavaIMAPStore login: permitted.");
             } catch (final InterruptedException e) {
