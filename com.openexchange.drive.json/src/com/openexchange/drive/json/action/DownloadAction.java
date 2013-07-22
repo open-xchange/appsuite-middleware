@@ -127,8 +127,11 @@ public class DownloadAction extends AbstractDriveAction {
     private static OXException getHttpError(OXException e) throws OXException {
         int status;
         if (DriveExceptionCodes.FILEVERSION_NOT_FOUND.equals(e) || DriveExceptionCodes.FILE_NOT_FOUND.equals(e) ||
-            DriveExceptionCodes.PATH_NOT_FOUND.equals(e)) {
+            DriveExceptionCodes.PATH_NOT_FOUND.equals(e) || "FLS-017".equals(e.getErrorCode())) {
             status = HttpServletResponse.SC_NOT_FOUND;
+        } else if (DriveExceptionCodes.INVALID_FILE_OFFSET.equals(e) || "FLS-018".equals(e.getErrorCode())
+            || "FLS-019".equals(e.getErrorCode()) || "FLS-020".equals(e.getErrorCode())) {
+            status = HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE;
         } else if (AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
             status = HttpServletResponse.SC_BAD_REQUEST;
         } else if (OXException.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {

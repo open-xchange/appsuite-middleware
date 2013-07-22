@@ -178,11 +178,8 @@ public abstract class DefaultFileStorage implements FileStorage {
     public InputStream getFile(String name, long offset, long length) throws OXException {
         EnhancedRandomAccessFile eraf = eraf(name, true);
         try {
-            if (offset > eraf.length()) {
-                throw FileStorageCodes.IOERROR.create("invalid offset: " + offset);
-            }
-            if (-1 != length && length > eraf.length() - offset) {
-                throw FileStorageCodes.IOERROR.create("invalid length: " + length);
+            if (offset > eraf.length() || -1 != length && length > eraf.length() - offset) {
+                throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, eraf.length());
             }
             return new RandomAccessFileInputStream(eraf, offset, length);
         } catch (FileNotFoundException e) {
@@ -198,7 +195,7 @@ public abstract class DefaultFileStorage implements FileStorage {
         try {
             eraf = eraf(name, false);
             if (offset != eraf.length()) {
-                throw FileStorageCodes.IOERROR.create("invalid offset: " + offset);
+                throw FileStorageCodes.INVALID_OFFSET.create(offset, name, eraf.length());
             }
             eraf.seek(eraf.length());
             byte[] buffer = new byte[8192];
@@ -228,7 +225,7 @@ public abstract class DefaultFileStorage implements FileStorage {
         try {
             raf = raf(name, false);
             if (length > raf.length()) {
-                throw FileStorageCodes.IOERROR.create("invalid length: " + length);
+                throw FileStorageCodes.INVALID_LENGTH.create(length, name, raf.length());
             }
             raf.setLength(length);
         } catch (IOException e) {
