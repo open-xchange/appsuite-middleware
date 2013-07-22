@@ -969,6 +969,7 @@ public class IMAPStore extends Store
                 (pool.separateStoreConnection || pool.storeConnectionInUse))) {
 
 		logger.fine("no connections in the pool, creating a new one");
+		    Exception cause = null;
                 try {
 		    if (forcePasswordRefresh)
 			refreshPassword();
@@ -984,10 +985,11 @@ public class IMAPStore extends Store
                         } catch (Exception ex2) { }
                     }
                     p = null;
+                    cause = ex1;
                 }
                  
                 if (p == null) {
-                    throw new MessagingException("connection failure");
+                    throw new MessagingException("connection failure", cause);
                 }
             } else {
 		if (logger.isLoggable(Level.FINE))
