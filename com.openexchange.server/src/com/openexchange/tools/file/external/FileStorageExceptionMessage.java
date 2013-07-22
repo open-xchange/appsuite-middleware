@@ -99,4 +99,13 @@ public class FileStorageExceptionMessage implements LocalizableStrings {
     // File does not exist in file storage "%1$s". Consider running consistency tool.
     public final static String FILE_NOT_FOUND_MSG = "File does not exist in file store \"%1$s\". Consider running the consistency tool.";
 
+    // The requested range (offset: %1$d, length: %2$d) for the file \"%3$s\" (current size: %4$d) is invalid.
+    public final static String INVALID_RANGE_MSG = "The requested range (offset: %1$d, length: %2$d) for the file \"%3$s\" (current size: %4$d) is invalid.";
+
+    // The specified offset %1$d for the file \"%2$s\" (current size: %3$d) is invalid.
+    public final static String INVALID_OFFSET_MSG = "The specified offset %1$d for the file \"%2$s\" (current size: %3$d) is invalid.";
+
+    // The specified length %1$d for the file \"%2$s\" (current size: %3$d) is invalid.
+    public final static String INVALID_LENGTH_MSG = "The specified length %1$d for the file \"%2$s\" (current size: %3$d) is invalid.";
+
 }
