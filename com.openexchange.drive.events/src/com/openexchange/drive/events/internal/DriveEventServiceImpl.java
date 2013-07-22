@@ -111,6 +111,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
             @Override
             public void run() {
                 try {
+                    LOG.debug("Checking for buffered events...");
                     Iterator<FolderBuffer> iterator = folderBuffers.values().iterator();
                     while (iterator.hasNext()) {
                         FolderBuffer buffer = iterator.next();
@@ -121,6 +122,8 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
                     }
                 } catch (Exception e) {
                     LOG.warn("error publishing drive events.", e);
+                } catch (Throwable t) {
+                    LOG.warn("error publishing drive events.", t);
                 }
             }
         }, publisherDelay, publisherDelay);
