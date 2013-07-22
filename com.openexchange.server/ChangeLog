@@ -8,6 +8,7 @@
 
  - Fix for bug 27669: Added null guard when counting SIEVE action commands
  - Fix for bug 27604: Fixed multiple problems occurring in customer environment
+ - Fix for bug 27671: Allow an "insecure" XML parser implementation needed for Apache CXF v2.6.8
 
 * 2013-07-19 - thorben.betten@open-xchange.com
 
