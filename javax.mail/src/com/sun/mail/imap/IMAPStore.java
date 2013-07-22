@@ -53,10 +53,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
-
 import javax.mail.*;
 import javax.mail.event.*;
-
 import com.sun.mail.iap.*;
 import com.sun.mail.imap.protocol.*;
 import com.sun.mail.util.PropUtil;
@@ -971,6 +969,7 @@ public class IMAPStore extends Store
                 (pool.separateStoreConnection || pool.storeConnectionInUse))) {
 
 		logger.fine("no connections in the pool, creating a new one");
+		    Exception cause = null;
                 try {
 		    if (forcePasswordRefresh)
 			refreshPassword();
@@ -986,10 +985,11 @@ public class IMAPStore extends Store
                         } catch (Exception ex2) { }
                     }
                     p = null;
+                    cause = ex1;
                 }
                  
                 if (p == null) {
-                    throw new MessagingException("connection failure");
+                    throw new MessagingException("connection failure", cause);
                 }
             } else {
 		if (logger.isLoggable(Level.FINE))
@@ -1088,7 +1088,7 @@ public class IMAPStore extends Store
                 } catch(Exception ex1) {
                     if (p != null) {
                         try {
-                            p.logout();
+                            logout(p);
                         } catch (Exception ex2) { }
                     }
                     p = null;
@@ -1234,7 +1234,7 @@ public class IMAPStore extends Store
 		    logger.fine(
 			"pool is full, not adding an Authenticated connection");
                     try {
-                        protocol.logout();
+                        logout(protocol);
                     } catch (ProtocolException pex) {};
                 }
             }
@@ -1326,7 +1326,7 @@ public class IMAPStore extends Store
 		    if (force) {
                 p.disconnect();
             } else {
-                p.logout();
+                logout(p);
             }
                 } catch (ProtocolException pex) {};
             }
@@ -1380,7 +1380,7 @@ public class IMAPStore extends Store
                         pool.authenticatedConnections.removeElementAt(index);
 
                         try {
-                            p.logout();
+                            logout(p);
                         } catch (ProtocolException pex) {}
                     }
                 }
@@ -1586,12 +1586,24 @@ public class IMAPStore extends Store
 	     * flag that causes releaseStoreProtocol to do the
 	     * Store cleanup.
 	     */
-	    protocol.logout();
+	    logout(protocol);
 	} catch (ProtocolException pex) { 
 	    // Hmm .. will this ever happen ?
 	    throw new MessagingException(pex.getMessage(), pex);
         } finally {
             releaseStoreProtocol(protocol);
+        }
+    }
+
+    /**
+     * Performs the logout.
+     *
+     * @param protocol The IMAP protocol instance
+     * @throws ProtocolException If logout attempt fails
+     */
+    protected void logout(final IMAPProtocol protocol) throws ProtocolException {
+        if (null != protocol) {
+            protocol.logout();
         }
     }
 

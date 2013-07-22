@@ -54,10 +54,15 @@ import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.URLName;
 import javax.security.auth.Subject;
+import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.util.PropUtil;
@@ -68,6 +73,24 @@ import com.sun.mail.util.PropUtil;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class JavaIMAPStore extends IMAPStore {
+
+    /** The login semaphore */
+    private static final ConcurrentMap<URLName, Semaphore> loginSemaphores = new ConcurrentHashMap<URLName, Semaphore>(16);
+
+    private static Semaphore initLoginSemaphore(final URLName url, final int permits) {
+        if (permits <= 0) {
+            return null;
+        }
+        Semaphore s = loginSemaphores.get(url);
+        if (null == s) {
+            Semaphore ns = new Semaphore(permits);
+            s = loginSemaphores.putIfAbsent(url, ns);
+            if (null == s) {
+                s = ns;
+            }
+        }
+        return s;
+    }
 
     /** Whether SASL is enabled. */
     private final boolean enableSASL;
@@ -86,6 +109,19 @@ public class JavaIMAPStore extends IMAPStore {
 
     /** Proxy auth user */
     private String proxyAuthUser;
+
+    /** The login timeout */
+    private final long loginSemaphoreTimeoutMillis;
+
+    /** The max. number of concurrent connected stores */
+    private final int maxNumConnections;
+
+    /** The login semaphore */
+    private volatile Semaphore semaphore;
+
+    /** The account identifier */
+    private int accountId;
+
 
     /**
      * Initializes a new {@link JavaIMAPStore}.
@@ -130,6 +166,16 @@ public class JavaIMAPStore extends IMAPStore {
                 proxyAuthUser = s;
             }
         }
+        final int maxNumConnections = PropUtil.getIntSessionProperty(session, "mail.imap.maxNumConnections", 0);
+        this.maxNumConnections = maxNumConnections;
+        if (maxNumConnections <= 0) {
+            loginSemaphoreTimeoutMillis = -1L;
+            accountId = -1;
+        } else {
+            final int millis = PropUtil.getIntSessionProperty(session, "mail.imap.loginSemaphoreTimeoutMillis", 20000);
+            loginSemaphoreTimeoutMillis = millis <= 0 ? 20000 : millis;
+            accountId = PropUtil.getIntSessionProperty(session, "mail.imap.accountId", 0);
+        }
     }
 
     /**
@@ -144,6 +190,28 @@ public class JavaIMAPStore extends IMAPStore {
 
     @Override
     protected void login(final IMAPProtocol p, final String u, final String pw) throws ProtocolException {
+        /*-
+         * Get semaphore (if enabled)
+         * 
+         * - Include account identifier for account-wise login tracking
+         */
+        final Semaphore semaphore = initLoginSemaphore(new URLName("imap", p.getHost(), p.getPort(), /*Integer.toString(accountId)*/null, u, pw), maxNumConnections);
+        if (null != semaphore) {
+            this.semaphore = semaphore;
+            try {
+                if (!semaphore.tryAcquire(loginSemaphoreTimeoutMillis, TimeUnit.MILLISECONDS)) {
+                    // No permit acquired in time
+                    throw new ConnectQuotaExceededException("Max. number of connections exceeded. Try again later.");
+                }
+                logger.fine("JavaIMAPStore login: permitted.");
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new ProtocolException("Interrupted", e);
+            }
+        }
+        /*
+         * Auth stuff
+         */
         if (enableSASL && null != kerberosSubject) {
             // Do Kerberos authentication
             final String authzid;
@@ -172,13 +240,25 @@ public class JavaIMAPStore extends IMAPStore {
         }
     }
 
+    @Override
+    protected void logout(final IMAPProtocol protocol) throws ProtocolException {
+        try {
+            super.logout(protocol);
+        } finally {
+            final Semaphore semaphore = this.semaphore;
+            if (null != semaphore) {
+                semaphore.release();
+            }
+        }
+    }
+
     private static void handlePrivilegedActionException(final PrivilegedActionException e) throws ProtocolException {
         if (null == e) {
             return;
         }
         final Exception cause = e.getException();
         if (null == cause) {
-            throw new ProtocolException(e.getMessage());
+            throw new ProtocolException(e.getMessage(), e);
         }
         if (cause instanceof ProtocolException) {
             throw (ProtocolException) cause;

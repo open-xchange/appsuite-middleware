@@ -61,6 +61,7 @@ import com.sun.mail.util.*;
 public class Protocol {
     protected String greeting;
     protected String host;
+    protected int port;
     private Socket socket;
     // in case we turn on TLS, we'll need these later
     protected boolean quote;
@@ -109,6 +110,7 @@ public class Protocol {
 		    throws IOException, ProtocolException {
 	try {
 	    this.host = host;
+	    this.port = port;
 	    this.props = props;
 	    this.prefix = prefix;
 	    this.logger = logger;
@@ -155,6 +157,7 @@ public class Protocol {
     public Protocol(InputStream in, PrintStream out, boolean debug)
 				throws IOException {
 	this.host = "localhost";
+	this.port = 143;
 	this.quote = false;
 	logger = new MailLogger(this.getClass(), "DEBUG", debug, out);
 	traceLogger = logger.getSubLogger("protocol", null);
@@ -178,7 +181,7 @@ public class Protocol {
     public long getTimestamp() {
         return timestamp;
     }
- 
+    
     /**
      * Adds a response handler.
      */
@@ -495,4 +498,22 @@ public class Protocol {
      */
     private void commandStart(String command) { }
     private void commandEnd() { }
+
+    /**
+     * Gets the host
+     *
+     * @return The host
+     */
+    public String getHost() {
+        return host;
+    }
+    
+    /**
+     * Gets the port
+     *
+     * @return The port
+     */
+    public int getPort() {
+        return port;
+    }
 }
