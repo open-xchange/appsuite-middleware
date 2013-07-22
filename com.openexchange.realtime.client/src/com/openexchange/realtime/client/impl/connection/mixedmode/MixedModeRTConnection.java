@@ -196,9 +196,9 @@ public class MixedModeRTConnection extends AbstractRTConnection {
 
     SequenceGenerator sequenceGenerator = new SequenceGenerator();
 
-    public MixedModeRTConnection(RTConnectionProperties connectionProperties, RTMessageHandler messageHandler) throws RTException {
+    public MixedModeRTConnection(AsyncHttpClient asyncHttpClient, RTConnectionProperties connectionProperties, RTMessageHandler messageHandler) throws RTException {
         super();
-        asyncHttpClient = new AsyncHttpClient();
+        this.asyncHttpClient = asyncHttpClient;
         atmosphereClient = new AtmosphereClient();
         init(connectionProperties, messageHandler);
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.client.impl.connection.mixedmode;
 
+import com.ning.http.client.AsyncHttpClient;
 import com.openexchange.realtime.client.RTConnection;
 import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
@@ -63,9 +64,16 @@ import com.openexchange.realtime.client.impl.connection.ConnectionProvider;
  */
 public class MixedModeProvider implements ConnectionProvider {
 
+    private final AsyncHttpClient asyncHttpClient;
+
+    public MixedModeProvider() {
+        super();
+        asyncHttpClient = new AsyncHttpClient();
+    }
+
     @Override
     public RTConnection create(RTConnectionProperties properties, RTMessageHandler messageHandler) throws RTException {
-        return new MixedModeRTConnection(properties, messageHandler);
+        return new MixedModeRTConnection(asyncHttpClient, properties, messageHandler);
     }
 
 }
