@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,51 +47,48 @@
  *
  */
 
-package com.openexchange.imap;
-
-import javax.mail.MessagingException;
-import com.sun.mail.imap.IMAPStore;
+package com.sun.mail.iap;
 
 
 /**
- * {@link IMAPStoreContainer} - A container for connected {@link IMAPStore} instances.
+ * {@link ConnectQuotaExceededException}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IMAPStoreContainer {
+public class ConnectQuotaExceededException extends ProtocolException {
+
+    private static final long serialVersionUID = -6785664248904143608L;
 
     /**
-     * The IMAP protocol name: <code>"imap"</code>.
+     * Initializes a new {@link ConnectQuotaExceededException}.
      */
-    public static final String PROTOCOL_NAME = IMAPProvider.PROTOCOL_IMAP.getName();
+    public ConnectQuotaExceededException() {
+        super();
+    }
 
     /**
-     * Gets a connected IMAP store.
-     *
-     * @param imapSession The IMAP session
-     * @return The connected IMAP store
-     * @throws MessagingException If returning a connected IMAP store fails
-     * @throws InterruptedException If thread is interrupted when possibly waiting for free resources
+     * Initializes a new {@link ConnectQuotaExceededException}.
+     * @param message
      */
-    IMAPStore getStore(javax.mail.Session imapSession, IMAPValidity validity) throws MessagingException, InterruptedException;
+    public ConnectQuotaExceededException(final String message) {
+        super(message);
+    }
 
     /**
-     * Returns specified IMAP store to container.
-     *
-     * @param imapStore The IMAP store to return
+     * Initializes a new {@link ConnectQuotaExceededException}.
+     * @param message
+     * @param cause
      */
-    void backStore(IMAPStore imapStore, IMAPValidity validity);
+    public ConnectQuotaExceededException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
 
     /**
-     * Close elapsed {@link IMAPStore} instances.
-     *
-     * @param stamp The stamp to check against
-     * @param debugBuilder The optional debug builder
+     * Initializes a new {@link ConnectQuotaExceededException}.
+     * @param r
      */
-    void closeElapsed(long stamp, StringBuilder debugBuilder);
+    public ConnectQuotaExceededException(final Response r) {
+        super(r);
+    }
 
-    /**
-     * Orderly clears this container.
-     */
-    void clear();
 }
