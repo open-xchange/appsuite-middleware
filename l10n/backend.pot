@@ -10072,6 +10072,27 @@ msgid ""
 "tool."
 msgstr ""
 
+#. The requested range (offset: %1$d, length: %2$d) for the file \"%3$s\" (current size: %4$d) is invalid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:103
+msgid ""
+"The requested range (offset: %1$d, length: %2$d) for the file \"%3$s"
+"\" (current size: %4$d) is invalid."
+msgstr ""
+
+#. The specified offset %1$d for the file \"%2$s\" (current size: %3$d) is invalid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:106
+msgid ""
+"The specified offset %1$d for the file \"%2$s\" (current size: %3$d) is "
+"invalid."
+msgstr ""
+
+#. The specified length %1$d for the file \"%2$s\" (current size: %3$d) is invalid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:109
+msgid ""
+"The specified length %1$d for the file \"%2$s\" (current size: %3$d) is "
+"invalid."
+msgstr ""
+
 #. * Couldn't reach the filestore
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/QuotaFileStorageExceptionMessage.java:69
 msgid "File store could not be accessed."
