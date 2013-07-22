@@ -532,17 +532,19 @@ public final class SieveTextFilter {
 
     private int getActionCommandSize(final List<ActionCommand> actioncommands) {
         int size = 0;
-        for (final ActionCommand actionCommand : actioncommands) {
-            if (Commands.VACATION.equals(actionCommand.getCommand()) || Commands.ENOTIFY.equals(actionCommand.getCommand())) {
-                // The text arguments for vacation end method for enotify are the last in the list
-                final ArrayList<Object> arguments = actionCommand.getArguments();
-                final int size2 = arguments.size();
-                if (0 < size2) {
-                    final ArrayList<String> object =  (ArrayList<String>) arguments.get(size2 - 1);
-                    size += countlines(object.get(0)) + 1;
+        if (null != actioncommands) {
+            for (final ActionCommand actionCommand : actioncommands) {
+                if (Commands.VACATION.equals(actionCommand.getCommand()) || Commands.ENOTIFY.equals(actionCommand.getCommand())) {
+                    // The text arguments for vacation end method for enotify are the last in the list
+                    final ArrayList<Object> arguments = actionCommand.getArguments();
+                    final int size2 = arguments.size();
+                    if (0 < size2) {
+                        final ArrayList<String> object = (ArrayList<String>) arguments.get(size2 - 1);
+                        size += countlines(object.get(0)) + 1;
+                    }
+                } else {
+                    size++;
                 }
-            } else {
-                size++;
             }
         }
         return size;
