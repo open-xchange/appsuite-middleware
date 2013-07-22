@@ -24,8 +24,6 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 	print "graph_vlabel Number\n";
 	print "a.label Sessions\n";
 	print "a.draw LINE1\n";
-	print "b.label UserSessions\n";
-	print "b.draw LINE1\n";
 	exit 0;
 }
 
@@ -37,12 +35,6 @@ while (<SHOWRUNTIME>)
     if ($_ =~ m/com.hazelcast:type=Map.+?name=sessions-\d+,Size\s*?=\s*?(\d+)/) {
 	    $val = $1;
 	    print "a.value $val\n";
-	    next;
-	}
-	
-	if ($_ =~ m/com.hazelcast:type=MultiMap.+?name=userSessions-\d+,Size\s*?=\s*?(\d+)/) {
-	    $val = $1;
-	    print "b.value $val\n";
 	    next;
 	}
 }
