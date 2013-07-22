@@ -68,7 +68,10 @@ import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.CustomGateAction;
 import com.openexchange.realtime.util.StanzaSequenceGate;
 import com.openexchange.server.ServiceLookup;
@@ -205,25 +208,18 @@ public class QueryAction extends RTAction {
         answerStanza.setTo(id);
 
         //send the ack asynchronously via the MessageDispatcher so office can synchronously receive the document
-//        long sequenceNumber = stanza.getSequenceNumber();
-//        if (sequenceNumber >= 0) {
-//            /*
-//              "from":,
-//              "to":,
-//              "selector":,
-//              "element":"message", //use iq here?
-//              "payloads":
-//              [{
-//                "namespace":"ox"
-//                "element":"ack",
-//                "data":"[0,1,2,3]",
-//              }]
-//             */
-//            Map<String, Object> r = new HashMap<String, Object>();
-//            r.put("acknowledgements", Collections.singletonList(sequenceNumber));
-//            return new AJAXRequestResult(r, "native");
-//            services.getService(MessageDispatcher.class).send(answerStanza);
-//        }
+        long sequenceNumber = stanza.getSequenceNumber();
+        if (sequenceNumber >= 0) {
+        Stanza s = new Message();
+        s.setFrom(answerStanza.getFrom());
+        s.setTo(answerStanza.getTo());
+        s.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
+            sequenceNumber,
+            "json",
+            "atmosphere",
+            "received").build()));
+            services.getService(MessageDispatcher.class).send(s);
+        }
 
         return new AJAXRequestResult(new StanzaWriter().write(answerStanza), "json");
     }
