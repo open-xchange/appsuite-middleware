@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.client.impl.connection.mixedmode;
 
+import java.util.UUID;
 import org.json.JSONValue;
 import org.junit.Test;
 import com.openexchange.realtime.client.ID;
@@ -61,6 +62,7 @@ import com.openexchange.realtime.client.RTMessageHandler;
 import com.openexchange.realtime.client.room.RTRoom;
 import com.openexchange.realtime.client.room.RTRoomFactory;
 import com.openexchange.realtime.client.room.chinese.ChineseRoomFactory;
+import com.openexchange.realtime.client.room.loadtest.LoadTestRoomFactory;
 
 
 /**
@@ -72,7 +74,7 @@ public class MixedModeConnectionTest {
 
     @Test
     public void testWasyncConnection() throws RTException {
-        RTConnectionProperties connectionProperties = RTConnectionProperties.newBuilder("marc.arens", "secret", "chineseRoom")
+        RTConnectionProperties connectionProperties = RTConnectionProperties.newBuilder("marc.arens", "secret", UUID.randomUUID().toString())
             .setHost("localhost")
             .setConnectionType(RTConnectionType.LONG_POLLING)
             .setSecure(true)
@@ -82,24 +84,26 @@ public class MixedModeConnectionTest {
 
     @Test
     public void testRoom() throws Exception {
-        RTConnectionProperties connectionProperties = RTConnectionProperties.newBuilder("marc.arens@premium", "secret", "desktop1")
+        RTConnectionProperties connectionProperties = RTConnectionProperties.newBuilder("marc.arens@premium", "secret", UUID.randomUUID().toString())
             .setHost("localhost")
             .setConnectionType(RTConnectionType.LONG_POLLING)
             .setSecure(true)
             .build();
         RTConnection connection = RTConnectionFactory.getInstance().newConnection(connectionProperties);
-        RTRoomFactory roomFactory = new ChineseRoomFactory();
-        RTRoom chineseRoom = roomFactory.newRoom(connection);
-        chineseRoom.join(new ID("synthetic.china://room1"), new RTMessageHandler() {
+        RTRoomFactory roomFactory = new LoadTestRoomFactory();
+        RTRoom loadTestRoom = roomFactory.newRoom(connection);
+        loadTestRoom.join(new ID("synthetic.loadTest://room1"), new RTMessageHandler() {
             @Override
             public void onMessage(JSONValue message) {
                 System.out.println(message.toString());
             }
         });
-        chineseRoom.say("Hello World");
-        Thread.sleep(120000);
-        chineseRoom.say("This is Marc speaking");
-        chineseRoom.leave();
+        loadTestRoom.say("Hello World");
+        Thread.sleep(10000);
+        loadTestRoom.say("This is Marc speaking");
+        Thread.sleep(10000);
+        loadTestRoom.leave();
+        connection.close();
     }
 
 }

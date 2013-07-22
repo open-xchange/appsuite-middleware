@@ -262,6 +262,10 @@ public class RTProtocol {
                     if (payloads.length() == 1) {
                         return false;
                     }
+                } else if (isAck(payload)) {
+                    long ack = getAck(payload);
+                    callback.onAck(ack);
+                    return false;
                 } else if (isNextSequence(payload)) {
                     sequenceGenerator.reset();
                     if (payloads.length() == 1) {
@@ -288,6 +292,14 @@ public class RTProtocol {
         }
 
         return true;
+    }
+
+    private boolean isAck(JSONObject payload) throws JSONException {
+        return isProtocolPayload(payload) && payload.get("element").equals("received");
+    }
+
+    private long getAck(JSONObject payload) throws NumberFormatException, JSONException {
+        return payload.getLong(("data"));
     }
 
     private boolean isMessage(JSONObject element) throws JSONException {
