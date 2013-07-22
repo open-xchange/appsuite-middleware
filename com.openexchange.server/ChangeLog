@@ -1,3 +1,7 @@
+* 2013-07-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27669: Added null guard when counting SIEVE action commands
+
 * 2013-07-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 27539: Sanitize Content-Type header if 'javax.mail.internet.MimeMessage.saveChanges()' fails
