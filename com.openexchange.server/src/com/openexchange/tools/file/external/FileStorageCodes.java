@@ -81,7 +81,14 @@ public enum FileStorageCodes implements OXExceptionCode {
     /** Eliminating the file storage failed. */
     NOT_ELIMINATED(FileStorageExceptionMessage.NOT_ELIMINATED_MSG, Category.CATEGORY_SERVICE_DOWN, 16),
     /** File does not exist in file storage "%1$s". Consider running consistency tool. */
-    FILE_NOT_FOUND(FileStorageExceptionMessage.FILE_NOT_FOUND_MSG, Category.CATEGORY_SERVICE_DOWN, 17);
+    FILE_NOT_FOUND(FileStorageExceptionMessage.FILE_NOT_FOUND_MSG, Category.CATEGORY_SERVICE_DOWN, 17),
+    /** The requested range (offset: %1$d, length: %2$d) for the file \"%3$s\" (current size: %4$d) is invalid. */
+    INVALID_RANGE(FileStorageExceptionMessage.INVALID_RANGE_MSG, Category.CATEGORY_USER_INPUT, 18),
+    /** The specified offset %1$d for the file \"%2$s\" (current size: %3$d) is invalid. */
+    INVALID_OFFSET(FileStorageExceptionMessage.INVALID_OFFSET_MSG, Category.CATEGORY_USER_INPUT, 19),
+    /** The specified length %1$d for the file \"%2$s\" (current size: %3$d) is invalid. */
+    INVALID_LENGTH(FileStorageExceptionMessage.INVALID_LENGTH_MSG, Category.CATEGORY_USER_INPUT, 20),
+    ;
 
     /**
      * Message of the exception.
