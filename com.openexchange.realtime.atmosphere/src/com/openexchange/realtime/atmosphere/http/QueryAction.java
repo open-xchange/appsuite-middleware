@@ -60,6 +60,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.impl.stanza.builder.IQBuilder;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
@@ -203,13 +204,26 @@ public class QueryAction extends RTAction {
         //Set the recipient to the client that originally sent the request
         answerStanza.setTo(id);
 
-        long sequenceNumber = stanza.getSequenceNumber();
-        if (sequenceNumber >= 0) {
-            services.getService(MessageDispatcher.class).send(answerStanza);
-            Map<String, Object> r = new HashMap<String, Object>();
-            r.put("acknowledgements", Collections.singletonList(sequenceNumber));
-            return new AJAXRequestResult(r, "native");
-        }
+        //send the ack asynchronously via the MessageDispatcher so office can synchronously receive the document
+//        long sequenceNumber = stanza.getSequenceNumber();
+//        if (sequenceNumber >= 0) {
+//            /*
+//              "from":,
+//              "to":,
+//              "selector":,
+//              "element":"message", //use iq here?
+//              "payloads":
+//              [{
+//                "namespace":"ox"
+//                "element":"ack",
+//                "data":"[0,1,2,3]",
+//              }]
+//             */
+//            Map<String, Object> r = new HashMap<String, Object>();
+//            r.put("acknowledgements", Collections.singletonList(sequenceNumber));
+//            return new AJAXRequestResult(r, "native");
+//            services.getService(MessageDispatcher.class).send(answerStanza);
+//        }
 
         return new AJAXRequestResult(new StanzaWriter().write(answerStanza), "json");
     }
