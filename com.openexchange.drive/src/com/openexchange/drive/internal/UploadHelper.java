@@ -75,7 +75,6 @@ import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 
 /**
  * {@link UploadHelper}
@@ -169,7 +168,7 @@ public class UploadHelper {
         String checksum = null;
         IDBasedFileAccess fileAccess = session.getStorage().getFileAccess();
         List<Field> modifiedFields = Arrays.asList(File.Field.FILE_SIZE, File.Field.FILE_MIMETYPE, File.Field.VERSION_COMMENT);
-        uploadFile.setVersionComment(getComment());
+        uploadFile.setVersionComment(session.getStorage().getVersionComment());
         uploadFile.setFileMIMEType(contentType);
         uploadFile.setFileSize(totalLength - offset);
         if (0 == offset) {
@@ -252,11 +251,6 @@ public class UploadHelper {
         }
 //        return uploadFile;
         return null == uploadFile ? null : new DefaultFile(uploadFile);//TODO: necessary due to ID interchanging when passing to file accesses
-    }
-
-    private String getComment() {
-        String device = Strings.isEmpty(session.getDeviceName()) ? session.getServerSession().getClient() : session.getDeviceName();
-        return "Uploaded with OX Drive (" + device + ")";
     }
 
     private static String getUploadFilename(String checksum) {

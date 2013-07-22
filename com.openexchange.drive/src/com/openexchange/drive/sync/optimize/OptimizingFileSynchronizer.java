@@ -79,6 +79,7 @@ public class OptimizingFileSynchronizer extends FileSynchronizer {
             }
             FileActionOptimizer[] optimizers = {
                 new FileRenameOptimizer(mapper),
+                new EmptyFileOptimizer(mapper),
                 new FileCopyOptimizer(mapper),
                 new FileMultipleUploadsOptimizer(mapper),
                 new FileOrderOptimizer(mapper)

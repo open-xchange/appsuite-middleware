@@ -49,58 +49,56 @@
 
 package com.openexchange.drive.sync.optimize;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.drive.Action;
-import com.openexchange.drive.DirectoryVersion;
+import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AbstractAction;
-import com.openexchange.drive.actions.EditDirectoryAction;
+import com.openexchange.drive.actions.AcknowledgeFileAction;
+import com.openexchange.drive.actions.DownloadFileAction;
+import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
+import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.drive.sync.SyncResult;
 
 
 /**
- * {@link DirectoryOrderOptimizer}
+ * {@link EmptyFileOptimizer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DirectoryOrderOptimizer extends DirectoryActionOptimizer {
+public class EmptyFileOptimizer extends FileActionOptimizer {
 
-    public DirectoryOrderOptimizer(VersionMapper<DirectoryVersion> mapper) {
+    public EmptyFileOptimizer(VersionMapper<FileVersion> mapper) {
         super(mapper);
     }
 
     @Override
-    public SyncResult<DirectoryVersion> optimize(DriveSession session, SyncResult<DirectoryVersion> result) {
-        List<AbstractAction<DirectoryVersion>> actionsForClient = result.getActionsForClient();
-        List<AbstractAction<DirectoryVersion>> actionsForServer = result.getActionsForServer();
-        Collections.sort(actionsForClient);
-        Collections.sort(actionsForServer);
-        actionsForClient = propagateRenames(actionsForClient);
-        actionsForServer = propagateRenames(actionsForServer);
-        return new SyncResult<DirectoryVersion>(actionsForServer, actionsForClient);
-    }
-
-    private static List<AbstractAction<DirectoryVersion>> propagateRenames(List<AbstractAction<DirectoryVersion>> actions) {
+    public SyncResult<FileVersion> optimize(DriveSession session, SyncResult<FileVersion> result) {
+        List<AbstractAction<FileVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<FileVersion>>(result.getActionsForClient());
+        List<AbstractAction<FileVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<FileVersion>>(result.getActionsForServer());
         /*
-         * propagate previous rename operations
+         * for client UPLOADs of new files, check for the empty checksum
          */
-        for (int i = 0; i < actions.size(); i++) {
-            if (Action.EDIT.equals(actions.get(i).getAction()) && null != actions.get(i).getVersion() && null != actions.get(i).getNewVersion()) {
-                String oldPath = actions.get(i).getVersion().getPath();
-                String newPath = actions.get(i).getNewVersion().getPath();
-                for (int j = i + 1; j < actions.size(); j++) {
-                    if (Action.EDIT.equals(actions.get(j).getAction()) &&
-                        actions.get(j).getVersion().getPath().startsWith(oldPath +'/')) {
-                        String newOldPath = newPath + actions.get(j).getVersion().getPath().substring(oldPath.length());
-                        DirectoryVersion modifiedOldVersion = new SimpleDirectoryVersion(newOldPath, actions.get(j).getVersion().getChecksum());
-                        actions.set(j, new EditDirectoryAction(modifiedOldVersion, actions.get(j).getNewVersion(), actions.get(j).getComparison()));
-                    }
-                }
+        for (AbstractAction<FileVersion> clientAction : result.getActionsForClient()) {
+            if (Action.UPLOAD == clientAction.getAction() && clientAction.wasCausedBy(Change.NEW, Change.NONE) &&
+                null == clientAction.getVersion() && null != clientAction.getNewVersion() &&
+                DriveConstants.EMPTY_MD5.equals(clientAction.getNewVersion().getChecksum())) {
+                /*
+                 * no need to upload, just create file on server and let client update it's metadata
+                 */
+                String path = (String)clientAction.getParameters().get(DriveAction.PARAMETER_PATH);
+                optimizedActionsForClient.remove(clientAction);
+                optimizedActionsForServer.add(new DownloadFileAction(null, clientAction.getNewVersion(), null, path, -1, null));
+                optimizedActionsForClient.add(new AcknowledgeFileAction(null, clientAction.getNewVersion(), null, path));
             }
         }
-        return actions;
+        /*
+         * return new sync result
+         */
+        return new SyncResult<FileVersion>(optimizedActionsForServer, optimizedActionsForClient);
     }
 
 }

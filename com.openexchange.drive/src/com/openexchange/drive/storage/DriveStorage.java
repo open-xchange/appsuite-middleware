@@ -86,6 +86,7 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
 import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 import com.openexchange.file.storage.composition.IDBasedSequenceNumberProvider;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -301,7 +302,7 @@ public class DriveStorage {
     }
 
     /**
-     * Creates a file.
+     * Creates an empty file.
      *
      * @param path The target folder path
      * @param fileName The target filename
@@ -309,13 +310,26 @@ public class DriveStorage {
      * @throws OXException
      */
     public File createFile(String path, String fileName) throws OXException {
-        File file = new DefaultFile();
+        return createFile(path, fileName, null);
+    }
+
+    /**
+     * Creates an empty file.
+     *
+     * @param path The target folder path
+     * @param fileName The target filename
+     * @param additionalMetadata Additional metadata when creating the file
+     * @return A file representing the created file
+     * @throws OXException
+     */
+    public File createFile(String path, String fileName, File additionalMetadata) throws OXException {
+        File file = null != additionalMetadata ? new DefaultFile(additionalMetadata) : new DefaultFile();
         file.setFolderId(getFolderID(path, true));
         file.setFileName(fileName);
         if (LOG.isDebugEnabled()) {
             LOG.debug(this.toString() + "touch " + combine(path, fileName));
         }
-        getFileAccess().saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+        getFileAccess().saveDocument(file, Streams.newByteArrayInputStream(new byte[0]), FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
         return file;
     }
 
@@ -507,6 +521,12 @@ public class DriveStorage {
         folders.put(ROOT_PATH, rootFolder);
         addSubfolders(folders, rootFolder, ROOT_PATH);
         return folders;
+    }
+
+    public String getVersionComment() {
+        String device = Strings.isEmpty(session.getDeviceName()) ? session.getServerSession().getClient() : session.getDeviceName();
+        //TODO: wording, i18n
+        return "Uploaded with OX Drive (" + device + ")";
     }
 
     private SearchIterator<File> getFilesIterator(String folderID, String pattern) throws OXException {
