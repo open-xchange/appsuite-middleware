@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap;
+package com.openexchange.imap.storecache;
 
 import java.util.Iterator;
 import java.util.Queue;
@@ -58,6 +58,8 @@ import org.apache.commons.logging.Log;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.imap.IMAPProvider;
+import com.openexchange.imap.IMAPValidity;
 import com.openexchange.imap.services.Services;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
@@ -256,19 +258,13 @@ public final class IMAPStoreCache {
         /*
          * Check for a cached one
          */
-        final Key key = newKey(server, port, login);
+        final Key key = newKey(accountId, server, port, login);
         /*
          * Get queue
          */
         IMAPStoreContainer container = map.get(key);
         if (null == container) {
-            final int maxCount = protocol.getMaxCount(server, MailAccount.DEFAULT_ID == accountId);
-            final IMAPStoreContainer newContainer;
-            if (maxCount > 0) {
-                newContainer = new BoundedIMAPStoreContainer(server, port, login, pw, maxCount, implType);
-            } else {
-                newContainer = new UnboundedIMAPStoreContainer(server, port, login, pw);
-            }
+            final IMAPStoreContainer newContainer = new UnboundedIMAPStoreContainer(server, port, login, pw);
             container = map.putIfAbsent(key, newContainer);
             if (null == container) {
                 container = newContainer;
@@ -291,16 +287,17 @@ public final class IMAPStoreCache {
     /**
      * Gets (optionally) associated IMAP store container.
      *
+     * @param accountId The account identifier
      * @param server The server name
      * @param port The port
      * @param login The login
      * @return The container or <code>null</code>
      */
-    public IMAPStoreContainer optContainer(final String server, final int port, final String login) {
+    public IMAPStoreContainer optContainer(final int accountId, final String server, final int port, final String login) {
         /*
          * Get container
          */
-        return map.get(newKey(server, port, login));
+        return map.get(newKey(accountId, server, port, login));
     }
 
     /**
@@ -346,11 +343,12 @@ public final class IMAPStoreCache {
      * Returns given connected IMAP store to cache.
      *
      * @param imapStore The connected IMAP store to return
+     * @param accountId The account identifier
      * @param server The host name of the IMAP server
      * @param port The port
      * @param login The login/user name
      */
-    public void returnIMAPStore(final IMAPStore imapStore, final String server, final int port, final String login, final IMAPValidity validity) {
+    public void returnIMAPStore(final IMAPStore imapStore, final int accountId, final String server, final int port, final String login, final IMAPValidity validity) {
         if (null == imapStore) {
             // Nothing to close
             return;
@@ -358,7 +356,7 @@ public final class IMAPStoreCache {
         /*
          * Get queue
          */
-        final IMAPStoreContainer container = map.get(newKey(server, port, login));
+        final IMAPStoreContainer container = map.get(newKey(accountId, server, port, login));
         if (null == container) {
             closeSafe(imapStore);
             return;
@@ -376,24 +374,27 @@ public final class IMAPStoreCache {
         }
     }
 
-    private static Key newKey(final String host, final int port, final String user) {
-        return new Key(host, port, user);
+    private static Key newKey(final int accountId, final String host, final int port, final String user) {
+        return new Key(accountId, host, port, user);
     }
 
     private static final class Key {
 
+        private final int accountId;
         private final String host;
         private final int port;
         private final String user;
         private final int hash;
 
-        protected Key(final String host, final int port, final String user) {
+        protected Key(final int accountId, final String host, final int port, final String user) {
             super();
+            this.accountId = accountId;
             this.host = host;
             this.port = port;
             this.user = user;
             final int prime = 31;
             int result = 1;
+            result = prime * result + accountId;
             result = prime * result + ((host == null) ? 0 : host.hashCode());
             result = prime * result + port;
             result = prime * result + ((user == null) ? 0 : user.hashCode());
@@ -414,14 +415,17 @@ public final class IMAPStoreCache {
                 return false;
             }
             final Key other = (Key) obj;
+            if (port != other.port) {
+                return false;
+            }
+            if (accountId != other.accountId) {
+                return false;
+            }
             if (host == null) {
                 if (other.host != null) {
                     return false;
                 }
             } else if (!host.equals(other.host)) {
-                return false;
-            }
-            if (port != other.port) {
                 return false;
             }
             if (user == null) {

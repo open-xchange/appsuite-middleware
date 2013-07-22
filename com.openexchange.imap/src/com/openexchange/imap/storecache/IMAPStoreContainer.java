@@ -47,9 +47,11 @@
  *
  */
 
-package com.openexchange.imap;
+package com.openexchange.imap.storecache;
 
 import javax.mail.MessagingException;
+import com.openexchange.imap.IMAPProvider;
+import com.openexchange.imap.IMAPValidity;
 import com.sun.mail.imap.IMAPStore;
 
 

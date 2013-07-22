@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap;
+package com.openexchange.imap.storecache;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,6 +59,9 @@ import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.IMAPValidity;
+import com.openexchange.imap.IMAPException.Code;
 import com.openexchange.imap.services.Services;
 import com.openexchange.log.Log;
 import com.openexchange.timer.ScheduledTimerTask;
