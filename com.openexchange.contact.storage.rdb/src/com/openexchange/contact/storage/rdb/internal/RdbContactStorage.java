@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.storage.DefaultContactStorage;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.fields.Fields;
@@ -742,7 +743,20 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * check fields
              */
-            QueryFields queryFields = new QueryFields(fields, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID);
+            QueryFields queryFields;
+            if (null != contactSearch.getPattern() && null != sortOptions
+                && null != sortOptions.getOrder() && 0 < sortOptions.getOrder().length) {
+                // add sort field(s) to queried fields as this leads to UNION selects
+                List<ContactField> mandatoryFields = new ArrayList<ContactField>();
+                mandatoryFields.add(ContactField.OBJECT_ID);
+                mandatoryFields.add(ContactField.INTERNAL_USERID);
+                for (SortOrder order : sortOptions.getOrder()) {
+                    mandatoryFields.add(order.getBy());
+                }
+                queryFields = new QueryFields(fields, mandatoryFields.toArray(new ContactField[mandatoryFields.size()]));
+            } else {
+                queryFields = new QueryFields(fields, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID);
+            }
             if (false == queryFields.hasContactData()) {
                 return null; // nothing to do
             }
