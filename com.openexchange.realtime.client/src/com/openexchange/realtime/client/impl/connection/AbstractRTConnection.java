@@ -284,7 +284,7 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
             }
 
         } catch (JSONException e) {
-            throw new RTException("The given string was not a valid JSON message.", e);
+            throw new RTException("The given string was not a valid JSON message: " + message, e);
         }
     }
 

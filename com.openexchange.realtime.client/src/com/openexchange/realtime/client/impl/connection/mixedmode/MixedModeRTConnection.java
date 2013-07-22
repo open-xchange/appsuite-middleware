@@ -54,6 +54,7 @@ import java.util.concurrent.TimeUnit;
 import org.atmosphere.wasync.Decoder;
 import org.atmosphere.wasync.Encoder;
 import org.atmosphere.wasync.Event;
+import org.atmosphere.wasync.Function;
 import org.atmosphere.wasync.impl.AtmosphereClient;
 import org.atmosphere.wasync.impl.DefaultOptions;
 import org.json.JSONArray;
@@ -216,28 +217,23 @@ public class MixedModeRTConnection extends AbstractRTConnection {
                     return jsonObject.toString();
                 }
             })
-
-            .decoder(new Decoder<String, JSONObject>() {
-                @Override
-                public JSONObject decode(final Event event, String received) {
-                    if (event.equals(Event.MESSAGE)) {
-                        LOG.debug("Received message in atmosphere channel: " + received);
-                        try {
-                            onReceive(received, true);
-                        } catch (RTException rtException) {
-                            LOG.error("Error in handling the incoming object.", rtException);
-                        }
-                    }
-
-                    return new JSONObject();
-                }
-            })
             .build();
 
         socket = atmosphereClient.create(
             (DefaultOptions) atmosphereClient.newOptionsBuilder().runtime(asyncHttpClient, true).reconnect(true).build()
         );
         try {
+            socket.on(Event.MESSAGE.name(), new Function<String>() {
+                @Override
+                public void on(String received) {
+                    LOG.debug("Received message in atmosphere channel: " + received);
+                    try {
+                        onReceive(received, true);
+                    } catch (RTException rtException) {
+                        LOG.error("Error in handling the incoming object.", rtException);
+                    }
+                }
+            });
             socket.open(request);
         } catch (IOException e) {
             throw new RTException("Could not open return channel.", e);
