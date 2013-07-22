@@ -58,6 +58,12 @@ open-xchange-file-distribution (7.2.2-0) UNRELEASED; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 27 May 2013 17:14:18 +0200
 
+open-xchange-file-distribution (7.2.1-5) stable; urgency=low
+
+  * Build for patch 2013-07-18
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 12 Jul 2013 18:13:03 +0200
+
 open-xchange-file-distribution (7.2.1-4) stable; urgency=low
 
   * Build for patch 2013-06-27
