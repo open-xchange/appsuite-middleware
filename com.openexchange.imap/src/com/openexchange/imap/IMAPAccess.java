@@ -68,6 +68,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import javax.mail.Provider;
+import javax.mail.URLName;
 import javax.mail.event.FolderEvent;
 import javax.mail.event.FolderListener;
 import javax.mail.internet.idn.IDNA;
@@ -114,6 +115,7 @@ import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.JavaIMAPStore;
@@ -1011,34 +1013,56 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         /*
          * Get store...
          */
-        if (useIMAPStoreCache()) {
-            return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session, getIMAPValidity(this));
+        final int maxRetryCount = 3;
+        int retryCount = 0;
+        while (retryCount++ < maxRetryCount) {
+            try {
+                if (useIMAPStoreCache()) {
+                    return IMAPStoreCache.getInstance().borrowIMAPStore(
+                        accountId,
+                        imapSession,
+                        server,
+                        port,
+                        login,
+                        pw,
+                        session,
+                        getIMAPValidity(this));
+                }
+                /*
+                 * Establish a new one...
+                 */
+                IMAPStore imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
+                /*
+                 * ... and connect it
+                 */
+                try {
+                    imapStore.connect(server, port, login, pw);
+                } catch (final AuthenticationFailedException e) {
+                    /*
+                     * Retry connect with AUTH=PLAIN disabled
+                     */
+                    imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
+                    imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
+                    imapStore.connect(server, port, login, pw);
+                }
+                /*
+                 * Done
+                 */
+                if (DEBUG) {
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.debug("IMAPAccess.connectIMAPStore() took " + dur + "msec.");
+                }
+                return imapStore;
+            } catch (final MessagingException e) {
+                if (!(e.getNextException() instanceof ConnectQuotaExceededException)) {
+                    throw e;
+                }
+                if (retryCount >= maxRetryCount) {
+                    throw e;
+                }
+            }
         }
-        /*
-         * Establish a new one...
-         */
-        IMAPStore imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
-        /*
-         * ... and connect it
-         */
-        try {
-            imapStore.connect(server, port, login, pw);
-        } catch (final AuthenticationFailedException e) {
-            /*
-             * Retry connect with AUTH=PLAIN disabled
-             */
-            imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
-            imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
-            imapStore.connect(server, port, login, pw);
-        }
-        /*
-         * Done
-         */
-        if (DEBUG) {
-            final long dur = System.currentTimeMillis() - st;
-            LOG.debug("IMAPAccess.connectIMAPStore() took " + dur + "msec.");
-        }
-        return imapStore;
+        throw new MessagingException("Unable to connect to IMAP store: " + new URLName("imap", server, port, null, login, "xxxx"));
     }
 
     private void checkTemporaryDown(final IIMAPProperties imapConfProps) throws OXException, IMAPException {
