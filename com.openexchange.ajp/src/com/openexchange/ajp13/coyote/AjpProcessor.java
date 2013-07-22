@@ -338,6 +338,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     private volatile int pingCount;
 
     /**
+     * The max. idle time
+     */
+    private volatile int max;
+
+    /**
      * Whether e secure connection is enforced.
      */
     private final boolean forceHttps;
@@ -487,6 +492,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             throw new IllegalStateException("Missing timer service!");
         }
         final int max = AJPv13Config.getKeepAliveTime();
+        this.max = max;
         scheduledKeepAliveTask =
             timer.scheduleWithFixedDelay(new KeepAliveRunnable(this, max), max, max, TimeUnit.MILLISECONDS);
     }
@@ -761,7 +767,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     try {
                         output.write(pongMessageArray);
                         lastWriteAccess = System.currentTimeMillis();
-                        // output.flush();
+                        output.flush();
                     } catch (final IOException e) {
                         error = true;
                     } finally {
@@ -1068,7 +1074,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      */
                     output.write(flushMessageArray);
                     lastWriteAccess = System.currentTimeMillis();
-                    // output.flush();
+                    output.flush();
                 } catch (final IOException e) {
                     // Set error flag
                     error = true;
@@ -1082,6 +1088,13 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 final Lock hardLock = mainLock.writeLock();
                 hardLock.lock();
                 try {
+                    /*
+                     * Ensure we still exceed max. idle time and are not yet finished
+                     */
+                    final int max = this.max;
+                    if (finished || (max <= 0) || (!isProcessing() || ((System.currentTimeMillis() - getLastWriteAccess()) <= max))) {
+                        return;
+                    }
                     boolean doReadMessage = true;
                     if (response.isCommitted()) {
                         /*
@@ -1089,7 +1102,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                          */
                         output.write(flushMessageArray);
                         lastWriteAccess = System.currentTimeMillis();
-                        // output.flush();
+                        output.flush();
                         if (DEBUG) {
                             LOG.debug("Performed keep-alive through a flush package.");
                         }
@@ -1098,8 +1111,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                          * Not committed, yet. Write an empty GET-BODY-CHUNK package.
                          */
                         output.write(AJPv13Response.getGetBodyChunkBytes(0));
-                        output.flush();
                         lastWriteAccess = System.currentTimeMillis();
+                        output.flush();
                         /*
                          * Receive probably empty body chunk
                          */
@@ -2059,7 +2072,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         softLock.lock();
         try {
             sink.writeTo(output);
-            // output.flush();
+            output.flush();
         } finally {
             softLock.unlock();
         }
@@ -2119,7 +2132,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         softLock.lock();
         try {
             output.write(reuse ? endMessageArray : endMessageArrayNoReuse);
-            // output.flush();
+            output.flush();
         } finally {
             softLock.unlock();
         }
@@ -2184,7 +2197,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         softLock.lock();
         try {
             output.write(getBodyMessageArray);
-            // output.flush();
+            output.flush();
         } finally {
             softLock.unlock();
         }
@@ -2337,8 +2350,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 len -= thisTime;
                 softLock.lock();
                 try {
-                    output.write(getSendBodyChunkBytes(b, start + off, thisTime));
-                    // output.flush();
+                    writeSendBodyChunkBytes(b, start + off, thisTime);
+                    output.flush();
                 } finally {
                     softLock.unlock();
                 }
@@ -2348,7 +2361,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             return chunk.getLength();
         }
 
-        private byte[] getSendBodyChunkBytes(final byte[] b, final int off, final int len) {
+        private void writeSendBodyChunkBytes(final byte[] b, final int off, final int len) throws IOException {
             /*
              * prefix + chunk_length (2 bytes) + chunk bytes + terminating zero byte
              */
@@ -2366,7 +2379,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             sink.write(len & 0xFF);
             sink.write(b, off, len);
             sink.write(0);
-            return sink.toByteArray();
+            sink.writeTo(output);
         }
 
     }
