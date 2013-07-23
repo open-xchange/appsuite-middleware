@@ -950,6 +950,11 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
     public void cleanUp(String secret, Session session) throws OXException {
         // noop
     }
+    
+    @Override
+    public void removeUnrecoverableItems(String secret, Session session) throws OXException {
+        // noop
+    }
 
     @Override
     public void updateAccount(final FileStorageAccount account, final Session session) throws OXException {

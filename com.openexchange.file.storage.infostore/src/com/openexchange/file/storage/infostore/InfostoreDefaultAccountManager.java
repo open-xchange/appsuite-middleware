@@ -145,6 +145,11 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
     public void cleanUp(String secret, Session session) throws OXException {
         // Nothing to do
     }
+    
+    @Override
+    public void removeUnrecoverableItems(String secret, Session session) throws OXException {
+        // Nothing to do        
+    }
 
     @Override
     public void updateAccount(final FileStorageAccount account, final Session session) throws OXException {

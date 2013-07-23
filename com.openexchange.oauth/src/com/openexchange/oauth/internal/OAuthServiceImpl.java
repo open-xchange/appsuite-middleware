@@ -964,6 +964,73 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             provider.releaseWriteConnection(context, con);
         }
     }
+    
+    @Override
+    public void removeUnrecoverableItems(String secret, ServerSession session) throws OXException {
+        final CryptoService cryptoService = Services.getService(CryptoService.class);
+        final int contextId = session.getContextId();
+        final Context context = getContext(contextId);
+        final Connection con = getConnection(false, context);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Boolean committed = null;
+        try {
+            stmt = con.prepareStatement("SELECT id, accessToken, accessSecret FROM oauthAccounts WHERE cid = ? AND user = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, session.getUserId());
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return;
+            }
+            final List<Integer> accounts = new ArrayList<Integer>(8);
+            do {
+                try {
+                    // Try using the secret.
+                    final String accessToken = rs.getString(2);
+                    if (!isEmpty(accessToken)) {
+                        cryptoService.decrypt(accessToken, secret);
+                    }
+                    final String accessSecret = rs.getString(3);
+                    if (!isEmpty(accessSecret)) {
+                        cryptoService.decrypt(accessSecret, secret);
+                    }
+                } catch (final OXException e) {
+                    // Clean-up
+                    accounts.add(Integer.valueOf(rs.getInt(1)));
+                }
+            } while (rs.next());
+            closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+            if (accounts.isEmpty()) {
+                return;
+            }
+            /*
+             * Delete them
+             */
+            committed = Boolean.FALSE;
+            startTransaction(con);
+            // Statement
+            stmt = con.prepareStatement("DELETE FROM oauthAccounts  WHERE cid = ? AND user = ? AND id = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, session.getUserId());
+            for (final Integer accountId : accounts) {
+                stmt.setInt(3, accountId.intValue());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+            con.commit();
+            committed = Boolean.TRUE;
+        } catch (final SQLException e) {
+            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (null != committed && !committed.booleanValue()) {
+                rollback(con);
+            }
+            closeSQLStuff(rs, stmt);
+            provider.releaseWriteConnection(context, con);
+        }
+    }
 
     @Override
     public boolean hasEncryptedItems(final ServerSession session) throws OXException {

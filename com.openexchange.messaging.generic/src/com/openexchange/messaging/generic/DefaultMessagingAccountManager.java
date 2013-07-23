@@ -160,5 +160,9 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
     public void cleanUp(String secret, Session session) throws OXException {
         CACHE.cleanUp(service, secret, session);
     }
-
+    
+    @Override
+    public void removeUnrecoverableItems(String secret, Session session) throws OXException {
+        CACHE.removeUnrecoverableItems(service, secret, session);        
+    }
 }

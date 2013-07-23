@@ -179,4 +179,9 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
         return isWhitespace;
     }
 
+    @Override
+    public void removeUnrecoverableItems(String secret, ServerSession session) throws OXException {
+        saveNewToken(session.getUser(), secret, session.getContext());
+    }
+
 }

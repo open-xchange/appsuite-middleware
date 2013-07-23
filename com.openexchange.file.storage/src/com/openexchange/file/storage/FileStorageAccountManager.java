@@ -118,6 +118,8 @@ public interface FileStorageAccountManager extends FileStorageConstants {
      */
     void cleanUp(String secret, Session session) throws OXException;
 
+    void removeUnrecoverableItems(String secret, Session session) throws OXException;
+    
     /**
      * Migrates all encrypted strings from an old secret to a new one.
      *
