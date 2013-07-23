@@ -369,6 +369,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 			throws OXException {
 		setOrganizer(cdao);
 		setPrincipal(cdao);
+		setOrganizerType(cdao);
 		return delegate.insertAppointmentObject(cdao);
 	}
 
