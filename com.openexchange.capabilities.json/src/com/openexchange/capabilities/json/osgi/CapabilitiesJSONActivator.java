@@ -77,7 +77,7 @@ public class CapabilitiesJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final AvailabilityChecker editPasswordChecker = TrackerAvailabilityChecker.getAvailabilityCheckerFor(PasswordChangeService.class, true, context);
+        final AvailabilityChecker editPasswordChecker = TrackerAvailabilityChecker.getAvailabilityCheckerFor(PasswordChangeService.class, false, context);
         this.editPasswordChecker = editPasswordChecker;
         final String editPasswordName = Permission.EDIT_PASSWORD.name().toLowerCase();
         final CapabilityFilter capabilityFilter = new CapabilityFilter() {
