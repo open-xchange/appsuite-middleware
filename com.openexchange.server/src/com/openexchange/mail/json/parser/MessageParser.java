@@ -1024,9 +1024,7 @@ public final class MessageParser {
     private static MailPath prepareMsgRef(final Session session, final MailPath msgref) throws OXException {
         final UnifiedInboxManagement unifiedINBOXManagement =
             ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
-        if (null != unifiedINBOXManagement && msgref.getAccountId() == unifiedINBOXManagement.getUnifiedINBOXAccountID(
-            session.getUserId(),
-            session.getContextId())) {
+        if (null != unifiedINBOXManagement && msgref.getAccountId() == unifiedINBOXManagement.getUnifiedINBOXAccountID(session)) {
             // Something like: INBOX/default6/INBOX
             final String nestedFullname = msgref.getFolder();
             final int pos = nestedFullname.indexOf(MailFolder.DEFAULT_FOLDER_ID);

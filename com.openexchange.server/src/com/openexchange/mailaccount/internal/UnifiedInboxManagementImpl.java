@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Collections;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
@@ -67,6 +68,8 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 
@@ -141,6 +144,17 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
                 storageService.insertMailAccount(mailAccountDescription, userId, ctx, null);
             } else {
                 storageService.insertMailAccount(mailAccountDescription, userId, ctx, null, con);
+            }
+            // Drop session parameters
+            try {
+                final SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+                if (null != sessiondService) {
+                    for (final Session session : sessiondService.getSessions(userId, contextId)) {
+                        session.setParameter("com.openexchange.mailaccount.unifiedMailAccountId", null);
+                    }
+                }
+            } catch (final Exception e) {
+                // Ignore
             }
         } catch (final OXException e) {
             throw e;
@@ -239,6 +253,17 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
         } finally {
             closeSQLStuff(rs, stmt);
         }
+    }
+
+    @Override
+    public int getUnifiedINBOXAccountID(final Session session) throws OXException {
+        final Integer i = (Integer) session.getParameter("com.openexchange.mailaccount.unifiedMailAccountId");
+        if (null != i) {
+            return i.intValue();
+        }
+        final int unifiedINBOXAccountId = getUnifiedINBOXAccountID(session.getUserId(), session.getContextId());
+        session.setParameter("com.openexchange.mailaccount.unifiedMailAccountId", Integer.valueOf(unifiedINBOXAccountId));
+        return unifiedINBOXAccountId;
     }
 
     @Override
