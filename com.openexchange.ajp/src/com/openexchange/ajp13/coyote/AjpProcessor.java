@@ -2072,11 +2072,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         softLock.lock();
         try {
             sink.writeTo(output);
+            lastWriteAccess = System.currentTimeMillis();
             output.flush();
         } finally {
             softLock.unlock();
         }
-        lastWriteAccess = System.currentTimeMillis();
     }
 
     private static final int getNumOfCookieHeader(final List<List<String>> formattedCookies) {
@@ -2132,11 +2132,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         softLock.lock();
         try {
             output.write(reuse ? endMessageArray : endMessageArrayNoReuse);
+            lastWriteAccess = System.currentTimeMillis();
             output.flush();
         } finally {
             softLock.unlock();
         }
-        lastWriteAccess = System.currentTimeMillis();
     }
 
     /**
@@ -2197,11 +2197,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         softLock.lock();
         try {
             output.write(getBodyMessageArray);
+            lastWriteAccess = System.currentTimeMillis();
             output.flush();
         } finally {
             softLock.unlock();
         }
-        lastWriteAccess = System.currentTimeMillis();
 
         final boolean moreData = receive();
         if (!moreData) {
@@ -2351,13 +2351,13 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 softLock.lock();
                 try {
                     writeSendBodyChunkBytes(b, start + off, thisTime);
+                    lastWriteAccess = System.currentTimeMillis();
                     output.flush();
                 } finally {
                     softLock.unlock();
                 }
                 off += thisTime;
             } while (len > 0);
-            lastWriteAccess = System.currentTimeMillis();
             return chunk.getLength();
         }
 

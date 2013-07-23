@@ -58,16 +58,13 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.WebdavFolderAliases;
@@ -77,6 +74,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -150,7 +148,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		try {
 			con = provider.getWriteConnection(getSession().getContext());
 			final OXFolderManager oxma = OXFolderManager.getInstance(getSession(), con, con);
-			oxma.deleteFolder(new FolderObject(id), true, System.currentTimeMillis());
+			oxma.deleteFolder(new FolderObject(id), true, FileStorageFileAccess.DISTANT_FUTURE);
 			//oxfa.deleteFolder(id, getSession(),con, con, true,System.currentTimeMillis()); // FIXME
 			exists = false;
 			factory.removed(this);

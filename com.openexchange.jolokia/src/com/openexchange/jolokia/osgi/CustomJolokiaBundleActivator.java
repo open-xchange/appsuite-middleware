@@ -49,6 +49,7 @@
 
 package com.openexchange.jolokia.osgi;
 
+import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.jolokia.osgi.JolokiaAuthenticatedHttpContext;
 import org.jolokia.osgi.JolokiaHttpContext;
@@ -56,6 +57,7 @@ import org.jolokia.osgi.servlet.JolokiaServlet;
 import org.osgi.framework.BundleActivator;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.jolokia.JolokiaConfig;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -74,6 +76,8 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator {
     // HttpContext used for authorization
     private HttpContext jolokiaHttpContext;
 
+    private String usedServletName;
+    
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, HttpService.class };
@@ -97,8 +101,25 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator {
         }
 
         JolokiaServlet jolServlet = new JolokiaServlet(context);
-        LOG.info("Servlet created: org.jolokia");
-        getService(HttpService.class).registerServlet(myConfig.getServletName(), jolServlet, null, getHttpContext());
+
+        HttpService httpService = getService(HttpService.class);
+
+        if (null == httpService) {
+            LOG.info("Shutting down Bundle due to missing httpService setting");
+            stopBundle();
+            return;
+        }
+
+        try {
+            LOG.info("Registering jolokia servlet.");
+            usedServletName = myConfig.getServletName();
+            httpService.registerServlet(usedServletName, jolServlet, null, getHttpContext());
+            
+        } catch (final ServletException e) {
+            LOG.error("Registering jolokia servlet failed.", e);
+        } catch (final NamespaceException e) {
+            LOG.error("Registering jolokia servlet failed.", e);
+        }
         LOG.info("Starting Bundle finished: org.jolokia");
     }
 
@@ -108,6 +129,10 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator {
             if (myConfig.getStarted().get()) {
                 myConfig.stop();
             }
+        }
+        HttpService httpService = getService(HttpService.class);
+        if (null != httpService) {
+            httpService.unregister(usedServletName);
         }
         cleanUp();
     }
