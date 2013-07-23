@@ -49,6 +49,7 @@
 
 package com.openexchange.secret.recovery.json.action;
 
+import java.util.Set;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -65,13 +66,17 @@ import com.openexchange.server.ServiceLookup;
  */
 public final class MigrateAction extends AbstractSecretRecoveryAction {
 
+    private Set<SecretMigrator> secretMigrators;
+
     /**
      * Initializes a new {@link MigrateAction}.
      *
      * @param services
+     * @param secretMigrators 
      */
-    public MigrateAction(final ServiceLookup services) {
+    public MigrateAction(final ServiceLookup services, Set<SecretMigrator> secretMigrators) {
         super(services);
+        this.secretMigrators = secretMigrators;
     }
 
     @Override
@@ -84,12 +89,9 @@ public final class MigrateAction extends AbstractSecretRecoveryAction {
         final String password = req.getParameter("password");
         final String secret = secretService.getSecret(req.getSession());
 
-        final SecretMigrator secretMigrator = getService(SecretMigrator.class);
-        if (null == secretMigrator) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SecretMigrator.class.getName());
+        for (SecretMigrator migrator : secretMigrators) {
+            migrator.migrate(password, secret, req.getSession());
         }
-
-        secretMigrator.migrate(password, secret, req.getSession());
 
         return new AJAXRequestResult(Integer.valueOf(1), "int");
     }

@@ -67,4 +67,13 @@ public interface EncryptedItemCleanUpService {
      * @throws OXException If check for encrypted items fails
      */
     public void cleanUpEncryptedItems(String secret, ServerSession session) throws OXException;
+    
+    /**
+     * Removes non-working encrypted items
+     * 
+     * @param secret The current secret
+     * @param session The session providing needed user information
+     * @throws OXException If check for encrypted items fails
+     */
+    public void removeUnrecoverableItems(String secret, ServerSession session) throws OXException;
 }

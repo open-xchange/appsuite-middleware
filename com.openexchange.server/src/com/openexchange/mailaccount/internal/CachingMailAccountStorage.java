@@ -409,6 +409,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         delegate.cleanUp(secret, session);
     }
 
+    @Override
+    public void removeUnrecoverableItems(String secret, Session session) throws OXException {
+        delegate.removeUnrecoverableItems(secret, session);        
+    }
+    
     private static volatile Integer maxWaitMillis;
     private static int maxWaitMillis() {
         Integer i = maxWaitMillis;

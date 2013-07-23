@@ -105,6 +105,12 @@ public class MailSecretRecoveryActivator extends HousekeepingActivator {
                 mailAccountStorage.cleanUp(secret, session);
             }
 
+            @Override
+            public void removeUnrecoverableItems(String secret, ServerSession session) throws OXException {
+                mailAccountStorage.removeUnrecoverableItems(secret, session);
+                
+            }
+
         });
     }
 
