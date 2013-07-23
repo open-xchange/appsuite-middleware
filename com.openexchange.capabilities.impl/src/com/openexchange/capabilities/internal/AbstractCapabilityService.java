@@ -63,7 +63,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import org.osgi.framework.BundleContext;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
@@ -79,12 +78,9 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.userconfiguration.AvailabilityChecker;
 import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.groupware.userconfiguration.TrackerAvailabilityChecker;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -118,20 +114,17 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     private final ConcurrentMap<String, Object> declaredCapabilities;
 
     private final ServiceLookup services;
-    
-    private final BundleContext context;
 
     private volatile Boolean autologin;
 
     /**
      * Initializes a new {@link AbstractCapabilityService}.
      */
-    public AbstractCapabilityService(final ServiceLookup services, BundleContext context) {
+    public AbstractCapabilityService(final ServiceLookup services) {
         super();
         this.services = services;
         capabilities = new ConcurrentHashMap<String, Capability>();
         declaredCapabilities = new ConcurrentHashMap<String, Object>();
-        this.context = context;
     }
 
     private Cache optContextCache() {
@@ -190,16 +183,9 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         // ------------- Combined capabilities/permissions ------------ //
         if (!serverSession.isAnonymous()) {
             final UserPermissionBits userPermissionBits = services.getService(UserPermissionService.class).getUserPermissionBits(serverSession.getUserId(), serverSession.getContext());
-            
-            //Check if passwordchange service is running
-            final AvailabilityChecker editPasswordChecker = TrackerAvailabilityChecker.getAvailabilityCheckerFor(PasswordChangeService.class, false, context);
             // Capabilities by user permission bits
             for (Permission p: Permission.byBits(userPermissionBits.getPermissionBits())) {
-                Capability capability = getCapability(toLowerCase(p.name()));
-                //Only add "edit_password" capability if passwordchange service is running
-                if (!"edit_password".equals(capability.getId()) || editPasswordChecker.isAvailable()) {
-                    capabilities.add(capability);
-                }
+                capabilities.add(getCapability(toLowerCase(p.name())));
             }
             // Portal
             if (userPermissionBits.hasPortal()) {

@@ -53,7 +53,6 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
@@ -82,8 +81,8 @@ public class CapabilitiesActivator extends HousekeepingActivator {
 
         private final CapabilityCheckerRegistry capCheckers;
 
-        CapabilityServiceImpl(ServiceLookup services, CapabilityCheckerRegistry capCheckers, BundleContext context) {
-            super(services, context);
+        CapabilityServiceImpl(ServiceLookup services, CapabilityCheckerRegistry capCheckers) {
+            super(services);
             this.capCheckers = capCheckers;
         }
 
@@ -91,7 +90,6 @@ public class CapabilitiesActivator extends HousekeepingActivator {
         protected Map<String, List<CapabilityChecker>> getCheckers() {
             return capCheckers.getCheckers();
         }
-        
     }
 
     /** The service look-up */
@@ -111,7 +109,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
         /*
          * Create & register CapabilityService
          */
-        final CapabilityServiceImpl capService = new CapabilityServiceImpl(this, capCheckers, context);
+        final CapabilityServiceImpl capService = new CapabilityServiceImpl(this, capCheckers);
         registerService(CapabilityService.class, capService);
 
         track(Capability.class, new SimpleRegistryListener<Capability>() {

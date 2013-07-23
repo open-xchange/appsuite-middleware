@@ -1,12 +1,3 @@
-* 2013-07-23 - jan.bauerdick@open-xchange.com
-
- - Fix for bug 27718: Check if passwordchange service is running before adding the capability "edit_password"
-
-* 2013-07-23 - tobias.friedrich@open-xchange.com
-
- - Fix for bug 27476: Implicitly add internal user in change exceptions if missing from imported iCal 
- - Fix for bug 27161: Pass DISTANT_FUTURE when deleting a folder via WebDAV 
-
 * 2013-07-22 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 27663: Always include ORDER BY columns in SELECT clause when using UNION SELECTs 

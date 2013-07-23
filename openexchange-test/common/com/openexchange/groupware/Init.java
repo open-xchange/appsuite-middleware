@@ -420,7 +420,7 @@ public final class Init {
             public <S> S getOptionalService(final Class<? extends S> clazz) {
                 return null;
             }
-        }, null) {
+        }) {
 
             @Override
             protected Map<String, List<CapabilityChecker>> getCheckers() {
