@@ -1,0 +1,5 @@
+[ox_*]
+timeout 15
+env.oxJolokiaUrl http://localhost:8009/internal/jolokia
+env.oxJolokiaUser testuser
+env.oxJolokiaPassword password

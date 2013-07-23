@@ -1,0 +1,86 @@
+#!/usr/bin/perl
+#%# family=auto
+#%# capabilities=autoconf
+
+use strict;
+use JMX::Jmx4Perl;
+use JMX::Jmx4Perl::Request;   # Type constants are exported here
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+	print "yes\n";
+	exit 0;
+}
+
+if ($ARGV[0] and $ARGV[0] eq "config") {
+    print "graph_title Overview\n";
+    print "graph_args --base 1000 -l 0\n";
+    print "graph_category Open Xchange\n";
+    print "graph_vlabel Number\n";
+    print "nbofdbc.label NumberOfDBConnections\n";
+    print "nbofdbc.draw LINE1\n";
+    print "nbofajp.label NumberOfOpenAJPSockets\n";
+    print "nbofajp.draw LINE1\n";
+    print "nbofimap.label ManuallyCountedIMAPConnections\n";
+    print "nbofimap.draw LINE1\n";
+    print "nboffile.label OpenFileDescriptorCount\n";
+    print "nboffile.draw LINE1\n";
+    exit 0
+}
+
+### Settings and connection Testing
+
+my $jmx = new JMX::Jmx4Perl(url => $ENV{oxJolokiaUrl},
+user => $ENV{oxJolokiaUser},
+password => $ENV{oxJolokiaPassword});
+
+### test if a connection can be made
+my $request = new JMX::Jmx4Perl::Request({type => AGENT_VERSION});
+my $response = $jmx->request($request);
+if ($response->is_error()){
+	my $status = $response->status();
+	if ($status == 404) {
+		die "Link to servlet might be wrong";
+	}
+	elsif ($status == 401) {
+		die "Credentials to login might be wrong";
+	}
+	else {
+		die "Something went wrong ",$status;
+	}
+}
+
+###
+
+$request = new JMX::Jmx4Perl::Request(READ,
+	"com.openexchange.pooling:name=Overview",
+	"NumConnections");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "nbofdbc.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(READ,
+	"com.openexchange.monitoring:name=GeneralMonitor",
+	"NumberOfOpenAJPSockets");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "nbofdbc.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(READ,
+	"com.openexchange.monitoring:name=GeneralMonitor",
+	"NumberOfIMAPConnections");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "nbofdbc.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(READ,
+	"java.lang:type=OperatingSystem",
+	"OpenFileDescriptorCount");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "nbofdbc.value ",$response->value(),"\n";
+}
+

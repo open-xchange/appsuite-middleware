@@ -1,0 +1,160 @@
+#!/usr/bin/perl
+#%# family=auto
+#%# capabilities=autoconf
+
+use strict;
+use JMX::Jmx4Perl;
+use JMX::Jmx4Perl::Request;   # Type constants are exported here
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+	print "yes\n";
+	exit 0;
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config")
+{
+	print "graph_title Cache objects\n";
+	print "graph_args --base 1000 -l 0\n";
+	print "graph_category Open Xchange\n";
+	print "graph_vlabel Number of objects in caches\n";
+	print "a.label Context\n";
+	print "a.draw LINE1\n";
+    print "b.label Filestore\n";
+    print "b.draw LINE1\n";
+    print "c.label DBPool\n";
+    print "c.draw LINE1\n";
+    print "d.label User\n";
+    print "d.draw LINE1\n";
+    print "e.label UserConfiguration\n";
+    print "e.draw LINE1\n";
+    print "f.label UserSettingMail\n";
+    print "f.draw LINE1\n";
+    print "g.label OXFolder\n";
+    print "g.draw LINE1\n";
+    print "h.label OXFolderQuery\n";
+    print "h.draw LINE1\n";
+    print "i.label IMAP Connection\n";
+    print "i.draw LINE1\n";
+    print "j.label Message\n";
+    print "j.draw LINE1\n";
+    print "k.label Mail Message\n";
+    print "k.draw LINE1\n";
+    print "l.label Mail Connection\n";
+    print "l.draw LINE1\n";
+    print "m.label Calendar\n";
+    print "m.draw LINE1\n";
+    print "n.label Session\n";
+    print "n.draw LINE1\n";
+	exit 0
+}
+									
+
+### Settings and connection Testing
+
+my $jmx = new JMX::Jmx4Perl(url => $ENV{oxJolokiaUrl},
+user => $ENV{oxJolokiaUser},
+password => $ENV{oxJolokiaPassword});
+
+### test if a connection can be made
+my $request = new JMX::Jmx4Perl::Request({type => AGENT_VERSION});
+my $response = $jmx->request($request);
+if ($response->is_error()){
+	my $status = $response->status();
+	if ($status == 404) {
+		die "Link to servlet might be wrong";
+	}
+	elsif ($status == 401) {
+		die "Credentials to login might be wrong";
+	}
+	else {
+		die "Something went wrong ",$status;
+	}
+}
+
+###
+
+$request = new JMX::Jmx4Perl::Request(EXEC,"com.openexchange.caching:name=JCSCacheInformation","getMemoryCacheCount","Context");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "a.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(EXEC,"com.openexchange.caching:name=JCSCacheInformation","getMemoryCacheCount","Filestore");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "b.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(EXEC,"com.openexchange.caching:name=JCSCacheInformation","getMemoryCacheCount","OXDBPoolCache");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "c.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(EXEC,"com.openexchange.caching:name=JCSCacheInformation","getMemoryCacheCount","User");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "d.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(EXEC,"com.openexchange.caching:name=JCSCacheInformation","getMemoryCacheCount","UserConfiguration");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "e.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(EXEC,"com.openexchange.caching:name=JCSCacheInformation","getMemoryCacheCount","UserSettingMail");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "f.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(EXEC,"com.openexchange.caching:name=JCSCacheInformation","getMemoryCacheCount","OXFolderCache");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "g.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(EXEC,"com.openexchange.caching:name=JCSCacheInformation","getMemoryCacheCount","OXFolderQueryCache");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "h.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(EXEC,"com.openexchange.caching:name=JCSCacheInformation","getMemoryCacheCount","OXIMAPConCache");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "i.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(EXEC,"com.openexchange.caching:name=JCSCacheInformation","getMemoryCacheCount","OXMessageCache");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "j.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(EXEC,"com.openexchange.caching:name=JCSCacheInformation","getMemoryCacheCount","MailMessageCache");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "k.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(EXEC,"com.openexchange.caching:name=JCSCacheInformation","getMemoryCacheCount","MailConnectionCache");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "l.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(EXEC,"com.openexchange.caching:name=JCSCacheInformation","getMemoryCacheCount","CalendarCache");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "m.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(EXEC,"com.openexchange.caching:name=JCSCacheInformation","getMemoryCacheCount","SessionCache");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "n.value ",$response->value(),"\n";
+}
+

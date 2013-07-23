@@ -1,0 +1,69 @@
+#!/usr/bin/perl
+#%# family=auto
+#%# capabilities=autoconf
+
+use strict;
+use JMX::Jmx4Perl;
+use JMX::Jmx4Perl::Request;   # Type constants are exported here
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+    if (-e "/opt/open-xchange/bundles/com.openexchange.sessionstorage.hazelcast.jar") {
+        print "yes\n";
+    } else {
+        print "no\n";
+    }
+    exit 0;
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config")
+{
+	print "graph_title Sessions in Storage\n";
+	print "graph_args --base 1000 -l 0\n";
+	print "graph_category Open Xchange\n";
+	print "graph_vlabel Number\n";
+	print "a.label Sessions\n";
+	print "a.draw LINE1\n";
+	exit 0;
+}
+
+### Settings and connection Testing
+
+my $jmx = new JMX::Jmx4Perl(url => $ENV{oxJolokiaUrl},
+user => $ENV{oxJolokiaUser},
+password => $ENV{oxJolokiaPassword});
+
+### test if a connection can be made
+my $request = new JMX::Jmx4Perl::Request({type => AGENT_VERSION});
+my $response = $jmx->request($request);
+if ($response->is_error()){
+	my $status = $response->status();
+	if ($status == 404) {
+		die "Link to servlet might be wrong";
+	}
+	elsif ($status == 401) {
+		die "Credentials to login might be wrong";
+	}
+	else {
+		die "Something went wrong ",$status;
+	}
+}
+
+###
+
+	
+use Data::Dumper;
+
+$request = new JMX::Jmx4Perl::Request(READ,
+	"com.hazelcast:*,name=sessions-*,type=Map",
+	"Size");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	my %hash = %{$response->value()};
+	### "map" with key and value is present, where keys are the returned mbeans
+	foreach my $val (values %hash) {
+		### access Size from here
+		my %innerHash = %{$val};
+		print "a.value ",$innerHash{Size},"\n";
+	}
+}
