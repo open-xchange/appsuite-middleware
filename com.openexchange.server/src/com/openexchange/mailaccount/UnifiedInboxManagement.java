@@ -55,6 +55,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link UnifiedInboxManagement} - Management for Unified Mail accounts.
@@ -190,6 +191,15 @@ public interface UnifiedInboxManagement {
      * @throws OXException If checking Unified Mail account's enabled status fails
      */
     public boolean isEnabled(int userId, int contextId, Connection con) throws OXException;
+
+    /**
+     * Gets the ID of the mail account denoting the Unified Mail account.
+     *
+     * @param session The session
+     * @return The ID of the Unified Mail account or <code>-1</code> if none found
+     * @throws OXException If detecting ID of the Unified Mail account fails
+     */
+    public int getUnifiedINBOXAccountID(Session session) throws OXException;
 
     /**
      * Gets the ID of the mail account denoting the Unified Mail account.
