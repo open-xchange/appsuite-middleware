@@ -840,7 +840,8 @@ public class StatisticTools extends AbstractJMXTools {
                 for (final MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
                     if ("Cluster".equals(type) && "Config".equals(attributeInfo.getName())) {
                         final String value = mbc.getAttribute(mbean.getObjectName(), attributeInfo.getName()).toString();
-                        for (final String keyword : new String[] { "groupConfig=", "properties=", "interfaces=", "tcpIpConfig=" }) {
+                        for (final String keyword : new String[] {
+                            "groupConfig=", "properties=", "interfaces=", "tcpIpConfig=", "multicastConfig=" }) {
                             final int startIdx = value.indexOf(keyword);
                             if (-1 < startIdx && startIdx + keyword.length() < value.length()) {
                                 out.println(objectName + "," + keyword.substring(0, keyword.length() - 1) + " = " + extractTextInBrackets(
