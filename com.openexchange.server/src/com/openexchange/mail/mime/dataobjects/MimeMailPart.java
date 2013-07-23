@@ -573,6 +573,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 }
             } else if (part instanceof MimeMessage) {
                 this.part = part = createMessage(getStreamFromPart(part));
+                multipart = null;
                 contentLoaded = true;
             }
         } catch (final MessagingException e) {
