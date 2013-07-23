@@ -325,6 +325,46 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         }
     }
 
+    @Override
+    public void removeUnrecoverableItems(String secret, Session session) throws OXException {
+        final SubscriptionSource subscriptionSource = getSubscriptionSource();
+        final Set<String> passwordFields = subscriptionSource.getPasswordFields();
+        if (passwordFields.isEmpty()) {
+            return;
+        }
+        final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        final List<Subscription> allSubscriptions = STORAGE.get().getSubscriptionsOfUser(serverSession.getContext(), session.getUserId());
+        final String id = subscriptionSource.getId();
+        final CryptoService cryptoService = CRYPTO_SERVICE.get();
+        
+        List<Subscription> subscriptionsToDelete = new ArrayList<Subscription>(allSubscriptions.size());
+        
+        for (final Subscription subscription : allSubscriptions) {
+            if (id.equals(getSubscriptionSourceId(subscription))) {
+                final Map<String, Object> configuration = subscription.getConfiguration();
+                boolean save = false;
+                for (final String passwordField : passwordFields) {
+                    final String password = (String) configuration.get(passwordField);
+                    if (!isEmpty(password)) {
+                        try {
+                            // If we can already decrypt with the new secret, we're done with this entry
+                            cryptoService.decrypt(password, secret);
+                        } catch (final OXException x) {
+                            // This one needs clean-up
+                            if (!subscriptionsToDelete.contains(subscription)) {
+                                subscriptionsToDelete.add(subscription);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        for (Subscription subscription : subscriptionsToDelete) {
+            unsubscribe(subscription);
+        }
+    }
+
     private static String getSubscriptionSourceId(final Subscription subscription) {
         if (null == subscription) {
             return null;

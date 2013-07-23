@@ -2406,14 +2406,20 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     if (id == MailAccount.DEFAULT_ID) {
                         continue;
                     }
-                    if (null == updateStmt) {
-                        updateStmt = con.prepareStatement(UPDATE_PASSWORD2);
-                        updateStmt.setInt(2, cid);
-                        updateStmt.setInt(4, user);
+                    try {
+                        // If we can decrypt the password with the newSecret, we don't need to do anything about this account
+                        MailPasswordUtil.decrypt(password, secret);
+                    } catch (final GeneralSecurityException x) {
+                        // We couldn't decrypt
+                        if (null == updateStmt) {
+                            updateStmt = con.prepareStatement(UPDATE_PASSWORD2);
+                            updateStmt.setInt(2, cid);
+                            updateStmt.setInt(4, user);
+                        }
+                        updateStmt.setString(1, "");
+                        updateStmt.setInt(3, id);
+                        updateStmt.addBatch();
                     }
-                    updateStmt.setString(1, "");
-                    updateStmt.setInt(3, id);
-                    updateStmt.addBatch();
                 }
             }
             if (null != updateStmt) {
@@ -2438,6 +2444,113 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 Database.back(cid, true, con);
             }
         }
+    }
+    
+    @Override
+    public void removeUnrecoverableItems(String secret, Session session) throws OXException {
+        final int user = session.getUserId();
+        final int cid = session.getContextId();
+        // Clear possible cached MailAccess instances
+        cleanUp(user, cid);
+        // Migrate password
+        Connection con = null;
+        PreparedStatement selectStmt = null;
+        PreparedStatement updateStmt = null;
+        ResultSet rs = null;
+        boolean rollback = false;
+        try {
+            con = Database.get(cid, true);
+            con.setAutoCommit(false); // BEGIN
+            rollback = true;
+            /*
+             * Perform SELECT query
+             */
+            selectStmt = con.prepareStatement(SELECT_PASSWORD1);
+            selectStmt.setInt(1, cid);
+            selectStmt.setInt(2, user);
+            rs = selectStmt.executeQuery();
+            while (rs.next()) {
+                final String password = rs.getString(2);
+                if (!isEmpty(password)) {
+                    final int id = rs.getInt(1);
+                    if (id != MailAccount.DEFAULT_ID) {
+                        try {
+                            // If we can decrypt the password with the newSecret, we don't need to do anything about this account
+                            MailPasswordUtil.decrypt(password, secret);
+                        } catch (final GeneralSecurityException x) {
+                            // We couldn't decrypt
+                            if (null == updateStmt) {
+                                updateStmt = con.prepareStatement(DELETE_MAIL_ACCOUNT);
+                                updateStmt.setInt(1, cid);
+                                updateStmt.setInt(3, user);
+                            }
+                            updateStmt.setInt(2, id);
+                            updateStmt.addBatch();
+                        }
+                    }
+                }
+            }
+            if (null != updateStmt) {
+                updateStmt.executeBatch();
+                DBUtils.closeSQLStuff(updateStmt);
+                updateStmt = null;
+            }
+            /*
+             * Close stuff
+             */
+            DBUtils.closeSQLStuff(rs, selectStmt);
+            /*
+             * Perform other SELECT query
+             */
+            selectStmt = con.prepareStatement(SELECT_PASSWORD2);
+            selectStmt.setInt(1, cid);
+            selectStmt.setInt(2, user);
+            rs = selectStmt.executeQuery();
+            while (rs.next()) {
+                final String password = rs.getString(2);
+                if (!isEmpty(password)) {
+                    final int id = rs.getInt(1);
+                    if (id == MailAccount.DEFAULT_ID) {
+                        continue;
+                    }
+                    try {
+                        // If we can decrypt the password with the newSecret, we don't need to do anything about this account
+                        MailPasswordUtil.decrypt(password, secret);
+                    } catch (final GeneralSecurityException x) {
+                        // We couldn't decrypt
+                        if (null == updateStmt) {
+                            updateStmt = con.prepareStatement(DELETE_TRANSPORT_ACCOUNT);
+                            updateStmt.setInt(1, cid);
+                            updateStmt.setInt(3, user);
+                        }
+                        updateStmt.setInt(2, id);
+                        updateStmt.addBatch();
+                    }
+                }
+            }
+            if (null != updateStmt) {
+                updateStmt.executeBatch();
+                DBUtils.closeSQLStuff(updateStmt);
+                updateStmt = null;
+            }
+            con.commit(); // COMMIT
+            rollback = false;
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
+            DBUtils.closeSQLStuff(rs, selectStmt);
+            DBUtils.closeSQLStuff(updateStmt);
+            if (con != null) {
+                DBUtils.autocommit(con);
+                Database.back(cid, true, con);
+            }
+        }    
+        cleanUp(user, cid);
     }
 
     private void cleanUp(final int user, final int cid) {

@@ -84,6 +84,11 @@ public abstract class AbstractFileStorageAccountManager implements FileStorageAc
     }
 
     @Override
+    public void removeUnrecoverableItems(String secret, Session session) throws OXException {
+        // Nope
+    }
+
+    @Override
     public boolean hasEncryptedItems(final Session session) throws OXException {
         return false;
     }
