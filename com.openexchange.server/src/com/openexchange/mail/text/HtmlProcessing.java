@@ -85,6 +85,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.HashUtility;
@@ -902,7 +903,7 @@ public final class HtmlProcessing {
         return reval;
     }
 
-    private static boolean replaceImgSrc(final Session session, final MailPath msgUID, final String imgTag, final StringBuilder cidBuffer, final StringBuilder linkBuilder) {
+    private static boolean replaceImgSrc(final Session session, final MailPath msgUID, final String imgTag, final StringBuilder cidBuffer, final StringBuilder linkBuilder) throws OXException {
         boolean retval = false;
         final Matcher cidMatcher = CID_PATTERN.matcher(imgTag);
         final MatcherReplacer cidReplacer = new MatcherReplacer(cidMatcher, imgTag);
@@ -925,13 +926,16 @@ public final class HtmlProcessing {
                     // Check mail identifier
                     String mailId = msgUID.getMailID();
                     if (mailId.indexOf('%') >= 0) {
-                        String tmp = AJAXServlet.decodeUrl(mailId, null);
-                        if (tmp.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
-                            // Expect mail path; e.g. "default0/INBOX/123"
-                            try {
-                                mailId = new MailPath(tmp).getMailID();
-                            } catch (OXException e) {
-                                // Ignore
+                        final int unifiedINBOXAccountID = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class).getUnifiedINBOXAccountID(session);
+                        if (unifiedINBOXAccountID < 0 || msgUID.getAccountId() != unifiedINBOXAccountID) {
+                            String tmp = AJAXServlet.decodeUrl(mailId, null);
+                            if (tmp.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+                                // Expect mail path; e.g. "default0/INBOX/123"
+                                try {
+                                    mailId = new MailPath(tmp).getMailID();
+                                } catch (OXException e) {
+                                    // Ignore
+                                }
                             }
                         }
                     }

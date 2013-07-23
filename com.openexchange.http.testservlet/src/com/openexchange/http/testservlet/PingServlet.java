@@ -47,59 +47,55 @@
  *
  */
 
-package com.openexchange.capabilities.json.osgi;
+package com.openexchange.http.testservlet;
 
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.Capability;
-import com.openexchange.capabilities.CapabilityFilter;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.capabilities.json.Capability2JSON;
-import com.openexchange.capabilities.json.CapabilityActionFactory;
-import com.openexchange.groupware.userconfiguration.AvailabilityChecker;
-import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.groupware.userconfiguration.TrackerAvailabilityChecker;
-import com.openexchange.passwordchange.PasswordChangeService;
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
- * {@link CapabilitiesJSONActivator}
+ * {@link PingServlet} - Default TestServlet for basic server tests.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CapabilitiesJSONActivator extends AJAXModuleActivator {
+public class PingServlet extends HttpServlet {
 
-    private volatile AvailabilityChecker editPasswordChecker;
+    private static final long serialVersionUID = -4037317824217606661L;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CapabilityService.class };
+    /**
+     * Default constructor.
+     */
+    public PingServlet() {
+        super();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        final AvailabilityChecker editPasswordChecker = TrackerAvailabilityChecker.getAvailabilityCheckerFor(PasswordChangeService.class, false, context);
-        this.editPasswordChecker = editPasswordChecker;
-        final String editPasswordName = Permission.EDIT_PASSWORD.name().toLowerCase();
-        final CapabilityFilter capabilityFilter = new CapabilityFilter() {
-
-            @Override
-            public boolean accept(final Capability capability) {
-                return (!editPasswordName.equals(capability.getId()) || editPasswordChecker.isAvailable());
-            }
-        };
-
-        registerService(ResultConverter.class, new Capability2JSON());
-        registerModule(new CapabilityActionFactory(this, capabilityFilter), "capabilities");
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        // Create a new HttpSession if it's missing
+        req.getSession(true);
+        super.service(req, resp);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected void stopBundle() throws Exception {
-        final AvailabilityChecker editPasswordChecker = this.editPasswordChecker;
-        if (null != editPasswordChecker) {
-            editPasswordChecker.close();
-            this.editPasswordChecker = null;
-        }
-        super.stopBundle();
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        final StringBuilder page = new StringBuilder(1024);
+        page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
+        page.append("<html>\n");
+        page.append("<head><title>TestServlet's doGet Page</title></head>\n");
+        page.append("<body>\n");
+        page.append("<h1>Ping</h1><hr/>\n");
+        page.append("<p>Open-Xchange Ping</p>\n");
+        page.append("</body>\n</html>");
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType("text/html; charset=UTF-8");
+        final byte[] output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
+        resp.setContentLength(output.length);
+        resp.getOutputStream().write(output);
     }
 
 }

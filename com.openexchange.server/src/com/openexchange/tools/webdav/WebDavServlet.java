@@ -56,6 +56,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.RateLimitedException;
@@ -233,15 +234,19 @@ public abstract class WebDavServlet extends HttpServlet {
 
     /**
      * Increments the number of requests to servlet at the very beginning of {@link #service(HttpServletRequest, HttpServletResponse)
-     * service} method
+     * service} method. Default implementation uses type {@link MonitoringInfo#WEBDAV_USER}, override if applicable.
      */
-    protected abstract void incrementRequests();
+    protected void incrementRequests() {
+        MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.WEBDAV_USER);
+    }
 
     /**
      * Decrements the number of requests to servlet at the very end of {@link #service(HttpServletRequest, HttpServletResponse) service}
-     * method
+     * method. Default implementation uses type {@link MonitoringInfo#WEBDAV_USER}, override if applicable.
      */
-    protected abstract void decrementRequests();
+    protected void decrementRequests() {
+        MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.WEBDAV_USER);
+    }
 
     /**
      * Status code (207) indicating that the returned content contains XML for WebDAV.

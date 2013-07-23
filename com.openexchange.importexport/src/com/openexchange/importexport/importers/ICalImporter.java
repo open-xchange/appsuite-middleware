@@ -55,6 +55,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TObjectProcedure;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -81,6 +82,8 @@ import com.openexchange.groupware.calendar.CalendarField;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -392,6 +395,10 @@ public class ICalImporter extends AbstractImporter {
 				}
 				// Check for possible full-time appointment
 				check4FullTime(appointmentObj);
+				/*
+				 * ensure there is at least one internal participant
+				 */
+				addUserParticipantIfNeeded(session, folder, appointmentObj);
 				try {
 					final boolean isMaster = appointmentObj.containsUid() && !pos2Master.containsKey(index);
 					final boolean isChange = appointmentObj.containsUid() && pos2Master.containsKey(index);
@@ -637,5 +644,39 @@ public class ICalImporter extends AbstractImporter {
 		return String.valueOf(id);
 
 	}
+
+    /**
+     * Adds the user (or the owner of the shared folder) to the list of participants if needed, i.e. the appointment not yet has any
+     * internal user participants.
+     *
+     * @param session The session
+     * @param targetFolder The target folder
+     * @param appointment The appointment to add the participant if needed
+     * @return <code>true</code> if the participant was added, <code>false</code>, otherwise
+     */
+    private static boolean addUserParticipantIfNeeded(ServerSession session, FolderObject targetFolder, Appointment appointment) {
+        Participant[] currentParticipants = appointment.getParticipants();
+        boolean containsInternalParticpiant = false;
+        if (null != currentParticipants && 0 < currentParticipants.length) {
+            for (Participant participant : appointment.getParticipants()) {
+                if (Participant.GROUP == participant.getType() || Participant.RESOURCE == participant.getType() ||
+                    Participant.USER == participant.getType() || Participant.RESOURCEGROUP == participant.getType()) {
+                    containsInternalParticpiant = true;
+                    break;
+                }
+            }
+        }
+        if (false == containsInternalParticpiant) {
+            UserParticipant userParticipant = new UserParticipant(
+                FolderObject.SHARED == targetFolder.getType() ? targetFolder.getCreatedBy() : session.getUserId());
+            userParticipant.setConfirm(Appointment.ACCEPT);
+            Participant[] newParticipants = null == currentParticipants ?
+                new Participant[1] : Arrays.copyOf(currentParticipants, 1 + currentParticipants.length);
+            newParticipants[newParticipants.length - 1] = userParticipant;
+            appointment.setParticipants(newParticipants);
+            return true;
+        }
+        return false;
+    }
 
 }

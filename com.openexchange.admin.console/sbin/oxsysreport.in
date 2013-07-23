@@ -91,7 +91,7 @@ FILES_DIRS="
 /etc/*apache*
 "
 
-PROCS='showruntimestats -a;showruntimestats -A -a;route -n;ps faux;df;mount;netstat -putane;free;report -d;listbundles;listservices'
+PROCS='showruntimestats -a;showruntimestats -A -a;route -n;ps faux;top -bHn 1;dmesg;df;mount;netstat -putane;free;report -d;listbundles;listservices'
 
 MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
 LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:'

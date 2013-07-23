@@ -104,7 +104,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 
         UIVersion.UIVERSION = context.getBundle().getVersion().toString();
 
-        final AvailabilityChecker editPasswordChecker = TrackerAvailabilityChecker.getAvailabilityCheckerFor(PasswordChangeService.class, true, context);
+        final AvailabilityChecker editPasswordChecker = TrackerAvailabilityChecker.getAvailabilityCheckerFor(PasswordChangeService.class, false, context);
         this.editPasswordChecker = editPasswordChecker;
         final String editPasswordName = Permission.EDIT_PASSWORD.name().toLowerCase();
         final CapabilityFilter capabilityFilter = new CapabilityFilter() {
