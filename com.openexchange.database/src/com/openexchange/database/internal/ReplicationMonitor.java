@@ -208,7 +208,7 @@ public final class ReplicationMonitor {
             poolId = assign.getWritePoolId();
             if (active && poolId != assign.getReadPoolId() && !usedAsRead && Constants.CONFIGDB_WRITE_ID != poolId) {
                 increaseTransactionCounter(assign, con);
-            } else if (active && poolId != assign.getReadPoolId() && !assign.isTransactionInitialized()) {
+            } else if (active && poolId != assign.getReadPoolId() && Constants.CONFIGDB_WRITE_ID != poolId && !assign.isTransactionInitialized()) {
                 try {
                     assign.setTransaction(readTransaction(con, assign.getContextId()));
                 } catch (OXException e) {
