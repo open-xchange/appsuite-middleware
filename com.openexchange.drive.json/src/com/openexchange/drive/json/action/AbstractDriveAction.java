@@ -50,6 +50,7 @@
 package com.openexchange.drive.json.action;
 
 import java.util.Locale;
+import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -59,6 +60,7 @@ import com.openexchange.drive.json.internal.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -102,6 +104,19 @@ public abstract class AbstractDriveAction implements AJAXActionService {
          * perform
          */
         return doPerform(requestData, session);
+    }
+
+    /**
+     * Enables an unlimited body size by setting the maximum body size in the underlying {@link CountingHttpServletRequest} to
+     * <code>-1</code>.
+     *
+     * @param requestData The AJAX request data
+     */
+    protected void enableUnlimitedBodySize(AJAXRequestData requestData) {
+        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
+        if (null != servletRequest && CountingHttpServletRequest.class.isInstance(servletRequest)) {
+            ((CountingHttpServletRequest)servletRequest).setMax(-1);
+        }
     }
 
 }

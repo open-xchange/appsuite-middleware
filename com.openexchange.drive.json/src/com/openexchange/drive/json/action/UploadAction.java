@@ -78,6 +78,10 @@ public class UploadAction extends AbstractDriveAction {
     @Override
     public AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException {
         /*
+         * no limits for upload
+         */
+        enableUnlimitedBodySize(requestData);
+        /*
          * get parameters
          */
         String rootFolderID = requestData.getParameter("root");
