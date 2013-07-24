@@ -55,6 +55,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -77,6 +79,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
@@ -234,6 +237,14 @@ public final class HtmlProcessing {
             }
         }
         return retval;
+    }
+
+    private static String getMarkerFor(final Session session) throws URISyntaxException {
+        final StringAllocator sb = new StringAllocator(64);
+        sb.append(Strings.getLineSeparator());
+        sb.append("<!-- ").append(new URI("ox", session.getLogin(), "open-xchange.com", 57462, null, null, null).toString()).append(" -->");
+        sb.append(Strings.getLineSeparator());
+        return sb.toString();
     }
 
     private static volatile Boolean useSanitize;
