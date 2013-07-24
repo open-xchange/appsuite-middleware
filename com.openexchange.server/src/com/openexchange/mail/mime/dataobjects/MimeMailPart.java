@@ -979,7 +979,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                         throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                     } catch (final ClassCastException e) {
                         // Cast to javax.mail.Multipart failed
-                        LOG.warn(new com.openexchange.java.StringAllocator(256).append(
+                        LOG.debug(new com.openexchange.java.StringAllocator(256).append(
                             "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
                             e.getMessage()).toString());
                         throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
