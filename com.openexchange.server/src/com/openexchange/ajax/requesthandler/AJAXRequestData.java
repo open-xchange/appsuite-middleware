@@ -1315,8 +1315,9 @@ public class AJAXRequestData {
      * @return The state
      */
     public AJAXState getState() {
+        AJAXState state = this.state;
         if (state == null) {
-            state = new AJAXState();
+            state = this.state = new AJAXState();
         }
         return state;
     }
