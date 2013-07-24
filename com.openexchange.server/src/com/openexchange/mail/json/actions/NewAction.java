@@ -56,6 +56,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -114,10 +115,12 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 responseDescription = "Object ID of the newly created/moved mail.")
 public final class NewAction extends AbstractMailAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(NewAction.class));
-
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(NewAction.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    private static final String FLAGS = MailJSONField.FLAGS.getKey();
+    private static final String FROM = MailJSONField.FROM.getKey();
+    private static final String UPLOAD_FORMFIELD_MAIL = AJAXServlet.UPLOAD_FORMFIELD_MAIL;
 
     /**
      * Initializes a new {@link NewAction}.
@@ -132,7 +135,7 @@ public final class NewAction extends AbstractMailAction {
         final AJAXRequestData request = req.getRequest();
         final List<OXException> warnings = new ArrayList<OXException>();
         try {
-            if (request.hasUploads() || request.getParameter(AJAXServlet.UPLOAD_FORMFIELD_MAIL) != null) {
+            if (request.hasUploads() || request.getParameter(UPLOAD_FORMFIELD_MAIL) != null) {
                 return performWithUploads(req, request, warnings);
             }
             return performWithoutUploads(req, warnings);
@@ -152,9 +155,9 @@ public final class NewAction extends AbstractMailAction {
         {
             final JSONObject jMail;
             {
-                final String json0 = uploadEvent.getFormField(AJAXServlet.UPLOAD_FORMFIELD_MAIL);
+                final String json0 = uploadEvent.getFormField(UPLOAD_FORMFIELD_MAIL);
                 if (json0 == null || json0.trim().length() == 0) {
-                    throw MailExceptionCode.PROCESSING_ERROR.create(MailExceptionCode.MISSING_PARAM.create(AJAXServlet.UPLOAD_FORMFIELD_MAIL), new Object[0]);
+                    throw MailExceptionCode.PROCESSING_ERROR.create(MailExceptionCode.MISSING_PARAM.create(UPLOAD_FORMFIELD_MAIL), new Object[0]);
                 }
                 jMail = new JSONObject(json0);
             }
@@ -165,7 +168,7 @@ public final class NewAction extends AbstractMailAction {
              */
             final InternetAddress from;
             try {
-                String value = jMail.getString(MailJSONField.FROM.getKey());
+                String value = jMail.getString(FROM);
                 final int endPos;
                 if (value.length() > 0 && '[' == value.charAt(0) && (endPos = value.indexOf(']', 1)) < value.length()) {
                     value = new com.openexchange.java.StringAllocator(32).append("\"[").append(value.substring(1, endPos)).append("]\"").append(value.substring(endPos+1)).toString();
@@ -187,7 +190,7 @@ public final class NewAction extends AbstractMailAction {
                 accountId = MailAccount.DEFAULT_ID;
             }
             final MailServletInterface mailInterface = getMailInterface(req);
-            if (jMail.hasAndNotNull(MailJSONField.FLAGS.getKey()) && (jMail.getInt(MailJSONField.FLAGS.getKey()) & MailMessage.FLAG_DRAFT) > 0) {
+            if ((jMail.optInt(FLAGS, 0) & MailMessage.FLAG_DRAFT) > 0) {
                 /*
                  * ... and save draft
                  */
