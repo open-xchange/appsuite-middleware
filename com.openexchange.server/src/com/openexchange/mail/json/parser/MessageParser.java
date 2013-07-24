@@ -421,24 +421,26 @@ public final class MessageParser {
                 if (jsonObj.hasAndNotNull(MailJSONField.ATTACHMENTS.getKey())) {
                     final JSONArray attachmentArray = jsonObj.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
                     /*
-                     * Parse body text
+                     * Parse body text (the first array element)
                      */
-                    final JSONObject tmp = attachmentArray.getJSONObject(0);
-                    final String sContent = tmp.getString(MailJSONField.CONTENT.getKey());
-                    final TextBodyMailPart part = provider.getNewTextBodyPart(sContent);
-                    final String contentType = parseContentType(tmp.getString(MailJSONField.CONTENT_TYPE.getKey()));
-                    part.setContentType(contentType);
-                    if (contentType.startsWith("text/plain") && tmp.hasAndNotNull("raw") && tmp.getBoolean("raw")) {
-                        part.setPlainText(sContent);
+                    final String sContent;
+                    {
+                        final JSONObject tmp = attachmentArray.getJSONObject(0);
+                        sContent = tmp.getString(MailJSONField.CONTENT.getKey());
+                        final TextBodyMailPart part = provider.getNewTextBodyPart(sContent);
+                        final String contentType = parseContentType(tmp.getString(MailJSONField.CONTENT_TYPE.getKey()));
+                        part.setContentType(contentType);
+                        if (contentType.startsWith("text/plain") && tmp.hasAndNotNull("raw") && tmp.getBoolean("raw")) {
+                            part.setPlainText(sContent);
+                        }
+                        transportMail.setContentType(part.getContentType());
+                        // Add text part
+                        attachmentHandler.setTextPart(part);
                     }
-                    transportMail.setContentType(part.getContentType());
-                    // Add text part
-                    attachmentHandler.setTextPart(part);
                     /*
                      * Parse referenced parts
                      */
-                    final int len = attachmentArray.length();
-                    if (len > 1) {
+                    if (attachmentArray.length() > 1) {
                         final Set<String> contentIds = extractContentIds(sContent);
                         parseReferencedParts(provider, session, accountId, transportMail.getMsgref(), attachmentHandler, attachmentArray, contentIds, prepare4Transport);
                     }
@@ -675,8 +677,7 @@ public final class MessageParser {
             ManagedFileManagement management = null;
             NextAttachment: for (int i = 1; i < len; i++) {
                 final JSONObject attachment = attachmentArray.getJSONObject(i);
-                final String seqId =
-                    attachment.hasAndNotNull(MailListField.ID.getKey()) ? attachment.getString(MailListField.ID.getKey()) : null;
+                final String seqId = attachment.optString(MailListField.ID.getKey(), null);
                 if (null == seqId && attachment.hasAndNotNull(MailJSONField.CONTENT.getKey())) {
                     /*
                      * A direct attachment, as data part
