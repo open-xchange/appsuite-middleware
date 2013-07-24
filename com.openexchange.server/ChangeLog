@@ -8,7 +8,7 @@
 
 * 2013-07-25 - marcus.klein@open-xchange.com
 
- - Fix for bug 26607: Optimized JMX queries for certain MBeans and removed multi threading.
+ - Fix for bug 26607: Optimized JMX queries for certain MBeans using object names and removed multi threading.
 
 * 2013-07-25 - thorben.betten@open-xchange.com
 
