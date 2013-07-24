@@ -57,7 +57,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -70,6 +72,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.DistributedFileManagement;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
+import com.openexchange.filemanagement.ManagedFileFilter;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -305,12 +308,12 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
     }
     
     @Override
-    public ManagedFile createManagedFile(String id, InputStream inputStream) throws OXException {
+    public ManagedFile createManagedFile(final String id, final InputStream inputStream) throws OXException {
         return createManagedFile0(id, inputStream, true, null);
     }
 
     @Override
-    public ManagedFile createManagedFile(InputStream inputStream, String optExtension) throws OXException {
+    public ManagedFile createManagedFile(final InputStream inputStream, final String optExtension) throws OXException {
         return createManagedFile0(null, inputStream, true, optExtension);
     }
 
@@ -368,7 +371,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         } while (!tmpDirReference.compareAndSet(directory, directory)); // Directory changed in the meantime
         files.put(mf.getID(), mf);
 
-        DistributedFileManagement distributed = getDistributed();
+        final DistributedFileManagement distributed = getDistributed();
         if (distributed != null && !distributed.exists(id)) {
             distributed.register(id);
         }
@@ -377,8 +380,8 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
     }
     
     @Override
-    public boolean containsLocal(String id) {
-        ManagedFile mf = files.get(id);
+    public boolean containsLocal(final String id) {
+        final ManagedFile mf = files.get(id);
         if (null == mf || mf.isDeleted()) {
             return false;
         }
@@ -396,7 +399,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         return true;
     }
     
-    private boolean containsDistributed(String id) {
+    private boolean containsDistributed(final String id) {
         if (getDistributed() == null) {
             return false;
         }
@@ -406,11 +409,30 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
                 getDistributed().touch(id);
                 return true;
             }
-        } catch (OXException e) {
+        } catch (final OXException e) {
             return false;
         }
 
         return false;
+    }
+
+    @Override
+    public List<ManagedFile> getManagedFiles() throws OXException {
+        return getManagedFiles(null);
+    }
+
+    @Override
+    public List<ManagedFile> getManagedFiles(final ManagedFileFilter filter) throws OXException {
+        if (null == filter) {
+            return new ArrayList<ManagedFile>(files.values());
+        }
+        final List<ManagedFile> list = new ArrayList<ManagedFile>(files.size());
+        for (final ManagedFile managedFile : files.values()) {
+            if (filter.accept(managedFile)) {
+                list.add(managedFile);
+            }
+        }
+        return list;
     }
 
     @Override
@@ -429,7 +451,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         return mf;
     }
 
-    private ManagedFile getByIDDistributed(String id) {
+    private ManagedFile getByIDDistributed(final String id) {
         if (getDistributed() == null) {
             return null;
         }
@@ -440,7 +462,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
             }
 
             return createManagedFile(id, getDistributed().get(id));
-        } catch (OXException e) {
+        } catch (final OXException e) {
             return null;
         }
 
@@ -474,21 +496,21 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
                     getDistributed().unregister(id);
                 }
             }
-        } catch (OXException e) {
+        } catch (final OXException e) {
             // Do nothing.
         } finally {
             files.remove(mf.getID());
         }
     }
     
-    private void removeByIDDistributed(String id) {
+    private void removeByIDDistributed(final String id) {
         if (getDistributed() == null) {
             return;
         }
         
         try {
             getDistributed().remove(id);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             // Do nothing.
         }
     }
@@ -497,7 +519,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         if (getDistributed() != null) {
             try {
                 getDistributed().unregister(id);
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 // Do nothing.
             }
         }
@@ -561,7 +583,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
     }
     
     private DistributedFileManagement getDistributed() {
-        DistributedFileManagement service = ServerServiceRegistry.getInstance().getService(DistributedFileManagement.class);
+        final DistributedFileManagement service = ServerServiceRegistry.getInstance().getService(DistributedFileManagement.class);
         return service;
     }
 

@@ -51,6 +51,7 @@ package com.openexchange.filemanagement;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.List;
 import com.openexchange.exception.OXException;
 
 /**
@@ -156,6 +157,23 @@ public interface ManagedFileManagement {
      * @throws OXException If a new managed file cannot be created from specified content
      */
     public ManagedFile createManagedFile(byte[] bytes) throws OXException;
+
+    /**
+     * Gets all currently (<i>locally</i>) stored managed files.
+     * 
+     * @return All managed files
+     * @throws OXException If listing all managed files fails
+     */
+    public List<ManagedFile> getManagedFiles() throws OXException;
+
+    /**
+     * Gets those currently (<i>locally</i>) stored managed files that satisfy specified filter (if not <code>null</code>)
+     * 
+     * @param filter The optional filter
+     * @return The filtered managed files
+     * @throws OXException If returning managed files fails
+     */
+    public List<ManagedFile> getManagedFiles(ManagedFileFilter filter) throws OXException;
 
     /**
      * Gets an existing managed file by its unique ID and updates its last-accessed time stamp if found.
