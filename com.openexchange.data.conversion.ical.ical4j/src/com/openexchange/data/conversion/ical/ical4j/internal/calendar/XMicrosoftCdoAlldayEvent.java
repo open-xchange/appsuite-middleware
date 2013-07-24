@@ -49,104 +49,61 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
-import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDate;
-import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDateTime;
-import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.parseDateConsideringDateType;
-
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DateProperty;
-import net.fortuna.ical4j.model.property.DtEnd;
 import net.fortuna.ical4j.model.property.DtStart;
-
+import net.fortuna.ical4j.model.property.XProperty;
+import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 
 /**
- *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link XMicrosoftCdoAlldayEvent}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public final class End<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
+public class XMicrosoftCdoAlldayEvent<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T, U> {
 
-    public End() {
-        super();
+    public static final String property = "X-MICROSOFT-CDO-ALLDAYEVENT";
+
+    @Override
+    public boolean isSet(U calendar) {
+        if (calendar instanceof Appointment) {
+            return ((Appointment) calendar).getFullTime();
+        }
+        return false;
     }
 
     @Override
-    public void emit(final Mode mode, final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
-        final DtEnd end = new DtEnd();
-        String tz = EmitterTools.extractTimezoneIfPossible(calendar);
-        final net.fortuna.ical4j.model.Date date = (needsDate(calendar)) ? toDate(calendar.getEndDate(),tz) : toDateTime(mode.getZoneInfo(), calendar.getEndDate(),tz);
-        end.setDate(date);
-        component.getProperties().add(end);
-    }
-
-    private boolean needsDate(final U calendar) {
-        return Appointment.class.isAssignableFrom(calendar.getClass()) && ((Appointment)calendar).getFullTime();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean hasProperty(final T component) {
-        return null != component.getProperty(Property.DTEND);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isSet(final U calendar) {
-        return calendar.containsEndDate();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void parse(final int index, final T component, final U calendar, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
-        if (!overrideFullTimeSetting(component, calendar)) {
-            calendar.setEndDate(parseDateConsideringDateType(component, new DtEnd(), timeZone));
+    public void emit(Mode mode, int index, U calendar, T component, List<ConversionWarning> warnings, Context ctx, Object... args) throws ConversionError {
+        if (calendar instanceof Appointment) {
+            if (((Appointment) calendar).getFullTime()) {
+                component.getProperties().add(new XProperty("X-MICROSOFT-CDO-ALLDAYEVENT", "TRUE"));
+            }
         }
     }
-    
 
+    @Override
+    public boolean hasProperty(T component) {
+        return component.getProperty(property) != null;
+    }
 
-    /**
-     * Overrides fulltime setting depending on Exchange Property: X-MICROSOFT-CDO-ALLDAYEVENT
-     * 
-     * @param component
-     * @param calendar
-     */
-    private boolean overrideFullTimeSetting(T component, U calendar) {
-        boolean retval = false;
-        
-        DtEnd dtEnd = new DtEnd();
-        Property msAllDay = component.getProperty(XMicrosoftCdoAlldayEvent.property);
-        if (msAllDay != null && msAllDay.getValue().equalsIgnoreCase("true")) {
-            DateProperty dateProperty = (DateProperty)component.getProperty(dtEnd.getName());
-            Date e = new Date(dateProperty.getDate().getTime() + dateProperty.getTimeZone().getOffset(dateProperty.getDate().getTime()));
-            calendar.setEndDate(e);
-            
+    @Override
+    public void parse(int index, T component, U calendar, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
+        if (component.getProperty(property).getValue().equalsIgnoreCase("true")) {
             if (calendar instanceof Appointment) {
                 Appointment appointment = (Appointment) calendar;
                 appointment.setFullTime(true);
             }
-            
-            retval = true;
         }
-        
-        return retval;
     }
 
 }

@@ -76,6 +76,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Sequence;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Start;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Title;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Uid;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.XMicrosoftCdoAlldayEvent;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.groupware.container.Appointment;
 
@@ -105,6 +106,8 @@ public final class AppointmentConverters {
     private static AbstractVerifyingAttributeConverter<VEvent, Appointment> verifyingStart = new Start<VEvent, Appointment>();
 
     private static AttributeConverter<VEvent, Appointment> end = new End<VEvent, Appointment>();
+    
+    private static AttributeConverter<VEvent, Appointment> xMicrosoftCdoAlldayEvent = new XMicrosoftCdoAlldayEvent<VEvent, Appointment>();
 
     private static AttributeConverter<VEvent, Appointment> duration = new Duration<VEvent, Appointment>();
 
@@ -185,6 +188,7 @@ public final class AppointmentConverters {
         tmp.add(createdBy);
         tmp.add(sequence);
         tmp.add(participants);
+        tmp.add(xMicrosoftCdoAlldayEvent);
 
         return tmp;
     }
@@ -211,6 +215,7 @@ public final class AppointmentConverters {
         tmp.add(createdBy);
         tmp.add(sequence);
         tmp.add(requestParticipants);
+        tmp.add(xMicrosoftCdoAlldayEvent);
 
         return tmp;
     }
@@ -237,6 +242,7 @@ public final class AppointmentConverters {
         tmp.add(createdBy);
         tmp.add(sequence);
         tmp.add(replyParticipants);
+        tmp.add(xMicrosoftCdoAlldayEvent);
 
         return tmp;
     }
@@ -263,6 +269,7 @@ public final class AppointmentConverters {
         tmp.add(createdBy);
         tmp.add(sequence);
         tmp.add(participants);
+        tmp.add(xMicrosoftCdoAlldayEvent);
 
         return tmp;
     }

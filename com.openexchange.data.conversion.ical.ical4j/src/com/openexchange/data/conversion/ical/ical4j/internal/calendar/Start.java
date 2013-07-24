@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.property.DateProperty;
 import net.fortuna.ical4j.model.property.DtStart;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
@@ -104,6 +105,10 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
 
     @Override
     public void parse(final int index, final T component, final U calendar,        final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
+        if (overrideFullTimeSetting(component, calendar)) {
+            return;
+        }
+
         final DtStart dtStart = new DtStart();
         final boolean isDateTime = isDateTime(component, dtStart);
         final TimeZone UTC = TimeZone.getTimeZone("UTC");
@@ -136,5 +141,33 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
             final Appointment appointment = (Appointment) calendar;
             appointment.setFullTime(true);
         }
+    }
+
+    /**
+     * Overrides fulltime setting depending on Exchange Property: X-MICROSOFT-CDO-ALLDAYEVENT
+     * 
+     * @param component
+     * @param calendar
+     */
+    private boolean overrideFullTimeSetting(T component, U calendar) {
+        boolean retval = false;
+        
+        DtStart dtStart = new DtStart();
+        Property msAllDay = component.getProperty(XMicrosoftCdoAlldayEvent.property);
+        if (msAllDay != null && msAllDay.getValue().equalsIgnoreCase("true")) {
+            DateProperty dateProperty = (DateProperty)component.getProperty(dtStart.getName());
+            Date s = new Date(dateProperty.getDate().getTime() + dateProperty.getTimeZone().getOffset(dateProperty.getDate().getTime()));
+            calendar.setStartDate(s);
+            calendar.setEndDate(s);
+            
+            if (calendar instanceof Appointment) {
+                Appointment appointment = (Appointment) calendar;
+                appointment.setFullTime(true);
+            }
+            
+            retval = true;
+        }
+        
+        return retval;
     }
 }
