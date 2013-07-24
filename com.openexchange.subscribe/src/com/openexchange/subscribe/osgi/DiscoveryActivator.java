@@ -69,6 +69,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.SecretEncryptionFactoryService;
+import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.subscribe.AbstractSubscribeService;
@@ -152,6 +153,7 @@ public class DiscoveryActivator extends HousekeepingActivator {
 
         final SubscriptionSecretHandling secretHandling = new SubscriptionSecretHandling(discoveryCollector);
         registerService(EncryptedItemDetectorService.class, secretHandling);
+        registerService(EncryptedItemCleanUpService.class, secretHandling);
         registerService(SecretMigrator.class, secretHandling);
     }
 
