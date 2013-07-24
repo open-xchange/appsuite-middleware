@@ -146,12 +146,12 @@ public class StatisticTools extends AbstractJMXTools {
             count++;
         }
         if (null != parser.getOptionValue(this.runtimestats) && 0 == count) {
-            System.out.print(getStats(mbc, "sun.management.RuntimeImpl"));
+            System.out.print(getStats(mbc, "java.lang:type=Runtime"));
             System.out.print(showMemoryPoolData(mbc));
             count++;
         }
         if (null != parser.getOptionValue(this.osstats) && 0 == count) {
-            System.out.print(getStats(mbc, "com.sun.management.UnixOperatingSystem"));
+            System.out.print(getStats(mbc, "java.lang:type=OperatingSystem"));
             count++;
         }
         if (null != parser.getOptionValue(this.threadingstats) && 0 == count) {
@@ -178,8 +178,8 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(showOXData(mbc));
             System.out.print(getStats(mbc, "com.openexchange.sessiond", "name", "SessionD Toolkit"));
             System.out.print(showThreadPoolData(mbc));
-            System.out.print(getStats(mbc, "com.sun.management.UnixOperatingSystem"));
-            System.out.print(getStats(mbc, "sun.management.RuntimeImpl"));
+            System.out.print(getStats(mbc, "java.lang:type=OperatingSystem"));
+            System.out.print(getStats(mbc, "java.lang:type=Runtime"));
             System.out.print(showMemoryPoolData(mbc));
             System.out.print(showSysThreadingData(mbc));
             System.out.print(showGrizzlyData(mbc));
@@ -413,28 +413,27 @@ public class StatisticTools extends AbstractJMXTools {
             NeededQuadState.notneeded);
     }
 
-    static String showMemoryPoolData(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
-        return getStats(mbc, ManagementFactory.getMemoryPoolMXBeans().get(0).getClass().getName()).toString();
+    static String showMemoryPoolData(MBeanServerConnection con) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
+        return getStats(con, "java.lang:type=MemoryPool,name=*").toString();
     }
 
-    static String showSysThreadingData(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
-        return getStats(mbc, ManagementFactory.getThreadMXBean().getClass().getName()).toString();
+    static String showSysThreadingData(final MBeanServerConnection con) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
+        return getStats(con, "java.lang:type=Threading").toString();
     }
 
-    private static String showOXData(MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
+    private static String showOXData(MBeanServerConnection con) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
         StringBuilder sb = new StringBuilder();
-        sb.append(getStats(mbc, "com.openexchange.admin.monitoring.Monitor"));
-        sb.append(getStats(mbc, "com.openexchange.ajp13.monitoring.AJPv13ServerThreadsMonitor"));
-        sb.append(getStats(mbc, "com.openexchange.ajp13.watcher.AJPv13TaskMonitor"));
-        sb.append(getStats(mbc, "com.openexchange.monitoring.internal.GeneralMonitor"));
-        sb.append(getStats(mbc, "com.openexchange.api2.MailInterfaceMonitor"));
-        sb.append(getStats(mbc, "com.openexchange.database.internal.ConnectionPool"));
-        sb.append(getStats(mbc, "com.openexchange.database.internal.Overview"));
+        sb.append(getStats(con, "com.openexchange.admin.monitor:name=CallMonitor"));
+        sb.append(getStats(con, "com.openexchange.monitoring:name=AJPv13ServerThreadsMonitor"));
+        sb.append(getStats(con, "com.openexchange.monitoring:name=AJPv13TaskMonitor"));
+        sb.append(getStats(con, "com.openexchange.monitoring:name=GeneralMonitor"));
+        sb.append(getStats(con, "com.openexchange.monitoring:name=MailInterfaceMonitor"));
+        sb.append(getStats(con, "com.openexchange.pooling:name=*"));
         return sb.toString();
     }
 
-    static String showThreadPoolData(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {
-        return getStats(mbc, "com.openexchange.threadpool.internal.ThreadPoolInformation").toString();
+    static String showThreadPoolData(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
+        return getStats(mbc, "com.openexchange.threadpool:name=ThreadPoolInformation").toString();
     }
 
     static String showOperations(final MBeanServerConnection mbc) throws IOException, InstanceNotFoundException, IntrospectionException, ReflectionException {
