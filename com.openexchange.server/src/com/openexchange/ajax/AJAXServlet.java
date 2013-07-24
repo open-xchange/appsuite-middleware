@@ -1180,20 +1180,18 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             final String uploadDir = ServerConfig.getProperty(Property.UploadDirectory);
             final String fileName = req.getParameter("filename");
             for (final FileItem fileItem : items) {
-                if (fileItem.isFormField()) {
-                    try {
-                        uploadEvent.addFormField(fileItem.getFieldName(), fileItem.getString(charEnc));
-                    } catch (final UnsupportedEncodingException e) {
-                        throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
-                    }
-                } else {
-                    if (fileItem.getSize() > 0 || !isEmpty(fileItem.getName())) {
-                        try {
+                try {
+                    if (fileItem.isFormField()) {
+                        uploadEvent.addFormField(fileItem.getFieldName(), new String(fileItem.get(), Charsets.forName(charEnc)));
+                    } else {
+                        if (fileItem.getSize() > 0 || !isEmpty(fileItem.getName())) {
                             uploadEvent.addUploadFile(processUploadedFile(fileItem, uploadDir, fileName));
-                        } catch (final Exception e) {
-                            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
                         }
                     }
+                } catch (final UnsupportedCharsetException e) {
+                    throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+                } catch (final Exception e) {
+                    throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
                 }
             }
             if (uploadEvent.getAffiliationId() < 0) {
