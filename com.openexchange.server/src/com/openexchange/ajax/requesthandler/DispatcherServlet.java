@@ -59,6 +59,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -484,7 +485,10 @@ public class DispatcherServlet extends SessionServlet {
      */
     protected void sendResponse(final AJAXRequestData requestData, final AJAXRequestResult result, final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) {
         ResponseRenderer candidate = null;
-        for (final ResponseRenderer renderer : RESPONSE_RENDERERS.get()) {
+        final List<ResponseRenderer> responseRenderers = RESPONSE_RENDERERS.get();
+        final Iterator<ResponseRenderer> iter = responseRenderers.iterator();
+        for (int i = responseRenderers.size(); i-- > 0;) {
+            final ResponseRenderer renderer = iter.next();
             if (renderer.handles(requestData, result)) {
                 candidate = renderer;
                 break;
