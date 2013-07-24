@@ -47,56 +47,49 @@
  *
  */
 
-package com.openexchange.secret.recovery.osgi;
+package com.openexchange.secret.recovery.json.action;
 
-import java.util.Collection;
-import org.apache.commons.logging.Log;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
+import java.util.Set;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.secret.recovery.SecretMigrator;
-import com.openexchange.secret.recovery.impl.FastSecretInconsistencyDetector;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.secret.SecretService;
+import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
+import com.openexchange.secret.recovery.json.SecretRecoveryAJAXRequest;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link WhiteboardSecretMigrator}
- *
+ * {@link RemoveAction}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class WhiteboardSecretMigrator extends ServiceTracker<SecretMigrator, SecretMigrator> implements SecretMigrator {
+public class RemoveAction extends AbstractSecretRecoveryAction {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(WhiteboardSecretMigrator.class);
+    private Set<EncryptedItemCleanUpService> cleanUpServices;
 
-    public WhiteboardSecretMigrator(final BundleContext context) {
-        super(context, SecretMigrator.class, null);
+    public RemoveAction(ServiceLookup services, Set<EncryptedItemCleanUpService> cleanUpServices) {
+        super(services);
+        this.cleanUpServices = cleanUpServices;
     }
 
     @Override
-    public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
-        final Collection<SecretMigrator> services = getTracked().values();
-        OXException exception = null;
-        FastSecretInconsistencyDetector special = null;
-        for (final SecretMigrator migrator : services) {
-            if (migrator == this) {
-                continue;
-            }
-            try {
-                if (migrator instanceof FastSecretInconsistencyDetector) {
-                    special = (FastSecretInconsistencyDetector) migrator;
-                } else {
-                    migrator.migrate(oldSecret, newSecret, session);
-                }
-            } catch (final OXException x) {
-                exception = x;
-                LOG.error(x.getMessage(), x);
-            }
+    protected AJAXRequestResult perform(SecretRecoveryAJAXRequest req) throws OXException, JSONException {
+        final SecretService secretService = getService(SecretService.class);
+        if (null == secretService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SecretService.class.getName());
         }
-        if (exception != null) {
-            throw exception;
+        // Get the secret string
+        final String secret = secretService.getSecret(req.getSession());
+        // Do the clean-up
+        for (EncryptedItemCleanUpService cleanUp : cleanUpServices) {
+            cleanUp.removeUnrecoverableItems(secret, req.getSession());
         }
-        if (null != special) {
-            special.migrate(oldSecret, newSecret, session);
-        }
+        // Prepare response
+        final JSONObject object = new JSONObject(1);
+        object.put("clean_up", true);
+        return new AJAXRequestResult(object, "json");
     }
+
 }

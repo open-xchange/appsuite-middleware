@@ -57,6 +57,7 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MailAccountStorageService} - The storage service for mail accounts.
@@ -303,4 +304,13 @@ public interface MailAccountStorageService {
      * @throws OXException If operation fails
      */
     public void cleanUp(String secret, Session session) throws OXException;
+
+    /**
+     * Removes accounts that could no more be decrypted with given secret
+     *
+     * @param secret The current secret
+     * @param session The session providing user information
+     * @throws OXException If operation fails
+     */
+    public void removeUnrecoverableItems(String secret, Session session) throws OXException;
 }

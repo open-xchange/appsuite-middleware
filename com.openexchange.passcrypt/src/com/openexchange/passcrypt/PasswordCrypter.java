@@ -125,6 +125,11 @@ public class PasswordCrypter implements LoginHandlerService, EncryptedItemDetect
     public void cleanUpEncryptedItems(String secret, ServerSession session) throws OXException {
         // Ignore
     }
+    
+    @Override
+    public void removeUnrecoverableItems(String secret, ServerSession session) throws OXException {
+        // Ignore
+    }
 
     @Override
     public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {

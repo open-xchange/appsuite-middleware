@@ -53,8 +53,9 @@ import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.log.LogFactory;
+import com.openexchange.osgi.ServiceSet;
 import com.openexchange.secret.SecretService;
-import com.openexchange.secret.recovery.SecretCleanUpService;
+import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.secret.recovery.json.SecretRecoveryActionFactory;
@@ -67,13 +68,21 @@ public class SecretRecoveryJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SecretMigrator.class, SecretInconsistencyDetector.class, SecretService.class, SecretCleanUpService.class };
+        return new Class<?>[] { SecretInconsistencyDetector.class, SecretService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
-            registerModule(new SecretRecoveryActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "recovery/secret");
+            ServiceSet<SecretMigrator> secretMigrators = new ServiceSet<SecretMigrator>();
+            ServiceSet<EncryptedItemCleanUpService> cleanUpServices = new ServiceSet<EncryptedItemCleanUpService>();
+            
+            track(SecretMigrator.class, secretMigrators);
+            track(EncryptedItemCleanUpService.class, cleanUpServices);
+            
+            openTrackers();
+            
+            registerModule(new SecretRecoveryActionFactory(new ExceptionOnAbsenceServiceLookup(this), secretMigrators, cleanUpServices), "recovery/secret");
             registerService(PreferencesItemService.class, new Enabled());
         } catch (final Exception x) {
             LOG.error(x.getMessage(), x);

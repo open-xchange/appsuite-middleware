@@ -227,4 +227,8 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
         delegatee.cleanUp(service, secret, session);
     }
 
+    public void removeUnrecoverableItems(MessagingService service, String secret, Session session) throws OXException {
+        delegatee.removeUnrecoverableItems(service, secret, session);        
+    }
+
 }

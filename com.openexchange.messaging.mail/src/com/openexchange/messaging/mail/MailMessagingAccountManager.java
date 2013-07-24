@@ -666,4 +666,9 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
     public void cleanUp(String secret, Session session) throws OXException {
         // We do this elsewhere
     }
+    
+    @Override
+    public void removeUnrecoverableItems(String secret, Session session) {
+        // We do this elsewhere
+    }
 }
