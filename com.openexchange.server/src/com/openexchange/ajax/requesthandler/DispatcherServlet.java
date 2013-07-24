@@ -217,9 +217,8 @@ public class DispatcherServlet extends SessionServlet {
         ServerSession session;
         final boolean sessionParamFound;
         {
-            final String sSession = req.getParameter("session");
-            if (sSession != null && sSession.length() > 0) {
-                final String sessionId = getSessionId(req);
+            final String sessionId = req.getParameter(PARAMETER_SESSION);
+            if (sessionId != null && sessionId.length() > 0) {
                 try {
                     session = getSession(req, sessionId, sessiondService);
                 } catch (final OXException e) {
