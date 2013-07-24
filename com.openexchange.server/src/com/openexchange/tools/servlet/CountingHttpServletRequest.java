@@ -85,7 +85,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
     private static final String LINE_SEP = System.getProperty("line.separator");
 
     private final HttpServletRequest servletRequest;
-    private final long max;
+    private volatile long max;
     private final Parameterizable parameterizable;
     private volatile ServletInputStream servletInputStream;
 
@@ -117,6 +117,15 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
         this.max = max;
         this.servletRequest = servletRequest;
         parameterizable = servletRequest instanceof Parameterizable ? (Parameterizable) servletRequest : null;
+    }
+    
+    /**
+     * Sets the max. number of bytes to accept
+     *
+     * @param max The max. number of bytes to accept
+     */
+    public void setMax(long max) {
+        this.max = max;
     }
 
     @Override
@@ -183,6 +192,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
+        final long max = this.max;
         if (max <= 0) {
             return servletRequest.getInputStream();
         }

@@ -76,6 +76,10 @@ public class DownloadAction extends AbstractDriveAction {
     public AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException {
         try {
             /*
+             * no limits for download
+             */
+            enableUnlimitedBodySize(requestData);
+            /*
              * get parameters
              */
             String rootFolderID = requestData.getParameter("root");

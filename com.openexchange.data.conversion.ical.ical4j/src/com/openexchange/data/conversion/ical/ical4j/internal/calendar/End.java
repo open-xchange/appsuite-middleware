@@ -135,7 +135,8 @@ public final class End<T extends CalendarComponent, U extends CalendarObject> ex
         Property msAllDay = component.getProperty(XMicrosoftCdoAlldayEvent.property);
         if (msAllDay != null && msAllDay.getValue().equalsIgnoreCase("true")) {
             DateProperty dateProperty = (DateProperty)component.getProperty(dtEnd.getName());
-            Date e = new Date(dateProperty.getDate().getTime() + dateProperty.getTimeZone().getOffset(dateProperty.getDate().getTime()));
+            int timeZoneOffset = dateProperty.getTimeZone() != null ? dateProperty.getTimeZone().getOffset(dateProperty.getDate().getTime()) : 0;
+            Date e = new Date(dateProperty.getDate().getTime() + timeZoneOffset);
             calendar.setEndDate(e);
             
             if (calendar instanceof Appointment) {

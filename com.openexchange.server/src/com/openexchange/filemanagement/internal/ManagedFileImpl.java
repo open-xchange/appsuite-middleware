@@ -74,7 +74,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
+public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, TtlAware {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ManagedFileImpl.class));
 
@@ -96,18 +96,38 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
 
     private String contentDisposition;
 
+    private int optTtl;
+
+    
+    /**
+     * Initializes a new {@link ManagedFileImpl}.
+     * 
+     * @param id The unique ID
+     * @param file The kept file
+     */
+    public ManagedFileImpl(final String id, final File file) {
+        this(id, file, -1);
+    }
+
     /**
      * Initializes a new {@link ManagedFileImpl}.
      *
      * @param id The unique ID
      * @param file The kept file
+     * @param optTtl The optional TTL
      */
-    public ManagedFileImpl(final String id, final File file) {
+    public ManagedFileImpl(final String id, final File file, int optTtl) {
         super();
+        this.optTtl = optTtl;
         this.id = id;
         this.file = file;
         lastAccessed = System.currentTimeMillis();
         listeners = new LinkedBlockingQueue<FileRemovedListener>();
+    }
+
+    @Override
+    public int optTimeToLive() {
+        return optTtl;
     }
 
     @Override

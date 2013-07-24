@@ -5,7 +5,8 @@
 
 * 2013-07-24 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 24534: Added import/export of distribution lists in csv-file  
+ - Fix for bug 27747: Bypass com.openexchange.servlet.maxBodySize when uploading / downloading files via drive servlet  
+ - Fix for bug 24534: Added import/export of distribution lists in csv-file
 
 * 2013-07-23 - marc.arens@open-xchange.com
 

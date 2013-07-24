@@ -464,7 +464,7 @@ public class ICal4JParser implements ICalParser {
             ); // FIXME: Encoding?
             return builder.build(chunkedReader);
         } catch (final IOException e) {
-            //IGNORE
+            LOG.error(e.getMessage(), e);
         } catch (final ParserException e) {
             LOG.warn(e.getMessage(), e);
             throw new ConversionError(-1, ConversionWarning.Code.PARSE_EXCEPTION, e.getMessage());

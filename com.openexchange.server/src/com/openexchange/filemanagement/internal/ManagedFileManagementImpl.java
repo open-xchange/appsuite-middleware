@@ -57,7 +57,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -70,8 +72,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.DistributedFileManagement;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
+import com.openexchange.filemanagement.ManagedFileFilter;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -115,11 +119,11 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
 
         private final org.apache.commons.logging.Log logger;
 
-        private final ConcurrentMap<String, ManagedFile> tfiles;
+        private final ConcurrentMap<String, ManagedFileImpl> tfiles;
 
         private final int time2live;
 
-        public FileManagementTask(final ConcurrentMap<String, ManagedFile> files, final int time2live, final org.apache.commons.logging.Log logger) {
+        public FileManagementTask(final ConcurrentMap<String, ManagedFileImpl> files, final int time2live, final org.apache.commons.logging.Log logger) {
             super();
             tfiles = files;
             this.time2live = time2live;
@@ -130,9 +134,10 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         public void run() {
             try {
                 final long now = System.currentTimeMillis();
-                for (final Iterator<ManagedFile> iter = tfiles.values().iterator(); iter.hasNext();) {
-                    final ManagedFile cur = iter.next();
-                    if (cur.isDeleted() || ((now - cur.getLastAccess()) > time2live)) {
+                for (final Iterator<ManagedFileImpl> iter = tfiles.values().iterator(); iter.hasNext();) {
+                    final ManagedFileImpl cur = iter.next();
+                    final int optTimeToLive = cur.optTimeToLive();
+                    if (cur.isDeleted() || ((now - cur.getLastAccess()) > (optTimeToLive > 0 ? optTimeToLive : time2live))) {
                         cur.delete();
                         iter.remove();
                     }
@@ -185,7 +190,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         }
     }
 
-    private final ConcurrentMap<String, ManagedFile> files;
+    private final ConcurrentMap<String, ManagedFileImpl> files;
 
     private PropertyListener propertyListener;
 
@@ -198,7 +203,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
      */
     private ManagedFileManagementImpl() {
         super();
-        files = new ConcurrentHashMap<String, ManagedFile>();
+        files = new ConcurrentHashMap<String, ManagedFileImpl>();
         tmpDirReference = new AtomicReference<File>();
         final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
         // Get configuration service
@@ -247,7 +252,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     @Override
     public void clear() {
-        for (final Iterator<ManagedFile> iter = files.values().iterator(); iter.hasNext();) {
+        for (final Iterator<ManagedFileImpl> iter = files.values().iterator(); iter.hasNext();) {
             iter.next().delete();
         }
         files.clear();
@@ -288,7 +293,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     @Override
     public ManagedFile createManagedFile(final File temporaryFile) throws OXException {
-        final ManagedFile mf = new ManagedFileImpl(UUID.randomUUID().toString(), temporaryFile);
+        final ManagedFileImpl mf = new ManagedFileImpl(UUID.randomUUID().toString(), temporaryFile);
         mf.setSize(temporaryFile.length());
         files.put(mf.getID(), mf);
         return mf;
@@ -296,7 +301,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     @Override
     public ManagedFile createManagedFile(final byte[] bytes) throws OXException {
-        return createManagedFile0(null, new UnsynchronizedByteArrayInputStream(bytes), false, null);
+        return createManagedFile0(null, new UnsynchronizedByteArrayInputStream(bytes), false, null, -1);
     }
 
     @Override
@@ -305,20 +310,25 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
     }
     
     @Override
-    public ManagedFile createManagedFile(String id, InputStream inputStream) throws OXException {
-        return createManagedFile0(id, inputStream, true, null);
+    public ManagedFile createManagedFile(final String id, final InputStream inputStream) throws OXException {
+        return createManagedFile0(id, inputStream, true, null, -1);
     }
 
     @Override
-    public ManagedFile createManagedFile(InputStream inputStream, String optExtension) throws OXException {
-        return createManagedFile0(null, inputStream, true, optExtension);
+    public ManagedFile createManagedFile(final String id, final InputStream inputStream, final int ttl) throws OXException {
+        return createManagedFile0(id, inputStream, true, null, ttl);
     }
 
-    private ManagedFile createManagedFile0(final String identifier, final InputStream inputStream, final boolean closeStream, final String optExtension) throws OXException {
+    @Override
+    public ManagedFile createManagedFile(final InputStream inputStream, final String optExtension) throws OXException {
+        return createManagedFile0(null, inputStream, true, optExtension, -1);
+    }
+
+    private ManagedFile createManagedFile0(final String identifier, final InputStream inputStream, final boolean closeStream, final String optExtension, final int optTtl) throws OXException {
         if (null == inputStream) {
             throw new IllegalArgumentException("Missing input stream.");
         }
-        ManagedFile mf = null;
+        ManagedFileImpl mf = null;
         File tmpFile = null;
         File directory = null;
         String id = identifier;
@@ -360,15 +370,15 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
                     Streams.close(inputStream);
                 }
             }
-            if (id == null || id.trim().equals("")) {
+            if (isEmpty(id)) {
                 id = UUID.randomUUID().toString();
             }
-            mf = new ManagedFileImpl(id, tmpFile);
+            mf = new ManagedFileImpl(id, tmpFile, optTtl);
             mf.setSize(tmpFile.length());
         } while (!tmpDirReference.compareAndSet(directory, directory)); // Directory changed in the meantime
         files.put(mf.getID(), mf);
 
-        DistributedFileManagement distributed = getDistributed();
+        final DistributedFileManagement distributed = getDistributed();
         if (distributed != null && !distributed.exists(id)) {
             distributed.register(id);
         }
@@ -377,8 +387,8 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
     }
     
     @Override
-    public boolean containsLocal(String id) {
-        ManagedFile mf = files.get(id);
+    public boolean containsLocal(final String id) {
+        final ManagedFile mf = files.get(id);
         if (null == mf || mf.isDeleted()) {
             return false;
         }
@@ -396,7 +406,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         return true;
     }
     
-    private boolean containsDistributed(String id) {
+    private boolean containsDistributed(final String id) {
         if (getDistributed() == null) {
             return false;
         }
@@ -406,11 +416,30 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
                 getDistributed().touch(id);
                 return true;
             }
-        } catch (OXException e) {
+        } catch (final OXException e) {
             return false;
         }
 
         return false;
+    }
+
+    @Override
+    public List<ManagedFile> getManagedFiles() throws OXException {
+        return getManagedFiles(null);
+    }
+
+    @Override
+    public List<ManagedFile> getManagedFiles(final ManagedFileFilter filter) throws OXException {
+        if (null == filter) {
+            return new ArrayList<ManagedFile>(files.values());
+        }
+        final List<ManagedFile> list = new ArrayList<ManagedFile>(files.size());
+        for (final ManagedFile managedFile : files.values()) {
+            if (filter.accept(managedFile)) {
+                list.add(managedFile);
+            }
+        }
+        return list;
     }
 
     @Override
@@ -429,7 +458,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         return mf;
     }
 
-    private ManagedFile getByIDDistributed(String id) {
+    private ManagedFile getByIDDistributed(final String id) {
         if (getDistributed() == null) {
             return null;
         }
@@ -440,7 +469,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
             }
 
             return createManagedFile(id, getDistributed().get(id));
-        } catch (OXException e) {
+        } catch (final OXException e) {
             return null;
         }
 
@@ -474,21 +503,21 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
                     getDistributed().unregister(id);
                 }
             }
-        } catch (OXException e) {
+        } catch (final OXException e) {
             // Do nothing.
         } finally {
             files.remove(mf.getID());
         }
     }
     
-    private void removeByIDDistributed(String id) {
+    private void removeByIDDistributed(final String id) {
         if (getDistributed() == null) {
             return;
         }
         
         try {
             getDistributed().remove(id);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             // Do nothing.
         }
     }
@@ -497,7 +526,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         if (getDistributed() != null) {
             try {
                 getDistributed().unregister(id);
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 // Do nothing.
             }
         }
@@ -561,8 +590,21 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
     }
     
     private DistributedFileManagement getDistributed() {
-        DistributedFileManagement service = ServerServiceRegistry.getInstance().getService(DistributedFileManagement.class);
+        final DistributedFileManagement service = ServerServiceRegistry.getInstance().getService(DistributedFileManagement.class);
         return service;
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }
