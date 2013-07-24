@@ -77,6 +77,7 @@ public class UnitTests {
         tests.addTest(new JUnit4TestAdapter(com.openexchange.mail.utils.MsisdnUtilityTest.class));
         tests.addTest(new JUnit4TestAdapter(com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTableTest.class));
         tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.MailAttachmentTest.class));
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.ProcessUploadStaticTest.class));
         tests.addTestSuite(com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class);
         tests.addTest(new JUnit4TestAdapter(com.openexchange.mail.utils.MsisdnUtilityTest.class));
         tests.addTest(new JUnit4TestAdapter(com.openexchange.groupware.userconfiguration.UserConfigurationTest.class));
