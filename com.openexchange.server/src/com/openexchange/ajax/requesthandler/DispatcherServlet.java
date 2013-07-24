@@ -484,20 +484,17 @@ public class DispatcherServlet extends SessionServlet {
      * @param httpResponse The associated HTTP Servlet response
      */
     protected void sendResponse(final AJAXRequestData requestData, final AJAXRequestResult result, final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) {
-        ResponseRenderer candidate = null;
         final List<ResponseRenderer> responseRenderers = RESPONSE_RENDERERS.get();
         final Iterator<ResponseRenderer> iter = responseRenderers.iterator();
         for (int i = responseRenderers.size(); i-- > 0;) {
             final ResponseRenderer renderer = iter.next();
             if (renderer.handles(requestData, result)) {
-                candidate = renderer;
-                break;
+                renderer.write(requestData, result, httpRequest, httpResponse);
+                return;
             }
         }
-        if (null == candidate) {
-            throw new IllegalStateException("No appropriate " + ResponseRenderer.class.getSimpleName() + " for request data/result pair.");
-        }
-        candidate.write(requestData, result, httpRequest, httpResponse);
+        // None found
+        throw new IllegalStateException("No appropriate " + ResponseRenderer.class.getSimpleName() + " for request data/result pair.");
     }
 
     /** ASCII-wise to upper-case */
