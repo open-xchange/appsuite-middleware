@@ -156,7 +156,8 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
         Property msAllDay = component.getProperty(XMicrosoftCdoAlldayEvent.property);
         if (msAllDay != null && msAllDay.getValue().equalsIgnoreCase("true")) {
             DateProperty dateProperty = (DateProperty)component.getProperty(dtStart.getName());
-            Date s = new Date(dateProperty.getDate().getTime() + dateProperty.getTimeZone().getOffset(dateProperty.getDate().getTime()));
+            int timeZoneOffset = dateProperty.getTimeZone() != null ? dateProperty.getTimeZone().getOffset(dateProperty.getDate().getTime()) : 0;
+            Date s = new Date(dateProperty.getDate().getTime() + timeZoneOffset);
             calendar.setStartDate(s);
             calendar.setEndDate(s);
             
