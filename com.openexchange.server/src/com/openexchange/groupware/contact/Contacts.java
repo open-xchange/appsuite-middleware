@@ -6868,7 +6868,7 @@ public final class Contacts {
 
             @Override
             public String getReadableTitle() {
-                return null;
+                return "Distribution list";
             }
         };
         /** ************** * intfield03 Part 2 * * ************ */

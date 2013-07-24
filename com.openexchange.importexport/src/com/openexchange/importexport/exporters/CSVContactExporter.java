@@ -113,7 +113,7 @@ public class CSVContactExporter implements Exporter {
         Contact.COUNTRY_OTHER,
         Contact.DEPARTMENT,
         Contact.DISPLAY_NAME,
-        // ContactObject.DISTRIBUTIONLIST,
+        Contact.DISTRIBUTIONLIST,
         Contact.EMAIL1,
         Contact.EMAIL2,
         Contact.EMAIL3,
