@@ -117,48 +117,45 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         }
     }
 
-    protected static StringBuffer getStats(final MBeanServerConnection mbc, final String className) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException {
+    protected static StringBuffer getStats(MBeanServerConnection con, String objectName) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
         final StringBuffer retval = new StringBuffer();
-
-        for (final ObjectInstance oin : mbc.queryMBeans(null, Query.isInstanceOf(Query.value(className)))) {
-            final ObjectName obj = oin.getObjectName();
+        for (final ObjectInstance instance : con.queryMBeans(new ObjectName(objectName), null)) {
+            final ObjectName obj = instance.getObjectName();
             if (null == obj) {
                 continue;
             }
             final MBeanInfo info;
             try {
-                info = mbc.getMBeanInfo(obj);
+                info = con.getMBeanInfo(obj);
             } catch (InstanceNotFoundException e) {
-                continue;
+                return retval;
             }
-            if (info.getClassName().equals(className)) {
-                final String ocname = obj.getCanonicalName();
-                final MBeanAttributeInfo[] attrs = info.getAttributes();
-                if (attrs.length > 0) {
-                    for (final MBeanAttributeInfo element : attrs) {
-                        try {
-                            final Object o = mbc.getAttribute(obj, element.getName());
-                            if (o != null) {
-                                final StringBuilder sb = new StringBuilder(ocname).append(",").append(element.getName()).append(" = ");
-                                if (o instanceof CompositeDataSupport) {
-                                    final CompositeDataSupport c = (CompositeDataSupport) o;
-                                    sb.append("[init=").append(c.get("init")).append(",max=").append(c.get("max")).append(",committed=").append(c.get("committed")).append(",used=").append(c.get("used")).append("]");
-                                    retval.append(sb.append(LINE_SEPARATOR));
+            final String ocname = obj.getCanonicalName();
+            final MBeanAttributeInfo[] attrs = info.getAttributes();
+            if (attrs.length > 0) {
+                for (final MBeanAttributeInfo element : attrs) {
+                    try {
+                        final Object o = con.getAttribute(obj, element.getName());
+                        if (o != null) {
+                            final StringBuilder sb = new StringBuilder(ocname).append(",").append(element.getName()).append(" = ");
+                            if (o instanceof CompositeDataSupport) {
+                                final CompositeDataSupport c = (CompositeDataSupport) o;
+                                sb.append("[init=").append(c.get("init")).append(",max=").append(c.get("max")).append(",committed=").append(c.get("committed")).append(",used=").append(c.get("used")).append("]");
+                                retval.append(sb.append(LINE_SEPARATOR));
+                            } else {
+                                if (o instanceof String[]) {
+                                    final String[] c = (String[]) o;
+                                    retval.append(sb.append(Arrays.toString(c)).append(LINE_SEPARATOR));
+                                } else if (o instanceof long[]) {
+                                    final long[] l = (long[]) o;
+                                    retval.append(sb.append(Arrays.toString(l)).append(LINE_SEPARATOR));
                                 } else {
-                                    if (o instanceof String[]) {
-                                        final String[] c = (String[]) o;
-                                        retval.append(sb.append(Arrays.toString(c)).append(LINE_SEPARATOR));
-                                    } else if (o instanceof long[]) {
-                                        final long[] l = (long[]) o;
-                                        retval.append(sb.append(Arrays.toString(l)).append(LINE_SEPARATOR));
-                                    } else {
-                                        retval.append(sb.append(o.toString()).append(LINE_SEPARATOR));
-                                    }
+                                    retval.append(sb.append(o.toString()).append(LINE_SEPARATOR));
                                 }
                             }
-                        } catch (final RuntimeMBeanException e) {
-                            // If there was an error getting the attribute we just omit that attribute
                         }
+                    } catch (final RuntimeMBeanException e) {
+                        // If there was an error getting the attribute we just omit that attribute
                     }
                 }
             }
