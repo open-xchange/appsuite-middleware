@@ -43,6 +43,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.microformats"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.templating"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.test"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.test.mock"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.textxtraction"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.threadpool"/>
 </provider>
