@@ -1,3 +1,7 @@
+* 2013-07-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24534: Added import/export of distribution lists in csv-file  
+
 * 2013-07-23 - marc.arens@open-xchange.com
 
  - Fix for bug 27712: Set maxForm- and maxBufferedPostSize to com.openexchange.servlet.maxBodySize
