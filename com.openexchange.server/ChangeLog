@@ -1,3 +1,7 @@
+* 2013-07-25 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26607: Optimized JMX queries for certain MBeans and removed multi threading.
+
 * 2013-07-01 - marc.arens@open-xchange.com
 
  - Fix for bug 26681: Repair broken state in HazelcastResourceDirectory
@@ -184,10 +188,6 @@
  - Fix for bug 26895: Signal an over-quota error during folder create attempt as a severe error to ensure user is aware of that
  - Fix for bug 26898: Treat special "[NONEXISTENT]" error prefix as empty response
  - Fix for bug 26897: Set proper error message
-
-* 2013-05-30 - thorben.betten@open-xchange.com
-
- - Fix for bug 26607: Gather statistic information in a concurrent fashion
 
 * 2013-05-29 - martin.herfurth@open-xchange.com
 
