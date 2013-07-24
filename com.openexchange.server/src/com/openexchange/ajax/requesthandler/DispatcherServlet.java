@@ -53,6 +53,9 @@ import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
 import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -149,7 +152,7 @@ public class DispatcherServlet extends SessionServlet {
         return PREFIX.get();
     }
 
-    private static final List<ResponseRenderer> RESPONSE_RENDERERS = new CopyOnWriteArrayList<ResponseRenderer>();
+    private static final AtomicReference<List<ResponseRenderer>> RESPONSE_RENDERERS = new AtomicReference<List<ResponseRenderer>>(Collections.<ResponseRenderer> emptyList());
 
     /**
      * The default <code>AJAXRequestDataTools</code>.
@@ -185,7 +188,23 @@ public class DispatcherServlet extends SessionServlet {
      * @param renderer The renderer
      */
     public static void registerRenderer(final ResponseRenderer renderer) {
-        RESPONSE_RENDERERS.add(renderer);
+        List<ResponseRenderer> expect;
+        List<ResponseRenderer> update;
+        do {
+            expect = RESPONSE_RENDERERS.get();
+            update = new ArrayList<ResponseRenderer>(expect);
+            update.add(renderer);
+            Collections.sort(update, new Comparator<ResponseRenderer>() {
+                
+                @Override
+                public int compare(ResponseRenderer responseRenderer, ResponseRenderer anotherResponseRenderer) {
+                    // Higher ranked first
+                    int thisRanking = responseRenderer.getRanking();
+                    int anotherRanking = anotherResponseRenderer.getRanking();
+                    return (thisRanking<anotherRanking ? 1 : (thisRanking==anotherRanking ? 0 : -1));
+                }
+            });
+        } while (!RESPONSE_RENDERERS.compareAndSet(expect, update));
     }
 
     /**
@@ -193,15 +212,31 @@ public class DispatcherServlet extends SessionServlet {
      *
      * @param renderer The renderer
      */
-    public static void unregisterRenderer(final ResponseRenderer renderer) {
-        RESPONSE_RENDERERS.remove(renderer);
+    public static synchronized void unregisterRenderer(final ResponseRenderer renderer) {
+        List<ResponseRenderer> expect;
+        List<ResponseRenderer> update;
+        do {
+            expect = RESPONSE_RENDERERS.get();
+            update = new ArrayList<ResponseRenderer>(expect);
+            update.remove(renderer);
+            Collections.sort(update, new Comparator<ResponseRenderer>() {
+                
+                @Override
+                public int compare(ResponseRenderer responseRenderer, ResponseRenderer anotherResponseRenderer) {
+                    // Higher ranked first
+                    int thisRanking = responseRenderer.getRanking();
+                    int anotherRanking = anotherResponseRenderer.getRanking();
+                    return (thisRanking<anotherRanking ? 1 : (thisRanking==anotherRanking ? 0 : -1));
+                }
+            });
+        } while (!RESPONSE_RENDERERS.compareAndSet(expect, update));
     }
 
     /**
      * Clears all registered renderer.
      */
     public static void clearRenderer() {
-        RESPONSE_RENDERERS.clear();
+        RESPONSE_RENDERERS.set(Collections.<ResponseRenderer> emptyList());
     }
 
     @Override
@@ -448,14 +483,11 @@ public class DispatcherServlet extends SessionServlet {
      * @param httpResponse The associated HTTP Servlet response
      */
     protected void sendResponse(final AJAXRequestData requestData, final AJAXRequestResult result, final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) {
-        int highest = 0;
-        boolean first = true;
         ResponseRenderer candidate = null;
-        for (final ResponseRenderer renderer : RESPONSE_RENDERERS) {
-            if ((first || highest <= renderer.getRanking()) && renderer.handles(requestData, result)) {
-                first = false;
-                highest = renderer.getRanking();
+        for (final ResponseRenderer renderer : RESPONSE_RENDERERS.get()) {
+            if (renderer.handles(requestData, result)) {
                 candidate = renderer;
+                break;
             }
         }
         if (null == candidate) {
