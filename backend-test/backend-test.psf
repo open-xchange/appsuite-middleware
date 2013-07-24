@@ -20,6 +20,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.global"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.html"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.http.deferrer"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.http.testservlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.i18n"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.filter"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.messaging"/>
@@ -46,5 +47,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.test.mock"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.textxtraction"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.threadpool"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.tokenlogin.impl"/>
 </provider>
 </psf>

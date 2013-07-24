@@ -58,7 +58,6 @@ import org.junit.Test;
 import com.openexchange.test.mock.MockFactory;
 import com.openexchange.test.mock.test.AbstractMockTest;
 
-
 /**
  * Unit tests for {@link TestServlet}
  * 
@@ -93,7 +92,7 @@ public class TestServletTest extends AbstractMockTest {
         this.httpServletResponse = MockFactory.getMock(HttpServletResponse.class);
     }
 
-    @Test(timeout = 2000)
+    @Test(timeout = 500)
     public void testDoGet_ThreadSleepNotExecuted_ReturnedWithin2000ms() throws ServletException, IOException {
         this.testServlet = new TestServlet() {
 
@@ -106,7 +105,7 @@ public class TestServletTest extends AbstractMockTest {
         this.testServlet.doGet(this.httpServletRequest, this.httpServletResponse);
     }
 
-    @Test(timeout = 2000)
+    @Test(timeout = 500)
     public void testDoPut_ThreadSleepNotExecuted_ReturnedWithin2000ms() throws ServletException, IOException {
         this.testServlet = new TestServlet() {
 
