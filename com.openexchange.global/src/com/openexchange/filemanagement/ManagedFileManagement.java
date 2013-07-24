@@ -126,9 +126,9 @@ public interface ManagedFileManagement {
     /**
      * Creates a new managed file from specified input stream.
      * <p>
-     * Forces the ManagedFile to have the specified id.
+     * Forces the ManagedFile to have the specified id (if not <code>null</code>).
      * 
-     * @param id The id
+     * @param id The id or <code>null</code> to use a newly generated one
      * @param inputStream input stream whose content is filled into newly created file
      * @return A new managed file
      * @throws OXException If a new managed file cannot be created from specified content
@@ -136,11 +136,11 @@ public interface ManagedFileManagement {
     public ManagedFile createManagedFile(String id, InputStream inputStream) throws OXException;
 
     /**
-     * Creates a new managed file from specified input stream with custome time-to-live.
+     * Creates a new managed file from specified input stream with custom time-to-live.
      * <p>
-     * Forces the ManagedFile to have the specified id.
+     * Forces the ManagedFile to have the specified id (if not <code>null</code>).
      * 
-     * @param id The id
+     * @param id The id or <code>null</code> to use a newly generated one
      * @param inputStream input stream whose content is filled into newly created file
      * @param ttl The custom time-to-live or <code>-1</code> to use default one
      * @return A new managed file
