@@ -58,6 +58,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedBy;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.End;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Start;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Uid;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.XMicrosoftCdoAlldayEvent;
 import com.openexchange.data.conversion.ical.ical4j.internal.freebusy.FreeBusyAttendee;
 import com.openexchange.data.conversion.ical.ical4j.internal.freebusy.FreeBusyAttendees;
 import com.openexchange.data.conversion.ical.ical4j.internal.freebusy.FreeBusySlots;
@@ -76,6 +77,7 @@ public final class FreeBusyConverters {
     private static AttributeConverter<VFreeBusy, FreeBusyInformation> createdAndDTStamp = new CreatedAndDTStamp<VFreeBusy, FreeBusyInformation>();
     private static AttributeConverter<VFreeBusy, FreeBusyInformation> start = new Start<VFreeBusy, FreeBusyInformation>();
     private static AttributeConverter<VFreeBusy, FreeBusyInformation> end = new End<VFreeBusy, FreeBusyInformation>();
+    private static AttributeConverter<VFreeBusy, FreeBusyInformation> xMicrosoftCdoAlldayEvent = new XMicrosoftCdoAlldayEvent();
     private static AttributeConverter<VFreeBusy, FreeBusyInformation> freeBusyAttendee = new FreeBusyAttendee();
     private static AttributeConverter<VFreeBusy, FreeBusyInformation> freeBusyAttendees = new FreeBusyAttendees();
     private static AttributeConverter<VFreeBusy, FreeBusyInformation> freeBusySlots = new FreeBusySlots();
@@ -97,6 +99,7 @@ public final class FreeBusyConverters {
         List<AttributeConverter<VFreeBusy, FreeBusyInformation>> tmp = new ArrayList<AttributeConverter<VFreeBusy, FreeBusyInformation>>();
         tmp.add(start);
         tmp.add(end);
+        tmp.add(xMicrosoftCdoAlldayEvent);
         tmp.add(uid);
         tmp.add(createdBy);
         tmp.add(createdAndDTStamp);
@@ -108,6 +111,7 @@ public final class FreeBusyConverters {
         List<AttributeConverter<VFreeBusy, FreeBusyInformation>> tmp = new ArrayList<AttributeConverter<VFreeBusy, FreeBusyInformation>>();
         tmp.add(start);
         tmp.add(end);
+        tmp.add(xMicrosoftCdoAlldayEvent);
         tmp.add(uid);
         tmp.add(createdBy);
         tmp.add(createdAndDTStamp);
