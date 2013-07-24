@@ -251,7 +251,18 @@ public class UploadEvent {
      * @param fieldValue The field's value.
      */
     public final void addFormField(final String fieldName, final String fieldValue) {
-        formFields.put(fieldName, fieldValue);
+        if (null != formFields.put(fieldName, fieldValue)) {
+            System.out.println("Duplicate form field: " + fieldName);
+        }
+    }
+
+    /**
+     * Gets the number of form fields.
+     *
+     * @return The number of form fields
+     */
+    public int getNumberOfFormFields() {
+        return formFields.size();
     }
 
     /**
