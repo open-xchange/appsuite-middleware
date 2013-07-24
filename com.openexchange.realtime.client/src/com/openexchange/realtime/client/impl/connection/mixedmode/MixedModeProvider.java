@@ -50,6 +50,8 @@
 package com.openexchange.realtime.client.impl.connection.mixedmode;
 
 import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.AsyncHttpClientConfig;
+import com.ning.http.client.providers.grizzly.GrizzlyAsyncHttpProvider;
 import com.openexchange.realtime.client.RTConnection;
 import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
@@ -68,6 +70,8 @@ public class MixedModeProvider implements ConnectionProvider {
 
     public MixedModeProvider() {
         super();
+//        final AsyncHttpClientConfig config = new AsyncHttpClientConfig.Builder().build();
+//        asyncHttpClient = new AsyncHttpClient(new GrizzlyAsyncHttpProvider(config), config);
         asyncHttpClient = new AsyncHttpClient();
     }
 

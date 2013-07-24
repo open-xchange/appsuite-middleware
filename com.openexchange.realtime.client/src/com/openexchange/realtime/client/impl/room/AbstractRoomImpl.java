@@ -157,16 +157,25 @@ public abstract class AbstractRoomImpl implements RTRoom {
         return RTRoomJSONHelper.createJoinMessage(this.roomName, this.toAddress);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void say(String message) throws RTException {
+        doSay(message, false);
+    }
+
+    @Override
+    public void trace(String message) throws RTException {
+        doSay(message, true);
+    }
+
+    private void doSay(String message, boolean isTraceEnabled) throws RTException {
         Validate.notNull(connection, "Not logged in!");
         Validate.notNull(message, "Message cannot be null!");
 
         try {
             JSONValue say = this.createSayObject(toPayloads(message));
+            if(isTraceEnabled) {
+                say = addTracer(say);
+            }
             this.send(say);
         } catch (Exception exception) {
             throw new RTException(exception);
@@ -184,6 +193,10 @@ public abstract class AbstractRoomImpl implements RTRoom {
      */
     private JSONValue createSayObject(JSONArray payloads) throws JSONException {
         return RTRoomJSONHelper.createSayMessage(this.toAddress, payloads);
+    }
+    
+    private JSONValue addTracer(JSONValue jsonValue) throws JSONException {
+        return RTRoomJSONHelper.addTracer(jsonValue);
     }
 
     /**
