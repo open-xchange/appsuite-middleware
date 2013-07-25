@@ -57,6 +57,8 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.json.JSONValue;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.OXException;
 
 /**
@@ -185,27 +187,27 @@ public class AJAXRequestResult {
      */
     public static final Object DIRECT_OBJECT = new Object();
 
-    private ResultType resultType;
+    private @NonNull ResultType resultType;
 
-    private Object resultObject;
+    private @Nullable Object resultObject;
 
-    private Date timestamp;
+    private @Nullable Date timestamp;
 
-    private Collection<OXException> warnings;
+    private @Nullable Collection<OXException> warnings;
 
     private boolean deferred;
 
-    private final Map<String, String> headers;
+    private final @NonNull Map<String, String> headers;
 
-    private final Map<String, Object> parameters;
+    private final @NonNull Map<String, Object> parameters;
 
-    private final Map<String, Object> responseProperties;
+    private final @NonNull Map<String, Object> responseProperties;
 
-    private String format;
+    private @Nullable String format;
 
     private long expires;
 
-    private OXException exception;
+    private @Nullable OXException exception;
 
     private long duration;
 
@@ -223,7 +225,7 @@ public class AJAXRequestResult {
      *
      * @param resultObject The result object
      */
-    public AJAXRequestResult(final Object resultObject) {
+    public AJAXRequestResult(final @Nullable Object resultObject) {
         this(resultObject, null, null);
     }
 
@@ -233,7 +235,7 @@ public class AJAXRequestResult {
      * @param resultObject The result object
      * @param timestamp The server's last-modified time stamp (corresponding to either a GET, ALL, or LIST request)
      */
-    public AJAXRequestResult(final Object resultObject, final Date timestamp) {
+    public AJAXRequestResult(final @Nullable Object resultObject, final @Nullable Date timestamp) {
         this(resultObject, timestamp, null);
     }
 
@@ -243,7 +245,7 @@ public class AJAXRequestResult {
      * @param resultObject The result object
      * @param format The format of the result object
      */
-    public AJAXRequestResult(final Object resultObject, final String format) {
+    public AJAXRequestResult(final @Nullable Object resultObject, final @Nullable String format) {
         this(resultObject, null, format);
     }
 
@@ -254,7 +256,7 @@ public class AJAXRequestResult {
      * @param timestamp The server's last-modified time stamp (corresponding to either a GET, ALL, or LIST request)
      * @param format The format of the result object
      */
-    public AJAXRequestResult(final Object resultObject, final Date timestamp, final String format) {
+    public AJAXRequestResult(final @Nullable Object resultObject, final @Nullable Date timestamp, final @Nullable String format) {
         super();
         duration = -1L;
         headers = new LinkedHashMap<String, String>(8);
@@ -287,7 +289,7 @@ public class AJAXRequestResult {
      * @param duration The duration to set
      * @return This AJAX request result with duration applied
      */
-    public AJAXRequestResult setDuration(final long duration) {
+    public @NonNull AJAXRequestResult setDuration(final long duration) {
         this.duration = duration < 0 ? -1L : duration;
         return this;
     }
@@ -302,7 +304,7 @@ public class AJAXRequestResult {
      * @param start The start time stamp
      * @return This AJAX request result with duration applied
      */
-    public AJAXRequestResult setDurationByStart(final long start) {
+    public @NonNull AJAXRequestResult setDurationByStart(final long start) {
         return setDuration(System.currentTimeMillis() - start);
     }
 
@@ -312,7 +314,7 @@ public class AJAXRequestResult {
      * @param duration The duration to add
      * @return This AJAX request result with duration applied
      */
-    public AJAXRequestResult addDuration(final long duration) {
+    public @NonNull AJAXRequestResult addDuration(final long duration) {
         if (this.duration < 0) {
             return setDuration(duration);
         }
@@ -330,7 +332,7 @@ public class AJAXRequestResult {
      * @param start The start time stamp
      * @return This AJAX request result with duration applied
      */
-    public AJAXRequestResult addDurationByStart(final long start) {
+    public @NonNull AJAXRequestResult addDurationByStart(final long start) {
         return addDuration(System.currentTimeMillis() - start);
     }
 
@@ -339,7 +341,7 @@ public class AJAXRequestResult {
      *
      * @return The result type
      */
-    public ResultType getType() {
+    public @NonNull ResultType getType() {
         return resultType;
     }
 
@@ -349,7 +351,7 @@ public class AJAXRequestResult {
      * @param resultType The result type to set
      * @return This result with type applied
      */
-    public AJAXRequestResult setType(final ResultType resultType) {
+    public @NonNull AJAXRequestResult setType(final @NonNull ResultType resultType) {
         this.resultType = resultType;
         return this;
     }
@@ -396,8 +398,10 @@ public class AJAXRequestResult {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((resultObject == null) ? 0 : resultObject.hashCode());
-        result = prime * result + ((timestamp == null) ? 0 : timestamp.hashCode());
+        final Object thisResultObject = resultObject;
+        result = prime * result + ((thisResultObject == null) ? 0 : thisResultObject.hashCode());
+        final Date thisTimestamp = timestamp;
+        result = prime * result + ((thisTimestamp == null) ? 0 : thisTimestamp.hashCode());
         return result;
     }
 
@@ -410,18 +414,20 @@ public class AJAXRequestResult {
             return false;
         }
         final AJAXRequestResult other = (AJAXRequestResult) obj;
-        if (resultObject == null) {
+        final Object thisResultObject = resultObject;
+        if (thisResultObject == null) {
             if (other.resultObject != null) {
                 return false;
             }
-        } else if (!resultObject.equals(other.resultObject)) {
+        } else if (!thisResultObject.equals(other.resultObject)) {
             return false;
         }
-        if (timestamp == null) {
+        final Date thisTimestamp = timestamp;
+        if (thisTimestamp == null) {
             if (other.timestamp != null) {
                 return false;
             }
-        } else if (!timestamp.equals(other.timestamp)) {
+        } else if (!thisTimestamp.equals(other.timestamp)) {
             return false;
         }
         return true;
@@ -432,7 +438,7 @@ public class AJAXRequestResult {
      *
      * @return The result object
      */
-    public Object getResultObject() {
+    public @Nullable Object getResultObject() {
         return resultObject;
     }
 
@@ -441,7 +447,7 @@ public class AJAXRequestResult {
      *
      * @param resultObject The result object to set
      */
-    public void setResultObject(final Object resultObject) {
+    public void setResultObject(final @Nullable Object resultObject) {
         this.resultObject = resultObject;
     }
 
@@ -450,7 +456,7 @@ public class AJAXRequestResult {
      *
      * @return The format
      */
-    public String getFormat() {
+    public @Nullable String getFormat() {
         return format;
     }
 
@@ -459,7 +465,7 @@ public class AJAXRequestResult {
      *
      * @param format The format
      */
-    public void setFormat(final String format) {
+    public void setFormat(final @Nullable String format) {
         this.format = format;
     }
 
@@ -468,8 +474,9 @@ public class AJAXRequestResult {
      *
      * @return The time stamp
      */
-    public Date getTimestamp() {
-        return null == timestamp ? null : new Date(timestamp.getTime());
+    public @Nullable Date getTimestamp() {
+        final Date thisTimestamp = timestamp;
+        return null == thisTimestamp ? null : new Date(thisTimestamp.getTime());
     }
 
     /**
@@ -477,7 +484,7 @@ public class AJAXRequestResult {
      *
      * @param timestamp The time stamp.
      */
-    public void setTimestamp(final Date timestamp) {
+    public void setTimestamp(final @Nullable Date timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -486,8 +493,13 @@ public class AJAXRequestResult {
      *
      * @return The warnings
      */
-    public Collection<OXException> getWarnings() {
-        return null == warnings ? Collections.<OXException> emptySet() : Collections.unmodifiableCollection(warnings);
+    public @NonNull Collection<OXException> getWarnings() {
+        final Collection<OXException> thisWarnings = warnings;
+        if (null == thisWarnings) {
+            return Collections.<OXException> emptySet();
+        } else {
+            return Collections.unmodifiableCollection(thisWarnings);
+        }
     }
 
     /**
@@ -496,14 +508,15 @@ public class AJAXRequestResult {
      * @param warnings The warnings to set
      * @return This request result with specified warnings added
      */
-    public AJAXRequestResult addWarnings(final Collection<OXException> warnings) {
+    public @NonNull AJAXRequestResult addWarnings(final @Nullable Collection<OXException> warnings) {
         if (null == warnings || warnings.isEmpty()) {
             return this;
         }
-        if (null == this.warnings) {
+        final Collection<OXException> thisWarning = this.warnings;
+        if (null == thisWarning) {
             this.warnings = new HashSet<OXException>(warnings);
         } else {
-            this.warnings.addAll(warnings);
+            thisWarning.addAll(warnings);
         }
         return this;
     }
@@ -511,7 +524,7 @@ public class AJAXRequestResult {
     /**
      * Sets a header value
      */
-    public void setHeader(final String header, final String value) {
+    public void setHeader(final @NonNull String header, final @Nullable String value) {
         if (null == value) {
             headers.remove(header);
         } else {
@@ -522,14 +535,14 @@ public class AJAXRequestResult {
     /**
      * Removes a header value
      */
-    public void removeHeader(final String header) {
+    public void removeHeader(final @NonNull String header) {
         headers.remove(header);
     }
 
     /**
      * Gets a header value
      */
-    public String getHeader(final String header) {
+    public String getHeader(final @NonNull String header) {
         return headers.get(header);
     }
 
@@ -538,7 +551,7 @@ public class AJAXRequestResult {
      *
      * @return The headers
      */
-    public Map<String, String> getHeaders() {
+    public @NonNull Map<String, String> getHeaders() {
         return new HashMap<String, String>(headers);
     }
 
@@ -548,7 +561,7 @@ public class AJAXRequestResult {
      * @param name The parameter name
      * @param value The value; if <code>null</code> a remove is performed
      */
-    public void setParameter(final String name, final Object value) {
+    public void setParameter(final @NonNull String name, final @Nullable Object value) {
         if (null == value) {
             parameters.remove(name);
         } else {
@@ -561,7 +574,7 @@ public class AJAXRequestResult {
      *
      * @param name The parameter name
      */
-    public void removeParameter(final String name) {
+    public void removeParameter(final @NonNull String name) {
         parameters.remove(name);
     }
 
@@ -571,7 +584,7 @@ public class AJAXRequestResult {
      * @param name The parameter name
      * @return The associated value or <code>null</code> if there is no such parameter
      */
-    public Object getParameter(final String name) {
+    public Object getParameter(final @NonNull String name) {
         return parameters.get(name);
     }
 
@@ -580,7 +593,7 @@ public class AJAXRequestResult {
      *
      * @return The parameters
      */
-    public Map<String, Object> getParameters() {
+    public @NonNull Map<String, Object> getParameters() {
         return new HashMap<String, Object>(parameters);
     }
 
@@ -590,7 +603,7 @@ public class AJAXRequestResult {
      * @param name The property name
      * @param value The value; if <code>null</code> a remove is performed
      */
-    public void setResponseProperty(final String name, final Object value) {
+    public void setResponseProperty(final @NonNull String name, final @Nullable Object value) {
         if (null == value) {
             responseProperties.remove(name);
         } else {
@@ -603,7 +616,7 @@ public class AJAXRequestResult {
      *
      * @param name The property name
      */
-    public void removeResponseProperty(final String name) {
+    public void removeResponseProperty(final @NonNull String name) {
         responseProperties.remove(name);
     }
 
@@ -613,7 +626,7 @@ public class AJAXRequestResult {
      * @param name The parameter name
      * @return The associated response property or <code>null</code> if there is no such parameter
      */
-    public Object getResponseProperty(final String name) {
+    public Object getResponseProperty(final @NonNull String name) {
         return responseProperties.get(name);
     }
 
@@ -622,14 +635,15 @@ public class AJAXRequestResult {
      *
      * @return The response properties
      */
-    public Map<String, Object> getResponseProperties() {
+    public @NonNull Map<String, Object> getResponseProperties() {
         return responseProperties;
     }
 
     @Override
     public String toString() {
+        final Collection<OXException> thisWarnings = warnings;
         return new com.openexchange.java.StringAllocator(34).append(super.toString()).append(" resultObject=").append(resultObject).append(", timestamp=").append(
-            timestamp).append(" warnings=").append(null == warnings ? "<none>" : warnings.toString()).toString();
+            timestamp).append(" warnings=").append(null == thisWarnings ? "<none>" : thisWarnings.toString()).toString();
     }
 
     /**
@@ -638,16 +652,16 @@ public class AJAXRequestResult {
      * @param object The result format
      * @param format The format
      */
-    public void setResultObject(final Object object, final String format) {
+    public void setResultObject(final @Nullable Object object, final @Nullable String format) {
         setResultObject(object);
         setFormat(format);
     }
 
-    public void setException(final OXException exception) {
+    public void setException(final @Nullable OXException exception) {
         this.exception = exception;
     }
 
-    public OXException getException() {
+    public @Nullable OXException getException() {
         return exception;
     }
 
