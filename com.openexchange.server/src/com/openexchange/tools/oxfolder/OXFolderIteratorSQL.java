@@ -66,6 +66,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -1082,8 +1083,7 @@ public final class OXFolderIteratorSQL {
         final ConditionTreeMap treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
         if (null != treeMap) {
             try {
-                final List<Condition> conditions = new ArrayList<Condition>(1);
-                conditions.add(new ConditionTreeMap.ParentCondition(parent));
+                final List<Condition> conditions = Collections.<Condition> singletonList(new ConditionTreeMap.ParentCondition(parent));
                 return new TIntArrayList(treeMap.getVisibleForUser(userId, memberInGroups, accessibleModules, conditions));
             } catch (final Exception e) {
                 LOG.debug(e.getMessage(), e);
