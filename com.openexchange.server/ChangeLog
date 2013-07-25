@@ -1,6 +1,7 @@
 * 2013-07-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 27345: Suppress "Shared files" folder if it does not contain user-visible subfolders
+ - Fix for bug 27647: Don't consider HTML content containing <img> tags as empty content
 
 * 2013-07-24 - tobias.friedrich@open-xchange.com
 
