@@ -1,3 +1,7 @@
+* 2013-07-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27345: Suppress "Shared files" folder if it does not contain user-visible subfolders
+
 * 2013-07-24 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 27747: Bypass com.openexchange.servlet.maxBodySize when uploading / downloading files via drive servlet  
