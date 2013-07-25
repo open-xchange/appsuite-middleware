@@ -1,3 +1,7 @@
+* 2013-07-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27345: Suppress "Shared files" folder if it does not contain user-visible subfolders
+
 * 2013-07-24 - martin.herfurth@open-xchange.com
 
  - Fix for bug 27591: Handle Exchange all-day flag: X-MICROSOFT-CDO-ALLDAYEVENT
