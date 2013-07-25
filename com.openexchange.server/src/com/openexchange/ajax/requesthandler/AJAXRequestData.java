@@ -73,6 +73,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.RequestConstants;
 import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
@@ -107,85 +109,85 @@ public class AJAXRequestData {
     }
 
     /** Map for parameters */
-    private final Map<String, String> params;
+    private final @NonNull Map<String, String> params;
 
     /** The {@code Parameterizable} reference */
     private Parameterizable parameterizable;
 
     /** Map for headers */
-    private final Map<String, String> headers;
+    private final @NonNull Map<String, String> headers;
 
     /** Map for properties */
-    private final Map<String, Object> properties;
+    private final @NonNull Map<String, Object> properties;
 
     /** Associated server session */
-    private ServerSession session;
+    private @Nullable ServerSession session;
 
     /** Whether a secure connection has been established */
     private boolean secure;
 
     /** The request body data */
-    private Object data;
+    private @Nullable Object data;
 
     /** The module string */
-    private String module;
+    private @Nullable String module;
 
     /** The action string */
-    private String action;
+    private @Nullable String action;
 
     /** The upload stream provider */
     private InputStreamProvider uploadStreamProvider;
 
     /** List of uploaded files */
-    private final List<UploadFile> files;
+    private final @NonNull List<UploadFile> files;
 
     /** The host name */
-    private String hostname;
+    private @Nullable String hostname;
 
     /** The remote address */
-    private String remoteAddress;
+    private @Nullable String remoteAddress;
 
     /** The Servlet's request URI */
-    private String servletRequestUri;
+    private @Nullable String servletRequestUri;
 
     /** The AJP route: &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt; */
-    private String route;
+    private @Nullable String route;
 
     /** The upload event */
-    private volatile UploadEvent uploadEvent;
+    private volatile @Nullable UploadEvent uploadEvent;
 
     /** The format */
-    private String format;
+    private @Nullable String format;
 
     /** The state reference */
-    private AJAXState state;
+    private @Nullable AJAXState state;
 
     /** The eTag */
-    private String eTag;
+    private @Nullable String eTag;
 
     /** The <code>User-Agent</code> value */
-    private String userAgent;
+    private @Nullable String userAgent;
 
     /** The expires millis */
     private long expires;
 
     /** The path information */
-    private String pathInfo;
+    private @Nullable String pathInfo;
 
     /** The HTTP Servlet request */
-    private HttpServletRequest httpServletRequest;
+    private @Nullable HttpServletRequest httpServletRequest;
 
     /** The decorator identifiers */
-    private final List<String> decoratorIds;
+    private final @NonNull List<String> decoratorIds;
 
     /** The multipart flag. */
     private boolean multipart;
 
     /** The path prefix; &lt;prefix&gt; + <code>'/'</code> + &lt;module&gt; */
-    private String prefix;
+    private @Nullable String prefix;
 
     /** The optional <code>HttpServletResponse</code> instance */
-    private HttpServletResponse httpServletResponse;
+    private @Nullable HttpServletResponse httpServletResponse;
 
     /**
      * Initializes a new {@link AJAXRequestData}.
@@ -193,7 +195,7 @@ public class AJAXRequestData {
      * @param json The JSON data
      * @throws OXException If an AJAX error occurs
      */
-    public AJAXRequestData(final JSONObject json) throws OXException {
+    public AJAXRequestData(final @Nullable JSONObject json) throws OXException {
         this();
         data = DataParser.checkJSONObject(json, RequestConstants.DATA);
     }
@@ -203,7 +205,7 @@ public class AJAXRequestData {
      *
      * @param data The payload to use data
      */
-    public AJAXRequestData(final Object data) {
+    public AJAXRequestData(final @Nullable Object data) {
         this();
         this.data = data;
     }
@@ -268,7 +270,7 @@ public class AJAXRequestData {
      *
      * @param userAgent The <code>User-Agent</code> value
      */
-    public void setUserAgent(String userAgent) {
+    public void setUserAgent(final @Nullable String userAgent) {
         this.userAgent = userAgent;
     }
 
@@ -277,7 +279,7 @@ public class AJAXRequestData {
      *
      * @return The <code>User-Agent</code> value
      */
-    public String getUserAgent() {
+    public @Nullable String getUserAgent() {
         return userAgent;
     }
 
@@ -293,7 +295,7 @@ public class AJAXRequestData {
      * @param resp The <code>HttpServletResponse</code> instance
      * @return This request data with <code>HttpServletResponse</code> instance applied
      */
-    public AJAXRequestData setHttpServletResponse(final HttpServletResponse resp) {
+    public @NonNull AJAXRequestData setHttpServletResponse(final @Nullable HttpServletResponse resp) {
         this.httpServletResponse = resp;
         return this;
     }
@@ -303,7 +305,7 @@ public class AJAXRequestData {
      *
      * @param servletRequest The HTTP Servlet request to examine
      */
-    public void examineServletRequest(final HttpServletRequest servletRequest) {
+    public void examineServletRequest(final @Nullable HttpServletRequest servletRequest) {
         if (null == servletRequest) {
             return;
         }
@@ -316,7 +318,7 @@ public class AJAXRequestData {
      * @param decoratorId The decorator identifier
      * @return This AJAX request data instance with decorator identifier added
      */
-    public AJAXRequestData addDecoratorId(final String decoratorId) {
+    public @NonNull AJAXRequestData addDecoratorId(final @NonNull String decoratorId) {
         decoratorIds.add(decoratorId);
         return this;
     }
@@ -327,7 +329,7 @@ public class AJAXRequestData {
      * @param decoratorId The decorator identifiers
      * @return This AJAX request data instance with decorator identifiers added
      */
-    public AJAXRequestData addDecoratorIds(final Collection<String> decoratorIds) {
+    public @NonNull AJAXRequestData addDecoratorIds(final @NonNull Collection<String> decoratorIds) {
         final List<String> thisDecoratorIds = this.decoratorIds;
         for (final String decoratorId : decoratorIds) {
             thisDecoratorIds.add(decoratorId);
@@ -347,7 +349,7 @@ public class AJAXRequestData {
      * @throws IOException If an input or output exception occurred
      * @see #optWriter()
      */
-    public OutputStream optOutputStream() throws IOException {
+    public @Nullable OutputStream optOutputStream() throws IOException {
         if (null != httpServletResponse) {
             return httpServletResponse.getOutputStream();
         }
@@ -371,7 +373,7 @@ public class AJAXRequestData {
      * @see #getOutputStream
      * @see #setCharacterEncoding
      */
-    public PrintWriter optWriter() throws IOException {
+    public @Nullable PrintWriter optWriter() throws IOException {
         if (null != httpServletResponse) {
             return httpServletResponse.getWriter();
         }
@@ -388,7 +390,7 @@ public class AJAXRequestData {
      *            (http://www.iana.org/assignments/character-sets)
      * @return <code>true</code> if set; otherwise <code>false</code>
      */
-    public boolean setResponseCharacterEncoding(final String charset) {
+    public boolean setResponseCharacterEncoding(final @NonNull String charset) {
         final HttpServletResponse resp = this.httpServletResponse;
         if (null != resp) {
             resp.setCharacterEncoding(charset);
@@ -406,7 +408,7 @@ public class AJAXRequestData {
      * @param value The value
      * @return <code>true</code> if set; otherwise <code>false</code>
      */
-    public boolean setResponseHeader(final String name, final String value) {
+    public boolean setResponseHeader(final @NonNull String name, final @Nullable String value) {
         final HttpServletResponse resp = this.httpServletResponse;
         if (null != resp) {
             resp.setHeader(name, value);
@@ -438,7 +440,7 @@ public class AJAXRequestData {
      * @param expires The optional expires time, pass <code>-1</code> to set default expiry (+ 1 year)
      * @return <code>true</code> if set; otherwise <code>false</code>
      */
-    public boolean setResponseETag(final String eTag, final long expires) {
+    public boolean setResponseETag(final @NonNull String eTag, final long expires) {
         return setResponseETag(eTag, expires > 0 ? new Date(expires) : null);
     }
 
@@ -450,7 +452,7 @@ public class AJAXRequestData {
      * @param expires The optional expires date, pass <code>null</code> to set default expiry (+ 1 year)
      * @return <code>true</code> if set; otherwise <code>false</code>
      */
-    public boolean setResponseETag(final String eTag, final Date expires) {
+    public boolean setResponseETag(final @NonNull String eTag, final Date expires) {
         final HttpServletResponse resp = this.httpServletResponse;
         if (null != resp) {
             Tools.setETag(eTag, expires, resp);
@@ -464,7 +466,7 @@ public class AJAXRequestData {
      *
      * @return The decorator identifiers
      */
-    public List<String> getDecoratorIds() {
+    public @NonNull List<String> getDecoratorIds() {
         return decoratorIds;
     }
 
@@ -473,7 +475,7 @@ public class AJAXRequestData {
      *
      * @return The session
      */
-    public ServerSession getSession() {
+    public @Nullable ServerSession getSession() {
         return session;
     }
 
@@ -482,7 +484,7 @@ public class AJAXRequestData {
      *
      * @param session The session to set
      */
-    public void setSession(final ServerSession session) {
+    public void setSession(final @Nullable ServerSession session) {
         this.session = session;
     }
 
@@ -491,7 +493,7 @@ public class AJAXRequestData {
      *
      * @return The HTTP Servlet request or <code>null</code> if absent
      */
-    public HttpServletRequest optHttpServletRequest() {
+    public @Nullable HttpServletRequest optHttpServletRequest() {
         return httpServletRequest;
     }
 
@@ -500,7 +502,7 @@ public class AJAXRequestData {
      *
      * @param httpServletRequest The HTTP Servlet request to set
      */
-    public void setHttpServletRequest(final HttpServletRequest httpServletRequest) {
+    public void setHttpServletRequest(final @Nullable HttpServletRequest httpServletRequest) {
         examineServletRequest(httpServletRequest);
         this.httpServletRequest = httpServletRequest;
     }
@@ -530,7 +532,7 @@ public class AJAXRequestData {
      *
      * @return The ETag or <code>null</code>
      */
-    public String getETag() {
+    public @Nullable String getETag() {
         String eTag = this.eTag;
         if (null == eTag) {
             eTag = getHeader("If-None-Match");
@@ -546,7 +548,7 @@ public class AJAXRequestData {
      *
      * @param eTag The ETag to set
      */
-    public void setETag(final String eTag) {
+    public void setETag(final @Nullable String eTag) {
         this.eTag = eTag;
     }
 
@@ -561,7 +563,7 @@ public class AJAXRequestData {
      * @return a <code>String</code>, decoded by the web container, specifying extra path information that comes after the servlet path but
      *         before the query string in the request URL; or <code>null</code> if the URL does not have any extra path information
      */
-    public String getPathInfo() {
+    public @Nullable String getPathInfo() {
         return pathInfo;
     }
 
@@ -570,7 +572,7 @@ public class AJAXRequestData {
      *
      * @param pathInfo The extra path information to set
      */
-    public void setPathInfo(final String pathInfo) {
+    public void setPathInfo(final @Nullable String pathInfo) {
         this.pathInfo = pathInfo;
     }
 
@@ -579,7 +581,7 @@ public class AJAXRequestData {
      *
      * @param servletRequestUri The URI part
      */
-    public void setServletRequestURI(final String servletRequestUri) {
+    public void setServletRequestURI(final @Nullable String servletRequestUri) {
         this.servletRequestUri = servletRequestUri;
     }
 
@@ -588,7 +590,7 @@ public class AJAXRequestData {
      *
      * @return The URI part or <code>null</code> if not applicable
      */
-    public String getSerlvetRequestURI() {
+    public @Nullable String getSerlvetRequestURI() {
         return servletRequestUri;
     }
 
@@ -601,7 +603,7 @@ public class AJAXRequestData {
      * @param value The parameter value
      * @throws NullPointerException If name is <code>null</code>
      */
-    public void putParameter(final String name, final String value) {
+    public void putParameter(final @Nullable String name, final @Nullable String value) {
         if (null == name) {
             throw new NullPointerException("name is null");
         }
@@ -623,7 +625,7 @@ public class AJAXRequestData {
      * @param name The parameter name
      * @return <code>true</code> if such a parameter exists; otherwise <code>false</code> if absent
      */
-    public boolean containsParameter(final String name) {
+    public boolean containsParameter(final @Nullable String name) {
         if (null == name) {
             throw new NullPointerException("name is null");
         }
@@ -637,7 +639,7 @@ public class AJAXRequestData {
      * @return The <code>int</code> value or <code>-1</code> if absent
      * @throws OXException If parameter value is not a number
      */
-    public int getIntParameter(final String name) throws OXException {
+    public int getIntParameter(final @Nullable String name) throws OXException {
         if (null == name) {
             throw new NullPointerException("name is null");
         }
@@ -657,7 +659,7 @@ public class AJAXRequestData {
      *
      * @return The parameters as a {@link Map map}
      */
-    public Map<String, String> getParameters() {
+    public @NonNull Map<String, String> getParameters() {
         return new HashMap<String, String>(params);
     }
 
@@ -672,7 +674,7 @@ public class AJAXRequestData {
      * @param name The parameter name
      * @return The values as an array
      */
-    public String[] getParameterValues(final String name) {
+    public String[] getParameterValues(final @Nullable String name) {
         if (null == name) {
             throw new NullPointerException("name is null");
         }
@@ -690,7 +692,7 @@ public class AJAXRequestData {
      * @return The value mapped to given parameter name or <code>null</code> if not present
      * @throws NullPointerException If name is <code>null</code>
      */
-    public String getParameter(final String name) {
+    public @Nullable String getParameter(final @Nullable String name) {
         if (null == name) {
             throw new NullPointerException("name is null");
         }
@@ -705,7 +707,7 @@ public class AJAXRequestData {
      * @throws NullPointerException If name is <code>null</code>
      * @throws OXException If no such parameter exists
      */
-    public String checkParameter(final String name) throws OXException {
+    public @NonNull String checkParameter(final @Nullable String name) throws OXException {
         if (null == name) {
             throw new NullPointerException("name is null");
         }
@@ -724,7 +726,7 @@ public class AJAXRequestData {
      * @throws NullPointerException If name is <code>null</code>
      * @throws OXException If no such parameter exists
      */
-    public String requireParameter(final String name) throws OXException {
+    public @NonNull String requireParameter(final @Nullable String name) throws OXException {
         return checkParameter(name);
     }
 
@@ -736,7 +738,7 @@ public class AJAXRequestData {
      * @throws NullPointerException If name is <code>null</code>
      * @throws OXException If no such parameter exists or its value is empty
      */
-    public String nonEmptyParameter(final String name) throws OXException {
+    public @NonNull String nonEmptyParameter(final @Nullable String name) throws OXException {
         if (null == name) {
             throw new NullPointerException("name is null");
         }
@@ -754,7 +756,7 @@ public class AJAXRequestData {
      * @return The <code>int</code> array
      * @throws OXException If an error occurs
      */
-    public int[] checkIntArray(final String name) throws OXException {
+    public @NonNull int[] checkIntArray(final @NonNull String name) throws OXException {
         final String parameter = getParameter(name);
         if (null == parameter) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
@@ -786,7 +788,7 @@ public class AJAXRequestData {
      * @return The <code>String</code> array
      * @throws OXException If parameter is absent
      */
-    public String[] checkParameterArray(final String name) throws OXException {
+    public @NonNull String[] checkParameterArray(final @Nullable String name) throws OXException {
         final String parameter = getParameter(name);
         if (null == parameter) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
@@ -802,7 +804,7 @@ public class AJAXRequestData {
      * @return The coerced value
      * @throws OXException if coercion fails
      */
-    public <T> T getParameter(final String name, final Class<T> coerceTo) throws OXException {
+    public @NonNull <T> T getParameter(final @Nullable String name, final @NonNull Class<T> coerceTo) throws OXException {
         final String value = getParameter(name);
         try {
             return ServerServiceRegistry.getInstance().getService(StringParser.class).parse(value, coerceTo);
@@ -820,7 +822,7 @@ public class AJAXRequestData {
      *
      * @return The {@link Iterator iterator} for available parameter names
      */
-    public Iterator<String> getParameterNames() {
+    public @NonNull Iterator<String> getParameterNames() {
         return params.keySet().iterator();
     }
 
@@ -830,7 +832,7 @@ public class AJAXRequestData {
      * @param nonMatchingParameterNames The non-matching parameter names
      * @return An {@link Iterator iterator} for non-matching parameters
      */
-    public Iterator<Entry<String, String>> getNonMatchingParameters(final Collection<String> nonMatchingParameterNames) {
+    public @NonNull Iterator<Entry<String, String>> getNonMatchingParameters(final Collection<String> nonMatchingParameterNames) {
         final Map<String, String> clone = new HashMap<String, String>(params);
         clone.keySet().removeAll(nonMatchingParameterNames);
         return clone.entrySet().iterator();
@@ -842,7 +844,7 @@ public class AJAXRequestData {
      * @param matchingParameterNames The matching parameter names
      * @return An {@link Iterator iterator} for matching parameters
      */
-    public Iterator<Entry<String, String>> getMatchingParameters(final Collection<String> matchingParameterNames) {
+    public @NonNull Iterator<Entry<String, String>> getMatchingParameters(final Collection<String> matchingParameterNames) {
         final Map<String, String> clone = new HashMap<String, String>(params);
         clone.keySet().retainAll(matchingParameterNames);
         return clone.entrySet().iterator();
@@ -855,7 +857,7 @@ public class AJAXRequestData {
      * @throws OXException If data object is <code>null</code>
      * @see #getData()
      */
-    public Object requireData() throws OXException {
+    public @NonNull Object requireData() throws OXException {
         final Object data = this.data;
         if (null == data) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
@@ -869,7 +871,7 @@ public class AJAXRequestData {
      * @return The data object or <code>null</code> if not available
      * @see #requireData()
      */
-    public Object getData() {
+    public @Nullable Object getData() {
         return data;
     }
 
@@ -878,7 +880,7 @@ public class AJAXRequestData {
      *
      * @param data The data object to set
      */
-    public void setData(final Object data) {
+    public void setData(final @Nullable Object data) {
         this.data = data;
     }
 
@@ -887,7 +889,7 @@ public class AJAXRequestData {
      *
      * @return The format
      */
-    public String getFormat() {
+    public @Nullable String getFormat() {
         return format;
     }
 
@@ -896,7 +898,7 @@ public class AJAXRequestData {
      *
      * @param format The format to set
      */
-    public void setFormat(final String format) {
+    public void setFormat(final @Nullable String format) {
         this.format = format;
     }
 
@@ -917,7 +919,7 @@ public class AJAXRequestData {
      * @param request The request data
      * @return <code>true</code> if extended response is indicated; otherwise <code>false</code>
      */
-    public boolean isExtendedResponse(final AJAXRequestData request) {
+    public boolean isExtendedResponse(final @NonNull AJAXRequestData request) {
         return AJAXRequestDataTools.parseBoolParameter(ExtendedResponse.PARAM_EXTENDED_RESPONSE, request);
     }
 
@@ -956,8 +958,9 @@ public class AJAXRequestData {
      * @return The upload stream or <code>null</code> if not available
      * @throws IOException If an I/O error occurs
      */
-    public InputStream getUploadStream() throws IOException {
-        return uploadStreamProvider.getInputStream();
+    public @Nullable InputStream getUploadStream() throws IOException {
+        final InputStreamProvider usp = uploadStreamProvider;
+        return null == usp ? null : usp.getInputStream();
     }
 
     /**
@@ -965,7 +968,7 @@ public class AJAXRequestData {
      *
      * @param uploadStream The upload stream provider to set
      */
-    public void setUploadStreamProvider(final InputStreamProvider uploadStreamProvider) {
+    public void setUploadStreamProvider(final @Nullable InputStreamProvider uploadStreamProvider) {
         this.uploadStreamProvider = uploadStreamProvider;
     }
 
@@ -976,7 +979,7 @@ public class AJAXRequestData {
      * @param mandatoryParameters The mandatory parameters expected.
      * @return A list of missing parameter names
      */
-    public List<String> getMissingParameters(final String... mandatoryParameters) {
+    public @NonNull List<String> getMissingParameters(final String... mandatoryParameters) {
         final List<String> missing = new ArrayList<String>(mandatoryParameters.length);
         for (final String paramName : mandatoryParameters) {
             if (!params.containsKey(paramName)) {
@@ -1011,7 +1014,7 @@ public class AJAXRequestData {
      * @param header The header name
      * @param value The header value
      */
-    public void setHeader(final String header, final String value) {
+    public void setHeader(final @Nullable String header, final @Nullable String value) {
         if (!isEmpty(header)) {
             if (null == value) {
                 headers.remove(header);
@@ -1026,7 +1029,7 @@ public class AJAXRequestData {
      *
      * @return The header value or <code>null</code>
      */
-    public String getHeader(final String header) {
+    public String getHeader(final @Nullable String header) {
         return headers.get(header);
     }
 
@@ -1044,7 +1047,7 @@ public class AJAXRequestData {
      *
      * @return The headers
      */
-    public Map<String, String> getHeaders() {
+    public @NonNull Map<String, String> getHeaders() {
         return new HashMap<String, String>(headers);
     }
 
@@ -1078,7 +1081,7 @@ public class AJAXRequestData {
      * @return The file, or null if no file field of this name was found
      * @throws OXException If upload files cannot be processed
      */
-    public UploadFile getFile(final String name) throws OXException {
+    public @Nullable UploadFile getFile(final String name) throws OXException {
         processUpload();
         for (final UploadFile file : files) {
             if (file.getFieldName().equals(name)) {
