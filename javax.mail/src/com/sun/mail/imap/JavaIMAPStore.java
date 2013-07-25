@@ -83,7 +83,7 @@ public class JavaIMAPStore extends IMAPStore {
         }
         Semaphore s = loginSemaphores.get(url);
         if (null == s) {
-            Semaphore ns = new Semaphore(permits);
+            final Semaphore ns = new Semaphore(permits);
             s = loginSemaphores.putIfAbsent(url, ns);
             if (null == s) {
                 s = ns;
@@ -192,7 +192,7 @@ public class JavaIMAPStore extends IMAPStore {
     protected void login(final IMAPProtocol p, final String u, final String pw) throws ProtocolException {
         /*-
          * Get semaphore (if enabled)
-         * 
+         *
          * - Include account identifier for account-wise login tracking
          */
         final Semaphore semaphore = initLoginSemaphore(new URLName("imap", p.getHost(), p.getPort(), /*Integer.toString(accountId)*/null, u, pw), maxNumConnections);
@@ -241,14 +241,28 @@ public class JavaIMAPStore extends IMAPStore {
     }
 
     @Override
+    protected void finalize() throws Throwable {
+        try {
+            super.finalize();
+        } finally {
+            releaseSemaphore();
+        }
+    }
+
+    @Override
     protected void logout(final IMAPProtocol protocol) throws ProtocolException {
         try {
             super.logout(protocol);
         } finally {
-            final Semaphore semaphore = this.semaphore;
-            if (null != semaphore) {
-                semaphore.release();
-            }
+            releaseSemaphore();
+        }
+    }
+
+    private void releaseSemaphore() {
+        final Semaphore semaphore = this.semaphore;
+        if (null != semaphore) {
+            semaphore.release();
+            this.semaphore = null;
         }
     }
 
