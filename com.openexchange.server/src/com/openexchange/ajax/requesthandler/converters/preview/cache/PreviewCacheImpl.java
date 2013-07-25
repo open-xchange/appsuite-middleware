@@ -440,6 +440,9 @@ public final class PreviewCacheImpl implements PreviewCache, EventHandler {
         if (databaseService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
+        if (null == id) {
+            throw PreviewExceptionCodes.ERROR.create("Missing identifier.");
+        }
         final Connection con = databaseService.getWritable(contextId);
         boolean committed = true;
         PreparedStatement stmt = null;
