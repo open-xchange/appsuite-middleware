@@ -192,11 +192,15 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         if (!validated) {
             return Boolean.FALSE;
         }
+        if (ignoreInvalidTransport) {
+            // No need to check transport settings then
+            return Boolean.TRUE;
+        }
         // Now check transport server URL, if a transport server is present
         if (!isEmpty(accountDescription.getTransportServer())) {
             validated = checkTransportServerURL(accountDescription, session, warnings);
         }
-        return Boolean.valueOf(validated || ignoreInvalidTransport);
+        return Boolean.valueOf(validated);
     }
 
     static boolean checkMailServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws OXException {
