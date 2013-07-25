@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang.Validate;
 import org.json.JSONArray;
@@ -91,6 +92,8 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     protected AtomicReference<RTSession> sessionRef;
 
+    protected AtomicBoolean isActive = new AtomicBoolean(false);
+
 
     protected AbstractRTConnection() {
         super();
@@ -106,6 +109,7 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
         sessionRef = new AtomicReference<RTSession>();
         login(messageHandler);
         reconnect();
+        isActive.set(true);
     }
 
     /*
@@ -133,6 +137,11 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     @Override
     public void send(JSONValue message) throws RTException {
+        if (!isActive.get()) {
+            LOG.warn("Connection is already closed. Message getting lost: " + message.toString());
+            return;
+        }
+
         if(message.isArray()) {
             Map<Long, JSONObject> addSequence = protocol.addSequence(message.toArray());
             for (Entry<Long, JSONObject> entry : addSequence.entrySet()) {
@@ -150,12 +159,18 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     @Override
     public void post(JSONValue message) throws RTException {
+        if (!isActive.get()) {
+            LOG.warn("Connection is already closed. Message getting lost: " + message.toString());
+            return;
+        }
+
         doSend(message);
         protocol.resetPingTimeout();
     }
 
     @Override
     public void close() throws RTException {
+        isActive.set(false);
         protocol.release();
         Thread deliverer = delivererRef.get();
         if (deliverer != null) {
@@ -165,11 +180,32 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
         resendBuffer.stop();
         logout();
+        doClose();
     }
 
     /*
      * RTProtocolCallback overrides
      */
+    @Override
+    public void sendACK(JSONObject ack) throws RTException {
+        if (!isActive.get()) {
+            LOG.warn("Connection is already closed. Ack will not be sent: " + ack.toString());
+            return;
+        }
+
+        doSendACK(ack);
+    }
+
+    @Override
+    public void sendPing(JSONObject ping) throws RTException {
+        if (!isActive.get()) {
+            LOG.warn("Connection is already closed. Ping will not be sent: " + ping.toString());
+            return;
+        }
+
+        doSendPing(ping);
+    }
+
     @Override
     public void onTimeout() {
         try {
@@ -202,6 +238,12 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
     protected abstract void reconnect() throws RTException;
 
     protected abstract void doSend(JSONValue message) throws RTException;
+
+    protected abstract void doSendACK(JSONObject ack) throws RTException;
+
+    protected abstract void doSendPing(JSONObject ping) throws RTException;
+
+    protected abstract void doClose();
 
     /*
      * Convenience methods

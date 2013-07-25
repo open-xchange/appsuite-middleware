@@ -153,7 +153,7 @@ public class RTConnectionTest extends AbstractRTConnection implements RTMessageH
     }
 
     @Override
-    public void sendACK(JSONObject ack) throws RTException {
+    public void doSendACK(JSONObject ack) throws RTException {
         try {
             JSONArray jsonArray = ack.getJSONArray("seq");
             lastAck = jsonArray.getLong(0);
@@ -163,26 +163,17 @@ public class RTConnectionTest extends AbstractRTConnection implements RTMessageH
     }
 
     @Override
-    public void sendPing(JSONObject ping) throws RTException {
+    public void doSendPing(JSONObject ping) throws RTException {
         lastPing = ping;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.client.impl.connection.AbstractRTConnection#reconnect()
-     */
     @Override
-    protected void reconnect() throws RTException {
-        // TODO Auto-generated method stub
+    protected void reconnect() throws RTException {}
 
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.realtime.client.impl.connection.AbstractRTConnection#doSend(org.json.JSONValue)
-     */
     @Override
-    protected void doSend(JSONValue message) throws RTException {
-        // TODO Auto-generated method stub
+    protected void doSend(JSONValue message) throws RTException {}
 
-    }
+    @Override
+    protected void doClose() {}
 
 }

@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * {@link PingPongTimer}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class PingPongTimer implements Runnable {
@@ -84,6 +84,7 @@ public class PingPongTimer implements Runnable {
 
     @Override
     public void run() {
+        LOG.info("PingPongTimer started...");
         while (true) {
             if (Thread.interrupted()) {
                 logInterruption();

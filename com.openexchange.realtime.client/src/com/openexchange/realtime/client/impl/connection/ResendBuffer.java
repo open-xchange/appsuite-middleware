@@ -81,6 +81,7 @@ public class ResendBuffer {
         this.connection = connection;
         timer = new Timer();
         activeTimers = new ConcurrentHashMap<Long, ResendTask>();
+        LOG.info("ResendBuffer started...");
     }
 
     public void put(long seq, JSONValue message) {
@@ -98,6 +99,7 @@ public class ResendBuffer {
     }
 
     public void stop() {
+        LOG.info("ResendBuffer shuts down...");
         timer.cancel();
     }
 
