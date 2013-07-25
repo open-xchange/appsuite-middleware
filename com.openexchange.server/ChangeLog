@@ -2,6 +2,7 @@
 
  - Fix for bug 27345: Suppress "Shared files" folder if it does not contain user-visible subfolders
  - Fix for bug 27647: Don't consider HTML content containing <img> tags as empty content
+ - Fix for bug 26920: Ensure versions are deleted prior to deleting document
 
 * 2013-07-24 - martin.herfurth@open-xchange.com
 
