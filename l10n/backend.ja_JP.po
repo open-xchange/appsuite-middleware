@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.ja_JP\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-07-19 17:05+0900\n"
+"PO-Revision-Date: 2013-07-24 17:19+0900\n"
 "Last-Translator: \n"
 "Language-Team:  <ja@li.org>\n"
 "Language: \n"
@@ -217,6 +217,7 @@ msgstr "次の場所にキャッシュ構成ファイルが見つかりません
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/TextXtractExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tokenlogin/src/com/openexchange/tokenlogin/TokenLoginExceptionMessages.java:73
 msgid "An I/O error occurred: %1$s"
 msgstr "I/O エラーが発生しました: %1$s"
 
@@ -1039,6 +1040,7 @@ msgstr "このメールは、このアポイントで使用する施設 %1$s を
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/TextXtractExceptionMessages.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tokenlogin/src/com/openexchange/tokenlogin/TokenLoginExceptionMessages.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.voipnow.json/src/com/openexchange/voipnow/json/VoipNowExceptionMessages.java:62
 msgid "An error occurred: %1$s"
@@ -1840,6 +1842,70 @@ msgstr "モジュール '%s' がレジストリにありません。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.documentation/src/com/openexchange/documentation/internal/DocumentationExceptionMessage.java:85
 msgid "The container '%s' is not known in the registry."
 msgstr "コンテナ '%s' がレジストリにありません。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:63
+msgid "The path \"%1$s\" is invalid"
+msgstr "パス \"%1$s\" が無効です。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:64
+msgid "The path \"%1$s\" was not found"
+msgstr "パス \"%1$s\" が見つかりませんでした。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:65
+msgid "The file \"%1$s\" was not found at \"%2$s\""
+msgstr "\"%2$s\" にファイル \"%1$s\" が見つかりませんでした。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:66
+msgid "An I/O error occurred: \"%1$s\""
+msgstr "次の I/O エラーが発生しました: \"%1$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:67
+msgid "The file offset \"%1$d\" is invalid"
+msgstr "ファイル オフセット \"%1$d\" が無効です。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:68
+msgid "Unexpected database error: \"%1$s\""
+msgstr "次の予期しないデータベース エラーが発生しました: \"%1$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:69
+msgid "The file \"%1$s\" with checksum \"%2$s\" was not found at \"%3$s\""
+msgstr "チェックサム \"%2$s\" のファイル \"%1$s\" は \"%3$s\" にありません。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:70
+msgid "No checksum for file \"%1$s\" available"
+msgstr "ファイル \"%1$s\" のチェックサムが利用できません。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:71
+msgid "Checksum \"%1$s\" for uploaded file \"%2$s\" different from \"%3$s\""
+msgstr "アップロードされたファイル \"%2$s\" のチェックサム \"%1$s\" が \"%3$s\" と異なっています。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:72
+msgid "The directory \"%1$s\" with checksum \"%2$s\""
+msgstr "ディレクトリ \"%1$s\" のチェックサムは \"%2$s\" です。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:73
+msgid "You are not allowed to delete the file \"%1$s\" at \"%2$s\""
+msgstr "\"%2$s\" にあるファイル \"%1$s\" の削除は許可されていません。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:74
+msgid "You are not allowed to create files at \"%1$s\""
+msgstr "\"%1$s\" へのファイルの作成は許可されていません。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:75
+msgid "You are not allowed to modify the file \"%1$s\" at \"%2$s\""
+msgstr "\"%2$s\" にあるファイル \"%1$s\" の編集は許可されていません。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:76
+msgid "You are not allowed to delete the directory \"%1$s\""
+msgstr "ディレクトリ \"%1$s\" の削除は許可されていません。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:77
+msgid "You are not allowed to create directories at \"%1$s\""
+msgstr "\"%1$s\" へのディレクトリの作成は許可されていません。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:78
+msgid "The allowed Quota is reached"
+msgstr "許可された割当量に達しました。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:63
 msgid "An error occurred for action: %1$s"
@@ -2968,12 +3034,16 @@ msgid "No such element."
 msgstr "そのような要素はありません。"
 
 #. An unexpected error occurred: %1$s
+#. *
+#. * Inserted for those exception that will turn to an <code>OXException</code> in future
+#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:75
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index/src/com/openexchange/index/IndexExceptionMessages.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.langdetect/src/com/openexchange/langdetect/LanguageDetectionExceptionMessages.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:149
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:355
 msgid "An unexpected error occurred: %1$s"
 msgstr "次の予期しないエラーが発生しました: %1$s"
 
@@ -3014,6 +3084,7 @@ msgstr "Grizzly サーバを起動できませんでした。"
 
 #. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
@@ -3065,8 +3136,8 @@ msgstr "トークンのフォーマットが無効か、サポートされてい
 
 #. The argument contains the filename of the .po file that could not be read.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.i18n/src/com/openexchange/i18n/parsing/I18NErrorStrings.java:74
-msgid "An IOException ocurred reading .po file %s."
-msgstr ".po ファイル %s の読み込み中に IOException が発生しました。"
+msgid "An I/O error ocurred reading .po file %s."
+msgstr ".po ファイル %s の読み込み中に I/O エラーが発生しました。"
 
 #. Help //
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.i18n/src/com/openexchange/i18n/parsing/I18NErrorStrings.java:77
@@ -3600,7 +3671,7 @@ msgid ""
 "FQL response body cannot be parsed to a JSON value:\n"
 "%1$s"
 msgstr ""
-"FQL 応答のボディを JSON 値として解析できません: \n"
+"FQL レスポンスのボディを JSON 値として解析できません: \n"
 "%1$s"
 
 #. XML parse error: %1$s.
@@ -3913,7 +3984,7 @@ msgstr "次のセキュリティ上の問題が発生しました: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:72
 msgid "Response is not of type: %1$s"
-msgstr "応答が次のタイプではありません: %1$s"
+msgstr "レスポンスが次のタイプではありません: %1$s"
 
 #. Unexpected status %1$s (%2$s)
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:78
@@ -4644,6 +4715,7 @@ msgid "Invalid session identifier: %1$s"
 msgstr "次のセッション識別子は無効です: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.json/src/com/openexchange/publish/json/PublicationJSONExceptionMessage.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:78
 msgid "An unexpected error occurred: %s"
 msgstr "次の予期しないエラーが発生しました: %s"
 
@@ -4652,6 +4724,7 @@ msgid "Missing value for parameter %s"
 msgstr "パラメータ %s の値が見つかりません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.json/src/com/openexchange/publish/json/PublicationJSONExceptionMessage.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:70
 msgid "Unknown action: %s"
 msgstr "次の動作が不明です: %s"
 
@@ -4766,8 +4839,8 @@ msgid "Cannot find the publication site."
 msgstr "公開サイトが見つかりません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:72
-msgid "%s has already been taken (field: %s)"
-msgstr "%s は既に削除されています (フィールド: %s)。"
+msgid "%1$s has already been taken (field: %2$s)"
+msgstr "%1$s は既に削除されています (フィールド: %2$s)。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:74
 msgid "You do not have the permissions to perform the chosen action (%s)"
@@ -5333,7 +5406,7 @@ msgstr "次のストレージ タイプがサポートされていません: %1$
 #. Folder "%1$s" could not be found in tree "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:131
 msgid "Folder \"%1$s\" could not be found in tree \"%2$s\"."
-msgstr "フォルダ \"%1$s\" がツリー \"%2$s\" に見つかりませんでした。"
+msgstr "ツリー \"%2$s\" にフォルダ \"%1$s\" が見つかりませんでした。"
 
 #. No default folder available for content type "%1$s" in tree "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:134
@@ -5526,7 +5599,7 @@ msgstr "指定したオブジェクトへの添付中にエラーが発生しま
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:93
 msgid "The object could not be detached because the update to an underlying object failed."
-msgstr "基本オブジェクトの更新に失敗したため、オブジェクトをデタッチできませんでした。"
+msgstr "基本オブジェクトの更新に失敗したため、このオブジェクトを切り離すことができませんでした。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:95
 msgid "Invalid parameter sent in request. Parameter '%1$s' was '%2$s' which does not look like a number."
@@ -5695,8 +5768,8 @@ msgid "Cannot resolve recurrence position because neither the recurring position
 msgstr "定期的なアポイントの順番または日付が不明なため、それらのアポイントの順番を解決できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:156
-msgid "Missing start date, unable to calculate recurring."
-msgstr "開始日が見つからないため、定期的なアポイントの繰り返しを処理できません。"
+msgid "Missing start date, unable to calculate recurrence."
+msgstr "開始日がないため、繰り返しを処理できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:158
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:160
@@ -5787,12 +5860,12 @@ msgid "You do not have the appropriate permissions to create an object"
 msgstr "オブジェクトを生成する権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:214
-msgid "You are trying to create a new recurring from an exception. This is not possible."
-msgstr "新しい繰り返しパターンを例外から作成しようとしていますが、その操作は許可されていません。"
+msgid "You are trying to create a new recurring appointment from an exception. This is not possible."
+msgstr "新しい定期的なアポイントを例外から作成しようとしていますが、その操作は許可されていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:216
-msgid "You can not move one element of a recurring appointment into another folder."
-msgstr "定期的なアポイントの 1 つの要素を他のフォルダに移動できません。"
+msgid "You cannot move one instance of a recurring appointment into another folder."
+msgstr "定期的なアポイントの中の 1 つのアポイントを他のフォルダに移動できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:218
 msgid "A database update exception occurred."
@@ -6004,8 +6077,8 @@ msgid "Unnecessary recurrence information (%1$s) for type %2$s"
 msgstr "タイプ %2$s に繰り返し情報 (%1$s) は必要ありません"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:358
-msgid "Unable to calculate given position. Seems to be a delete exception or outside range"
-msgstr "指定した順番を処理できません。削除の例外に指定されているか、範囲外の可能性があります。"
+msgid "The recurring appointment has been deleted or is outside of the range of the recurrence."
+msgstr "定期的なアポイントが削除されたか、定期的なアポイントが繰り返しの範囲外です。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:360
 msgid "Changing an exception into a series is not supported."
@@ -7825,6 +7898,10 @@ msgstr "ファイル名にスラッシュは使用できません。"
 msgid "File name contains illegal characters."
 msgstr "ファイル名に無効な文字が含まれています。"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:129
+msgid "New file versions can't be saved with an offset."
+msgstr "指定されたオフセットで新規のファイル バージョンを保存できません。"
+
 #. *
 #. * A property from the ldap.properties file is missing.
 #.
@@ -8287,10 +8364,10 @@ msgstr "次の仕事の属性が不明です: %d"
 msgid "Date range in search must contain 2 and not %d values."
 msgstr "検索に日付範囲を指定する場合、%d 個ではなく、2 個の値が必要です。"
 
-#. Cannot decrease number of attachments below zero.
+#. Cannot detach more attachments than actually available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:126
-msgid "Cannot decrease number of attachments below zero."
-msgstr "添付ファイルの数を 0 未満にすることはできません。"
+msgid "Cannot detach more attachments than actually available."
+msgstr "実際の数以上の添付ファイルを切り離すことはできません。"
 
 #. You are not allowed to read the contents of folder %1$s (%2$d).
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:129
@@ -9502,73 +9579,69 @@ msgstr "メール サーバ上の割当量を超過しました。エラー メ�
 msgid "The quota on mail server \"%1$s\" exceeded with login %2$s (user=%3$s, context=%4$s). Error message: %5$s"
 msgstr "ログイン %2$s (ユーザ = %3$s、コンテキスト = %4$s) のアクセス先メール サーバ \"%1$s\" 上の割当量を超過しました。エラー メッセージ: %5$s"
 
-#. *
-#. * A command to mail server failed. Server response: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:271
-msgid "A command to mail server failed. Server response: %1$s."
-msgstr "メール サーバへのコマンドが失敗しました。サーバの応答: %1$s"
+#. A command sent to mail server failed. Server response: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:269
+msgid "A command sent to mail server failed. Server response: %1$s"
+msgstr "メール サーバに送信されたコマンドが失敗しました。サーバからの応答: %1$s"
 
 #. *
 #. * A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:276
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:274
 msgid "A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s"
-msgstr "ログイン %2$s (ユーザ = %3$s、コンテキスト = %4$s) のアクセス先メール サーバ %1$s へのコマンドが失敗しました。サーバの応答: %5$s"
+msgstr "ログイン %2$s (ユーザ = %3$s、コンテキスト = %4$s) のアクセス先メール サーバ %1$s へのコマンドが失敗しました。サーバからの応答: %5$s"
 
 #. *
 #. * Mail server indicates a bad command. Server response: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:281
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:279
 msgid "Mail server indicates a bad command. Server response: %1$s"
-msgstr "メール サーバが無効なコマンドを示しています。サーバ応答: %1$s"
+msgstr "メール サーバが無効なコマンドを示しています。サーバからの応答: %1$s"
 
 #. *
 #. * Bad command indicated by mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:286
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:284
 msgid "Bad command indicated by mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s"
 msgstr "ログイン %2$s (ユーザ = %3$s、コンテキスト = %4$s) のアクセス先メール サーバ %1$s が無効なコマンドを示しました。サーバの応答: %5$s"
 
 #. *
 #. * Error in mail server protocol. Error message: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:291
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:289
 msgid "Error in mail server protocol. Error message: %1$s"
 msgstr "メール サーバのプロトコルにエラーが発生しました。エラーメッセージ: %1$s "
 
-#. *
-#. * An error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:296
-msgid "Error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s"
-msgstr "ログイン %2$s (ユーザ = %3$s、コンテキスト = %4$s) のアクセス先メール サーバ %1$s へのプロトコル エラーが発生しました。エラー メッセージ: %5$s"
+#. Protocol error in data sent to to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:292
+msgid "Protocol error in data sent to to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s"
+msgstr "ログイン %2$s (ユーザ = %3$s、コンテキスト = %4$s) のアクセス先メール サーバ %1$s に送信されたデータにプロトコル エラーが発生しました。エラー メッセージ: %5$s"
 
 #. *
 #. * Message could not be sent: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:301
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:297
 msgid "Message could not be sent: %1$s"
 msgstr "次のメッセージを送信できませんでした: %1$s"
 
 #. *
 #. * Message could not be sent: %1$s %2$s (arbitrary server information)
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:306
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:302
 msgid "Message could not be sent: %1$s %2$s"
 msgstr "次のメッセージを送信できませんでした: %1$s %2$s"
 
 #. *
 #. * Message cannot be displayed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:311
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:307
 msgid "Message cannot be displayed."
 msgstr "メッセージを表示できません。"
 
 #. *
 #. * Wrong or missing login data to access mail transport server %1$s. Error message from mail transport server: %2$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:316
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:312
 msgid "Wrong or missing login data to access mail transport server %1$s. Error message from mail transport server: %2$s"
 msgstr "メール トランスポート サーバ %1$s にアクセスするためのログイン データが誤っているか見つかりません。メール トランスポート サーバからのエラー メッセージ: %2$s"
 
@@ -9576,59 +9649,59 @@ msgstr "メール トランスポート サーバ %1$s にアクセスするた�
 #. * Wrong or missing login data to access mail transport server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail
 #. * transport server: %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:322
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:318
 msgid "Wrong or missing login data to access mail transport server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail transport server: %5$s"
 msgstr "ログイン %2$s (ユーザ = %3$s、コンテキスト = %4$s) のアクセス先メール トランスポート サーバ %1$s にアクセスするためのログイン データが誤っているか、見つかりません。メール トランスポート サーバからのエラー メッセージ: %5$s"
 
 #. *
 #. * Error processing mail server response. The administrator has been informed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:327
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:323
 msgid "Error processing mail server response. The administrator has been informed."
-msgstr "メール サーバの応答の処理中にエラーが発生しました。このエラーは、管理者に通知されました。"
+msgstr "メール サーバからの応答の処理中にエラーが発生しました。このエラーは管理者に通知されました。"
 
 #. *
 #. * Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:332
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:328
 msgid "Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed."
 msgstr "ログイン %2$s (ユーザ = %3$s、コンテキスト = %4$s) のアクセス先メール サーバからの応答の処理中にエラー %1$s が発生しました。このエラーは、管理者に通知されました。"
 
 #. *
 #. * I/O error "%1$s" occurred in communication with "%2$s" mail server for login %3$s (user=%4$s, context=%5$s).
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:342
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:338
 msgid "I/O error \"%1$s\" occurred in communication with \"%2$s\" mail server for login %3$s (user=%4$s, context=%5$s)."
 msgstr "ログイン %3$s (ユーザ = %4$s、コンテキスト = %5$s) のアクセス先メール サーバ %2$s への接続中に I/O エラー \"%1$s\" が発生しました。"
 
 #. *
 #. * Error processing mail server response. The administrator has been informed. Error message: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:347
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:343
 msgid "Error processing mail server response. The administrator has been informed. Error message: %1$s"
-msgstr "メール サーバの応答の処理中にエラーが発生しました。管理者に通知されました。エラー メッセージ: %1$s"
+msgstr "メール サーバからの応答の処理中にエラーが発生しました。管理者に通知されました。エラー メッセージ: %1$s"
 
 #. *
 #. * Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed. Error
 #. * message: %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:353
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:349
 msgid "Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed. Error message: %5$s"
-msgstr "ログイン %2$s (ユーザ = %3$s、コンテキスト = %4$s) についてのメール サーバの応答の処理中にエラー %1$s が発生しました。管理者に通知されました。エラー メッセージ: %5$s"
+msgstr "ログイン %2$s (ユーザ = %3$s、コンテキスト = %4$s) についてのメール サーバからの応答の処理中にエラー %1$s が発生しました。管理者に通知されました。エラー メッセージ: %5$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:355
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:351
 msgid "That mailbox is already in use by another process. Please try again later."
 msgstr "このメールボックスは、既に他のプロセスによって使用されています。後でもう一度やり直してください。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:355
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:351
 msgid "Error message: %1$s"
 msgstr "エラー メッセージ: %1$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:357
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:353
 msgid "That mailbox is already in use by another process on %1$s mail server for login %2$s (user=%3$s, context=%4$s). Please try again later."
 msgstr "ログイン %2$s (ユーザ = %3$s、コンテキスト = %4$s) のアクセス先メール サーバ %1$s 上のメールボックスは、既に他のプロセスによって使用されています。後でもう一度やり直してください。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:357
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:353
 msgid "Error message: %5$s"
 msgstr "エラー メッセージ: %5$s"
 
@@ -9869,10 +9942,10 @@ msgstr "次の IO エラーが発生しました: %s"
 msgid "File store could not be accessed: %s"
 msgstr "ファイル ストアにアクセスできませんでした: %s"
 
-#. Cannot create directory \"%1$s\" for FileStorage.
+#. Cannot create directory "%1$s" in file storage.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:76
-msgid "Cannot create directory \"%1$s\" for FileStorage."
-msgstr "ファイル ストレージのディレクトリ \"%1$s\" を作成できません。"
+msgid "Cannot create directory \"%1$s\" in file storage."
+msgstr "ファイル ストレージにディレクトリ \"%1$s\" を作成できません。"
 
 #. Unsupported encoding.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:79
@@ -9899,20 +9972,35 @@ msgstr "次のエントリの計算中に 'Depth' の不一致が検出されま
 msgid "Cannot remove lock file."
 msgstr "ロック ファイルを削除できません。"
 
-#. Cannot create lock file here %1$s. Please check for a stale .lock file, permissions or too long usage of the filestore.
+#. Cannot create lock file here %1$s. Please check for a stale .lock file, inappropriate permissions or usage of the file store for too long a time.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:94
-msgid "Cannot create lock file here %1$s. Please check for a stale .lock file, permissions or too long usage of the file store."
-msgstr "ここにロック ファイルを作成できません (%1$s)。古い .lock ファイルの有無、権限、ファイル ストアの使用が長過ぎていないかをチェックしてください。"
+msgid "Cannot create lock file here %1$s. Please check for a stale .lock file, inappropriate permissions or usage of the file store for too long a time."
+msgstr "ここにロック ファイル %1$s を作成できません。古い .lock ファイルの有無や権限をチェックしてください。また、ファイル ストアを長時間使用していないかチェックしてください。"
 
-#. Eliminating the FileStorage failed.
+#. Eliminating the file storage failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:97
-msgid "Eliminating the FileStorage failed."
-msgstr "FileStorage の削除に失敗しました。"
+msgid "Eliminating the file storage failed."
+msgstr "ファイル ストレージの削除に失敗しました。"
 
-#. File does not exist in filestore \"%1$s\". Consider running consistency tool.
+#. File does not exist in file storage "%1$s". Consider running consistency tool.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:100
 msgid "File does not exist in file store \"%1$s\". Consider running the consistency tool."
 msgstr "ファイルがファイル ストア \"%1$s\" に存在しません。整合性検査ツールを使用してください。"
+
+#. The requested range (offset: %1$d, length: %2$d) for the file \"%3$s\" (current size: %4$d) is invalid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:103
+msgid "The requested range (offset: %1$d, length: %2$d) for the file \"%3$s\" (current size: %4$d) is invalid."
+msgstr "ファイル \"%3$s\" (現在のサイズ: %4$d) にリクエストした範囲 (オフセット: %1$d、長さ: %2$d) が無効です。"
+
+#. The specified offset %1$d for the file \"%2$s\" (current size: %3$d) is invalid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:106
+msgid "The specified offset %1$d for the file \"%2$s\" (current size: %3$d) is invalid."
+msgstr "ファイル \"%2$s\" (現在のサイズ: %3$d) に指定したオフセット %1$d が無効です。"
+
+#. The specified length %1$d for the file \"%2$s\" (current size: %3$d) is invalid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:109
+msgid "The specified length %1$d for the file \"%2$s\" (current size: %3$d) is invalid."
+msgstr "ファイル \"%2$s\" (現在のサイズ: %3$d) に指定した長さ %1$d が無効です。"
 
 #. * Couldn't reach the filestore
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/QuotaFileStorageExceptionMessage.java:69
@@ -10055,24 +10143,24 @@ msgid "A duplicate folder exists in parent folder %1$s in context %2$s"
 msgstr "コンテキスト %2$s の親フォルダ %1$s に重複したフォルダが存在しています。"
 
 #. *
-#. * Parent folder %1$s does not allow folder's type setting %2$s in context %3$s
+#. * Parent folder %1$s does not allow type %2$s in context %3$s
 #. * <p>
 #. * Folder's type setting is invalid
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:152
-msgid "Parent folder %1$s does not allow folder's type setting %2$s in context %3$s"
-msgstr "コンテキスト %3$s では、親フォルダ %1$s のフォルダ タイプの設定 %2$s が許可されていません。"
+msgid "Parent folder %1$s does not allow type %2$s in context %3$s"
+msgstr "コンテキスト %3$s では、親フォルダ %1$s にフォルダ タイプ %2$s を設定することは許可されていません。"
 
 #. *
-#. * Parent folder %1$s does not allow folder's module setting (%2$s) in context %3$s
+#. * Parent folder %1$s does not allow module %2$s in context %3$s
 #. * <p>
 #. * Folder's module setting is invalid
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:159
-msgid "Parent folder %1$s does not allow folder's module setting (%2$s) in context %3$s"
-msgstr "コンテキスト %3$s では、親フォルダ %1$s のモジュール設定 (%2$s) が許可されていません。"
+msgid "Parent folder %1$s does not allow module %2$s in context %3$s"
+msgstr "コンテキスト %3$s では、親フォルダ %1$s にフォルダ モジュール %2$s を設定することは許可されていません。"
 
 #. *
 #. * Only one admin permission is allowed on a private folder
@@ -10350,13 +10438,6 @@ msgid "Folder %1$s must not be moved to one of its subfolders in context %2$s"
 msgstr "コンテキスト %2$s にあるサブフォルダの 1 つにフォルダ %1$s を移動できません。"
 
 #. *
-#. * Inserted for those exception that will turn to an <code>OXException</code> in future
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:355
-msgid "UNKNOWN EXCEPTION"
-msgstr "不明な例外"
-
-#. *
 #. * A LDAP error occurred in context %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:359
@@ -10441,10 +10522,10 @@ msgid "Unknown action: %1$s"
 msgstr "次の操作が不明です: %1$s"
 
 #. *
-#. * Shared folder %1$s MUST NOT be updated in context %2$s
+#. * Shared folder %1$s must not be updated in context %2$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:423
-msgid "Shared folder %1$s MUST NOT be updated in context %2$s"
+msgid "Shared folder %1$s must not be updated in context %2$s"
 msgstr "コンテキスト %2$s では、共有フォルダ %1$s を更新できません。"
 
 #. *
@@ -10490,24 +10571,23 @@ msgid "No subfolder creation below shared folder %1$s in context %2$s"
 msgstr "コンテキスト %2$s の共有フォルダ %1$s の配下にサブフォルダを作成できません。"
 
 #. *
-#. * User %1$s grants invalid permissions on shared folder %2$s in context %3$s. Only owner of parental shared folder %4$s may be
-#. * folder admin
+#. * User %1$s granted invalid permissions on shared folder %2$s in context %3$s. Only the owner of the parent shared folder %4$s can administrate the folder.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:452
-msgid "User %1$s grants invalid permissions on shared folder %2$s in context %3$s. Only the owner of parental shared folder %4$s can be the folder admin."
-msgstr "ユーザ %1$s がコンテキスト %3$s の共有フォルダ %2$s に無効な権限を許可しました。親の共有フォルダ %4$s の所有者のみがフォルダの管理者になれます。"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:451
+msgid "User %1$s granted invalid permissions on shared folder %2$s in context %3$s. Only the owner of the parent shared folder %4$s can administrate the folder."
+msgstr "ユーザ %1$s がコンテキスト %3$s の共有フォルダ %2$s に無効な権限を付与しました。親の共有フォルダ %4$s の所有者のみがフォルダの管理者になれます。"
 
 #. *
 #. * Owner %1$s of default folder %2$s must keep the folder admin permission
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:456
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:455
 msgid "Owner %1$s of default folder %2$s must keep the folder admin permission"
 msgstr "既定のフォルダ %2$s の所有者 %1$s には、管理者権限が割り当てられている必要があります。"
 
 #. *
 #. * User %1$s is not allowed to share folder %2$s in context %3$s due to user configuration
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:460
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:459
 msgid "User %1$s is not allowed to share folder %2$s in context %3$s due to user configuration"
 msgstr "ユーザの構成により、コンテキスト %3$s のフォルダ %2$s を共有することはユーザ %1$s に許可されていません。"
 
@@ -10515,7 +10595,7 @@ msgstr "ユーザの構成により、コンテキスト %3$s のフォルダ %2
 #. * The permissions for the user %1$s are limited. It is not possible to grant this user the wanted permissions for the folder %2$s
 #. * in context %3$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:465
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:464
 msgid "The permissions for the user %1$s are limited. It is not possible to grant this user the wanted permissions for the folder %2$s in context %3$s."
 msgstr "ユーザ %1$s の権限が制限されています。コンテキスト %3$s のフォルダ %2$s に指定した権限をこのユーザに許可できません。"
 
@@ -10523,21 +10603,21 @@ msgstr "ユーザ %1$s の権限が制限されています。コンテキスト
 #. * Folder %1$s in context %2$s contains a hidden subfolder. User %3$s has no delete rights for this subfolder and consequently
 #. * cannot delete its parent folder.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:470
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:469
 msgid "Folder %1$s in context %2$s contains a hidden subfolder. User %3$s has no delete rights for this subfolder and consequently cannot delete its parent folder."
 msgstr "コンテキスト %2$s のフォルダ %1$s には隠しサブフォルダがあります。ユーザ %3$s にはこのサブフォルダの削除権限がないため、その親フォルダを削除できません。"
 
 #. *
 #. * An infostore folder named %1$s already exists below folder %2$s (%3$s) in context %4$s. Please choose another display name.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:474
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:473
 msgid "An infostore folder named %1$s already exists below folder %2$s (%3$s) in context %4$s. Please choose another display name."
 msgstr "名前 %1$s のインフォストア フォルダは、コンテキスト %4$s のフォルダ %2$s (%3$s) の配下に既に存在します。他の表示名を選択してください。"
 
 #. *
 #. * Folder contains invalid data: "%1$s"
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:478
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:477
 msgid "Folder contains invalid data: \"%1$s\""
 msgstr "フォルダに次の無効なデータがあります: \"%1$s\""
 
@@ -10545,63 +10625,63 @@ msgstr "フォルダに次の無効なデータがあります: \"%1$s\""
 #. * You already share a personal folder named "%1$s" with the same user. You can not share two folders with exactly the same name
 #. * with a user. Please rename the folder before sharing it with this user.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:483
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:482
 msgid "You already share a personal folder named \"%1$s\" with the same user. You can not share two folders with exactly the same name with a user. Please rename the folder before sharing it with this user."
 msgstr "名前 \"%1$s\" の個人フォルダを既に同じユーザと共有しています。同名の 2 つのフォルダをユーザと共有できません。このユーザとフォルダを共有するには、フォルダの名前を変更してください。"
 
 #. *
 #. * Folder module cannot be updated since folder is not empty
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:487
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:486
 msgid "Folder module cannot be updated since folder is not empty"
 msgstr "フォルダが空でないので、フォルダ モジュールを更新できません。"
 
 #. *
 #. * Duplicate permission defined for user %1$s. Only one permission per user is allowed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:491
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:490
 msgid "Duplicate permission defined for user %1$s. Only one permission per user is allowed."
 msgstr "ユーザ %1$s に権限が重複して定義されています。権限はユーザごとに 1 つしか許可されていません。"
 
 #. *
 #. * Duplicate permission defined for group %1$s. Only one permission per group is allowed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:495
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:494
 msgid "Duplicate permission defined for group %1$s. Only one permission per group is allowed."
 msgstr "グループ %1$s に権限が重複して定義されています。権限はグループごとに 1 つしか許可されていません。"
 
 #. *
 #. * Only the folder visibility permission is allowed to be changed for folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:499
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:498
 msgid "Only the folder visibility permission is allowed to be changed for folder %1$s in context %2$s."
 msgstr "コンテキスト %2$s のフォルダ %1$s には、フォルダの表示権限の変更のみが許可されます。"
 
 #. *
 #. * Only individual user permissions, but no group permissions are allowed for folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:503
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:502
 msgid "Only individual user permissions, but no group permissions are allowed for folder %1$s in context %2$s."
 msgstr "コンテキスト %2$s にあるフォルダ %1$s には、グループ権限ではなく、個別のユーザ権限しか許可されていません。"
 
 #. *
 #. * No individual user permissions are allowed for folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:507
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:506
 msgid "No individual user permissions are allowed for folder %1$s in context %2$s."
 msgstr "コンテキスト %2$s のフォルダ %1$s には、個別のユーザ権限が許可されていません。"
 
 #. *
 #. * Folder module must not be updated.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:511
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:510
 msgid "Folder module must not be updated."
 msgstr "フォルダ モジュールを更新できません。"
 
 #. *
 #. * The module of a default folder must not be changed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:515
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:514
 msgid "The module of a default folder must not be changed."
 msgstr "既定のフォルダのモジュールは変更できません。"
 
@@ -10611,33 +10691,33 @@ msgstr "既定のフォルダのモジュールは変更できません。"
 #. * No necessary rename access granted for update operation
 #. * </p>
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:522
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:521
 msgid "User %1$s must not rename folder %2$s in context %3$s"
 msgstr "ユーザ %1$s は、コンテキスト %3$s のフォルダ %2$s の名前を変更できません。"
 
 #. *
 #. * Failed to create folder. Please retry.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:526
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:525
 msgid "Failed to create folder. Please retry."
 msgstr "フォルダの作成に失敗しました。もう一度やり直してください。"
 
 #. *
 #. * Delete cannot be performed because of locked documents in folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:530
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:529
 msgid "Delete cannot be performed because of locked documents in folder %1$s in context %2$s."
 msgstr "コンテキスト %2$s のフォルダ %1$s にあるドキュメントはロックされているため、削除を実行できません。"
 
 #. *
 #. * Operation may only be performed for context administrator.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:534
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:533
 msgid "Operation may only be performed for context administrator."
 msgstr "コンテキストの管理者のみが操作を実行できます。"
 
 #. Folder %1$s must not be deleted in context %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:537
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:536
 msgid "Folder %1$s must not be deleted in context %2$s."
 msgstr "コンテキスト %2$s では、フォルダ %1$s を削除できません。"
 
@@ -10755,10 +10835,15 @@ msgstr "HTTP エラーが発生しました。状態 %1$s メッセージ %2$s"
 msgid "Unsupported format: %1$s"
 msgstr "次のフォーマットはサポートされていません: %1$s"
 
-#. Missing cookie: %s
+#. Missing cookie: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:146
-msgid "Missing cookie: %s"
-msgstr "次の Cookie が見つかりません: %s"
+msgid "Missing cookie: %1$s"
+msgstr "次の Cookie が見つかりません: %1$s"
+
+#. Cookie "%1$s" cannot be found because requests does not have any cookies.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:149
+msgid "Cookie \"%1$s\" cannot be found because requests does not have any cookies."
+msgstr "リクエストに Cookie がないため、Cookie \"%1$s\" が見つかりません。"
 
 #. *
 #. * Exception while writing JSON.
@@ -10834,6 +10919,7 @@ msgstr "要素 \"%1$s\" に次の無効な値があります: %2$s"
 #. * An I/O error occurred.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/webdav/WebdavExceptionMessage.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:70
 msgid "An I/O error occurred."
 msgstr "I/O エラーが発生しました。"
 
@@ -10991,7 +11077,6 @@ msgid "Start of SessionStorageService failed."
 msgstr "SessionStorageService の開始に失敗しました。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:63
 msgid "Saving session with sessionId %1$s failed."
 msgstr "sessionId %1$s を使用したセッションの保存に失敗しました。"
 
@@ -11000,7 +11085,6 @@ msgid "Lookup for session with sessionId %1$s failed."
 msgstr "sessionId %1$s を使用したセッションの検索に失敗しました。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:67
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:65
 msgid "Removing session with sessionId %1$s failed."
 msgstr "sessionId %1$s を使用したセッションの削除に失敗しました。"
 
@@ -11011,7 +11095,6 @@ msgid "Operation %1$s not supported."
 msgstr "操作 %1$s はサポートされていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:73
 msgid "Lookup for session with altId %1$s failed"
 msgstr "altId %1 を使用したセッションの検索に失敗しました。"
 
@@ -11031,6 +11114,7 @@ msgid "No session found for identifier: %1$s"
 msgstr "次の識別子のセッションが見つかりません: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:63
 msgid "Saving session with session identifier %1$s failed."
 msgstr "セッション識別子 %1$s を使用したセッションの保存に失敗しました。"
 
@@ -11039,6 +11123,7 @@ msgid "Lookup for session with session identifier %1$s failed."
 msgstr "セッション識別子 %1$s を使用したセッションの検索に失敗しました。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:65
 msgid "Removing session with session identifier %1$s failed."
 msgstr "セッション識別子 %1$s を使用したセッションの削除に失敗しました。"
 
@@ -11059,8 +11144,12 @@ msgid "No sessions found by random token %1$s."
 msgstr "ランダム トークン %1$s ではセッションが見つかりません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:67
-msgid "No session with sessionId %1$s found."
-msgstr "sessionId %1$s のセッションが見つかりません。"
+msgid "No session with session identifier %1$s found."
+msgstr "セッション ID %1$s のセッションが見つかりません。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:73
+msgid "Lookup for session with public identifier %1$s failed"
+msgstr "公開識別子 %1$s を使用したセッションの検索に失敗しました。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:79
 msgid "No sessions found by random token %1$s"
@@ -11254,11 +11343,11 @@ msgid "The given value for userSource \"%s\" is not a possible one"
 msgstr "userSource \"%s\" に指定した値は無効です。"
 
 #. *
-#. * The parameter "%s" must be a long value but is "%s"
+#. * The parameter "%s" must be numeric, but is "%s"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamhandler.spamassassin/src/com/openexchange/spamhandler/spamassassin/exceptions/SpamhandlerSpamassassinExceptionMessage.java:101
-msgid "The parameter \"%s\" must be a long value but is \"%s\""
-msgstr "パラメータ \"%s\" は長整数値で指定する必要がありますが、実際は \"%s\"でした"
+msgid "The parameter \"%s\" must be numeric, but is \"%s\""
+msgstr "パラメータ \"%s\" が \"%s\" でした。このパラメータは数字でなければなりません。"
 
 #. *
 #. * Spamd returned wrong exit code "%s"
@@ -11299,33 +11388,25 @@ msgstr "サービスから spamd プロバイダを取得中に次のエラー�
 msgid "Missing parameter %s"
 msgstr "次のパラメータが見つかりません: %s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:70
-msgid "Unknown Action: %s"
-msgstr "次の操作が不明です: %s"
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:72
-msgid "Got JSONException"
-msgstr "JSONException を受け取りました。"
+msgid "A JSON error occurred"
+msgstr "JSON エラーが発生しました。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:74
-msgid "Missing Field(s): %s"
+msgid "Missing field(s): %s"
 msgstr "次のフィールドが見つかりません: %s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:76
-msgid "Missing Form Field(s): %s"
+msgid "Missing form field(s): %s"
 msgstr "次のフォーム フィールドが見つかりません: %s"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:78
-msgid "Got Exception %s"
-msgstr "例外 %s を受け取りました。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:94
 msgid "Please ask only for columns the server knows"
 msgstr "サーバに既知の列のみ指定してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:96
-msgid "Unknown Subscription"
-msgstr "登録アイテムが不明です。"
+msgid "Unknown subscription"
+msgstr "不明な登録アイテムがあります。"
 
 #. Provide well-formed HTML.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:63
@@ -11333,10 +11414,10 @@ msgstr "登録アイテムが不明です。"
 msgid "Provide well-formed HTML."
 msgstr "正しいフォーマットの HTML を入力してください。"
 
-#. An IOException occurred: %1$s. Was trying to get the service at %2$s.
+#. An I/O error occurred: %1$s. Was trying to get the service at %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:66
-msgid "An IOException occurred: %1$s. Was trying to get the service at %2$s."
-msgstr "IOException %1$s が発生しました。%2$s でサービスの取得を試みました。"
+msgid "An I/O error occurred: %1$s. Was trying to get the service at %2$s."
+msgstr "%2$s でサービスの取得を試みたときに次の I/O エラーが発生しました: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:71
@@ -11345,10 +11426,10 @@ msgstr "IOException %1$s が発生しました。%2$s でサービスの取得�
 msgid "Try again later."
 msgstr "後でもう一度やり直してください。"
 
-#. A HTTPException occurred: %1$s. Was trying to get the service at %2$s.
+#. A HTTP error occurred: %1$s. Was trying to get the service at %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:70
-msgid "A HTTPException occurred: %1$s. Was trying to get the service at %2$s."
-msgstr "HTTPException %1$s が発生しました。%2$s でサービスの取得を試みました。"
+msgid "A HTTP Error occurred: %1$s. Was trying to get the service at %2$s."
+msgstr "%2$s でサービスの取得を試みたときに次の HTTP エラーが発生しました: %1$s"
 
 #. Can only post to external subscription sources.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:74
@@ -11502,10 +11583,6 @@ msgstr "次の予期しないエラーが発生しました: %1$s"
 msgid "Verify file system and templates."
 msgstr "ファイル システムとテンプレートが有効か確認してください。"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:70
-msgid "An IOException occurred."
-msgstr "IOException が発生しました。"
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:72
 msgid "Please correct the template"
 msgstr "テンプレートを修正してください。"
@@ -11542,6 +11619,26 @@ msgstr "このテンプレートは、'com.openexchange.templating.templateWhite
 msgid "This template was not whitelisted,"
 msgstr "このテンプレートはホワイトリストに登録されていませんでした。"
 
+#. No such token: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tokenlogin/src/com/openexchange/tokenlogin/TokenLoginExceptionMessages.java:76
+msgid "No such token: %1$s"
+msgstr "次のトークンが見つかりません: %1$s"
+
+#. Token login service is not available.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tokenlogin/src/com/openexchange/tokenlogin/TokenLoginExceptionMessages.java:79
+msgid "Token login service is not available."
+msgstr "トークン ログイン サービスが利用できません。"
+
+#. No such session for token: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tokenlogin/src/com/openexchange/tokenlogin/TokenLoginExceptionMessages.java:82
+msgid "No such session for token: %1$s"
+msgstr "次のトークンのセッションが見つかりません: %1$s"
+
+#. Token redeem denied.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tokenlogin/src/com/openexchange/tokenlogin/TokenLoginExceptionMessages.java:85
+msgid "Token redeem denied."
+msgstr "トークンの使用が拒否されました。"
+
 #. The consumer key/consumer secret pair is missing in configuration.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:72
 msgid "The consumer key/consumer secret pair is missing in configuration."
@@ -11564,7 +11661,7 @@ msgid ""
 "Please (re-)authorize your Twitter accounts.\n"
 "Twitter responded with: %1$s"
 msgstr ""
-"Twitter アカウントを (再) 承認してください。\n"
+"Twitter アカウントを承認または再承認してください。\n"
 "Twitter は次の応答を返しました: %1$s"
 
 #. The request is understood, but it has been refused or access is not allowed: %1$s
@@ -13840,6 +13937,31 @@ msgstr "UTC (協定世界時)"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "ズールー"
+
+#~ msgid ""
+#~ "Unable to calculate given position. Seems to be a delete exception or "
+#~ "outside range"
+#~ msgstr ""
+#~ "指定した順番を処理できません。削除の例外に指定されているか、範囲外の可能性"
+#~ "があります。"
+
+#~ msgid "Cannot decrease number of attachments below zero."
+#~ msgstr "添付ファイルの数を 0 未満にすることはできません。"
+
+#~ msgid "UNKNOWN EXCEPTION"
+#~ msgstr "不明な例外"
+
+#~ msgid "Unknown Action: %s"
+#~ msgstr "次の操作が不明です: %s"
+
+#~ msgid "Got JSONException"
+#~ msgstr "JSONException を受け取りました。"
+
+#~ msgid "Got Exception %s"
+#~ msgstr "例外 %s を受け取りました。"
+
+#~ msgid "An IOException occurred."
+#~ msgstr "IOException が発生しました。"
 
 #~ msgid "A severe error occurred."
 #~ msgstr "深刻なエラーが発生しました。"
