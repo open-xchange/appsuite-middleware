@@ -74,6 +74,8 @@ import com.sun.mail.util.PropUtil;
  */
 public class JavaIMAPStore extends IMAPStore {
 
+    private static final int DEFAULT_SEMAPHORE_TIMEOUT_MILLIS = 20000;
+
     /** The login semaphore */
     private static final ConcurrentMap<URLName, Semaphore> loginSemaphores = new ConcurrentHashMap<URLName, Semaphore>(16);
 
@@ -172,8 +174,14 @@ public class JavaIMAPStore extends IMAPStore {
             loginSemaphoreTimeoutMillis = -1L;
             accountId = -1;
         } else {
-            final int millis = PropUtil.getIntSessionProperty(session, "mail.imap.loginSemaphoreTimeoutMillis", 20000);
-            loginSemaphoreTimeoutMillis = millis <= 0 ? 20000 : millis;
+            final boolean loginSemaphoreAwait = PropUtil.getBooleanSessionProperty(session, "mail.imap.loginSemaphoreAwait", false);
+            if (loginSemaphoreAwait) {
+                loginSemaphoreTimeoutMillis = -1L;
+            } else {
+                final int defaultTimeout = DEFAULT_SEMAPHORE_TIMEOUT_MILLIS;
+                final int millis = PropUtil.getIntSessionProperty(session, "mail.imap.loginSemaphoreTimeoutMillis", defaultTimeout);
+                loginSemaphoreTimeoutMillis = millis <= 0 ? defaultTimeout : millis;
+            }
             accountId = PropUtil.getIntSessionProperty(session, "mail.imap.accountId", 0);
         }
     }
@@ -199,9 +207,16 @@ public class JavaIMAPStore extends IMAPStore {
         if (null != semaphore) {
             this.semaphore = semaphore;
             try {
-                if (!semaphore.tryAcquire(loginSemaphoreTimeoutMillis, TimeUnit.MILLISECONDS)) {
-                    // No permit acquired in time
-                    throw new ConnectQuotaExceededException("Max. number of connections exceeded. Try again later.");
+                final long loginSemaphoreTimeoutMillis = this.loginSemaphoreTimeoutMillis;
+                if (loginSemaphoreTimeoutMillis > 0) {
+                    // Await released permit only for specified amount of milliseconds
+                    if (!semaphore.tryAcquire(loginSemaphoreTimeoutMillis, TimeUnit.MILLISECONDS)) {
+                        // No permit acquired in time
+                        throw new ConnectQuotaExceededException("Max. number of connections exceeded. Try again later.");
+                    }
+                } else {
+                    // Await until released permit available
+                    semaphore.acquire();
                 }
                 logger.fine("JavaIMAPStore login: permitted.");
             } catch (final InterruptedException e) {
