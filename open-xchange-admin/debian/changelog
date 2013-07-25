@@ -1,3 +1,9 @@
+open-xchange-admin (7.2.2-10) stable; urgency=low
+
+  * Build for patch 2013-07-16
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 25 Jul 2013 18:29:52 +0200
+
 open-xchange-admin (7.2.2-9) stable; urgency=low
 
   * Build for patch 2013-07-18
