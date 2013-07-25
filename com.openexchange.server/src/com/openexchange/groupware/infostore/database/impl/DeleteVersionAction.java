@@ -81,11 +81,8 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
                 }
             });
         }
-        try {
-            doUpdates(updates);
-        } catch (final OXException e) {
-            throw e;
-        }
+
+        doUpdates(updates);
     }
 
     @Override
@@ -120,11 +117,8 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
                 }
             });
         }
-        try {
-            doUpdates(updates);
-        } catch (final OXException e) {
-            throw e;
-        }
+
+        doUpdates(updates);
     }
 
     private int batchSize = 1000;

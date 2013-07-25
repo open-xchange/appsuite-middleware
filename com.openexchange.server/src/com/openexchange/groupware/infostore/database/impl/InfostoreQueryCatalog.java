@@ -238,7 +238,7 @@ public class InfostoreQueryCatalog {
 
     private static final String INSERT_DEL_INFOSTORE_DOCUMENT = buildInsert(Table.DEL_INFOSTORE_DOCUMENT, STR_CID);
 
-    public String getDelete(final Table t, final List<DocumentMetadata> documents) {
+    public List<String> getDelete(final Table t, final List<DocumentMetadata> documents) {
         switch (t) {
         default:
             break;
@@ -246,17 +246,33 @@ public class InfostoreQueryCatalog {
         case DEL_INFOSTORE_DOCUMENT:
             throw new IllegalArgumentException("getDelete is only applicable for the non version tables infostore and del_infostore");
         }
-        final StringBuilder delete = new StringBuilder("DELETE FROM ").append(t.getTablename()).append(" WHERE ").append(
-            Metadata.ID_LITERAL.doSwitch(t.getFieldSwitcher())).append(" IN (");
-        for (final DocumentMetadata doc : documents) {
-            delete.append(doc.getId()).append(',');
+        final int size = documents.size();
+        final List<String> l = new ArrayList<String>(2);
+        // Versions
+        {
+            final Table versionTable = Table.INFOSTORE.equals(t) ? Table.INFOSTORE_DOCUMENT : Table.DEL_INFOSTORE_DOCUMENT;
+            final StringAllocator delete = new StringAllocator("DELETE FROM ").append(versionTable.getTablename()).append(" WHERE ").append(
+                Metadata.ID_LITERAL.doSwitch(versionTable.getFieldSwitcher())).append(" IN (");
+            delete.append(documents.get(0).getId());
+            for (int i = 1; i < size; i++) {
+                delete.append(',').append(documents.get(i).getId());
+            }
+            delete.append(") AND cid = ?");
+            l.add(delete.toString());
         }
-        delete.setLength(delete.length() - 1);
+        // Documents
+        final StringAllocator delete = new StringAllocator("DELETE FROM ").append(t.getTablename()).append(" WHERE ").append(
+            Metadata.ID_LITERAL.doSwitch(t.getFieldSwitcher())).append(" IN (");
+        delete.append(documents.get(0).getId());
+        for (int i = 1; i < size; i++) {
+            delete.append(',').append(documents.get(i).getId());
+        }
         delete.append(") AND cid = ?");
-        return delete.toString();
+        l.add(delete.toString());
+        return l;
     }
 
-    public String getSingleDelete(final Table t) {
+    public List<String> getSingleDelete(final Table t) {
         switch (t) {
         default:
             break;
@@ -264,9 +280,19 @@ public class InfostoreQueryCatalog {
         case DEL_INFOSTORE_DOCUMENT:
             throw new IllegalArgumentException("getDelete is only applicable for the non version tables infostore and del_infostore");
         }
-        final StringBuilder delete = new StringBuilder("DELETE FROM ").append(t.getTablename()).append(" WHERE ").append(
+        final List<String> l = new ArrayList<String>(2);
+        // Versions
+        {
+            final Table versionTable = Table.INFOSTORE.equals(t) ? Table.INFOSTORE_DOCUMENT : Table.DEL_INFOSTORE_DOCUMENT;
+            final StringAllocator delete = new StringAllocator("DELETE FROM ").append(versionTable.getTablename()).append(" WHERE ").append(
+                Metadata.ID_LITERAL.doSwitch(versionTable.getFieldSwitcher())).append("  = ? AND cid = ?");
+            l.add(delete.toString());
+        }
+        // Document
+        final StringAllocator delete = new StringAllocator("DELETE FROM ").append(t.getTablename()).append(" WHERE ").append(
             Metadata.ID_LITERAL.doSwitch(t.getFieldSwitcher())).append("  = ? AND cid = ?");
-        return delete.toString();
+        l.add(delete.toString());
+        return l;
     }
 
     public String getDocumentInsert() {

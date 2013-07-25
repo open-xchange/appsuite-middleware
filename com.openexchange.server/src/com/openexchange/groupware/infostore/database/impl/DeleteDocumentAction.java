@@ -61,7 +61,7 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
 
     @Override
     protected void undoAction() throws OXException {
-        if(getDocuments().size() == 0) {
+        if (getDocuments().isEmpty()) {
             return;
         }
         final UpdateBlock[] updates = new UpdateBlock[getDocuments().size()];
@@ -76,16 +76,13 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
 
             };
         }
-        try {
-            doUpdates(updates);
-        } catch (final OXException e) {
-            throw e;
-        }
+
+        doUpdates(updates);
     }
 
     @Override
     public void perform() throws OXException {
-        if(getDocuments().size() == 0) {
+        if (getDocuments().isEmpty()) {
             return;
         }
 
@@ -95,22 +92,20 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
         final List<UpdateBlock> updates = new ArrayList<UpdateBlock>();
 
         for(int j = 0, size = slices.length; j < size; j++) {
-            updates.add(new Update(getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.INFOSTORE, getDocuments())){
+            final List<String> deleteStmts = getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.INFOSTORE, getDocuments());
+            for (final String deleteStmt : deleteStmts) {
+                updates.add(new Update(deleteStmt){
 
-                @Override
-                public void fillStatement() throws SQLException {
-                    stmt.setInt(1, getContext().getContextId());
-                }
+                    @Override
+                    public void fillStatement() throws SQLException {
+                        stmt.setInt(1, getContext().getContextId());
+                    }
 
-            });
+                });
+            }
         }
 
-        try {
-            doUpdates(updates);
-        } catch (final OXException e) {
-            throw e;
-        }
-
+        doUpdates(updates);
     }
 
     @Override

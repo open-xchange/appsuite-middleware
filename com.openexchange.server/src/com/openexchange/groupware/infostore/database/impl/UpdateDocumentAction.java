@@ -60,12 +60,7 @@ public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
 
     @Override
     protected void undoAction() throws OXException {
-        int counter = 0;
-        try {
-            counter = doUpdates(getQueryCatalog().getDocumentUpdate(getModified()), getQueryCatalog().filterForDocument(getModified()), getOldDocuments());
-        } catch (final OXException e) {
-            throw e;
-        }
+        int counter = doUpdates(getQueryCatalog().getDocumentUpdate(getModified()), getQueryCatalog().filterForDocument(getModified()), getOldDocuments());
         if (counter < 0) {
             throw InfostoreExceptionCodes.UPDATED_BETWEEN_DO_AND_UNDO.create();
         }
@@ -74,13 +69,12 @@ public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
     @Override
     public void perform() throws OXException {
         int counter = 0;
-        try {
+        {
             Metadata[] fields = getQueryCatalog().filterForDocument(getModified());
             fields = getQueryCatalog().filterWritable(fields);
             counter = doUpdates(getQueryCatalog().getDocumentUpdate(fields), fields, getDocuments());
-        } catch (final OXException e) {
-            throw e;
         }
+
         setTimestamp(System.currentTimeMillis());
         if (counter <= 0) {
             throw InfostoreExceptionCodes.MODIFIED_CONCURRENTLY.create();

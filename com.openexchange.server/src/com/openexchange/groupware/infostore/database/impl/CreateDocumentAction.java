@@ -51,6 +51,8 @@ package com.openexchange.groupware.infostore.database.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
@@ -58,27 +60,27 @@ public class CreateDocumentAction extends AbstractDocumentListAction {
 
     @Override
     protected void undoAction() throws OXException {
-        final UpdateBlock update = new Update(getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.INFOSTORE, getDocuments())){
+        final List<String> deleteStmts = getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.INFOSTORE, getDocuments());
 
-            @Override
-            public void fillStatement() throws SQLException {
-                stmt.setInt(1, getContext().getContextId());
-            }
-        };
-        try {
-            doUpdates(update);
-        } catch (final OXException e) {
-            throw e;
+        final List<UpdateBlock> updates = new ArrayList<UpdateBlock>(2);
+
+        for (final String deleteStmt : deleteStmts) {
+            final UpdateBlock update = new Update(deleteStmt){
+
+                @Override
+                public void fillStatement() throws SQLException {
+                    stmt.setInt(1, getContext().getContextId());
+                }
+            };
+            updates.add(update);
         }
+
+        doUpdates(updates);
     }
 
     @Override
     public void perform() throws OXException {
-        try {
-            doUpdates( getQueryCatalog().getDocumentInsert(), getQueryCatalog().getWritableDocumentFields(), getDocuments());
-        } catch (final OXException e) {
-            throw e;
-        }
+        doUpdates( getQueryCatalog().getDocumentInsert(), getQueryCatalog().getWritableDocumentFields(), getDocuments());
     }
 
     @Override
