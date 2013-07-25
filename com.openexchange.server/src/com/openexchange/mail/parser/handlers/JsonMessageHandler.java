@@ -81,6 +81,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -209,7 +210,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         this.usm = usm;
         this.displayMode = displayMode;
         this.mailPath = new MailPath(mailPath);
-        jsonObject = new JSONObject();
+        jsonObject = new JSONObject(32);
         this.token = token;
         this.ttlMillis = ttlMillis;
     }
@@ -256,7 +257,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         this.usm = usm;
         this.displayMode = displayMode;
         this.mailPath = mailPath;
-        jsonObject = new JSONObject();
+        jsonObject = new JSONObject(32);
         try {
             if (DisplayMode.MODIFYABLE.equals(this.displayMode) && null != mailPath) {
                 jsonObject.put(MailJSONField.MSGREF.getKey(), mailPath.toString());
@@ -364,7 +365,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 token.setAccessInfo(accountId, session);
                 token.setAttachmentInfo(tokenFolder, tokenMailId, attachmentId);
                 AttachmentTokenRegistry.getInstance().putToken(token, session);
-                final JSONObject attachmentObject = new JSONObject();
+                final JSONObject attachmentObject = new JSONObject(2);
                 attachmentObject.put("id", token.getId());
                 attachmentObject.put("jsessionid", token.getJSessionId());
                 jsonObject.put("token", attachmentObject);
@@ -529,7 +530,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             return true;
         }
         try {
-            final JSONObject hdrObject = new JSONObject();
+            final JSONObject hdrObject = new JSONObject(size);
             for (int i = 0; i < size; i++) {
                 final Map.Entry<String, String> entry = iter.next();
                 final String headerName = entry.getKey();
@@ -696,7 +697,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     /*
                      * Check if HTML is empty or has an empty body section
                      */
-                    if ((isEmpty(htmlContent) || (htmlContent.length() < 1024 && isEmpty(html2text(htmlContent)))) && plainText != null) {
+                    if ((isEmpty(htmlContent) || (htmlContent.length() < 1024 && hasNoImage(htmlContent) && isEmpty(html2text(htmlContent)))) && plainText != null) {
                         /*
                          * No text present
                          */
@@ -725,7 +726,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 asRawContent(id, contentType.getBaseType(), htmlContent);
             } else {
                 try {
-                    final JSONObject jsonObject = new JSONObject();
+                    final JSONObject jsonObject = new JSONObject(6);
                     jsonObject.put(MailListField.ID.getKey(), id);
                     jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), contentType.getBaseType());
                     jsonObject.put(MailJSONField.SIZE.getKey(), htmlContent.length());
@@ -815,7 +816,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                      */
                     asRawContent(id, contentType.getBaseType(), plainTextContentArg);
                 } else {
-                    final JSONObject jsonObject = new JSONObject();
+                    final JSONObject jsonObject = new JSONObject(6);
                     jsonObject.put(MailListField.ID.getKey(), id);
                     jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
                     jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), contentType.getBaseType());
@@ -921,7 +922,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     @Override
     public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
         try {
-            final JSONObject jsonObject = new JSONObject();
+            final JSONObject jsonObject = new JSONObject(8);
             jsonObject.put(MailListField.ID.getKey(), id);
             String contentType = MimeTypes.MIME_APPL_OCTET;
             final String filename = part.getFileName();
@@ -979,7 +980,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         try {
             final String headersKey = MailJSONField.HEADERS.getKey();
             if (!jsonObject.hasAndNotNull(headersKey)) {
-                jsonObject.put(headersKey, new JSONObject());
+                jsonObject.put(headersKey, new JSONObject(1));
             }
             final String attachKey = MailJSONField.ATTACHMENTS.getKey();
             final String dispKey = MailJSONField.DISPOSITION.getKey();
@@ -1418,6 +1419,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
         return null == htmlService ? null : htmlService.html2text(htmlContent, true);
     }
 
+    private boolean hasNoImage(final String htmlContent) {
+        return null == htmlContent || (toLowerCase(htmlContent).indexOf("<img ") < 0);
+    }
+
     /** Check for an empty string */
     private static boolean isEmpty(final String string) {
         if (null == string) {
@@ -1429,6 +1434,20 @@ public final class JsonMessageHandler implements MailMessageHandler {
             isWhitespace = Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }
