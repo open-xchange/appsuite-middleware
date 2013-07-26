@@ -284,6 +284,13 @@ public class MixedModeRTConnection extends AbstractRTConnection {
                 }
                 JSONObject command = (JSONObject) payloads.opt(0);
                 String commandData = command.optString("data");
+                if("leave".equalsIgnoreCase(commandData)) {
+                    try {
+                        object.put("tracer", "leaveTracer");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
                 if("join".equalsIgnoreCase(commandData) || "leave".equalsIgnoreCase(commandData)) {
                     return true;
                 }
