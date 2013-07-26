@@ -144,13 +144,13 @@ public class FolderBuffer {
         /*
          * add folder and all parent folders, resolve to root if not already known
          */
-        if (folderIDs.add(folderID) && null != folderPath) {
-            folderIDs.addAll(folderPath);
+        if (folderIDs.add(folderID)) {
+            folderIDs.addAll(null != folderPath ? folderPath : resolveToRoot(folderID, session));
         }
     }
 
     public void add(Session session, String folderID) {
-        add(session, folderID, resolveToRoot(folderID, session));
+        add(session, folderID, null);
     }
 
     public Set<String> getFolderIDs() {

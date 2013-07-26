@@ -56,7 +56,7 @@ import com.openexchange.realtime.client.RTMessageHandler;
 
 /**
  * Interface that should be implemented when it is desired to use the chat functionality of the realtime framework.
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
@@ -74,7 +74,7 @@ public interface RTRoom {
     /**
      * Use this method to say something into a room. Based on settings made with com.openexchange.realtime.client.room.RTRoom.join(String,
      * String, RTMessageHandler) your message will be transferred to all users joined the room.
-     * 
+     *
      * @param message - the message to send.
      */
     public void say(String message) throws RTException;
@@ -87,6 +87,8 @@ public interface RTRoom {
      * @param message - the message to send.
      */
     public void trace(String message) throws RTException;
+
+    public void sendCommand(String command, String content) throws RTException;
 
     /**
      * Use this to leave the room joined with com.openexchange.realtime.client.room.RTRoom.join(String, String, RTMessageHandler) before.

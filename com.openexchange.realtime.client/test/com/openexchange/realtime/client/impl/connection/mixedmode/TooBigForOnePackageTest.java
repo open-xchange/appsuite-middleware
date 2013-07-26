@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,57 @@
  *
  */
 
-package com.openexchange.realtime.client.impl.room.chinese;
+package com.openexchange.realtime.client.impl.connection.mixedmode;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import org.json.JSONValue;
+import org.junit.Assert;
+import org.junit.Test;
+import com.openexchange.realtime.client.ID;
 import com.openexchange.realtime.client.RTConnection;
-import com.openexchange.realtime.client.RTException;
-import com.openexchange.realtime.client.impl.room.AbstractRoomImpl;
+import com.openexchange.realtime.client.RTConnectionFactory;
+import com.openexchange.realtime.client.RTConnectionProperties;
+import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
+import com.openexchange.realtime.client.RTMessageHandler;
+import com.openexchange.realtime.client.room.RTRoom;
+import com.openexchange.realtime.client.room.RTRoomFactory;
+import com.openexchange.realtime.client.room.loadtest.LoadTestRoomFactory;
 
 
 /**
- * {@link ChineseRoom}
+ * {@link TooBigForOnePackageTest}
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ChineseRoom extends AbstractRoomImpl {
+public class TooBigForOnePackageTest {
 
-    /**
-     * Initializes a new {@link ChineseRoom}.
-     * @param rtUser
-     * @param rtConnectionProperties
-     */
-    public ChineseRoom(RTConnection connection) {
-        super(connection);
-    }
-    /**
-     *
-     * @param message
-     * @return
-     * @throws JSONException
-     * @throws RTException
-     */
-//    [
-//     {
-//       "seq": 3,
-//       "to": "synthetic.china://room1",
-//       "payloads": [
-//         {
-//           "data": "say",
-//           "element": "action"
-//         },
-//         {
-//           "data": "Hallo, Hamburg! Gl..ckwunsch zum Einj..hrigen!",
-//           "namespace": "china",
-//           "element": "message"
-//         }
-//       ],
-//       "element": "message"
-//     }
-//   ]
-    public JSONArray toPayloads(String message) throws JSONException, RTException {
-        JSONArray payloads = new JSONArray();
-        JSONObject actionPayload = new JSONObject();
-        JSONObject messagePayload = new JSONObject();
-
-        actionPayload.put("element", "action");
-        actionPayload.put("data", "say");
-
-        messagePayload.put("element", "message");
-        messagePayload.put("namespace", "china");
-        messagePayload.put("data", message);
-
-        payloads.put(actionPayload);
-        payloads.put(messagePayload);
-
-        return payloads;
+    @Test
+    public void testGiantResponse() throws Exception {
+        final CountDownLatch latch = new CountDownLatch(2); // welcome message and answer
+        RTConnectionProperties connectionProperties = RTConnectionProperties.newBuilder("marc.arens@premium", "secret", UUID.randomUUID().toString())
+            .setHost("localhost")
+            .setConnectionType(RTConnectionType.LONG_POLLING)
+            .setSecure(false)
+            .build();
+        RTConnection connection = RTConnectionFactory.getInstance().newConnection(connectionProperties);
+        RTRoomFactory roomFactory = new LoadTestRoomFactory();
+        RTRoom loadTestRoom = roomFactory.newRoom(connection);
+        loadTestRoom.join(new ID("synthetic.loadTest://" + UUID.randomUUID().toString()), new RTMessageHandler() {
+            @Override
+            public void onMessage(JSONValue message) {
+                System.out.println(message.toString());
+                latch.countDown();
+            }
+        });
+        loadTestRoom.sendCommand("floodMe", "murks");
+        if (latch.await(1, TimeUnit.MINUTES)) {
+            connection.close();
+        } else {
+            connection.close();
+            Assert.fail("Latch time out");
+        }
     }
 
 }

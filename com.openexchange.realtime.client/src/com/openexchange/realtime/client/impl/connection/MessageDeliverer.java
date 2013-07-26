@@ -85,7 +85,7 @@ public class MessageDeliverer implements Runnable {
 
     @Override
     public void run() {
-        LOG.info("MessageDeliverer started...");
+        LOG.info("MessageDeliverer started.");
         while (true) {
             if (Thread.interrupted()) {
                 logInterruption();
@@ -137,7 +137,7 @@ public class MessageDeliverer implements Runnable {
     }
 
     private void logInterruption() {
-        LOG.info("MessageDeliverer shuts down due to interrupt...");
+        LOG.info("MessageDeliverer stopped.");
     }
 
 }

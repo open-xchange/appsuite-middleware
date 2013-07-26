@@ -84,8 +84,8 @@ for FILE in ${GWCONFFILES}; do
     dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/${FILE} \
         /opt/open-xchange/etc/${FILE} 6.20.99 open-xchange -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange)
 done
-
 # SoftwareChange_Request-1297
+
 if [ -e /opt/open-xchange/etc/sessioncache.ccf ]; then
     dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/sessioncache.ccf -- "$@"
 fi
@@ -176,6 +176,30 @@ ox_set_property com.openexchange.push.udp.pushEnabled false /opt/open-xchange/et
 ox_set_property com.openexchange.push.udp.registerDistributionEnabled false /opt/open-xchange/etc/push-udp.properties
 ox_set_property com.openexchange.push.udp.eventDistributionEnabled false /opt/open-xchange/etc/push-udp.properties
 ox_set_property com.openexchange.push.udp.multicastEnabled false /opt/open-xchange/etc/push-udp.properties
+
+# SoftwareChange_Request-1446
+pfile=/opt/open-xchange/etc/server.properties
+VALUE=$(ox_read_property MAX_UPLOAD_SIZE $pfile)
+if [ "$VALUE" == "0" ]; then
+    ox_set_property MAX_UPLOAD_SIZE 104857600 $pfile
+fi
+VALUE=$(ox_read_property com.openexchange.defaultMaxConcurrentAJAXRequests $pfile)
+if [ "$VALUE" == "250" ]; then
+    ox_set_property com.openexchange.defaultMaxConcurrentAJAXRequests 100 $pfile
+fi
+VALUE=$(ox_read_property com.openexchange.servlet.maxActiveSessions $pfile)
+if [ "$VALUE" == "-1" ]; then
+    ox_set_property com.openexchange.servlet.maxActiveSessions 250000 $pfile
+fi
+pfile=/opt/open-xchange/etc/sessiond.properties
+VALUE=$(ox_read_property com.openexchange.sessiond.maxSession $pfile)
+if [ "$VALUE" == "5000" ]; then
+    ox_set_property com.openexchange.sessiond.maxSession 50000 $pfile
+fi
+VALUE=$(ox_read_property com.openexchange.sessiond.randomTokenTimeout $pfile)
+if [ "$VALUE" == "1M" ]; then
+    ox_set_property com.openexchange.sessiond.randomTokenTimeout 30000 $pfile
+fi
 
 # SoftwareChange_Request-1445
 pfile=/opt/open-xchange/etc/hazelcast.properties
@@ -358,7 +382,15 @@ for opt in "-XX:+DisableExplicitGC" "-server" "-Djava.awt.headless=true" \
         elif [ "$opt" = "-XX:NewRatio=" ]; then
             opt="-XX:NewRatio=3"
         fi
-        nopts="$nopts $opt"
+        if [ "$opt" == "-XX:+UseConcMarkSweepGC" -o "$opt" == "-XX:+UseParNewGC" -o "$opt" == "-XX:CMSInitiatingOccupancyFraction=75" -o "$opt" == "-XX:+UseCMSInitiatingOccupancyOnly" ]; then
+            echo "oha"
+            if ! echo $nopts | grep -- "-XX:+UseParallelGC" > /dev/null && ! echo $nopts | grep -- "-XX:+UseParallelOldGC" > /dev/null; then
+                nopts="$nopts $opt"
+            fi
+        else
+            echo "np"
+            nopts="$nopts $opt"
+        fi
     fi
 done
 # -----------------------------------------------------------------------

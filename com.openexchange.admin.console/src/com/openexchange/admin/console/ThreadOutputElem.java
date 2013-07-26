@@ -47,19 +47,59 @@
  *
  */
 
-package com.openexchange.drive.events;
+package com.openexchange.admin.console;
 
+public class ThreadOutputElem {
 
-/**
- * {@link DriveEventPublisher}
- *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- */
-public interface DriveEventPublisher {
+    private final long threadId;
+    private final String threadName;
+    private final long allocatedBytes;
+    private final long cpuTime;
+    private final long userTime;
+    private StackTraceElement[] stackTrace;
 
-    void publish(DriveEvent event);
+    public ThreadOutputElem(final long threadId, final String threadName, final long allocatedBytes, final long cpuTime, final long userTime) {
+        this.threadId = threadId;
+        this.threadName = threadName;
+        this.allocatedBytes = allocatedBytes;
+        this.cpuTime = cpuTime;
+        this.userTime = userTime;
+    }
 
-    boolean isLocalOnly();
+    public ThreadOutputElem(final long threadId, final String threadName, final long allocatedBytes, final long cpuTime, final long userTime, final StackTraceElement[] stackTrace) {
+        this.threadId = threadId;
+        this.threadName = threadName;
+        this.allocatedBytes = allocatedBytes;
+        this.cpuTime = cpuTime;
+        this.userTime = userTime;
+        this.stackTrace = stackTrace;
+    }
 
+    public long getThreadId() {
+        return threadId;
+    }
+
+    public String getThreadName() {
+        return threadName;
+    }
+
+    public long getAllocatedBytes() {
+        return allocatedBytes;
+    }
+
+    public long getCpuTime() {
+        return cpuTime;
+    }
+
+    public long getUserTime() {
+        return userTime;
+    }
+
+    public StackTraceElement[] getStackTrace() {
+        return stackTrace;
+    }
+
+    public void setStackTrace(final StackTraceElement[] stackTrace) {
+        this.stackTrace = stackTrace;
+    }
 }
-

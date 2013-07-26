@@ -53,7 +53,6 @@ import static com.openexchange.file.storage.FileStorageEventConstants.FOLDER_ID;
 import static com.openexchange.file.storage.FileStorageEventConstants.FOLDER_PATH;
 import static com.openexchange.file.storage.FileStorageEventConstants.PARENT_FOLDER_ID;
 import static com.openexchange.file.storage.FileStorageEventConstants.SESSION;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -64,8 +63,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.drive.DriveAction;
-import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.DriveEventService;
@@ -84,12 +81,6 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveEventServiceImpl.class);
 
-    private static final List<DriveAction<? extends DriveVersion>> SYNC_DIRECTORIES_ACTION;
-    static {
-        SYNC_DIRECTORIES_ACTION = new ArrayList<DriveAction<? extends DriveVersion>>(1);
-        SYNC_DIRECTORIES_ACTION.add(new SyncDirectoriesAction());
-    }
-
     private final List<DriveEventPublisher> publishers;
     private final ConcurrentMap<Integer, FolderBuffer> folderBuffers;
     private final ScheduledTimerTask periodicPublisher;
@@ -97,15 +88,20 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
     private final int maxDelayTime ;
     private final int defaultDelayTime;
 
+    /**
+     * Initializes a new {@link DriveEventServiceImpl}.
+     *
+     * @throws OXException
+     */
     public DriveEventServiceImpl() throws OXException {
         super();
         this.publishers = new CopyOnWriteArrayList<DriveEventPublisher>();
         this.folderBuffers = new ConcurrentHashMap<Integer, FolderBuffer>();
         ConfigurationService configService = DriveEventServiceLookup.getService(ConfigurationService.class, true);
-        this.consolidationTime = configService.getIntProperty("com.openexchange.drive.events.consolidationTime", 2000);
-        this.maxDelayTime = configService.getIntProperty("com.openexchange.drive.events.maxDelayTime", 20000);
-        this.defaultDelayTime = configService.getIntProperty("com.openexchange.drive.events.defaultDelayTime", 5000);
-        int publisherDelay = configService.getIntProperty("com.openexchange.drive.events.publisherDelay", 5000);
+        this.consolidationTime = configService.getIntProperty("com.openexchange.drive.events.consolidationTime", 1000);
+        this.maxDelayTime = configService.getIntProperty("com.openexchange.drive.events.maxDelayTime", 10000);
+        this.defaultDelayTime = configService.getIntProperty("com.openexchange.drive.events.defaultDelayTime", 2500);
+        int publisherDelay = configService.getIntProperty("com.openexchange.drive.events.publisherDelay", 2500);
         this.periodicPublisher = DriveEventServiceLookup.getService(TimerService.class, true).scheduleWithFixedDelay(new Runnable() {
 
             @Override
@@ -116,7 +112,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
                         FolderBuffer buffer = iterator.next();
                         if (buffer.isReady()) {
                             iterator.remove();
-                            publish(buffer);
+                            notifyPublishers(buffer);
                         }
                     }
                 } catch (Exception e) {
@@ -132,15 +128,26 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
         }
     }
 
-    private void publish(FolderBuffer buffer) {
+    public void notifyPublishers(DriveEvent event) {
+        LOG.debug("Publishing: " + event);
+        for (DriveEventPublisher publisher : publishers) {
+            if (event.isRemote() && publisher.isLocalOnly()) {
+
+            } else {
+                publisher.publish(event);
+
+            }
+
+            if (false == event.isRemote() || false == publisher.isLocalOnly()) {
+            }
+        }
+    }
+
+    private void notifyPublishers(FolderBuffer buffer) {
         if (null != buffer) {
             Set<String> folderIDs = buffer.getFolderIDs();
             if (null != folderIDs && 0 < folderIDs.size()) {
-                DriveEvent event = new DriveEventImpl(buffer.getContexctID(), folderIDs, SYNC_DIRECTORIES_ACTION);
-                LOG.debug("Publishing buffered: " + event);
-                for (DriveEventPublisher publisher : publishers) {
-                    publisher.publish(event);
-                }
+                notifyPublishers(new DriveEventImpl(buffer.getContexctID(), folderIDs, false));
             }
         }
     }
@@ -155,7 +162,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
         /*
          * check event
          */
-        if (LOG.isDebugEnabled()) {
+        if (LOG.isTraceEnabled()) {
             LOG.debug(FileStorageEventHelper.createDebugMessage("event", event));
         }
         if (false == check(event)) {

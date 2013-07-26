@@ -50,10 +50,14 @@
 package com.openexchange.realtime.client.impl.connection.mixedmode;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.atmosphere.wasync.Decoder;
 import org.atmosphere.wasync.Encoder;
 import org.atmosphere.wasync.Event;
 import org.atmosphere.wasync.Function;
+import org.atmosphere.wasync.ReplayDecoder;
 import org.atmosphere.wasync.impl.AtmosphereClient;
 import org.atmosphere.wasync.impl.DefaultOptions;
 import org.json.JSONArray;
@@ -213,16 +217,60 @@ public class MixedModeRTConnection extends AbstractRTConnection {
                     return jsonObject.toString();
                 }
             })
+            /*
+             * Message might span several packages/chunks
+             */
+            .decoder(new ReplayDecoder() {
+                private StringBuilder messageBuilder = new StringBuilder(1024);
+                private final List<String> EMPTY = Collections.emptyList();
+                private boolean wasLastMesageComplete = true;
+
+                @Override
+                public List<String> decode(Event event, String received) {
+                    if(event.equals(Event.MESSAGE)) {
+                        if(received.endsWith("}") || received.endsWith("}]")) { //either complete message or we are completing a chunked one
+                            if(wasLastMesageComplete) {
+                                List<String> messages = Collections.singletonList(received);
+                                return messages;
+                            } else { //we are completing a chunked message
+                                messageBuilder.append(received);
+                                List<String> messages = Collections.singletonList(messageBuilder.toString());
+                                messageBuilder.delete(0, messageBuilder.length());
+                                wasLastMesageComplete = true;
+                                if (LOG.isTraceEnabled()) {
+                                    LOG.trace("Completed message in atmosphere decoder: " + received);
+                                }
+                                return messages;
+                            }
+                        } else { // incoming message wasn't complete
+                            messageBuilder.append(received);
+                            wasLastMesageComplete = false;
+                            if (LOG.isTraceEnabled()) {
+                                LOG.trace("Received incompleted message in atmosphere decoder: " + received);
+                            }
+                            return EMPTY;
+                        }
+                    }
+                    return EMPTY;
+                }
+            })
             .build();
+        List<Decoder<?,?>> decoders = request.decoders();
+        decoders.remove(0);
+        decoders.remove(0);
 
         socket = atmosphereClient.create(
             (DefaultOptions) atmosphereClient.newOptionsBuilder().runtime(asyncHttpClient, true).reconnect(true).build()
         );
         try {
             socket.on(Event.MESSAGE.name(), new Function<String>() {
+
                 @Override
                 public void on(String received) {
-                    LOG.debug("Received message in atmosphere channel: " + received);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Received message in atmosphere channel: " + received);
+                    }
+
                     try {
                         onReceive(received, true);
                     } catch (RTException rtException) {

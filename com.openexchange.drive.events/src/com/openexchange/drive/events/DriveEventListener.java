@@ -55,8 +55,8 @@ package com.openexchange.drive.events;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface DriveEventListener {
-
-    void onEvent(DriveEvent event);
-
-}
+//public interface DriveEventListener {
+//
+//    void onEvent(DriveEvent event);
+//
+//}

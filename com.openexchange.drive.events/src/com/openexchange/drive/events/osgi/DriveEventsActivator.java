@@ -52,15 +52,21 @@ package com.openexchange.drive.events.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.drive.events.internal.DriveEventServiceImpl;
 import com.openexchange.drive.events.internal.DriveEventServiceLookup;
+import com.openexchange.drive.events.ms.MsDriveEventHandler;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
+import com.openexchange.ms.MsService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 
@@ -90,12 +96,47 @@ public class DriveEventsActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
         DriveEventServiceLookup.set(this);
-        DriveEventServiceImpl service = new DriveEventServiceImpl();
+        final DriveEventServiceImpl service = new DriveEventServiceImpl();
         registerService(DriveEventService.class, service);
         Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC,
             new String[] { FileStorageEventConstants.ALL_TOPICS, FileStorageEventConstants.ALL_FOLDER_TOPICS });
         registerService(EventHandler.class, service, serviceProperties);
+        track(MsService.class, new ServiceTrackerCustomizer<MsService, MsService>() {
+
+            private volatile MsDriveEventHandler eventHandler;
+
+            @Override
+            public MsService addingService(ServiceReference<MsService> reference) {
+                MsService messagingService = context.getService(reference);
+                MsDriveEventHandler.setMsService(messagingService);
+                LOG.debug("Initializing messaging service drive event handler");
+                try {
+                    this.eventHandler = new MsDriveEventHandler(service);
+                } catch (OXException e) {
+                    throw new IllegalStateException(
+                        e.getMessage(), new BundleException(e.getMessage(), BundleException.ACTIVATOR_ERROR, e));
+                }
+                return messagingService;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<MsService> reference, MsService service) {
+                // Ignored
+            }
+
+            @Override
+            public void removedService(ServiceReference<MsService> reference, MsService service) {
+                LOG.debug("Stopping messaging service cache event handler");
+                MsDriveEventHandler eventHandler = this.eventHandler;
+                if (null != eventHandler) {
+                    eventHandler.stop();
+                    this.eventHandler = null;
+                }
+                MsDriveEventHandler.setMsService(null);
+            }
+        });
+        openTrackers();
     }
 
     @Override

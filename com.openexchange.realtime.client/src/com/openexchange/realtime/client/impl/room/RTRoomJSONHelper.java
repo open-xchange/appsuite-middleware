@@ -59,7 +59,7 @@ import org.json.JSONValue;
 
 /**
  * Helper class that generates the {@link JSONValue} instances to participate in room actions.
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
@@ -67,7 +67,7 @@ public class RTRoomJSONHelper {
 
     /**
      * Creates the {@link JSONValue} to join a room
-     * 
+     *
      * @param name - String with the name of the room (selector)
      * @param to - String with the address to send the message to
      * @return {@link JSONValue} to join a room
@@ -94,7 +94,7 @@ public class RTRoomJSONHelper {
 
     /**
      * Creates the {@link JSONValue} to say a message into room
-     * 
+     *
      * @param to - String with the address to send the message to
      * @param payloads - {@link JSONArray} with the message (all required payloads) to say.
      * @return {@link JSONValue} to say a message into a room
@@ -142,7 +142,7 @@ public class RTRoomJSONHelper {
 
     /**
      * Creates the {@link JSONValue} to leave a room
-     * 
+     *
      * @param to - String with the address to send the message to
      * @return {@link JSONValue} to leave into a room
      * @throws JSONException

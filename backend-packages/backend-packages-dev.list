@@ -6,6 +6,5 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-file-storage-cmis"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-freebusy-ews"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-preview"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-realtime-client"/>
 </provider>
 </psf>
