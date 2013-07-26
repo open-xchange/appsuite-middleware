@@ -14,9 +14,9 @@
 	    <symlink resource="${sbinInstallDir}/registercorestore" link="${destDir}/${sbinInstallDir}/unregistercorestore" overwrite="true" />
 	    <symlink resource="${sbinInstallDir}/registercorestore" link="${destDir}/${sbinInstallDir}/listcorestore" overwrite="true" />
 	    <symlink resource="${sbinInstallDir}/registercorestore" link="${destDir}/${sbinInstallDir}/changecorestore" overwrite="true" />
-	    <chmod perm="755" file="${sbinInstallDir}/unregistercorestore" />
-	    <chmod perm="755" file="${sbinInstallDir}/listcorestore" />
-        <chmod perm="755" file="${sbinInstallDir}/changecorestore" />
+	    <chmod perm="755" file="${destDir}/${sbinInstallDir}/unregistercorestore" verbose="true" />
+	    <chmod perm="755" file="${destDir}/${sbinInstallDir}/listcorestore" verbose="true" />
+        <chmod perm="755" file="${destDir}/${sbinInstallDir}/changecorestore" verbose="true" />
 	</target>
 
 </project>
