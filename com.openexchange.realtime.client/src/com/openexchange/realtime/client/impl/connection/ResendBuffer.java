@@ -53,6 +53,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CountDownLatch;
 import org.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +76,10 @@ public class ResendBuffer {
     private final AbstractRTConnection connection;
 
     private final Timer timer;
+    
+    private boolean shouldStop=false;
+    
+    private final CountDownLatch allSent = new CountDownLatch(1);
 
     public ResendBuffer(AbstractRTConnection connection) {
         super();
@@ -85,6 +90,13 @@ public class ResendBuffer {
     }
 
     public void put(long seq, JSONValue message) {
+        if(shouldStop) {
+            LOG.info("Stop triggered. Not accepting new Message {} with Sequence {}", message, seq);
+            return;
+        }
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Received message {} with Sequence {}", message, seq);
+        }
         ResendTask task = new ResendTask(connection, seq, message);
         timer.scheduleAtFixedRate(task, 0L, 3000L);
         activeTimers.put(seq, task);
@@ -96,9 +108,26 @@ public class ResendBuffer {
             task.cancel();
             timer.purge();
         }
+        if(shouldStop) {
+            if(activeTimers.isEmpty()) {
+                allSent.countDown();
+            }
+        }
     }
 
+    /**
+     * Trigger stop on the ResendBuffer. This causes the ResendBuffer to not accept any new messages via
+     * {@link ResendBuffer#put(long, JSONValue)} and only (re)sending the already received messages. This call blocks until all messages
+     * were sent.
+     * @throws InterruptedException
+     */
     public void stop() {
+        shouldStop=true;
+        try {
+            allSent.await();
+        } catch (InterruptedException e) {
+            LOG.error("Error while stopping the ResendBuffer", e);
+        }
         LOG.info("ResendBuffer shuts down...");
         timer.cancel();
     }
