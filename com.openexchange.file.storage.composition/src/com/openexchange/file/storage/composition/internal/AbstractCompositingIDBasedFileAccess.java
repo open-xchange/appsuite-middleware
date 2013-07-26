@@ -357,8 +357,10 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public List<String> removeDocument(final List<String> ids, final long sequenceNumber) throws OXException {
+        /*
+         * get affected file storages
+         */
         final Map<FileStorageFileAccess, List<IDTuple>> deleteOperations = new HashMap<FileStorageFileAccess, List<IDTuple>>();
-        final List<File> reloaded = new ArrayList<File>();
         for (final String id : ids) {
             final FileID fileID = new FileID(id);
             final FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
@@ -367,9 +369,20 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 deletes = new ArrayList<IDTuple>();
                 deleteOperations.put(fileAccess, deletes);
             }
-
             deletes.add(new FileStorageFileAccess.IDTuple(fileID.getFolderId(), fileID.getFileId()));
-            TimedResult<File> documents = fileAccess.getDocuments(deletes, Arrays.asList(new Field[] { Field.ID, Field.FOLDER_ID }));
+        }
+        /*
+         * delete files per storage
+         */
+        final List<String> notDeleted = new ArrayList<String>(ids.size());
+        for (final Map.Entry<FileStorageFileAccess, List<IDTuple>> deleteOp : deleteOperations.entrySet()) {
+            final FileStorageFileAccess access = deleteOp.getKey();
+            final List<IDTuple> toDelete = deleteOp.getValue();
+            /*
+             * reload & remember documents to get folder ID for upcoming event
+             */
+            final List<File> reloaded = new ArrayList<File>();
+            TimedResult<File> documents = access.getDocuments(toDelete, Arrays.asList(new Field[] { Field.ID, Field.FOLDER_ID }));
             if (documents != null) {
                 SearchIterator<File> it = documents.results();
                 while (it.hasNext()) {
@@ -377,13 +390,9 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                     reloaded.add(file);
                 }
             }
-        }
-
-
-        final List<String> notDeleted = new ArrayList<String>(ids.size());
-        for (final Map.Entry<FileStorageFileAccess, List<IDTuple>> deleteOp : deleteOperations.entrySet()) {
-            final FileStorageFileAccess access = deleteOp.getKey();
-            final List<IDTuple> toDelete = deleteOp.getValue();
+            /*
+             * delete
+             */
             final List<IDTuple> conflicted = access.removeDocument(toDelete, sequenceNumber);
             for (final IDTuple tuple : conflicted) {
                 final FileStorageAccountAccess accountAccess = access.getAccountAccess();
@@ -404,16 +413,11 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 String fileFolder = tuple.getFolder();
                 String id = tuple.getId();
                 if (fileFolder == null) {
-                    /*
-                     * Reload the document to get it's folder id.
-                     */
                     for (File file : reloaded) {
                         if (file.getId().equals(id)) {
                             fileFolder = file.getFolderId();
                         }
                     }
-                } else {
-
                 }
                 String folderId = new FolderID(serviceId, accountId, fileFolder).toUniqueID();
                 String objectId = new FileID(serviceId, accountId, fileFolder, id).toUniqueID();

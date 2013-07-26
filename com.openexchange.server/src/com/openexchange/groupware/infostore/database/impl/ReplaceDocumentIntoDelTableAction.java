@@ -54,63 +54,81 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.Table;
 
-public class DeleteDocumentAction extends AbstractDocumentListAction {
+/**
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class ReplaceDocumentIntoDelTableAction extends AbstractDocumentListAction{
 
-    private static final int batchSize = 1000;
+    private static final int batchSize = 100;
 
     @Override
-    protected void undoAction() throws OXException {
-        if (getDocuments().isEmpty()) {
-            return;
-        }
-        final UpdateBlock[] updates = new UpdateBlock[getDocuments().size()];
-        int i = 0;
-        for(final DocumentMetadata doc : getDocuments()) {
-            updates[i++] = new Update(getQueryCatalog().getDocumentInsert()) {
-
-                @Override
-                public void fillStatement() throws SQLException {
-                    fillStmt(stmt,getQueryCatalog().getWritableDocumentFields(),doc,Integer.valueOf(getContext().getContextId()));
-                }
-
-            };
-        }
-
-        doUpdates(updates);
+    protected Object[] getAdditionals(DocumentMetadata doc) {
+        return new Object[0];
     }
 
     @Override
-    public void perform() throws OXException {
-        if (getDocuments().isEmpty()) {
+    protected void undoAction() throws OXException {
+        /*
+         * cleans up the del_infostore table again
+         */
+        List<DocumentMetadata> documents = getDocuments();
+        if (null == documents || 0 == documents.size()) {
             return;
         }
-
-        final List<DocumentMetadata> documents = getDocuments();
-        final List<DocumentMetadata>[] slices = getSlices(batchSize, documents);
-
-        final List<UpdateBlock> updates = new ArrayList<UpdateBlock>(slices.length << 1);
-
-        for(int j = 0, size = slices.length; j < size; j++) {
-            final List<String> deleteStmts = getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.INFOSTORE, slices[j]);
-            for (final String deleteStmt : deleteStmts) {
-                updates.add(new Update(deleteStmt){
+        List<DocumentMetadata>[] slices = getSlices(batchSize, documents);
+        List<UpdateBlock> updates = new ArrayList<UpdateBlock>(slices.length << 1);
+        for (int i = 0; i < slices.length; i++) {
+            List<String> deleteStmts = getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.DEL_INFOSTORE, slices[i]);
+            for (String deleteStmt : deleteStmts) {
+                updates.add(new Update(deleteStmt) {
 
                     @Override
                     public void fillStatement() throws SQLException {
                         stmt.setInt(1, getContext().getContextId());
                     }
-
                 });
             }
         }
-
+        /*
+         * perform updates
+         */
         doUpdates(updates);
     }
 
     @Override
-    protected Object[] getAdditionals(final DocumentMetadata doc) {
-        return null;
+    public void perform() throws OXException {
+        /*
+         * replaces entries in the del_infostore table
+         */
+        List<DocumentMetadata> documents = getDocuments();
+        if (null == documents || 0 == documents.size()) {
+            return;
+        }
+        /*
+         * create update batches
+         */
+        final Integer contextID = Integer.valueOf(getContext().getContextId());
+        List<DocumentMetadata>[] slices = getSlices(batchSize, documents);
+        List<UpdateBlock> updates = new ArrayList<UpdateBlock>(slices.length);
+        for (int i = 0; i < slices.length; i++) {
+            final List<DocumentMetadata> slice = slices[i];
+            updates.add(new Update(getQueryCatalog().getReplace(Table.DEL_INFOSTORE, slice.size())) {
+
+                @Override
+                public void fillStatement() throws SQLException {
+                    int parameterIndex = 1;
+                    for (DocumentMetadata document : slice) {
+                        parameterIndex = fillStmt(parameterIndex, stmt, getQueryCatalog().getWritableDocumentFields(), document, contextID);
+                    }
+                }
+            });
+        }
+        /*
+         * perform updates
+         */
+        doUpdates(updates);
     }
 
 }

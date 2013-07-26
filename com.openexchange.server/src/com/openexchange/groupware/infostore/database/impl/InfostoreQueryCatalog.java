@@ -295,6 +295,39 @@ public class InfostoreQueryCatalog {
         return l;
     }
 
+    /**
+     * Constructs an REPLACE INTO statement useful to insert multiple entries into the del_* tables at once, overwriting already
+     * existing entries if needed automatically.
+     *
+     * @param table The table to replace into
+     * @param count The number of rows to prepare parameter placeholders for. For each row, the number of writable fields are prepared,
+     *        additionally a paramter for the context ID is for each row.
+     * @return The statement string
+     */
+    public String getReplace(Table table, int count) {
+        if (1 > count) {
+            throw new IllegalArgumentException("need at least one item to create statement");
+        }
+        Metadata[] fields = table.getFields();
+        MetadataSwitcher switcher = table.getFieldSwitcher();
+        StringAllocator questionMarksAllocator = new StringAllocator("(");
+        StringAllocator allocator = new StringAllocator("REPLACE INTO ").append(table.getTablename()).append(" (");
+        for (int i = 0; i < fields.length; i++) {
+            if (IGNORE_ON_WRITE.contains(fields[i])) {
+                continue;
+            }
+            questionMarksAllocator.append("?,");
+            allocator.append(fields[i].doSwitch(switcher)).append(',');
+        }
+        String questionMarks = questionMarksAllocator.append("?)").toString();
+        allocator.append("cid) VALUES ").append(questionMarks);
+        for (int i = 1; i < count; i++) {
+            allocator.append(',').append(questionMarks);
+        }
+        allocator.append(';');
+        return allocator.toString();
+    }
+
     public String getDocumentInsert() {
         return INSERT_INFOSTORE;
     }
