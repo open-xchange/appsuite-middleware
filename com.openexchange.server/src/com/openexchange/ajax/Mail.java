@@ -3991,14 +3991,13 @@ public class Mail extends PermissionServlet implements UploadListener {
             final BlockingQueue<MimeMessage> queue = new ArrayBlockingQueue<MimeMessage>(100);
             Future<Object> future = null;
             {
-                final ServletFileUpload servletFileUpload = getFileUploadBase();
                 if (!ServletFileUpload.isMultipartContent(req)) {
                     throw MailExceptionCode.UNSUPPORTED_MIME_TYPE.create(req.getContentType());
                 }
                 final ThreadPoolService service = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
                 task = new AppenderTask(mailInterface, folder, force, flags, queue);
                 try {
-                    final FileItemIterator iter = servletFileUpload.getItemIterator(req);
+                    final FileItemIterator iter = newFileUploadBase().getItemIterator(req);
                     if (iter.hasNext()) {
                         future = service.submit(task);
                     }
