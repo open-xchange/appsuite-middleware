@@ -1,3 +1,7 @@
+* 2013-07-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 27722: Introduced various optimizations to speed up batch deletion of many files  
+
 * 2013-07-26 - martin.herfurth@open-xchange.com
 
  - Fix for bug 27210: Avoid event handling from interrupting user deletion.
