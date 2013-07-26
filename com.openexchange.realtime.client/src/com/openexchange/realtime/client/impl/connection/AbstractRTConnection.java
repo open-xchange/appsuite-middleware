@@ -53,11 +53,16 @@ import java.io.StringReader;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.time.StopWatch;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -93,6 +98,12 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
     protected AtomicReference<RTSession> sessionRef;
 
     protected AtomicBoolean isActive = new AtomicBoolean(false);
+    
+    private CountDownLatch ackSentLatch = new CountDownLatch(1);
+    
+    private ResettableCountDown ackCountDown;
+    
+    private boolean isClosing=false;
 
 
     protected AbstractRTConnection() {
@@ -170,6 +181,22 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     @Override
     public void close() throws RTException {
+        isClosing = true;
+        //wait a given time until no mare acks have been sent out
+        ackCountDown = new ResettableCountDown(30, TimeUnit.SECONDS);
+        ackCountDown.addRunnable(new Runnable() {
+            
+            @Override
+            public void run() {
+                ackSentLatch.countDown();
+            }
+        });
+        ackCountDown.start();
+        try {
+            ackSentLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         isActive.set(false);
         protocol.release();
         Thread deliverer = delivererRef.get();
@@ -188,6 +215,10 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
      */
     @Override
     public void sendACK(JSONObject ack) throws RTException {
+        if(isClosing) {
+            ackCountDown.reset();
+            ackCountDown.start();
+        }
         if (!isActive.get()) {
             LOG.warn("Connection is already closed. Ack will not be sent: " + ack.toString());
             return;
