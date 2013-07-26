@@ -776,11 +776,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 collection.triggerEvent(so, type, cdao);
 
             } catch (final OXException ex) {
-                if (Category.CATEGORY_WARNING.equals(ex.getCategory())) {
-                    LOG.warn("While deleting an object (type:"+type+") the master object with id "+object_id+" in context "+context.getContextId()+" was not found!", ex);
-                } else {
-                    throw ex;
-                }
+                LOG.warn("While deleting an object (type:"+type+") the master object with id "+object_id+" in context "+context.getContextId()+" was not found!", ex);
             }
         } finally {
             collection.closeResultSet(rs);
