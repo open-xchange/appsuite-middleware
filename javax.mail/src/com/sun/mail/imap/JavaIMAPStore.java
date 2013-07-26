@@ -213,7 +213,7 @@ public class JavaIMAPStore extends IMAPStore {
                 if (loginSemaphoreTimeoutMillis > 0) {
                     // Await released permit only for specified amount of milliseconds
                     if (debug) {
-                        logger.fine("JavaIMAPStore.login: performing limited login. max wait time: " + loginSemaphoreTimeoutMillis + " -- number of threads waiting to acquire: " + semaphore.getQueueLength());
+                        logger.fine("JavaIMAPStore.login: performing limited login. max wait time: " + loginSemaphoreTimeoutMillis + " -- current number of permits available: " + semaphore.availablePermits());
                     }
                     if (!semaphore.tryAcquire(loginSemaphoreTimeoutMillis, TimeUnit.MILLISECONDS)) {
                         // No permit acquired in time
@@ -222,7 +222,7 @@ public class JavaIMAPStore extends IMAPStore {
                 } else {
                     // Await until released permit available
                     if (debug) {
-                        logger.fine("JavaIMAPStore.login: performing limited login. awaiting until a used connection gets closed -- number of threads waiting to acquire: " + semaphore.getQueueLength());
+                        logger.fine("JavaIMAPStore.login: performing limited login. awaiting until a used connection gets closed -- current number of permits available: " + semaphore.availablePermits());
                     }
                     semaphore.acquire();
                 }
