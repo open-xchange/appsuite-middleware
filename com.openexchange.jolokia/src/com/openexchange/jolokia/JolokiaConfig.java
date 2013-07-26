@@ -81,7 +81,7 @@ public class JolokiaConfig implements Initialization {
     private boolean jolokiaStart = false;
 
     /** The servlet name, jolokia will try to get connected to */
-    private String jolokiaServletName = "/servlet/jolokia";
+    private String jolokiaServletName = "/monitoring/jolokia";
 
     /** The user for authentication */
     private String user;
@@ -113,10 +113,10 @@ public class JolokiaConfig implements Initialization {
         }
 
         // jolokia properties
-        this.jolokiaServletName = configService.getProperty("com.openexchange.jolokia.servlet.name", "/servlet/jolokia");
+        this.jolokiaServletName = configService.getProperty("com.openexchange.jolokia.servlet.name", "/monitoring/jolokia");
         this.jolokiaStart = configService.getBoolProperty("com.openexchange.jolokia.start", false);
         this.user = configService.getProperty("com.openexchange.jolokia.user");
-        this.password = configService.getProperty("com.openexchange.jolokia.password", "password");
+        this.password = configService.getProperty("com.openexchange.jolokia.password", "secret");
 
     }
 
