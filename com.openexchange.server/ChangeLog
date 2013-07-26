@@ -1,3 +1,7 @@
+* 2013-07-26 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 27210: Avoid event handling from interrupting user deletion.
+
 * 2013-07-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 27345: Suppress "Shared files" folder if it does not contain user-visible subfolders
