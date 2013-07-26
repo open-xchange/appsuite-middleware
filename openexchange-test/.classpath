@@ -77,7 +77,7 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.servicemix.specs.jaxb-api-2.1-1.3.0.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.servicemix.specs.stax-api-1.0-1.3.0.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.equinox.event_1.3.0.v20130327-1442.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.util_3.2.300.v20120912-140840.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.util_3.2.300.v20130513-1956.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chat"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chat.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.importexport"/>
