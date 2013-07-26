@@ -55,22 +55,27 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tx.AbstractUndoable;
 import com.openexchange.tx.UndoableAction;
 
-public abstract class AbstractDBAction extends AbstractUndoable implements
-		UndoableAction {
+public abstract class AbstractDBAction extends AbstractUndoable implements UndoableAction {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractDBAction.class));
+	static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractDBAction.class));
 
 	private DBProvider provider = null;
 	private Context context = null;
 
+	/**
+	 * Initializes a new {@link AbstractDBAction}.
+	 */
+	protected AbstractDBAction() {
+	    super();
+	}
 
 	protected int doUpdates(final UpdateBlock...updates) throws OXException {
 		Connection writeCon = null;
@@ -126,8 +131,8 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 
 		protected PreparedStatement stmt;
 		protected ResultSet rs;
-		protected String sql;
-		protected String statementString = null;
+		protected final String sql;
+		protected String statementString;
 
 		public Update(final String sql) {
 			this.sql = sql;

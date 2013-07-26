@@ -55,8 +55,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
-import com.openexchange.java.util.UUIDs;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
@@ -65,6 +63,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.InfostoreFilenameReservation;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.java.util.UUIDs;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link SelectForUpdateReservation}
@@ -207,11 +207,7 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
             }
         } finally {
             if (iter != null) {
-                try {
-                    iter.close();
-                } catch (final OXException e) {
-                    throw e;
-                }
+                iter.close();
             }
         }
 

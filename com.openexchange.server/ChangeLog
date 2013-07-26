@@ -1,3 +1,13 @@
+* 2013-07-26 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 27210: Avoid event handling from interrupting user deletion.
+
+* 2013-07-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27345: Suppress "Shared files" folder if it does not contain user-visible subfolders
+ - Fix for bug 27647: Don't consider HTML content containing <img> tags as empty content
+ - Fix for bug 26920: Ensure versions are deleted prior to deleting document
+
 * 2013-07-24 - martin.herfurth@open-xchange.com
 
  - Fix for bug 27591: Handle Exchange all-day flag: X-MICROSOFT-CDO-ALLDAYEVENT
@@ -15,6 +25,11 @@
 * 2013-07-23 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 27718: Changed defaultAvailability in AvailabilityChecker
+
+* 2013-07-23 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 27476: Implicitly add internal user in change exceptions if missing from imported iCal 
+ - Fix for bug 27161: Pass DISTANT_FUTURE when deleting a folder via WebDAV 
 
 * 2013-07-22 - tobias.friedrich@open-xchange.com
 

@@ -236,6 +236,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         "application/vnd",
         "application/vnd.ms-word.document.12n",
         "application/vnd.ms-word.document.12",
+        "application/vnd.ms-word",
         "application/odt",
         "application/x-pdf")));
 

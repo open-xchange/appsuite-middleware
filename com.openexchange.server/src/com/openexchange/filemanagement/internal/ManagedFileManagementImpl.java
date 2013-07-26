@@ -308,7 +308,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
     public ManagedFile createManagedFile(final InputStream inputStream) throws OXException {
         return createManagedFile(null, inputStream);
     }
-    
+
     @Override
     public ManagedFile createManagedFile(final String id, final InputStream inputStream) throws OXException {
         return createManagedFile0(id, inputStream, true, null, -1);
@@ -385,7 +385,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
 
         return mf;
     }
-    
+
     @Override
     public boolean containsLocal(final String id) {
         final ManagedFile mf = files.get(id);
@@ -405,15 +405,16 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         mf.touch();
         return true;
     }
-    
+
     private boolean containsDistributed(final String id) {
-        if (getDistributed() == null) {
+        final DistributedFileManagement distributedFileManagement = getDistributed();
+        if (distributedFileManagement == null) {
             return false;
         }
 
         try {
-            if (getDistributed().exists(id)) {
-                getDistributed().touch(id);
+            if (distributedFileManagement.exists(id)) {
+                distributedFileManagement.touch(id);
                 return true;
             }
         } catch (final OXException e) {
@@ -451,24 +452,27 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         if (null == mf || mf.isDeleted()) {
             throw ManagedFileExceptionErrorMessage.NOT_FOUND.create(id);
         }
-        if (getDistributed() != null && getDistributed().exists(id)) {
-            getDistributed().touch(id);
+
+        final DistributedFileManagement distributedFileManagement = getDistributed();
+        if (distributedFileManagement != null && distributedFileManagement.exists(id)) {
+            distributedFileManagement.touch(id);
         }
         mf.touch();
         return mf;
     }
 
     private ManagedFile getByIDDistributed(final String id) {
-        if (getDistributed() == null) {
+        final DistributedFileManagement distributedFileManagement = getDistributed();
+        if (distributedFileManagement == null) {
             return null;
         }
 
         try {
-            if (!getDistributed().exists(id)) {
+            if (!distributedFileManagement.exists(id)) {
                 return null;
             }
 
-            return createManagedFile(id, getDistributed().get(id));
+            return createManagedFile(id, distributedFileManagement.get(id));
         } catch (final OXException e) {
             return null;
         }
@@ -499,8 +503,9 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         try {
             if (!mf.isDeleted()) {
                 mf.delete();
-                if (getDistributed() != null) {
-                    getDistributed().unregister(id);
+                final DistributedFileManagement distributedFileManagement = getDistributed();
+                if (distributedFileManagement != null) {
+                    distributedFileManagement.unregister(id);
                 }
             }
         } catch (final OXException e) {
@@ -509,23 +514,25 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
             files.remove(mf.getID());
         }
     }
-    
+
     private void removeByIDDistributed(final String id) {
-        if (getDistributed() == null) {
+        final DistributedFileManagement distributedFileManagement = getDistributed();
+        if (distributedFileManagement == null) {
             return;
         }
-        
+
         try {
-            getDistributed().remove(id);
+            distributedFileManagement.remove(id);
         } catch (final OXException e) {
             // Do nothing.
         }
     }
 
     void removeFromFiles(final String id) {
-        if (getDistributed() != null) {
+        final DistributedFileManagement distributedFileManagement = getDistributed();
+        if (distributedFileManagement != null) {
             try {
-                getDistributed().unregister(id);
+                distributedFileManagement.unregister(id);
             } catch (final OXException e) {
                 // Do nothing.
             }
@@ -588,7 +595,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
             }
         }
     }
-    
+
     private DistributedFileManagement getDistributed() {
         final DistributedFileManagement service = ServerServiceRegistry.getInstance().getService(DistributedFileManagement.class);
         return service;

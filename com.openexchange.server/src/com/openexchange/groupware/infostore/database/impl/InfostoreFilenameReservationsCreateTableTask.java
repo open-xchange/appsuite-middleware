@@ -74,14 +74,14 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
-    
+
     private final FullPrimaryKeySupportService fullPrimaryKeySupportService;
 
     /**
      *
      */
     private static final String INFOSTORE_RESERVED_PATHS = "infostoreReservedPaths";
-    
+
     public InfostoreFilenameReservationsCreateTableTask(FullPrimaryKeySupportService service) {
         this.fullPrimaryKeySupportService = service;
     }
@@ -156,12 +156,8 @@ public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreate
 
     private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
         final DatabaseService ds = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        final Connection writeCon;
-        try {
-            writeCon = ds.getWritable(contextId);
-        } catch (final OXException e) {
-            throw e;
-        }
+        final Connection writeCon = ds.getWritable(contextId);
+
         PreparedStatement stmt = null;
         try {
             if (tableExists(writeCon, tablename)) {

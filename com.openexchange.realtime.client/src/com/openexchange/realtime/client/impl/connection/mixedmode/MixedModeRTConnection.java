@@ -51,7 +51,6 @@ package com.openexchange.realtime.client.impl.connection.mixedmode;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import org.atmosphere.wasync.Decoder;
 import org.atmosphere.wasync.Encoder;
 import org.atmosphere.wasync.Event;
 import org.atmosphere.wasync.Function;
@@ -75,7 +74,6 @@ import com.openexchange.realtime.client.RTMessageHandler;
 import com.openexchange.realtime.client.impl.connection.AbstractRTConnection;
 import com.openexchange.realtime.client.impl.connection.Constants;
 import com.openexchange.realtime.client.impl.connection.RequestBuilderHelper;
-import com.openexchange.realtime.client.impl.connection.SequenceGenerator;
 
 /**
  * {@link MixedModeRTConnection} This Connection class is needed to communicate with the realtime interfaces of our backend after the
@@ -195,8 +193,6 @@ public class MixedModeRTConnection extends AbstractRTConnection {
     // Data received by this client should delegate the data to RTProtocol.handleIncoming(JSONObject)
     private AtmosphereClient atmosphereClient;
 
-    SequenceGenerator sequenceGenerator = new SequenceGenerator();
-
     public MixedModeRTConnection(AsyncHttpClient asyncHttpClient, RTConnectionProperties connectionProperties, RTMessageHandler messageHandler) throws RTException {
         super();
         this.asyncHttpClient = asyncHttpClient;
@@ -260,13 +256,20 @@ public class MixedModeRTConnection extends AbstractRTConnection {
     }
 
     @Override
-    public void sendACK(JSONObject ack) throws RTException {
+    public void doSendACK(JSONObject ack) throws RTException {
         fireSendRequest(ack);
     }
 
     @Override
-    public void sendPing(JSONObject ping) throws RTException {
+    public void doSendPing(JSONObject ping) throws RTException {
         fireAtmosphereRequest(ping);
+    }
+
+    @Override
+    protected void doClose() {
+        if (socket != null) {
+            socket.close();
+        }
     }
 
     private boolean isQueryAction(JSONValue json) {

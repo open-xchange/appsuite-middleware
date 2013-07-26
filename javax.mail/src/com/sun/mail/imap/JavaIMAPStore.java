@@ -74,6 +74,8 @@ import com.sun.mail.util.PropUtil;
  */
 public class JavaIMAPStore extends IMAPStore {
 
+    private static final int DEFAULT_SEMAPHORE_TIMEOUT_MILLIS = 20000;
+
     /** The login semaphore */
     private static final ConcurrentMap<URLName, Semaphore> loginSemaphores = new ConcurrentHashMap<URLName, Semaphore>(16);
 
@@ -83,7 +85,7 @@ public class JavaIMAPStore extends IMAPStore {
         }
         Semaphore s = loginSemaphores.get(url);
         if (null == s) {
-            Semaphore ns = new Semaphore(permits);
+            final Semaphore ns = new Semaphore(permits);
             s = loginSemaphores.putIfAbsent(url, ns);
             if (null == s) {
                 s = ns;
@@ -172,8 +174,14 @@ public class JavaIMAPStore extends IMAPStore {
             loginSemaphoreTimeoutMillis = -1L;
             accountId = -1;
         } else {
-            final int millis = PropUtil.getIntSessionProperty(session, "mail.imap.loginSemaphoreTimeoutMillis", 20000);
-            loginSemaphoreTimeoutMillis = millis <= 0 ? 20000 : millis;
+            final boolean loginSemaphoreAwait = PropUtil.getBooleanSessionProperty(session, "mail.imap.loginSemaphoreAwait", false);
+            if (loginSemaphoreAwait) {
+                loginSemaphoreTimeoutMillis = -1L;
+            } else {
+                final int defaultTimeout = DEFAULT_SEMAPHORE_TIMEOUT_MILLIS;
+                final int millis = PropUtil.getIntSessionProperty(session, "mail.imap.loginSemaphoreTimeoutMillis", defaultTimeout);
+                loginSemaphoreTimeoutMillis = millis <= 0 ? defaultTimeout : millis;
+            }
             accountId = PropUtil.getIntSessionProperty(session, "mail.imap.accountId", 0);
         }
     }
@@ -192,16 +200,23 @@ public class JavaIMAPStore extends IMAPStore {
     protected void login(final IMAPProtocol p, final String u, final String pw) throws ProtocolException {
         /*-
          * Get semaphore (if enabled)
-         * 
+         *
          * - Include account identifier for account-wise login tracking
          */
         final Semaphore semaphore = initLoginSemaphore(new URLName("imap", p.getHost(), p.getPort(), /*Integer.toString(accountId)*/null, u, pw), maxNumConnections);
         if (null != semaphore) {
             this.semaphore = semaphore;
             try {
-                if (!semaphore.tryAcquire(loginSemaphoreTimeoutMillis, TimeUnit.MILLISECONDS)) {
-                    // No permit acquired in time
-                    throw new ConnectQuotaExceededException("Max. number of connections exceeded. Try again later.");
+                final long loginSemaphoreTimeoutMillis = this.loginSemaphoreTimeoutMillis;
+                if (loginSemaphoreTimeoutMillis > 0) {
+                    // Await released permit only for specified amount of milliseconds
+                    if (!semaphore.tryAcquire(loginSemaphoreTimeoutMillis, TimeUnit.MILLISECONDS)) {
+                        // No permit acquired in time
+                        throw new ConnectQuotaExceededException("Max. number of connections exceeded. Try again later.");
+                    }
+                } else {
+                    // Await until released permit available
+                    semaphore.acquire();
                 }
                 logger.fine("JavaIMAPStore login: permitted.");
             } catch (final InterruptedException e) {
@@ -241,14 +256,28 @@ public class JavaIMAPStore extends IMAPStore {
     }
 
     @Override
+    protected void finalize() throws Throwable {
+        try {
+            super.finalize();
+        } finally {
+            releaseSemaphore();
+        }
+    }
+
+    @Override
     protected void logout(final IMAPProtocol protocol) throws ProtocolException {
         try {
             super.logout(protocol);
         } finally {
-            final Semaphore semaphore = this.semaphore;
-            if (null != semaphore) {
-                semaphore.release();
-            }
+            releaseSemaphore();
+        }
+    }
+
+    private void releaseSemaphore() {
+        final Semaphore semaphore = this.semaphore;
+        if (null != semaphore) {
+            semaphore.release();
+            this.semaphore = null;
         }
     }
 

@@ -114,10 +114,13 @@ public class ResendBufferTest extends AbstractRTConnection {
     }
 
     @Override
-    public void sendACK(JSONObject ack) throws RTException {}
+    public void doSendACK(JSONObject ack) throws RTException {}
 
     @Override
-    public void sendPing(JSONObject ping) throws RTException {}
+    public void doSendPing(JSONObject ping) throws RTException {}
+
+    @Override
+    protected void doClose() {}
 
     @Override
     protected void reconnect() throws RTException {}

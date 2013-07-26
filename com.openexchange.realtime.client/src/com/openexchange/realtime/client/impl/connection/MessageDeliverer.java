@@ -85,8 +85,10 @@ public class MessageDeliverer implements Runnable {
 
     @Override
     public void run() {
+        LOG.info("MessageDeliverer started...");
         while (true) {
             if (Thread.interrupted()) {
+                logInterruption();
                 return;
             }
 
@@ -105,6 +107,7 @@ public class MessageDeliverer implements Runnable {
                     }
                 }
             } catch (InterruptedException e) {
+                logInterruption();
                 return;
             } catch (Throwable t) {
                 LOG.error("Exception during MessageDelivery run", t);
@@ -131,6 +134,10 @@ public class MessageDeliverer implements Runnable {
             associatedHandler = messageHandlers.get(selector);
         }
         return associatedHandler;
+    }
+
+    private void logInterruption() {
+        LOG.info("MessageDeliverer shuts down due to interrupt...");
     }
 
 }
