@@ -274,6 +274,30 @@ ox_set_property com.openexchange.push.udp.registerDistributionEnabled false /opt
 ox_set_property com.openexchange.push.udp.eventDistributionEnabled false /opt/open-xchange/etc/push-udp.properties
 ox_set_property com.openexchange.push.udp.multicastEnabled false /opt/open-xchange/etc/push-udp.properties
 
+# SoftwareChange_Request-1446
+pfile=/opt/open-xchange/etc/server.properties
+VALUE=$(ox_read_property MAX_UPLOAD_SIZE $pfile)
+if [ "$VALUE" == "0" ]; then
+    ox_set_property MAX_UPLOAD_SIZE 104857600 $pfile
+fi
+VALUE=$(ox_read_property com.openexchange.defaultMaxConcurrentAJAXRequests $pfile)
+if [ "$VALUE" == "250" ]; then
+    ox_set_property com.openexchange.defaultMaxConcurrentAJAXRequests 100 $pfile
+fi
+VALUE=$(ox_read_property com.openexchange.servlet.maxActiveSessions $pfile)
+if [ "$VALUE" == "-1" ]; then
+    ox_set_property com.openexchange.servlet.maxActiveSessions 250000 $pfile
+fi
+pfile=/opt/open-xchange/etc/sessiond.properties
+VALUE=$(ox_read_property com.openexchange.sessiond.maxSession $pfile)
+if [ "$VALUE" == "5000" ]; then
+    ox_set_property com.openexchange.sessiond.maxSession 50000 $pfile
+fi
+VALUE=$(ox_read_property com.openexchange.sessiond.randomTokenTimeout $pfile)
+if [ "$VALUE" == "1M" ]; then
+    ox_set_property com.openexchange.sessiond.randomTokenTimeout 30000 $pfile
+fi
+
 # SoftwareChange_Request-1445
 pfile=/opt/open-xchange/etc/hazelcast.properties
 if ! ox_exists_property com.openexchange.hazelcast.maxOperationTimeout $pfile; then
