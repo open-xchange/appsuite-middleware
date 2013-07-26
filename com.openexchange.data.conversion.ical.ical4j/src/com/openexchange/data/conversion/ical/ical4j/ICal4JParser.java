@@ -149,27 +149,33 @@ public class ICal4JParser implements ICalParser {
 
     @Override
     public List<CalendarDataObject> parseAppointments(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
-        final List<CalendarDataObject> appointments = new ArrayList<CalendarDataObject>();
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(ical, UTF8));
 
-            while(true) {
+            List<CalendarDataObject> appointments = null;
+            while (true) {
                 final net.fortuna.ical4j.model.Calendar calendar = parse(reader);
-                if(calendar == null) { break; }
-                ComponentList vevents = calendar.getComponents("VEVENT");
-                int myLimit = limit < 0 ? vevents.size() : limit < vevents.size() ? limit : vevents.size();
-                for(int i = 0; i < myLimit; i++) {
-                	final Object componentObj = vevents.get(i);
+                if (calendar == null) {
+                    break;
+                }
+                final ComponentList vevents = calendar.getComponents("VEVENT");
+                final int myLimit = limit < 0 ? vevents.size() : limit < vevents.size() ? limit : vevents.size();
+                if (null == appointments) {
+                    appointments = new ArrayList<CalendarDataObject>(myLimit);
+                }
+                for (int i = 0; i < myLimit; i++) {
+                    final Object componentObj = vevents.get(i);
                     final Component vevent = (Component) componentObj;
                     try {
-                        appointments.add(convertAppointment(i, (VEvent)vevent, defaultTZ, ctx, warnings ));
+                        appointments.add(convertAppointment(i, (VEvent) vevent, defaultTZ, ctx, warnings));
                     } catch (final ConversionError conversionError) {
                         errors.add(conversionError);
                     }
                 }
             }
 
+            return appointments;
         } catch (final UnsupportedCharsetException e) {
             // IGNORE
         } catch (final ConversionError e){
@@ -178,9 +184,7 @@ public class ICal4JParser implements ICalParser {
             closeSafe(reader);
         }
 
-
-
-        return appointments;
+        return Collections.emptyList();
     }
 
 	@Override
@@ -400,10 +404,8 @@ public class ICal4JParser implements ICalParser {
 
     protected net.fortuna.ical4j.model.Calendar parse(final BufferedReader reader) throws ConversionError {
         final CalendarBuilder builder = new CalendarBuilder();
-
         try {
             final StringBuilder chunk = new StringBuilder();
-            String line;
             boolean read = false;
             boolean timezoneStarted = false; //hack to fix bug 11958
             boolean timezoneEnded = false; //hack to fix bug 11958
@@ -411,7 +413,7 @@ public class ICal4JParser implements ICalParser {
             final StringBuilder timezoneInfo = new StringBuilder(); //hack to fix bug 11958
             // Copy until we find an END:VCALENDAR
             boolean beginFound = false;
-            while((line = reader.readLine()) != null) {
+            for (String line; (line = reader.readLine()) != null;) {
             	if(!beginFound && line.endsWith("BEGIN:VCALENDAR")){
             		line = removeByteOrderMarks(line);
             	}
@@ -459,8 +461,9 @@ public class ICal4JParser implements ICalParser {
             	workaroundFor17492(
             	workaroundFor17963(
             	workaroundFor20453(
+            	workaroundFor27706(
             	removeAnnoyingWhitespaces(chunk.toString()
-                ))))))))
+                )))))))))
             ); // FIXME: Encoding?
             return builder.build(chunkedReader);
         } catch (final IOException e) {
@@ -492,6 +495,14 @@ public class ICal4JParser implements ICalParser {
 			.replaceAll("DTEND;\\s*\n", "")
 			;
 	}
+
+	private String workaroundFor27706(final String input) {
+        return input
+            .replaceAll("DTSTAMP;TZID=UTC:\\s*([0-9]{8}T[0-9]{6})", "DTSTAMP:$1Z")
+            .replaceAll("DTSTART;TZID=UTC:\\s*([0-9]{8}T[0-9]{6})", "DTSTART:$1Z")
+            .replaceAll("DTEND;TZID=UTC:\\s*([0-9]{8}T[0-9]{6})", "DTEND:$1Z")
+            ;
+    }
 
 	/**
      * Method written out of laziness: Because you can spread iCal attributes
