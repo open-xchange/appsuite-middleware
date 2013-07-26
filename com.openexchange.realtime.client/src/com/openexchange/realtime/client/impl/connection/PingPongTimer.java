@@ -84,7 +84,7 @@ public class PingPongTimer implements Runnable {
 
     @Override
     public void run() {
-        LOG.info("PingPongTimer started...");
+        LOG.info("PingPongTimer started.");
         while (true) {
             if (Thread.interrupted()) {
                 logInterruption();
@@ -92,14 +92,9 @@ public class PingPongTimer implements Runnable {
             }
 
             long now = System.currentTimeMillis();
-            LOG.debug("Now: {}", now);
-            LOG.debug("lastContact: {}", lastContact.get());
-            LOG.debug("idleTime: {}", idleTime);
             long timeToPing = lastContact.get() + idleTime;
-            LOG.debug("timeToPing adds up to: {}", timeToPing);
             try {
                 if (timeToPing <= now) {
-                    LOG.debug("timeToPing <= now");
                     /*
                      * {"type": "ping", "commit": true }
                      */
@@ -119,7 +114,6 @@ public class PingPongTimer implements Runnable {
                     }
                     Thread.sleep(idleTime);
                 } else {
-                    LOG.debug("Thread.sleep(timeToPing - System.currentTimeMillis()): {}", timeToPing - System.currentTimeMillis());
                     Thread.sleep(timeToPing - System.currentTimeMillis());
                 }
             } catch (InterruptedException e) {
@@ -150,6 +144,6 @@ public class PingPongTimer implements Runnable {
     }
 
     private void logInterruption() {
-        LOG.info("PingPongTimer shuts down due to interrupt...");
+        LOG.info("PingPongTimer stopped.");
     }
 }
