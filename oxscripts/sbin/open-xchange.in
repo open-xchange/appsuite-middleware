@@ -89,4 +89,4 @@ else
     umask 066
 fi
 
-exec $JAVA_BIN $JAVA_OPTS $CLASSPATH -jar /opt/open-xchange/bundles/org.eclipse.osgi_3.8.1.v20120830-144521.jar -configuration file:$OSGIPATH >> $CONSOLELOG 2>&1
+exec $JAVA_BIN $JAVA_OPTS $CLASSPATH -jar /opt/open-xchange/bundles/org.eclipse.osgi_3.9.0.v20130529-1710.jar-configuration file:$OSGIPATH >> $CONSOLELOG 2>&1

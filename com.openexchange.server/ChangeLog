@@ -1,3 +1,24 @@
+* 2013-07-26 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26803: Not adding ConcurrentMarkSweepGC options in post install script if ParallelOldGC is configured.
+
+* 2013-07-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27706: Deal with UTC time zone set for UTC properties
+
+* 2013-07-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 27722: Introduced various optimizations to speed up batch deletion of many files  
+
+* 2013-07-26 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 27210: Avoid event handling from interrupting user deletion.
+ - Fix for bug 26109: Bad exception detection on iTip handling.
+
+* 2013-07-25 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26607: Optimized JMX queries for certain MBeans using object names and removed multi threading.
+
 * 2013-07-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 27345: Suppress "Shared files" folder if it does not contain user-visible subfolders
@@ -50,7 +71,7 @@
 * 2013-07-16 - marc.arens@open-xchange.com
 
  - Fix for bug 27469: Stop checking aliases as soon as a valid match was found
-   
+
 * 2013-07-11 - marcus.klein@open-xchange.com/jan.bauerdick@open-xchange.com
 
  - Fix for bug 19817: Initializing the transaction counter for the replication monitor as early as possible no normal groupware login
@@ -312,10 +333,6 @@
  - Fix for bug 26895: Signal an over-quota error during folder create attempt as a severe error to ensure user is aware of that
  - Fix for bug 26898: Treat special "[NONEXISTENT]" error prefix as empty response
  - Fix for bug 26897: Set proper error message
-
-* 2013-05-30 - thorben.betten@open-xchange.com
-
- - Fix for bug 26607: Gather statistic information in a concurrent fashion
 
 * 2013-05-29 - martin.herfurth@open-xchange.com
 

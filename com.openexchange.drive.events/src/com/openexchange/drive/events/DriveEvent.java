@@ -83,4 +83,11 @@ public interface DriveEvent {
      */
     Set<String> getFolderIDs();
 
+    /**
+     * Gets a value indicating whether this event is originated from a remote backend node or not.
+     *
+     * @return <code>true</code> it this event is 'remote', <code>false</code>, otherwise
+     */
+    boolean isRemote();
+
 }

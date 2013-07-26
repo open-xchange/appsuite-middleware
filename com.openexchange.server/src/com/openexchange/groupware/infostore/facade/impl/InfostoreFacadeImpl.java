@@ -99,7 +99,7 @@ import com.openexchange.groupware.infostore.database.impl.InfostoreIterator;
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
-import com.openexchange.groupware.infostore.database.impl.InsertDocumentIntoDelTableAction;
+import com.openexchange.groupware.infostore.database.impl.ReplaceDocumentIntoDelTableAction;
 import com.openexchange.groupware.infostore.database.impl.SelectForUpdateFilenameReserver;
 import com.openexchange.groupware.infostore.database.impl.UpdateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
@@ -168,6 +168,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     private static final InfostoreFilenameReserver filenameReserver = new SelectForUpdateFilenameReserver();
 
     static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreFacadeImpl.class));
+
+    private static final boolean INDEXING_ENABLED = false; //TODO: remove switch once we index infoitems
 
     public static final InfostoreQueryCatalog QUERIES = new InfostoreQueryCatalog();
 
@@ -819,7 +821,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final boolean ignoreVersion, final ServerSession session) throws OXException {
-        saveDocument(document, data, sequenceNumber, modifiedColumns, false, -1L, session);
+        saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion, -1L, session);
     }
 
     @Override
@@ -1050,7 +1052,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     DocumentMetadataImpl tombstoneDocument = new DocumentMetadataImpl(oldDocument);
                     tombstoneDocument.setLastModified(document.getLastModified());
                     tombstoneDocument.setModifiedBy(document.getModifiedBy());
-                    InsertDocumentIntoDelTableAction tombstoneAction = new InsertDocumentIntoDelTableAction();
+                    ReplaceDocumentIntoDelTableAction tombstoneAction = new ReplaceDocumentIntoDelTableAction();
                     tombstoneAction.setContext(context);
                     tombstoneAction.setDocuments(Arrays.asList(new DocumentMetadata[] { tombstoneDocument }));
                     tombstoneAction.setProvider(this);
@@ -1109,46 +1111,44 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
         final Context context = sessionObj.getContext();
 
-        final InsertDocumentIntoDelTableAction insertIntoDel = new InsertDocumentIntoDelTableAction();
-        insertIntoDel.setContext(context);
-        insertIntoDel.setDocuments(delDocs);
-        insertIntoDel.setProvider(this);
-        insertIntoDel.setQueryCatalog(QUERIES);
+        /*
+         * Move records into del_* tables
+         */
+        ReplaceDocumentIntoDelTableAction replaceIntoDel = new ReplaceDocumentIntoDelTableAction();
+        replaceIntoDel.setContext(context);
+        replaceIntoDel.setDocuments(delDocs);
+        replaceIntoDel.setProvider(this);
+        replaceIntoDel.setQueryCatalog(QUERIES);
+        perform(replaceIntoDel, true);
 
-        perform(insertIntoDel, true);
-
+        /*
+         * Remove referenced files from underlying storage
+         */
+        List<String> filestoreLocations = new ArrayList<String>(allVersions.size());
         for (final DocumentMetadata m : allVersions) {
             if (!rejectedIds.contains(Integer.valueOf(m.getId()))) {
                 delVers.add(m);
                 m.setLastModified(now);
-                removeFile(context, m.getFilestoreLocation());
+                if (null != m.getFilestoreLocation()) {
+                    filestoreLocations.add(m.getFilestoreLocation());
+                }
             }
         }
+        removeFiles(context, filestoreLocations);
 
-        // Set<Integer> notDeleted = db.removeDocuments(deleteMe,
-        // timed.sequenceNumber(), sessionObj.getContext(),
-        // sessionObj.getUserObject(), getUserConfiguration(sessionObj));
-
-        final DeleteVersionAction deleteVersion = new DeleteVersionAction();
-        deleteVersion.setContext(context);
-        deleteVersion.setDocuments(delVers);
-        deleteVersion.setProvider(this);
-        deleteVersion.setQueryCatalog(QUERIES);
-
-        {
-            perform(deleteVersion, true);
-        }
-
-        final DeleteDocumentAction deleteDocument = new DeleteDocumentAction();
+        /*
+         * Delete documents and all versions from database
+         */
+        DeleteDocumentAction deleteDocument = new DeleteDocumentAction();
         deleteDocument.setContext(context);
         deleteDocument.setDocuments(delDocs);
         deleteDocument.setProvider(this);
         deleteDocument.setQueryCatalog(QUERIES);
+        perform(deleteDocument, true);
 
-        {
-            perform(deleteDocument, true);
-        }
-
+        /*
+         * Remove from index
+         */
         removeFromIndex(context, sessionObj.getUserId(), delDocs);
         // TODO: This triggers a full re-indexing and can be improved. We only have to re-index if the latest version is affected.
         removeFromIndex(context, sessionObj.getUserId(), delVers);
@@ -1164,6 +1164,26 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         } else {
             final QuotaFileStorage qfs = getFileStorage(context);
             qfs.deleteFile(filestoreLocation);
+        }
+    }
+
+    /**
+     * Removes the supplied files from the underlying storage. If a transaction is active, the files are remembered to be deleted during
+     * the {@link #commit()}-phase - otherwise they're deleted from the storage directly.
+     *
+     * @param context The context
+     * @param filestoreLocations A list of locations referencing the files to be deleted in the storage
+     * @throws OXException
+     */
+    private void removeFiles(Context context, List<String> filestoreLocations) throws OXException {
+        if (null != filestoreLocations && 0 < filestoreLocations.size()) {
+            List<String> removeList = fileIdRemoveList.get();
+            if (null != removeList) {
+                removeList.addAll(filestoreLocations);
+                ctxHolder.set(context);
+            } else {
+                getFileStorage(context).deleteFiles(filestoreLocations.toArray(new String[filestoreLocations.size()]));
+            }
         }
     }
 
@@ -1779,15 +1799,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         db.commit();
         ServiceMethod.COMMIT.callUnsafe(security);
         lockManager.commit();
-        if (null != fileIdRemoveList.get() && fileIdRemoveList.get().size() > 0) {
-            final QuotaFileStorage qfs = getFileStorage(ctxHolder.get());
-            for (final String id : fileIdRemoveList.get()) {
-                try {
-                    qfs.deleteFile(id);
-                } catch (final OXException x) {
-                    throw x;
-                }
-            }
+        List<String> filesToRemove = fileIdRemoveList.get();
+        if (null != filesToRemove && 0 < filesToRemove.size()) {
+            getFileStorage(ctxHolder.get()).deleteFiles(filesToRemove.toArray(new String[filesToRemove.size()]));
         }
         super.commit();
     }
@@ -2015,10 +2029,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     private void removeFromIndex(final Context context, final int userId, final List<DocumentMetadata> documents) {
+        if (false == INDEXING_ENABLED) {
+            return;
+        }
         if (documents == null || documents.isEmpty()) {
             return;
         }
-
         ThreadPoolService threadPoolService = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
         ExecutorService executorService = threadPoolService.getExecutor();
         executorService.submit(new Runnable() {
@@ -2081,6 +2097,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     private void indexDocument(final Context context, final int userId, final int id, final long origFolderId, final boolean isCreation) {
+        if (false == INDEXING_ENABLED) {
+            return;
+        }
         ThreadPoolService threadPoolService = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
         ExecutorService executorService = threadPoolService.getExecutor();
         executorService.submit(new Runnable() {

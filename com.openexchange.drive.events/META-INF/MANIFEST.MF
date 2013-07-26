@@ -25,6 +25,7 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.log,
+ com.openexchange.ms,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.server.impl,
@@ -36,5 +37,6 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.tx,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.service.event
+ org.osgi.service.event,
+ org.osgi.util.tracker;version="1.5.1"
 Export-Package: com.openexchange.drive.events

@@ -132,6 +132,11 @@ public class ListenerRegistrar implements DriveEventPublisher  {
     }
 
     @Override
+    public boolean isLocalOnly() {
+        return false;
+    }
+
+    @Override
     public void publish(DriveEvent event) {
         Set<String> listenerSessionIDs = new HashSet<String>();
         for (String folderID : event.getFolderIDs()) {

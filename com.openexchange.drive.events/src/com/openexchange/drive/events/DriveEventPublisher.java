@@ -59,5 +59,7 @@ public interface DriveEventPublisher {
 
     void publish(DriveEvent event);
 
+    boolean isLocalOnly();
+
 }
 

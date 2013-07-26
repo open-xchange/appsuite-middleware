@@ -5,9 +5,8 @@ Bundle-SymbolicName: com.openexchange.common
 Bundle-Version: 7.4.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Eclipse-RegisterBuddy: javax.activation
 Import-Package: com.openexchange.tools.ssl,
- javax.activation,
+ javax.activation;version="1.1.0",
  javax.crypto,
  javax.crypto.interfaces,
  javax.crypto.spec,
@@ -128,7 +127,6 @@ Export-Package: com.googlecode.concurrentlinkedhashmap,
  edu.emory.mathcs.backport.java.util.concurrent.atomic,
  edu.emory.mathcs.backport.java.util.concurrent.helpers,
  edu.emory.mathcs.backport.java.util.concurrent.locks,
- gnu.inet.encoding,
  gnu.rex,
  gnu.trove,
  gnu.trove.decorator,

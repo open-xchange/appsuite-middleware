@@ -203,7 +203,7 @@ public class ReportClient extends AbstractJMXTools {
             }
 
             System.out.println("Starting the Open-Xchange report client. Note that the report generation may take a little while.");
-            final MBeanServerConnection initConnection = initConnection(false, env);
+            final MBeanServerConnection initConnection = initConnection(env);
 
             // Is one of the appsuite report options set? In that case do something completely different.
 
