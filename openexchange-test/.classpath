@@ -87,7 +87,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contacts.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.tasks.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contact.storage.rdb"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi_3.8.1.v20120830-144521.jar" sourcepath="/com.openexchange.bundles/source/org.eclipse.osgi.source_3.8.1.v20120830-144521.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi_3.9.0.v20130529-1710.jar" sourcepath="/com.openexchange.bundles/source/org.eclipse.osgi.source_3.9.0.v20130529-1710.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe.facebook"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe.linkedin"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe.msn"/>
