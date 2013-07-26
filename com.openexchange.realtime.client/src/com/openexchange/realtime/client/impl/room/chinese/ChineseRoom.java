@@ -52,7 +52,6 @@ package com.openexchange.realtime.client.impl.room.chinese;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONValue;
 import com.openexchange.realtime.client.RTConnection;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.impl.room.AbstractRoomImpl;
@@ -74,11 +73,11 @@ public class ChineseRoom extends AbstractRoomImpl {
         super(connection);
     }
     /**
-     * 
+     *
      * @param message
-     * @return 
-     * @throws JSONException 
-     * @throws RTException 
+     * @return
+     * @throws JSONException
+     * @throws RTException
      */
 //    [
 //     {
@@ -102,17 +101,17 @@ public class ChineseRoom extends AbstractRoomImpl {
         JSONArray payloads = new JSONArray();
         JSONObject actionPayload = new JSONObject();
         JSONObject messagePayload = new JSONObject();
-        
+
         actionPayload.put("element", "action");
         actionPayload.put("data", "say");
-        
+
         messagePayload.put("element", "message");
         messagePayload.put("namespace", "china");
         messagePayload.put("data", message);
-        
+
         payloads.put(actionPayload);
         payloads.put(messagePayload);
-        
+
         return payloads;
     }
 

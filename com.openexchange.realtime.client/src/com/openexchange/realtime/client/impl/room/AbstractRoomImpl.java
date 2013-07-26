@@ -55,6 +55,7 @@ import java.util.UUID;
 import org.apache.commons.lang.Validate;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.realtime.client.ID;
 import com.openexchange.realtime.client.RTConnection;
@@ -170,6 +171,34 @@ public abstract class AbstractRoomImpl implements RTRoom {
             this.send(say);
         } catch (Exception exception) {
             throw new RTException(exception);
+        }
+    }
+
+    @Override
+    public void sendCommand(String command, String content) throws RTException {
+        try {
+            JSONObject objectToSend = new JSONObject();
+            objectToSend.put("element", "message");
+            objectToSend.put("to", toAddress);
+
+            JSONArray payloads = new JSONArray();
+            JSONObject actionPayload = new JSONObject();
+            JSONObject messagePayload = new JSONObject();
+
+            actionPayload.put("element", "action");
+            actionPayload.put("data", command);
+
+            messagePayload.put("element", "message");
+            messagePayload.put("namespace", "loadTest");
+            messagePayload.put("data", content);
+
+            payloads.put(actionPayload);
+            payloads.put(messagePayload);
+
+            objectToSend.put("payloads", payloads);
+            this.send(objectToSend);
+        } catch (JSONException e) {
+            throw new RTException(e);
         }
     }
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,57 @@
  *
  */
 
-package com.openexchange.realtime.client.room;
+package com.openexchange.realtime.client.impl.connection.mixedmode;
 
+import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import org.json.JSONValue;
+import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.realtime.client.ID;
 import com.openexchange.realtime.client.RTConnection;
-import com.openexchange.realtime.client.RTException;
+import com.openexchange.realtime.client.RTConnectionFactory;
+import com.openexchange.realtime.client.RTConnectionProperties;
+import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
 import com.openexchange.realtime.client.RTMessageHandler;
+import com.openexchange.realtime.client.room.RTRoom;
+import com.openexchange.realtime.client.room.RTRoomFactory;
+import com.openexchange.realtime.client.room.loadtest.LoadTestRoomFactory;
+
 
 /**
- * Interface that should be implemented when it is desired to use the chat functionality of the realtime framework.
+ * {@link TooBigForOnePackageTest}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface RTRoom {
+public class TooBigForOnePackageTest {
 
-    /**
-     * Joins the addressed room. Internally the given {@link RTMessageHandler} will be registered at the used
-     * {@link RTConnection}. The selector for incoming messages will be generated automatically.
-     *
-     * @param room - defines the room to join to.
-     * @param messageHandler - {@link RTMessageHandler} to deal with messages
-     */
-    public void join(ID room, RTMessageHandler messageHandler) throws RTException;
-
-    /**
-     * Use this method to say something into a room. Based on settings made with com.openexchange.realtime.client.room.RTRoom.join(String,
-     * String, RTMessageHandler) your message will be transferred to all users joined the room.
-     *
-     * @param message - the message to send.
-     */
-    public void say(String message) throws RTException;
-
-    public void sendCommand(String command, String content) throws RTException;
-
-    /**
-     * Use this to leave the room joined with com.openexchange.realtime.client.room.RTRoom.join(String, String, RTMessageHandler) before.
-     */
-    public void leave() throws RTException;
+    @Test
+    public void testGiantResponse() throws Exception {
+        final CountDownLatch latch = new CountDownLatch(2); // welcome message and answer
+        RTConnectionProperties connectionProperties = RTConnectionProperties.newBuilder("marc.arens@premium", "secret", UUID.randomUUID().toString())
+            .setHost("localhost")
+            .setConnectionType(RTConnectionType.LONG_POLLING)
+            .setSecure(false)
+            .build();
+        RTConnection connection = RTConnectionFactory.getInstance().newConnection(connectionProperties);
+        RTRoomFactory roomFactory = new LoadTestRoomFactory();
+        RTRoom loadTestRoom = roomFactory.newRoom(connection);
+        loadTestRoom.join(new ID("synthetic.loadTest://" + UUID.randomUUID().toString()), new RTMessageHandler() {
+            @Override
+            public void onMessage(JSONValue message) {
+                System.out.println(message.toString());
+                latch.countDown();
+            }
+        });
+        loadTestRoom.sendCommand("floodMe", "murks");
+        if (latch.await(1, TimeUnit.MINUTES)) {
+            connection.close();
+        } else {
+            connection.close();
+            Assert.fail("Latch time out");
+        }
+    }
 
 }
