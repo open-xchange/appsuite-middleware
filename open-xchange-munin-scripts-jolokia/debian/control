@@ -1,4 +1,4 @@
-Source: open-xchange-munin-scripts
+Source: open-xchange-munin-scripts-jolokia
 Section: net
 Priority: optional
 Maintainer: Holger Achtziger <holger.achtziger@open-xchange.com>
@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), su
 Standards-Version: 3.8.4
 Homepage: http://www.open-xchange.com
 
-Package: open-xchange-munin-scripts
+Package: open-xchange-munin-scripts-jolokia
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-core (>= @OXVERSION@), perl, munin-node
 Description: network-wide graphing framework (user contributed plugins for node)
