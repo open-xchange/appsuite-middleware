@@ -3,7 +3,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-installroot=$(CURDIR)/debian/open-xchange-munin-scripts
+installroot=$(CURDIR)/debian/open-xchange-munin-scripts-jolokia
 
 configure: configure-stamp
 configure-stamp:
@@ -28,7 +28,7 @@ install: build
 	dh_testroot
 	dh_prep
 	dh_installdirs
-	ant -lib build/lib -Dbasedir=build -DdestDir=$(installroot) -DpackageName=open-xchange-munin-scripts -f build/build.xml build
+	ant -lib build/lib -Dbasedir=build -DdestDir=$(installroot) -DpackageName=open-xchange-munin-scripts-jolokia -f build/build.xml build
 
 # Build architecture-independent files here.
 binary-indep: build install
