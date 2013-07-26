@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -125,6 +126,7 @@ public final class TaskTestSuite {
         tests.addTestSuite(Bug21026Test.class);
         tests.addTestSuite(Bug22305Test.class);
         tests.addTestSuite(Bug23444Test.class);
+        tests.addTest(new JUnit4TestAdapter(Bug26217Test.class));
         return tests;
     }
 }
