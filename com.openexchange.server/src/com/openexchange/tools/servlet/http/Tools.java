@@ -74,6 +74,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
@@ -542,7 +543,7 @@ public final class Tools {
         if (contentType == null) {
             return false;
         }
-        if (contentType.toLowerCase().startsWith(MULTIPART)) {
+        if (toLowerCase(contentType).startsWith(MULTIPART)) {
             return true;
         }
         return false;
@@ -610,4 +611,16 @@ public final class Tools {
         return isWhitespace;
     }
 
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
+    }
 }
