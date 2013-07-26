@@ -254,7 +254,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
      */
     protected void send(JSONValue objectToSend) throws RTException {
         try {
-            this.connection.send(objectToSend);
+            this.connection.sendBlocking(objectToSend);
         } catch (Exception exception) {
             throw new RTException(exception);
         }

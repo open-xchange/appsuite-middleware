@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang.Validate;
@@ -136,6 +137,34 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
     }
 
     @Override
+    public void sendBlocking(JSONValue message) throws RTException {
+        if (!isActive.get()) {
+            LOG.warn("Connection is already closed. Message getting lost: " + message.toString());
+            return;
+        }
+
+        CountDownLatch sent = null;
+        if(message.isArray()) {
+            Map<Long, JSONObject> addSequence = protocol.addSequence(message.toArray());
+            for (Entry<Long, JSONObject> entry : addSequence.entrySet()) {
+                sent = resendBuffer.put(entry.getKey(), entry.getValue());
+            }
+        } else if (message.isObject()){
+            Map<Long, JSONObject> addSequence = protocol.addSequence(message.toObject());
+            Entry<Long, JSONObject> entry = addSequence.entrySet().iterator().next();
+            sent = resendBuffer.put(entry.getKey(), entry.getValue());
+        } else {
+            throw new RTException("jsonValue must be either JSONArray or JSONObject");
+        }
+        protocol.resetPingTimeout();
+        try {
+            sent.await();
+        } catch (InterruptedException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public void send(JSONValue message) throws RTException {
         if (!isActive.get()) {
             LOG.warn("Connection is already closed. Message getting lost: " + message.toString());
@@ -170,6 +199,7 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     @Override
     public void close() throws RTException {
+        LOG.info("Closing RTConnection.");
         isActive.set(false);
         protocol.release();
         Thread deliverer = delivererRef.get();
@@ -229,6 +259,7 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     @Override
     public void onAck(long seq) {
+        LOG.debug("Received ACK for seq {}", seq);
         resendBuffer.remove(seq);
     }
 

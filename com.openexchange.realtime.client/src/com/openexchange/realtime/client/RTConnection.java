@@ -100,6 +100,14 @@ public interface RTConnection {
     void send(JSONValue message) throws RTException;
 
     /**
+     * Sends a message to the server. This method must be used for reliable delivery.
+     *
+     * @param message The message.
+     * @throws RTException
+     */
+    void sendBlocking(JSONValue message) throws RTException;
+
+    /**
      * Closes the connection and frees all resources. The underlying user session will also be closed.
      *
      * @throws RTException

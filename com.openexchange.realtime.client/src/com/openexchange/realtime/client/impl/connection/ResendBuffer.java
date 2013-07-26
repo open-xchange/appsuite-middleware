@@ -53,6 +53,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CountDownLatch;
 import org.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,10 +85,12 @@ public class ResendBuffer {
         LOG.info("ResendBuffer started.");
     }
 
-    public void put(long seq, JSONValue message) {
-        ResendTask task = new ResendTask(connection, seq, message);
+    public CountDownLatch put(long seq, JSONValue message) {
+        CountDownLatch ackBarrier = new CountDownLatch(1);
+        ResendTask task = new ResendTask(connection, seq, message, ackBarrier);
         timer.scheduleAtFixedRate(task, 0L, 3000L);
         activeTimers.put(seq, task);
+        return ackBarrier;
     }
 
     public void remove(long seq) {
@@ -95,6 +98,7 @@ public class ResendBuffer {
         if (task != null) {
             task.cancel();
             timer.purge();
+            task.getACKBarrier().countDown();
         }
     }
 
@@ -111,13 +115,16 @@ public class ResendBuffer {
 
         private final JSONValue message;
 
+        private final CountDownLatch ackBarrier;
+
         private int resendCount;
 
-        public ResendTask(AbstractRTConnection connection, long seq, JSONValue message) {
+        public ResendTask(AbstractRTConnection connection, long seq, JSONValue message, CountDownLatch ackBarrier) {
             super();
             this.connection = connection;
             this.seq = seq;
             this.message = message;
+            this.ackBarrier = ackBarrier;
             resendCount = 0;
         }
 
@@ -129,11 +136,18 @@ public class ResendBuffer {
                     cancel();
                 }
 
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Trying to send message {}. Resend count: {}", message.toString(), resendCount);
+                }
                 connection.doSend(message);
                 resendCount++;
             } catch (RTException e) {
                 LOG.warn("Error while sending message " + seq + ". Resend count is: " + resendCount, e);
             }
+        }
+
+        public CountDownLatch getACKBarrier() {
+            return ackBarrier;
         }
 
     }
