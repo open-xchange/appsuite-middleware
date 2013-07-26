@@ -378,13 +378,10 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		return organizer;
 	}
 
-	protected Appointment findAndRemoveMatchingException(final Appointment exception,
-			final List<Appointment> exceptions) {
-		for (final Iterator<Appointment> iterator = exceptions.iterator(); iterator
-				.hasNext();) {
+	protected Appointment findAndRemoveMatchingException(final Appointment exception, final List<Appointment> exceptions) {
+		for (final Iterator<Appointment> iterator = exceptions.iterator(); iterator.hasNext();) {
 			final Appointment existingException = iterator.next();
-			if (sameDay(existingException.getRecurrenceDatePosition(),
-					(exception.getRecurrenceDatePosition()))) {
+			if (sameDay(existingException.getRecurrenceDatePosition(), exception.getRecurrenceDatePosition())) {
 				iterator.remove();
 				return existingException;
 			}

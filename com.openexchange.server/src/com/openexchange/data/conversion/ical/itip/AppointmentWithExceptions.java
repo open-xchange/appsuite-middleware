@@ -99,6 +99,9 @@ public class AppointmentWithExceptions {
     }
 
     public boolean addException(Appointment exception) {
+        if (CalendarDataObject.class.isInstance(exception)) {
+            return addException((CalendarDataObject) exception);
+        }
         CalendarDataObject copy = new CalendarDataObject();
         for (int i : Appointment.ALL_COLUMNS) {
             if (exception.contains(i)) {

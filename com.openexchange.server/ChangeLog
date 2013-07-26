@@ -13,6 +13,7 @@
 * 2013-07-26 - martin.herfurth@open-xchange.com
 
  - Fix for bug 27210: Avoid event handling from interrupting user deletion.
+ - Fix for bug 26109: Bad exception detection on iTip handling.
 
 * 2013-07-25 - marcus.klein@open-xchange.com
 
