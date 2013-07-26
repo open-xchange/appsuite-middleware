@@ -56,6 +56,8 @@ import org.apache.commons.lang.Validate;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.realtime.client.ID;
 import com.openexchange.realtime.client.RTConnection;
 import com.openexchange.realtime.client.RTConnectionProperties;
@@ -71,6 +73,7 @@ import com.openexchange.realtime.client.room.RTRoom;
  */
 public abstract class AbstractRoomImpl implements RTRoom {
 
+    private static Logger LOG = LoggerFactory.getLogger(AbstractRoomImpl.class);
     /**
      * Instance used for communication (beside 'create')
      */
@@ -238,6 +241,9 @@ public abstract class AbstractRoomImpl implements RTRoom {
      */
     protected void send(JSONValue objectToSend) throws RTException {
         try {
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Handing message {} too connection.send()", objectToSend);
+            }
             this.connection.send(objectToSend);
         } catch (Exception exception) {
             throw new RTException(exception);
