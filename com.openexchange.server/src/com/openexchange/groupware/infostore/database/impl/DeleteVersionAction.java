@@ -54,13 +54,12 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.Table;
 
 public class DeleteVersionAction extends AbstractDocumentListAction {
 
     @Override
     protected void undoAction() throws OXException {
-        if (getDocuments().size()==0) {
+        if (getDocuments().isEmpty()) {
             return;
         }
         final List<DocumentMetadata> documents = getDocuments();
@@ -82,11 +81,8 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
                 }
             });
         }
-        try {
-            doUpdates(updates);
-        } catch (final OXException e) {
-            throw e;
-        }
+
+        doUpdates(updates);
     }
 
     @Override
@@ -96,7 +92,7 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
          * versions from the infostore_document table.
          */
         List<DocumentMetadata> documents = getDocuments();
-        if (null == documents || 0 == documents.size()) {
+        if (null == documents || documents.isEmpty()) {
             return;
         }
         /*
@@ -110,7 +106,7 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
             /*
              * add batches to replace any values in the del_infostore_document table
              */
-            updates.add(new Update(getQueryCatalog().getReplace(Table.DEL_INFOSTORE_DOCUMENT, slice.size())) {
+            updates.add(new Update(getQueryCatalog().getReplace(InfostoreQueryCatalog.Table.DEL_INFOSTORE_DOCUMENT, slice.size())) {
 
                 @Override
                 public void fillStatement() throws SQLException {
@@ -127,7 +123,7 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
 
                 @Override
                 public void fillStatement() throws SQLException {
-                    stmt.setInt(1, contextID);
+                    stmt.setInt(1, contextID.intValue());
                 }
             });
         }
