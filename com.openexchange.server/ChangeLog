@@ -1,3 +1,7 @@
+* 2013-07-26 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26803: Not adding ConcurrentMarkSweepGC options in post install script if ParallelOldGC is configured.
+
 * 2013-07-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 27706: Deal with UTC time zone set for UTC properties
