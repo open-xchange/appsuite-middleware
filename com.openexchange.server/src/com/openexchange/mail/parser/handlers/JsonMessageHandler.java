@@ -126,6 +126,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(JsonMessageHandler.class));
 
     private static final String VIRTUAL = "___VIRTUAL___";
+    private static final String MULTIPART_ID = "___MP-ID___";
 
     private static final class PlainTextContent {
 
@@ -603,9 +604,9 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     final String keyContent = MailJSONField.CONTENT.getKey();
                     final String keySize = MailJSONField.SIZE.getKey();
                     boolean b = true;
-                    for (int i = len-1; b && i >= 0; i--) {
-                        final JSONObject jObject = attachments.getJSONObject(i);
-                        if (jObject.getString(keyContentType).startsWith("text/plain")) {
+                    for (int i = len; b && i-- > 0;) {
+                        final JSONObject jAttachment = attachments.getJSONObject(i);
+                        if (jAttachment.getString(keyContentType).startsWith("text/plain")) {
                             final String imageURL;
                             {
                                 final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
@@ -613,11 +614,37 @@ public final class JsonMessageHandler implements MailMessageHandler {
                                 imageURL = imgSource.generateUrl(imageLocation, session);
                             }
                             final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + fileName + "\">";
-                            final String content = jObject.getString(keyContent);
+                            final String content = jAttachment.getString(keyContent);
                             final String newContent = content + imgTag;
-                            jObject.put(keyContent, newContent);
-                            jObject.put(keySize, newContent.length());
+                            jAttachment.put(keyContent, newContent);
+                            jAttachment.put(keySize, newContent.length());
                             b = false;
+                        }
+                    }
+                    if (b) { // No suitable text/plain
+                        try {
+                            for (int i = len; b && i-- > 0;) {
+                                final JSONObject jAttachment = attachments.getJSONObject(i);
+                                // Is HTML and in same multipart
+                                if (jAttachment.optString(MailJSONField.CONTENT_TYPE.getKey(), "").startsWith("text/htm") && mpId.equals(jAttachment.optString(MULTIPART_ID, null))) {
+                                    String content = jAttachment.optString(MailJSONField.CONTENT.getKey(), "null");
+                                    if (!"null".equals(content)) {
+                                        // Append to first one
+                                        final String imageURL;
+                                        {
+                                            final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
+                                            final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(accountId, mailPath.getFolder())).id(mailPath.getMailID()).build();
+                                            imageURL = imgSource.generateUrl(imageLocation, session);
+                                        }
+                                        final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + fileName + "\">";
+                                        content = new StringAllocator(content).append(imgTag).toString();
+                                        jAttachment.put(MailJSONField.CONTENT.getKey(), content);
+                                        b = false;
+                                    }
+                                }
+                            }
+                        } catch (final JSONException e) {
+                            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                         }
                     }
                     return handleAttachment(part, false, baseContentType, fileName, id);
@@ -659,6 +686,30 @@ public final class JsonMessageHandler implements MailMessageHandler {
                                 throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                             }
                         }
+                    }
+                    /*
+                     * Check if nested in same multipart
+                     */
+                    try {
+                        final String mpId = multiparts.peek();
+                        final JSONArray attachments = getAttachmentsArr();
+                        final int length = attachments.length();
+                        for (int i = length; i-- > 0;) {
+                            final JSONObject jAttachment = attachments.getJSONObject(i);
+                            // Is HTML and in same multipart
+                            if (jAttachment.optString(MailJSONField.CONTENT_TYPE.getKey(), "").startsWith("text/htm") && null != mpId && mpId.equals(jAttachment.optString(MULTIPART_ID, null))) {
+                                String content = jAttachment.optString(MailJSONField.CONTENT.getKey(), "null");
+                                if (!"null".equals(content)) {
+                                    // Append to first one
+                                    final String moreContent = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, usm, modified, displayMode, embedded);
+                                    content = new StringAllocator(content).append(moreContent).toString();
+                                    jAttachment.put(MailJSONField.CONTENT.getKey(), content);
+                                    return true;
+                                }
+                            }
+                        }
+                    } catch (final JSONException e) {
+                        throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                     }
                     /*
                      * Add HTML alternative part as attachment
@@ -1334,6 +1385,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
             jsonObject.put(MailJSONField.CONTENT.getKey(), content);
+            final String mpId = multiparts.peek();
+            jsonObject.put(MULTIPART_ID, null == mpId ? JSONObject.NULL : mpId);
             getAttachmentsArr().put(jsonObject);
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -1349,6 +1402,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
             jsonObject.put(MailJSONField.CONTENT.getKey(), content);
+            final String mpId = multiparts.peek();
+            jsonObject.put(MULTIPART_ID, null == mpId ? JSONObject.NULL : mpId);
             getAttachmentsArr().put(jsonObject);
             return jsonObject;
         } catch (final JSONException e) {
@@ -1375,6 +1430,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
             jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
             jsonObject.put(MailJSONField.CONTENT.getKey(), content);
+            final String mpId = multiparts.peek();
+            jsonObject.put(MULTIPART_ID, null == mpId ? JSONObject.NULL : mpId);
             getAttachmentsArr().put(jsonObject);
             if (addAttachment) {
                 /*
