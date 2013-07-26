@@ -84,7 +84,6 @@ import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
@@ -1017,54 +1016,17 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return processUploadStatic(req);
     }
 
-    private static volatile ServletFileUpload servletFileUpload;
-
-    /**
-     * Gets the {@link ServletFileUpload} instance.
-     *
-     * @return The {@link ServletFileUpload} instance
-     */
-    protected static ServletFileUpload getFileUploadBase() {
-        ServletFileUpload tmp = servletFileUpload;
-        if (null == tmp) {
-            synchronized (AJAXServlet.class) {
-                tmp = servletFileUpload;
-                if (null == tmp) {
-                    tmp = servletFileUpload = newFileUploadBase();
-                }
-            }
-        }
-        return tmp;
-    }
-
     /**
      * 1MB threshold.
      */
     private static final int SIZE_THRESHOLD = 1048576;
 
     /**
-     * The file cleaning tracker.
-     */
-    private static volatile DeleteOnExitFileCleaningTracker tracker;
-
-    /**
-     * Exits the file cleaning tracker.
-     */
-    public static void exitTracker() {
-        AJAXServlet.servletFileUpload = null;
-        final DeleteOnExitFileCleaningTracker tracker = AJAXServlet.tracker;
-        if (null != tracker) {
-            tracker.deleteAllTracked();
-            AJAXServlet.tracker = null;
-        }
-    }
-
-    /**
-     * Creates a new {@code ServletFileUpload} instance.
+     * Creates a new {@code TrackerAwareServletFileUpload} instance.
      *
-     * @return A new {@code ServletFileUpload} instance
+     * @return A new {@code TrackerAwareServletFileUpload} instance
      */
-    private static ServletFileUpload newFileUploadBase() {
+    public static TrackerAwareServletFileUpload newFileUploadBase() {
         /*
          * Create the upload event
          */
@@ -1076,11 +1038,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         factory.setRepository(new File(ServerConfig.getProperty(Property.UploadDirectory)));
         final DeleteOnExitFileCleaningTracker tracker = new DeleteOnExitFileCleaningTracker(false);
         factory.setFileCleaningTracker(tracker);
-        AJAXServlet.tracker = tracker;
         /*
          * Create a new file upload handler
          */
-        final ServletFileUpload sfu = new ServletFileUpload(factory);
+        final TrackerAwareServletFileUpload sfu = new TrackerAwareServletFileUpload(factory, tracker);
         /*
          * Set overall request size constraint
          */
@@ -1127,40 +1088,41 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         /*
          * Get file upload
          */
-        final ServletFileUpload upload = getFileUploadBase();
-        /*
-         * Parse the upload request
-         */
-        final List<FileItem> items = new LinkedList<FileItem>();
-        {
-            boolean cleanUp = true;
-            try {
-                upload.parseRequest(new ServletRequestContext(req), items);
-                cleanUp = false;
-            } catch (final FileUploadException e) {
-                final Throwable cause = e.getCause();
-                if (cause instanceof IOException) {
-                    final String message = cause.getMessage();
-                    if (null != message && message.startsWith("Max. byte count of ")) {
-                        // E.g. Max. byte count of 10240 exceeded.
-                        final int pos = message.indexOf(" exceeded", 19 + 1);
-                        final String limit = message.substring(19, pos);
-                        throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, limit);
+        final TrackerAwareServletFileUpload upload = newFileUploadBase();
+        List<FileItem> items = null;
+        try {
+            /*
+             * Parse the upload request
+             */
+            items = new LinkedList<FileItem>();
+            {
+                boolean cleanUp = true;
+                try {
+                    upload.parseRequest(new ServletRequestContext(req), items);
+                    cleanUp = false;
+                } catch (final FileUploadException e) {
+                    final Throwable cause = e.getCause();
+                    if (cause instanceof IOException) {
+                        final String message = cause.getMessage();
+                        if (null != message && message.startsWith("Max. byte count of ")) {
+                            // E.g. Max. byte count of 10240 exceeded.
+                            final int pos = message.indexOf(" exceeded", 19 + 1);
+                            final String limit = message.substring(19, pos);
+                            throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, limit);
+                        }
                     }
-                }
-                throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
-            } finally {
-                if (cleanUp) {
-                    for (final FileItem fileItem : items) {
-                        try { fileItem.delete(); } catch (final Exception e) { /* Ignore */ }
+                    throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
+                } finally {
+                    if (cleanUp) {
+                        for (final FileItem fileItem : items) {
+                            try { fileItem.delete(); } catch (final Exception e) { /* Ignore */ }
+                        }
                     }
                 }
             }
-        }
-        /*
-         * Create the upload event
-         */
-        try {
+            /*
+             * Create the upload event
+             */
             final UploadEvent uploadEvent = new UploadEvent();
             uploadEvent.setAction(action);
             /*
@@ -1199,8 +1161,14 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             }
             return uploadEvent;
         } finally {
-            for (final FileItem fileItem : items) {
-                try { fileItem.delete(); } catch (final Exception e) { /* Ignore */ }
+            if (null != items) {
+                for (final FileItem fileItem : items) {
+                    try { fileItem.delete(); } catch (final Exception e) { /* Ignore */ }
+                }
+            }
+            final DeleteOnExitFileCleaningTracker tracker = upload.getTracker();
+            if (null != tracker) {
+                tracker.deleteAllTracked();
             }
         }
     }
