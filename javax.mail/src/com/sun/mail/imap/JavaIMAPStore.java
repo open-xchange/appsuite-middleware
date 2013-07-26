@@ -58,6 +58,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.URLName;
@@ -205,20 +206,29 @@ public class JavaIMAPStore extends IMAPStore {
          */
         final Semaphore semaphore = initLoginSemaphore(new URLName("imap", p.getHost(), p.getPort(), /*Integer.toString(accountId)*/null, u, pw), maxNumConnections);
         if (null != semaphore) {
+            final boolean debug = (logger.isLoggable(Level.FINE));
             this.semaphore = semaphore;
             try {
                 final long loginSemaphoreTimeoutMillis = this.loginSemaphoreTimeoutMillis;
                 if (loginSemaphoreTimeoutMillis > 0) {
                     // Await released permit only for specified amount of milliseconds
+                    if (debug) {
+                        logger.fine("JavaIMAPStore.login: performing limited login. max wait time: " + loginSemaphoreTimeoutMillis + " -- number of threads waiting to acquire: " + semaphore.getQueueLength());
+                    }
                     if (!semaphore.tryAcquire(loginSemaphoreTimeoutMillis, TimeUnit.MILLISECONDS)) {
                         // No permit acquired in time
                         throw new ConnectQuotaExceededException("Max. number of connections exceeded. Try again later.");
                     }
                 } else {
                     // Await until released permit available
+                    if (debug) {
+                        logger.fine("JavaIMAPStore.login: performing limited login. awaiting until a used connection gets closed -- number of threads waiting to acquire: " + semaphore.getQueueLength());
+                    }
                     semaphore.acquire();
                 }
-                logger.fine("JavaIMAPStore login: permitted.");
+                if (debug) {
+                    logger.fine("JavaIMAPStore.login: login permitted -- number of threads waiting to acquire: " + semaphore.getQueueLength());
+                }
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new ProtocolException("Interrupted", e);
@@ -276,6 +286,9 @@ public class JavaIMAPStore extends IMAPStore {
     private void releaseSemaphore() {
         final Semaphore semaphore = this.semaphore;
         if (null != semaphore) {
+            if (logger.isLoggable(Level.FINE)) {
+                logger.fine("JavaIMAPStore.logout: releasing login semaphore -- number of threads waiting to acquire: " + semaphore.getQueueLength());
+            }
             semaphore.release();
             this.semaphore = null;
         }
