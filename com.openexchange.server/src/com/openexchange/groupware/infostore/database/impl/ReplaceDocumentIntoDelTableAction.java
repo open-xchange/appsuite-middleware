@@ -78,7 +78,7 @@ public class ReplaceDocumentIntoDelTableAction extends AbstractDocumentListActio
             return;
         }
         List<DocumentMetadata>[] slices = getSlices(batchSize, documents);
-        List<UpdateBlock> updates = new ArrayList<UpdateBlock>();
+        List<UpdateBlock> updates = new ArrayList<UpdateBlock>(slices.length << 1);
         for (int i = 0; i < slices.length; i++) {
             List<String> deleteStmts = getQueryCatalog().getDelete(InfostoreQueryCatalog.Table.DEL_INFOSTORE, slices[i]);
             for (String deleteStmt : deleteStmts) {
