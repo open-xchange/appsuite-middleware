@@ -1040,6 +1040,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 final int len = attachments.length();
                 for (int i = 0; i < len; i++) {
                     final JSONObject attachment = attachments.getJSONObject(i);
+                    attachment.remove(MULTIPART_ID);
                     if (attachment.hasAndNotNull(dispKey) && Part.ATTACHMENT.equalsIgnoreCase(attachment.getString(dispKey))) {
                         if (attachment.hasAndNotNull(VIRTUAL) && attachment.getBoolean(VIRTUAL)) {
                             attachment.remove(VIRTUAL);
