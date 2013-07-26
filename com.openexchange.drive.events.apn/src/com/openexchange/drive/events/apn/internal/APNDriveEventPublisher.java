@@ -131,4 +131,9 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
         return payloads;
     }
 
+    @Override
+    public boolean isLocalOnly() {
+        return true;
+    }
+
 }

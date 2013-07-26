@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,19 +47,64 @@
  *
  */
 
-package com.openexchange.drive.events;
+package com.openexchange.drive.events.ms;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.events.internal.DriveEventImpl;
 
 /**
- * {@link DriveEventPublisher}
+ * {@link DriveEventWrapper}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface DriveEventPublisher {
+public class DriveEventWrapper {
 
-    void publish(DriveEvent event);
+    /**
+     * Wraps the supplied drive event into a pojo map.
+     *
+     * @param driveEvent The drive event to wrap
+     * @return The wrapped drive event
+     */
+    public static Map<String, Serializable> wrap(DriveEvent driveEvent) {
+        if (null == driveEvent) {
+            return null;
+        }
+        Map<String, Serializable> map = new HashMap<String, Serializable>(2);
+        map.put("__contextID", Integer.valueOf(driveEvent.getContextID()));
+        Set<String> folderIDs = driveEvent.getFolderIDs();
+        if (null != folderIDs) {
+            map.put("__folderIDs", driveEvent.getFolderIDs().toArray(new String[folderIDs.size()]));
+        }
+        return map;
+    }
 
-    boolean isLocalOnly();
+    /**
+     * Unwraps a drive event from the supplied pojo map. The <code>remote</code> flag in the event is set to <code>true</code> implicitly.
+     *
+     * @param map The wrapped drive event
+     * @return The drive event
+     */
+    public static DriveEvent unwrap(Map<String, Serializable> map) {
+        if (null == map) {
+            return null;
+        }
+        Integer contextID = (Integer)map.get("__contextID");
+        String[] folderIDs = (String[])map.get("__folderIDs");
+        if (null != folderIDs && null != contextID) {
+            return new DriveEventImpl(contextID.intValue(), new HashSet<String>(Arrays.asList(folderIDs)), true);
+        } else {
+            return null;
+        }
+    }
+
+    private DriveEventWrapper() {
+        super();
+    }
 
 }
-

@@ -80,7 +80,7 @@ public class OptimizingDirectorySynchronizer extends DirectorySynchronizer {
             DirectoryActionOptimizer[] optimizers = {
                 new DirectoryRemoveOptimizer(mapper),
                 new DirectoryRenameOptimizer(mapper),
-                new EmptyDirectoryOptimizer(mapper),
+//              new EmptyDirectoryOptimizer(mapper),
                 new DirectoryOrderOptimizer(mapper)
             };
             for (DirectoryActionOptimizer optimizer : optimizers) {
