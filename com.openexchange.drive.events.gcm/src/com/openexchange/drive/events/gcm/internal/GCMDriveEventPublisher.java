@@ -88,6 +88,11 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
     }
 
     @Override
+    public boolean isLocalOnly() {
+        return true;
+    }
+
+    @Override
     public void publish(DriveEvent event) {
         List<Subscription> subscriptions = null;
         try {

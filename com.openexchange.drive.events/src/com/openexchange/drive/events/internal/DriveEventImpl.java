@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.events.internal;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.drive.DriveAction;
@@ -62,9 +63,16 @@ import com.openexchange.drive.events.DriveEvent;
  */
 public class DriveEventImpl implements DriveEvent {
 
+    /** The only resulting action from events for now */
+    private static final List<DriveAction<? extends DriveVersion>> SYNC_DIRECTORIES_ACTION;
+    static {
+        SYNC_DIRECTORIES_ACTION = new ArrayList<DriveAction<? extends DriveVersion>>(1);
+        SYNC_DIRECTORIES_ACTION.add(new SyncDirectoriesAction());
+    }
+
     private final int contextID;
     private final Set<String> folderIDs;
-    private final List<DriveAction<? extends DriveVersion>> actions;
+    private final boolean remote;
 
     /**
      * Initializes a new {@link DriveEventImpl}.
@@ -72,12 +80,13 @@ public class DriveEventImpl implements DriveEvent {
      * @param contextID the context ID
      * @param folderIDs The affected folder IDs
      * @param actions The client actions to execute
+     * @param remote <code>true</code> it this event is 'remote', <code>false</code>, otherwise
      */
-    public DriveEventImpl(int contextID, Set<String> folderIDs, List<DriveAction<? extends DriveVersion>> actions) {
+    public DriveEventImpl(int contextID, Set<String> folderIDs, boolean remote) {
         super();
         this.contextID = contextID;
         this.folderIDs = folderIDs;
-        this.actions = actions;
+        this.remote = remote;
     }
 
     @Override
@@ -92,12 +101,17 @@ public class DriveEventImpl implements DriveEvent {
 
     @Override
     public List<DriveAction<? extends DriveVersion>> getActions() {
-        return actions;
+        return SYNC_DIRECTORIES_ACTION;
     }
 
     @Override
     public String toString() {
-        return "DriveEvent [contextID=" + contextID + ", folderIDs=" + folderIDs + "]";
+        return "DriveEvent [remote=" + remote + ", contextID=" + contextID + ", folderIDs=" + folderIDs + "]";
+    }
+
+    @Override
+    public boolean isRemote() {
+        return remote;
     }
 
 }

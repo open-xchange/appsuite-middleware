@@ -80,14 +80,14 @@ public class GCMActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
+        LOG.info("starting bundle: com.openexchange.drive.events.gcm");
         Services.set(this);
         getService(DriveEventService.class).registerPublisher(new GCMDriveEventPublisher());
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
+        LOG.info("stopping bundle: com.openexchange.drive.events.gcm");
         Services.set(null);
         super.stopBundle();
     }

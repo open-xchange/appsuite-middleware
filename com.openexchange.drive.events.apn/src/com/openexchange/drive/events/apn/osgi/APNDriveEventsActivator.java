@@ -84,7 +84,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
+        LOG.info("starting bundle: com.openexchange.drive.events.apn");
         com.openexchange.drive.events.apn.internal.Services.set(this);
         getService(DriveEventService.class).registerPublisher(new APNDriveEventPublisher(getAccess()));
     }
@@ -108,7 +108,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
+        LOG.info("stopping bundle: com.openexchange.drive.events.apn");
         Services.set(null);
         super.stopBundle();
     }
