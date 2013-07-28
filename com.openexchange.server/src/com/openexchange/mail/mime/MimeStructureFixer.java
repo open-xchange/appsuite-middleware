@@ -212,10 +212,9 @@ public final class MimeStructureFixer {
             final String messageId = mimeMessage.getHeader(MESSAGE_ID, null);
             // Possible root multipart for unexpectedly found file attachments
             final AtomicReference<MimeMultipart> artificialRoot = new AtomicReference<MimeMultipart>();
-            final LinkedList<Multipart> mpStack = new LinkedList<Multipart>();
-            final Multipart content = (Multipart) mimeMessage.getContent();
-            mpStack.add(content);
-            handlePart(content, new AtomicReference<MimeMultipart>(newMultipart), artificialRoot, mpStack);
+            final LinkedList<MimeMultipart> mpStack = new LinkedList<MimeMultipart>();
+            mpStack.add(newMultipart);
+            handlePart((Multipart) mimeMessage.getContent(), new AtomicReference<MimeMultipart>(newMultipart), artificialRoot, mpStack);
             // Check if a new root has been set
             final MimeMultipart artificialRootMimeMultipart = artificialRoot.get();
             if (null == artificialRootMimeMultipart) {
@@ -245,7 +244,7 @@ public final class MimeStructureFixer {
         }
     }
 
-    private void handlePart(final Multipart multipart, final AtomicReference<MimeMultipart> newMultipartRef, final AtomicReference<MimeMultipart> artificialRoot, final LinkedList<Multipart> mpStack) throws MessagingException, IOException, OXException {
+    private void handlePart(final Multipart multipart, final AtomicReference<MimeMultipart> newMultipartRef, final AtomicReference<MimeMultipart> artificialRoot, final LinkedList<MimeMultipart> mpStack) throws MessagingException, IOException, OXException {
         final int count = multipart.getCount();
         if (toLowerCase(multipart.getContentType()).startsWith("multipart/mixed")) {
             final String prefixImage = "image/";
@@ -339,7 +338,7 @@ public final class MimeStructureFixer {
                             bodyParts.add(bodyPart);
                         }
                     } else {
-                        if (mpStack.size() > 1) {
+                        if (isHtml || mpStack.size() > 1) {
                             others.add(bodyPart);
                         } else {
                             bodyParts.add(bodyPart);
@@ -369,7 +368,14 @@ public final class MimeStructureFixer {
                     newSubMultipart.addBodyPart(nextBodyPart);
                 }
                 // Replace new multipart
-                newMultipartRef.set(newSubMultipart);
+                if (isHtml && 1 == mpStack.size()) {
+                    final MimeMultipart mimeMultipart = newMultipartRef.get();
+                    final MimeBodyPart mimeBodyPart = new MimeBodyPart();
+                    MessageUtility.setContent(newSubMultipart, mimeBodyPart);
+                    mimeMultipart.addBodyPart(mimeBodyPart, 0);
+                } else {
+                    newMultipartRef.set(newSubMultipart);
+                }
                 // Check for others
                 if (!others.isEmpty()) {
                     if (isHtml) {
@@ -383,7 +389,7 @@ public final class MimeStructureFixer {
                                 artificialRoot.set(mixedMultipart);
                             }
                         } else {
-                            mixedMultipart = newSubMultipart;
+                            mixedMultipart = mpStack.getFirst();
                         }
                         for (final BodyPart otherBodyPart : others) {
                             mixedMultipart.addBodyPart(otherBodyPart);
@@ -408,7 +414,8 @@ public final class MimeStructureFixer {
             } else {
                 final ContentType contentType = new ContentType(sContentType);
                 if (contentType.startsWith("multipart/")) {
-                    final AtomicReference<MimeMultipart> mpReference = new AtomicReference<MimeMultipart>(new MimeMultipart(contentType.getSubType()));
+                    final MimeMultipart newMimeMultipart2 = new MimeMultipart(contentType.getSubType());
+                    final AtomicReference<MimeMultipart> mpReference = new AtomicReference<MimeMultipart>(newMimeMultipart2);
                     {
                         final Multipart mpContent;
                         final Object content = bodyPart.getContent();
@@ -417,7 +424,7 @@ public final class MimeStructureFixer {
                         } else {
                             mpContent = new MimeMultipart(bodyPart.getDataHandler().getDataSource());
                         }
-                        mpStack.add(mpContent);
+                        mpStack.add(newMimeMultipart2);
                         handlePart(mpContent, mpReference, artificialRoot, mpStack);
                         mpStack.removeLast();
                     }
