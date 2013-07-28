@@ -59,7 +59,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import com.openexchange.exception.OXException;
-import com.openexchange.i18n.LocaleTools;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
@@ -143,7 +142,7 @@ public class MimeFilter {
         }
         try {
             final String messageId = mimeMessage.getHeader(MESSAGE_ID, null);
-            final String contentType = LocaleTools.toLowerCase(mimeMessage.getContentType());
+            final String contentType = toLowerCase(mimeMessage.getContentType());
             if (!contentType.startsWith("multipart/")) {
                 // Nothing to filter
                 return mimeMessage;
@@ -212,7 +211,7 @@ public class MimeFilter {
             if (isEmpty(contentType)) {
                 newMultipart.addBodyPart(bodyPart);
             } else {
-                contentType = LocaleTools.toLowerCase(contentType.trim());
+                contentType = toLowerCase(contentType.trim());
                 if (contentType.startsWith("multipart/")) {
                     final MimeMultipart newSubMultipart = new MimeMultipart(getSubType(contentType, "mixed"));
                     {
@@ -267,6 +266,19 @@ public class MimeFilter {
             isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }
