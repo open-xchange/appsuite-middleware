@@ -1775,6 +1775,21 @@ public final class MimeMessageConverter {
     /**
      * Creates a message data object from given message bytes conform to RFC822.
      *
+     * @param in The message input stream conform to RFC822
+     * @return An instance of <code>{@link MailMessage}</code>
+     * @throws OXException If conversion fails
+     */
+    public static MailMessage convertMessage(final InputStream in) throws OXException {
+        try {
+            return convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), in));
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Creates a message data object from given message bytes conform to RFC822.
+     *
      * @param asciiBytes The message bytes conform to RFC822
      * @return An instance of <code>{@link MailMessage}</code>
      * @throws OXException If conversion fails
