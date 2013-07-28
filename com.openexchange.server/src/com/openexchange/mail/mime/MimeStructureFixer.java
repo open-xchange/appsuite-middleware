@@ -71,6 +71,7 @@ import javax.mail.internet.MimePart;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
@@ -113,6 +114,62 @@ public final class MimeStructureFixer {
     /**
      * Processes specified MIME message.
      *
+     * @param message The message
+     * @return The message with fixed multipart structure
+     * @throws OXException If fix attempt fails
+     */
+    public MailMessage process(final MailMessage message) throws OXException {
+        if (null == message) {
+            return message;
+        }
+        final ContentType contentType = message.getContentType();
+        if (!contentType.startsWith("multipart/")) {
+            // Nothing to filter
+            return message;
+        }
+        // Check mailer/boundary for "Apple"
+        {
+            final String mailer = message.getHeader(MessageHeaders.HDR_X_MAILER, null);
+            final boolean noAppleMailer;
+            if (null == mailer || (noAppleMailer = (toLowerCase(mailer).indexOf("apple") < 0))) {
+                // Not composed by Apple mailer
+                return message;
+            }
+            final String boundary = contentType.getParameter("boundary");
+            if (noAppleMailer && (null == boundary || toLowerCase(boundary).indexOf("apple") < 0)) {
+                // Not composed by Apple mailer
+                return message;
+            }
+        }
+        // Fix it...
+        final MimeMessage mimeMessage = (MimeMessage) MimeMessageConverter.convertMailMessage(message);
+        final MimeMessage processed = process0(mimeMessage, contentType);
+        final MailMessage processedMessage = MimeMessageConverter.convertMessage(processed, true);
+        processedMessage.setMailId(message.getMailId());
+        if (message.containsAccountId()) {
+            processedMessage.setAccountId(message.getAccountId());
+        }
+        if (message.containsFolder()) {
+            processedMessage.setFolder(message.getFolder());
+        }
+        if (message.containsFlags()) {
+            processedMessage.setFlags(message.getFlags());
+        }
+        if (message.containsColorLabel()) {
+            processedMessage.setColorLabel(message.getColorLabel());
+        }
+        if (message.containsUserFlags()) {
+            processedMessage.addUserFlags(message.getUserFlags());
+        }
+        return processedMessage;
+    }
+
+
+    // ------------------------------------------------------------------------------------------------- //
+
+    /**
+     * Processes specified MIME message.
+     *
      * @param mimeMessage The MIME message
      * @return The MIME message with fixed multipart structure
      * @throws OXException If fix attempt fails
@@ -141,6 +198,15 @@ public final class MimeStructureFixer {
                     return mimeMessage;
                 }
             }
+            // Start to check & fix multipart structure
+            return process0(mimeMessage, contentType);
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    private MimeMessage process0(final MimeMessage mimeMessage, final ContentType contentType) throws OXException {
+        try {
             // Start to check & fix multipart structure
             final MimeMultipart newMultipart = new MimeMultipart(contentType.getSubType());
             final String messageId = mimeMessage.getHeader(MESSAGE_ID, null);
