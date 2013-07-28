@@ -558,7 +558,7 @@ public final class MimeForward {
                         return MimeProcessingUtility.readContent(part, charset);
                     }
                     final StringAllocator sb = new StringAllocator(MimeProcessingUtility.readContent(part, charset));
-                    for (int j = i + 1; j < count; j++) {s
+                    for (int j = i + 1; j < count; j++) {
                         final MailPart nextPart = multipartPart.getEnclosedMailPart(j);
                         final ContentType nextContentType = nextPart.getContentType();
                         if (nextContentType.startsWith(TEXT_HTM) && MimeProcessingUtility.isInline(nextPart, nextContentType) && !MimeProcessingUtility.isSpecial(nextContentType.getBaseType())) {
