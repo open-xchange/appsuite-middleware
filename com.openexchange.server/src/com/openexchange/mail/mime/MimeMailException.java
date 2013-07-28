@@ -52,11 +52,11 @@ package com.openexchange.mail.mime;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.net.SocketException;
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.Address;
 import javax.mail.Folder;
+import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.SendFailedException;
 import javax.mail.Store;
@@ -66,6 +66,10 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.LogProperties.Name;
+import com.openexchange.log.Props;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
@@ -175,11 +179,30 @@ public class MimeMailException extends OXException {
      */
     public static OXException handleMessagingException(final MessagingException e, final MailConfig mailConfig, final Session session, final Folder folder) {
         try {
-            if ((e instanceof javax.mail.AuthenticationFailedException) || ((e.getMessage() != null) && (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_AUTH_FAILED) != -1))) {
+            // Put log properties
+            if (null != mailConfig) {
+                final Props props = LogProperties.getLogProperties();
+                props.put(Name.MAIL_ACCOUNT_ID, Integer.valueOf(mailConfig.getAccountId()));
+                props.put(Name.MAIL_HOST, mailConfig.getServer());
+                props.put(Name.MAIL_LOGIN, mailConfig.getLogin());
+                if (null != folder) {
+                    props.put(Name.MAIL_FULL_NAME, folder.getFullName());
+                }
+            }
+            // Start examining MessageException
+            if (e instanceof MessageRemovedException) {
+                // Message has been removed in the meantime
+                if (null != folder) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND.create(e, "", folder.getFullName());
+                }
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, new Object[0]);
+            }
+            if ((e instanceof javax.mail.AuthenticationFailedException) || ((toLowerCase(e.getMessage(), "").indexOf(ERR_AUTH_FAILED) != -1))) {
+                // Authentication failed
                 if (null != mailConfig && MailAccount.DEFAULT_ID == mailConfig.getAccountId()) {
                     return MimeMailExceptionCode.LOGIN_FAILED.create(e, mailConfig.getServer(), mailConfig.getLogin());
                 }
-                if ((e.getMessage() != null) && ERR_TMP.equals(e.getMessage().toLowerCase(Locale.ENGLISH))) {
+                if ((e.getMessage() != null) && ERR_TMP.equals(toLowerCase(e.getMessage()))) {
                     return MimeMailExceptionCode.LOGIN_FAILED.create(
                         e,
                         mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
@@ -251,7 +274,7 @@ public class MimeMailException extends OXException {
                 return MimeMailExceptionCode.SEARCH_ERROR.create(e, appendInfo(e.getMessage(), folder));
             } else if (e instanceof com.sun.mail.smtp.SMTPSendFailedException) {
                 final SMTPSendFailedException exc = (SMTPSendFailedException) e;
-                if ((exc.getReturnCode() == 552) || (exc.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_MSG_TOO_LARGE) > -1)) {
+                if ((exc.getReturnCode() == 552) || (toLowerCase(exc.getMessage(), "").indexOf(ERR_MSG_TOO_LARGE) > -1)) {
                     return MimeMailExceptionCode.MESSAGE_TOO_LARGE.create(exc, new Object[0]).setLogLevel(LogLevel.ERROR);
                 }
                 final Exception nextException = exc.getNextException();
@@ -274,7 +297,7 @@ public class MimeMailException extends OXException {
                 return MimeMailExceptionCode.SEND_FAILED_EXT.create(exc, Arrays.toString(addrs), null == serverInfo ? "" : '('+serverInfo+')').setLogLevel(LogLevel.ERROR);
             } else if (e instanceof javax.mail.SendFailedException) {
                 final SendFailedException exc = (SendFailedException) e;
-                if (exc.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_MSG_TOO_LARGE) > -1) {
+                if (toLowerCase(exc.getMessage(), "").indexOf(ERR_MSG_TOO_LARGE) > -1) {
                     return MimeMailExceptionCode.MESSAGE_TOO_LARGE.create(exc, new Object[0]);
                 }
                 final Exception nextException = exc.getNextException();
@@ -316,7 +339,7 @@ public class MimeMailException extends OXException {
             }
             final Exception nextException = e.getNextException();
             if (nextException == null) {
-                if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_QUOTA) != -1) {
+                if (toLowerCase(e.getMessage(), "").indexOf(ERR_QUOTA) != -1) {
                     return MimeMailExceptionCode.QUOTA_EXCEEDED.create(e, getInfo(skipTag(e.getMessage())));
                 } else if ("Unable to load BODYSTRUCTURE".equals(e.getMessage())) {
                     return MimeMailExceptionCode.MESSAGE_NOT_DISPLAYED.create(e, EMPTY_ARGS);
@@ -475,7 +498,7 @@ public class MimeMailException extends OXException {
                         Integer.valueOf(session.getContextId()));
                 }
                 return MimeMailExceptionCode.IO_ERROR.create(nextException, appendInfo(nextException.getMessage(), folder));
-            } else if (e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_QUOTA) != -1) {
+            } else if (toLowerCase(e.getMessage(), "").indexOf(ERR_QUOTA) != -1) {
                 return MimeMailExceptionCode.QUOTA_EXCEEDED.create(e, getInfo(skipTag(e.getMessage())));
             }
             /*
@@ -588,8 +611,13 @@ public class MimeMailException extends OXException {
 
     /** ASCII-wise to lower-case */
     private static String toLowerCase(final CharSequence chars) {
+        return toLowerCase(chars, null);
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars, final String defaultValue) {
         if (null == chars) {
-            return null;
+            return defaultValue;
         }
         final int length = chars.length();
         final StringAllocator builder = new StringAllocator(length);
