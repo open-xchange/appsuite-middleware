@@ -900,6 +900,7 @@ public final class MimeReply {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
             partContentType.setContentType(part.getContentType());
             if (partContentType.startsWith(TEXT) && (avoidHTML ? !partContentType.startsWith(TEXT_HTM) : true) && MimeProcessingUtility.isInline(part, partContentType) && !MimeProcessingUtility.isSpecial(partContentType.getBaseType())) {
+                boolean first = true;
                 if (pc.retvalContentType.getPrimaryType() == null) {
                     String text = MimeProcessingUtility.handleInlineTextPart(part, partContentType, pc.usm.isDisplayHtmlInlineContent());
                     if (isEmpty(text)) {
@@ -914,10 +915,21 @@ public final class MimeReply {
                     pc.retvalContentType.setCharsetParameter(charset);
                     pc.textBuilder.append(text);
                 } else {
+                    first = false;
                     final String charset = MessageUtility.checkCharset(part, partContentType);
                     partContentType.setCharsetParameter(charset);
                     final String text = MimeProcessingUtility.handleInlineTextPart(part, partContentType, pc.usm.isDisplayHtmlInlineContent());
                     MimeProcessingUtility.appendRightVersion(pc.retvalContentType, partContentType, text, pc.textBuilder);
+                }
+                if (first && multipartPart.getContentType().startsWith("multipart/mixed")) {
+                    for (int j = i + 1; j < count; j++) {
+                        final MailPart nextPart = multipartPart.getEnclosedMailPart(j);
+                        final ContentType nextContentType = nextPart.getContentType();
+                        if (nextContentType.startsWith(TEXT) && (avoidHTML ? !nextContentType.startsWith(TEXT_HTM) : true) && MimeProcessingUtility.isInline(nextPart, nextContentType) && !MimeProcessingUtility.isSpecial(nextContentType.getBaseType())) {
+                            String text = MimeProcessingUtility.handleInlineTextPart(nextPart, nextContentType, pc.usm.isDisplayHtmlInlineContent());
+                            pc.textBuilder.append(text);
+                        }
+                    }
                 }
                 found = true;
             } else if (partContentType.startsWith(MULTIPART)) {
