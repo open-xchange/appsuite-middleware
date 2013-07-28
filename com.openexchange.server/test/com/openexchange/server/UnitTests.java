@@ -80,6 +80,7 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class);
         tests.addTest(new JUnit4TestAdapter(com.openexchange.mail.utils.MsisdnUtilityTest.class));
         tests.addTest(new JUnit4TestAdapter(com.openexchange.groupware.userconfiguration.UserConfigurationTest.class));
+        tests.addTestSuite(com.openexchange.mail.mime.MimeStructureFixerTest.class);
         return tests;
     }
 }
