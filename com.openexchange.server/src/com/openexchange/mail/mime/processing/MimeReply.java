@@ -882,6 +882,7 @@ public final class MimeReply {
                                 pc.textBuilder.append(imgTag);
                             }
                         }
+                        return true;
                     }
                     found = true;
                 } else if (partContentType.startsWith(MULTIPART)) {
@@ -930,6 +931,7 @@ public final class MimeReply {
                             pc.textBuilder.append(text);
                         }
                     }
+                    return true;
                 }
                 found = true;
             } else if (partContentType.startsWith(MULTIPART)) {
