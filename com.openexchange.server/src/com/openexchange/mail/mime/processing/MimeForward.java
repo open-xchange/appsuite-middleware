@@ -50,7 +50,7 @@
 package com.openexchange.mail.mime.processing;
 
 import static com.openexchange.mail.mime.filler.MimeMessageFiller.setReplyHeaders;
-import java.io.ByteArrayOutputStream;
+import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
@@ -78,11 +78,13 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.Streams;
+import com.openexchange.image.ImageLocation;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -91,6 +93,7 @@ import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
@@ -327,7 +330,7 @@ public final class MimeForward {
                  * Grab first seen text from original message
                  */
                 final ContentType contentType = new ContentType();
-                String firstSeenText = getFirstSeenText(originalMsg, contentType, usm);
+                String firstSeenText = getFirstSeenText(originalMsg, contentType, usm, originalMsg, session, false);
                 {
                     final String cs = contentType.getCharsetParameter();
                     if (cs == null || "US-ASCII".equalsIgnoreCase(cs)) {
@@ -517,12 +520,7 @@ public final class MimeForward {
             if (originalMsg instanceof MimeMailMessage) {
                 nested = MimeMessageConverter.convertMessage(((MimeMailMessage) originalMsg).getMimeMessage());
             } else {
-                final ByteArrayOutputStream tmp = Streams.newByteArrayOutputStream((int) originalMsg.getSize());
-                originalMsg.writeTo(tmp);
-                nested =
-                    MimeMessageConverter.convertMessage(new MimeMessage(
-                        MimeDefaultSession.getDefaultSession(),
-                        Streams.asInputStream(tmp)));
+                nested = MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), MimeMessageUtility.getStreamFromMailPart(originalMsg)));
             }
             nested.setMsgref(originalMsg.getMailPath());
             compositeMail.addAdditionalParts(new NestedMessageMailPart(nested));
@@ -540,14 +538,15 @@ public final class MimeForward {
      * @throws MessagingException
      * @throws IOException
      */
-    private static String getFirstSeenText(final MailPart multipartPart, final ContentType retvalContentType, final UserSettingMail usm) throws OXException, MessagingException, IOException {
+    private static String getFirstSeenText(final MailPart multipartPart, final ContentType retvalContentType, final UserSettingMail usm, final MailMessage origMail, final Session session, final boolean alt) throws OXException, MessagingException, IOException {
         final ContentType contentType = multipartPart.getContentType();
         final int count = multipartPart.getEnclosedCount();
         final ContentType partContentType = new ContentType();
-        if ((contentType.startsWith(MimeTypes.MIME_MULTIPART_ALTERNATIVE) || contentType.startsWith(MimeTypes.MIME_MULTIPART_RELATED)) && usm.isDisplayHtmlInlineContent() && count >= 2) {
+        if (alt || ((contentType.startsWith(MimeTypes.MIME_MULTIPART_ALTERNATIVE) || contentType.startsWith(MimeTypes.MIME_MULTIPART_RELATED)) && usm.isDisplayHtmlInlineContent() && count >= 2)) {
             /*
              * Get html content
              */
+            final boolean alternative = alt || contentType.startsWith(MimeTypes.MIME_MULTIPART_ALTERNATIVE);
             for (int i = 0; i < count; i++) {
                 final MailPart part = multipartPart.getEnclosedMailPart(i);
                 partContentType.setContentType(part.getContentType());
@@ -555,9 +554,36 @@ public final class MimeForward {
                     final String charset = MessageUtility.checkCharset(part, partContentType);
                     retvalContentType.setContentType(partContentType);
                     retvalContentType.setCharsetParameter(charset);
-                    return MimeProcessingUtility.readContent(part, charset);
+                    if (!multipartPart.getContentType().startsWith("multipart/mixed")) {
+                        return MimeProcessingUtility.readContent(part, charset);
+                    }
+                    final StringAllocator sb = new StringAllocator(MimeProcessingUtility.readContent(part, charset));
+                    for (int j = i + 1; j < count; j++) {
+                        final MailPart nextPart = multipartPart.getEnclosedMailPart(j);
+                        final ContentType nextContentType = nextPart.getContentType();
+                        if (nextContentType.startsWith(TEXT_HTM) && MimeProcessingUtility.isInline(nextPart, nextContentType) && !MimeProcessingUtility.isSpecial(nextContentType.getBaseType())) {
+                            final String nextCharset = MessageUtility.checkCharset(nextPart, partContentType);
+                            final String nextText = MimeProcessingUtility.readContent(nextPart, nextCharset);
+                            sb.append(nextText);
+                        } else if (nextContentType.startsWith("image/") && MimeProcessingUtility.isInline(nextPart, nextContentType)) {
+                            final String imageURL;
+                            String fileName = nextPart.getFileName();
+                            {
+                                final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
+                                if (null == fileName) {
+                                    final String ext = MimeType2ExtMap.getFileExtension(nextContentType.getBaseType());
+                                    fileName = new StringAllocator("image").append(j).append('.').append(ext).toString();
+                                }
+                                final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(origMail.getAccountId(), origMail.getFolder())).id(origMail.getMailId()).build();
+                                imageURL = imgSource.generateUrl(imageLocation, session);
+                            }
+                            final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + fileName + "\">";
+                            sb.append(imgTag);
+                        }
+                    }
+                    return sb.toString();
                 } else if (partContentType.startsWith(MULTIPART)) {
-                    final String text = getFirstSeenText(part, retvalContentType, usm);
+                    final String text = getFirstSeenText(part, retvalContentType, usm, origMail, session, alternative);
                     if (text != null) {
                         return text;
                     }
@@ -584,7 +610,7 @@ public final class MimeForward {
                 }
                 return text;
             } else if (partContentType.startsWith(MULTIPART)) {
-                final String text = getFirstSeenText(part, retvalContentType, usm);
+                final String text = getFirstSeenText(part, retvalContentType, usm, origMail, session, alt);
                 if (text != null) {
                     return text;
                 }
@@ -764,6 +790,8 @@ public final class MimeForward {
         return textContent.replaceAll("(?m)^", "> ");
     }
 
+    private static final Pattern PATTERN_HTML = Pattern.compile("(<html[^>]*?>)" + "|" + "(</html>)", Pattern.CASE_INSENSITIVE);
+
     private static final Pattern PATTERN_HTML_START = Pattern.compile("<html[^>]*?>", Pattern.CASE_INSENSITIVE);
 
     private static final Pattern PATTERN_HTML_END = Pattern.compile("</html>", Pattern.CASE_INSENSITIVE);
@@ -774,7 +802,22 @@ public final class MimeForward {
     private static final String BLOCKQUOTE_END = "</blockquote>\n<br>&nbsp;";
 
     private static String quoteHtml(final String htmlContent) {
-        Matcher m = PATTERN_HTML_START.matcher(htmlContent);
+        Matcher m = PATTERN_HTML.matcher(htmlContent);
+        if (m.find()) {
+            final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
+            final StringBuilder sb = new StringBuilder(htmlContent.length());
+            do {
+                if (m.group(1) != null) {
+                    mr.appendLiteralReplacement(sb, BLOCKQUOTE_START);
+                } else {
+                    mr.appendLiteralReplacement(sb, BLOCKQUOTE_END);
+                }
+            } while (m.find());
+            mr.appendTail(sb);
+            return sb.toString();
+        }
+        // Regular
+        m = PATTERN_HTML_START.matcher(htmlContent);
         final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
         final StringBuilder sb = new StringBuilder(htmlContent.length());
         if (m.find()) {
