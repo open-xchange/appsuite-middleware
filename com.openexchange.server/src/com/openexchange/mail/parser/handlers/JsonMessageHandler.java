@@ -734,6 +734,27 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     return true;
                 }
             } else {
+                try {
+                    final String mpId = multiparts.peek();
+                    final JSONArray attachments = getAttachmentsArr();
+                    final int length = attachments.length();
+                    for (int i = length; i-- > 0;) {
+                        final JSONObject jAttachment = attachments.getJSONObject(i);
+                        // Is HTML and in same multipart
+                        if (jAttachment.optString(MailJSONField.CONTENT_TYPE.getKey(), "").startsWith("text/htm") && null != mpId && mpId.equals(jAttachment.optString(MULTIPART_ID, null))) {
+                            String content = jAttachment.optString(MailJSONField.CONTENT.getKey(), "null");
+                            if (!"null".equals(content)) {
+                                // Append to first one
+                                final String moreContent = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, usm, modified, displayMode, embedded);
+                                content = new StringAllocator(content).append(moreContent).toString();
+                                jAttachment.put(MailJSONField.CONTENT.getKey(), content);
+                                return true;
+                            }
+                        }
+                    }
+                } catch (final JSONException e) {
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                }
                 /*
                  * Add HTML part as attachment
                  */
