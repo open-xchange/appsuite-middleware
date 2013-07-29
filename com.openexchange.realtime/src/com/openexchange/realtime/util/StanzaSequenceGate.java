@@ -91,7 +91,7 @@ public abstract class StanzaSequenceGate {
     }
 
     /**
-     * Ensures a correct order of sequence numbers of incoming Stanzas. <li>Stanzas that don't carry a sequence number are directly handed
+     * Ensures a correct order of sequence numbers of incoming Stanzas. <li"Expected Sequence %">Stanzas that don't carry a sequence number are directly handed
      * over to handleInternal of the components that makes use of this StanzaSequenceGate and have to adapt the logic of the Stanza handling
      * of the received Stanzas.</li> <li>Stanzas that carry a sequence number are enqueued until a correct sequence is established. Stanza
      * that already passed this gate are discarded. If the buffer for creating a valid sequence is full Stanzas are discarded.</li> </p>
@@ -211,11 +211,16 @@ public abstract class StanzaSequenceGate {
 
                 return true;
             } else {
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug(String.format("Expected sequence %d but got %d", threshold.get(), stanza.getSequenceNumber()));
+                }
                 /* Stanzas got out of sync, enqueue until we receive the Stanza matching threshold */
                 if (threshold.get() > stanza.getSequenceNumber()) {
                     // Discard as this stanza already passed the gate once
                     stanza.trace("Discarded as this sequence number has already successfully passed this gate: " + stanza.getSequenceNumber());
-                    LOG.debug("Discarded as this sequence number has already successfully passed this gate: " + stanza.getSequenceNumber());
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Discarded as this sequence number has already successfully passed this gate: " + stanza.getSequenceNumber());
+                    }
                     return true;
                 }
 

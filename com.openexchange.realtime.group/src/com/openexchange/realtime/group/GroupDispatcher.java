@@ -70,9 +70,11 @@ import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.commands.LeaveCommand;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IDEventHandler;
+import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ActionHandler;
 import com.openexchange.server.ServiceLookup;
 
@@ -468,7 +470,7 @@ public class GroupDispatcher implements ComponentHandle {
             try {
                 leave(id);
             } catch (OXException e) {
-                // Ignore
+                LOG.error("Error while handling LEAVE for ID:" + id, e);
             }
         }
     };
@@ -486,11 +488,23 @@ public class GroupDispatcher implements ComponentHandle {
     }
 
     public Stanza getWelcomeMessage(ID onBehalfOf) {
-        throw new UnsupportedOperationException("Clients can not join this group synchronously");
+        Stanza welcome = new Message();
+        welcome.setTo(onBehalfOf);
+        welcome.setFrom(getId());
+        welcome.setSelector(getStamp(onBehalfOf));
+        welcome.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
+                        new PayloadElement("Welcome", "json", "group", "message")).build()));
+        return welcome;
     }
 
     public Stanza getSignOffMessage(ID onBehalfOf) {
-        throw new UnsupportedOperationException("Clients can not leave this group synchronously");
+        Stanza goodbye = new Message();
+        goodbye.setTo(onBehalfOf);
+        goodbye.setFrom(getId());
+        goodbye.setSelector(getStamp(onBehalfOf));
+        goodbye.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
+                        new PayloadElement("Goodbye", "json", "group", "message")).build()));
+        return goodbye;
     }
 
 }
