@@ -25,3 +25,4 @@ Import-Package: com.mysql.jdbc,
 Require-Bundle: com.openexchange.admin.plugin.hosting,
  com.openexchange.admin.rmi,
  com.openexchange.admin
+Bundle-ClassPath: .

@@ -26,3 +26,4 @@ Import-Package: com.openexchange.admin.daemons,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
+Bundle-ClassPath: .

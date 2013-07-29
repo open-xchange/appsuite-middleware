@@ -42,3 +42,4 @@ Import-Package: com.openexchange.admin.rmi,
  org.osgi.framework,
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.admin.soap.resource.osgi.SoapResourceActivator
+Bundle-ClassPath: .
