@@ -2598,8 +2598,11 @@ public final class MimeMessageConverter {
      * @throws MessagingException If a messaging error occurs
      */
     public static String getSubject(final Message message) throws MessagingException {
-        final String subject = getStringHeader(MessageHeaders.HDR_SUBJECT, message, '\0');
-        return null == subject ? "" : subject;
+        final String[] valueArr = message.getHeader(MessageHeaders.HDR_SUBJECT);
+        if (null == valueArr || valueArr.length == 0) {
+            return null;
+        }
+        return MimeMessageUtility.decodeEnvelopeSubject(valueArr[0]);
     }
 
     /**
@@ -2614,8 +2617,11 @@ public final class MimeMessageConverter {
      * @return The decoded header
      */
     public static String getSubject(final MailMessage message) {
-        final String subject = getStringHeader(MessageHeaders.HDR_SUBJECT, message, '\0');
-        return null == subject ? "" : subject;
+        final String[] valueArr = message.getHeader(MessageHeaders.HDR_SUBJECT);
+        if (null == valueArr || valueArr.length == 0) {
+            return null;
+        }
+        return MimeMessageUtility.decodeEnvelopeSubject(valueArr[0]);
     }
 
     /**
