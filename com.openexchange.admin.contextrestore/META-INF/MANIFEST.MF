@@ -7,7 +7,6 @@ Bundle-Activator: com.openexchange.admin.contextrestore.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.mysql.jdbc,
- com.openexchange.admin.console,
  com.openexchange.admin.contextrestore.rmi,
  com.openexchange.admin.contextrestore.rmi.exceptions,
  com.openexchange.admin.storage.interfaces,

@@ -2,7 +2,7 @@
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,com.openexchange.admin.contextrestore"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,com.openexchange.admin.contextrestore.console"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,com.openexchange.admin.contextrestore.consolenew"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,com.openexchange.admin.contextrestore.rmi"/>
 </provider>
 </psf>

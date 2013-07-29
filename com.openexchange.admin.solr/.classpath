@@ -5,7 +5,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.solr"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.cli_1.2.0.v201105210650.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.console"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.rmi"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.consolenew"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.console.common"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

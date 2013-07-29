@@ -5,7 +5,6 @@ Bundle-SymbolicName: com.openexchange.admin.user.copy.console
 Bundle-Version: 7.4.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.admin.console,
- com.openexchange.admin.rmi,
+Import-Package: com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.dataobjects,
  com.openexchange.admin.user.copy.rmi
