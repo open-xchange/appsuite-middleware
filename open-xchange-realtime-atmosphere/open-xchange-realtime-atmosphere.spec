@@ -8,7 +8,7 @@ BuildRequires: open-xchange-realtime-core
 BuildRequires: open-xchange-grizzly
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 8
+%define        ox_release 9
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0

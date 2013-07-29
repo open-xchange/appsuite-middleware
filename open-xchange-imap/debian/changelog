@@ -4,6 +4,12 @@ open-xchange-imap (7.4.0-0) UNRELEASED; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Apr 2013 10:29:40 +0200
 
+open-xchange-imap (7.2.2-9) stable; urgency=low
+
+  * Build for patch 2013-07-18
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 12 Jul 2013 16:27:22 +0200
+
 open-xchange-imap (7.2.2-8) stable; urgency=low
 
   * Build for patch 2013-07-10
@@ -117,6 +123,12 @@ open-xchange-imap (7.2.1-0) UNRELEASED; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Apr 2013 10:22:38 +0200
 
+open-xchange-imap (7.2.0-11) UNRELEASED; urgency=low
+
+  * Build for patch 2013-07-18
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Jul 2013 09:37:44 +0200
+
 open-xchange-imap (7.2.0-10) UNRELEASED; urgency=low
 
   * Build for patch 2013-05-22
@@ -182,6 +194,12 @@ open-xchange-imap (7.2.0-0) UNRELEASED; urgency=low
   * prepare for 7.2.0
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 15 Mar 2013 13:33:15 +0100
+
+open-xchange-imap (7.0.2-13) unstable; urgency=low
+
+  * Second build for patch  2013-07-18
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Jul 2013 10:00:32 +0200
 
 open-xchange-imap (7.0.2-12) unstable; urgency=low
 
