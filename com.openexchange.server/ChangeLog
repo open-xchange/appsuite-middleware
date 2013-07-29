@@ -1,3 +1,7 @@
+* 2013-07-29 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 27775: Use new build system to build admin clt packages
+
 * 2013-07-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 27845: Fixed imports for login counter tool
