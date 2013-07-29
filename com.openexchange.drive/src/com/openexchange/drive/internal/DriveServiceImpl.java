@@ -546,16 +546,30 @@ public class DriveServiceImpl implements DriveService {
                 /*
                  * copy file, store checksum
                  */
-                File copiedFile = null != targetFile ? session.getStorage().copyFile(sourceFile, targetFile) :
-                    session.getStorage().copyFile(sourceFile, action.getNewVersion().getName(), path);
-                FileID fileID = new FileID(copiedFile.getId());
-                FolderID folderID = new FolderID(copiedFile.getFolderId());
-                if (null == fileID.getFolderId()) {
-                    // TODO: check
-                    fileID.setFolderId(folderID.getFolderId());
+                try {
+                    File copiedFile = null != targetFile ? session.getStorage().copyFile(sourceFile, targetFile) :
+                        session.getStorage().copyFile(sourceFile, action.getNewVersion().getName(), path);
+                    FileID fileID = new FileID(copiedFile.getId());
+                    FolderID folderID = new FolderID(copiedFile.getFolderId());
+                    if (null == fileID.getFolderId()) {
+                        // TODO: check
+                        fileID.setFolderId(folderID.getFolderId());
+                    }
+                    session.getChecksumStore().insertFileChecksum(fileID, copiedFile.getVersion(),
+                        copiedFile.getSequenceNumber(), sourceVersion.getChecksum());
+                } catch (OXException e) {
+                    if ("FLS-0017".equals(e.getErrorCode())) {
+                        // not found
+                        FileID fileID = new FileID(sourceFile.getId());
+                        FolderID folderID = new FolderID(sourceFile.getFolderId());
+                        if (null == fileID.getFolderId()) {
+                            // TODO: check
+                            fileID.setFolderId(folderID.getFolderId());
+                        }
+                        session.getChecksumStore().removeFileChecksums(fileID);
+                    }
+                    throw e;
                 }
-                session.getChecksumStore().insertFileChecksum(fileID, copiedFile.getVersion(),
-                    copiedFile.getSequenceNumber(), sourceVersion.getChecksum());
             }
             break;
         case EDIT:
