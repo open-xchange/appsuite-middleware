@@ -159,9 +159,39 @@ public final class JsonMessageHandler implements MailMessageHandler {
         }
     } // End of class PlainTextContent
 
+    private static final class MultipartInfo {
+        final String mpId;
+        final ContentType contentType;
+
+        MultipartInfo(final String mpId, final ContentType contentType) {
+            super();
+            this.mpId = mpId;
+            this.contentType = contentType;
+        }
+
+        boolean isSubType(final String subtype) {
+            return null != contentType && contentType.startsWith("multipart/" + subtype);
+        }
+
+        @Override
+        public String toString() {
+            final StringAllocator builder = new StringAllocator(256);
+            builder.append("MultipartInfo [");
+            if (mpId != null) {
+                builder.append("mpId=").append(mpId).append(", ");
+            }
+            if (contentType != null) {
+                builder.append("contentType=").append(contentType);
+            }
+            builder.append("]");
+            return builder.toString();
+        }
+
+    } // End of class MultipartInfo
+
     private final Session session;
     private final Context ctx;
-    private final LinkedList<String> multiparts;
+    private final LinkedList<MultipartInfo> multiparts;
     private TimeZone timeZone;
     private final UserSettingMail usm;
     private final DisplayMode displayMode;
@@ -201,7 +231,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      */
     public JsonMessageHandler(final int accountId, final String mailPath, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
         super();
-        multiparts = new LinkedList<String>();
+        multiparts = new LinkedList<MultipartInfo>();
         this.embedded = embedded;
         attachHTMLAlternativePart = !usm.isSuppressHTMLAlternativePart();
         this.accountId = accountId;
@@ -246,7 +276,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      */
     private JsonMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final Context ctx, final boolean token, final int ttlMillis) throws OXException {
         super();
-        multiparts = new LinkedList<String>();
+        multiparts = new LinkedList<MultipartInfo>();
         this.embedded = embedded;
         attachHTMLAlternativePart = !usm.isSuppressHTMLAlternativePart();
         this.ttlMillis = ttlMillis;
@@ -595,8 +625,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
     @Override
     public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws OXException {
         if (isInline && (DisplayMode.RAW.getMode() < displayMode.getMode())) {
-            final String mpId = multiparts.peek();
-            if (null != mpId && textAppended && id.startsWith(mpId)) {
+            final MultipartInfo mpInfo = multiparts.peek();
+            if (null != mpInfo && textAppended && id.startsWith(mpInfo.mpId) && mpInfo.isSubType("mixed")) {
                 try {
                     final JSONArray attachments = getAttachmentsArr();
                     final int len = attachments.length();
@@ -626,7 +656,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             for (int i = len; b && i-- > 0;) {
                                 final JSONObject jAttachment = attachments.getJSONObject(i);
                                 // Is HTML and in same multipart
-                                if (jAttachment.optString(MailJSONField.CONTENT_TYPE.getKey(), "").startsWith("text/htm") && mpId.equals(jAttachment.optString(MULTIPART_ID, null))) {
+                                if (jAttachment.optString(MailJSONField.CONTENT_TYPE.getKey(), "").startsWith("text/htm") && mpInfo.equals(jAttachment.optString(MULTIPART_ID, null))) {
                                     String content = jAttachment.optString(MailJSONField.CONTENT.getKey(), "null");
                                     if (!"null".equals(content)) {
                                         // Append to first one
@@ -691,13 +721,13 @@ public final class JsonMessageHandler implements MailMessageHandler {
                      * Check if nested in same multipart
                      */
                     try {
-                        final String mpId = multiparts.peek();
+                        final MultipartInfo mpInfo = multiparts.peek();
                         final JSONArray attachments = getAttachmentsArr();
                         final int length = attachments.length();
                         for (int i = length; i-- > 0;) {
                             final JSONObject jAttachment = attachments.getJSONObject(i);
                             // Is HTML and in same multipart
-                            if (jAttachment.optString(MailJSONField.CONTENT_TYPE.getKey(), "").startsWith("text/htm") && null != mpId && mpId.equals(jAttachment.optString(MULTIPART_ID, null))) {
+                            if (jAttachment.optString(MailJSONField.CONTENT_TYPE.getKey(), "").startsWith("text/htm") && null != mpInfo && mpInfo.mpId.equals(jAttachment.optString(MULTIPART_ID, null)) && mpInfo.isSubType("mixed")) {
                                 String content = jAttachment.optString(MailJSONField.CONTENT.getKey(), "null");
                                 if (!"null".equals(content)) {
                                     // Append to first one
@@ -735,13 +765,13 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 }
             } else {
                 try {
-                    final String mpId = multiparts.peek();
+                    final MultipartInfo mpInfo = multiparts.peek();
                     final JSONArray attachments = getAttachmentsArr();
                     final int length = attachments.length();
                     for (int i = length; i-- > 0;) {
                         final JSONObject jAttachment = attachments.getJSONObject(i);
                         // Is HTML and in same multipart
-                        if (jAttachment.optString(MailJSONField.CONTENT_TYPE.getKey(), "").startsWith("text/htm") && null != mpId && mpId.equals(jAttachment.optString(MULTIPART_ID, null))) {
+                        if (jAttachment.optString(MailJSONField.CONTENT_TYPE.getKey(), "").startsWith("text/htm") && null != mpInfo && mpInfo.mpId.equals(jAttachment.optString(MULTIPART_ID, null)) && mpInfo.isSubType("mixed")) {
                             String content = jAttachment.optString(MailJSONField.CONTENT.getKey(), "null");
                             if (!"null".equals(content)) {
                                 // Append to first one
@@ -918,8 +948,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
                      * A plain text message body has already been detected
                      */
                     final String content = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
-                    final String mpId = multiparts.peek();
-                    if (null != mpId && (DisplayMode.RAW.getMode() < displayMode.getMode()) && id.startsWith(mpId)) {
+                    final MultipartInfo mpInfo = multiparts.peek();
+                    if (null != mpInfo && (DisplayMode.RAW.getMode() < displayMode.getMode()) && id.startsWith(mpInfo.mpId) && mpInfo.isSubType("mixed")) {
                         final JSONArray attachments = getAttachmentsArr();
                         final int len = attachments.length();
                         final String keyContentType = MailJSONField.CONTENT_TYPE.getKey();
@@ -1113,7 +1143,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
              */
             isAlternative = false;
         }
-        multiparts.push(id);
+        multiparts.push(new MultipartInfo(id, mp.getContentType()));
         return true;
     }
 
@@ -1407,8 +1437,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
             jsonObject.put(MailJSONField.CONTENT.getKey(), content);
-            final String mpId = multiparts.peek();
-            jsonObject.put(MULTIPART_ID, null == mpId ? JSONObject.NULL : mpId);
+            final MultipartInfo mpInfo = multiparts.peek();
+            jsonObject.put(MULTIPART_ID, null == mpInfo ? JSONObject.NULL : mpInfo.mpId);
             getAttachmentsArr().put(jsonObject);
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -1424,8 +1454,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
             jsonObject.put(MailJSONField.CONTENT.getKey(), content);
-            final String mpId = multiparts.peek();
-            jsonObject.put(MULTIPART_ID, null == mpId ? JSONObject.NULL : mpId);
+            final MultipartInfo mpInfo = multiparts.peek();
+            jsonObject.put(MULTIPART_ID, null == mpInfo ? JSONObject.NULL : mpInfo.mpId);
             getAttachmentsArr().put(jsonObject);
             return jsonObject;
         } catch (final JSONException e) {
@@ -1452,8 +1482,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
             jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
             jsonObject.put(MailJSONField.CONTENT.getKey(), content);
-            final String mpId = multiparts.peek();
-            jsonObject.put(MULTIPART_ID, null == mpId ? JSONObject.NULL : mpId);
+            final MultipartInfo mpInfo = multiparts.peek();
+            jsonObject.put(MULTIPART_ID, null == mpInfo ? JSONObject.NULL : mpInfo.mpId);
             getAttachmentsArr().put(jsonObject);
             if (addAttachment) {
                 /*
@@ -1516,7 +1546,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     }
 
     /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
+    static String toLowerCase(final CharSequence chars) {
         if (null == chars) {
             return null;
         }
