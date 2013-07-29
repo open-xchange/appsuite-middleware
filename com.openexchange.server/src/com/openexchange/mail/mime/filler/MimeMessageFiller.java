@@ -2036,7 +2036,11 @@ public class MimeMessageFiller {
             super();
             this.data = imageData.getData(InputStream.class, imageData.generateDataArgumentsFrom(imageLocation), session);
             final DataProperties dataProperties = data.getDataProperties();
-            contentType = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
+            final String contentType = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
+            if (null != contentType && toLowerCase(contentType).indexOf("image/") < 0) {
+                throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(imageLocation.getImageId(), imageLocation.getId(), imageLocation.getFolder());
+            }
+            this.contentType = contentType;
             fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
         }
 
@@ -2081,7 +2085,7 @@ public class MimeMessageFiller {
     }
 
     /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
+    static String toLowerCase(final CharSequence chars) {
         if (null == chars) {
             return null;
         }
