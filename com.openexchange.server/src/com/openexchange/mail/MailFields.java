@@ -92,9 +92,13 @@ public final class MailFields {
      */
     public MailFields(final MailField mailField, final MailField... mailFields) {
         this();
-        arr[mailField.ordinal()] = true;
-        for (final MailField mf : mailFields) {
-            arr[mf.ordinal()] = true;
+        if (null != mailField) {
+            arr[mailField.ordinal()] = true;
+        }
+        if (null != mailFields) {
+            for (final MailField mf : mailFields) {
+                arr[mf.ordinal()] = true;
+            }
         }
     }
 
@@ -105,8 +109,10 @@ public final class MailFields {
      */
     public MailFields(final MailField[] mailFields) {
         this();
-        for (final MailField mailField : mailFields) {
-            arr[mailField.ordinal()] = true;
+        if (null != mailFields) {
+            for (final MailField mailField : mailFields) {
+                arr[mailField.ordinal()] = true;
+            }
         }
     }
 
@@ -117,8 +123,10 @@ public final class MailFields {
      */
     public MailFields(final Collection<MailField> mailFields) {
         this();
-        for (final MailField mailField : mailFields) {
-            arr[mailField.ordinal()] = true;
+        if (null != mailFields) {
+            for (final MailField mailField : mailFields) {
+                arr[mailField.ordinal()] = true;
+            }
         }
     }
 
@@ -130,7 +138,9 @@ public final class MailFields {
     public MailFields(final MailFields mailFields) {
         super();
         arr = new boolean[VALUES.length];
-        System.arraycopy(mailFields.arr, 0, arr, 0, arr.length);
+        if (null != mailFields) {
+            System.arraycopy(mailFields.arr, 0, arr, 0, arr.length);
+        }
     }
 
     @Override
@@ -160,7 +170,9 @@ public final class MailFields {
      * @return This instance with mail field added
      */
     public MailFields add(final MailField mailField) {
-        arr[mailField.ordinal()] = true;
+        if (mailField != null) {
+            arr[mailField.ordinal()] = true;
+        }
         return this;
     }
 
@@ -170,8 +182,10 @@ public final class MailFields {
      * @param mailFields The mail fields to add
      */
     public void addAll(final MailField[] mailFields) {
-        for (final MailField mailField : mailFields) {
-            arr[mailField.ordinal()] = true;
+        if (mailFields != null) {
+            for (final MailField mailField : mailFields) {
+                arr[mailField.ordinal()] = true;
+            }
         }
     }
 
@@ -181,8 +195,10 @@ public final class MailFields {
      * @param mailFields The collection of {@link MailField} constants to add
      */
     public void addAll(final Collection<MailField> mailFields) {
-        for (final MailField mailField : mailFields) {
-            arr[mailField.ordinal()] = true;
+        if (mailFields != null) {
+            for (final MailField mailField : mailFields) {
+                arr[mailField.ordinal()] = true;
+            }
         }
     }
 
@@ -192,7 +208,9 @@ public final class MailFields {
      * @param mailField The mail field to remove
      */
     public void removeMailField(final MailField mailField) {
-        arr[mailField.ordinal()] = false;
+        if (mailField != null) {
+            arr[mailField.ordinal()] = false;
+        }
     }
 
     /**
@@ -201,8 +219,10 @@ public final class MailFields {
      * @param mailFields The mail fields to remove
      */
     public void removeMailFields(final MailField[] mailFields) {
-        for (final MailField mailField : mailFields) {
-            arr[mailField.ordinal()] = false;
+        if (mailFields != null) {
+            for (final MailField mailField : mailFields) {
+                arr[mailField.ordinal()] = false;
+            }
         }
     }
 
@@ -213,7 +233,7 @@ public final class MailFields {
      * @return <code>true</code> if specified {@link MailField} constant is contained; otherwise <code>false</code>.
      */
     public boolean contains(final MailField mailField) {
-        return arr[mailField.ordinal()];
+        return null != mailField &&  arr[mailField.ordinal()];
     }
 
     /**
@@ -223,6 +243,9 @@ public final class MailFields {
      * @return <code>true</code> if any of specified mail field constants is contained; otherwise <code>false</code>.
      */
     public boolean containsAny(final MailFields mailFields) {
+        if (mailFields == null) {
+            return false;
+        }
         final boolean[] otherArr = mailFields.arr;
         for (int i = 0; i < otherArr.length; i++) {
             if (otherArr[i] && arr[i]) {
@@ -239,6 +262,9 @@ public final class MailFields {
      * @return <code>true</code> if all of specified mail field constants is contained; otherwise <code>false</code>.
      */
     public boolean containsAll(final MailFields mailFields) {
+        if (mailFields == null) {
+            return false;
+        }
         final boolean[] otherArr = mailFields.arr;
         for (int i = 0; i < otherArr.length; i++) {
             if (otherArr[i] && !arr[i]) {
@@ -255,6 +281,9 @@ public final class MailFields {
      * @return <code>true</code> if this instance changed as a result of the call; otherwise <code>false</code>
      */
     public boolean removeAll(final MailFields otherFields) {
+        if (otherFields == null) {
+            return false;
+        }
         final boolean[] otherArr = otherFields.arr;
         boolean retval = false;
         for (int i = 0; i < otherArr.length; i++) {
@@ -273,6 +302,9 @@ public final class MailFields {
      * @return <code>true</code> if this instance changed as a result of the call; otherwise <code>false</code>
      */
     public boolean retainAll(final MailFields otherFields) {
+        if (otherFields == null) {
+            return false;
+        }
         final boolean[] otherArr = otherFields.arr;
         boolean retval = false;
         for (int i = 0; i < otherArr.length; i++) {
