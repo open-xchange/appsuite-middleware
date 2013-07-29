@@ -251,9 +251,7 @@ public class UploadEvent {
      * @param fieldValue The field's value.
      */
     public final void addFormField(final String fieldName, final String fieldValue) {
-        if (null != formFields.put(fieldName, fieldValue)) {
-            System.out.println("Duplicate form field: " + fieldName);
-        }
+        formFields.put(fieldName, fieldValue);
     }
 
     /**
