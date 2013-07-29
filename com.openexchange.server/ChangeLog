@@ -1,6 +1,14 @@
 * 2013-08-30 - thorben.betten@open-xchange.com
 
+<<<<<<< HEAD
  - Fix for bug 28602: Don't close ThresholdFileHolder instance
+=======
+ - Fix for bug 27845: Fixed imports for login counter tool
+ - Fix for bug 27640: Ignore delimiting white-space between mail-safe encoded words
+ - Fix for bug 27863: Added null guard while composing mail debug information
+ - Fix for bug 27864: Deal with possible null elements in passed message array on APPEND operation
+ - Fix for bug 27866: Handle possible null return value from iCal parse attempt
+>>>>>>> 446d90c... Fix for bug 27866: Handle possible null return value from iCal parse attempt
 
 * 2013-08-07 - martin.herfurth@open-xchange.com
 
