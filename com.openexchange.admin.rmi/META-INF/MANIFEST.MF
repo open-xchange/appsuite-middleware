@@ -9,3 +9,4 @@ Export-Package: com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.dataobjects,
  com.openexchange.admin.rmi.exceptions,
  com.openexchange.admin.rmi.extensions
+Bundle-ClassPath: .

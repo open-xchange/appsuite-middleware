@@ -14,3 +14,4 @@ Import-Package: com.openexchange.admin.rmi.dataobjects,
  com.openexchange.admin.rmi.extensions
 Require-Bundle: com.openexchange.admin.plugin.hosting;resolution:=optional
 Eclipse-RegisterBuddy: com.openexchange.admin.plugin.hosting
+Bundle-ClassPath: .

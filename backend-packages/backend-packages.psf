@@ -85,5 +85,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-upsell-multiple"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-munin-scripts"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-munin-scripts-jolokia"/>
 </provider>
 </psf>
