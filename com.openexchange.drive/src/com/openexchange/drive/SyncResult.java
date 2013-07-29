@@ -47,13 +47,9 @@
  *
  */
 
-package com.openexchange.drive.sync;
+package com.openexchange.drive;
 
-import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.drive.DriveVersion;
-import com.openexchange.drive.actions.AbstractAction;
-import com.openexchange.java.StringAllocator;
 
 
 /**
@@ -61,66 +57,20 @@ import com.openexchange.java.StringAllocator;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SyncResult<T extends DriveVersion> {
-
-    private final List<AbstractAction<T>> actionsForServer;
-    private final List<AbstractAction<T>> actionsForClient;
-
-    public SyncResult(List<AbstractAction<T>> actionsForServer, List<AbstractAction<T>> actionsForClient) {
-        super();
-        this.actionsForClient = actionsForClient;
-        this.actionsForServer = actionsForServer;
-    }
-
-    public SyncResult() {
-        this(new ArrayList<AbstractAction<T>>(), new ArrayList<AbstractAction<T>>());
-    }
-
-    public void addActionForClient(AbstractAction<T> action) {
-        actionsForClient.add(action);
-    }
-
-    public void addActionForServer(AbstractAction<T> action) {
-        actionsForServer.add(action);
-    }
-
-    public boolean isEmpty() {
-        return (null == actionsForServer || 0 == actionsForServer.size()) && (null == actionsForClient || 0 == actionsForClient.size());
-    }
-
-    /**
-     * Gets the actionsForServer
-     *
-     * @return The actionsForServer
-     */
-    public List<AbstractAction<T>> getActionsForServer() {
-        return actionsForServer;
-    }
+public interface SyncResult<T extends DriveVersion> {
 
     /**
      * Gets the actionsForClient
      *
      * @return The actionsForClient
      */
-    public List<AbstractAction<T>> getActionsForClient() {
-        return actionsForClient;
-    }
+    public List<DriveAction<T>> getActionsForClient();
 
-    @Override
-    public String toString() {
-        StringAllocator stringAllocator = new StringAllocator();
-        if (null != actionsForServer) {
-            stringAllocator.append("Actions for server:\n");
-            for (AbstractAction<T> action : actionsForServer) {
-                stringAllocator.append("  ").append(action).append('\n');
-            }
-        }
-        if (null != actionsForClient) {
-            stringAllocator.append("Actions for client:\n");
-            for (AbstractAction<T> action : actionsForClient) {
-                stringAllocator.append("  ").append(action).append('\n');
-            }
-        }
-        return stringAllocator.toString();
-    }
+    /**
+     * Gets the diagnostics log.
+     *
+     * @return The diagnostics log, or <code>null</code> if not available
+     */
+    public String getDiagnostics();
+
 }

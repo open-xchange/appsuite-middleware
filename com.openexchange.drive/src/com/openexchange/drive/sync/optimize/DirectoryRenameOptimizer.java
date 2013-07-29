@@ -61,7 +61,7 @@ import com.openexchange.drive.actions.EditDirectoryAction;
 import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
-import com.openexchange.drive.sync.SyncResult;
+import com.openexchange.drive.sync.IntermediateSyncResult;
 
 
 /**
@@ -76,7 +76,7 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
     }
 
     @Override
-    public SyncResult<DirectoryVersion> optimize(DriveSession session, SyncResult<DirectoryVersion> result) {
+    public IntermediateSyncResult<DirectoryVersion> optimize(DriveSession session, IntermediateSyncResult<DirectoryVersion> result) {
         List<AbstractAction<DirectoryVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForClient());
         List<AbstractAction<DirectoryVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForServer());
         List<AbstractAction<DirectoryVersion>> renameActionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>();
@@ -163,7 +163,7 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
         /*
          * return new sync results
          */
-        return new SyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient);
+        return new IntermediateSyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient);
 
     }
 

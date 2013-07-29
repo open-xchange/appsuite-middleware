@@ -57,7 +57,7 @@ import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.actions.EditDirectoryAction;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
-import com.openexchange.drive.sync.SyncResult;
+import com.openexchange.drive.sync.IntermediateSyncResult;
 
 
 /**
@@ -72,14 +72,14 @@ public class DirectoryOrderOptimizer extends DirectoryActionOptimizer {
     }
 
     @Override
-    public SyncResult<DirectoryVersion> optimize(DriveSession session, SyncResult<DirectoryVersion> result) {
+    public IntermediateSyncResult<DirectoryVersion> optimize(DriveSession session, IntermediateSyncResult<DirectoryVersion> result) {
         List<AbstractAction<DirectoryVersion>> actionsForClient = result.getActionsForClient();
         List<AbstractAction<DirectoryVersion>> actionsForServer = result.getActionsForServer();
         Collections.sort(actionsForClient);
         Collections.sort(actionsForServer);
         actionsForClient = propagateRenames(actionsForClient);
         actionsForServer = propagateRenames(actionsForServer);
-        return new SyncResult<DirectoryVersion>(actionsForServer, actionsForClient);
+        return new IntermediateSyncResult<DirectoryVersion>(actionsForServer, actionsForClient);
     }
 
     private static List<AbstractAction<DirectoryVersion>> propagateRenames(List<AbstractAction<DirectoryVersion>> actions) {

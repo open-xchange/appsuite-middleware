@@ -69,6 +69,7 @@ import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 
 /**
@@ -145,41 +146,61 @@ public class ChecksumProvider {
      * @throws OXException
      */
     public static List<DirectoryChecksum> getChecksums(DriveSession session, List<String> folderIDs) throws OXException {
+        StringAllocator trace = session.isTraceEnabled() ? new StringAllocator("Directory checksums:\n") : null;
         List<FolderID> fids = new ArrayList<FolderID>(folderIDs.size());
         for (String folderID : folderIDs) {
             fids.add(new FolderID(folderID));
         }
+        List<DirectoryChecksum> checksums;
         if (false == session.getStorage().supportsFolderSequenceNumbers()) {
-            return calculateDirectoryChecksums(session, fids);
-        }
-        List<DirectoryChecksum> checksums = new ArrayList<DirectoryChecksum>(folderIDs.size());
-        List<DirectoryChecksum> storedChecksums = session.getChecksumStore().getDirectoryChecksums(fids);
-        List<DirectoryChecksum> updatedChecksums = new ArrayList<DirectoryChecksum>();
-        List<DirectoryChecksum> newChecksums = new ArrayList<DirectoryChecksum>();
-        Map<String, Long> sequenceNumbers = session.getStorage().getSequenceNumbers(folderIDs);
-        for (FolderID folderID : fids) {
-            DirectoryChecksum directoryChecksum = find(storedChecksums, folderID);
-            Long value = sequenceNumbers.get(folderID.toUniqueID());
-            long sequenceNumber = null != value ? value.longValue() : 0;
-            if (null != directoryChecksum) {
-                if (sequenceNumber != directoryChecksum.getSequenceNumber()) {
-                    directoryChecksum.setChecksum(calculateMD5(session, folderID));
-                    directoryChecksum.setSequenceNumber(sequenceNumber);
-                    updatedChecksums.add(directoryChecksum);
-                }
-            } else {
-                directoryChecksum = new DirectoryChecksum(folderID, sequenceNumber, calculateMD5(session, folderID));
-                if (0 < sequenceNumber) {
+            if (null != trace) {
+                trace.append(" No folder sequence numbers supported.\n");
+            }
+            checksums = calculateDirectoryChecksums(session, fids);
+        } else {
+            checksums = new ArrayList<DirectoryChecksum>(folderIDs.size());
+            List<DirectoryChecksum> storedChecksums = session.getChecksumStore().getDirectoryChecksums(fids);
+            List<DirectoryChecksum> updatedChecksums = new ArrayList<DirectoryChecksum>();
+            List<DirectoryChecksum> newChecksums = new ArrayList<DirectoryChecksum>();
+            Map<String, Long> sequenceNumbers = session.getStorage().getSequenceNumbers(folderIDs);
+            for (FolderID folderID : fids) {
+                DirectoryChecksum directoryChecksum = find(storedChecksums, folderID);
+                Long value = sequenceNumbers.get(folderID.toUniqueID());
+                long sequenceNumber = null != value ? value.longValue() : 0;
+                if (null != directoryChecksum) {
+                    if (sequenceNumber != directoryChecksum.getSequenceNumber()) {
+                        if (null != trace) {
+                            trace.append(" Stored, invalid ( != " + sequenceNumber + " ): ").append(directoryChecksum).append('\n');
+                        }
+                        directoryChecksum.setChecksum(calculateMD5(session, folderID));
+                        directoryChecksum.setSequenceNumber(sequenceNumber);
+                        updatedChecksums.add(directoryChecksum);
+                        if (null != trace) {
+                            trace.append(" Re-calculated: ").append(directoryChecksum).append('\n');
+                        }
+                    } else {
+                        if (null != trace) {
+                            trace.append(" Stored, valid: ").append(directoryChecksum).append('\n');
+                        }
+                    }
+                } else {
+                    directoryChecksum = new DirectoryChecksum(folderID, sequenceNumber, calculateMD5(session, folderID));
+                    if (null != trace) {
+                        trace.append(" Newly calculated: ").append(directoryChecksum).append('\n');
+                    }
                     newChecksums.add(directoryChecksum);
                 }
+                checksums.add(directoryChecksum);
             }
-            checksums.add(directoryChecksum);
+            if (0 < updatedChecksums.size()) {
+                session.getChecksumStore().updateDirectoryChecksums(updatedChecksums);
+            }
+            if (0 < newChecksums.size()) {
+                session.getChecksumStore().insertDirectoryChecksums(newChecksums);
+            }
         }
-        if (0 < updatedChecksums.size()) {
-            session.getChecksumStore().updateDirectoryChecksums(updatedChecksums);
-        }
-        if (0 < newChecksums.size()) {
-            session.getChecksumStore().insertDirectoryChecksums(newChecksums);
+        if (null != trace) {
+            session.trace(trace);
         }
         return checksums;
     }
@@ -206,28 +227,46 @@ public class ChecksumProvider {
     }
 
     private static String calculateMD5(DriveSession session, FolderID folderID) throws OXException {
+        StringAllocator trace = session.isTraceEnabled() ? new StringAllocator("File checksums in folder " + folderID + ":\n") : null;
+        String checksum;
         List<File> filesInFolder = session.getStorage().getFilesInFolder(folderID.toUniqueID());
         if (null == filesInFolder || 0 == filesInFolder.size()) {
-            return DriveConstants.EMPTY_MD5;
-        }
-        Set<File> files = new TreeSet<File>(FILENAME_COMPARATOR);
-        files.addAll(filesInFolder);
-        MD md5 = session.newMD5();
-        List<FileChecksum> knownChecksums = session.getChecksumStore().getFileChecksums(folderID);
-        List<FileChecksum> calculatedChecksums = new ArrayList<FileChecksum>();
-        for (File file : files) {
-            FileChecksum fileChecksum = find(knownChecksums, file);
-            if (null == fileChecksum) {
-                fileChecksum = calculateFileChecksum(session, file);
-                calculatedChecksums.add(fileChecksum);
+            checksum = DriveConstants.EMPTY_MD5;
+            if (null != trace) {
+                trace.append(" no files in folder, using empty MD5");
             }
-            md5.update(file.getFileName().getBytes(Charsets.UTF_8));
-            md5.update(fileChecksum.getChecksum().getBytes(Charsets.UTF_8));
+        } else {
+            Set<File> files = new TreeSet<File>(FILENAME_COMPARATOR);
+            files.addAll(filesInFolder);
+            MD md5 = session.newMD5();
+            List<FileChecksum> knownChecksums = session.getChecksumStore().getFileChecksums(folderID);
+            List<FileChecksum> calculatedChecksums = new ArrayList<FileChecksum>();
+            for (File file : files) {
+                FileChecksum fileChecksum = find(knownChecksums, file);
+                if (null == fileChecksum) {
+                    fileChecksum = calculateFileChecksum(session, file);
+                    if (null != trace) {
+                        trace.append(' ' + file.getFileName()).append(" - Newly calculated: ").append(fileChecksum).append('\n');
+                    }
+                    calculatedChecksums.add(fileChecksum);
+                } else {
+                    if (null != trace) {
+                        trace.append(' ' + file.getFileName()).append(" - Stored, valid: ").append(fileChecksum).append('\n');
+                    }
+                }
+                md5.update(file.getFileName().getBytes(Charsets.UTF_8));
+                md5.update(fileChecksum.getChecksum().getBytes(Charsets.UTF_8));
+            }
+            if (0 < calculatedChecksums.size()) {
+                session.getChecksumStore().insertFileChecksums(calculatedChecksums);
+            }
+            checksum = md5.getFormattedValue();
         }
-        if (0 < calculatedChecksums.size()) {
-            session.getChecksumStore().insertFileChecksums(calculatedChecksums);
+        if (null != trace) {
+            trace.append("Directory checksum: ").append(checksum).append('\n');
+            session.trace(trace);
         }
-        return md5.getFormattedValue();
+        return checksum;
     }
 
     private static FileChecksum calculateFileChecksum(DriveSession session, File file) throws OXException {

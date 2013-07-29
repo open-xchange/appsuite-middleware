@@ -50,12 +50,17 @@
 package com.openexchange.drive.internal;
 
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import jonelo.jacksum.algorithm.MD;
+import org.apache.commons.logging.Log;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.checksum.ChecksumStore;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -65,12 +70,16 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DriveSession {
 
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveSession.class);
+
     private final ServerSession session;
 
     private ChecksumStore checksumStore;
     private final String rootFolderID;
     private DriveStorage storage;
     private DirectLinkGenerator linkGenerator;
+    private StringAllocator diagnosticsLog;
+    private Boolean diagnostics;
 
     /**
      * Initializes a new {@link DriveSession}.
@@ -146,6 +155,50 @@ public class DriveSession {
             linkGenerator = new DirectLinkGenerator(this);
         }
         return linkGenerator;
+    }
+
+    /**
+     * Appends a new line for the supplied message into the trace log.
+     *
+     * @param message The message to trace
+     */
+    public void trace(Object message) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(message);
+        }
+        if (isDiagnostics()) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            sdf.setTimeZone(TimeZones.UTC);
+            diagnosticsLog
+                .append(sdf.format(new Date()))
+                .append(" [").append(Thread.currentThread().getId()).append("]\n")
+                .append(message).append("\n\n");
+        }
+    }
+
+    public String getDiagnosticsLog() {
+        return null != diagnosticsLog ? diagnosticsLog.toString() : null;
+    }
+
+    /**
+     * Gets a value indicating whether tracing is enabled either in the named logger instance or the drive-internal diagnostics log
+     * generator.
+     *
+     * @return <code>true</code> if tracing is enabled, <code>false</code>, otherwise
+     */
+    public boolean isTraceEnabled() {
+        return LOG.isTraceEnabled() || isDiagnostics();
+    }
+
+    private boolean isDiagnostics() {
+        if (null == diagnostics) {
+            Object parameter = getServerSession().getParameter("com.openexchange.drive.diagnostics");
+            diagnostics = null != parameter && Boolean.class.isInstance(parameter) ? diagnostics = (Boolean)parameter : Boolean.FALSE;
+            if (diagnostics.booleanValue()) {
+                diagnosticsLog = new StringAllocator();
+            }
+        }
+        return diagnostics.booleanValue();
     }
 
 }
