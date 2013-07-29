@@ -582,7 +582,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         }
         try {
             final JSONObject hdrObject = new JSONObject(size);
-            for (int i = 0; i < size; i++) {
+            for (int i = size; i-- > 0;) {
                 final Map.Entry<String, String> entry = iter.next();
                 final String headerName = entry.getKey();
                 if (MessageHeaders.HDR_DISP_NOT_TO.equalsIgnoreCase(headerName)) {
