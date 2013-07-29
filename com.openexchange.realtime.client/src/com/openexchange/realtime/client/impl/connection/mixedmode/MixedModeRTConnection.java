@@ -51,6 +51,7 @@ package com.openexchange.realtime.client.impl.connection.mixedmode;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.atmosphere.wasync.Decoder;
@@ -332,13 +333,13 @@ public class MixedModeRTConnection extends AbstractRTConnection {
                 }
                 JSONObject command = (JSONObject) payloads.opt(0);
                 String commandData = command.optString("data");
-                if("leave".equalsIgnoreCase(commandData)) {
-                    try {
-                        object.put("tracer", "leaveTracer");
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
+//                if("leave".equalsIgnoreCase(commandData)) {
+//                    try {
+//                        object.put("tracer", "leaveTracer");
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
                 if("join".equalsIgnoreCase(commandData) || "leave".equalsIgnoreCase(commandData)) {
                     return true;
                 }
@@ -423,6 +424,9 @@ public class MixedModeRTConnection extends AbstractRTConnection {
     }
 
     private void fireSynchronousRequest(Request request) throws RTException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(System.currentTimeMillis() + ": Firing Request with body " + request.getStringData());
+        }
         try {
             ListenableFuture<Response> requestFuture = asyncHttpClient.executeRequest(request);
             Response response = requestFuture.get(Constants.REQUEST_TIMEOUT, TimeUnit.SECONDS);
