@@ -527,7 +527,7 @@ public class MimeMailException extends OXException {
         if (null == folder) {
             return info;
         }
-        final StringAllocator sb = new StringAllocator(info);
+        final StringAllocator sb = null == info ? new StringAllocator(64) : new StringAllocator(info);
         sb.append(" (folder=\"").append(folder.getFullName()).append('"');
         final Store store = folder.getStore();
         if (null != store) {
