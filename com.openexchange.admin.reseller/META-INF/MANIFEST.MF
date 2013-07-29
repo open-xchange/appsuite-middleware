@@ -36,3 +36,4 @@ Import-Package: com.openexchange.admin.daemons,
  org.osgi.util.tracker
 Require-Bundle: com.openexchange.admin,
  com.openexchange.admin.plugin.hosting
+Bundle-ClassPath: .
