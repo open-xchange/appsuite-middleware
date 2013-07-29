@@ -54,10 +54,11 @@ import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.internal.DriveSession;
@@ -205,12 +206,12 @@ public class ChecksumProvider {
     }
 
     private static String calculateMD5(DriveSession session, FolderID folderID) throws OXException {
-        List<File> files = session.getStorage().getFilesInFolder(folderID.toUniqueID());
-        if (null == files || 0 == files.size()) {
+        List<File> filesInFolder = session.getStorage().getFilesInFolder(folderID.toUniqueID());
+        if (null == filesInFolder || 0 == filesInFolder.size()) {
             return DriveConstants.EMPTY_MD5;
-        } else if (1 < files.size()) {
-            Collections.sort(files, FILENAME_COMPARATOR);
         }
+        Set<File> files = new TreeSet<File>(FILENAME_COMPARATOR);
+        files.addAll(filesInFolder);
         MD md5 = session.newMD5();
         List<FileChecksum> knownChecksums = session.getChecksumStore().getFileChecksums(folderID);
         List<FileChecksum> calculatedChecksums = new ArrayList<FileChecksum>();
