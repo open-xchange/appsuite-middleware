@@ -87,6 +87,7 @@ import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeStructureFixer;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.TNEFBodyPart;
@@ -268,28 +269,29 @@ public final class StructureMailMessageParser {
      * @param prefix The initial prefix for mail part identifiers; e.g. <code>&quot;1.1&quot;</code>
      * @throws OXException If parsing specified mail fails
      */
-    public void parseMailMessage(final MailMessage mail, final StructureHandler handler, final String prefix) throws OXException {
+    public void parseMailMessage(MailMessage mail, final StructureHandler handler, final String prefix) throws OXException {
         if (null == mail) {
             throw MailExceptionCode.MISSING_PARAMETER.create("mail");
         }
         if (null == handler) {
             throw MailExceptionCode.MISSING_PARAMETER.create("handler");
         }
+        final MailMessage mm = MimeStructureFixer.getInstance().process(mail);
         try {
             /*
              * Parse mail's envelope
              */
-            parseEnvelope(mail, handler);
+            parseEnvelope(mm, handler);
             /*
              * Parse content
              */
-            parseMailContent(mail, handler, prefix, 1);
+            parseMailContent(mm, handler, prefix, 1);
             /*
              * Mark end of parsing
              */
-            handler.handleEnd(mail);
+            handler.handleEnd(mm);
         } catch (final IOException e) {
-            throw MailExceptionCode.UNREADBALE_PART_CONTENT.create(e, Long.valueOf(mail.getMailId()), mail.getFolder());
+            throw MailExceptionCode.UNREADBALE_PART_CONTENT.create(e, Long.valueOf(mm.getMailId()), mm.getFolder());
         }
     }
 
