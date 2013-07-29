@@ -50,14 +50,12 @@
 package com.openexchange.realtime.client.impl.connection;
 
 import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CountDownLatch;
-import org.json.JSONValue;
+import java.util.concurrent.Future;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.realtime.client.RTException;
 
 
 /**
@@ -68,8 +66,6 @@ import com.openexchange.realtime.client.RTException;
 public class ResendBuffer {
 
     private static final Logger LOG = LoggerFactory.getLogger(ResendBuffer.class);
-
-    private static final int RESEND_LIMIT = 100;
 
     private final ConcurrentMap<Long, ResendTask> activeTimers;
 
@@ -85,12 +81,11 @@ public class ResendBuffer {
         LOG.info("ResendBuffer started.");
     }
 
-    public CountDownLatch put(long seq, JSONValue message) {
-        CountDownLatch ackBarrier = new CountDownLatch(1);
-        ResendTask task = new ResendTask(connection, seq, message, ackBarrier);
+    public Future<MessageState> put(long seq, JSONObject message) {
+        ResendTask task = new ResendTask(connection, seq, message);
         timer.scheduleAtFixedRate(task, 0L, 3000L);
         activeTimers.put(seq, task);
-        return ackBarrier;
+        return task;
     }
 
     public void remove(long seq) {
@@ -98,58 +93,12 @@ public class ResendBuffer {
         if (task != null) {
             task.cancel();
             timer.purge();
-            task.getACKBarrier().countDown();
         }
     }
 
     public void stop() {
         LOG.info("ResendBuffer stopped.");
         timer.cancel();
-    }
-
-    private static final class ResendTask extends TimerTask {
-
-        private final AbstractRTConnection connection;
-
-        private final long seq;
-
-        private final JSONValue message;
-
-        private final CountDownLatch ackBarrier;
-
-        private int resendCount;
-
-        public ResendTask(AbstractRTConnection connection, long seq, JSONValue message, CountDownLatch ackBarrier) {
-            super();
-            this.connection = connection;
-            this.seq = seq;
-            this.message = message;
-            this.ackBarrier = ackBarrier;
-            resendCount = 0;
-        }
-
-        @Override
-        public void run() {
-            try {
-                if (resendCount == RESEND_LIMIT) {
-                    LOG.error("Could not send message " + seq + " after " + RESEND_LIMIT + " tries.");
-                    cancel();
-                }
-
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Trying to send message {}. Resend count: {}", message.toString(), resendCount);
-                }
-                connection.doSend(message);
-                resendCount++;
-            } catch (RTException e) {
-                LOG.warn("Error while sending message " + seq + ". Resend count is: " + resendCount, e);
-            }
-        }
-
-        public CountDownLatch getACKBarrier() {
-            return ackBarrier;
-        }
-
     }
 
 }

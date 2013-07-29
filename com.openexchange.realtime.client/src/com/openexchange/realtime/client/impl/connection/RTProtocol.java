@@ -49,10 +49,6 @@
 
 package com.openexchange.realtime.client.impl.connection;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -180,48 +176,26 @@ public class RTProtocol {
     /**
      * To reliably send messages to the server we have to make use of numeric sequences in every message that gets sent from the client to
      * the server. The Server uses these sequences to ensure the sequence of incoming messages. The client waits for acknowledges for every
-     * sequence number to ensure successful delivery of messages. This method takes a JSONArray of messages and adds a sequence number to
-     * every single one of them.
-     *
-     * @param messages The array containing the messages that need to be enhanced with sequence numbers
-     * @return A map containing all set sequence numbers and the according modified messages
-     * @throws RTException if the messages array doesn't consist of JSONObjects
-     */
-    public Map<Long, JSONObject> addSequence(JSONArray messages) throws RTException {
-        Map<Long, JSONObject> sequencedMessages = new HashMap<Long, JSONObject>();
-        Iterator<Object> iterator = messages.iterator();
-        while(iterator.hasNext()) {
-            Object message = iterator.next();
-            if(!(message instanceof JSONObject)) {
-                throw new RTException("Only JSONObjects are allowed in the messages array");
-            }
-            sequencedMessages.putAll(addSequence((JSONObject)message));
-        }
-        return sequencedMessages;
-    }
-
-    /**
-     * To reliably send messages to the server we have to make use of numeric sequences in every message that gets sent from the client to
-     * the server. The Server uses these sequences to ensure the sequence of incoming messages. The client waits for acknowledges for every
      * sequence number to ensure successful delivery of messages. This method takes a message as JSONObject and adds a sequence number to
      * it.
      *
      * @param message The messages that needs to be enhanced with a sequence number
      * @return A map containing all set sequence numbers and the according modified messages
      */
-    public Map<Long, JSONObject> addSequence(JSONObject message) {
+    public long addSequence(JSONObject message) {
         try {
             long sequence = sequenceGenerator.nextSequence();
-            JSONObject sequencedMessage = message.put("seq", sequence);
-            return Collections.singletonMap(sequence, sequencedMessage);
+            message.put("seq", sequence);
+            return sequence;
         } catch (RTException rte) {
             // TODO: Implement reset of sequence numbers on the server side if a user should really manage to exhaust 2^63-1 sequences.
             LOG.error("Error while adding sequence to message object", rte);
         } catch (JSONException je) {
             //Can't happen
+            LOG.error(je.getMessage(), je);
         }
 
-        return null;
+        return -1L;
     }
 
     /**

@@ -51,11 +51,12 @@ package com.openexchange.realtime.client.impl.connection;
 
 import java.io.StringReader;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang.Validate;
@@ -137,62 +138,44 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
     }
 
     @Override
-    public void sendBlocking(JSONValue message) throws RTException {
+    public void sendBlocking(JSONObject message, long timeout, TimeUnit unit) throws RTException, TimeoutException, InterruptedException {
         if (!isActive.get()) {
             LOG.warn("Connection is already closed. Message getting lost: " + message.toString());
             return;
         }
 
-        CountDownLatch sent = null;
-        if(message.isArray()) {
-            Map<Long, JSONObject> addSequence = protocol.addSequence(message.toArray());
-            for (Entry<Long, JSONObject> entry : addSequence.entrySet()) {
-                sent = resendBuffer.put(entry.getKey(), entry.getValue());
-            }
-        } else if (message.isObject()){
-            Map<Long, JSONObject> addSequence = protocol.addSequence(message.toObject());
-            Entry<Long, JSONObject> entry = addSequence.entrySet().iterator().next();
-            sent = resendBuffer.put(entry.getKey(), entry.getValue());
-        } else {
-            throw new RTException("jsonValue must be either JSONArray or JSONObject");
-        }
+        long seq = protocol.addSequence(message);
+        LOG.debug("Sending message: {}", message);
+        Future<MessageState> sent = resendBuffer.put(seq, message);
         protocol.resetPingTimeout();
         try {
-            sent.await();
-        } catch (InterruptedException e) {
+            sent.get(timeout, unit);
+        } catch (ExecutionException e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
     @Override
-    public void send(JSONValue message) throws RTException {
+    public void send(JSONObject message) throws RTException {
         if (!isActive.get()) {
             LOG.warn("Connection is already closed. Message getting lost: " + message.toString());
             return;
         }
 
-        if(message.isArray()) {
-            Map<Long, JSONObject> addSequence = protocol.addSequence(message.toArray());
-            for (Entry<Long, JSONObject> entry : addSequence.entrySet()) {
-                resendBuffer.put(entry.getKey(), entry.getValue());
-            }
-        } else if (message.isObject()){
-            Map<Long, JSONObject> addSequence = protocol.addSequence(message.toObject());
-            Entry<Long, JSONObject> entry = addSequence.entrySet().iterator().next();
-            resendBuffer.put(entry.getKey(), entry.getValue());
-        } else {
-            throw new RTException("jsonValue must be either JSONArray or JSONObject");
-        }
+        long seq = protocol.addSequence(message);
+        LOG.debug("Sending message: {}", message);
+        resendBuffer.put(seq, message);
         protocol.resetPingTimeout();
     }
 
     @Override
-    public void post(JSONValue message) throws RTException {
+    public void post(JSONObject message) throws RTException {
         if (!isActive.get()) {
             LOG.warn("Connection is already closed. Message getting lost: " + message.toString());
             return;
         }
 
+        LOG.debug("Sending message: {}", message);
         doSend(message);
         protocol.resetPingTimeout();
     }
@@ -268,7 +251,7 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
      */
     protected abstract void reconnect() throws RTException;
 
-    protected abstract void doSend(JSONValue message) throws RTException;
+    protected abstract void doSend(JSONObject message) throws RTException;
 
     protected abstract void doSendACK(JSONObject ack) throws RTException;
 
