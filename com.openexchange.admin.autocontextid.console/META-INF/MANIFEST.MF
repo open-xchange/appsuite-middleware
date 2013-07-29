@@ -5,7 +5,4 @@ Bundle-SymbolicName: com.openexchange.admin.autocontextid.console
 Bundle-Version: 7.4.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.admin.console,
- com.openexchange.admin.console.context.extensioninterfaces,
- com.openexchange.admin.console.user,
- com.openexchange.admin.rmi.dataobjects
+Import-Package: com.openexchange.admin.rmi.dataobjects

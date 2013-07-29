@@ -6,11 +6,7 @@ Bundle-Version: 7.4.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-Activator: com.openexchange.admin.autocontextid.osgi.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.admin.console,
- com.openexchange.admin.console.context.extensioninterfaces,
- com.openexchange.admin.console.exception,
- com.openexchange.admin.console.user,
- com.openexchange.admin.daemons,
+Import-Package: com.openexchange.admin.daemons,
  com.openexchange.admin.exceptions,
  com.openexchange.admin.plugins,
  com.openexchange.admin.rmi.dataobjects,
@@ -30,3 +26,4 @@ Import-Package: com.openexchange.admin.console,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
+Bundle-ClassPath: .

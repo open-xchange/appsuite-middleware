@@ -8,3 +8,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.admin.rmi.dataobjects,
  com.openexchange.admin.rmi.exceptions
 Export-Package: com.openexchange.admin.user.copy.rmi
+Bundle-ClassPath: .

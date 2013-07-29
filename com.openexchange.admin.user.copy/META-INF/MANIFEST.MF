@@ -21,3 +21,4 @@ Import-Package: com.openexchange.admin.rmi.dataobjects,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
+Bundle-ClassPath: .

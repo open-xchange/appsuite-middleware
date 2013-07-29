@@ -2,7 +2,7 @@
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,com.openexchange.admin.reseller"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,com.openexchange.admin.reseller.console"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,com.openexchange.admin.reseller.consolenew"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,com.openexchange.admin.reseller.rmi"/>
 </provider>
 </psf>

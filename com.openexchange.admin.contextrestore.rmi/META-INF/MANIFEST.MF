@@ -9,3 +9,4 @@ Import-Package: com.openexchange.admin.rmi.dataobjects,
  com.openexchange.admin.rmi.exceptions
 Export-Package: com.openexchange.admin.contextrestore.rmi,
  com.openexchange.admin.contextrestore.rmi.exceptions
+Bundle-ClassPath: .

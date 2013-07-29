@@ -49,3 +49,4 @@ Import-Package: com.openexchange.admin.plugins,
  org.osgi.util.tracker
 Require-Bundle: com.openexchange.admin.reseller;bundle-version="6.21.0"
 Bundle-Activator: com.openexchange.admin.soap.reseller.osgi.SoapResellerActivator
+Bundle-ClassPath: .
