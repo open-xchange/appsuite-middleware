@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.lv_LV.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: DATE\n"
-"PO-Revision-Date: 2013-06-19 16:20+0200\n"
+"PO-Revision-Date: 2013-07-26 18:03+0200\n"
 "Last-Translator: Aivars Oliņš <aivars@adsl.lv>\n"
 "Language-Team: Latvian <LL@li.org>\n"
 "Language: lv\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2;\n"
-"X-Generator: Poedit 1.5.5\n"
+"X-Generator: Poedit 1.5.7\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2;\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
@@ -217,6 +217,7 @@ msgstr "Iztrūkstošs kešatmiņas konfigurācijas fails vietā: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/TextXtractExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tokenlogin/src/com/openexchange/tokenlogin/TokenLoginExceptionMessages.java:73
 msgid "An I/O error occurred: %1$s"
 msgstr "Datu apmaiņas I/O kļūda: %1$s"
 
@@ -1115,6 +1116,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/TextXtractExceptionMessages.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tokenlogin/src/com/openexchange/tokenlogin/TokenLoginExceptionMessages.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.voipnow.json/src/com/openexchange/voipnow/json/VoipNowExceptionMessages.java:62
 msgid "An error occurred: %1$s"
@@ -1940,6 +1942,71 @@ msgstr "Reģistrā modulis '%s' nav zināms."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.documentation/src/com/openexchange/documentation/internal/DocumentationExceptionMessage.java:85
 msgid "The container '%s' is not known in the registry."
 msgstr "Reģistrā konteineris '%s' nav zināms."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:63
+msgid "The path \"%1$s\" is invalid"
+msgstr "Ceļš \"%1$s\" ir nepareizs"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:64
+msgid "The path \"%1$s\" was not found"
+msgstr "Ceļš \"%1$s\" nav atrasts"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:65
+msgid "The file \"%1$s\" was not found at \"%2$s\""
+msgstr "Fails \"%1$s\" vietā \"%2$s\" nav atrasts"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:66
+msgid "An I/O error occurred: \"%1$s\""
+msgstr "Reģistrēta I/O kļūda: \"%1$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:67
+msgid "The file offset \"%1$d\" is invalid"
+msgstr "Offsets \"%1$d\" ir nepareizs"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:68
+msgid "Unexpected database error: \"%1$s\""
+msgstr "Neparedzēta datubāzes kļūda: \"%1$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:69
+msgid "The file \"%1$s\" with checksum \"%2$s\" was not found at \"%3$s\""
+msgstr "Fails \"%1$s\" ar kontrolsummu \"%2$s\" vietā \"%3$s\" nav atrasts"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:70
+msgid "No checksum for file \"%1$s\" available"
+msgstr "Failam \"%1$s\" nav pieejama kontrolsumma"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:71
+msgid "Checksum \"%1$s\" for uploaded file \"%2$s\" different from \"%3$s\""
+msgstr ""
+"Kontrolsumma \"%1$s\" augšup ielādētajam failam \"%2$s\" atšķiras no \"%3$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:72
+msgid "The directory \"%1$s\" with checksum \"%2$s\""
+msgstr "Direktorija \"%1$s\" ar kontrolsummu \"%2$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:73
+msgid "You are not allowed to delete the file \"%1$s\" at \"%2$s\""
+msgstr "Jums nav tiesību izdzēst failu \"%1$s\" vietā \"%2$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:74
+msgid "You are not allowed to create files at \"%1$s\""
+msgstr "Jums nav tiesību izveidot failus vietā \"%1$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:75
+msgid "You are not allowed to modify the file \"%1$s\" at \"%2$s\""
+msgstr "Jums nav tiesību modificēt failu \"%1$s\" vietā \"%2$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:76
+msgid "You are not allowed to delete the directory \"%1$s\""
+msgstr "Jums nav tiesību izdzēst direktoriju \"%1$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:77
+msgid "You are not allowed to create directories at \"%1$s\""
+msgstr "Jums nav tiesību izveidot direktorijas vietā \"%1$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:78
+msgid "The allowed Quota is reached"
+msgstr "Sasniegta pieļaujamā kvota"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:63
 msgid "An error occurred for action: %1$s"
@@ -2919,13 +2986,21 @@ msgstr "[Nav pieejams]"
 
 #. The default message displayed to user.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:66
-msgid "A severe error occurred."
-msgstr "Smaga kļūda."
+msgid ""
+"An error occurred inside the Open-Xchange server which prevented it from "
+"fulfilling the request."
+msgstr ""
+"Open-Xchange servera darbībā ir radusies kļūda, kuras dēļ pieprasījums nevar "
+"tikt izpildīts."
 
-#. The default message displayed to user.
+#. The default message displayed to user when a re-try is recommended
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:69
-msgid "An error occurred. Please try again later."
-msgstr "reģistrēta kļūda. Lūdzu mēģiniet vēlreiz vēlāk."
+msgid ""
+"A temporary error occurred inside the Open-Xchange server which prevented it "
+"from fulfilling the request.. Please try again later."
+msgstr ""
+"Open-Xchange servera darbībā ir radusies īslaicīga kļūda, kuras dēļ "
+"pieprasījums nevar tikt izpildīts. Lūdzu mēģiniet vēlāk vēlreiz."
 
 #. The general message for a conflicting update operation.
 #. The object has been changed in the meantime.
@@ -3160,12 +3235,16 @@ msgid "No such element."
 msgstr "Šāds elements neeksistē."
 
 #. An unexpected error occurred: %1$s
+#. *
+#. * Inserted for those exception that will turn to an <code>OXException</code> in future
+#.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:75
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index/src/com/openexchange/index/IndexExceptionMessages.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.langdetect/src/com/openexchange/langdetect/LanguageDetectionExceptionMessages.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:149
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:355
 msgid "An unexpected error occurred: %1$s"
 msgstr "Neparedzēta kļūda: %1$s"
 
@@ -3206,8 +3285,9 @@ msgstr "Nevar startēt 'grizzly' serveri"
 
 #. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
 msgstr "Sekojošs nepieciešamais serviss nav atrasts: \"%1$s\""
 
@@ -3259,8 +3339,8 @@ msgstr ""
 
 #. The argument contains the filename of the .po file that could not be read.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.i18n/src/com/openexchange/i18n/parsing/I18NErrorStrings.java:74
-msgid "An IOException ocurred reading .po file %s."
-msgstr "IOException kļūda pie .po faila %s lasīšanas."
+msgid "An I/O error ocurred reading .po file %s."
+msgstr "I/O kļūda pie .po faila %s lasīšanas."
 
 #. Help //
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.i18n/src/com/openexchange/i18n/parsing/I18NErrorStrings.java:77
@@ -3529,6 +3609,11 @@ msgstr "Augšupielādētais fails ir tukšs"
 msgid "Something went wrong reading from specified file. Please try again."
 msgstr ""
 "Kļūda pie informācijas lasīšanas no norādītā faila. Lūdzu mēģiniet vēlreiz."
+
+#. Could not create: %s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:161
+msgid "Could not create: %s"
+msgstr "Nevar izveidot: %s"
 
 #. No IndexAccess implementation was found for module %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index.solr/src/com/openexchange/index/solr/SolrIndexExceptionMessages.java:70
@@ -4394,6 +4479,11 @@ msgstr "Nevar izveidot datubāzes pieslēgumu."
 msgid "No permission to modify resources in context %1$s"
 msgstr "Nav tiesību modificēt resursus kontekstā %1$s"
 
+#. Cannot change password: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:104
+msgid "Cannot change password: %1$s"
+msgstr "Nevar izmainīt paroli: %1$s."
+
 #. *
 #. * Invalid locale string: %1$s
 #.
@@ -4976,6 +5066,7 @@ msgid "Invalid session identifier: %1$s"
 msgstr "Nepareizs sesijas identifikators: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.json/src/com/openexchange/publish/json/PublicationJSONExceptionMessage.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:78
 msgid "An unexpected error occurred: %s"
 msgstr "Neparedzēta kļūda: %s"
 
@@ -4984,6 +5075,7 @@ msgid "Missing value for parameter %s"
 msgstr "Iztrūkstoša vērtība parametram %s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.json/src/com/openexchange/publish/json/PublicationJSONExceptionMessage.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:70
 msgid "Unknown action: %s"
 msgstr "Nezināma darbība: %s"
 
@@ -5113,8 +5205,8 @@ msgid "Cannot find the publication site."
 msgstr "Nevar atrast publikāciju vietni."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:72
-msgid "%s has already been taken (field: %s)"
-msgstr "%s jau ir paņemts (lauks: %s)"
+msgid "%1$s has already been taken (field: %2$s)"
+msgstr "%1$s jau ir aizņemts (lauks: %2$s)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:74
 msgid "You do not have the permissions to perform the chosen action (%s)"
@@ -5242,10 +5334,10 @@ msgstr ""
 msgid "The session information didn't match any ServerSession"
 msgstr "Sesijas informācija neatbilst nevienai servera sesijai"
 
-#. * Missing key \"%1$s\" in: \"%2$s\"
+#. * "Obligatory key \"%1$s\" is missing from the Stanza"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:64
-msgid "Missing key \"%1$s\" in: \"%2$s\""
-msgstr "Iztrūkstoša atslēga \"%1$s\" iekš: \"%2$s\""
+msgid "Obligatory key \"%1$s\" is missing from the Stanza"
+msgstr "Obligātā atslēga \"%1$s\" datu virknē nav atrasta"
 
 #. * Could not find a builder for the specified element: . \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:66
@@ -5287,18 +5379,38 @@ msgstr "Iztrūkstošs obligātais elements: \"%1$s\""
 msgid "Malformed Presence Data"
 msgstr "Nepareizi saformēti klātbūtnes dati"
 
-#. * Malformed Presence Element: \"%1$s\"
+#. * Malformed Message Data
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:82
+msgid "Malformed Message Data"
+msgstr "Nepareizi saformēti ziņojuma dati"
+
+#. * Malformed Iq Data
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:84
+msgid "Malformed Iq Data"
+msgstr "Nepareizi saformēti IQ dati"
+
+#. * Malformed Presence Element: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:86
 msgid "Malformed Presence Element: \"%1$s\""
 msgstr "Nepareizi saformēts klātbūtnes elements: \"%1$s\""
 
+#. * Malformed Message Element: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:88
+msgid "Malformed Message Element: \"%1$s\""
+msgstr "Nepareizi saformēts ziņojuma elements: \"%1$s\""
+
+#. * Malformed IQ Element: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:90
+msgid "Malformed IQ Element: \"%1$s\""
+msgstr "Nepareizi saformēts IQ elements: \"%1$s\""
+
 #. * Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:92
 msgid "Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\""
 msgstr "Nepareiza vērtība \"%1$s\" atslēgas \"%1$s\" laukā: \"%3$s\""
 
 #. * Malformed POST Data"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:94
 msgid "Malformed POST Data"
 msgstr "Nepareizi formatēti POST dati"
 
@@ -5327,7 +5439,7 @@ msgstr "Nezināms kanāls %1$s"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:100
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:151
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:120
@@ -5352,7 +5464,7 @@ msgstr "Nepareizs konteksta ID. Nevar atrast konekstu priekš: %1$s"
 #. Generic (start with code 1000)
 #. * No appropriate channel found for recipient %1$s with payload namespace %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:94
 msgid ""
 "No appropriate channel found for recipient %1$s with payload namespace %2$s"
 msgstr ""
@@ -5360,19 +5472,42 @@ msgstr ""
 
 #. * Invalid ID. Resource identifier is missing.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:103
 msgid "Invalid ID. Resource identifier is missing."
 msgstr "Nepareizs ID. Iztrūkstošs resursa identifikators."
 
+#. XMPP
+#. * The client has sent a message that is malformed or cannot be processed: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:65
+msgid ""
+"The client has sent a message that is malformed or cannot be processed: %1$s"
+msgstr ""
+"Klienta atsūtītais ziņojums ir nepareizi formatēts vai nevar tikt "
+"apstrādāts: %1$s"
+
+#. * The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:71
+msgid ""
+"The server could not process the stanza because of a misconfiguration or an "
+"otherwise-undefined internal server error: %1$s"
+msgstr ""
+"Dati nevar tikt apstrādāti nepareizas servera konfigurācijas vai kādas "
+"neatpazītas iekšējas kļūdas dēļ: %1$s"
+
 #. * Resource not available.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:103
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:106
 msgid "Resource not available."
 msgstr "Resurss nav pieejams."
 
-#. * You session is invlaid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:106
+#. * Your session is invalid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:109
 msgid "Your session is invalid."
 msgstr "Jūsu sesija nav derīga."
+
+#. * The sent sequence is invalid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:112
+msgid "The sent sequence is invalid."
+msgstr "Nosūtītā sekvence nav pareiza."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rmi/src/com/openexchange/rmi/exceptions/OXRMIExceptionMessage.java:62
 msgid "Start of RMI service failed."
@@ -6102,7 +6237,7 @@ msgstr ""
 "arī atkārtošanās datuma pozīcija."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:156
-msgid "Missing start date, unable to calculate recurring."
+msgid "Missing start date, unable to calculate recurrence."
 msgstr "Iztrūkstošs sākuma datums, atkārtojumu aprēķins nav iespējams."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:158
@@ -6207,15 +6342,15 @@ msgstr "Jums nav objekta izveidei nepieciešamo tiesību"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:214
 msgid ""
-"You are trying to create a new recurring from an exception. This is not "
-"possible."
+"You are trying to create a new recurring appointment from an exception. This "
+"is not possible."
 msgstr ""
 "Jūs mēģinat izveidot jaunu atkārtojošos ierakstu no izņēmuma. Tas nav "
 "iespējams."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:216
 msgid ""
-"You can not move one element of a recurring appointment into another folder."
+"You cannot move one instance of a recurring appointment into another folder."
 msgstr "Regulāru tišanās sēriju vienu elementu nevar pārvietot uz citu mapi."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:218
@@ -6448,10 +6583,10 @@ msgstr "Nevajadzīga atkārtojumu informācija (%1$s) tipam %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:358
 msgid ""
-"Unable to calculate given position. Seems to be a delete exception or "
-"outside range"
+"The recurring appointment has been deleted or is outside of the range of the "
+"recurrence."
 msgstr ""
-"Nevar aprēķināt norādīto pozīciju. Iespējama dzēšanas vai pārsnieguma kļūda."
+"Regulārais notikums ir izdzēsts vai ir ārpus atkārtojumu datumu apgabala."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:360
 msgid "Changing an exception into a series is not supported."
@@ -6618,10 +6753,10 @@ msgstr "Nevar iegūt konekciju no DBPool"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:97
 msgid ""
 "Some data entered exceeded the field limit. Please shorten the value for "
-"\"%1$s\" (current: %2$s, limit: %3$s) and try again."
+"\"%1$s\" (limit: %2$s, current: %3$s) and try again."
 msgstr ""
 "Daži no ievadītajiem datiem pārsniedz limitus. Lūdzu saīsiniet \"%1$s\" "
-"vērtību (pašreiz: %2$s, limits: %3$s) un mēģiniet vēlreiz."
+"vērtību (limits: %2$s, pašreiz: %3$s) un mēģiniet vēlreiz."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:99
 msgid ""
@@ -8392,6 +8527,10 @@ msgstr "Faila vārds nevar saturēt slīpsvītras."
 msgid "File name contains illegal characters."
 msgstr "Faila vārds satur neatļautus simbolus."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:129
+msgid "New file versions can't be saved with an offset."
+msgstr "Jaunas faila versijas nevar tikt saglabātas ar offsetu."
+
 #. *
 #. * A property from the ldap.properties file is missing.
 #.
@@ -8877,10 +9016,10 @@ msgstr "Nezināms uzdevumu atribūts %d."
 msgid "Date range in search must contain 2 and not %d values."
 msgstr "Datumu apgabalam meklēšanā ir jāsatur 2 nevis %d vērtības."
 
-#. Cannot decrease number of attachments below zero.
+#. Cannot detach more attachments than actually available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:126
-msgid "Cannot decrease number of attachments below zero."
-msgstr "Pievienojumu skaitu nevar samazināt zem nulles."
+msgid "Cannot detach more attachments than actually available."
+msgstr "Nevar noņemt vairāk pievienojumus nekā faktiski pieejams."
 
 #. You are not allowed to read the contents of folder %1$s (%2$d).
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:129
@@ -10280,17 +10419,15 @@ msgstr ""
 "Kvota pasta serverī \"%1$s\" pieslēgumam %2$s (lietotājs=%3$s, konteksts="
 "%4$s) ir pārsniegta. Kļūdas paziņojums %5$s"
 
-#. *
-#. * A command to mail server failed. Server response: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:271
-msgid "A command to mail server failed. Server response: %1$s."
-msgstr "Kļūda komandas pasta serverim izpildē. Servera atbilde: %1$s."
+#. A command sent to mail server failed. Server response: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:269
+msgid "A command sent to mail server failed. Server response: %1$s"
+msgstr "Kļūda komandas pasta serverim izpildē. Servera atbilde: %1$s"
 
 #. *
 #. * A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:276
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:274
 msgid ""
 "A command failed on mail server %1$s with login %2$s (user=%3$s, context="
 "%4$s). Server response: %5$s"
@@ -10301,14 +10438,14 @@ msgstr ""
 #. *
 #. * Mail server indicates a bad command. Server response: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:281
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:279
 msgid "Mail server indicates a bad command. Server response: %1$s"
 msgstr "Pasta serveris norāda uz nepareizu komandu. Servera atbilde: %1$s"
 
 #. *
 #. * Bad command indicated by mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:286
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:284
 msgid ""
 "Bad command indicated by mail server %1$s with login %2$s (user=%3$s, "
 "context=%4$s). Server response: %5$s"
@@ -10319,46 +10456,44 @@ msgstr ""
 #. *
 #. * Error in mail server protocol. Error message: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:291
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:289
 msgid "Error in mail server protocol. Error message: %1$s"
 msgstr "Kļūda pasta servera protokolā. Kļūdas ziņojums: %1$s"
 
-#. *
-#. * An error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:296
+#. Protocol error in data sent to to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:292
 msgid ""
-"Error in protocol to mail server %1$s with login %2$s (user=%3$s, context="
-"%4$s). Error message: %5$s"
+"Protocol error in data sent to to mail server %1$s with login %2$s (user="
+"%3$s, context=%4$s). Error message: %5$s"
 msgstr ""
 "Kļūda pasta servera %1$ protokolā pieslēgumamam %2$s (lietotājs=%3$s, "
-"konteksts=%4$s).Kļūdas ziņojums: %5$s"
+"konteksts=%4$s). Kļūdas ziņojums: %5$s"
 
 #. *
 #. * Message could not be sent: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:301
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:297
 msgid "Message could not be sent: %1$s"
 msgstr "Ziņojumu nevar nosūtīt: %1$s"
 
 #. *
 #. * Message could not be sent: %1$s %2$s (arbitrary server information)
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:306
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:302
 msgid "Message could not be sent: %1$s %2$s"
 msgstr "Nevar nosūtīt ziņojumu: %1$s %2$s"
 
 #. *
 #. * Message cannot be displayed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:311
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:307
 msgid "Message cannot be displayed."
 msgstr "Ziņojumu nevar parādīt."
 
 #. *
 #. * Wrong or missing login data to access mail transport server %1$s. Error message from mail transport server: %2$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:316
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:312
 msgid ""
 "Wrong or missing login data to access mail transport server %1$s. Error "
 "message from mail transport server: %2$s"
@@ -10370,7 +10505,7 @@ msgstr ""
 #. * Wrong or missing login data to access mail transport server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail
 #. * transport server: %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:322
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:318
 msgid ""
 "Wrong or missing login data to access mail transport server %1$s with login "
 "%2$s (user=%3$s, context=%4$s). Error message from mail transport server: "
@@ -10383,7 +10518,7 @@ msgstr ""
 #. *
 #. * Error processing mail server response. The administrator has been informed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:327
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:323
 msgid ""
 "Error processing mail server response. The administrator has been informed."
 msgstr ""
@@ -10392,7 +10527,7 @@ msgstr ""
 #. *
 #. * Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:332
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:328
 msgid ""
 "Error processing %1$s mail server response for login %2$s (user=%3$s, "
 "context=%4$s). The administrator has been informed."
@@ -10403,7 +10538,7 @@ msgstr ""
 #. *
 #. * I/O error "%1$s" occurred in communication with "%2$s" mail server for login %3$s (user=%4$s, context=%5$s).
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:342
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:338
 msgid ""
 "I/O error \"%1$s\" occurred in communication with \"%2$s\" mail server for "
 "login %3$s (user=%4$s, context=%5$s)."
@@ -10414,7 +10549,7 @@ msgstr ""
 #. *
 #. * Error processing mail server response. The administrator has been informed. Error message: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:347
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:343
 msgid ""
 "Error processing mail server response. The administrator has been informed. "
 "Error message: %1$s"
@@ -10426,7 +10561,7 @@ msgstr ""
 #. * Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed. Error
 #. * message: %5$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:353
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:349
 msgid ""
 "Error processing %1$s mail server response for login %2$s (user=%3$s, "
 "context=%4$s). The administrator has been informed. Error message: %5$s"
@@ -10434,18 +10569,18 @@ msgstr ""
 "Kļūda apstrādājot %1$s pasta servera atbildi pieslēgumam %2$s (lietotājs="
 "%3$s, konteksts=%4$s). Administrators ir informēts. Kļūdas paziņojums: %5$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:355
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:351
 msgid ""
 "That mailbox is already in use by another process. Please try again later."
 msgstr ""
 "Šo pasta kasti pašreiz jau izmanto kāds cits process. Lūdzu mēģiniet vēlāk "
 "vēlreiz."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:355
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:351
 msgid "Error message: %1$s"
 msgstr "Kļūdas paziņojums: %1$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:357
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:353
 msgid ""
 "That mailbox is already in use by another process on %1$s mail server for "
 "login %2$s (user=%3$s, context=%4$s). Please try again later."
@@ -10454,7 +10589,7 @@ msgstr ""
 "pieslēgumam %2$s (lietotājs=%3$s, konteksts=%4$s). Lūdzu mēģiniet vēlāk "
 "vēlreiz."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:357
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:353
 msgid "Error message: %5$s"
 msgstr "Kļūdas paziņojums: %5$s"
 
@@ -10733,10 +10868,10 @@ msgstr "Datu apmaiņas I/O kļūda: %s"
 msgid "File store could not be accessed: %s"
 msgstr "Nevar piekļūt failu glabātuvei: %s"
 
-#. Cannot create directory \"%1$s\" for FileStorage.
+#. Cannot create directory "%1$s" in file storage.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:76
-msgid "Cannot create directory \"%1$s\" for FileStorage."
-msgstr "Nevar izveidot direktoriju \"%1$s\" failu uzglabāšanai."
+msgid "Cannot create directory \"%1$s\" in file storage."
+msgstr "Nevar izveidot direktoriju \"%1$s\" failu glabātuvē."
 
 #. Unsupported encoding.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:79
@@ -10763,22 +10898,22 @@ msgstr "'Dziļuma' neatbilstība pie nākamā ieraksta aprēķina."
 msgid "Cannot remove lock file."
 msgstr "Nevar izmest noslēgšanas failu."
 
-#. Cannot create lock file here %1$s. Please check for a stale .lock file, permissions or too long usage of the filestore.
+#. Cannot create lock file here %1$s. Please check for a stale .lock file, inappropriate permissions or usage of the file store for too long a time.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:94
 msgid ""
 "Cannot create lock file here %1$s. Please check for a stale .lock file, "
-"permissions or too long usage of the file store."
+"inappropriate permissions or usage of the file store for too long a time."
 msgstr ""
-"Nevar izveidot noslēgšanas failu iekš %1$s. Pārbaudiet vai nav jau esošu "
-"vecu .lock failu, atbilstošās piekļuves tiesības, kā arī vai failu glabātuve "
-"nav pārpildīta."
+"Nevar izveidot noslēgšanas failu šeit %1$s. Pārbaudiet vai nav jau esošu "
+"vecu .lock failu, atbilstošās piekļuves tiesības, kā arī failu glabātuves "
+"izmantošanas laiku."
 
-#. Eliminating the FileStorage failed.
+#. Eliminating the file storage failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:97
-msgid "Eliminating the FileStorage failed."
+msgid "Eliminating the file storage failed."
 msgstr "Kļūda pie failu glabātuves likvidēšanas."
 
-#. File does not exist in filestore \"%1$s\". Consider running consistency tool.
+#. File does not exist in file storage "%1$s". Consider running consistency tool.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:100
 msgid ""
 "File does not exist in file store \"%1$s\". Consider running the consistency "
@@ -10786,6 +10921,33 @@ msgid ""
 msgstr ""
 "Fails neeksistē failu glabātuvē \"%1$s\". Ieteicams veikt datu konsistences "
 "pārbaudi."
+
+#. The requested range (offset: %1$d, length: %2$d) for the file \"%3$s\" (current size: %4$d) is invalid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:103
+msgid ""
+"The requested range (offset: %1$d, length: %2$d) for the file \"%3$s"
+"\" (current size: %4$d) is invalid."
+msgstr ""
+"Prasītais apgabals (offsets: %1$d, garums: %2$d) failam \"%3$s"
+"\" (pašreizējais izmērs: %4$d) ir nepareizs."
+
+#. The specified offset %1$d for the file \"%2$s\" (current size: %3$d) is invalid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:106
+msgid ""
+"The specified offset %1$d for the file \"%2$s\" (current size: %3$d) is "
+"invalid."
+msgstr ""
+"Norādītais offsets %1$d failam \"%2$s\" (pašreizējais izmērs: %3$d) ir "
+"nepareizs."
+
+#. The specified length %1$d for the file \"%2$s\" (current size: %3$d) is invalid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:109
+msgid ""
+"The specified length %1$d for the file \"%2$s\" (current size: %3$d) is "
+"invalid."
+msgstr ""
+"Norādītais garums %1$d failam \"%2$s\" (pašreizējais izmērs: %3$d) ir "
+"nepareizs."
 
 #. * Couldn't reach the filestore
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/QuotaFileStorageExceptionMessage.java:69
@@ -10939,27 +11101,24 @@ msgid "A duplicate folder exists in parent folder %1$s in context %2$s"
 msgstr "Mapē %1$s kontekstā %2$s ir atrastas dublikātas apakš-mapes"
 
 #. *
-#. * Parent folder %1$s does not allow folder's type setting %2$s in context %3$s
+#. * Parent folder %1$s does not allow type %2$s in context %3$s
 #. * <p>
 #. * Folder's type setting is invalid
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:152
-msgid ""
-"Parent folder %1$s does not allow folder's type setting %2$s in context %3$s"
+msgid "Parent folder %1$s does not allow type %2$s in context %3$s"
 msgstr "Virsmape %1$s neatļauj mapes tipa iestatījumu %2$s kontekstā %3$s"
 
 #. *
-#. * Parent folder %1$s does not allow folder's module setting (%2$s) in context %3$s
+#. * Parent folder %1$s does not allow module %2$s in context %3$s
 #. * <p>
 #. * Folder's module setting is invalid
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:159
-msgid ""
-"Parent folder %1$s does not allow folder's module setting (%2$s) in context "
-"%3$s"
-msgstr "Virsmape %1$s neatļauj mapes moduļa iestatījumu (%2$s) kontekstā %3$s"
+msgid "Parent folder %1$s does not allow module %2$s in context %3$s"
+msgstr "Virsmape %1$s neatļauj moduli %2$s kontekstā %3$s"
 
 #. *
 #. * Only one admin permission is allowed on a private folder
@@ -11268,13 +11427,6 @@ msgstr ""
 "Mape %1$s kontekstā %2$s nevar tikt pārvietota uz kādu no tās apakšmapēm"
 
 #. *
-#. * Inserted for those exception that will turn to an <code>OXException</code> in future
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:355
-msgid "UNKNOWN EXCEPTION"
-msgstr "NEATPAZĪTA KĻŪDA "
-
-#. *
 #. * A LDAP error occurred in context %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:359
@@ -11366,11 +11518,11 @@ msgid "Unknown action: %1$s"
 msgstr "Nezināma darbība: %1$s"
 
 #. *
-#. * Shared folder %1$s MUST NOT be updated in context %2$s
+#. * Shared folder %1$s must not be updated in context %2$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:423
-msgid "Shared folder %1$s MUST NOT be updated in context %2$s"
-msgstr "Koplietojuma mape %1$s kontekstā %2$s NEVAR TIKT JAUNINĀTA"
+msgid "Shared folder %1$s must not be updated in context %2$s"
+msgstr "Koplietojuma mape %1$s kontekstā %2$s nevar tikt jaunināta"
 
 #. *
 #. * The attribute %1$s contains too much characters. Current length %3$s is more than allowed length of %2$s characters.
@@ -11421,28 +11573,27 @@ msgstr ""
 "Koplietojuma mapei %1$s kontekstā %2$s apakšmapes nevar tikt izveidotas"
 
 #. *
-#. * User %1$s grants invalid permissions on shared folder %2$s in context %3$s. Only owner of parental shared folder %4$s may be
-#. * folder admin
+#. * User %1$s granted invalid permissions on shared folder %2$s in context %3$s. Only the owner of the parent shared folder %4$s can administrate the folder.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:452
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:451
 msgid ""
-"User %1$s grants invalid permissions on shared folder %2$s in context %3$s. "
-"Only the owner of parental shared folder %4$s can be the folder admin."
+"User %1$s granted invalid permissions on shared folder %2$s in context %3$s. "
+"Only the owner of the parent shared folder %4$s can administrate the folder."
 msgstr ""
-"Nepareizas lietotāja %1$s tiesības uz koplietojuma mapi %2$s kontekstā %3$s. "
-"Tikai koplietojuma virsmapes %4$s īpašniekam var būt \"admin\" tiesības."
+"Lietotāja %1$s tiesības uz koplietojuma mapi %2$s kontekstā %3$s nav "
+"pareizas. Tikai koplietojuma virsmapes %4$s īpašnieks var administrēt mapi."
 
 #. *
 #. * Owner %1$s of default folder %2$s must keep the folder admin permission
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:456
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:455
 msgid "Owner %1$s of default folder %2$s must keep the folder admin permission"
 msgstr "Noklusētas mapes %2$s īpašniekam  %1$s ir jābūt mapes administratoram"
 
 #. *
 #. * User %1$s is not allowed to share folder %2$s in context %3$s due to user configuration
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:460
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:459
 msgid ""
 "User %1$s is not allowed to share folder %2$s in context %3$s due to user "
 "configuration"
@@ -11452,7 +11603,7 @@ msgstr "Lietotājam %1$s nav tiesību koplietot mapi %2$s k0ontekstā %3$s "
 #. * The permissions for the user %1$s are limited. It is not possible to grant this user the wanted permissions for the folder %2$s
 #. * in context %3$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:465
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:464
 msgid ""
 "The permissions for the user %1$s are limited. It is not possible to grant "
 "this user the wanted permissions for the folder %2$s in context %3$s."
@@ -11464,7 +11615,7 @@ msgstr ""
 #. * Folder %1$s in context %2$s contains a hidden subfolder. User %3$s has no delete rights for this subfolder and consequently
 #. * cannot delete its parent folder.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:470
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:469
 msgid ""
 "Folder %1$s in context %2$s contains a hidden subfolder. User %3$s has no "
 "delete rights for this subfolder and consequently cannot delete its parent "
@@ -11476,7 +11627,7 @@ msgstr ""
 #. *
 #. * An infostore folder named %1$s already exists below folder %2$s (%3$s) in context %4$s. Please choose another display name.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:474
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:473
 msgid ""
 "An infostore folder named %1$s already exists below folder %2$s (%3$s) in "
 "context %4$s. Please choose another display name."
@@ -11487,7 +11638,7 @@ msgstr ""
 #. *
 #. * Folder contains invalid data: "%1$s"
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:478
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:477
 msgid "Folder contains invalid data: \"%1$s\""
 msgstr "Mape satur nepareizus datus: \"%1$s\""
 
@@ -11495,7 +11646,7 @@ msgstr "Mape satur nepareizus datus: \"%1$s\""
 #. * You already share a personal folder named "%1$s" with the same user. You can not share two folders with exactly the same name
 #. * with a user. Please rename the folder before sharing it with this user.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:483
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:482
 msgid ""
 "You already share a personal folder named \"%1$s\" with the same user. You "
 "can not share two folders with exactly the same name with a user. Please "
@@ -11508,14 +11659,14 @@ msgstr ""
 #. *
 #. * Folder module cannot be updated since folder is not empty
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:487
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:486
 msgid "Folder module cannot be updated since folder is not empty"
 msgstr "Mapes modulis nevar tikt jaunināts jo mape nav tukša"
 
 #. *
 #. * Duplicate permission defined for user %1$s. Only one permission per user is allowed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:491
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:490
 msgid ""
 "Duplicate permission defined for user %1$s. Only one permission per user is "
 "allowed."
@@ -11526,7 +11677,7 @@ msgstr ""
 #. *
 #. * Duplicate permission defined for group %1$s. Only one permission per group is allowed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:495
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:494
 msgid ""
 "Duplicate permission defined for group %1$s. Only one permission per group "
 "is allowed."
@@ -11537,7 +11688,7 @@ msgstr ""
 #. *
 #. * Only the folder visibility permission is allowed to be changed for folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:499
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:498
 msgid ""
 "Only the folder visibility permission is allowed to be changed for folder "
 "%1$s in context %2$s."
@@ -11546,7 +11697,7 @@ msgstr "Mapei %1$s kontekstā %2$s var mainīt tikai mapes redzamības tiesības
 #. *
 #. * Only individual user permissions, but no group permissions are allowed for folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:503
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:502
 msgid ""
 "Only individual user permissions, but no group permissions are allowed for "
 "folder %1$s in context %2$s."
@@ -11557,7 +11708,7 @@ msgstr ""
 #. *
 #. * No individual user permissions are allowed for folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:507
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:506
 msgid ""
 "No individual user permissions are allowed for folder %1$s in context %2$s."
 msgstr ""
@@ -11567,14 +11718,14 @@ msgstr ""
 #. *
 #. * Folder module must not be updated.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:511
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:510
 msgid "Folder module must not be updated."
 msgstr "Mapes moduli nevar jaunināt."
 
 #. *
 #. * The module of a default folder must not be changed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:515
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:514
 msgid "The module of a default folder must not be changed."
 msgstr "Noklusētās mapes modulis nevar tikt mainīts."
 
@@ -11584,21 +11735,21 @@ msgstr "Noklusētās mapes modulis nevar tikt mainīts."
 #. * No necessary rename access granted for update operation
 #. * </p>
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:522
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:521
 msgid "User %1$s must not rename folder %2$s in context %3$s"
 msgstr "Lietotājs %1$s nedrīkst pārsaukt mapi %2$s kontekstā %3$s"
 
 #. *
 #. * Failed to create folder. Please retry.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:526
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:525
 msgid "Failed to create folder. Please retry."
 msgstr "Kļūda pie mapes izveided. Lūdzu mēģiniet vēlreiz."
 
 #. *
 #. * Delete cannot be performed because of locked documents in folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:530
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:529
 msgid ""
 "Delete cannot be performed because of locked documents in folder %1$s in "
 "context %2$s."
@@ -11609,12 +11760,12 @@ msgstr ""
 #. *
 #. * Operation may only be performed for context administrator.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:534
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:533
 msgid "Operation may only be performed for context administrator."
 msgstr "Šo operāciju var veikt tikai konteksta administrators."
 
 #. Folder %1$s must not be deleted in context %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:537
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:536
 msgid "Folder %1$s must not be deleted in context %2$s."
 msgstr "Mape %1$s kontekstā %2$s nevar tikt dzēsta."
 
@@ -11740,10 +11891,16 @@ msgstr "HTTP kļūda. Statuss %1$s. Paziņojums %2$s."
 msgid "Unsupported format: %1$s"
 msgstr "Neatbalstīts formāts: %1$s"
 
-#. Missing cookie: %s
+#. Missing cookie: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:146
-msgid "Missing cookie: %s"
-msgstr "Iztrūkstošs sīkfails: %s"
+msgid "Missing cookie: %1$s"
+msgstr "Iztrūkstošs sīkfails: %1$s"
+
+#. Cookie "%1$s" cannot be found because requests does not have any cookies.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:149
+msgid ""
+"Cookie \"%1$s\" cannot be found because requests does not have any cookies."
+msgstr "Sīkfails \"%1$s\" nav atrasts, jo pieprasījumos nav sīkfailu."
 
 #. *
 #. * Exception while writing JSON.
@@ -11820,6 +11977,7 @@ msgstr "Nepareiza vērtība elementāt \"%1$s\": %2$s."
 #. * An I/O error occurred.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/webdav/WebdavExceptionMessage.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:70
 msgid "An I/O error occurred."
 msgstr "Datu apmaiņas I/O kļūda."
 
@@ -11981,7 +12139,6 @@ msgid "Start of SessionStorageService failed."
 msgstr "Kļūda pie  SessionStorageService aktivēšanas."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:63
 msgid "Saving session with sessionId %1$s failed."
 msgstr "Kļūda pie sesijas ar id %1$s saglabāšanas."
 
@@ -11990,7 +12147,6 @@ msgid "Lookup for session with sessionId %1$s failed."
 msgstr "Kļūda pie sesijas ar id %1$s informācijas iegūšanas."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:67
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:65
 msgid "Removing session with sessionId %1$s failed."
 msgstr "Kļūda pie sesijas ar id %1$s noņemšanas."
 
@@ -12001,7 +12157,6 @@ msgid "Operation %1$s not supported."
 msgstr "Darbība %1$s netiek nodrošināt."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:73
 msgid "Lookup for session with altId %1$s failed"
 msgstr "Kļūda pie sesijas ir altId %1$s meklēšanas"
 
@@ -12021,6 +12176,7 @@ msgid "No session found for identifier: %1$s"
 msgstr "Sesija nav atrasta identifikatoram: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:63
 msgid "Saving session with session identifier %1$s failed."
 msgstr "Kļūda pie sesijas ar identifikatoru %1$s saglabāšanas."
 
@@ -12029,6 +12185,7 @@ msgid "Lookup for session with session identifier %1$s failed."
 msgstr "Kļūda pie sesijas ar identifikatoru %1$s informācijas iegūšanas."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:65
 msgid "Removing session with session identifier %1$s failed."
 msgstr "Kļūda pie sesijas ar identifikatoru %1$s noņemšanas."
 
@@ -12050,8 +12207,12 @@ msgid "No sessions found by random token %1$s."
 msgstr "Gadījuma žetonam %1$s nav atrasta neviena atbilstoša sesija."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:67
-msgid "No session with sessionId %1$s found."
-msgstr "Sesija ar id %1$s nav atrasta."
+msgid "No session with session identifier %1$s found."
+msgstr "Sesija ar identifikatoru %1$s nav atrasta."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:73
+msgid "Lookup for session with public identifier %1$s failed"
+msgstr "Kļūda pie sesijas ar publisko identifikatoru %1$s meklēšanas"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/exceptions/OXSessionStorageExceptionMessages.java:79
 msgid "No sessions found by random token %1$s"
@@ -12277,11 +12438,11 @@ msgid "The given value for userSource \"%s\" is not a possible one"
 msgstr "Norādītā \"userSource\" vērtība \"%s\" nav iespējama "
 
 #. *
-#. * The parameter "%s" must be a long value but is "%s"
+#. * The parameter "%s" must be numeric, but is "%s"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamhandler.spamassassin/src/com/openexchange/spamhandler/spamassassin/exceptions/SpamhandlerSpamassassinExceptionMessage.java:101
-msgid "The parameter \"%s\" must be a long value but is \"%s\""
-msgstr "Parametra \"%s\" vērtībai ir jābūt veselam skaitlims, bet tā ir \"%s\""
+msgid "The parameter \"%s\" must be numeric, but is \"%s\""
+msgstr "Parametra \"%s\" vērtībai ir jābūt skaitlims, bet tā ir \"%s\""
 
 #. *
 #. * Spamd returned wrong exit code "%s"
@@ -12322,32 +12483,24 @@ msgstr "Kļūda pie spamd provaidera iegūšanas no servisa: \"%s\""
 msgid "Missing parameter %s"
 msgstr "Iztrūkstošs parametrs %s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:70
-msgid "Unknown Action: %s"
-msgstr "Nezināma darbība: %s"
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:72
-msgid "Got JSONException"
-msgstr "JSON kļūda."
+msgid "A JSON error occurred"
+msgstr "JSON kļūda"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:74
-msgid "Missing Field(s): %s"
+msgid "Missing field(s): %s"
 msgstr "Iztrūkstoši lauki: %s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:76
-msgid "Missing Form Field(s): %s"
+msgid "Missing form field(s): %s"
 msgstr "Iztrūkstoši formas lauki: %s"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:78
-msgid "Got Exception %s"
-msgstr "Reģistrēta kļūda %s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:94
 msgid "Please ask only for columns the server knows"
 msgstr "lūdzu vaicājiet tikai serverim zināmas kolonnas"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:96
-msgid "Unknown Subscription"
+msgid "Unknown subscription"
 msgstr "Nezināma abonēšana"
 
 #. Provide well-formed HTML.
@@ -12356,10 +12509,10 @@ msgstr "Nezināma abonēšana"
 msgid "Provide well-formed HTML."
 msgstr "Nodrošiniet pareizi formatētu HTML."
 
-#. An IOException occurred: %1$s. Was trying to get the service at %2$s.
+#. An I/O error occurred: %1$s. Was trying to get the service at %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:66
-msgid "An IOException occurred: %1$s. Was trying to get the service at %2$s."
-msgstr "IOException kļūda: %1$s. Mēģinājums iegūt servisu no %2$s."
+msgid "An I/O error occurred: %1$s. Was trying to get the service at %2$s."
+msgstr "I/OE kļūda:%1$s. Mēģinājums iegūt servisu no %2$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:71
@@ -12368,10 +12521,10 @@ msgstr "IOException kļūda: %1$s. Mēģinājums iegūt servisu no %2$s."
 msgid "Try again later."
 msgstr "Lūdzu mēģiniet vēlreiz vēlāk."
 
-#. A HTTPException occurred: %1$s. Was trying to get the service at %2$s.
+#. A HTTP error occurred: %1$s. Was trying to get the service at %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:70
-msgid "A HTTPException occurred: %1$s. Was trying to get the service at %2$s."
-msgstr "HTTPException kļūda: %1$s. Mēģinājums iegūt servisu no %2$s."
+msgid "A HTTP Error occurred: %1$s. Was trying to get the service at %2$s."
+msgstr "HTTP kļūda: %1$s. Mēģinājums iegūt servisu no %2$s."
 
 #. Can only post to external subscription sources.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:74
@@ -12547,10 +12700,6 @@ msgstr "Neparedzēta kļūda: %1$s"
 msgid "Verify file system and templates."
 msgstr "Pārbaudiet failu sistēmu un sagataves."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:70
-msgid "An IOException occurred."
-msgstr "Reģistrēta I/O kļūda."
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:72
 msgid "Please correct the template"
 msgstr "Lūdzu izlabojiet sagatavi"
@@ -12592,6 +12741,26 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:90
 msgid "This template was not whitelisted,"
 msgstr "Šī sagatave nav 'baltajā' sarakstā."
+
+#. No such token: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tokenlogin/src/com/openexchange/tokenlogin/TokenLoginExceptionMessages.java:76
+msgid "No such token: %1$s"
+msgstr "Nav šāda žetona: %1$s"
+
+#. Token login service is not available.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tokenlogin/src/com/openexchange/tokenlogin/TokenLoginExceptionMessages.java:79
+msgid "Token login service is not available."
+msgstr "Žetonu pieslēguma serviss nav pieejams."
+
+#. No such session for token: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tokenlogin/src/com/openexchange/tokenlogin/TokenLoginExceptionMessages.java:82
+msgid "No such session for token: %1$s"
+msgstr "Žetonam %1$s nav atrasta atbilstoša sesija"
+
+#. Token redeem denied.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tokenlogin/src/com/openexchange/tokenlogin/TokenLoginExceptionMessages.java:85
+msgid "Token redeem denied."
+msgstr "Žetona atgūšana atteikta."
 
 #. The consumer key/consumer secret pair is missing in configuration.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:72
@@ -14910,6 +15079,40 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid "A severe error occurred."
+#~ msgstr "Smaga kļūda."
+
+#~ msgid "An error occurred. Please try again later."
+#~ msgstr "reģistrēta kļūda. Lūdzu mēģiniet vēlreiz vēlāk."
+
+#~ msgid "Missing key \"%1$s\" in: \"%2$s\""
+#~ msgstr "Iztrūkstoša atslēga \"%1$s\" iekš: \"%2$s\""
+
+#~ msgid ""
+#~ "Unable to calculate given position. Seems to be a delete exception or "
+#~ "outside range"
+#~ msgstr ""
+#~ "Nevar aprēķināt norādīto pozīciju. Iespējama dzēšanas vai pārsnieguma "
+#~ "kļūda."
+
+#~ msgid "Cannot decrease number of attachments below zero."
+#~ msgstr "Pievienojumu skaitu nevar samazināt zem nulles."
+
+#~ msgid "UNKNOWN EXCEPTION"
+#~ msgstr "NEATPAZĪTA KĻŪDA "
+
+#~ msgid "Unknown Action: %s"
+#~ msgstr "Nezināma darbība: %s"
+
+#~ msgid "Got JSONException"
+#~ msgstr "JSON kļūda."
+
+#~ msgid "Got Exception %s"
+#~ msgstr "Reģistrēta kļūda %s"
+
+#~ msgid "An IOException occurred."
+#~ msgstr "Reģistrēta I/O kļūda."
+
 #~ msgid "The following needed service is missing: %1$s"
 #~ msgstr "Sekojošs nepieciešamais serviss nav atrasts: %1$s"
 
@@ -15003,9 +15206,6 @@ msgstr "Zulu"
 
 #~ msgid "%s"
 #~ msgstr "%s"
-
-#~ msgid "A JSON error occurred: %s"
-#~ msgstr "JSON kļūda: %s"
 
 #~ msgid ""
 #~ "A protocol exception occurred during execution of IMAP request \"%1$s\".\n"
@@ -15669,9 +15869,6 @@ msgstr "Zulu"
 
 #~ msgid "An SQL Exception has occurred."
 #~ msgstr "SQL kļūda."
-
-#~ msgid "No such node: %1$s"
-#~ msgstr "Nav šāda zara: %1$s"
 
 #~ msgid ""
 #~ "This EAV implementation does not support floating point numbers. Please "
