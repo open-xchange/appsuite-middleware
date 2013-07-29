@@ -142,4 +142,48 @@ public class ProcessUploadStaticTest extends TestCase {
         }
     }
 
+    public void testProcessUploadStatic2() {
+        try {
+            // Mocking
+            final HttpServletRequest mockRequest = PowerMockito.mock(HttpServletRequest.class);
+
+            final ByteArrayInputStream bin = new ByteArrayInputStream((
+                "-----------------------------1902770288168124293960248547\r\nContent-Disposition: form-data; name=\"json_0\"\r\n\r\n{\"from\":\"T" +
+                "horben Betten <thorben@devel-mail.netline.de>\",\"to\":\"Thorben Betten <thorben@devel-mail.netline.de>\",\"cc\":\"\",\"bcc\":\"\",\"subje" +
+                "ct\":\"Subject\",\"priority\":\"3\",\"vcard\":1,\"attachments\":[{\"content_type\":\"ALTERNATIVE\",\"content\":\"<html><body" +
+                ">&gt;Content1&lt;</body></html>\"}],\"datasources\":[]}\r\n"
+                 +
+                 "-----------------------------1902770288168124293960248547\r\nContent-Disposition: form-data; name=\"json_0\"\r\n\r\n{\"from\":\"T" +
+                 "horben Betten <thorben@devel-mail.netline.de>\",\"to\":\"Thorben Betten <thorben@devel-mail.netline.de>\",\"cc\":\"\",\"bcc\":\"\",\"subje" +
+                 "ct\":\"Subject\",\"priority\":\"3\",\"vcard\":1,\"attachments\":[{\"content_type\":\"ALTERNATIVE\",\"content\":\"<html><body" +
+                 ">&gt;Content2&lt;</body></html>\"}],\"datasources\":[]}\r\n-----------------------------1902770288168124293960248547--"
+                ).getBytes());
+            final ServletInputStream in = new ServletInputStream() {
+
+                @Override
+                public int read() throws IOException {
+                    return bin.read();
+                }
+            };
+            PowerMockito.when(mockRequest.getInputStream()).thenReturn(in);
+            PowerMockito.when(mockRequest.getContentType()).thenReturn("multipart/form-data; boundary=---------------------------1902770288168124293960248547");
+            PowerMockito.when(mockRequest.getContentLength()).thenReturn(-1);
+            PowerMockito.when(mockRequest.getCharacterEncoding()).thenReturn("UTF-8");
+            PowerMockito.when(mockRequest.getParameter("action")).thenReturn("new");
+
+            // Parse multipart
+            UploadEvent uploadEvent = AJAXServlet.processUploadStatic(mockRequest);
+            assertEquals("Unexpected number of form fields", 1, uploadEvent.getNumberOfFormFields());
+            final JSONObject jo = new JSONObject(uploadEvent.getFormField("json_0"));
+            assertEquals(
+                "Unexpected form field content",
+                "<html><body>&gt;Content2&lt;</body></html>",
+                jo.getJSONArray("attachments").getJSONObject(0).getString("content"));
+
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
 }
