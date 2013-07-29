@@ -82,6 +82,7 @@ public class ResendBuffer {
     }
 
     public Future<MessageState> put(long seq, JSONObject message) {
+        LOG.debug("Scheduling ResendTask for message {}", message);
         ResendTask task = new ResendTask(connection, seq, message);
         timer.scheduleAtFixedRate(task, 0L, 3000L);
         activeTimers.put(seq, task);
@@ -90,7 +91,10 @@ public class ResendBuffer {
 
     public void remove(long seq) {
         ResendTask task = activeTimers.remove(seq);
-        if (task != null) {
+        if (task == null) {
+            LOG.debug("ResendTask for seq {} was already cancelled", seq);
+        } else {
+            LOG.debug("Cancelling ResendTask for message {}", task.getMessage());
             task.cancel();
             timer.purge();
         }

@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.atmosphere.wasync.Decoder;
 import org.atmosphere.wasync.Encoder;
@@ -67,6 +68,7 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import com.google.common.base.Strings;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.ListenableFuture;
@@ -199,6 +201,8 @@ public class MixedModeRTConnection extends AbstractRTConnection {
     // Data received by this client should delegate the data to RTProtocol.handleIncoming(JSONObject)
     private AtmosphereClient atmosphereClient;
 
+    private final Map<?, ?> contextMap = MDC.getCopyOfContextMap();
+
     public MixedModeRTConnection(AsyncHttpClient asyncHttpClient, RTConnectionProperties connectionProperties, RTMessageHandler messageHandler) throws RTException {
         super();
         this.asyncHttpClient = asyncHttpClient;
@@ -229,6 +233,7 @@ public class MixedModeRTConnection extends AbstractRTConnection {
 
                 @Override
                 public List<String> decode(Event event, String received) {
+                    MDC.setContextMap(contextMap);
                     if(event.equals(Event.MESSAGE)) {
                         if(received.endsWith("}") || received.endsWith("}]")) { //either complete message or we are completing a chunked one
                             if(wasLastMesageComplete) {
@@ -269,6 +274,7 @@ public class MixedModeRTConnection extends AbstractRTConnection {
 
                 @Override
                 public void on(String received) {
+                    MDC.setContextMap(contextMap);
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Received message in atmosphere channel: " + received);
                     }

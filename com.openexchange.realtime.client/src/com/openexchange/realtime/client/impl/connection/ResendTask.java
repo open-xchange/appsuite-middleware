@@ -96,6 +96,10 @@ public class ResendTask extends TimerTask implements Future<MessageState> {
             resendCount = 0;
         }
 
+        public JSONObject getMessage() {
+            return message;
+        }
+
         @Override
         public void run() {
             try {
@@ -108,6 +112,8 @@ public class ResendTask extends TimerTask implements Future<MessageState> {
                     } finally {
                         lock.unlock();
                     }
+
+                    return;
                 }
 
                 if (LOG.isDebugEnabled()) {
@@ -136,6 +142,7 @@ public class ResendTask extends TimerTask implements Future<MessageState> {
         public boolean cancel() {
             lock.lock();
             try {
+                super.cancel();
                 if (!isCancelled) {
                     isCancelled = true;
                     state = MessageState.ACK_RECEIVED;
