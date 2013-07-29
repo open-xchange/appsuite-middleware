@@ -49,8 +49,6 @@
 
 package com.openexchange.realtime.client.impl.room;
 
-import java.util.Iterator;
-import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -107,16 +105,6 @@ public class RTRoomJSONHelper {
         objectToSend.put("payloads", payloads);
 
         return objectToSend;
-    }
-
-    /**
-     * Adds an unique tracer to a single JSONObject representing a message.
-     * @param message the JSONValue representing one or more messages
-     * @throws JSONException
-     */
-    public static JSONObject addTracerToMessage(JSONObject message) throws JSONException {
-        message.put("tracer", UUID.randomUUID());
-        return message;
     }
 
     /**

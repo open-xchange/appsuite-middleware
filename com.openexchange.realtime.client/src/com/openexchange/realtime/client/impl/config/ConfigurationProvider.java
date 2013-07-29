@@ -153,6 +153,11 @@ public class ConfigurationProvider {
     private AtomicBoolean secure = new AtomicBoolean(true);
 
     /**
+     * Flag to identify if secured connections (https) should be used
+     */
+    private AtomicBoolean isTraceEnabled = new AtomicBoolean(false);
+    
+    /**
      * Initializes a new {@link ConfigurationProvider} - only internal
      */
     private ConfigurationProvider() {
@@ -254,6 +259,7 @@ public class ConfigurationProvider {
         result.append(" host: " + this.getHost() + newLine);
         result.append(" port: " + this.getPort() + newLine);
         result.append(" secure: " + this.isSecure() + newLine);
+        result.append(" isTraceEnabled: " + this.isTraceEnabled() + newLine);
         result.append("}");
 
         return result.toString();
@@ -374,6 +380,16 @@ public class ConfigurationProvider {
      */
     public String getAtmospherePath() {
         return atmospherePath;
+    }
+
+    
+    /**
+     * Gets if tracing is enabled
+     *
+     * @return true if tracing is enabled
+     */
+    public boolean isTraceEnabled() {
+        return isTraceEnabled.get();
     }
 
     /**
@@ -529,6 +545,16 @@ public class ConfigurationProvider {
          */
         public Builder setSendPath(String sendPath) {
             configurationProvider.sendPath = sendPath;
+            return this;
+        }
+        
+        /**
+         * Enable or disable tracing of messages
+         *
+         * @param isTraceEnabled true or false
+         */
+        public Builder setTraceEnabled(boolean isTraceEnabled) {
+            configurationProvider.isTraceEnabled.set(isTraceEnabled);
             return this;
         }
 

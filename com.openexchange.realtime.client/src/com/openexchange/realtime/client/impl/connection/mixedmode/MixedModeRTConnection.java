@@ -76,6 +76,7 @@ import com.ning.http.client.Response;
 import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
+import com.openexchange.realtime.client.impl.config.ConfigurationProvider;
 import com.openexchange.realtime.client.impl.connection.AbstractRTConnection;
 import com.openexchange.realtime.client.impl.connection.Constants;
 import com.openexchange.realtime.client.impl.connection.RequestBuilderHelper;

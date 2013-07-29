@@ -51,6 +51,7 @@ package com.openexchange.realtime.client.impl.connection;
 
 import java.io.StringReader;
 import java.util.Iterator;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -71,6 +72,7 @@ import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
 import com.openexchange.realtime.client.RTSession;
+import com.openexchange.realtime.client.impl.TracerInjector;
 import com.openexchange.realtime.client.impl.config.ConfigurationProvider;
 
 /**
@@ -161,9 +163,11 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
             LOG.warn("Connection is already closed. Message getting lost: " + message.toString());
             return;
         }
-
+        TracerInjector.injectTracer(message);
         long seq = protocol.addSequence(message);
-        LOG.debug("Sending message: {}", message);
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Sending message: {}", message);
+        }
         resendBuffer.put(seq, message);
         protocol.resetPingTimeout();
     }
@@ -174,8 +178,10 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
             LOG.warn("Connection is already closed. Message getting lost: " + message.toString());
             return;
         }
-
-        LOG.debug("Sending message: {}", message);
+        TracerInjector.injectTracer(message);
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Sending message: {}", message);
+        }
         doSend(message);
         protocol.resetPingTimeout();
     }
@@ -390,6 +396,16 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
             associatedHandler = messageHandlers.get(selector);
         }
         return associatedHandler;
+    }
+
+    /**
+     * Adds an unique tracer to a single JSONObject representing a message.
+     * @param message the JSONValue representing one or more messages
+     * @throws JSONException
+     */
+    protected JSONObject addTracerToMessage(JSONObject message) throws JSONException {
+        message.put("tracer", UUID.randomUUID());
+        return message;
     }
 
 }
