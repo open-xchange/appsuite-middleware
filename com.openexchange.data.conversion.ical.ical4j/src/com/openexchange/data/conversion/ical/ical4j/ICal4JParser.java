@@ -59,6 +59,7 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -402,7 +403,11 @@ public class ICal4JParser implements ICalParser {
         return tz.getID();
     }
 
-    protected net.fortuna.ical4j.model.Calendar parse(final BufferedReader reader) throws ConversionError {
+	protected net.fortuna.ical4j.model.Calendar parse(final BufferedReader reader) throws ConversionError {
+	    return parse(reader, null);
+	}
+
+    protected net.fortuna.ical4j.model.Calendar parse(final BufferedReader reader, final Collection<Exception> exceptions) throws ConversionError {
         final CalendarBuilder builder = new CalendarBuilder();
         try {
             final StringBuilder chunk = new StringBuilder();
@@ -467,10 +472,12 @@ public class ICal4JParser implements ICalParser {
             ); // FIXME: Encoding?
             return builder.build(chunkedReader);
         } catch (final IOException e) {
-            //IGNORE
+            if (null != exceptions) {
+                exceptions.add(e);
+            }
         } catch (final ParserException e) {
             LOG.warn(e.getMessage(), e);
-            throw new ConversionError(-1, ConversionWarning.Code.PARSE_EXCEPTION, e.getMessage());
+            throw new ConversionError(-1, ConversionWarning.Code.PARSE_EXCEPTION, e, e.getMessage());
         }
         return null;
     }
