@@ -67,16 +67,18 @@ public class ResettableCountDown {
     
     private Set<Runnable> callbacks = new HashSet<Runnable>();
     private Timer timer;
-    private long timeout;
-    private TimeUnit unit;
+    private long count;
+    private long interval;
+    private TimeUnit intervalUnit;
     private CountDownTask countDownTask;
     ExecutorService executorService = Executors.newFixedThreadPool(50);
     
-    public ResettableCountDown(int timeout, TimeUnit unit) {
-        this.timeout = timeout;
-        this.unit=unit;
+    public ResettableCountDown(long count, long interval, TimeUnit intervalUnit) {
+        this.count = count;
+        this.interval = interval;
+        this.intervalUnit=intervalUnit;
         timer = new Timer();
-        countDownTask = new CountDownTask(timeout);
+        countDownTask = new CountDownTask(count);
     }
 
     public void addRunnable(Runnable runnable) {
@@ -86,9 +88,9 @@ public class ResettableCountDown {
     public void removeRunnable(Runnable runnable) {
         callbacks.remove(runnable);
     }
-    
+
     public void start() {
-        timer.schedule(countDownTask, 0, unit.toMillis(timeout));
+        timer.schedule(countDownTask, 0, intervalUnit.toMillis(interval));
     }
 
     /**
@@ -97,7 +99,7 @@ public class ResettableCountDown {
     public void reset() {
         timer.cancel();
         timer = new Timer();
-        countDownTask = new CountDownTask(timeout);
+        countDownTask = new CountDownTask(count);
     }
 
     private class CountDownTask extends TimerTask {
@@ -117,6 +119,7 @@ public class ResettableCountDown {
                 for (Runnable runnable : callbacks) {
                     executorService.execute(runnable);
                 }
+                timer.cancel();
             }
         }
 

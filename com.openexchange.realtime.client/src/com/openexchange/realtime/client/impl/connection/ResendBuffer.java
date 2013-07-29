@@ -54,6 +54,7 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,9 +77,11 @@ public class ResendBuffer {
     private final AbstractRTConnection connection;
 
     private final Timer timer;
-    
+
+    //determines if stop was called
     private boolean shouldStop=false;
-    
+
+    //Latch to wait until all messages are sent from this buffer after stop was called
     private final CountDownLatch allSent = new CountDownLatch(1);
 
     public ResendBuffer(AbstractRTConnection connection) {
@@ -100,9 +103,15 @@ public class ResendBuffer {
         ResendTask task = new ResendTask(connection, seq, message);
         timer.scheduleAtFixedRate(task, 0L, 3000L);
         activeTimers.put(seq, task);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("ActiveTimers after put: " + activeTimers.keySet());
+        }
     }
 
     public void remove(long seq) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Removing message with Sequence " + seq);
+        }
         ResendTask task = activeTimers.remove(seq);
         if (task != null) {
             task.cancel();
@@ -110,6 +119,9 @@ public class ResendBuffer {
         }
         if(shouldStop) {
             if(activeTimers.isEmpty()) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("No more active timers in ResendBuffer, signalling shutdown");
+                }
                 allSent.countDown();
             }
         }
@@ -123,10 +135,13 @@ public class ResendBuffer {
      */
     public void stop() {
         shouldStop=true;
-        try {
-            allSent.await();
-        } catch (InterruptedException e) {
-            LOG.error("Error while stopping the ResendBuffer", e);
+        if (!activeTimers.isEmpty()) {
+            try {
+                LOG.info("Waiting for all messages to be sent from the ResendBuffer");
+                allSent.await(1, TimeUnit.MINUTES);
+            } catch (InterruptedException e) {
+                LOG.error("Error while stopping the ResendBuffer", e);
+            }
         }
         LOG.info("ResendBuffer stopped.");
         timer.cancel();
@@ -158,6 +173,9 @@ public class ResendBuffer {
                     cancel();
                 }
 
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Calling connection.send with message " + message);
+                }
                 connection.doSend(message);
                 resendCount++;
             } catch (RTException e) {
