@@ -1,6 +1,7 @@
 * 2013-07-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 27845: Fixed imports for login counter tool
+ - Fix for bug 27640: Ignore delimiting whitespaces between mail-safe encoded words
 
 * 2013-07-26 - marcus.klein@open-xchange.com
 
