@@ -87,13 +87,13 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     }
 
     @Override
-    public SyncResult<FileVersion> sync() throws OXException {
+    public IntermediateSyncResult<FileVersion> sync() throws OXException {
         usedFilenames = new HashSet<String>(mapper.getKeys());
         return super.sync();
     }
 
     @Override
-    protected void processServerChange(SyncResult<FileVersion> result, ThreeWayComparison<FileVersion> comparison) throws OXException {
+    protected void processServerChange(IntermediateSyncResult<FileVersion> result, ThreeWayComparison<FileVersion> comparison) throws OXException {
         switch (comparison.getServerChange()) {
         case DELETED:
             /*
@@ -133,7 +133,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     }
 
     @Override
-    protected void processClientChange(SyncResult<FileVersion> result, ThreeWayComparison<FileVersion> comparison) throws OXException {
+    protected void processClientChange(IntermediateSyncResult<FileVersion> result, ThreeWayComparison<FileVersion> comparison) throws OXException {
         switch (comparison.getClientChange()) {
         case DELETED:
             if (mayDelete(comparison.getServerVersion())) {
@@ -228,7 +228,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     }
 
     @Override
-    protected void processConflictingChange(SyncResult<FileVersion> result, ThreeWayComparison<FileVersion> comparison) throws OXException {
+    protected void processConflictingChange(IntermediateSyncResult<FileVersion> result, ThreeWayComparison<FileVersion> comparison) throws OXException {
         if (Change.DELETED == comparison.getServerChange() && Change.DELETED == comparison.getClientChange()) {
             /*
              * both deleted, just let client remove it's metadata

@@ -47,55 +47,80 @@
  *
  */
 
-package com.openexchange.drive.sync.optimize;
+package com.openexchange.drive.sync;
 
-import com.openexchange.drive.FileVersion;
-import com.openexchange.drive.comparison.VersionMapper;
-import com.openexchange.drive.internal.DriveSession;
-import com.openexchange.drive.sync.FileSynchronizer;
-import com.openexchange.drive.sync.IntermediateSyncResult;
-import com.openexchange.exception.OXException;
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.drive.DriveVersion;
+import com.openexchange.drive.actions.AbstractAction;
+import com.openexchange.java.StringAllocator;
 
 
 /**
- * {@link OptimizingFileSynchronizer}
+ * {@link IntermediateSyncResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class OptimizingFileSynchronizer extends FileSynchronizer {
+public class IntermediateSyncResult<T extends DriveVersion> {
 
-    public OptimizingFileSynchronizer(DriveSession session, VersionMapper<FileVersion> mapper, String path) throws OXException {
-        super(session, mapper, path);
+    private final List<AbstractAction<T>> actionsForServer;
+    private final List<AbstractAction<T>> actionsForClient;
+
+    public IntermediateSyncResult(List<AbstractAction<T>> actionsForServer, List<AbstractAction<T>> actionsForClient) {
+        super();
+        this.actionsForClient = actionsForClient;
+        this.actionsForServer = actionsForServer;
+    }
+
+    public IntermediateSyncResult() {
+        this(new ArrayList<AbstractAction<T>>(), new ArrayList<AbstractAction<T>>());
+    }
+
+    public void addActionForClient(AbstractAction<T> action) {
+        actionsForClient.add(action);
+    }
+
+    public void addActionForServer(AbstractAction<T> action) {
+        actionsForServer.add(action);
+    }
+
+    public boolean isEmpty() {
+        return (null == actionsForServer || 0 == actionsForServer.size()) && (null == actionsForClient || 0 == actionsForClient.size());
+    }
+
+    /**
+     * Gets the actionsForServer
+     *
+     * @return The actionsForServer
+     */
+    public List<AbstractAction<T>> getActionsForServer() {
+        return actionsForServer;
+    }
+
+    /**
+     * Gets the actionsForClient
+     *
+     * @return The actionsForClient
+     */
+    public List<AbstractAction<T>> getActionsForClient() {
+        return actionsForClient;
     }
 
     @Override
-    public IntermediateSyncResult<FileVersion> sync() throws OXException {
-        IntermediateSyncResult<FileVersion> result = super.sync();
-        if (false == result.isEmpty()) {
-            String lastResults = null;
-            if (session.isTraceEnabled()) {
-                lastResults = result.toString();
-                session.trace("Sync results before optimizations:\n" + lastResults);
-            }
-            FileActionOptimizer[] optimizers = {
-                new FileRenameOptimizer(mapper),
-                new EmptyFileOptimizer(mapper),
-                new FileCopyOptimizer(mapper),
-                new FileMultipleUploadsOptimizer(mapper),
-                new FileOrderOptimizer(mapper)
-            };
-            for (FileActionOptimizer optimizer : optimizers) {
-                result = optimizer.optimize(session, result);
-                if (session.isTraceEnabled()) {
-                    String currentResults = result.toString();
-                    if (false == currentResults.equals(lastResults)) {
-                        lastResults = currentResults;
-                        session.trace("Sync results after optimizations of " + optimizer.getClass().getSimpleName() + ":\n" + lastResults);
-                    }
-                }
+    public String toString() {
+        StringAllocator stringAllocator = new StringAllocator();
+        if (null != actionsForServer) {
+            stringAllocator.append("Actions for server:\n");
+            for (AbstractAction<T> action : actionsForServer) {
+                stringAllocator.append("  ").append(action).append('\n');
             }
         }
-        return result;
+        if (null != actionsForClient) {
+            stringAllocator.append("Actions for client:\n");
+            for (AbstractAction<T> action : actionsForClient) {
+                stringAllocator.append("  ").append(action).append('\n');
+            }
+        }
+        return stringAllocator.toString();
     }
-
 }

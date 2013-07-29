@@ -78,7 +78,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion>{
     }
 
     @Override
-    protected void processServerChange(SyncResult<DirectoryVersion> result, ThreeWayComparison<DirectoryVersion> comparison) throws OXException {
+    protected void processServerChange(IntermediateSyncResult<DirectoryVersion> result, ThreeWayComparison<DirectoryVersion> comparison) throws OXException {
         switch (comparison.getServerChange()) {
         case DELETED:
             /*
@@ -113,7 +113,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion>{
     }
 
     @Override
-    protected void processClientChange(SyncResult<DirectoryVersion> result, ThreeWayComparison<DirectoryVersion> comparison) throws OXException {
+    protected void processClientChange(IntermediateSyncResult<DirectoryVersion> result, ThreeWayComparison<DirectoryVersion> comparison) throws OXException {
         switch (comparison.getClientChange()) {
         case DELETED:
             if (mayDelete(comparison.getServerVersion())) {
@@ -167,7 +167,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion>{
     }
 
     @Override
-    protected void processConflictingChange(SyncResult<DirectoryVersion> result, ThreeWayComparison<DirectoryVersion> comparison) throws OXException {
+    protected void processConflictingChange(IntermediateSyncResult<DirectoryVersion> result, ThreeWayComparison<DirectoryVersion> comparison) throws OXException {
         if (Change.DELETED == comparison.getServerChange() && Change.DELETED == comparison.getClientChange()) {
             /*
              * both deleted, just let client remove it's metadata

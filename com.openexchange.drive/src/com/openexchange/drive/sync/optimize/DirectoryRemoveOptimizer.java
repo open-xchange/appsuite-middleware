@@ -58,7 +58,7 @@ import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
-import com.openexchange.drive.sync.SyncResult;
+import com.openexchange.drive.sync.IntermediateSyncResult;
 
 
 /**
@@ -73,12 +73,12 @@ public class DirectoryRemoveOptimizer extends DirectoryActionOptimizer {
     }
 
     @Override
-    public SyncResult<DirectoryVersion> optimize(DriveSession session, SyncResult<DirectoryVersion> result) {
+    public IntermediateSyncResult<DirectoryVersion> optimize(DriveSession session, IntermediateSyncResult<DirectoryVersion> result) {
         List<AbstractAction<DirectoryVersion>> clientActions = result.getActionsForClient();
         clientActions.removeAll(getRedundantRemoves(clientActions));
         List<AbstractAction<DirectoryVersion>> serverActions = result.getActionsForServer();
         serverActions.removeAll(getRedundantRemoves(serverActions));
-        return new SyncResult<DirectoryVersion>(serverActions, clientActions);
+        return new IntermediateSyncResult<DirectoryVersion>(serverActions, clientActions);
     }
 
     private static List<AbstractAction<DirectoryVersion>> getRedundantRemoves(List<AbstractAction<DirectoryVersion>> driveActions) {

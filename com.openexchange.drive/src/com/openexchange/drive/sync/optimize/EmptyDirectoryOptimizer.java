@@ -60,7 +60,7 @@ import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.storage.DriveConstants;
-import com.openexchange.drive.sync.SyncResult;
+import com.openexchange.drive.sync.IntermediateSyncResult;
 
 
 /**
@@ -75,7 +75,7 @@ public class EmptyDirectoryOptimizer extends DirectoryActionOptimizer {
     }
 
     @Override
-    public SyncResult<DirectoryVersion> optimize(DriveSession session, SyncResult<DirectoryVersion> result) {
+    public IntermediateSyncResult<DirectoryVersion> optimize(DriveSession session, IntermediateSyncResult<DirectoryVersion> result) {
         List<AbstractAction<DirectoryVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForClient());
         List<AbstractAction<DirectoryVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForServer());
         /*
@@ -92,7 +92,7 @@ public class EmptyDirectoryOptimizer extends DirectoryActionOptimizer {
         /*
          * return new sync results
          */
-        return new SyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient);
+        return new IntermediateSyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient);
 
     }
 

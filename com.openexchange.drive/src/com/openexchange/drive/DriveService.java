@@ -74,7 +74,7 @@ public interface DriveService {
      * @return A list of resulting actions to execute on the client afterwards
      * @throws OXException
      */
-    List<DriveAction<DirectoryVersion>> syncFolders(ServerSession session, String rootFolderID, List<DirectoryVersion> originalVersions,
+    SyncResult<DirectoryVersion> syncFolders(ServerSession session, String rootFolderID, List<DirectoryVersion> originalVersions,
         List<DirectoryVersion> clientVersions) throws OXException;
 
     /**
@@ -88,7 +88,7 @@ public interface DriveService {
      * @return A list of resulting actions to execute on the client afterwards
      * @throws OXException
      */
-    List<DriveAction<FileVersion>> syncFiles(ServerSession session, String rootFolderID, String path, List<FileVersion> originalVersions,
+    SyncResult<FileVersion> syncFiles(ServerSession session, String rootFolderID, String path, List<FileVersion> originalVersions,
         List<FileVersion> clientVersions) throws OXException;
 
     /**
@@ -106,7 +106,7 @@ public interface DriveService {
      * @return A list of resulting file actions to execute on the client afterwards
      * @throws OXException
      */
-    List<DriveAction<FileVersion>> upload(ServerSession session, String rootFolderID, String path, InputStream uploadStream,
+    SyncResult<FileVersion> upload(ServerSession session, String rootFolderID, String path, InputStream uploadStream,
         FileVersion originalVersion, FileVersion newVersion, String contentType, long offset, long totalLength) throws OXException;
 
     /**

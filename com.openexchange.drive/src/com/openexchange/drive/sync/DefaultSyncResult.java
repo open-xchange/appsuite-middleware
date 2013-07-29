@@ -47,55 +47,66 @@
  *
  */
 
-package com.openexchange.drive.sync.optimize;
+package com.openexchange.drive.sync;
 
-import com.openexchange.drive.FileVersion;
-import com.openexchange.drive.comparison.VersionMapper;
-import com.openexchange.drive.internal.DriveSession;
-import com.openexchange.drive.sync.FileSynchronizer;
-import com.openexchange.drive.sync.IntermediateSyncResult;
-import com.openexchange.exception.OXException;
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.DriveVersion;
+import com.openexchange.drive.SyncResult;
+import com.openexchange.drive.actions.AbstractAction;
+import com.openexchange.java.StringAllocator;
 
 
 /**
- * {@link OptimizingFileSynchronizer}
+ * {@link DefaultSyncResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class OptimizingFileSynchronizer extends FileSynchronizer {
+public class DefaultSyncResult<T extends DriveVersion> implements SyncResult<T>{
 
-    public OptimizingFileSynchronizer(DriveSession session, VersionMapper<FileVersion> mapper, String path) throws OXException {
-        super(session, mapper, path);
+    private final List<DriveAction<T>> actionsForClient;
+    private final String diagnosticsLog;
+
+    public DefaultSyncResult(List<AbstractAction<T>> actionsForClient, String diagnosticsLog) {
+        super();
+        this.actionsForClient = new ArrayList<DriveAction<T>>(actionsForClient.size());
+        for (DriveAction<? extends T> driveAction : actionsForClient) {
+            this.actionsForClient.add((DriveAction<T>) driveAction);
+        }
+        this.diagnosticsLog = diagnosticsLog;
+    }
+
+    /**
+     * Gets the actionsForClient
+     *
+     * @return The actionsForClient
+     */
+    @Override
+    public List<DriveAction<T>> getActionsForClient() {
+        return actionsForClient;
+    }
+
+    /**
+     * Gets the diagnostics log.
+     *
+     * @return The diagnostics log, or <code>null</code> if not available
+     */
+    @Override
+    public String getDiagnostics() {
+        return diagnosticsLog;
     }
 
     @Override
-    public IntermediateSyncResult<FileVersion> sync() throws OXException {
-        IntermediateSyncResult<FileVersion> result = super.sync();
-        if (false == result.isEmpty()) {
-            String lastResults = null;
-            if (session.isTraceEnabled()) {
-                lastResults = result.toString();
-                session.trace("Sync results before optimizations:\n" + lastResults);
-            }
-            FileActionOptimizer[] optimizers = {
-                new FileRenameOptimizer(mapper),
-                new EmptyFileOptimizer(mapper),
-                new FileCopyOptimizer(mapper),
-                new FileMultipleUploadsOptimizer(mapper),
-                new FileOrderOptimizer(mapper)
-            };
-            for (FileActionOptimizer optimizer : optimizers) {
-                result = optimizer.optimize(session, result);
-                if (session.isTraceEnabled()) {
-                    String currentResults = result.toString();
-                    if (false == currentResults.equals(lastResults)) {
-                        lastResults = currentResults;
-                        session.trace("Sync results after optimizations of " + optimizer.getClass().getSimpleName() + ":\n" + lastResults);
-                    }
-                }
+    public String toString() {
+        StringAllocator stringAllocator = new StringAllocator();
+        if (null != actionsForClient) {
+            stringAllocator.append("Actions for client:\n");
+            for (DriveAction<T> action : actionsForClient) {
+                stringAllocator.append("  ").append(action).append('\n');
             }
         }
-        return result;
+        return stringAllocator.toString();
     }
 
 }

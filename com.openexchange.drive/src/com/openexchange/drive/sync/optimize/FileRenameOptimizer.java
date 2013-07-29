@@ -64,7 +64,7 @@ import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.sync.RenameTools;
 import com.openexchange.drive.sync.SimpleFileVersion;
-import com.openexchange.drive.sync.SyncResult;
+import com.openexchange.drive.sync.IntermediateSyncResult;
 
 
 /**
@@ -82,7 +82,7 @@ public class FileRenameOptimizer extends FileActionOptimizer {
     }
 
     @Override
-    public SyncResult<FileVersion> optimize(DriveSession session, SyncResult<FileVersion> result) {
+    public IntermediateSyncResult<FileVersion> optimize(DriveSession session, IntermediateSyncResult<FileVersion> result) {
         List<AbstractAction<FileVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<FileVersion>>(result.getActionsForClient());
         List<AbstractAction<FileVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<FileVersion>>(result.getActionsForServer());
         for (AbstractAction<FileVersion> clientAction : result.getActionsForClient()) {
@@ -190,7 +190,7 @@ Actions for client:
         /*
          * optimize common rename operations and return results
          */
-        return new SyncResult<FileVersion>(optimizeRenames(optimizedActionsForServer), optimizeRenames(optimizedActionsForClient));
+        return new IntermediateSyncResult<FileVersion>(optimizeRenames(optimizedActionsForServer), optimizeRenames(optimizedActionsForClient));
     }
 
     private List<AbstractAction<FileVersion>> optimizeRenames(List<AbstractAction<FileVersion>> actions) {

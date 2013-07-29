@@ -55,8 +55,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DirectoryVersion;
-import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveService;
+import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.JsonDirectoryAction;
 import com.openexchange.drive.json.json.JsonDirectoryVersion;
@@ -102,12 +102,18 @@ public class SyncFoldersAction extends AbstractDriveAction {
          * determine sync actions
          */
         DriveService driveService = Services.getService(DriveService.class, true);
-        List<DriveAction<DirectoryVersion>> actions = driveService.syncFolders(session, rootFolderID, originalVersions, clientVersions);
+        SyncResult<DirectoryVersion> syncResult = driveService.syncFolders(session, rootFolderID, originalVersions, clientVersions);
         /*
          * return json result
          */
         try {
-            return new AJAXRequestResult(JsonDirectoryAction.serialize(actions, getLocale(session)), "json");
+            if (includeDiagnostics()) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("diagnostics", syncResult.getDiagnostics());
+                jsonObject.put("actions", JsonDirectoryAction.serialize(syncResult.getActionsForClient(), getLocale(session)));
+                return new AJAXRequestResult(jsonObject, "json");
+            }
+            return new AJAXRequestResult(JsonDirectoryAction.serialize(syncResult.getActionsForClient(), getLocale(session)), "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

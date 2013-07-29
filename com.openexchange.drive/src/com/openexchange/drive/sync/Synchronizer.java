@@ -77,15 +77,15 @@ public abstract class Synchronizer<T extends DriveVersion> {
         this.mapper = mapper;
     }
 
-    public SyncResult<T> sync() throws OXException {
-        SyncResult<T> result = new SyncResult<T>();
+    public IntermediateSyncResult<T> sync() throws OXException {
+        IntermediateSyncResult<T> result = new IntermediateSyncResult<T>();
         for (Entry<String, ThreeWayComparison<T>> entry : mapper) {
             process(result, entry.getValue());
         }
         return result;
     }
 
-    private void process(SyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException {
+    private void process(IntermediateSyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException {
         Change clientChange = comparison.getClientChange();
         Change serverChange = comparison.getServerChange();
         if (Change.NONE == clientChange && Change.NONE == serverChange) {
@@ -111,10 +111,10 @@ public abstract class Synchronizer<T extends DriveVersion> {
         }
     }
 
-    protected abstract void processServerChange(SyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException;
+    protected abstract void processServerChange(IntermediateSyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException;
 
-    protected abstract void processClientChange(SyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException;
+    protected abstract void processClientChange(IntermediateSyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException;
 
-    protected abstract void processConflictingChange(SyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException;
+    protected abstract void processConflictingChange(IntermediateSyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException;
 
 }
