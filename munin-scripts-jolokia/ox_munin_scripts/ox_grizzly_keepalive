@@ -1,0 +1,111 @@
+#!/usr/bin/perl
+#%# family=auto
+#%# capabilities=autoconf
+
+use strict;
+use JMX::Jmx4Perl;
+use JMX::Jmx4Perl::Request;   # Type constants are exported here
+
+###
+# Infos about HTTP keepalive:
+#   hits count:    Requests that get handled via a "keep-alive" enabled connection.
+#   live count:    The number of live keep-alive connections.
+#   refuses count: the number of times keep-alive mode was refused.
+#   timeouts cout: Connections that weren't closed to signal completion according to HTTP1.0/1.1 but simply timed out. 
+###
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+    if (-e "/opt/open-xchange/bundles/com.openexchange.http.grizzly/com.openexchange.http.grizzly.jar") {
+        print "yes\n";
+        exit 0;
+    } else {
+        print "no\n";
+        exit 0;
+    }
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config") {
+    print "graph_title Grizzly KeepAlive\n";
+    print "graph_args --base 1000 -l 0\n";
+    print "graph_category Open Xchange\n";
+    print "graph_vlabel Number\n";
+    
+    print "hits-count.label hits-count\n";
+    print "hits-count.draw LINE1\n";
+    print "hits-count.type DERIVE\n";
+    print "hits-count.min 0\n";
+    
+    print "live-connections-count.label live-connections-count\n";
+    print "live-connections-count.draw LINE1\n";
+    print "live-connections-count.type DERIVE\n";
+    print "live-connections-count.min 0\n";
+
+    print "refuses-count.label refuses-count\n";
+    print "refuses-count.draw LINE1\n";
+    print "refuses-count.type DERIVE\n";
+    print "refuses-count.min 0\n";
+
+    print "timeouts-count.label timeouts-count\n";
+    print "timeouts-count.draw LINE1\n";
+    print "timeouts-count.type DERIVE\n";
+    print "timeouts-count.min 0\n";
+
+    exit 0
+}
+
+### Settings and connection Testing
+
+my $jmx = new JMX::Jmx4Perl(url => $ENV{oxJolokiaUrl},
+user => $ENV{oxJolokiaUser},
+password => $ENV{oxJolokiaPassword});
+
+### test if a connection can be made
+my $request = new JMX::Jmx4Perl::Request({type => AGENT_VERSION});
+my $response = $jmx->request($request);
+if ($response->is_error()){
+	my $status = $response->status();
+	if ($status == 404) {
+		die "Link to servlet might be wrong";
+	}
+	elsif ($status == 401) {
+		die "Credentials to login might be wrong";
+	}
+	else {
+		die "Something went wrong ",$status;
+	}
+}
+
+###
+
+$request = new JMX::Jmx4Perl::Request(READ,
+	"org.glassfish.grizzly:name=Keep-Alive,pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=KeepAlive",
+	"hits-count");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "hits-count.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(READ,
+	"org.glassfish.grizzly:name=Keep-Alive,pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=KeepAlive",
+	"live-connections-count");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "live-connections-count.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(READ,
+	"org.glassfish.grizzly:name=Keep-Alive,pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=KeepAlive",
+	"refuses-count");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "refuses-count.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(READ,
+	"org.glassfish.grizzly:name=Keep-Alive,pp=/gmbal-root/HttpServer[HttpServer]/NetworkListener[NetworkListener[http-listener]],type=KeepAlive",
+	"timeouts-count");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "timeouts-count.value ",$response->value(),"\n";
+}

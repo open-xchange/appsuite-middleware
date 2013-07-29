@@ -53,7 +53,7 @@ import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.sync.DirectorySynchronizer;
-import com.openexchange.drive.sync.SyncResult;
+import com.openexchange.drive.sync.IntermediateSyncResult;
 import com.openexchange.exception.OXException;
 
 
@@ -69,13 +69,13 @@ public class OptimizingDirectorySynchronizer extends DirectorySynchronizer {
     }
 
     @Override
-    public SyncResult<DirectoryVersion> sync() throws OXException {
-        SyncResult<DirectoryVersion> result = super.sync();
+    public IntermediateSyncResult<DirectoryVersion> sync() throws OXException {
+        IntermediateSyncResult<DirectoryVersion> result = super.sync();
         if (false == result.isEmpty()) {
             String lastResults = null;
-            if (LOG.isDebugEnabled()) {
+            if (session.isTraceEnabled()) {
                 lastResults = result.toString();
-                LOG.debug("Sync results before optimizations:\n" + lastResults);
+                session.trace("Sync results before optimizations:\n" + lastResults);
             }
             DirectoryActionOptimizer[] optimizers = {
                 new DirectoryRemoveOptimizer(mapper),
@@ -85,11 +85,11 @@ public class OptimizingDirectorySynchronizer extends DirectorySynchronizer {
             };
             for (DirectoryActionOptimizer optimizer : optimizers) {
                 result = optimizer.optimize(session, result);
-                if (LOG.isTraceEnabled()) {
+                if (session.isTraceEnabled()) {
                     String currentResults = result.toString();
                     if (false == currentResults.equals(lastResults)) {
                         lastResults = currentResults;
-                        LOG.trace("Sync results after optimizations of " + optimizer.getClass().getSimpleName() + ":\n" + lastResults);
+                        session.trace("Sync results after optimizations of " + optimizer.getClass().getSimpleName() + ":\n" + lastResults);
                     }
                 }
             }

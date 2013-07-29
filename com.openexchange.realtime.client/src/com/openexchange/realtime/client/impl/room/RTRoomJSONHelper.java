@@ -73,7 +73,7 @@ public class RTRoomJSONHelper {
      * @return {@link JSONValue} to join a room
      * @throws JSONException
      */
-    public static JSONValue createJoinMessage(String name, String to) throws JSONException {
+    public static JSONObject createJoinMessage(String name, String to) throws JSONException {
         JSONObject objectToSend = new JSONObject();
         objectToSend.put("element", "message");
         objectToSend.put("selector", name);
@@ -100,7 +100,7 @@ public class RTRoomJSONHelper {
      * @return {@link JSONValue} to say a message into a room
      * @throws JSONException
      */
-    public static JSONValue createSayMessage(String to, JSONArray payloads) throws JSONException {
+    public static JSONObject createSayMessage(String to, JSONArray payloads) throws JSONException {
         JSONObject objectToSend = new JSONObject();
         objectToSend.put("element", "message");
         objectToSend.put("to", to);
@@ -110,34 +110,13 @@ public class RTRoomJSONHelper {
     }
 
     /**
-     * Adds an unique tracer to a single JSONObject representing a message or and array of those.
-     * 
-     * @param message the JSONValue representing one or more messages
-     * @return the message(s) with a unique tracer added 
-     * @throws JSONException 
-     */
-    public static JSONValue addTracer(JSONValue message) throws JSONException {
-        if(message.isObject()) {
-            addTracerToMessage((JSONObject)message);
-            return message;
-        } else if (message.isArray()) {
-            JSONArray messageArray = (JSONArray) message;
-            Iterator<Object> iterator = messageArray.iterator();
-            while(iterator.hasNext()) {
-                addTracerToMessage((JSONObject)message);
-            }
-            return messageArray;
-        }
-        return message;
-    }
-
-    /**
      * Adds an unique tracer to a single JSONObject representing a message.
      * @param message the JSONValue representing one or more messages
      * @throws JSONException
      */
-    private static void addTracerToMessage(JSONObject message) throws JSONException {
+    public static JSONObject addTracerToMessage(JSONObject message) throws JSONException {
         message.put("tracer", UUID.randomUUID());
+        return message;
     }
 
     /**
@@ -147,7 +126,7 @@ public class RTRoomJSONHelper {
      * @return {@link JSONValue} to leave into a room
      * @throws JSONException
      */
-    public static JSONValue createLeaveMessage(String to) throws JSONException {
+    public static JSONObject createLeaveMessage(String to) throws JSONException {
         JSONObject objectToSend = new JSONObject();
         objectToSend.put("element", "message");
         objectToSend.put("to", to);

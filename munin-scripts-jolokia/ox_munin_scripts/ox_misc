@@ -1,0 +1,106 @@
+#!/usr/bin/perl
+#%# family=auto
+#%# capabilities=autoconf
+
+use strict;
+use JMX::Jmx4Perl;
+use JMX::Jmx4Perl::Request;   # Type constants are exported here
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+	print "yes\n";
+	exit 0;
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config")
+{
+	print "graph_title Misc\n";
+	print "graph_args --base 1000 -l 0\n";
+	print "graph_category Open Xchange\n";
+	print "graph_vlabel Number\n";
+	print "b.label AJAXConnections\n";
+	print "b.draw LINE1\n";
+	print "c.label WebDAVUserConnections\n";
+	print "c.draw LINE1\n";
+	print "d.label OutlookConnections\n";
+	print "d.draw LINE1\n";
+	print "e.label SyncMLConnections\n";
+	print "e.draw LINE1\n";
+	print "f.label IMAPConnections\n";
+	print "f.draw LINE1\n";
+	print "g.label Threads\n";
+	print "g.draw LINE1\n";
+	exit 0
+}
+									
+### Settings and connection Testing
+
+my $jmx = new JMX::Jmx4Perl(url => $ENV{oxJolokiaUrl},
+user => $ENV{oxJolokiaUser},
+password => $ENV{oxJolokiaPassword});
+
+### test if a connection can be made
+my $request = new JMX::Jmx4Perl::Request({type => AGENT_VERSION});
+my $response = $jmx->request($request);
+if ($response->is_error()){
+	my $status = $response->status();
+	if ($status == 404) {
+		die "Link to servlet might be wrong";
+	}
+	elsif ($status == 401) {
+		die "Credentials to login might be wrong";
+	}
+	else {
+		die "Something went wrong ",$status;
+	}
+}
+
+###
+
+$request = new JMX::Jmx4Perl::Request(READ,
+	"com.openexchange.monitoring:name=GeneralMonitor",
+	"NumberOfAJAXConnections");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "b.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(READ,
+	"com.openexchange.monitoring:name=GeneralMonitor",
+	"NumberOfWebDAVUserConnections");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "c.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(READ,
+	"com.openexchange.monitoring:name=GeneralMonitor",
+	"NumberOfOutlookConnections");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "d.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(READ,
+	"com.openexchange.monitoring:name=GeneralMonitor",
+	"NumberOfSyncMLConnections");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "e.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(READ,
+	"com.openexchange.monitoring:name=GeneralMonitor",
+	"NumberOfIMAPConnections");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "f.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(READ,
+	"java.lang:type=Threading",
+	"ThreadCount");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "g.value ",$response->value(),"\n";
+}

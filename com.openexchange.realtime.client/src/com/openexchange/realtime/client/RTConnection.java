@@ -49,7 +49,9 @@
 
 package com.openexchange.realtime.client;
 
-import org.json.JSONValue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import org.json.JSONObject;
 
 /**
  * A {@link RTConnection} is the interface for establishing RT connections to post and receive {@link Stanza}s.
@@ -89,7 +91,7 @@ public interface RTConnection {
      * @param message The message.
      * @throws RTException
      */
-    void post(JSONValue message) throws RTException;
+    void post(JSONObject message) throws RTException;
 
     /**
      * Sends a message to the server. This method must be used for reliable delivery.
@@ -97,7 +99,16 @@ public interface RTConnection {
      * @param message The message.
      * @throws RTException
      */
-    void send(JSONValue message) throws RTException;
+    void send(JSONObject message) throws RTException;
+
+    /**
+     * Sends a message to the server. This method must be used for reliable delivery.
+     *
+     * @param message The message.
+     * @throws RTException
+     * @throws InterruptedException
+     */
+    void sendBlocking(JSONObject message, long timeout, TimeUnit unit) throws RTException, TimeoutException, InterruptedException;
 
     /**
      * Closes the connection and frees all resources. The underlying user session will also be closed.

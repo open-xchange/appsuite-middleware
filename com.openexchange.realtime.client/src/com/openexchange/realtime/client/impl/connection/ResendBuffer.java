@@ -50,15 +50,12 @@
 package com.openexchange.realtime.client.impl.connection;
 
 import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import org.json.JSONValue;
+import java.util.concurrent.Future;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.realtime.client.RTException;
 
 
 /**
@@ -70,19 +67,11 @@ public class ResendBuffer {
 
     private static final Logger LOG = LoggerFactory.getLogger(ResendBuffer.class);
 
-    private static final int RESEND_LIMIT = 100;
-
     private final ConcurrentMap<Long, ResendTask> activeTimers;
 
     private final AbstractRTConnection connection;
 
     private final Timer timer;
-
-    //determines if stop was called
-    private boolean shouldStop=false;
-
-    //Latch to wait until all messages are sent from this buffer after stop was called
-    private final CountDownLatch allSent = new CountDownLatch(1);
 
     public ResendBuffer(AbstractRTConnection connection) {
         super();
@@ -92,97 +81,25 @@ public class ResendBuffer {
         LOG.info("ResendBuffer started.");
     }
 
-    public void put(long seq, JSONValue message) {
-        if(shouldStop) {
-            LOG.info("Stop triggered. Not accepting new Message {} with Sequence {}", message, seq);
-            return;
-        }
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Received message {} with Sequence {}", message, seq);
-        }
+    public Future<MessageState> put(long seq, JSONObject message) {
         ResendTask task = new ResendTask(connection, seq, message);
         timer.scheduleAtFixedRate(task, 0L, 3000L);
         activeTimers.put(seq, task);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("ActiveTimers after put: " + activeTimers.keySet());
-        }
+        return task;
     }
 
     public void remove(long seq) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Removing message with Sequence " + seq);
-        }
         ResendTask task = activeTimers.remove(seq);
         if (task != null) {
             task.cancel();
             timer.purge();
         }
-        if(shouldStop) {
-            if(activeTimers.isEmpty()) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("No more active timers in ResendBuffer, signalling shutdown");
-                }
-                allSent.countDown();
-            }
-        }
     }
 
-    /**
-     * Trigger stop on the ResendBuffer. This causes the ResendBuffer to not accept any new messages via
-     * {@link ResendBuffer#put(long, JSONValue)} and only (re)sending the already received messages. This call blocks until all messages
-     * were sent.
-     * @throws InterruptedException
-     */
     public void stop() {
-        shouldStop=true;
-        if (!activeTimers.isEmpty()) {
-            try {
-                LOG.info("Waiting for all messages to be sent from the ResendBuffer");
-                allSent.await(1, TimeUnit.MINUTES);
-            } catch (InterruptedException e) {
-                LOG.error("Error while stopping the ResendBuffer", e);
-            }
-        }
         LOG.info("ResendBuffer stopped.");
         timer.cancel();
     }
 
-    private static final class ResendTask extends TimerTask {
-
-        private final AbstractRTConnection connection;
-
-        private final long seq;
-
-        private final JSONValue message;
-
-        private int resendCount;
-
-        public ResendTask(AbstractRTConnection connection, long seq, JSONValue message) {
-            super();
-            this.connection = connection;
-            this.seq = seq;
-            this.message = message;
-            resendCount = 0;
-        }
-
-        @Override
-        public void run() {
-            try {
-                if (resendCount == RESEND_LIMIT) {
-                    LOG.error("Could not send message " + seq + " after " + RESEND_LIMIT + " tries.");
-                    cancel();
-                }
-
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Calling connection.send with message " + message);
-                }
-                connection.doSend(message);
-                resendCount++;
-            } catch (RTException e) {
-                LOG.warn("Error while sending message " + seq + ". Resend count is: " + resendCount, e);
-            }
-        }
-
-    }
-
 }
+

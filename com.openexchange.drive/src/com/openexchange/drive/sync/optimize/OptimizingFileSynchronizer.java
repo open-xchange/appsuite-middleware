@@ -53,7 +53,7 @@ import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.sync.FileSynchronizer;
-import com.openexchange.drive.sync.SyncResult;
+import com.openexchange.drive.sync.IntermediateSyncResult;
 import com.openexchange.exception.OXException;
 
 
@@ -69,13 +69,13 @@ public class OptimizingFileSynchronizer extends FileSynchronizer {
     }
 
     @Override
-    public SyncResult<FileVersion> sync() throws OXException {
-        SyncResult<FileVersion> result = super.sync();
+    public IntermediateSyncResult<FileVersion> sync() throws OXException {
+        IntermediateSyncResult<FileVersion> result = super.sync();
         if (false == result.isEmpty()) {
             String lastResults = null;
-            if (LOG.isDebugEnabled()) {
+            if (session.isTraceEnabled()) {
                 lastResults = result.toString();
-                LOG.debug("Sync results before optimizations:\n" + lastResults);
+                session.trace("Sync results before optimizations:\n" + lastResults);
             }
             FileActionOptimizer[] optimizers = {
                 new FileRenameOptimizer(mapper),
@@ -86,11 +86,11 @@ public class OptimizingFileSynchronizer extends FileSynchronizer {
             };
             for (FileActionOptimizer optimizer : optimizers) {
                 result = optimizer.optimize(session, result);
-                if (LOG.isTraceEnabled()) {
+                if (session.isTraceEnabled()) {
                     String currentResults = result.toString();
                     if (false == currentResults.equals(lastResults)) {
                         lastResults = currentResults;
-                        LOG.trace("Sync results after optimizations of " + optimizer.getClass().getSimpleName() + ":\n" + lastResults);
+                        session.trace("Sync results after optimizations of " + optimizer.getClass().getSimpleName() + ":\n" + lastResults);
                     }
                 }
             }

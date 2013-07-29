@@ -52,6 +52,8 @@ package com.openexchange.realtime.client.impl.room;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.apache.commons.lang.Validate;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -132,7 +134,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
         setupTimer();
 
         try {
-            JSONValue join = this.createJoinObject();
+            JSONObject join = this.createJoinObject();
             this.send(join);
         } catch (Exception exception) {
             throw new RTException(exception);
@@ -157,7 +159,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
      * @return {@link JSONValue} with the data to join a room.
      * @throws JSONException
      */
-    private JSONValue createJoinObject() throws JSONException {
+    private JSONObject createJoinObject() throws JSONException {
         return RTRoomJSONHelper.createJoinMessage(this.roomName, this.toAddress);
     }
 
@@ -176,7 +178,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
         Validate.notNull(message, "Message cannot be null!");
 
         try {
-            JSONValue say = this.createSayObject(toPayloads(message));
+            JSONObject say = this.createSayObject(toPayloads(message));
             if(isTraceEnabled) {
                 say = addTracer(say);
             }
@@ -223,12 +225,12 @@ public abstract class AbstractRoomImpl implements RTRoom {
      * @return {@link JSONValue} with the complete message to send to the room
      * @throws JSONException
      */
-    private JSONValue createSayObject(JSONArray payloads) throws JSONException {
+    private JSONObject createSayObject(JSONArray payloads) throws JSONException {
         return RTRoomJSONHelper.createSayMessage(this.toAddress, payloads);
     }
     
-    private JSONValue addTracer(JSONValue jsonValue) throws JSONException {
-        return RTRoomJSONHelper.addTracer(jsonValue);
+    private JSONObject addTracer(JSONObject jsonObject) throws JSONException {
+        return RTRoomJSONHelper.addTracerToMessage(jsonObject);
     }
 
     /**
@@ -237,16 +239,14 @@ public abstract class AbstractRoomImpl implements RTRoom {
     @Override
     public void leave() throws RTException {
         Validate.notNull(connection, "Not logged in!");
-
         try {
-            JSONValue leave = this.createLeaveObject();
-            this.send(leave);
-
             this.connection.unregisterHandler(this.roomName);
             this.pingTimer.cancel();
             this.pingTimerTask.cancel();
             this.pingTimer = null;
             this.pingTimerTask = null;
+            JSONObject leave = this.createLeaveObject();
+            this.send(leave);
         } catch (Exception exception) {
             throw new RTException(exception);
         }
@@ -259,7 +259,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
      * @return {@link JSONValue} with the data to say something into a room.
      * @throws JSONException
      */
-    private JSONValue createLeaveObject() throws JSONException {
+    private JSONObject createLeaveObject() throws JSONException {
         return RTRoomJSONHelper.createLeaveMessage(this.toAddress);
     }
 
@@ -268,16 +268,18 @@ public abstract class AbstractRoomImpl implements RTRoom {
      *
      * @param objectToSend - {@link JSONValue} with the data to send to the server and deal with join/say/leave
      */
-    protected void send(JSONValue objectToSend) throws RTException {
+    protected void send(JSONObject objectToSend) throws RTException {
         try {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Handing message {} too connection.send()", objectToSend);
             }
-            this.connection.send(objectToSend);
-        } catch (Exception exception) {
-            throw new RTException(exception);
+            this.connection.sendBlocking(objectToSend, 1L, TimeUnit.MINUTES);
+            this.resetTimer();
+        } catch (TimeoutException e) {
+            throw new RTException("Timeout while trying to deliver message.", e);
+        } catch (InterruptedException e) {
+            throw new RTException("Interrupted while trying to deliver message.", e);
         }
-        this.resetTimer();
     }
 
     /**

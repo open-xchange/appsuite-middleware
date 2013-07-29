@@ -1,0 +1,5 @@
+[ox_*]
+timeout 15
+env.oxJolokiaUrl http://localhost:8009/monitoring/jolokia
+env.oxJolokiaUser oxadmin
+env.oxJolokiaPassword secret
