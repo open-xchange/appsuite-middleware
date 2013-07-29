@@ -2773,16 +2773,24 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Drop special "x-original-headers" header
                  */
-                for (final MailMessage mail : mailMessages) {
+                for (final MailMessage mail : filterNullElements(mailMessages)) {
                     mail.removeHeader("x-original-headers");
                 }
                 /*
                  * Convert messages to JavaMail message objects
                  */
                 msgs = new Message[length];
-                msgs[0] = MimeMessageConverter.convertMailMessage(mailMessages[0], MimeMessageConverter.BEHAVIOR_CLONE);
+                {
+                    final MailMessage m = mailMessages[0];
+                    if (null != m) {
+                        msgs[0] = MimeMessageConverter.convertMailMessage(m, MimeMessageConverter.BEHAVIOR_CLONE);
+                    }
+                }
                 for (int i = 1; i < length; i++) {
-                    msgs[i] = MimeMessageConverter.convertMailMessage(mailMessages[i], MimeMessageConverter.BEHAVIOR_CLONE | MimeMessageConverter.BEHAVIOR_STREAM2FILE);
+                    final MailMessage m = mailMessages[i];
+                    if (null != m) {
+                        msgs[i] = MimeMessageConverter.convertMailMessage(m, MimeMessageConverter.BEHAVIOR_CLONE | MimeMessageConverter.BEHAVIOR_STREAM2FILE);
+                    }
                 }
                 /*
                  * Check if destination folder supports user flags
@@ -2793,26 +2801,29 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                      * Remove all user flags from messages before appending to folder
                      */
                     for (final Message message : msgs) {
-                        removeUserFlagsFromMessage(message);
+                        if (null != message) {
+                            removeUserFlagsFromMessage(message);
+                        }
                     }
                 }
                 /*
                  * Mark first message for later lookup
                  */
+                final List<Message> filteredMsgs = filterNullElements(msgs);
                 final String hash = randomUUID();
-                msgs[0].setHeader(MessageHeaders.HDR_X_OX_MARKER, fold(13, hash));
+                filteredMsgs.get(0).setHeader(MessageHeaders.HDR_X_OX_MARKER, fold(13, hash));
                 /*
                  * ... and append them to folder
                  */
-                long[] retval = new long[0];
+                long[] retval = null;
                 final boolean hasUIDPlus = imapConfig.getImapCapabilities().hasUIDPlus();
                 try {
                     if (hasUIDPlus) {
                         // Perform append expecting APPENUID response code
-                        retval = checkAndConvertAppendUID(imapFolder.appendUIDMessages(msgs));
+                        retval = checkAndConvertAppendUID(imapFolder.appendUIDMessages(filteredMsgs.toArray(new Message[0])));
                     } else {
                         // Perform simple append
-                        imapFolder.appendMessages(msgs);
+                        imapFolder.appendMessages(filteredMsgs.toArray(new Message[0]));
                     }
                 } catch (final MessagingException e) {
                     final Exception nextException = e.getNextException();
@@ -2821,12 +2832,23 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                     throw e;
                 }
-                if (retval.length > 0) {
+                if (null != retval) {
                     /*
                      * Close affected IMAP folder to ensure consistency regarding IMAFolder's internal cache.
                      */
                     notifyIMAPFolderModification(destFullName);
-                    return retval;
+                    if (retval.length >= length) {
+                        return retval;
+                    }
+                    final long[] longs = new long[length];
+                    Arrays.fill(longs, -1L);
+                    for (int i = 0, k = 0; i < length; i++) {
+                        final MailMessage m = mailMessages[i];
+                        if (null != m) {
+                            longs[i] = retval[k++];
+                        }
+                    }
+                    return longs;
                 }
                 /*-
                  * OK, go the long way:
@@ -2850,7 +2872,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Close affected IMAP folder to ensure consistency regarding IMAFolder's internal cache.
                  */
                 notifyIMAPFolderModification(destFullName);
-                return retval;
+                if (retval.length >= length) {
+                    return retval;
+                }
+                final long[] longs = new long[length];
+                Arrays.fill(longs, -1L);
+                for (int i = 0, k = 0; i < length; i++) {
+                    final MailMessage m = mailMessages[i];
+                    if (null != m) {
+                        longs[i] = retval[k++];
+                    }
+                }
+                return longs;
             } finally {
                 if (marked) {
                     unsetMarker(opKey);
@@ -2863,10 +2896,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(8192);
                     sb.append("\r\nAPPEND command failed. Printing messages' headers for debugging purpose:\r\n");
                     for (int i = 0; i < mailMessages.length; i++) {
-                        sb.append("----------------------------------------------------\r\n\r\n");
-                        sb.append(i + 1).append(". message's header:\r\n");
-                        sb.append(mailMessages[i].getHeaders().toString());
-                        sb.append("----------------------------------------------------\r\n\r\n");
+                        final MailMessage mailMessage = mailMessages[i];
+                        if (null != mailMessage) {
+                            sb.append("----------------------------------------------------\r\n\r\n");
+                            sb.append(i + 1).append(". message's header:\r\n");
+                            sb.append(mailMessage.getHeaders().toString());
+                            sb.append("----------------------------------------------------\r\n\r\n");
+                        }
                     }
                     LOG.debug(sb.toString());
                 }
@@ -3994,6 +4030,21 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             map.put(pairs[i], pairs[i+1]);
         }
         return map;
+    }
+
+    private static <E> List<E> filterNullElements(final E[] elements) {
+        if (null == elements) {
+            return Collections.emptyList();
+        }
+        final int length = elements.length;
+        final List<E> list = new ArrayList<E>(length);
+        for (int i = 0; i < length; i++) {
+            final E elem = elements[i];
+            if (null != elem) {
+                list.add(elem);
+            }
+        }
+        return list;
     }
 
 }
