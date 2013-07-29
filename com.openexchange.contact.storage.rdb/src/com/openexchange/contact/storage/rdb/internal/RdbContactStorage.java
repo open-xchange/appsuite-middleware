@@ -744,7 +744,7 @@ public class RdbContactStorage extends DefaultContactStorage {
              * check fields
              */
             QueryFields queryFields;
-            if (null != contactSearch.getPattern() && null != sortOptions
+            if (null == contactSearch.getPattern() && null != sortOptions
                 && null != sortOptions.getOrder() && 0 < sortOptions.getOrder().length) {
                 // add sort field(s) to queried fields as this leads to UNION selects
                 List<ContactField> mandatoryFields = new ArrayList<ContactField>();
