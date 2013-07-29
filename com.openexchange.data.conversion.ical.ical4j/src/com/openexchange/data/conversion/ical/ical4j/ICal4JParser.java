@@ -472,7 +472,9 @@ public class ICal4JParser implements ICalParser {
             ); // FIXME: Encoding?
             return builder.build(chunkedReader);
         } catch (final IOException e) {
-            if (null != exceptions) {
+            if (null == exceptions) {
+                LOG.error(e.getMessage(), e);
+            } else {
                 exceptions.add(e);
             }
         } catch (final ParserException e) {
