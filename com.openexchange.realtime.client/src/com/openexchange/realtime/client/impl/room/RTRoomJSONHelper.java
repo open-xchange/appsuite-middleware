@@ -71,7 +71,7 @@ public class RTRoomJSONHelper {
      * @return {@link JSONValue} to join a room
      * @throws JSONException
      */
-    public static JSONValue createJoinMessage(String name, String to) throws JSONException {
+    public static JSONObject createJoinMessage(String name, String to) throws JSONException {
         JSONObject objectToSend = new JSONObject();
         objectToSend.put("element", "message");
         objectToSend.put("selector", name);
@@ -98,7 +98,7 @@ public class RTRoomJSONHelper {
      * @return {@link JSONValue} to say a message into a room
      * @throws JSONException
      */
-    public static JSONValue createSayMessage(String to, JSONArray payloads) throws JSONException {
+    public static JSONObject createSayMessage(String to, JSONArray payloads) throws JSONException {
         JSONObject objectToSend = new JSONObject();
         objectToSend.put("element", "message");
         objectToSend.put("to", to);
@@ -114,7 +114,7 @@ public class RTRoomJSONHelper {
      * @return {@link JSONValue} to leave into a room
      * @throws JSONException
      */
-    public static JSONValue createLeaveMessage(String to) throws JSONException {
+    public static JSONObject createLeaveMessage(String to) throws JSONException {
         JSONObject objectToSend = new JSONObject();
         objectToSend.put("element", "message");
         objectToSend.put("to", to);

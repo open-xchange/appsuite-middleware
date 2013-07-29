@@ -54,13 +54,12 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 import junit.framework.Assert;
 import org.json.JSONObject;
-import org.json.JSONValue;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.realtime.client.RTConnectionProperties;
+import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
-import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
 
 
 /**
@@ -100,7 +99,7 @@ public class ResendBufferTest extends AbstractRTConnection {
     }
 
     @Override
-    protected void doSend(JSONValue message) throws RTException {
+    protected void doSend(JSONObject message) throws RTException {
         try {
             resendCount++;
             barrier.await();

@@ -47,74 +47,18 @@
  *
  */
 
-package com.openexchange.realtime.client;
+package com.openexchange.realtime.client.impl.connection;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import org.json.JSONObject;
 
 /**
- * A {@link RTConnection} is the interface for establishing RT connections to post and receive {@link Stanza}s.
+ * {@link MessageState}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface RTConnection {
+public enum MessageState {
 
-    /**
-     * Returns the OX session owned by this connection instance. If the connection is already closed or could not be established
-     * an {@link IllegalStateException} will be thrown.
-     */
-    RTSession getOXSession();
-
-    /**
-     * Registers a new {@link RTMessageHandler} for the given selector. To ensure that no message gets lost, it's best practice to
-     * register message handlers before calling {@link #login(RTMessageHandler)}.
-     *
-     * @param selector The selector
-     * @param messageHandler The message handler
-     * @throws RTException if it would overwrite an already existing MessageHandler for the given selector.
-     */
-    void registerHandler(String selector, RTMessageHandler messageHandler) throws RTException;
-
-    /**
-     * Remove the message handler that is associated with the given selector from the connection to let it know that we aren't interested in
-     * further messages.
-     *
-     * @param selector The selector
-     */
-    void unregisterHandler(String selector);
-
-    /**
-     * Sends a message to the server.
-     * It's not guaranteed that the message arrives. This call returns immediately.
-     *
-     * @param message The message.
-     * @throws RTException
-     */
-    void post(JSONObject message) throws RTException;
-
-    /**
-     * Sends a message to the server. This method must be used for reliable delivery.
-     *
-     * @param message The message.
-     * @throws RTException
-     */
-    void send(JSONObject message) throws RTException;
-
-    /**
-     * Sends a message to the server. This method must be used for reliable delivery.
-     *
-     * @param message The message.
-     * @throws RTException
-     * @throws InterruptedException
-     */
-    void sendBlocking(JSONObject message, long timeout, TimeUnit unit) throws RTException, TimeoutException, InterruptedException;
-
-    /**
-     * Closes the connection and frees all resources. The underlying user session will also be closed.
-     *
-     * @throws RTException
-     */
-    void close() throws RTException;
+    PENDING,
+    CANCELLED,
+    ACK_RECEIVED;
 
 }

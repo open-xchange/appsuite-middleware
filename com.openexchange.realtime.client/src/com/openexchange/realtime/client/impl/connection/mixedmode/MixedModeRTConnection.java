@@ -293,7 +293,7 @@ public class MixedModeRTConnection extends AbstractRTConnection {
      * {"data":{"acknowledgements":[]}}
      */
     @Override
-    protected void doSend(JSONValue message) throws RTException {
+    protected void doSend(JSONObject message) throws RTException {
         if(isQueryAction(message)) {
             fireQueryRequest(message);
         } else if(isSendAction(message)) {

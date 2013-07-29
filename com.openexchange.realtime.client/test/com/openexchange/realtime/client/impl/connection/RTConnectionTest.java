@@ -171,7 +171,7 @@ public class RTConnectionTest extends AbstractRTConnection implements RTMessageH
     protected void reconnect() throws RTException {}
 
     @Override
-    protected void doSend(JSONValue message) throws RTException {}
+    protected void doSend(JSONObject message) throws RTException {}
 
     @Override
     protected void doClose() {}

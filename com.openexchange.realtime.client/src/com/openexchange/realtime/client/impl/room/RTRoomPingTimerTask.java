@@ -53,14 +53,13 @@ import java.util.TimerTask;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.realtime.client.RTConnection;
 
 /**
  * Sends a ping into a room to give a heart beat the realtime server and with that to not be removed out of the room.
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
@@ -88,7 +87,7 @@ public class RTRoomPingTimerTask extends TimerTask {
 
     /**
      * Initializes a new {@link RTRoomPingTimerTask}.
-     * 
+     *
      * @param rtConnection
      * @param to
      */
@@ -105,7 +104,7 @@ public class RTRoomPingTimerTask extends TimerTask {
     public void run() {
         synchronized (this.lock) {
             try {
-                final JSONValue ping = this.createPingObject();
+                final JSONObject ping = this.createPingObject();
                 this.rtConnection.post(ping);
             } catch (final Exception e) {
                 LOG.error(e.getMessage(), e);
@@ -115,11 +114,11 @@ public class RTRoomPingTimerTask extends TimerTask {
 
     /**
      * Creates the object to send a ping.
-     * 
+     *
      * @return {@JSONObject} which includes the ping data.
      * @throws JSONException - thrown when an error while JSON object creation occurs.
      */
-    private JSONValue createPingObject() throws JSONException {
+    private JSONObject createPingObject() throws JSONException {
         JSONObject pingObject = new JSONObject();
 
         pingObject.put("element", "message");
@@ -134,10 +133,6 @@ public class RTRoomPingTimerTask extends TimerTask {
         payloads.put(payload);
 
         pingObject.put("payloads", payloads);
-        
-        JSONArray pingArray = new JSONArray();
-        pingArray.put(pingObject);
-
-        return pingArray;
+        return pingObject;
     }
 }
