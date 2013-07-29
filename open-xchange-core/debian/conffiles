@@ -22,6 +22,7 @@ opt/open-xchange/etc/index.properties
 opt/open-xchange/etc/contextSets/index.yml
 opt/open-xchange/etc/infostore.properties
 opt/open-xchange/etc/javamail.properties
+opt/open-xchange/etc/jolokia.properties
 opt/open-xchange/etc/ldap.properties
 opt/open-xchange/etc/login.properties
 opt/open-xchange/etc/mailcache.ccf
