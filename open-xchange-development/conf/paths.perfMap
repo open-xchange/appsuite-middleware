@@ -53,3 +53,6 @@ modules/calendar/calendar_freebusy > io.ox/calendar//freeBusy
 modules/tasks/notifyAcceptedDeclinedAsCreator > io.ox/tasks//notifyAcceptedDeclinedAsCreator
 modules/tasks/notifyAcceptedDeclinedAsParticipant > io.ox/tasks//notifyAcceptedDeclinedAsParticipant
 modules/tasks/notifyNewModifiedDeleted > io.ox/tasks//notifyNewModifiedDeleted
+
+# Documents
+modules/com.open-xchange.documents > io.ox/office//module
