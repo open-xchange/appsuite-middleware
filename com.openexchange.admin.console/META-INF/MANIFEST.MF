@@ -16,18 +16,3 @@ Import-Package: com.openexchange.admin.rmi,
  org.apache.commons.cli,
  org.apache.commons.logging,
  org.osgi.framework
-Export-Package: com.openexchange.admin.console,
- com.openexchange.admin.console.admincore,
- com.openexchange.admin.console.context,
- com.openexchange.admin.console.context.extensioninterfaces,
- com.openexchange.admin.console.exception,
- com.openexchange.admin.console.group,
- com.openexchange.admin.console.resource,
- com.openexchange.admin.console.taskmanagement,
- com.openexchange.admin.console.user,
- com.openexchange.admin.console.util,
- com.openexchange.admin.console.util.database,
- com.openexchange.admin.console.util.filestore,
- com.openexchange.admin.console.util.reason,
- com.openexchange.admin.console.util.server
-Bundle-Activator: com.openexchange.admin.console.osgi.AdminConsoleActivator

@@ -1,0 +1,122 @@
+#! /usr/bin/perl -w
+#
+#   OPEN-XCHANGE legal information
+#
+#   All intellectual property rights in the Software are protected by
+#   international copyright laws.
+#
+#
+#   In some countries OX, OX Open-Xchange, open xchange and OXtender
+#   as well as the corresponding Logos OX Open-Xchange and OX are registered
+#   trademarks of the Open-Xchange, Inc. group of companies.
+#   The use of the Logos is not covered by the GNU General Public License.
+#   Instead, you are allowed to use these Logos according to the terms and
+#   conditions of the Creative Commons License, Version 2.5, Attribution,
+#   Non-commercial, ShareAlike, and the interpretation of the term
+#   Non-commercial applicable to the aforementioned license is published
+#   on the web site http://www.open-xchange.com/EN/legal/index.html.
+#
+#   Please make sure that third-party modules and libraries are used
+#   according to their respective licenses.
+#
+#   Any modifications to this package must retain all copyright notices
+#   of the original copyright holder(s) for the original code used.
+#
+#   After any such modifications, the original and derivative code shall remain
+#   under the copyright of the copyright holder(s) and/or original author(s)per
+#   the Attribution and Assignment Agreement that can be located at
+#   http://www.open-xchange.com/EN/developer/. The contributing author shall be
+#   given Attribution for the derivative code and a license granting use.
+#
+#    Copyright (C) 2004-2012 Open-Xchange, Inc.
+#    Mail: info@open-xchange.com
+#
+#
+#    This program is free software; you can redistribute it and/or modify it
+#    under the terms of the GNU General Public License, Version 2 as published
+#    by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful, but
+#    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+#    or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+#    for more details.
+#
+#    You should have received a copy of the GNU General Public License along
+#    with this program; if not, write to the Free Software Foundation, Inc., 59
+#    Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+
+use strict;
+use Getopt::Long qw(:config no_ignore_case);
+
+my $OXMASTER   = "oxadminmaster";
+my $OXMPWFILE  = "@confDir@/mpasswd";
+my $OXPASSWORD = undef;
+my $USAGE      = undef;
+
+GetOptions( "adminuser|A=s"   => \$OXMASTER,
+            "adminpass|P=s"   => \$OXPASSWORD,
+            "mpasswdfile|f=s" => \$OXMPWFILE,
+            "help|h|?"        => \$USAGE
+) || exit;
+
+if( $< != 0 ) {
+	die "You must be root to run this command";
+}
+
+usage() if ! defined $OXMASTER || ! defined $OXMPWFILE || defined $USAGE;
+
+my $cryptedpw = undef;
+if( ! defined $OXPASSWORD ) {
+	$cryptedpw=encryptPassword(promptPassword());
+} else {
+	$cryptedpw=encryptPassword($OXPASSWORD);
+}
+
+if( defined $cryptedpw && length($cryptedpw)>0 ) {
+	open(OUT,">$OXMPWFILE") || die "unable to open $OXMPWFILE: $!";
+	print OUT "$OXMASTER:$cryptedpw\n";
+	close(OUT);
+	print "saved password for user $OXMASTER in $OXMPWFILE\n";
+}
+
+
+
+1;
+# ---------------------------------- functions -------
+
+sub usage {
+	print <<EoF;
+
+This program stores the username and password of the superadmin to the mpasswd file.
+
+Usage: $0
+ -h,--help       Prints this help text
+ -A,--adminuser <adminuser>\t\tAccount name of superadmin (Default: $OXMASTER)
+ -P,--adminpass <adminpass>\t\t* Password of superadmin
+ -f,--mpasswdfile <mpasswdfile>\t\tpath to mpasswd
+					(Default: $OXMPWFILE)
+
+Entries marked with an asterisk (*) are mandatory.
+
+EoF
+	exit 1;
+}
+
+sub promptPassword {
+    system("stty -echo");
+    print "Enter password for user $OXMASTER: ";
+    while( <STDIN> ) {
+        chomp;
+        last if $_ ne "";
+    }
+    print "\n";
+    my $PW = $_;
+    system("stty echo");
+	return $PW;
+}
+
+sub encryptPassword {
+	my $pw = shift;
+	return crypt($pw, pack("C2",(int(rand 26)+65),(int(rand 26)+65)));
+}

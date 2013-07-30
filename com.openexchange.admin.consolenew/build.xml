@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.admin.console overrides">
+
+    <description>
+        Installs the scripts for the CLTs.
+    </description>
+
+    <import file="build-clt.xml" />
+
+    <!-- Constants -->
+    <property name="sbinDir" value="sbin" />
+
+    <target name="postInstall">
+        <antcall target="createLinks" />
+    </target>
+
+    <target name="createLinks">
+        <property name="contextLinks" value="changecontext,deletecontext,disablecontext,disableallcontext,enablecontext,enableallcontext,existscontext,deleteinvisible,movecontextdatabase,movecontextfilestore,listcontext,listcontextsbydatabase,listcontextsbyfilestore,changefilestore,listdatabase,listfilestore,listserver,registerdatabase,registerfilestore,registerserver,unregisterdatabase,unregisterfilestore,unregisterserver,changedatabase,getaccesscombinationnameforcontext,getmoduleaccessforcontext,getadminid" />
+        <foreach list="${contextLinks}" target="createContextLink" param="linkName" />
+        <property name="userLinks" value="deleteuser,changeuser,listuser,existsuser,creategroup,deletegroup,changegroup,listgroup,createresource,deleteresource,changeresource,listresource,getaccesscombinationnameforuser,changeaccessglobal" />
+        <foreach list="${userLinks}" target="createUserLink" param="linkName" />
+    	<property name="publicationLinks" value="deletepublication" />
+    	<foreach list="${publicationLinks}" target="getPublicationLink" param="linkName" />
+    </target>
+
+    <target name="createContextLink">
+        <symlink resource="${prefix}/${sbinDir}/createcontext" link="${destDir}/${prefix}/${sbinDir}/${linkName}" overwrite="true" />
+    </target>
+
+    <target name="createUserLink">
+        <symlink resource="${prefix}/${sbinDir}/createuser" link="${destDir}/${prefix}/${sbinDir}/${linkName}" overwrite="true" />
+    </target>
+
+	<target name="getPublicationLink">
+	        <symlink resource="${prefix}/${sbinDir}/getpublication" link="${destDir}/${prefix}/${sbinDir}/${linkName}" overwrite="true" />
+	</target>
+
+</project>
