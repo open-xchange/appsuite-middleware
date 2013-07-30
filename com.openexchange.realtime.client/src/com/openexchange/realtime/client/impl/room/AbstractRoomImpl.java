@@ -223,15 +223,16 @@ public abstract class AbstractRoomImpl implements RTRoom {
     public void leave() throws RTException {
         Validate.notNull(connection, "Not logged in!");
         try {
+            JSONObject leave = this.createLeaveObject();
+            this.send(leave);
+        } catch (Exception exception) {
+            throw new RTException(exception);
+        } finally {
             this.connection.unregisterHandler(this.roomName);
             this.pingTimer.cancel();
             this.pingTimerTask.cancel();
             this.pingTimer = null;
             this.pingTimerTask = null;
-            JSONObject leave = this.createLeaveObject();
-            this.send(leave);
-        } catch (Exception exception) {
-            throw new RTException(exception);
         }
     }
 

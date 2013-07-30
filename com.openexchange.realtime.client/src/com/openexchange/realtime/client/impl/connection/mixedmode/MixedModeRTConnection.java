@@ -51,7 +51,6 @@ package com.openexchange.realtime.client.impl.connection.mixedmode;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -78,7 +77,6 @@ import com.ning.http.client.Response;
 import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;
 import com.openexchange.realtime.client.RTMessageHandler;
-import com.openexchange.realtime.client.impl.config.ConfigurationProvider;
 import com.openexchange.realtime.client.impl.connection.AbstractRTConnection;
 import com.openexchange.realtime.client.impl.connection.Constants;
 import com.openexchange.realtime.client.impl.connection.RequestBuilderHelper;
@@ -282,7 +280,7 @@ public class MixedModeRTConnection extends AbstractRTConnection {
                     try {
                         onReceive(received, true);
                     } catch (RTException rtException) {
-                        LOG.error("Error in handling the incoming object.", rtException);
+                        LOG.error("Error in handling the incoming message: {}", received, rtException);
                     }
                 }
             });
@@ -458,7 +456,7 @@ public class MixedModeRTConnection extends AbstractRTConnection {
                 }
             }
         } catch (Exception e) {
-            LOG.error("Exception while executing send request.", e);
+            LOG.error("Exception while executing request {} with data {}", request, request.getStringData(), e);
             throw new RTException("Exception while executing send request.", e);
         }
     }
