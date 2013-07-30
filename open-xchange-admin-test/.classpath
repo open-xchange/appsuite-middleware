@@ -5,7 +5,7 @@
 	<classpathentry kind="lib" path="lib/junit-4.6.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.rmi"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.consolenew"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.console"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.plugin.hosting"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.common"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.reseller"/>

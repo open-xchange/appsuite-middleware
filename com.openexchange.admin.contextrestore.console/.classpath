@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.cli_1.2.0.v201105210650.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.cli.source_1.2.0.v201105210650.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.console.common"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.contextrestore.rmi"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.rmi"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.contextrestore"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
