@@ -1,3 +1,7 @@
+* 2013-07-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27868: Added null guard
+
 * 2013-07-30 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 26639: Introduced image data source for user contacts   
