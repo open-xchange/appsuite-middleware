@@ -829,7 +829,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		 */
 		final EffectivePermission permission = Tools.getPermission(contextID, folderID, currentUserID);
 		QueryFields queryFields;
-		if (permission.canReadAllObjects() || 1 == userIDs.length && currentUserID == userIDs[0]) {
+		if (permission.canReadAllObjects() || null != userIDs && 1 == userIDs.length && currentUserID == userIDs[0]) {
 			// no limitation
 			queryFields = new QueryFields(fields);
 		} else {
@@ -847,7 +847,7 @@ public class ContactServiceImpl extends DefaultContactService {
         if (null == userIDs || 0 == userIDs.length) {
             searchTerm.addSearchTerm(Tools.createContactFieldTerm(
                 ContactField.INTERNAL_USERID, SingleOperation.GREATER_THAN, Integer.valueOf(0)));
-        } else if (1 == userIDs.length) {
+        } else if (null != userIDs && 1 == userIDs.length) {
             searchTerm.addSearchTerm(Tools.createContactFieldTerm(
                 ContactField.INTERNAL_USERID, SingleOperation.EQUALS, Integer.valueOf(userIDs[0])));
         } else {

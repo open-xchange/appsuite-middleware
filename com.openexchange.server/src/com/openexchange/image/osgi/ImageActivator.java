@@ -55,6 +55,7 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.filemanagement.internal.ManagedFileImageDataSource;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
+import com.openexchange.groupware.contact.datasource.UserImageDataSource;
 import com.openexchange.image.ImageActionFactory;
 import com.openexchange.image.Mp3ImageDataSource;
 import com.openexchange.mail.conversion.InlineImageDataSource;
@@ -90,6 +91,13 @@ public class ImageActivator extends AJAXModuleActivator {
             contactProps.put("identifier", contactDataSource.getRegistrationName());
             registerService(DataSource.class, contactDataSource, contactProps);
             ImageActionFactory.addMapping(contactDataSource.getRegistrationName(), contactDataSource.getAlias());
+        }
+        {
+            UserImageDataSource userDataSource = UserImageDataSource.getInstance();
+            Dictionary<String, Object> contactProps = new Hashtable<String, Object>(1);
+            contactProps.put("identifier", userDataSource.getRegistrationName());
+            registerService(DataSource.class, userDataSource, contactProps);
+            ImageActionFactory.addMapping(userDataSource.getRegistrationName(), userDataSource.getAlias());
         }
         {
             Mp3ImageDataSource mp3DataSource = Mp3ImageDataSource.getInstance();
