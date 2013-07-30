@@ -50,9 +50,9 @@
 package com.openexchange.folderstorage.outlook;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExtension;
@@ -94,7 +94,7 @@ public final class OutlookFolder implements FolderExtension {
     private Boolean subscribedSubfolders;
 
     private String newId;
-    
+
 
     /**
      * Initializes a {@link OutlookFolder} with specified real folder.
@@ -444,13 +444,15 @@ public final class OutlookFolder implements FolderExtension {
     public void setBits(final int bits) {
         // Nothing to do
     }
-    
-    
 
+
+
+    @Override
     public void setMeta(Map<String, Object> meta) {
         realFolder.setMeta(meta);
     }
 
+    @Override
     public Map<String, Object> getMeta() {
         return realFolder.getMeta();
     }
@@ -460,6 +462,17 @@ public final class OutlookFolder implements FolderExtension {
             return null;
         }
         return new Date(d.getTime());
+    }
+
+    @Override
+    public Set<String> getSupportedCapabilities() {
+        return realFolder.getSupportedCapabilities();
+    }
+
+    @Override
+    public void setSupportedCapabilities(Set<String> capabilities) {
+        realFolder.setSupportedCapabilities(capabilities);
+
     }
 
 }

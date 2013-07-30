@@ -49,7 +49,10 @@
 
 package com.openexchange.file.storage;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -86,6 +89,18 @@ public interface FileStorageFolder extends FileStorageConstants {
      * The capability identifier for subscription support.
      */
     public static final String CAPABILITY_SUBSCRIPTION = "SUBSCRIPTION";
+
+    /**
+     * The capability identifier for publication support.
+     */
+    public static final String CAPABILITY_PUBLICATION = "PUBLICATION";
+
+    /**
+     * All known capabilities in a set.
+     */
+    public static final Set<String> ALL_CAPABILITIES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] {
+        CAPABILITY_PERMISSIONS, CAPABILITY_PUBLICATION, CAPABILITY_QUOTA, CAPABILITY_SORT, CAPABILITY_SUBSCRIPTION }
+    )));
 
     /**
      * Gets the capabilities of this folder; e.g <code>"QUOTA"</code>, <code>"PERMISSIONS"</code>, etc.

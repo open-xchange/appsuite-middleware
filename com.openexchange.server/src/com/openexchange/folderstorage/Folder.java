@@ -53,6 +53,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * {@link Folder} - A folder.
@@ -441,7 +442,7 @@ public interface Folder extends Serializable, Cloneable {
      * @param bits The bits to set
      */
     void setBits(final int bits);
-    
+
     /**
      * Sets dynamic metadata
      */
@@ -451,7 +452,21 @@ public interface Folder extends Serializable, Cloneable {
      * Gets dynamic metadata
      */
     Map<String, Object> getMeta();
-    
+
+    /**
+     * Gets a list of supported capabilities.
+     *
+     * @return The supported capabilities
+     */
+    Set<String> getSupportedCapabilities();
+
+    /**
+     * Sets the list of supported capabilities.
+     *
+     * @param capabilitites The capabilities to set
+     */
+    void setSupportedCapabilities(Set<String> capabilities);
+
     /**
      * Creates and returns a copy of this object.
      *

@@ -149,6 +149,10 @@ public enum FolderField {
      */
     STANDARD_FOLDER_TYPE(316, "standard_folder_type"),
     /**
+     * The folder's supported capabilities
+     */
+    SUPPORTED_CAPABILITIES(317, "supported_capabilities"),
+    /**
      * The permissions bits
      */
     BITS(-1, "bits"),
@@ -159,8 +163,8 @@ public enum FolderField {
     /**
      * The permission's group flag
      */
-    GROUP(-1, "group"), 
-    
+    GROUP(-1, "group"),
+
     META(23, "meta");
 
     private final int column;
