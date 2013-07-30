@@ -49,10 +49,12 @@
 
 package com.openexchange.ajax.container;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -65,6 +67,57 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added some JavaDoc comments
  */
 public class FileHolder implements IFileHolder {
+
+    private static final Field bufField;
+    private static final Field markField;
+    static {
+        Field f;
+        try {
+            f = ByteArrayInputStream.class.getDeclaredField("buf");
+            f.setAccessible(true);
+        } catch (final SecurityException e) {
+            f = null;
+        } catch (final NoSuchFieldException e) {
+            f = null;
+        }
+        bufField = f;
+        try {
+            f = ByteArrayInputStream.class.getDeclaredField("mark");
+            f.setAccessible(true);
+        } catch (final SecurityException e) {
+            f = null;
+        } catch (final NoSuchFieldException e) {
+            f = null;
+        }
+        markField = f;
+    }
+
+    private static byte[] bytesFrom(final ByteArrayInputStream bais) {
+        if (null == bais) {
+            return null;
+        }
+        try {
+            final Field bufField = FileHolder.bufField;
+            final Field markfield = FileHolder.markField;
+            if (null != bufField && null != markfield) {
+                final byte[] buf = (byte[]) bufField.get(bais);
+                final int mark = markfield.getInt(bais);
+                if (mark <= 0) {
+                    return buf;
+                }
+                final int len = buf.length - mark;
+                if (len <= 0) {
+                    return null;
+                }
+                final byte [] ret = new byte[len];
+                System.arraycopy(buf, mark, ret, 0, len);
+                return ret;
+            }
+        } catch (final Exception e) {
+            // Ignore
+        }
+        return null;
+    }
 
     private static final class FileInputStreamClosure implements InputStreamClosure {
 
@@ -164,7 +217,18 @@ public class FileHolder implements IFileHolder {
 
     @Override
     public boolean repetitive() {
-        return null != isClosure;
+        if (null != isClosure) {
+            return true;
+        }
+        if (is instanceof ByteArrayInputStream) {
+            final ByteArrayInputStream bais = (ByteArrayInputStream) is;
+            final byte[] bytes = bytesFrom(bais);
+            if (null != bytes) {
+                isClosure = new ByteArrayInputStreamClosure(bytes);
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
