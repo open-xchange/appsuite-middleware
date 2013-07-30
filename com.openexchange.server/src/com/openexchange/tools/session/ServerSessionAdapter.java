@@ -115,7 +115,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         }
         return null == session ? null : new ServerSessionAdapter(session, context, user);
     }
-    
+
 
     /**
      * Gets the server session for specified session.
@@ -132,7 +132,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         }
         return null == session ? null : new ServerSessionAdapter(session, context, user, userConfiguration);
     }
-    
+
     public static ServerSession valueOf(int userId, int contextId) throws OXException {
         return new ServerSessionAdapter(userId, contextId);
     }
@@ -146,16 +146,18 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
     public ServerSessionAdapter(final int userId, final int contextId) throws OXException {
         super();
-        
+
         this.session = new SessionObject("synthetic") {
+            @Override
             public int getUserId() { return userId; };
+            @Override
             public int getContextId() {return contextId; };
         };
         this.serverSession = null;
-        
+
         ctx = contextId > 0 ? ContextStorage.getStorageContext(contextId) : null;
     }
-    
+
     /**
      * Initializes a new {@link ServerSessionAdapter}.
      *

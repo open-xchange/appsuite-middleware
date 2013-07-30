@@ -56,10 +56,13 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.logging.Log;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UserConfiguration} - Represents a user configuration.
@@ -650,6 +653,25 @@ public class UserConfiguration implements Serializable, Cloneable {
      */
     public boolean canDelegateTasks() {
         return hasPermission(DELEGATE_TASKS);
+    }
+
+    /**
+     * Checks if global address book is enabled.
+     *
+     * @param serverSession The session
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     */
+    public boolean isGlobalAddressBookEnabled(final ServerSession serverSession) {
+        final Context context = serverSession.getContext();
+        if (null == context) {
+            return false;
+        }
+        try {
+            return new OXFolderAccess(context).getFolderPermission(FolderObject.SYSTEM_LDAP_FOLDER_ID, serverSession.getUserId(), this).isFolderVisible();
+        } catch (final OXException e) {
+            LOG.warn("Cannot check availability of Global Address Book.", e);
+            return false;
+        }
     }
 
     /**
