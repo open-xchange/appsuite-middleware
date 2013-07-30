@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.database.getfolder.SystemInfostoreFolder;
@@ -505,6 +506,10 @@ public final class DatabaseFolderConverter {
                 }
             }
         }
+        /*
+         * assume all supported capabilities for database folders
+         */
+        databaseFolder.setSupportedCapabilities(FileStorageFolder.ALL_CAPABILITIES);
         return databaseFolder;
     }
 

@@ -109,7 +109,7 @@ public final class FileStorageFolderImpl extends AbstractFolder {
     public FileStorageFolderImpl(final FileStorageFolder fsFolder, final String accountId, final String serviceId) {
         super();
         final String fullname = fsFolder.getId();
-        id = FileStorageFolderIdentifier.getFQN(serviceId, accountId, fullname);
+        id = FileStorageFolderIdentifier.isFQN(fullname) ? fullname : FileStorageFolderIdentifier.getFQN(serviceId, accountId, fullname);
         name = fsFolder.getName();
         final boolean isRootFolder = fsFolder.isRootFolder();
         if (isRootFolder) { // Root folder
@@ -147,6 +147,7 @@ public final class FileStorageFolderImpl extends AbstractFolder {
             cacheable = !fsFolder.isDefaultFolder();
         }
         meta = fsFolder.getMeta();
+        supportedCapabilities = fsFolder.getCapabilities();
     }
 
     @Override

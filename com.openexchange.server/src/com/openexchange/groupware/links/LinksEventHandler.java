@@ -148,7 +148,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                 } catch (OXException e) {
                     LOG.error(e.getMessage(), e);
                 } catch (NumberFormatException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.debug("Error parsing numerical identifiers from event: " + e.getMessage() + ". Skipping.");
                 }
 
                 if (LOG.isDebugEnabled()) {
@@ -166,7 +166,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                 } catch (OXException e) {
                     LOG.error(e.getMessage(), e);
                 } catch (NumberFormatException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.debug("Error parsing numerical identifiers from event: " + e.getMessage() + ". Skipping.");
                 }
 
                 if (LOG.isDebugEnabled()) {

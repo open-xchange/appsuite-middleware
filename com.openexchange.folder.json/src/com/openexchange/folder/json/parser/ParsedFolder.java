@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.Permission;
@@ -112,8 +113,10 @@ public final class ParsedFolder implements Folder {
     protected int bits;
 
     protected String newId;
-    
+
     protected Map<String, Object> meta = new HashMap<String, Object>();
+
+    protected Set<String> supportedCapbilitites;
 
     /**
      * Initializes an empty {@link ParsedFolder}.
@@ -431,7 +434,15 @@ public final class ParsedFolder implements Folder {
     public void setMeta(Map<String, Object> meta) {
         this.meta = meta;
     }
-    
-    
+
+    @Override
+    public Set<String> getSupportedCapabilities() {
+        return this.supportedCapbilitites;
+    }
+
+    @Override
+    public void setSupportedCapabilities(Set<String> capabilities) {
+        this.supportedCapbilitites = capabilities;
+    }
 
 }

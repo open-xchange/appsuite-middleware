@@ -9,6 +9,7 @@
 
 * 2013-07-30 - tobias.friedrich@open-xchange.com
 
+ - Fix for bug 27396: Added "supported_capabilities" to indicate non-publishable folders   
  - Fix for bug 26639: Introduced image data source for user contacts   
 
 * 2013-07-29 - jan.bauerdick@open-xchange.com

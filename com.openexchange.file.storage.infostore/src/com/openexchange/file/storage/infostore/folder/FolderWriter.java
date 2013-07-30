@@ -103,6 +103,7 @@ public final class FolderWriter {
                 final String[] subfolderIDs = folder.getSubfolderIDs();
                 ret.setSubfolders(subfolderIDs != null && subfolderIDs.length > 0);
             }
+            ret.setCapabilities(FileStorageFolder.ALL_CAPABILITIES);
             return ret;
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());

@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderField;
@@ -458,14 +459,24 @@ public final class VirtualFolder implements ParameterizedFolder {
         return Collections.unmodifiableMap(properties);
     }
 
+    @Override
     public void setMeta(Map<String, Object> meta) {
         realFolder.setMeta(meta);
     }
 
+    @Override
     public Map<String, Object> getMeta() {
         return realFolder.getMeta();
     }
-    
-    
+
+    @Override
+    public Set<String> getSupportedCapabilities() {
+        return realFolder.getSupportedCapabilities();
+    }
+
+    @Override
+    public void setSupportedCapabilities(Set<String> capabilities) {
+        realFolder.setSupportedCapabilities(capabilities);
+    }
 
 }

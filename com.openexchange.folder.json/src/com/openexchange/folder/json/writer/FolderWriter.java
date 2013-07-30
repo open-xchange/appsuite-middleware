@@ -61,6 +61,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -453,7 +454,15 @@ public final class FolderWriter {
                 Map<String, Object> meta =  folder.getMeta();
                 jsonPutter.put(FolderField.META.getName(), JSONCoercion.coerceToJSON(meta));
             }
-            
+
+        });
+        m.put(FolderField.SUPPORTED_CAPABILITIES.getColumn(), new FolderFieldWriter() {
+
+            @Override
+            public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+                final Set<String> caps = folder.getSupportedCapabilities();
+                jsonPutter.put(FolderField.SUPPORTED_CAPABILITIES.getName(), null == caps ? JSONObject.NULL : new JSONArray(caps));
+            }
         });
         STATIC_WRITERS_MAP = m;
 
