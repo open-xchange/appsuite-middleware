@@ -6,6 +6,7 @@
 * 2013-07-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 27868: Added null guard
+ - Fix for bug 27872: Introduced possibility to output unparsable images to disk for debugging purpose
 
 * 2013-07-30 - tobias.friedrich@open-xchange.com
 
