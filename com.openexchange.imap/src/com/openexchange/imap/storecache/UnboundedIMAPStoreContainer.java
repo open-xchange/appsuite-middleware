@@ -60,6 +60,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPValidity;
+import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.imap.IMAPStore;
 
 
@@ -118,7 +119,15 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         final IMAPStoreWrapper imapStoreWrapper = queue.poll();
         IMAPStore imapStore = null == imapStoreWrapper ? null : imapStoreWrapper.imapStore;
         if (null == imapStore) {
-            imapStore = newStore(server, port, login, pw, imapSession, validity);
+            try {
+                imapStore = newStore(server, port, login, pw, imapSession, validity);
+            } catch (final MessagingException e) {
+                if (!(e.getNextException() instanceof ConnectQuotaExceededException)) {
+                    throw e;
+                }
+                // Await until available
+                return queue.take().imapStore;
+            }
             if (DEBUG) {
                 LOG.debug("IMAPStoreContainer.getStore(): Returning newly established IMAPStore instance.");
             }

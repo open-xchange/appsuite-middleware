@@ -49,21 +49,16 @@
 
 package com.sun.mail.imap;
 
+import java.io.IOException;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.URLName;
 import javax.security.auth.Subject;
-import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.util.PropUtil;
@@ -74,26 +69,6 @@ import com.sun.mail.util.PropUtil;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class JavaIMAPStore extends IMAPStore {
-
-    private static final int DEFAULT_SEMAPHORE_TIMEOUT_MILLIS = 20000;
-
-    /** The login semaphore */
-    private static final ConcurrentMap<URLName, Semaphore> loginSemaphores = new ConcurrentHashMap<URLName, Semaphore>(16);
-
-    private static Semaphore initLoginSemaphore(final URLName url, final int permits) {
-        if (permits <= 0) {
-            return null;
-        }
-        Semaphore s = loginSemaphores.get(url);
-        if (null == s) {
-            final Semaphore ns = new Semaphore(permits);
-            s = loginSemaphores.putIfAbsent(url, ns);
-            if (null == s) {
-                s = ns;
-            }
-        }
-        return s;
-    }
 
     /** Whether SASL is enabled. */
     private final boolean enableSASL;
@@ -112,19 +87,6 @@ public class JavaIMAPStore extends IMAPStore {
 
     /** Proxy auth user */
     private String proxyAuthUser;
-
-    /** The login timeout */
-    private final long loginSemaphoreTimeoutMillis;
-
-    /** The max. number of concurrent connected stores */
-    private final int maxNumConnections;
-
-    /** The login semaphore */
-    private volatile Semaphore semaphore;
-
-    /** The account identifier */
-    private int accountId;
-
 
     /**
      * Initializes a new {@link JavaIMAPStore}.
@@ -169,22 +131,6 @@ public class JavaIMAPStore extends IMAPStore {
                 proxyAuthUser = s;
             }
         }
-        final int maxNumConnections = PropUtil.getIntSessionProperty(session, "mail.imap.maxNumConnections", 0);
-        this.maxNumConnections = maxNumConnections;
-        if (maxNumConnections <= 0) {
-            loginSemaphoreTimeoutMillis = -1L;
-            accountId = -1;
-        } else {
-            final boolean loginSemaphoreAwait = PropUtil.getBooleanSessionProperty(session, "mail.imap.loginSemaphoreAwait", false);
-            if (loginSemaphoreAwait) {
-                loginSemaphoreTimeoutMillis = -1L;
-            } else {
-                final int defaultTimeout = DEFAULT_SEMAPHORE_TIMEOUT_MILLIS;
-                final int millis = PropUtil.getIntSessionProperty(session, "mail.imap.loginSemaphoreTimeoutMillis", defaultTimeout);
-                loginSemaphoreTimeoutMillis = millis <= 0 ? defaultTimeout : millis;
-            }
-            accountId = PropUtil.getIntSessionProperty(session, "mail.imap.accountId", 0);
-        }
     }
 
     /**
@@ -198,42 +144,12 @@ public class JavaIMAPStore extends IMAPStore {
     }
 
     @Override
+    protected IMAPProtocol newIMAPProtocol(String host, int port) throws IOException, ProtocolException {
+        return new JavaIMAPProtocol(name, host, port, session.getProperties(), isSSL, logger);
+    }
+
+    @Override
     protected void login(final IMAPProtocol p, final String u, final String pw) throws ProtocolException {
-        /*-
-         * Get semaphore (if enabled)
-         *
-         * - Include account identifier for account-wise login tracking
-         */
-        final Semaphore semaphore = initLoginSemaphore(new URLName("imap", p.getHost(), p.getPort(), /*Integer.toString(accountId)*/null, u, pw), maxNumConnections);
-        if (null != semaphore) {
-            final boolean debug = (logger.isLoggable(Level.FINE));
-            this.semaphore = semaphore;
-            try {
-                final long loginSemaphoreTimeoutMillis = this.loginSemaphoreTimeoutMillis;
-                if (loginSemaphoreTimeoutMillis > 0) {
-                    // Await released permit only for specified amount of milliseconds
-                    if (debug) {
-                        logger.fine("JavaIMAPStore.login: performing limited login. max wait time: " + loginSemaphoreTimeoutMillis + " -- current number of permits available: " + semaphore.availablePermits());
-                    }
-                    if (!semaphore.tryAcquire(loginSemaphoreTimeoutMillis, TimeUnit.MILLISECONDS)) {
-                        // No permit acquired in time
-                        throw new ConnectQuotaExceededException("Max. number of connections exceeded. Try again later.");
-                    }
-                } else {
-                    // Await until released permit available
-                    if (debug) {
-                        logger.fine("JavaIMAPStore.login: performing limited login. awaiting until a used connection gets closed -- current number of permits available: " + semaphore.availablePermits());
-                    }
-                    semaphore.acquire();
-                }
-                if (debug) {
-                    logger.fine("JavaIMAPStore.login: login permitted -- number of threads waiting to acquire: " + semaphore.getQueueLength());
-                }
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new ProtocolException("Interrupted", e);
-            }
-        }
         /*
          * Auth stuff
          */
@@ -262,35 +178,6 @@ public class JavaIMAPStore extends IMAPStore {
         } else {
             // Do regular authentication
             super.login(p, u, pw);
-        }
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            super.finalize();
-        } finally {
-            releaseSemaphore();
-        }
-    }
-
-    @Override
-    protected void logout(final IMAPProtocol protocol) throws ProtocolException {
-        try {
-            super.logout(protocol);
-        } finally {
-            releaseSemaphore();
-        }
-    }
-
-    private void releaseSemaphore() {
-        final Semaphore semaphore = this.semaphore;
-        if (null != semaphore) {
-            if (logger.isLoggable(Level.FINE)) {
-                logger.fine("JavaIMAPStore.logout: releasing login semaphore -- number of threads waiting to acquire: " + semaphore.getQueueLength());
-            }
-            semaphore.release();
-            this.semaphore = null;
         }
     }
 

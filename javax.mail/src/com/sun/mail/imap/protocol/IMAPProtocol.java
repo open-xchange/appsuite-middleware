@@ -44,7 +44,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Date;
@@ -287,6 +286,7 @@ public class IMAPProtocol extends Protocol {
 	// only other choice is PREAUTH
 	final IMAPResponse ir = (IMAPResponse)r;
 	if (ir.keyEquals("PREAUTH")) {
+	    authenticatedStatusChanging(true, "PREAUTH", null);
 	    authenticated = true;
 	    setCapabilities(r);
 	} else {
@@ -386,7 +386,10 @@ public class IMAPProtocol extends Protocol {
     @Override
     public void disconnect() {
 	super.disconnect();
-	authenticated = false;	// just in case
+	if (authenticated) {
+	    try { authenticatedStatusChanging(false, null, null); } catch(Exception x) {/*ignore*/}
+	    authenticated = false;	// just in case
+	}
     }
 
     /**
@@ -418,10 +421,14 @@ public class IMAPProtocol extends Protocol {
      * @see "RFC2060, section 6.1.3"
      */
     public void logout() throws ProtocolException {
+    boolean notified = false;
 	try {
+	    authenticatedStatusChanging(false, null, null);
+
 	    final Response[] r = command("LOGOUT", null);
 
 	    authenticated = false;
+	    notified = true;
 	    // dispatch any unsolicited responses.
 	    //  NOTE that the BYE response is dispatched here as well
 	    notifyResponseHandlers(r);
@@ -436,6 +443,7 @@ public class IMAPProtocol extends Protocol {
      * @see "RFC2060, section 6.2.2"
      */
     public void login(final String u, final String p) throws ProtocolException {
+    authenticatedStatusChanging(true, u, p);
 	final Argument args = new Argument();
 	args.writeString(u);
 	args.writeString(p);
@@ -471,7 +479,8 @@ public class IMAPProtocol extends Protocol {
      */
     public synchronized void authlogin(final String u, final String p)
 				throws ProtocolException {
-	final List<Response> v = new ArrayList<Response>();
+    authenticatedStatusChanging(true, u, p);
+    final List<Response> v = new ArrayList<Response>();
 	String tag = null;
 	Response r = null;
 	boolean done = false;
@@ -586,6 +595,7 @@ public class IMAPProtocol extends Protocol {
      */
     public synchronized void authplain(final String authzid, final String u, final String p)
 				throws ProtocolException {
+    authenticatedStatusChanging(true, u, p);
     final List<Response> v = new ArrayList<Response>();
 	String tag = null;
 	Response r = null;
@@ -696,6 +706,7 @@ public class IMAPProtocol extends Protocol {
      */
     public synchronized void authntlm(final String authzid, final String u, final String p)
 				throws ProtocolException {
+    authenticatedStatusChanging(true, u, p);
     final List<Response> v = new ArrayList<Response>();
 	String tag = null;
 	Response r = null;
@@ -786,7 +797,8 @@ public class IMAPProtocol extends Protocol {
      */
     public void sasllogin(final String[] allowed, final String realm, final String authzid,
 				final String u, final String p) throws ProtocolException {
-	if (saslAuthenticator == null) {
+    authenticatedStatusChanging(true, u, p);
+    if (saslAuthenticator == null) {
 	    try {
 		final Class sac = Class.forName(
 		    "com.sun.mail.imap.protocol.IMAPSaslAuthenticator");
@@ -2738,5 +2750,16 @@ public class IMAPProtocol extends Protocol {
 	} catch (final IOException ex) {
 	    // nothing to do, hope to detect it again later
 	}
+    }
+
+    /**
+     * Invoked whenever the authenticated status is about being changed.
+     *
+     * @param authenticated The authenticated status to be set
+     * @param u The user identifier or <code>"PREAUTH"</code>
+     * @param p The password
+     */
+    protected void authenticatedStatusChanging(final boolean authenticate, final String u, final String p) throws ProtocolException {
+        // Nothing
     }
 }
