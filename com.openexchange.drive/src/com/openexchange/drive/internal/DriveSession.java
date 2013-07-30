@@ -163,16 +163,19 @@ public class DriveSession {
      * @param message The message to trace
      */
     public void trace(Object message) {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace(message);
-        }
-        if (isDiagnostics()) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-            sdf.setTimeZone(TimeZones.UTC);
-            diagnosticsLog
-                .append(sdf.format(new Date()))
-                .append(" [").append(Thread.currentThread().getId()).append("]\n")
-                .append(message).append("\n\n");
+        if (LOG.isTraceEnabled() || isDiagnostics()) {
+            String msg = String.valueOf(message);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(msg);
+            }
+            if (isDiagnostics()) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+                sdf.setTimeZone(TimeZones.UTC);
+                diagnosticsLog
+                    .append(sdf.format(new Date()))
+                    .append(" [").append(Thread.currentThread().getId()).append("] : ")
+                    .append(msg.trim()).append("\n\n");
+            }
         }
     }
 
