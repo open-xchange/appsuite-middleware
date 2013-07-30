@@ -1,6 +1,7 @@
 * 2013-07-30 - martin.herfurth@open-xchange.com
 
  - Fix for bug 27581: Removed Direct Link label from external invitation mails.
+ - Fix for bug 27314: Missing folder id on itip analyze response with exceptions.
 
 * 2013-07-30 - thorben.betten@open-xchange.com
 
