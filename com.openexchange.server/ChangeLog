@@ -1,3 +1,7 @@
+* 2013-07-30 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 27581: Removed Direct Link label from external invitation mails.
+
 * 2013-07-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 27868: Added null guard

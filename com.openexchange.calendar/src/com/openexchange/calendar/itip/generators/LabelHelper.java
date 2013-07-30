@@ -234,7 +234,7 @@ public class LabelHelper {
 
     public String getDirectLink() {
     	if (mail.getRecipient().isExternal() || mail.getRecipient().isResource()) {
-    		return "";
+    		return null;
     	}
     	final ConfigurationService config = services.getService(ConfigurationService.class);
 		final String template = config.getProperty("object_link", "https://[hostname]/[uiwebpath]#m=[module]&i=[object]&f=[folder]");
