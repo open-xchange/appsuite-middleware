@@ -246,6 +246,12 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             } else {
                 capabilities.remove(getCapability("spam"));
             }
+            // Global Address Book
+            if (serverSession.getUserConfiguration().isGlobalAddressBookEnabled(serverSession)) {
+                capabilities.add(getCapability("gab"));
+            } else {
+                capabilities.remove(getCapability("gab"));
+            }
 
             // permission properties
             final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
