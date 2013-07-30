@@ -192,9 +192,9 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     private final ConcurrentMap<String, ManagedFileImpl> files;
 
-    private PropertyListener propertyListener;
+    private volatile PropertyListener propertyListener;
 
-    private ScheduledTimerTask timerTask;
+    private volatile ScheduledTimerTask timerTask;
 
     private final AtomicReference<File> tmpDirReference;
 
@@ -211,7 +211,9 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         if (null == cs) {
             throw new IllegalStateException("Missing configuration service");
         }
-        final String path = cs.getProperty("UPLOAD_DIRECTORY", (propertyListener = new FileManagementPropertyListener(tmpDirReference)));
+        final FileManagementPropertyListener propertyListener = new FileManagementPropertyListener(tmpDirReference);
+        this.propertyListener = propertyListener;
+        final String path = cs.getProperty("UPLOAD_DIRECTORY", propertyListener);
         tmpDirReference.set(getTmpDirByPath(path));
         // Register timer task
         final TimerService timer = registry.getService(TimerService.class);
@@ -541,20 +543,22 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
     }
 
     void shutDown(final boolean complete) {
+        final PropertyListener propertyListener = this.propertyListener;
         if (complete && propertyListener != null) {
             final ConfigurationService cs = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
             if (null != cs) {
                 cs.removePropertyListener("UPLOAD_DIRECTORY", propertyListener);
             }
-            propertyListener = null;
+            this.propertyListener = null;
         }
+        final ScheduledTimerTask timerTask = this.timerTask;
         if (timerTask != null) {
             timerTask.cancel(true);
             final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
             if (null != timer) {
                 timer.purge();
             }
-            timerTask = null;
+            this.timerTask = null;
         }
         tmpDirReference.set(null);
         clear();
