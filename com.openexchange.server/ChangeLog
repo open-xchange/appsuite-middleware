@@ -1,3 +1,7 @@
+* 2013-07-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 26639: Introduced image data source for user contacts   
+
 * 2013-07-29 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 27775: Use new build system to build admin clt packages

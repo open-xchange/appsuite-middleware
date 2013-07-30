@@ -49,8 +49,6 @@
 
 package com.openexchange.mail.json.osgi;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
@@ -62,14 +60,15 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXResultDecorator;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
+import com.openexchange.groupware.contact.datasource.UserImageDataSource;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.image.ImageLocation;
@@ -118,7 +117,8 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         registerService(ResultConverter.class, converter);
         registerService(ResultConverter.class, new MailJSONConverter(converter));
 
-        final ContactField[] fields = new ContactField[] { ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };
+        final ContactField[] fields = new ContactField[] {
+            ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };
         registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, fields));
     }
 
@@ -170,46 +170,73 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                     if (null == from || 0 == from.length) {
                         return;
                     }
-                    final ContactSearchObject searchObject = createContactSearchObject(from[0]);
-                    SearchIterator<Contact> it = null;
-                    final List<Contact> contacts = new LinkedList<Contact>();
+                    /*
+                     * discover image URL for 'from' address
+                     */
+                    SearchIterator<Contact> searchIterator = null;
+                    String imageURL = null;
                     try {
-                        it = getService(ContactService.class).searchContacts(
-                            session, searchObject, fields, new SortOptions(ContactField.FOLDER_ID, Order.ASCENDING));
-                        while (it.hasNext()) {
-                            contacts.add(it.next());
-                        }
-                    } finally {
-                        if (it != null) {
-                            it.close();
-                        }
-                    }
-                    converter.convert2JSON(requestData, result, session);
-                    final JSONObject jObject = (JSONObject) result.getResultObject();
-                    final JSONArray jArray = new JSONArray();
-                    for (final Contact contact : contacts) {
-                        if (0 < contact.getNumberOfImages() || contact.containsImage1() && null != contact.getImage1()) {
-                            try {
-                                final ContactImageDataSource imgSource = ContactImageDataSource.getInstance();
-                                String timestamp = null != contact.getLastModified() ?
-                                    String.valueOf(contact.getLastModified().getTime()) : null;
-                                final ImageLocation imageLocation =
-                                    new ImageLocation.Builder().folder(Integer.toString(contact.getParentFolderID())).id(
-                                        Integer.toString(contact.getObjectID())).timestamp(timestamp).build();
-                                final String imageURL = imgSource.generateUrl(imageLocation, session);
-                                jArray.put(imageURL);
-                            } catch (final OXException e) {
-                                com.openexchange.log.LogFactory.getLog(ContactWriter.class).warn(
-                                    "Contact image URL could not be generated.",
-                                    e);
+                        searchIterator = getService(ContactService.class).searchContacts(
+                            session, createContactSearchObject(from[0]), fields, new SortOptions(ContactField.FOLDER_ID, Order.ASCENDING));
+                        if (null != searchIterator) {
+                            while (null == imageURL && searchIterator.hasNext()) {
+                                Contact contact = searchIterator.next();
+                                imageURL = getImageURL(session, contact);
                             }
                         }
+                    } finally {
+                        if (null != searchIterator) {
+                            searchIterator.close();
+                        }
                     }
-                    jObject.put("from_image_urls", jArray);
+                    /*
+                     * convert to JSON, decorate with image URL
+                     */
+                    converter.convert2JSON(requestData, result, session);
+                    JSONArray fromImageURLs = new JSONArray();
+                    if (null != imageURL) {
+                        fromImageURLs.put(imageURL);
+                    }
+                    ((JSONObject)result.getResultObject()).put("from_image_urls", fromImageURLs);
                 } catch (final JSONException e) {
                     throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
                 }
             }
+        }
+
+        /**
+         * Tries to generate an URL for the image of the supplied contact if available.
+         *
+         * @param session The server session
+         * @param contact The contact to generate the image URL for
+         * @return The image URL, or <code>null</code> if not available or something went wrong
+         */
+        private String getImageURL(ServerSession session, Contact contact) {
+            if (0 < contact.getNumberOfImages() || contact.containsImage1() && null != contact.getImage1()) {
+                String timestamp = null != contact.getLastModified() ? String.valueOf(contact.getLastModified().getTime()) : null;
+                try {
+                    if (FolderObject.SYSTEM_LDAP_FOLDER_ID == contact.getParentFolderID() && contact.containsInternalUserId()) {
+                        /*
+                         * prefer user contact image url
+                         */
+                        ImageLocation imageLocation = new ImageLocation.Builder().id(
+                            String.valueOf(contact.getInternalUserId())).timestamp(timestamp).build();
+                        return UserImageDataSource.getInstance().generateUrl(imageLocation, session);
+                    } else {
+                        /*
+                         * use default contact image data source
+                         */
+                        ImageLocation imageLocation = new ImageLocation.Builder().folder(String.valueOf(contact.getParentFolderID()))
+                            .id(String.valueOf(contact.getObjectID())).timestamp(timestamp).build();
+                        return ContactImageDataSource.getInstance().generateUrl(imageLocation, session);
+                    }
+                } catch (OXException e) {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn("Error generating contact image URL", e);
+                    }
+                }
+            }
+            return null;
         }
 
         private ContactSearchObject createContactSearchObject(final InternetAddress from) {
