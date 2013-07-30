@@ -7,6 +7,7 @@
 
  - Fix for bug 27868: Added null guard
  - Fix for bug 27872: Introduced possibility to output unparsable images to disk for debugging purpose
+ - Fix for bug 27477: Refactored IMAP exception class to let its error message reside in a dedicated translatable class file
 
 * 2013-07-30 - tobias.friedrich@open-xchange.com
 
