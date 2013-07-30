@@ -20,5 +20,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.user.copy"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.java"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.console.common"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
