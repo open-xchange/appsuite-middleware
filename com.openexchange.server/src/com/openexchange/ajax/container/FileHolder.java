@@ -225,6 +225,7 @@ public class FileHolder implements IFileHolder {
             final byte[] bytes = bytesFrom(bais);
             if (null != bytes) {
                 isClosure = new ByteArrayInputStreamClosure(bytes);
+                is = null;
                 return true;
             }
         }
