@@ -1,5 +1,6 @@
 * 2013-07-30 - martin.herfurth@open-xchange.com
 
+<<<<<<< HEAD
  - Fix for bug 27581: Removed Direct Link label from external invitation mails.
  - Fix for bug 27314: Missing folder id on itip analyze response with exceptions.
 
@@ -46,7 +47,7 @@
 * 2013-07-25 - marcus.klein@open-xchange.com
 
  - Fix for bug 26607: Optimized JMX queries for certain MBeans using object names and removed multi threading.
-
+ 
 * 2013-07-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 27345: Suppress "Shared files" folder if it does not contain user-visible subfolders
@@ -99,6 +100,8 @@
 * 2013-07-17 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 27554: Removed unneeded System.out.println
+ - Fix for bug 26913: Update task to delete redundant keys & removed them from table definitions
+ 
 
 * 2013-07-16 - marc.arens@open-xchange.com
 
