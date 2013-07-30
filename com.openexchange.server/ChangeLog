@@ -1,6 +1,5 @@
 * 2013-07-30 - martin.herfurth@open-xchange.com
 
-<<<<<<< HEAD
  - Fix for bug 27581: Removed Direct Link label from external invitation mails.
  - Fix for bug 27314: Missing folder id on itip analyze response with exceptions.
 
@@ -96,6 +95,10 @@
 
  - Fix for bug 27232: Reconnect if mail part's folder has been closed in the meantime
  - Fix for bug 27641: Lowered log level for charset auto-detection triggered by invalid charset name
+
+* 2013-07-18 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 27579: Check if connection leads to configdb
 
 * 2013-07-17 - jan.bauerdick@open-xchange.com
 
