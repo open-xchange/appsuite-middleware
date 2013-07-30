@@ -48,7 +48,6 @@ import java.util.Vector;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.io.PrintStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -265,7 +264,7 @@ public class IMAPStore extends Store
     static class ConnectionPool {
 
         // container for the pool's IMAP protocol objects
-        private final Vector authenticatedConnections = new Vector();
+        private final Vector<IMAPProtocol> authenticatedConnections = new Vector<IMAPProtocol>();
 
         // vectore of open folders
         private Vector folders;
@@ -836,7 +835,9 @@ public class IMAPStore extends Store
             FAILED_AUTHS.put(new StringBuilder(u).append('@').append(pw).toString(), new StampAndError(cex, System.currentTimeMillis()));
         }
 	    throw cex;
-	}
+	} catch (ConnectQuotaExceededException cqex) {
+        throw cqex;
+    }
 
 	if (proxyAuthUser != null) {
         p.proxyauth(proxyAuthUser);
@@ -997,7 +998,7 @@ public class IMAPStore extends Store
                         pool.authenticatedConnections.size());
 
                 // remove the available connection from the Authenticated queue
-                p = (IMAPProtocol)pool.authenticatedConnections.lastElement();
+                p = pool.authenticatedConnections.lastElement();
                 pool.authenticatedConnections.removeElement(p);
 
 		// check if the connection is still live
@@ -1108,7 +1109,7 @@ public class IMAPStore extends Store
                     pool.logger.fine("getStoreProtocol() - " +
                         "connection available -- size: " +
                         pool.authenticatedConnections.size());
-                p = (IMAPProtocol)pool.authenticatedConnections.firstElement();
+                p = pool.authenticatedConnections.firstElement();
             }
  
 	    if (pool.storeConnectionInUse) {
@@ -1320,8 +1321,7 @@ public class IMAPStore extends Store
             for (int index = pool.authenticatedConnections.size() - 1;
 		    index >= 0; --index) {
                 try {
-		    IMAPProtocol p = (IMAPProtocol)
-			pool.authenticatedConnections.elementAt(index);
+		    IMAPProtocol p = pool.authenticatedConnections.elementAt(index);
 		    p.removeResponseHandler(this);
 		    if (force) {
                 p.disconnect();
@@ -1364,7 +1364,7 @@ public class IMAPStore extends Store
                 // (leave the first connection).
                 for (int index = pool.authenticatedConnections.size() - 1; 
                      index > 0; index--) {
-                    p = (IMAPProtocol)pool.authenticatedConnections.
+                    p = pool.authenticatedConnections.
                         elementAt(index);
 		    if (pool.logger.isLoggable(Level.FINE))
                         pool.logger.fine("protocol last used: " +

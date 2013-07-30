@@ -1003,31 +1003,34 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             imapSession.getProperties().put("mail.imap.authTimeout", Long.toString(authTimeout));
         }
         /*
+         * Get store either from store cache or newly created
+         */
+        if (useIMAPStoreCache()) {
+            /*
+             * Possible connect limitation
+             */
+            if (maxCount > 0) {
+                imapSession.getProperties().put("mail.imap.maxNumAuthenticated", Integer.toString(maxCount));
+                imapSession.getProperties().put("mail.imap.authAwait", "true");
+                imapSession.getProperties().put("mail.imap.accountId", Integer.toString(accountId));
+            }
+            return borrowIMAPStore(imapSession, server, port, login, pw);
+        }
+        /*
          * Possible connect limitation
          */
         if (maxCount > 0) {
-            imapSession.getProperties().put("mail.imap.maxNumConnections", Integer.toString(maxCount));
-            imapSession.getProperties().put("mail.imap.loginSemaphoreTimeoutMillis", Integer.toString(20000));
+            imapSession.getProperties().put("mail.imap.maxNumAuthenticated", Integer.toString(maxCount));
+            imapSession.getProperties().put("mail.imap.authTimeoutMillis", "10000");
             imapSession.getProperties().put("mail.imap.accountId", Integer.toString(accountId));
         }
         /*
-         * Get store...
+         * Retry loop...
          */
         final int maxRetryCount = 3;
         int retryCount = 0;
         while (retryCount++ < maxRetryCount) {
             try {
-                if (useIMAPStoreCache()) {
-                    return IMAPStoreCache.getInstance().borrowIMAPStore(
-                        accountId,
-                        imapSession,
-                        server,
-                        port,
-                        login,
-                        pw,
-                        session,
-                        getIMAPValidity(this));
-                }
                 /*
                  * Establish a new one...
                  */
@@ -1063,6 +1066,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
         }
         throw new MessagingException("Unable to connect to IMAP store: " + new URLName("imap", server, port, null, login, "xxxx"));
+    }
+
+    private IMAPStore borrowIMAPStore(final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw) throws MessagingException, OXException {
+        return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session, getIMAPValidity(this));
     }
 
     private void checkTemporaryDown(final IIMAPProperties imapConfProps) throws OXException, IMAPException {
