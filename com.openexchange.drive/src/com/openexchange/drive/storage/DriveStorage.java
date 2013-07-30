@@ -61,7 +61,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.drive.internal.DriveSession;
@@ -96,8 +95,6 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DriveStorage {
-
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveStorage.class);
 
     private final FolderID rootFolderID;
     private final DriveSession session;
@@ -172,8 +169,8 @@ public class DriveStorage {
         copiedFile.setLastModified(new Date());
         copiedFile.setVersion("1");
         List<Field> fileFields = Arrays.asList(new Field[] { Field.FILENAME, Field.TITLE, Field.FOLDER_ID });
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(this.toString() + "cp " + combine(getPath(sourceFile.getFolderId()), sourceFile.getFileName()) + " " +
+        if (session.isTraceEnabled()) {
+            session.trace(this.toString() + "cp " + combine(getPath(sourceFile.getFolderId()), sourceFile.getFileName()) + " " +
                 combine(targetPath, targetFileName));
         }
         String targetId = getFileAccess().copy(sourceFile.getId(), copiedFile.getFolderId(), copiedFile, null, fileFields);
@@ -194,8 +191,8 @@ public class DriveStorage {
         copiedFile.setLastModified(new Date());
         copiedFile.setFileSize(sourceFile.getFileSize());
         copiedFile.setFileMD5Sum(sourceFile.getFileMD5Sum());
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(this.toString() + "cp " + combine(getPath(sourceFile.getFolderId()), sourceFile.getFileName()) + " " +
+        if (session.isTraceEnabled()) {
+            session.trace(this.toString() + "cp " + combine(getPath(sourceFile.getFolderId()), sourceFile.getFileName()) + " " +
                 combine(getPath(copiedFile.getFolderId()), copiedFile.getFileName()));
         }
         getFileAccess().saveDocument(copiedFile, getDocument(sourceFile), copiedFile.getSequenceNumber());
@@ -224,8 +221,8 @@ public class DriveStorage {
      * @throws OXException
      */
     public File deleteFile(File file) throws OXException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(this.toString() + "rm " + combine(getPath(file.getFolderId()), file.getFileName()));
+        if (session.isTraceEnabled()) {
+            session.trace(this.toString() + "rm " + combine(getPath(file.getFolderId()), file.getFileName()));
         }
         List<String> notRemoved = getFileAccess().removeDocument(Arrays.asList(new String[] { file.getId() }), file.getSequenceNumber());
         if (null != notRemoved && 0 < notRemoved.size()) {
@@ -292,8 +289,8 @@ public class DriveStorage {
             }
         }
         if (0 < updatedFields.size()) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(this.toString() + "mv " + combine(getPath(file.getFolderId()), file.getFileName()) + " " +
+            if (session.isTraceEnabled()) {
+                session.trace(this.toString() + "mv " + combine(getPath(file.getFolderId()), file.getFileName()) + " " +
                     combine(getPath(movedFile.getFolderId()), movedFile.getFileName()));
             }
             getFileAccess().saveFileMetadata(movedFile, file.getSequenceNumber(), updatedFields);
@@ -326,8 +323,8 @@ public class DriveStorage {
         File file = null != additionalMetadata ? new DefaultFile(additionalMetadata) : new DefaultFile();
         file.setFolderId(getFolderID(path, true));
         file.setFileName(fileName);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(this.toString() + "touch " + combine(path, fileName));
+        if (session.isTraceEnabled()) {
+            session.trace(this.toString() + "touch " + combine(path, fileName));
         }
         getFileAccess().saveDocument(file, Streams.newByteArrayInputStream(new byte[0]), FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
         return file;
@@ -364,8 +361,8 @@ public class DriveStorage {
         /*
          * check for move and/or rename operations
          */
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(this.toString() + "mv " + path + " " + newPath);
+        if (session.isTraceEnabled()) {
+            session.trace(this.toString() + "mv " + path + " " + newPath);
         }
         if (false == oldParentPath.equals(newParentPath)) {
             /*
@@ -406,8 +403,8 @@ public class DriveStorage {
         }
         FileStorageFolder folder = getFolder(path);
         knownFolders.forget(path, folder, true);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(this.toString() + "rmdir " + path);
+        if (session.isTraceEnabled()) {
+            session.trace(this.toString() + "rmdir " + path);
         }
         getFolderAccess().deleteFolder(folder.getId());
         return folder.getId();
@@ -622,8 +619,8 @@ public class DriveStorage {
         for (FileStoragePermission permission : parent.getPermissions()) {
             newFolder.addPermission(permission);
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(this.toString() + "mkdir " + combine(getPath(parent.getId()), name));
+        if (session.isTraceEnabled()) {
+            session.trace(this.toString() + "mkdir " + combine(getPath(parent.getId()), name));
         }
         String newFolderID = getFolderAccess().createFolder(newFolder);
         return getFolderAccess().getFolder(newFolderID);
