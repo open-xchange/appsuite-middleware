@@ -146,6 +146,7 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
             return;
         }
 
+        TracerInjector.injectTracer(message);
         long seq = protocol.addSequence(message);
         LOG.debug("Sending message: {}", message);
         Future<MessageState> sent = resendBuffer.put(seq, message);
