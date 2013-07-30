@@ -203,6 +203,9 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             	analysis.addAnnotation(annotation);
             	break;
             } else if (differ) {
+                if (original != null) {
+                    exception.setParentFolderID(original.getParentFolderID());
+                }
                 change.setNewAppointment(exception);
                 change.setConflicts(util.getConflicts(exception, session));
 
