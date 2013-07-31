@@ -87,14 +87,13 @@ public final class SystemPrivateFolder {
      * Gets the database folder representing system private folder.
      *
      * @param fo The folder object fetched from database
-     * @param translate Whether to translate
      * @return The database folder representing system private folder
      */
-    public static DatabaseFolder getSystemPrivateFolder(final FolderObject fo, final boolean translate) {
+    public static DatabaseFolder getSystemPrivateFolder(final FolderObject fo) {
         /*
          * The system public folder
          */
-        final DatabaseFolder retval = translate ? new LocalizedDatabaseFolder(fo) : new DatabaseFolder(fo);
+        final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
         retval.setName(FolderStrings.SYSTEM_PRIVATE_FOLDER_NAME);
         // Enforce getSubfolders() on storage
         retval.setSubfolderIDs(null);
@@ -112,7 +111,7 @@ public final class SystemPrivateFolder {
      * @return The database folder representing system private folder
      * @throws OXException If the database folder cannot be returned
      */
-    public static int[] getSystemPrivateFolderSubfoldersAsInt(final User user, final UserConfiguration userConfiguration, final Context ctx, final boolean translate, final Connection con) throws OXException {
+    public static int[] getSystemPrivateFolderSubfoldersAsInt(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
         try {
             /*
              * The system private folder
@@ -134,31 +133,25 @@ public final class SystemPrivateFolder {
                 if (folderObject.isDefaultFolder()) {
                     final int module = folderObject.getModule();
                     if (FolderObject.CALENDAR == module) {
-                        if (translate) {
+                        {
                             if (null == stringHelper) {
                                 stringHelper = StringHelper.valueOf(user.getLocale());
                             }
                             folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
-                        } else {
-                            folderObject.setFolderName(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME);
                         }
                     } else if (FolderObject.CONTACT == module) {
-                        if (translate) {
+                        {
                             if (null == stringHelper) {
                                 stringHelper = StringHelper.valueOf(user.getLocale());
                             }
                             folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
-                        } else {
-                            folderObject.setFolderName(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME);
                         }
                     } else if (FolderObject.TASK == module) {
-                        if (translate) {
+                        {
                             if (null == stringHelper) {
                                 stringHelper = StringHelper.valueOf(user.getLocale());
                             }
                             folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
-                        } else {
-                            folderObject.setFolderName(FolderStrings.DEFAULT_TASK_FOLDER_NAME);
                         }
                     }
                 }
@@ -187,7 +180,7 @@ public final class SystemPrivateFolder {
      * @return The database folder representing system private folder
      * @throws OXException If the database folder cannot be returned
      */
-    public static List<String[]> getSystemPrivateFolderSubfolders(final User user, final UserConfiguration userConfiguration, final boolean translate, final Context ctx, final Connection con) throws OXException {
+    public static List<String[]> getSystemPrivateFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
         try {
             /*
              * The system private folder
@@ -209,32 +202,20 @@ public final class SystemPrivateFolder {
                 if (folderObject.isDefaultFolder()) {
                     final int module = folderObject.getModule();
                     if (FolderObject.CALENDAR == module) {
-                        if (translate) {
-                            if (null == stringHelper) {
-                                stringHelper = StringHelper.valueOf(user.getLocale());
-                            }
-                            folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
-                        } else {
-                            folderObject.setFolderName(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME);
+                        if (null == stringHelper) {
+                            stringHelper = StringHelper.valueOf(user.getLocale());
                         }
+                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
                     } else if (FolderObject.CONTACT == module) {
-                        if (translate) {
-                            if (null == stringHelper) {
-                                stringHelper = StringHelper.valueOf(user.getLocale());
-                            }
-                            folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
-                        } else {
-                            folderObject.setFolderName(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME);
+                        if (null == stringHelper) {
+                            stringHelper = StringHelper.valueOf(user.getLocale());
                         }
+                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
                     } else if (FolderObject.TASK == module) {
-                        if (translate) {
-                            if (null == stringHelper) {
-                                stringHelper = StringHelper.valueOf(user.getLocale());
-                            }
-                            folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
-                        } else {
-                            folderObject.setFolderName(FolderStrings.DEFAULT_TASK_FOLDER_NAME);
+                        if (null == stringHelper) {
+                            stringHelper = StringHelper.valueOf(user.getLocale());
                         }
+                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
                     }
                 }
             }

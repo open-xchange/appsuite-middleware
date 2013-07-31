@@ -62,7 +62,6 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
 /**
@@ -88,7 +87,7 @@ public final class ClearAction extends AbstractFolderAction {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final com.openexchange.tools.session.ServerSession session) throws OXException {
+    protected AJAXRequestResult doPerform(final AJAXRequestData request, final com.openexchange.tools.session.ServerSession session) throws OXException, JSONException {
         /*
          * Parse parameters
          */
@@ -107,29 +106,25 @@ public final class ClearAction extends AbstractFolderAction {
         /*
          * Delete
          */
-        try {
-            final List<OXException> warnings = new LinkedList<OXException>();
-            final JSONArray responseArray = new JSONArray();
-            final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-            for (int i = 0; i < len; i++) {
-                final String folderId = jsonArray.getString(i);
-                try {
-                    folderService.clearFolder(treeId, folderId, session);
-                } catch (final OXException e) {
-                    final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ClearAction.class));
-                    log.error(e.getMessage(), e);
-                    responseArray.put(folderId);
-                    e.setCategory(com.openexchange.exception.Category.CATEGORY_WARNING);
-                    warnings.add(e);
-                }
+        final List<OXException> warnings = new LinkedList<OXException>();
+        final JSONArray responseArray = new JSONArray();
+        final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
+        for (int i = 0; i < len; i++) {
+            final String folderId = jsonArray.getString(i);
+            try {
+                folderService.clearFolder(treeId, folderId, session);
+            } catch (final OXException e) {
+                final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ClearAction.class));
+                log.error(e.getMessage(), e);
+                responseArray.put(folderId);
+                e.setCategory(com.openexchange.exception.Category.CATEGORY_WARNING);
+                warnings.add(e);
             }
-            /*
-             * Return appropriate result
-             */
-            return new AJAXRequestResult(responseArray).addWarnings(warnings);
-        } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
+        /*
+         * Return appropriate result
+         */
+        return new AJAXRequestResult(responseArray).addWarnings(warnings);
     }
 
 }
