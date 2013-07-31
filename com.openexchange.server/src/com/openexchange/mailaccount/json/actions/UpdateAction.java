@@ -138,6 +138,30 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
         final List<OXException> warnings = new LinkedList<OXException>();
         final Set<Attribute> fieldsToUpdate = MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
 
+        final int id = accountDescription.getId();
+        if (-1 == id) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.ID);
+        }
+
+        if (fieldsToUpdate.contains(Attribute.LOGIN_LITERAL)) {
+            final String login = accountDescription.getLogin();
+            if (isEmpty(login)) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(MailAccountFields.LOGIN, null == login ? "null" : login);
+            }
+        }
+        if (fieldsToUpdate.contains(Attribute.PASSWORD_LITERAL)) {
+            final String pw = accountDescription.getPassword();
+            if (MailAccount.DEFAULT_ID != id && isEmpty(pw)) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(MailAccountFields.PASSWORD, null == pw ? "null" : pw);
+            }
+        }
+        if (fieldsToUpdate.contains(Attribute.MAIL_URL_LITERAL)) {
+            final String server = accountDescription.getMailServer();
+            if (MailAccount.DEFAULT_ID != id && isEmpty(server)) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(MailAccountFields.MAIL_URL, null == server ? "null" : server);
+            }
+        }
+
         final Set<Attribute> notAllowed = new HashSet<Attribute>(fieldsToUpdate);
         notAllowed.removeAll(WEBMAIL_ALLOWED);
         final int contextId = session.getContextId();
@@ -150,11 +174,6 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
 
         final MailAccountStorageService storageService =
             ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-
-        final int id = accountDescription.getId();
-        if (-1 == id) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.ID);
-        }
 
         final MailAccount toUpdate = storageService.getMailAccount(id, session.getUserId(), contextId);
         if (isUnifiedINBOXAccount(toUpdate)) {

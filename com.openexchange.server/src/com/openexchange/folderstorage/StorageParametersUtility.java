@@ -52,8 +52,8 @@ package com.openexchange.folderstorage;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Set;
+import com.openexchange.java.StringAllocator;
 
 /**
  * {@link StorageParametersUtility} - A utility class for {@link StorageParameters}.
@@ -117,7 +117,21 @@ public final class StorageParametersUtility {
      * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
      */
     public static boolean parseBoolParameter(final String value) {
-        return (null != value) && BOOL_VALS.contains(value.trim().toLowerCase(Locale.ENGLISH));
+        return (null != value) && BOOL_VALS.contains(toLowerCase(value.trim()));
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

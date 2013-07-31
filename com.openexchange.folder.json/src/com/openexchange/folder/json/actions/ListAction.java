@@ -50,8 +50,6 @@
 package com.openexchange.folder.json.actions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -103,7 +101,7 @@ public final class ListAction extends AbstractFolderAction {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    protected AJAXRequestResult doPerform(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*
          * Parse parameters
          */
@@ -140,7 +138,7 @@ public final class ListAction extends AbstractFolderAction {
                 parentId,
                 all,
                 session,
-                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put("ignoreTranslation", request.getParameter("ignoreTranslation")));
+                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put(PARAM_IGNORE_TRANSLATION, request.getParameter(PARAM_IGNORE_TRANSLATION)));
         /*
          * Determine max. last-modified time stamp
          */
@@ -157,16 +155,17 @@ public final class ListAction extends AbstractFolderAction {
         /*
          * length > 0
          */
+        final boolean ignoreTranslation = parseBoolean(request.getParameter(PARAM_IGNORE_TRANSLATION), false);
         if (errorOnDuplicateName) {
             final Set<String> names = new HashSet<String>(length);
-            final List<UserizedFolder> ret = new ArrayList<UserizedFolder>();
+            final List<UserizedFolder> ret = new ArrayList<UserizedFolder>(length);
             for (int i = 0; i < length; i++) {
                 final UserizedFolder userizedFolder = subfolders[i];
                 Locale locale = userizedFolder.getLocale();
                 if (null == locale) {
                     locale = FolderWriter.DEFAULT_LOCALE;
                 }
-                if (!names.add(userizedFolder.getLocalizedName(locale))) {
+                if (!names.add(ignoreTranslation ? userizedFolder.getLocalizedName(locale) : userizedFolder.getName())) {
                     // Duplicate name
                     //final String parentName = folderService.getFolder(treeId, parentId, session, null).getLocalizedName(locale);
                     //throw FolderExceptionErrorMessage.DUPLICATE_NAME.create(userizedFolder.getLocalizedName(locale), parentName);
@@ -193,20 +192,11 @@ public final class ListAction extends AbstractFolderAction {
         /*
          * Write subfolders as JSON arrays to JSON array
          */
-        final JSONArray jsonArray = FolderWriter.writeMultiple2Array(columns, subfolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
+        final JSONArray jsonArray = FolderWriter.writeMultiple2Array(columns, subfolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST, ignoreTranslation ? parametersFor(PARAM_IGNORE_TRANSLATION, Boolean.TRUE) : null);
         /*
          * Return appropriate result
          */
         return new AJAXRequestResult(jsonArray, 0 == lastModified ? null : new Date(lastModified)).addWarnings(subfoldersResponse.getWarnings());
-    }
-
-    private static Set<String> TRUES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true", "yes", "on", "1")));
-
-    private static boolean parseBoolean(final String string, final boolean defaultValue) {
-        if (null == string) {
-            return defaultValue;
-        }
-        return TRUES.contains(string.toLowerCase(Locale.ENGLISH).trim());
     }
 
 }

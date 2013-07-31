@@ -51,19 +51,26 @@ package com.openexchange.folder.json.actions;
 
 import static com.openexchange.folder.json.Tools.getUnsignedInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
+import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractFolderAction} - An abstract folder action.
@@ -73,11 +80,37 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 public abstract class AbstractFolderAction implements AJAXActionService {
 
     /**
+     * <code>"ignoreTranslation"</code>.
+     */
+    public static final String PARAM_IGNORE_TRANSLATION = "ignoreTranslation".intern();
+
+    /**
      * Initializes a new {@link AbstractFolderAction}.
      */
     protected AbstractFolderAction() {
         super();
     }
+
+    @Override
+    public final AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        try {
+            return doPerform(request, session);
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Performs the action.
+     *
+     * @param request The AJAX request data
+     * @param session The associated session
+     * @throws OXException If an OX error occurs
+     * @throws JSONException If a JSON error occurs
+     */
+    protected abstract AJAXRequestResult doPerform(final AJAXRequestData request, final ServerSession session) throws OXException, JSONException;
 
     /**
      * Gets the default tree identifier to use if request does not provide any.
@@ -229,6 +262,54 @@ public abstract class AbstractFolderAction implements AJAXActionService {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(parameterName, tmp);
         }
         return ct;
+    }
+
+    private static Set<String> TRUES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true", "yes", "on", "1", "y")));
+
+    /**
+     * Parses string to boolean.
+     *
+     * @param string The string to parse
+     * @param defaultValue The default value to return if passed string is <code>null</code>
+     * @return The parsed boolean value or the default value if passed string is <code>null</code>
+     */
+    public static boolean parseBoolean(final String string, final boolean defaultValue) {
+        if (null == string) {
+            return defaultValue;
+        }
+        return TRUES.contains(toLowerCase(string).trim());
+    }
+
+    protected Map<String, Object> parametersFor(final Object... objects) {
+        if (null == objects) {
+            return null;
+        }
+        final int length = objects.length;
+        if (length == 0) {
+            return null;
+        }
+        if (length % 2 != 0) {
+            throw new IllegalArgumentException("Eden number of objects required");
+        }
+        final Map<String, Object> ret = new HashMap<String, Object>(length >> 1);
+        for (int i = 0; i < length; i += 2) {
+            ret.put(objects[i].toString(), objects[i+1]);
+        }
+        return ret;
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

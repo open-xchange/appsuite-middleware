@@ -58,21 +58,19 @@ import com.openexchange.folderstorage.SortableId;
  */
 public final class MailId implements SortableId {
 
-    private final String fullname;
-
+    private final String fullName;
     private final int ordinal;
-
     private String name;
 
     /**
      * Initializes a new {@link MailId}.
      *
-     * @param fullname The fullname
+     * @param fullName The full name
      * @param ordinal The ordinal
      */
-    public MailId(final String fullname, final int ordinal) {
+    public MailId(final String fullName, final int ordinal) {
         super();
-        this.fullname = fullname;
+        this.fullName = fullName;
         this.ordinal = ordinal;
     }
 
@@ -94,7 +92,7 @@ public final class MailId implements SortableId {
 
     @Override
     public String getId() {
-        return fullname;
+        return fullName;
     }
 
     @Override
@@ -145,7 +143,7 @@ public final class MailId implements SortableId {
 
     @Override
     public String toString() {
-        return new com.openexchange.java.StringAllocator(32).append("{folderId=").append(fullname).append(", ordinal=").append(ordinal).append('}').toString();
+        return new com.openexchange.java.StringAllocator(32).append("{folderId=").append(fullName).append(", ordinal=").append(ordinal).append('}').toString();
     }
 
 }

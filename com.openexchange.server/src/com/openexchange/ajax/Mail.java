@@ -203,7 +203,7 @@ import com.openexchange.tools.versit.utility.VersitUtility;
 
 /**
  * {@link Mail} - The servlet to handle mail requests.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Mail extends PermissionServlet implements UploadListener {
@@ -234,7 +234,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
     /**
      * Generates a wrapping {@link AbstractOXException} for specified exception.
-     * 
+     *
      * @param cause The exception to wrap
      * @return The wrapping {@link AbstractOXException}
      */
@@ -2443,7 +2443,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
     /**
      * Checks if specified file name has a trailing file extension.
-     * 
+     *
      * @param fileName The file name
      * @return The extension (e.g. <code>".txt"</code>) or <code>null</code>
      */
@@ -3991,14 +3991,13 @@ public class Mail extends PermissionServlet implements UploadListener {
             final BlockingQueue<MimeMessage> queue = new ArrayBlockingQueue<MimeMessage>(100);
             Future<Object> future = null;
             {
-                final ServletFileUpload servletFileUpload = getFileUploadBase();
                 if (!ServletFileUpload.isMultipartContent(req)) {
                     throw MailExceptionCode.UNSUPPORTED_MIME_TYPE.create(req.getContentType());
                 }
                 final ThreadPoolService service = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
                 task = new AppenderTask(mailInterface, folder, force, flags, queue);
                 try {
-                    final FileItemIterator iter = servletFileUpload.getItemIterator(req);
+                    final FileItemIterator iter = newFileUploadBase().getItemIterator(req);
                     if (iter.hasNext()) {
                         future = service.submit(task);
                     }

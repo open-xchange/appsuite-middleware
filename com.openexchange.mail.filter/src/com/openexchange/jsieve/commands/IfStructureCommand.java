@@ -49,7 +49,9 @@
 package com.openexchange.jsieve.commands;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import com.openexchange.jsieve.commands.ActionCommand.Commands;
 
 public abstract class IfStructureCommand extends ControlCommand {
 
@@ -62,8 +64,24 @@ public abstract class IfStructureCommand extends ControlCommand {
         this.actioncommands = actioncommands;
     }
 
+    /**
+     * Gets the command of the first action command contained in action list
+     *
+     * @return The first command or <code>null</code> (if there is no action command available)
+     */
+    public final Commands getFirstCommand() {
+        final List<ActionCommand> thisActionCommands = this.actioncommands;
+        return null == thisActionCommands ? null : (thisActionCommands.isEmpty() ? null : thisActionCommands.get(0).getCommand());
+    }
+
+    /**
+     * Gets the action command
+     *
+     * @return The list of action command; never <code>null</code>
+     */
     public final List<ActionCommand> getActioncommands() {
-        return this.actioncommands;
+        final List<ActionCommand> thisActionCommands = this.actioncommands;
+        return null == thisActionCommands ? Collections.<ActionCommand> emptyList() : thisActionCommands;
     }
 
     public final void setActioncommands(final List<ActionCommand> actioncommands) {

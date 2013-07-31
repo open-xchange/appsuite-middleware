@@ -128,8 +128,8 @@ public final class MessagingFolderImpl extends AbstractFolder {
     }
 
     private MessagingFolderType messagingFolderType;
-
     private boolean cacheable;
+    private String localizedName;
 
     /**
      * Initializes an empty {@link MessagingFolderImpl}.
@@ -153,7 +153,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
      * @param serviceId The service identifier
      * @param fullnameProvider The (optional) fullname provider
      */
-    public MessagingFolderImpl(final MessagingFolder messagingFolder, final int accountId, final String serviceId, final User user, final DefaultFolderFullnameProvider fullnameProvider, final boolean translate) {
+    public MessagingFolderImpl(final MessagingFolder messagingFolder, final int accountId, final String serviceId, final User user, final DefaultFolderFullnameProvider fullnameProvider) {
         super();
         final String fullname = messagingFolder.getId();
         id = MessagingFolderIdentifier.getFQN(serviceId, accountId, fullname);
@@ -191,26 +191,19 @@ public final class MessagingFolderImpl extends AbstractFolder {
             messagingFolderType = TYPES.get(messagingFolder.getDefaultFolderType());
             switch (messagingFolderType) {
             case DRAFTS:
-                if (translate) {
-                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS);
-                }
+                localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS);
                 break;
             case SENT:
-                if (translate) {
-                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT);
-                }
+                localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT);
                 break;
             case SPAM:
-                if (translate) {
-                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM);
-                }
+                localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM);
                 break;
             case TRASH:
-                if (translate) {
-                    name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH);
-                }
+                localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH);
                 break;
             default:
+                localizedName = null;
                 break;
             }
         } else if (messagingFolder.isRootFolder()) {
@@ -218,26 +211,18 @@ public final class MessagingFolderImpl extends AbstractFolder {
         } else if (null != fullname) {
             try {
                 if (fullname.equals(fullnameProvider.getDraftsFolder())) {
-                    if (translate) {
-                        name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS);
-                    }
+                    localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DRAFTS);
                     messagingFolderType = MessagingFolderType.DRAFTS;
                 } else if (fullname.equals(fullnameProvider.getINBOXFolder())) {
                     messagingFolderType = MessagingFolderType.INBOX;
                 } else if (fullname.equals(fullnameProvider.getSentFolder())) {
-                    if (translate) {
-                        name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT);
-                    }
+                    localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SENT);
                     messagingFolderType = MessagingFolderType.SENT;
                 } else if (fullname.equals(fullnameProvider.getSpamFolder())) {
-                    if (translate) {
-                        name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM);
-                    }
+                    localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.SPAM);
                     messagingFolderType = MessagingFolderType.SPAM;
                 } else if (fullname.equals(fullnameProvider.getTrashFolder())) {
-                    if (translate) {
-                        name = StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH);
-                    }
+                    localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.TRASH);
                     messagingFolderType = MessagingFolderType.TRASH;
                 } else {
                     messagingFolderType = MessagingFolderType.NONE;
@@ -300,6 +285,15 @@ public final class MessagingFolderImpl extends AbstractFolder {
     @Override
     public boolean isGlobalID() {
         return false;
+    }
+
+    @Override
+    public String getLocalizedName(final Locale locale) {
+        final String localizedName = this.localizedName;
+        if (null == localizedName) {
+            return name;
+        }
+        return localizedName;
     }
 
     private static final Map<IgnoreCaseString, Integer> KNOWN_CAPS;

@@ -49,9 +49,7 @@
 
 package com.openexchange.html.internal.css;
 
-import gnu.trove.set.TCharSet;
 import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TCharHashSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -676,7 +674,9 @@ public final class CSSMatcher {
                     tmpBuilder.append(m.group()).append(cssElemsBuffer.toString()).append('}').append('\n').toString());
                 cssElemsBuffer.setLength(0);
             }
-            cssBuilder.append(css.substring(lastPos));
+            if (lastPos < css.length()) {
+                cssBuilder.append(css.substring(lastPos));
+            }
             return modified;
         }
         return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
