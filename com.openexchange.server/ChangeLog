@@ -1,3 +1,7 @@
+* 2013-07-31 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27767: Refactored to use "ignoreTranslation" flag in JSON layer only to not affect folder caches
+
 * 2013-07-30 - martin.herfurth@open-xchange.com
 
  - Fix for bug 27581: Removed Direct Link label from external invitation mails.
