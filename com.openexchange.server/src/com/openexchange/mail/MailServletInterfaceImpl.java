@@ -999,15 +999,33 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return mailAccess.getFolderStorage().getFolder(fullName);
     }
 
-    private static final int MAX_FORWARD_COUNT = 8;
+    private static volatile Integer maxForwardCount;
+    private static int maxForwardCount() {
+        Integer tmp = maxForwardCount;
+        if (null == tmp) {
+            synchronized (MailServletInterfaceImpl.class) {
+                tmp = maxForwardCount;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return 8;
+                    }
+                    tmp = Integer.valueOf(service.getIntProperty("com.openexchange.mail.maxForwardCount", 8));
+                    maxForwardCount = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
 
     @Override
     public MailMessage getForwardMessageForDisplay(final String[] folders, final String[] fowardMsgUIDs, final UserSettingMail usm) throws OXException {
         if ((null == folders) || (null == fowardMsgUIDs) || (folders.length != fowardMsgUIDs.length)) {
             throw new IllegalArgumentException("Illegal arguments");
         }
-        if (folders.length > MAX_FORWARD_COUNT) {
-            throw MailExceptionCode.TOO_MANY_FORWARD_MAILS.create(Integer.valueOf(MAX_FORWARD_COUNT));
+        final int maxForwardCount = maxForwardCount();
+        if (maxForwardCount > 0 && folders.length > maxForwardCount) {
+            throw MailExceptionCode.TOO_MANY_FORWARD_MAILS.create(Integer.valueOf(maxForwardCount));
         }
         final FullnameArgument[] arguments = new FullnameArgument[folders.length];
         for (int i = 0; i < folders.length; i++) {
