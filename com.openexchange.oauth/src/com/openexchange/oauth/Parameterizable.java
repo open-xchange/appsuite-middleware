@@ -81,7 +81,7 @@ public interface Parameterizable {
     /**
      * Gets the available parameters' names.
      *
-     * @return The paramter names
+     * @return The parameter names
      */
     Set<String> getParamterNames();
 
