@@ -51,6 +51,8 @@ package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2String;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.getUserName;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -345,6 +347,45 @@ public class OXFolderAccess {
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Determines if folder is visible (without respect to user configuration).
+     *
+     * @param folderId The folder ID
+     * @param userId The user ID
+     * @return <code>true</code> if folder is visible; otherwise <code>false</code>
+     * @throws OXException If operation fails
+     */
+    public final boolean isVisibleFor(final int folderId, final int userId) throws OXException {
+        return isVisibleFor(folderId, userId, UserStorage.getStorageUser(userId, ctx).getGroups());
+    }
+
+    /**
+     * Determines if folder is visible (without respect to user configuration).
+     *
+     * @param folderId The folder ID
+     * @param userId The user ID
+     * @param groups The group identifiers
+     * @return <code>true</code> if folder is visible; otherwise <code>false</code>
+     * @throws OXException If operation fails
+     */
+    public final boolean isVisibleFor(final int folderId, final int userId, final int[] groups) throws OXException {
+        if (null == groups) {
+            return isVisibleFor(folderId, userId);
+        }
+
+        final FolderObject fo = getFolderObject(folderId);
+        final TIntSet set = new TIntHashSet(8);
+        set.add(userId);
+        set.addAll(groups);
+        // Check
+        for (final OCLPermission cur : fo.getPermissions()) {
+            if (set.contains(cur.getEntity()) && cur.isFolderVisible()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

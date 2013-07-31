@@ -183,8 +183,9 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         // ------------- Combined capabilities/permissions ------------ //
         if (!serverSession.isAnonymous()) {
             final UserPermissionBits userPermissionBits = services.getService(UserPermissionService.class).getUserPermissionBits(serverSession.getUserId(), serverSession.getContext());
+            userPermissionBits.setGroups(serverSession.getUser().getGroups());
             // Capabilities by user permission bits
-            for (Permission p: Permission.byBits(userPermissionBits.getPermissionBits())) {
+            for (final Permission p: Permission.byBits(userPermissionBits.getPermissionBits())) {
                 capabilities.add(getCapability(toLowerCase(p.name())));
             }
             // Portal
@@ -232,7 +233,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 capabilities.remove(getCapability("spam"));
             }
             // Global Address Book
-            if (serverSession.getUserConfiguration().isGlobalAddressBookEnabled(serverSession)) {
+            if (userPermissionBits.isGlobalAddressBookEnabled(serverSession)) {
                 capabilities.add(getCapability("gab"));
             } else {
                 capabilities.remove(getCapability("gab"));
