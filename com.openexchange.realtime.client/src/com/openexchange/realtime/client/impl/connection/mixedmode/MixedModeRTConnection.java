@@ -430,7 +430,7 @@ public class MixedModeRTConnection extends AbstractRTConnection {
 
     private void fireSynchronousRequest(Request request) throws RTException {
         if (LOG.isDebugEnabled()) {
-            LOG.debug(System.currentTimeMillis() + ": Firing Request with body " + request.getStringData());
+            LOG.debug("Firing synchronous request with body: {} ", request.getStringData());
         }
         try {
             ListenableFuture<Response> requestFuture = asyncHttpClient.executeRequest(request);
@@ -440,6 +440,9 @@ public class MixedModeRTConnection extends AbstractRTConnection {
             }
             //the ox http api wraps the response stanzas into a data : {} object, try to unwrap
             String responseBody = response.getResponseBody();
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Received synchronously: {}", responseBody);
+            }
             if(!Strings.isNullOrEmpty(responseBody)) {
                 try {
                     JSONObject body = new JSONObject(responseBody);
@@ -468,6 +471,9 @@ public class MixedModeRTConnection extends AbstractRTConnection {
      */
     private void fireAtmosphereRequest(JSONValue jsonValue) {
         try {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Firing asynchronous request with body: {} ", jsonValue.toString());
+            }
             socket.fire(jsonValue);
         } catch (IOException ioException) {
             LOG.info("Unable to fire ping request. Try again with the next iteration");

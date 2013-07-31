@@ -50,13 +50,14 @@
 package com.openexchange.realtime.client.impl.config;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.google.common.base.Strings;
 import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
 
 /**
@@ -74,6 +75,8 @@ import com.openexchange.realtime.client.RTConnectionProperties.RTConnectionType;
  * @since 7.4
  */
 public class ConfigurationProvider {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigurationProvider.class);
 
     /**
      * Singleton that provides the configuration data
@@ -158,6 +161,16 @@ public class ConfigurationProvider {
     private AtomicBoolean isTraceEnabled = new AtomicBoolean(false);
     
     /**
+     * Path for login calls
+     */
+    private String loginPath = apiPath + "/login";
+    
+    /**
+     * Parameter used for login actions
+     */
+    private String loginAction = "login";
+    
+    /**
      * Initializes a new {@link ConfigurationProvider} - only internal
      */
     private ConfigurationProvider() {
@@ -172,14 +185,7 @@ public class ConfigurationProvider {
     public static final synchronized ConfigurationProvider getInstance() {
         if (SINGLETON == null) {
             SINGLETON = new ConfigurationProvider();
-
-            try {
-                loadPropertiesFile();
-            } catch (IllegalAccessException e) {
-                // Error in reading property file content
-            } catch (NoSuchFieldException e) {
-                // Error in reading property file content
-            }
+            SINGLETON.loadPropertiesFile();
         }
         return SINGLETON;
     }
@@ -192,7 +198,7 @@ public class ConfigurationProvider {
      * @throws IllegalAccessException
      * @throws NoSuchFieldException
      */
-    private static void loadPropertiesFile() throws IllegalAccessException, NoSuchFieldException {
+    protected void loadPropertiesFile() {
         Properties prop = new Properties();
 
         try {
@@ -228,10 +234,8 @@ public class ConfigurationProvider {
                 }
             }
             SINGLETON.initializedWithPropertiesFile = true;
-        } catch (FileNotFoundException fileNotFoundException) {
-            // No properties file provided - use default
-        } catch (IOException ioException) {
-            // No properties file provided - use default
+        } catch (Exception e) {
+            LOG.error("Couldn't parse property file", e);
         }
     }
 
@@ -246,20 +250,22 @@ public class ConfigurationProvider {
         String newLine = System.getProperty("line.separator");
 
         result.append(" InitializedWithPropertiesFile: " + this.isInitializedWithPropertiesFile() + newLine);
-        result.append(" clientId: " + this.getClientId() + newLine);
-        result.append(" defaultSelector: " + this.getDefaultSelector() + newLine);
         result.append(" apiPath: " + this.getApiPath() + newLine);
-        result.append(" createPath: " + this.getCreatePath() + newLine);
-        result.append(" queryPath: " + this.getQueryPath() + newLine);
-        result.append(" sendPath: " + this.getSendPath() + newLine);
         result.append(" atmospherePath: " + this.getAtmospherePath() + newLine);
-        result.append(" queryAction: " + this.getQueryAction() + newLine);
-        result.append(" sendAction: " + this.getSendAction() + newLine);
+        result.append(" clientId: " + this.getClientId() + newLine);
         result.append(" connectionType: " + this.getConnectionType() + newLine);
+        result.append(" createPath: " + this.getCreatePath() + newLine);
+        result.append(" defaultSelector: " + this.getDefaultSelector() + newLine);
         result.append(" host: " + this.getHost() + newLine);
-        result.append(" port: " + this.getPort() + newLine);
-        result.append(" secure: " + this.isSecure() + newLine);
         result.append(" isTraceEnabled: " + this.isTraceEnabled() + newLine);
+        result.append(" loginPath: " + this.getLoginPath() + newLine);
+        result.append(" loginAction: " + this.getLoginAction() + newLine);
+        result.append(" port: " + this.getPort() + newLine);
+        result.append(" queryAction: " + this.getQueryAction() + newLine);
+        result.append(" queryPath: " + this.getQueryPath() + newLine);
+        result.append(" secure: " + this.isSecure() + newLine);
+        result.append(" sendPath: " + this.getSendPath() + newLine);
+        result.append(" sendAction: " + this.getSendAction() + newLine);
         result.append("}");
 
         return result.toString();
@@ -355,6 +361,26 @@ public class ConfigurationProvider {
         return host;
     }
 
+    
+    /**
+     * Gets the loginPath
+     *
+     * @return The loginPath
+     */
+    public String getLoginPath() {
+        return loginPath;
+    }
+
+    
+    /**
+     * Gets the loginAction
+     *
+     * @return The loginAction
+     */
+    public String getLoginAction() {
+        return loginAction;
+    }
+
     /**
      * Gets the port
      * 
@@ -413,9 +439,8 @@ public class ConfigurationProvider {
 
     /**
      * Static class that should be used to configure a new {@link ConfigurationProvider}. By calling the setter-methods the default values
-     * will be overridden which means, calling no setter will create a {@link ConfigurationProvider} with the default settings (also created
+     * will be overridden which means, calling {@link Builder#fromFile()} will create a {@link ConfigurationProvider} with the default settings (also created
      * by {@link ConfigurationProvider#getInstance()}.
-     * 
      * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
      * @since 7.4
      */
@@ -428,13 +453,20 @@ public class ConfigurationProvider {
             configurationProvider = new ConfigurationProvider();
         }
 
+        public Builder fromFile() {
+            configurationProvider.loadPropertiesFile();
+            return this;
+        }
+        
         /**
          * Sets the apiPath.
          * 
          * @param apiPath - Path for api calls.
          */
         public Builder setApiPath(String apiPath) {
-            configurationProvider.apiPath = apiPath;
+            if(!Strings.isNullOrEmpty(apiPath)) {
+                configurationProvider.apiPath = apiPath;
+            }
             return this;
         }
 
@@ -444,7 +476,9 @@ public class ConfigurationProvider {
          * @param clientId - Id of the client.
          */
         public Builder setClientId(String clientId) {
-            configurationProvider.clientId = clientId;
+            if(!Strings.isNullOrEmpty(clientId)) {
+                configurationProvider.clientId = clientId;
+            }
             return this;
         }
 
@@ -453,8 +487,22 @@ public class ConfigurationProvider {
          * 
          * @param connectionType - {@link RTConnectionType} the client would like to use.
          */
+        public Builder setConnectionType(String connectionType) {
+            if(!Strings.isNullOrEmpty(connectionType)) {
+                configurationProvider.connectionType = getConnectionType(connectionType);
+            }
+            return this;
+        }
+        
+        /**
+         * Sets the connectionType.
+         * 
+         * @param connectionType - {@link RTConnectionType} the client would like to use.
+         */
         public Builder setConnectionType(RTConnectionType connectionType) {
-            configurationProvider.connectionType = connectionType;
+            if(connectionType != null) {
+                configurationProvider.connectionType = connectionType;
+            }
             return this;
         }
 
@@ -464,7 +512,9 @@ public class ConfigurationProvider {
          * @param createPath - the createPath.
          */
         public Builder setCreatePath(String createPath) {
-            configurationProvider.createPath = createPath;
+            if(!Strings.isNullOrEmpty(createPath)) {
+                configurationProvider.createPath = createPath;
+            }
             return this;
         }
 
@@ -474,7 +524,9 @@ public class ConfigurationProvider {
          * @param atmospherePath - the atmospherePath.
          */
         public Builder setAtmospherePath(String atmospherePath) {
-            configurationProvider.atmospherePath = atmospherePath;
+            if(!Strings.isNullOrEmpty(atmospherePath)) {
+                configurationProvider.atmospherePath = atmospherePath;
+            }
             return this;
         }
 
@@ -484,7 +536,9 @@ public class ConfigurationProvider {
          * @param defaultSelector - the defaultSelector.
          */
         public Builder setDefaultSelector(String defaultSelector) {
-            configurationProvider.defaultSelector = defaultSelector;
+            if(!Strings.isNullOrEmpty(defaultSelector)) {
+                configurationProvider.defaultSelector = defaultSelector;
+            }
             return this;
         }
 
@@ -494,10 +548,48 @@ public class ConfigurationProvider {
          * @param host - the host.
          */
         public Builder setHost(String host) {
-            configurationProvider.host = host;
+            if(!Strings.isNullOrEmpty(host)) {
+                configurationProvider.host = host;
+            }
             return this;
         }
 
+        /**
+         * Sets the login path
+         * 
+         * @param loginPath the login path
+         */
+        public Builder setLoginPath(String loginPath) {
+            if(!Strings.isNullOrEmpty(loginPath)) {
+                configurationProvider.loginPath = loginPath;
+            }
+            return this;
+        }
+
+        /**
+         * Sets the login path
+         * 
+         * @param loginPath the login path
+         */
+        public Builder setLoginAction(String loginAction) {
+            if(!Strings.isNullOrEmpty(loginAction)) {
+                configurationProvider.loginPath = loginAction;
+            }
+            return this;
+        }
+
+        /**
+         * Sets the port.
+         * 
+         * @param port - the port.
+         */
+        public Builder setPort(String port) {
+            if(!Strings.isNullOrEmpty(port)) {
+                configurationProvider.port = new AtomicInteger(Integer.parseInt(port));
+            }
+            return this;
+        }
+        
         /**
          * Sets the port.
          * 
@@ -514,7 +606,9 @@ public class ConfigurationProvider {
          * @param queryAction - the queryAction.
          */
         public Builder setQueryAction(String queryAction) {
-            configurationProvider.queryAction = queryAction;
+            if(!Strings.isNullOrEmpty(queryAction)) {
+                configurationProvider.queryAction = queryAction;
+            }
             return this;
         }
 
@@ -524,7 +618,29 @@ public class ConfigurationProvider {
          * @param queryPath - the queryPath.
          */
         public Builder setQueryPath(String queryPath) {
-            configurationProvider.queryPath = queryPath;
+            if (!Strings.isNullOrEmpty(queryPath)) {
+                configurationProvider.queryPath = queryPath;
+            }
+            return this;
+        }
+
+        /**
+         * Toggle https usage
+         * @param isSecure if true then use https, else http
+         */
+        public Builder setSecure(String isSecure) {
+            if(!Strings.isNullOrEmpty(isSecure)) {
+                configurationProvider.secure.set(Boolean.parseBoolean(isSecure));
+            }
+            return this;
+        }
+
+        /**
+         * Toggle https usage
+         * @param isSecure if true then use https, else http
+         */
+        public Builder setSecure(boolean isSecure) {
+            configurationProvider.secure.set(isSecure);
             return this;
         }
 
@@ -534,7 +650,9 @@ public class ConfigurationProvider {
          * @param sendAction - the sendAction.
          */
         public Builder setSendAction(String sendAction) {
-            configurationProvider.sendAction = sendAction;
+            if(!Strings.isNullOrEmpty(sendAction)) {
+                configurationProvider.sendAction = sendAction;
+            }
             return this;
         }
 
@@ -544,10 +662,24 @@ public class ConfigurationProvider {
          * @param sendPath - the sendPath.
          */
         public Builder setSendPath(String sendPath) {
-            configurationProvider.sendPath = sendPath;
+            if(!Strings.isNullOrEmpty(sendPath)) {
+                configurationProvider.sendPath = sendPath;
+            }
             return this;
         }
         
+        /**
+         * Enable or disable tracing of messages
+         *
+         * @param isTraceEnabled true or false
+         */
+        public Builder setTraceEnabled(String isTraceEnabled) {
+            if(!Strings.isNullOrEmpty(isTraceEnabled)) {
+                configurationProvider.isTraceEnabled.set(Boolean.parseBoolean(isTraceEnabled));
+            }
+            return this;
+        }
+
         /**
          * Enable or disable tracing of messages
          *
@@ -558,6 +690,16 @@ public class ConfigurationProvider {
             return this;
         }
 
+        private RTConnectionType getConnectionType(String connectionType) {
+            for (RTConnectionType type : RTConnectionType.values()) {
+                if (type.name().equalsIgnoreCase(connectionType)) {
+                    return type;
+                }
+            }
+            LOG.info("Couldn't find matching RTConnectionType for: " + connectionType + ". Using RTConnectionType.LONG_POLLING as default");
+            return RTConnectionType.LONG_POLLING;
+        }
+        
         /**
          * @return A valid {@link ConfigurationProvider} instance.
          */
