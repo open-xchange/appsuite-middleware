@@ -194,6 +194,7 @@ public class Bug26789Test {
     @Test
     public void testForNullPointerException2() {
         StringBuilder sb = new StringBuilder(190000);
+        sb.append("<html><head>");
         sb.append("<style type=\"text/css\">.mceResizeHandle {position: absolute;border: 1px soli");
         sb.append("d black;background: #FFF;width: 5px;height: 5px;z-index: 10000}.mceResizeHan");
         sb.append("dle:hover {background: #000}img[data-mce-selected] {outline: 1px solid black");
@@ -2594,6 +2595,7 @@ public class Bug26789Test {
         sb.append("//www.top-of-software.de/\"],a[href^=\"https://farm.plista.com/pets\"],input[on");
         sb.append("click^=\"window.open('http://www.firstload.de/affiliate/\"] { display:none !im");
         sb.append("portant; }</style>");
+        sb.append("</head><body>TEST</body></html>");
 
         String content = sb.toString();
         String test = service.getConformHTML(content, "UTF-8");
