@@ -957,9 +957,6 @@ public class UserPermissionBits implements Serializable{
             return false;
         }
         try {
-
-            System.out.println("UserPermissionBits.isGlobalAddressBookEnabled()");
-
             return new OXFolderAccess(context).isVisibleFor(FolderObject.SYSTEM_LDAP_FOLDER_ID, userId, groups);
         } catch (final OXException e) {
             final Log logger = com.openexchange.log.Log.loggerFor(UserPermissionBits.class);
