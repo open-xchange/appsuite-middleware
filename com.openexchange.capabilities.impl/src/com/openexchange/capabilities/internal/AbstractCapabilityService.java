@@ -171,22 +171,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     @Override
     public Set<Capability> getCapabilities(final int userId, final int contextId, final CapabilityFilter filter) throws OXException {
-        return getCapabilities(ServerSessionAdapter.valueOf(userId, contextId), filter);
-    }
-
-    @Override
-    public Set<Capability> getCapabilities(final int userId, final int contextId) throws OXException {
-        return getCapabilities(userId, contextId, null);
-    }
-
-    @Override
-    public Set<Capability> getCapabilities(final Session session) throws OXException {
-        return getCapabilities(session.getUserId(), session.getContextId());
-    }
-
-    @Override
-    public Set<Capability> getCapabilities(final Session session, final CapabilityFilter filter) throws OXException {
-        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        ServerSession serverSession = ServerSessionAdapter.valueOf(userId, contextId);
 
         Set<Capability> capabilities = new HashSet<Capability>(64);
 
@@ -256,7 +241,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             // permission properties
             final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
             if (configViews != null) {
-                final ConfigView view = configViews.getView(session.getUserId(), session.getContextId());
+                final ConfigView view = configViews.getView(userId, contextId);
                 final String property = PERMISSION_PROPERTY;
                 for (final String scope : configViews.getSearchPath()) {
                     final String permissions = view.property(property, String.class).precedence(scope).get();
@@ -293,11 +278,11 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
         // ---------------- Now the ones from database ------------------ //
         {
-            if (session.getContextId() > 0) {
+            if (contextId > 0) {
                 final Set<String> set = new HashSet<String>();
                 final Set<String> removees = new HashSet<String>();
                 // Context-sensitive
-                for (final String sCap : getContextCaps(session.getContextId())) {
+                for (final String sCap : getContextCaps(contextId)) {
                     final char firstChar = sCap.charAt(0);
                     if ('-' == firstChar) {
                         final String val = toLowerCase(sCap.substring(1));
@@ -312,8 +297,8 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                     }
                 }
                 // User-sensitive
-                if (session.getUserId() > 0) {
-                    for (final String sCap : getUserCaps(session.getUserId(), session.getContextId())) {
+                if (userId > 0) {
+                    for (final String sCap : getUserCaps(userId, contextId)) {
                         final char firstChar = sCap.charAt(0);
                         if ('-' == firstChar) {
                             final String val = toLowerCase(sCap.substring(1));
@@ -360,6 +345,21 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         }
 
         return capabilities;
+    }
+
+    @Override
+    public Set<Capability> getCapabilities(final int userId, final int contextId) throws OXException {
+        return getCapabilities(userId, contextId, null);
+    }
+
+    @Override
+    public Set<Capability> getCapabilities(final Session session) throws OXException {
+        return getCapabilities(session.getUserId(), session.getContextId());
+    }
+
+    @Override
+    public Set<Capability> getCapabilities(final Session session, final CapabilityFilter filter) throws OXException {
+        return getCapabilities(session.getUserId(), session.getContextId(), filter);
     }
 
     private boolean check(String cap, ServerSession session, Set<Capability> allCapabilities) throws OXException {
