@@ -213,6 +213,10 @@ public enum Attribute {
             return switcher.pop3Path();
         case ADDRESSES:
             return switcher.addresses();
+        case ARCHIVE_FULLNAME_LITERAL:
+            return switcher.archiveFullname();
+        case ARCHIVE_LITERAL:
+            return switcher.archive();
         case META:
             // Ignore for virtual attribute
             return null;
