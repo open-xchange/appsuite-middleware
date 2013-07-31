@@ -765,9 +765,7 @@ final class ListLsubCollection {
      * @throws ProtocolException If a protocol error occurs
      */
     protected void doListLsubCommand(final IMAPProtocol protocol, final boolean lsub) throws ProtocolException {
-        /*
-         * Perform command
-         */
+        // Perform command
         final String command = lsub ? "LSUB" : "LIST";
         final Response[] r;
         if (DEBUG) {
@@ -783,53 +781,41 @@ final class ListLsubCollection {
             final ConcurrentMap<String, ListLsubEntryImpl> map = lsub ? lsubMap : listMap;
             final Map<String, List<ListLsubEntryImpl>> parentMap = new HashMap<String, List<ListLsubEntryImpl>>(4);
             final ListLsubEntryImpl rootEntry = map.get(ROOT_FULL_NAME);
-            /*
-             * Get sorted responses
-             */
+
+            // Get sorted responses
             final List<ListLsubEntryImpl> listResponses = sortedListResponses(r, command, lsub);
             char separator = '\0';
             for (final ListLsubEntryImpl next : listResponses) {
                 ListLsubEntryImpl listLsubEntry = next;
-                /*
-                 * Check for MBox format while iterating LIST/LSUB responses.
-                 */
+
+                // Check for MBox format while iterating LIST/LSUB responses.
                 if (listLsubEntry.hasInferiors() && listLsubEntry.canOpen()) {
                     mbox = Boolean.FALSE;
                 }
                 final String fullName = listLsubEntry.getFullName();
-                /*
-                 * (Re-)Set children
-                 */
+
+                // (Re-)Set children
                 {
                     final ListLsubEntryImpl oldEntry = map.get(fullName);
                     if (oldEntry == null) {
-                        /*
-                         * Wasn't in map before
-                         */
+                        // Wasn't in map before
                         map.put(fullName, listLsubEntry);
                     } else {
-                        /*
-                         * Already contained in map
-                         */
+                        // Already contained in map
                         oldEntry.clearChildren();
                         oldEntry.copyFrom(listLsubEntry);
                         listLsubEntry = oldEntry;
                     }
                 }
-                /*
-                 * Determine parent
-                 */
+
+                // Determine parent
                 final int pos = fullName.lastIndexOf((separator = listLsubEntry.getSeparator()));
                 if (pos >= 0) {
-                    /*
-                     * Non-root level
-                     */
+                    // Non-root level
                     final String parentFullName = fullName.substring(0, pos);
                     final ListLsubEntryImpl parent = map.get(parentFullName);
                     if (null == parent) {
-                        /*
-                         * Parent not (yet) in map
-                         */
+                        // Parent not (yet) in map
                         List<ListLsubEntryImpl> children = parentMap.get(parentFullName);
                         if (null == children) {
                             children = new ArrayList<ListLsubCollection.ListLsubEntryImpl>(8);
@@ -841,37 +827,29 @@ final class ListLsubCollection {
                         parent.addChild(listLsubEntry);
                     }
                 } else {
-                    /*
-                     * Root level
-                     */
+                    // Root level
                     listLsubEntry.setParent(rootEntry);
                     rootEntry.addChild(listLsubEntry);
                 }
             } // End of for loop
             if (!parentMap.isEmpty()) {
-                /*
-                 * Handle parent map
-                 */
+                // Handle parent map
                 handleParentMap(parentMap, separator, rootEntry, lsub, map);
             }
-            /*
-             * Check namespace folders
-             */
+
+            // Check namespace folders
             if (!lsub) {
                 handleNamespaces(map, rootEntry, separator);
             }
-            /*
-             * Dispatch remaining untagged responses
-             */
+
+            // Dispatch remaining untagged responses
             protocol.notifyResponseHandlers(r);
             if (DEBUG) {
                 final long d = System.currentTimeMillis() - st;
                 LOG.debug(command + " cache filled within " + d + "msec.");
             }
         } else {
-            /*
-             * Dispatch remaining untagged responses
-             */
+            // Dispatch remaining untagged responses
             protocol.notifyResponseHandlers(r);
             protocol.handleResult(response);
         }
@@ -921,7 +899,7 @@ final class ListLsubCollection {
     }
 
     private List<ListLsubEntryImpl> sortedListResponses(final Response[] r, final String command, final boolean lsub) {
-        final List<ListLsubEntryImpl> list = new ArrayList<ListLsubCollection.ListLsubEntryImpl>(r.length);
+        final List<ListLsubEntryImpl> list = new ArrayList<ListLsubEntryImpl>(r.length);
         for (int i = 0, len = r.length - 1; i < len; i++) {
             if (!(r[i] instanceof IMAPResponse)) {
                 continue;
@@ -1748,8 +1726,7 @@ final class ListLsubCollection {
 
         protected ListLsubEntryImpl(final String fullName, final Set<String> attributes, final char separator, final ChangeState changeState, final boolean hasInferiors, final boolean canOpen, final Boolean hasChildren, final ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
             super();
-            this.fullName =
-                String.valueOf(separator).equals(fullName) ? ROOT_FULL_NAME : (INBOX.equalsIgnoreCase(fullName) ? INBOX : fullName);
+            this.fullName = checkFullName(fullName, separator);
             this.attributes = attributes;
             this.separator = separator;
             this.changeState = changeState;
@@ -2129,6 +2106,38 @@ final class ListLsubCollection {
                 sb.append(lineSeparator);
             }
         }
+    }
+
+    /** Checks the full name */
+    protected static String checkFullName(final String fullName, final char separator) {
+        if (null == fullName) {
+            return fullName;
+        }
+        if (String.valueOf(separator).equals(fullName)) {
+            return ROOT_FULL_NAME;
+        }
+        final String upperCase = toUpperCase(fullName);
+        if (INBOX.equals(upperCase)) {
+            return INBOX;
+        }
+        if (fullName.length() > 5 && upperCase.startsWith("INBOX") && separator == upperCase.charAt(5)) {
+            return new StringAllocator(INBOX).append(separator).append(fullName.substring(6)).toString();
+        }
+        return fullName;
+    }
+
+    /** ASCII-wise to upper-case */
+    private static String toUpperCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+        }
+        return builder.toString();
     }
 
 }
