@@ -85,7 +85,6 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
 import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 import com.openexchange.file.storage.composition.IDBasedSequenceNumberProvider;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -307,7 +306,7 @@ public class DriveStorage {
      * @throws OXException
      */
     public File createFile(String path, String fileName) throws OXException {
-        return createFile(path, fileName, null);
+        return createFile(path, fileName, null, null);
     }
 
     /**
@@ -316,17 +315,22 @@ public class DriveStorage {
      * @param path The target folder path
      * @param fileName The target filename
      * @param additionalMetadata Additional metadata when creating the file
+     * @param data The binary content, or <code>null</code> to create a file without data
      * @return A file representing the created file
      * @throws OXException
      */
-    public File createFile(String path, String fileName, File additionalMetadata) throws OXException {
+    public File createFile(String path, String fileName, File additionalMetadata, InputStream data) throws OXException {
         File file = null != additionalMetadata ? new DefaultFile(additionalMetadata) : new DefaultFile();
         file.setFolderId(getFolderID(path, true));
         file.setFileName(fileName);
         if (session.isTraceEnabled()) {
             session.trace(this.toString() + "touch " + combine(path, fileName));
         }
-        getFileAccess().saveDocument(file, Streams.newByteArrayInputStream(new byte[0]), FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+        if (null == data) {
+            getFileAccess().saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+        } else {
+            getFileAccess().saveDocument(file, data, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+        }
         return file;
     }
 

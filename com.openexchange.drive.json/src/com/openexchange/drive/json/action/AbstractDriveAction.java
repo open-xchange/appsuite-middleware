@@ -103,9 +103,7 @@ public abstract class AbstractDriveAction implements AJAXActionService {
          * extract device name information if present
          */
         String device = requestData.getParameter("device");
-        if (false == Strings.isEmpty(device)) {
-            session.setParameter("com.openexchange.drive.device", device);
-        }
+        session.setParameter("com.openexchange.drive.device", Strings.isEmpty(device) ? null : device);
         /*
          * extract diagnostics parameter if present
          */
@@ -113,6 +111,8 @@ public abstract class AbstractDriveAction implements AJAXActionService {
         if (false == Strings.isEmpty(diagnostics)) {
             this.diagnostics = Boolean.valueOf(diagnostics);
             session.setParameter("com.openexchange.drive.diagnostics", this.diagnostics);
+        } else {
+            session.setParameter("com.openexchange.drive.diagnostics", null);
         }
         /*
          * perform
