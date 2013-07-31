@@ -140,19 +140,20 @@ public class SendAddress implements PreferencesItemService {
                     }
                 }
 
-                found = (user.getMail().equals(newAlias));
+                final int pos = newAlias.indexOf('/');
+                String checkAlias = newAlias;
+                if (pos > 0) {
+                    checkAlias = checkAlias.substring(0, pos);
+                }
 
-                if (!found) {
-                    String checkAlias = newAlias;
-                    final int pos = newAlias.indexOf('/');
-                    if (pos > 0) {
-                        checkAlias = checkAlias.substring(0, pos);
-                    }
+                Iterator<String> aliasIterator = allAliases.iterator();
+                while(!found && aliasIterator.hasNext()) {
+                    String nextAlias = aliasIterator.next();
+                    found = nextAlias.equals(checkAlias);
+                }
 
-                    final Iterator<String> aliasIterator = allAliases.iterator();
-                    for (int i = allAliases.size(); !found && i-- > 0;) {
-                        found = checkAlias.equals(aliasIterator.next());
-                    }
+                if (user.getMail().equals(newAlias)) {
+                    found = true;
                 }
 
                 if (!found) {
