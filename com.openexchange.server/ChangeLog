@@ -2,6 +2,7 @@
 
  - Fix for bug 27767: Refactored to use "ignoreTranslation" flag in JSON layer only to not affect folder caches
  - Fix for bug 27914: Interpret "Inbox/" full name prefix as "INBOX/"
+ - Fix for bug 27891: Check for valid values provided for mandatory fields in update attempt
 
 * 2013-07-30 - martin.herfurth@open-xchange.com
 
