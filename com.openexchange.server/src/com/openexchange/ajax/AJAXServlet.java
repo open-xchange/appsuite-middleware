@@ -84,6 +84,7 @@ import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
@@ -1023,38 +1024,53 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      */
     private static final int SIZE_THRESHOLD = 1048576;
 
+    private static volatile DeleteOnExitFileCleaningTracker fileCleaningTracker;
+    private static DeleteOnExitFileCleaningTracker fileCleaningTracker() {
+        DeleteOnExitFileCleaningTracker tmp = fileCleaningTracker;
+        if (null == tmp) {
+            synchronized (AJAXServlet.class) {
+                tmp = fileCleaningTracker;
+                if (null == tmp) {
+                    tmp = new DeleteOnExitFileCleaningTracker(false);
+                    fileCleaningTracker = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
     /**
-     * Creates a new {@code TrackerAwareServletFileUpload} instance.
+     * Creates a new {@code ServletFileUpload} instance.
      *
-     * @return A new {@code TrackerAwareServletFileUpload} instance
+     * @return A new {@code ServletFileUpload} instance
      */
-    public static TrackerAwareServletFileUpload newFileUploadBase() {
-        /*
-         * Create the upload event
-         */
+    public static ServletFileUpload newFileUploadBase() {
+        // Create the upload event
         final DiskFileItemFactory factory = new DiskFileItemFactory();
-        /*
-         * Set factory constraints; threshold for single files
-         */
+        // Set factory constraints; threshold for single files
         factory.setSizeThreshold(SIZE_THRESHOLD);
         factory.setRepository(new File(ServerConfig.getProperty(Property.UploadDirectory)));
-        final DeleteOnExitFileCleaningTracker tracker = new DeleteOnExitFileCleaningTracker(false);
-        factory.setFileCleaningTracker(tracker);
-        /*
-         * Create a new file upload handler
-         */
-        final TrackerAwareServletFileUpload sfu = new TrackerAwareServletFileUpload(factory, tracker);
-        /*
-         * Set overall request size constraint
-         */
+        factory.setFileCleaningTracker(fileCleaningTracker());
+        // Create a new file upload handler
+        final ServletFileUpload sfu = new ServletFileUpload(factory);
+        // Set overall request size constraint
         sfu.setSizeMax(-1);
         return sfu;
     }
 
+    /**
+     * Exits the file cleaning tracker.
+     */
+    public static void exitTracker() {
+        final DeleteOnExitFileCleaningTracker tracker = AJAXServlet.fileCleaningTracker;
+        if (null != tracker) {
+            tracker.deleteAllTracked();
+            AJAXServlet.fileCleaningTracker = null;
+        }
+    }
+
     private static final Set<String> UPLOAD_ACTIONS =
         new HashSet<String>(Arrays.asList(ACTION_NEW, ACTION_ADDFILE, ACTION_UPLOAD, ACTION_APPEND, ACTION_UPDATE, ACTION_ATTACH, ACTION_COPY, "import"));
-
-
 
     /**
      * (Statically) Processes specified request's upload provided that request is of content type <code>multipart/*</code>.
@@ -1090,7 +1106,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         /*
          * Get file upload
          */
-        final TrackerAwareServletFileUpload upload = newFileUploadBase();
+        final ServletFileUpload upload = newFileUploadBase();
         List<FileItem> items = null;
         try {
             /*
@@ -1167,10 +1183,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 for (final FileItem fileItem : items) {
                     try { fileItem.delete(); } catch (final Exception e) { /* Ignore */ }
                 }
-            }
-            final DeleteOnExitFileCleaningTracker tracker = upload.getTracker();
-            if (null != tracker) {
-                tracker.deleteAllTracked();
             }
         }
     }
