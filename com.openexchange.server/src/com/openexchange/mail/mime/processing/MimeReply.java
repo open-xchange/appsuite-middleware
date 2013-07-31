@@ -807,19 +807,12 @@ public final class MimeReply {
          */
         for (int i = count - 1; i >= 0; i--) {
             final MailPart part = multipartPart.getEnclosedMailPart(i);
-            partContentType.setContentType(part.getContentType());
-            if (partContentType.startsWith(MimeTypes.MIME_MESSAGE_RFC822)) {
-                final MailMessage enclosedMsg = (MailMessage) part.getContent();
-                found |= generateReplyText(enclosedMsg, pc.retvalContentType, pc.strHelper, pc.ltz, pc.usm, pc.mailSession, pc.session, accountId, pc.replyTexts);
-            } else if (MimeProcessingUtility.fileNameEndsWith(".eml", part, partContentType)) {
-                /*
-                 * Create message from input stream
-                 */
-                final InputStream is = MimeMessageUtility.getStreamFromMailPart(part);
-                try {
-                    final MailMessage attachedMsg = MimeMessageConverter.convertMessage(is);
+            if (!"attachment".equals(toLowerCase(part.getContentDisposition().getDisposition()))) {
+                partContentType.setContentType(part.getContentType());
+                if (partContentType.startsWith(MimeTypes.MIME_MESSAGE_RFC822)) {
+                    final MailMessage enclosedMsg = (MailMessage) part.getContent();
                     found |= generateReplyText(
-                        attachedMsg,
+                        enclosedMsg,
                         pc.retvalContentType,
                         pc.strHelper,
                         pc.ltz,
@@ -828,8 +821,26 @@ public final class MimeReply {
                         pc.session,
                         accountId,
                         pc.replyTexts);
-                } finally {
-                    Streams.close(is);
+                } else if (MimeProcessingUtility.fileNameEndsWith(".eml", part, partContentType)) {
+                    /*
+                     * Create message from input stream
+                     */
+                    final InputStream is = MimeMessageUtility.getStreamFromMailPart(part);
+                    try {
+                        final MailMessage attachedMsg = MimeMessageConverter.convertMessage(is);
+                        found |= generateReplyText(
+                            attachedMsg,
+                            pc.retvalContentType,
+                            pc.strHelper,
+                            pc.ltz,
+                            pc.usm,
+                            pc.mailSession,
+                            pc.session,
+                            accountId,
+                            pc.replyTexts);
+                    } finally {
+                        Streams.close(is);
+                    }
                 }
             }
         }
@@ -1057,6 +1068,19 @@ public final class MimeReply {
 
     private static boolean hasContent(final String html) {
         return PATTERN_CONTENT.matcher(html).find();
+    }
+
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }
