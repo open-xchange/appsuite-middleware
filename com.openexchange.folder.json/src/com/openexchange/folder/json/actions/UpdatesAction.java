@@ -50,6 +50,7 @@
 package com.openexchange.folder.json.actions;
 
 import java.util.Date;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -99,7 +100,7 @@ public final class UpdatesAction extends AbstractFolderAction {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    protected AJAXRequestResult doPerform(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*
          * Parse parameters
          */
@@ -143,7 +144,7 @@ public final class UpdatesAction extends AbstractFolderAction {
                 includeMail ? new ContentType[] { ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class).getByString(
                     "mail") } : null,
                 session,
-                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put("ignoreTranslation", request.getParameter("ignoreTranslation")));
+                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put(PARAM_IGNORE_TRANSLATION, request.getParameter(PARAM_IGNORE_TRANSLATION)));
         /*
          * Determine last-modified time stamp
          */
@@ -166,14 +167,16 @@ public final class UpdatesAction extends AbstractFolderAction {
         /*
          * Write subfolders as JSON arrays to JSON array
          */
-        final JSONArray resultArray = FolderWriter.writeMultiple2Array(columns, result[0], session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
+        final boolean ignoreTranslation = parseBoolean(request.getParameter(PARAM_IGNORE_TRANSLATION), false);
+        final Map<String, Object> params = ignoreTranslation ? parametersFor(PARAM_IGNORE_TRANSLATION, Boolean.TRUE) : null;
+        final JSONArray resultArray = FolderWriter.writeMultiple2Array(columns, result[0], session, Constants.ADDITIONAL_FOLDER_FIELD_LIST, params);
         try {
             final JSONArray jsonArray2 =
                 FolderWriter.writeMultiple2Array(
                     new int[] { FolderField.ID.getColumn() },
                     result[1],
                     session,
-                    Constants.ADDITIONAL_FOLDER_FIELD_LIST);
+                    Constants.ADDITIONAL_FOLDER_FIELD_LIST, params);
             final int len = jsonArray2.length();
             for (int i = 0; i < len; i++) {
                 resultArray.put(jsonArray2.getJSONArray(i).get(0));

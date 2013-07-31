@@ -94,7 +94,7 @@ public final class PathAction extends AbstractFolderAction {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    protected AJAXRequestResult doPerform(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*
          * Parse parameters
          */
@@ -121,7 +121,7 @@ public final class PathAction extends AbstractFolderAction {
                 treeId,
                 folderId,
                 session,
-                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put("ignoreTranslation", request.getParameter("ignoreTranslation")));
+                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put(PARAM_IGNORE_TRANSLATION, request.getParameter(PARAM_IGNORE_TRANSLATION)));
         /*
          * Determine last-modified time stamp
          */
@@ -137,7 +137,8 @@ public final class PathAction extends AbstractFolderAction {
         /*
          * Write subfolders as JSON arrays to JSON array
          */
-        final JSONArray jsonArray = FolderWriter.writeMultiple2Array(columns, subfolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
+        final boolean ignoreTranslation = parseBoolean(request.getParameter(PARAM_IGNORE_TRANSLATION), false);
+        final JSONArray jsonArray = FolderWriter.writeMultiple2Array(columns, subfolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST, ignoreTranslation ? parametersFor(PARAM_IGNORE_TRANSLATION, Boolean.TRUE) : null);
         /*
          * Return appropriate result
          */
