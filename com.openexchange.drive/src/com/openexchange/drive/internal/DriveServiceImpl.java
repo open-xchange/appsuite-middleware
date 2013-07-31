@@ -94,6 +94,7 @@ import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -489,7 +490,8 @@ public class DriveServiceImpl implements DriveService {
                 metadata.setFileMD5Sum(DriveConstants.EMPTY_MD5);
                 metadata.setVersion("1");
                 metadata.setVersionComment(session.getStorage().getVersionComment());
-                File createdFile = session.getStorage().createFile(path, action.getNewVersion().getName(), metadata);
+                InputStream data = new UnsynchronizedByteArrayInputStream(new byte[0]);
+                File createdFile = session.getStorage().createFile(path, action.getNewVersion().getName(), metadata, data);
                 FileID fileID = new FileID(createdFile.getId());
                 FolderID folderID = new FolderID(createdFile.getFolderId());
                 if (null == fileID.getFolderId()) {

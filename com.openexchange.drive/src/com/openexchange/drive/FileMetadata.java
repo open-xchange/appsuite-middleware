@@ -49,6 +49,8 @@
 
 package com.openexchange.drive;
 
+import java.util.Date;
+
 /**
  * {@link FileMetadata}
  *
@@ -57,10 +59,17 @@ package com.openexchange.drive;
 public interface FileMetadata extends FileVersion {
 
     /**
-     * Gets a direct link to the file
+     * Gets a direct link to the file.
      *
      * @return The direct link
      */
     String getDirectLink();
+
+    /**
+     * Gets the date of the last modification.
+     *
+     * @return The last modified date
+     */
+    Date getLastModified();
 
 }

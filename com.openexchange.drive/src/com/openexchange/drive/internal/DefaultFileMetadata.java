@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.internal;
 
+import java.util.Date;
 import com.openexchange.drive.FileMetadata;
 import com.openexchange.drive.comparison.ServerFileVersion;
 
@@ -81,6 +82,11 @@ public class DefaultFileMetadata implements FileMetadata {
     @Override
     public String getDirectLink() {
         return session.getLinkGenerator().getFileLink(fileVersion.getFile());
+    }
+
+    @Override
+    public Date getLastModified() {
+        return fileVersion.getFile().getLastModified();
     }
 
 }

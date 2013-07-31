@@ -49,11 +49,17 @@
 
 package com.openexchange.drive.checksum;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +70,7 @@ import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
@@ -146,6 +153,61 @@ public class ChecksumProvider {
      * @throws OXException
      */
     public static List<DirectoryChecksum> getChecksums(DriveSession session, List<String> folderIDs) throws OXException {
+
+
+
+
+
+
+        try {
+            List<File> files = new ArrayList<File>();
+            List<String> lines = new ArrayList<String>();
+            FileInputStream is = new FileInputStream("d:/lines.txt");
+            DataInputStream in = new DataInputStream(is);
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            String strLine;
+            while ((strLine = br.readLine()) != null)   {
+                lines.add(strLine);
+            }
+            in.close();
+
+            for (String line : lines) {
+                String[] splitted = line.split("\\|");
+                File file = new DefaultFile();
+                file.setFileName(splitted[0].trim());
+                file.setFileMD5Sum(splitted[1].trim());
+                files.add(file);
+            }
+
+            Collections.sort(files, FILENAME_COMPARATOR);
+            MD md5 = session.newMD5();
+            for (File file : files) {
+
+                md5.update(file.getFileName().getBytes(Charsets.UTF_8));
+                md5.update(file.getFileMD5Sum().getBytes(Charsets.UTF_8));
+            }
+
+            String formattedValue = md5.getFormattedValue();
+
+
+            System.out.println(formattedValue);
+
+        } catch (FileNotFoundException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+
+
+
+
+
+
+
+
         StringAllocator trace = session.isTraceEnabled() ? new StringAllocator("Directory checksums:\n") : null;
         List<FolderID> fids = new ArrayList<FolderID>(folderIDs.size());
         for (String folderID : folderIDs) {

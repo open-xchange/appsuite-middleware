@@ -72,10 +72,12 @@ public class JsonFileMetadata {
     }
 
     public static JSONObject serialize(FileMetadata metadata) throws JSONException {
-        JSONObject jsonObject = new JSONObject(3);
+        JSONObject jsonObject = new JSONObject(4);
         jsonObject.put("name", metadata.getName());
         jsonObject.put("checksum", metadata.getChecksum());
         jsonObject.put("directLink", metadata.getDirectLink());
+        jsonObject.put("lastModified", null != metadata.getLastModified() ?
+            Long.valueOf(metadata.getLastModified().getTime()) : JSONObject.NULL);
         return jsonObject;
     }
 
