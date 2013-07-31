@@ -1832,6 +1832,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     @Override
     public String deleteFolder(final String fullName, final boolean hardDelete) throws OXException {
+        boolean clearListLsubCache = false;
         try {
             if (DEFAULT_FOLDER_ID.equals(fullName)) {
                 throw MailExceptionCode.NO_ROOT_FOLDER_MODIFY_DELETE.create();
@@ -1845,6 +1846,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
             FolderCache.removeCachedFolders(session, accountId);
+            clearListLsubCache = true;
             synchronized (deleteMe) {
                 imapAccess.getMessageStorage().notifyIMAPFolderModification(fullName);
                 if (hardDelete) {
@@ -1903,7 +1905,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         } finally {
-            ListLsubCache.clearCache(accountId, session);
+            if (clearListLsubCache) {
+                ListLsubCache.clearCache(accountId, session);
+            }
         }
     }
 
