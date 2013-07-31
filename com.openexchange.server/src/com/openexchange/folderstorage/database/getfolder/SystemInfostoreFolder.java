@@ -89,14 +89,13 @@ public final class SystemInfostoreFolder {
      *
      * @param fo The folder object fetched from database
      * @param altNames <code>true</code> to use alternative names for former InfoStore folders; otherwise <code>false</code>
-     * @param translate Whether to translate
      * @return The database folder representing system infostore folder
      */
-    public static DatabaseFolder getSystemInfostoreFolder(final FolderObject fo, final boolean altNames, final boolean translate) {
+    public static DatabaseFolder getSystemInfostoreFolder(final FolderObject fo, final boolean altNames) {
         /*
          * The system infostore folder
          */
-        final DatabaseFolder retval = translate ? new LocalizedDatabaseFolder(fo) : new DatabaseFolder(fo);
+        final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
         retval.setName(altNames ? FolderStrings.SYSTEM_FILES_FOLDER_NAME : FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME);
         retval.setContentType(InfostoreContentType.getInstance());
         // Enforce getSubfolders() on storage
@@ -120,7 +119,7 @@ public final class SystemInfostoreFolder {
      * @return The database folder representing system infostore folder
      * @throws OXException If the database folder cannot be returned
      */
-    public static List<String[]> getSystemInfostoreFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final boolean altNames, final boolean translate, final Connection con) throws OXException {
+    public static List<String[]> getSystemInfostoreFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final boolean altNames, final Connection con) throws OXException {
         try {
             /*
              * The system infostore folder
@@ -152,7 +151,7 @@ public final class SystemInfostoreFolder {
                     }
                 }
             }
-            final StringHelper sh = translate ? StringHelper.valueOf(user.getLocale()) : null;
+            final StringHelper sh = StringHelper.valueOf(user.getLocale());
             final List<String[]> subfolderIds = new ArrayList<String[]>(size);
             final Iterator<FolderObject> iter = l.iterator();
             for (int i = 0; i < size; i++) {
@@ -163,13 +162,13 @@ public final class SystemInfostoreFolder {
                         // Check if there are shared files -- discard if there are none
                         final TIntList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(fuid, user.getId(), user.getGroups(), userConfiguration.getAccessibleModules(), ctx, null);
                         if (!subfolders.isEmpty()) {
-                            subfolderIds.add(toArray(String.valueOf(fuid), null == sh ? (FolderStrings.SYSTEM_USER_FILES_FOLDER_NAME) : (sh.getString(FolderStrings.SYSTEM_USER_FILES_FOLDER_NAME))));
+                            subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(FolderStrings.SYSTEM_USER_FILES_FOLDER_NAME)));
                         }
                     } else {
-                        subfolderIds.add(toArray(String.valueOf(fuid), null == sh ? (FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME) : (sh.getString(FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME))));
+                        subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME)));
                     }
                 } else if (fuid == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID) {
-                    subfolderIds.add(toArray(String.valueOf(fuid), null == sh ? (altNames ? FolderStrings.SYSTEM_PUBLIC_FILES_FOLDER_NAME : FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME) : (sh.getString(altNames ? FolderStrings.SYSTEM_PUBLIC_FILES_FOLDER_NAME : FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME))));
+                    subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(altNames ? FolderStrings.SYSTEM_PUBLIC_FILES_FOLDER_NAME : FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME)));
                 } else {
                     subfolderIds.add(toArray(String.valueOf(fuid), fo.getFolderName()));
                 }

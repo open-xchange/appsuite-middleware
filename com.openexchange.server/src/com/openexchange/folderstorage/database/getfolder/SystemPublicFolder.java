@@ -87,14 +87,13 @@ public final class SystemPublicFolder {
      * Gets the database folder representing system public folder.
      *
      * @param fo The folder object fetched from database
-     * @param translate Whether to translate folders according to user's locale
      * @return The database folder representing system public folder
      */
-    public static DatabaseFolder getSystemPublicFolder(final FolderObject fo, final boolean translate) {
+    public static DatabaseFolder getSystemPublicFolder(final FolderObject fo) {
         /*
          * The system public folder
          */
-        final DatabaseFolder retval = translate ? new LocalizedDatabaseFolder(fo) : new DatabaseFolder(fo);
+        final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
         retval.setName(FolderStrings.SYSTEM_PUBLIC_FOLDER_NAME);
         // Enforce getSubfolders() on storage
         retval.setSubfolderIDs(null);
@@ -192,7 +191,7 @@ public final class SystemPublicFolder {
      * @return The database folder representing system public folder
      * @throws OXException If the database folder cannot be returned
      */
-    public static List<String[]> getSystemPublicFolderSubfolders(final User user, final UserConfiguration userConfiguration, final boolean translate, final Context ctx, final Connection con) throws OXException {
+    public static List<String[]> getSystemPublicFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
         try {
             /*
              * The system public folder
@@ -207,11 +206,11 @@ public final class SystemPublicFolder {
                     null,
                     con)).asQueue();
             final List<String[]> subfolderIds = new ArrayList<String[]>(q.size());
-            final StringHelper sh = translate ? StringHelper.valueOf(user.getLocale()) : null;
+            final StringHelper sh = StringHelper.valueOf(user.getLocale());
             /*
              * Add global address book and subfolders
              */
-            subfolderIds.add(toArray(String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID), null == sh ? FolderStrings.SYSTEM_LDAP_FOLDER_NAME : sh.getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME)));
+            subfolderIds.add(toArray(String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME)));
             for (final FolderObject folderObject : q) {
                 subfolderIds.add(toArray(String.valueOf(folderObject.getObjectID()), folderObject.getFolderName()));
             }
@@ -228,7 +227,7 @@ public final class SystemPublicFolder {
                         ctx,
                         con);
                 if (tmp) {
-                    subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID), null == sh ? FolderStrings.VIRTUAL_LIST_CALENDAR_FOLDER_NAME : sh.getString(FolderStrings.VIRTUAL_LIST_CALENDAR_FOLDER_NAME)));
+                    subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_CALENDAR_FOLDER_NAME)));
                 }
             }
             {
@@ -241,7 +240,7 @@ public final class SystemPublicFolder {
                         ctx,
                         con);
                 if (tmp) {
-                    subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID), null == sh ? FolderStrings.VIRTUAL_LIST_CONTACT_FOLDER_NAME : sh.getString(FolderStrings.VIRTUAL_LIST_CONTACT_FOLDER_NAME)));
+                    subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_CONTACT_FOLDER_NAME)));
                 }
             }
             {
@@ -254,7 +253,7 @@ public final class SystemPublicFolder {
                         ctx,
                         con);
                 if (tmp) {
-                    subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID), null == sh ? FolderStrings.VIRTUAL_LIST_TASK_FOLDER_NAME : sh.getString(FolderStrings.VIRTUAL_LIST_TASK_FOLDER_NAME)));
+                    subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_TASK_FOLDER_NAME)));
                 }
             }
             return subfolderIds;
