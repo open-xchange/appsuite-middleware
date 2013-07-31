@@ -864,7 +864,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 
     private boolean isVacationRule(final Rule newrule) {
         final RuleComment ruleComment = newrule.getRuleComment();
-        return (null != ruleComment) && (null != ruleComment.getFlags()) && ruleComment.getFlags().contains("vacation") && ActionCommand.Commands.VACATION.equals(newrule.getIfCommand().getActioncommands().get(0).getCommand());
+        return (null != ruleComment) && (null != ruleComment.getFlags()) && ruleComment.getFlags().contains("vacation") && ActionCommand.Commands.VACATION.equals(newrule.getIfCommand().getFirstCommand());
     }
 
     private void changeIncomingVacationRule(final Rule newrule) throws SieveException {
@@ -874,7 +874,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         if (null != vacationdomains && 0 != vacationdomains.length()) {
             final IfCommand ifCommand = newrule.getIfCommand();
             final RuleComment ruleComment = newrule.getRuleComment();
-            if (null != ruleComment && null != ruleComment.getFlags() && ruleComment.getFlags().contains("vacation") && ActionCommand.Commands.VACATION.equals(ifCommand.getActioncommands().get(0).getCommand())) {
+            if (null != ruleComment && null != ruleComment.getFlags() && ruleComment.getFlags().contains("vacation") && ActionCommand.Commands.VACATION.equals(ifCommand.getFirstCommand())) {
                 final List<Object> argList = new ArrayList<Object>();
                 argList.add(Rule2JSON2Rule.createTagArg("is"));
                 argList.add(Rule2JSON2Rule.createTagArg("domain"));
@@ -911,7 +911,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             for (final Rule rule : clientrules) {
                 final IfCommand ifCommand = rule.getIfCommand();
                 final RuleComment ruleComment = rule.getRuleComment();
-                if (null != ruleComment && null != ruleComment.getFlags() && ruleComment.getFlags().contains("vacation") && ActionCommand.Commands.VACATION.equals(ifCommand.getActioncommands().get(0).getCommand())) {
+                if (null != ruleComment && null != ruleComment.getFlags() && ruleComment.getFlags().contains("vacation") && ActionCommand.Commands.VACATION.equals(ifCommand.getFirstCommand())) {
                     final TestCommand testcommand = ifCommand.getTestcommand();
                     if (Commands.ADDRESS.equals(testcommand.getCommand())) {
                         // Test command found now check if it's the right one...
