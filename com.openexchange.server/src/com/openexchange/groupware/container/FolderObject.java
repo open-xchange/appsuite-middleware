@@ -594,6 +594,37 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     }
 
     /**
+     * Checks if this folder is visible for any of specified entities.
+     * <p>
+     * <b>Note</b>: This method only checks <b><small>ALL</small></b> basic permissions and does not consider any configuration settings.
+     * Use {@link #isVisible(int, UserConfiguration)} for a detailed check if this folder is visible to a certain user.
+     *
+     * @param entities The entity identifiers (either user or group identifiers)
+     * @return <code>true</code> if this folder is visible for any of entities; otherwise <code>false</code>
+     * @see #isVisible(int, UserConfiguration)
+     */
+    public boolean isVisibleForAny(final int[] entities) {
+        if (null == entities) {
+            return false;
+        }
+        final int length = entities.length;
+        if (0 == length) {
+            return false;
+        }
+        if (1 == length) {
+            return isVisible(entities[0]);
+        }
+        // Sort
+        Arrays.sort(entities);
+        for (final OCLPermission cur : permissions) {
+            if (Arrays.binarySearch(entities, cur.getEntity()) >= 0 && cur.isFolderVisible()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Checks if this folder is visible to specified entity
      * <p>
      * <b>Note</b>: This method only checks <b><small>ALL</small></b> basic permissions and does not consider any configuration settings.
@@ -604,6 +635,9 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * @see #isVisible(int, UserConfiguration)
      */
     public boolean isVisible(final int entity) {
+        if (entity < 0) {
+            return false;
+        }
         for (final OCLPermission cur : permissions) {
             if (cur.getEntity() == entity && cur.isFolderVisible()) {
                 return true;
@@ -1676,7 +1710,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     public void setMeta(Map<String, Object> meta) {
         this.meta = meta;
     }
-    
+
     public Map<String, Object> getMeta() {
         return meta;
     }

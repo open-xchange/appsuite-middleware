@@ -72,8 +72,12 @@ import com.openexchange.server.impl.DBPool;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbUserPermissionBitsStorage.class);
 
+    /**
+     * Initializes a new {@link RdbUserPermissionBitsStorage}.
+     */
     public RdbUserPermissionBitsStorage() {
         super();
     }
@@ -276,7 +280,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
-            return rs.next() ? new UserPermissionBits( rs.getInt(1) , userId, ctx.getContextId()) : new UserPermissionBits(0, userId, ctx.getContextId());
+            return rs.next() ? new UserPermissionBits(rs.getInt(1) , userId, groups, ctx.getContextId()) : new UserPermissionBits(0, userId, groups, ctx.getContextId());
         } finally {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
         }
@@ -354,9 +358,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
             if (!rs.next()) {
                 throw UserConfigurationCodes.NOT_FOUND.create(Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
             }
-            final UserPermissionBits UserPermissionBits = new UserPermissionBits(rs.getInt(1), userId, ctx.getContextId());
-
-            return UserPermissionBits;
+            return new UserPermissionBits(rs.getInt(1), userId, ctx.getContextId());
         } finally {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
         }
@@ -419,9 +421,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
                 final int userId = result.getInt(1);
                 if (userMap.containsKey(userId)) {
                     final int index = userMap.get(userId);
-                    final UserPermissionBits UserPermissionBits = new UserPermissionBits(result.getInt(2), userId, ctx.getContextId());
-
-                    retval[index] = UserPermissionBits;
+                    retval[index] = new UserPermissionBits(result.getInt(2), userId, ctx.getContextId());
                 }
             }
         } finally {

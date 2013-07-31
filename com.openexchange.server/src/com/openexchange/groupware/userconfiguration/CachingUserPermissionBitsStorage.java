@@ -189,15 +189,19 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
 
     @Override
     public UserPermissionBits getUserPermissionBits(int userId, Context ctx) throws OXException {
-        if (cache == null) { return getFallback().getUserPermissionBits(userId, ctx); }
-        return get(cache, ctx, new int[]{ userId })[0];
+        if (cache == null) {
+            return getFallback().getUserPermissionBits(userId, ctx);
+        }
+        return get(cache, ctx, new int[] { userId })[0];
     }
 
     @Override
     public UserPermissionBits[] getUserPermissionBits(Context ctx, User[] users) throws OXException {
-        if (cache == null) { return getFallback().getUserPermissionBits(ctx, users); }
+        if (cache == null) {
+            return getFallback().getUserPermissionBits(ctx, users);
+        }
         int[] userIds = new int[users.length];
-        for(int i = 0; i < users.length; i++) {
+        for (int i = 0; i < users.length; i++) {
             userIds[i] = users[i].getId();
         }
 

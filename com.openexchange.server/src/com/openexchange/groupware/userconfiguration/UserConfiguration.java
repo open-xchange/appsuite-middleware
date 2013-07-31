@@ -656,25 +656,6 @@ public class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
-     * Checks if global address book is enabled.
-     *
-     * @param serverSession The session
-     * @return <code>true</code> if enabled; otherwise <code>false</code>
-     */
-    public boolean isGlobalAddressBookEnabled(final ServerSession serverSession) {
-        final Context context = serverSession.getContext();
-        if (null == context) {
-            return false;
-        }
-        try {
-            return new OXFolderAccess(context).getFolderPermission(FolderObject.SYSTEM_LDAP_FOLDER_ID, serverSession.getUserId(), this).isFolderVisible();
-        } catch (final OXException e) {
-            LOG.warn("Cannot check availability of Global Address Book.", e);
-            return false;
-        }
-    }
-
-    /**
      * Checks if this user configuration indicates to collect email addresses.
      *
      * @return <code>true</code> if this user configuration indicates to collect email addresses; otherwise <code>false</code>

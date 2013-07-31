@@ -983,37 +983,37 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     private int countUsersByModuleAccess(final Context ctx, final UserModuleAccess access) throws StorageException {
         try {
-            final UserPermissionBits userconf = new UserPermissionBits(0, 0, ctx.getId());
-            userconf.setCalendar(access.getCalendar());
-            userconf.setContact(access.getContacts());
-            userconf.setForum(access.getForum());
-            userconf.setFullPublicFolderAccess(access.getEditPublicFolders());
-            userconf.setFullSharedFolderAccess(access.getReadCreateSharedFolders());
-            userconf.setICal(access.getIcal());
-            userconf.setInfostore(access.getInfostore());
-            userconf.setPinboardWriteAccess(access.getPinboardWrite());
-            userconf.setProject(access.getProjects());
-            userconf.setRSSBookmarks(access.getRssBookmarks());
-            userconf.setRSSPortal(access.getRssPortal());
-            userconf.setSyncML(access.getSyncml());
-            userconf.setTask(access.getTasks());
-            userconf.setVCard(access.getVcard());
-            userconf.setWebDAV(access.getWebdav());
-            userconf.setWebDAVXML(access.getWebdavXml());
-            userconf.setWebMail(access.getWebmail());
-            userconf.setDelegateTasks(access.getDelegateTask());
-            userconf.setEditGroup(access.getEditGroup());
-            userconf.setEditResource(access.getEditResource());
-            userconf.setEditPassword(access.getEditPassword());
-            userconf.setCollectEmailAddresses(access.isCollectEmailAddresses());
-            userconf.setMultipleMailAccounts(access.isMultipleMailAccounts());
-            userconf.setSubscription(access.isSubscription());
-            userconf.setPublication(access.isPublication());
-            userconf.setActiveSync(access.isActiveSync());
-            userconf.setUSM(access.isUSM());
-            userconf.setOLOX20(access.isOLOX20());
+            final UserPermissionBits ubp = new UserPermissionBits(0, 0, null, ctx.getId().intValue());
+            ubp.setCalendar(access.getCalendar());
+            ubp.setContact(access.getContacts());
+            ubp.setForum(access.getForum());
+            ubp.setFullPublicFolderAccess(access.getEditPublicFolders());
+            ubp.setFullSharedFolderAccess(access.getReadCreateSharedFolders());
+            ubp.setICal(access.getIcal());
+            ubp.setInfostore(access.getInfostore());
+            ubp.setPinboardWriteAccess(access.getPinboardWrite());
+            ubp.setProject(access.getProjects());
+            ubp.setRSSBookmarks(access.getRssBookmarks());
+            ubp.setRSSPortal(access.getRssPortal());
+            ubp.setSyncML(access.getSyncml());
+            ubp.setTask(access.getTasks());
+            ubp.setVCard(access.getVcard());
+            ubp.setWebDAV(access.getWebdav());
+            ubp.setWebDAVXML(access.getWebdavXml());
+            ubp.setWebMail(access.getWebmail());
+            ubp.setDelegateTasks(access.getDelegateTask());
+            ubp.setEditGroup(access.getEditGroup());
+            ubp.setEditResource(access.getEditResource());
+            ubp.setEditPassword(access.getEditPassword());
+            ubp.setCollectEmailAddresses(access.isCollectEmailAddresses());
+            ubp.setMultipleMailAccounts(access.isMultipleMailAccounts());
+            ubp.setSubscription(access.isSubscription());
+            ubp.setPublication(access.isPublication());
+            ubp.setActiveSync(access.isActiveSync());
+            ubp.setUSM(access.isUSM());
+            ubp.setOLOX20(access.isOLOX20());
 
-            final int ret = RdbUserPermissionBitsStorage.adminCountUsersByPermission(ctx.getId(), userconf, null);
+            final int ret = RdbUserPermissionBitsStorage.adminCountUsersByPermission(ctx.getId().intValue(), ubp, null);
             if( ret < 0 ) {
                 throw new StorageException("unable to count number of users by module access");
             }
