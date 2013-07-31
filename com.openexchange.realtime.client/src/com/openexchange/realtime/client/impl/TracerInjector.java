@@ -114,9 +114,9 @@ public class TracerInjector {
      */
     private static boolean isPing(JSONObject json) {
         if(json.has("type") && json.optString("type").equalsIgnoreCase("ping")) {
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     /*
@@ -124,8 +124,8 @@ public class TracerInjector {
      */
     private static boolean isAck(JSONObject json) {
         if(json.has("type") && json.optString("type").equalsIgnoreCase("ack")) {
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 }
