@@ -116,7 +116,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  */
                 File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
                 result.addActionForClient(new DownloadFileAction(
-                    comparison.getClientVersion(), comparison.getServerVersion(), comparison, path, serverFile.getFileSize(), serverFile.getFileMIMEType()));
+                    comparison.getClientVersion(), comparison.getServerVersion(), comparison, path, serverFile));
             }
             break;
         case NEW:
@@ -125,7 +125,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
              */
             File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
             result.addActionForClient(new DownloadFileAction(
-                comparison.getClientVersion(), comparison.getServerVersion(), comparison, path, serverFile.getFileSize(), serverFile.getFileMIMEType()));
+                comparison.getClientVersion(), comparison.getServerVersion(), comparison, path, serverFile));
             break;
         default:
             break;
@@ -147,8 +147,8 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  * not allowed, let client re-download the file, indicate as error without quarantine flag
                  */
                 File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
-                result.addActionForClient(new DownloadFileAction(comparison.getClientVersion(), comparison.getServerVersion(),
-                    comparison, path, serverFile.getFileSize(), serverFile.getFileMIMEType()));
+                result.addActionForClient(new DownloadFileAction(
+                    comparison.getClientVersion(), comparison.getServerVersion(), comparison, path, serverFile));
                 result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), comparison.getServerVersion(), comparison,
                     path, DriveExceptionCodes.NO_DELETE_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path), false));
             }
@@ -161,8 +161,10 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                     /*
                      * just renamed on client, let server edit the file, acknowledge rename to client
                      */
-                    result.addActionForServer(new EditFileAction(comparison.getServerVersion(), comparison.getClientVersion(), comparison, path));
-                    result.addActionForClient(new AcknowledgeFileAction(comparison.getOriginalVersion(), comparison.getClientVersion(), comparison, path));
+                    ServerFileVersion serverFileVersion = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session);
+                    result.addActionForServer(new EditFileAction(serverFileVersion, comparison.getClientVersion(), comparison, path));
+                    result.addActionForClient(new AcknowledgeFileAction(
+                        comparison.getOriginalVersion(), comparison.getClientVersion(), comparison, path, serverFileVersion.getFile()));
                 } else {
                     /*
                      * modified on client, let client upload the modified file
@@ -186,8 +188,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  */
                 result.addActionForClient(new UploadFileAction(null, renamedVersion, comparison, path, getUploadOffset(path, renamedVersion)));
                 File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
-                result.addActionForClient(new DownloadFileAction(null, comparison.getServerVersion(), comparison, path,
-                    serverFile.getFileSize(), serverFile.getFileMIMEType()));
+                result.addActionForClient(new DownloadFileAction(null, comparison.getServerVersion(), comparison, path, serverFile));
             } else {
                 /*
                  * not allowed, let client first rename it's file and mark as error with quarantine flag...
@@ -200,8 +201,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  * ... then download the server version afterwards
                  */
                 File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
-                result.addActionForClient(new DownloadFileAction(null, comparison.getServerVersion(), comparison, path,
-                    serverFile.getFileSize(), serverFile.getFileMIMEType()));
+                result.addActionForClient(new DownloadFileAction(null, comparison.getServerVersion(), comparison, path, serverFile));
             }
             break;
         case NEW:
@@ -243,7 +243,9 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 /*
                  * same file version, let client update it's metadata
                  */
-                result.addActionForClient(new AcknowledgeFileAction(comparison.getOriginalVersion(), comparison.getClientVersion(), comparison, path));
+                ServerFileVersion serverFileVersion = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session);
+                result.addActionForClient(new AcknowledgeFileAction(
+                    comparison.getOriginalVersion(), comparison.getClientVersion(), comparison, path, serverFileVersion.getFile()));
             } else if (comparison.getClientVersion().getChecksum().equalsIgnoreCase(comparison.getServerVersion().getChecksum()) &&
                 comparison.getClientVersion().getName().equalsIgnoreCase(comparison.getServerVersion().getName()) &&
                 false == comparison.getClientVersion().getName().equals(comparison.getServerVersion().getName())) {
@@ -271,14 +273,14 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  * ... and download the server version aftwerwards
                  */
                 File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
-                result.addActionForClient(new DownloadFileAction(null, comparison.getServerVersion(), comparison, path, serverFile.getFileSize(), serverFile.getFileMIMEType()));
+                result.addActionForClient(new DownloadFileAction(null, comparison.getServerVersion(), comparison, path, serverFile));
             }
         } else if (Change.DELETED == comparison.getClientChange() && (Change.MODIFIED == comparison.getServerChange() || Change.NEW == comparison.getServerChange())) {
             /*
              * delete-edit conflict, let client download server version
              */
             File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
-            result.addActionForClient(new DownloadFileAction(null, comparison.getServerVersion(), comparison, path, serverFile.getFileSize(), serverFile.getFileMIMEType()));
+            result.addActionForClient(new DownloadFileAction(null, comparison.getServerVersion(), comparison, path, serverFile));
         } else if ((Change.NEW == comparison.getClientChange() || Change.MODIFIED == comparison.getClientChange()) && Change.DELETED == comparison.getServerChange()) {
             /*
              * edit-delete conflict, let client upload it's file

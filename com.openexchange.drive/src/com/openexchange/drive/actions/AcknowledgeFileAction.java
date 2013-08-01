@@ -52,6 +52,7 @@ package com.openexchange.drive.actions;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.comparison.ThreeWayComparison;
+import com.openexchange.file.storage.File;
 
 /**
  * {@link AcknowledgeFileAction}
@@ -78,8 +79,28 @@ public class AcknowledgeFileAction extends AbstractAction<FileVersion> {
      * @param path The path to the parent directory
      */
     public AcknowledgeFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path) {
+        this(file, newFile, comparison, path, null, null, null);
+    }
+
+    public AcknowledgeFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, String contentType, Long created, Long modified) {
         super(file, newFile, comparison);
         parameters.put(PARAMETER_PATH, path);
+        if (null != contentType) {
+            parameters.put(PARAMETER_CONTENT_TYPE, contentType);
+        }
+        if (null != created) {
+            parameters.put(PARAMETER_CREATED, created);
+        }
+        if (null != modified) {
+            parameters.put(PARAMETER_MODIFIED, modified);
+        }
+    }
+
+    public AcknowledgeFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, File serverFile) {
+        this(file, newFile, comparison, path, serverFile.getFileMIMEType(),
+            null != serverFile.getCreated() ? serverFile.getCreated().getTime() : null,
+            null != serverFile.getLastModified() ? serverFile.getLastModified().getTime() : null
+        );
     }
 
     @Override

@@ -50,6 +50,7 @@
 package com.openexchange.drive;
 
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.exception.OXException;
@@ -103,11 +104,13 @@ public interface DriveService {
      * @param file The target file version
      * @param offset The start offset in bytes for the upload when resuming, or <code>0</code> when initially starting an upload
      * @param totalLength The total expected length of the file (required to support resume of uploads), or <code>-1</code> if unknown
+     * @param created The time the file was created, or <code>null</code> if not set
+     * @param modified The time the file was modified, or <code>null</code> if not set
      * @return A list of resulting file actions to execute on the client afterwards
      * @throws OXException
      */
     SyncResult<FileVersion> upload(ServerSession session, String rootFolderID, String path, InputStream uploadStream,
-        FileVersion originalVersion, FileVersion newVersion, String contentType, long offset, long totalLength) throws OXException;
+        FileVersion originalVersion, FileVersion newVersion, String contentType, long offset, long totalLength, Date created, Date modified) throws OXException;
 
     /**
      * Processes a file download from the server.

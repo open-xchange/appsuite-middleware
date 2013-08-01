@@ -85,8 +85,13 @@ public class DefaultFileMetadata implements FileMetadata {
     }
 
     @Override
-    public Date getLastModified() {
+    public Date getModified() {
         return fileVersion.getFile().getLastModified();
+    }
+
+    @Override
+    public Date getCreated() {
+        return fileVersion.getFile().getCreated();
     }
 
 }
