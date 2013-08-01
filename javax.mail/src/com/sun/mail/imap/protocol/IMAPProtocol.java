@@ -52,7 +52,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -104,13 +103,14 @@ public class IMAPProtocol extends Protocol {
     private boolean rev1 = false;	// REV1 server ?
     private boolean noauthdebug = true;	// hide auth info in debug output
     private boolean authenticated;	// authenticated?
+    private boolean logoutSignaled;  // logout signaled?
     // WARNING: authenticated may be set to true in superclass
     //		constructor, don't initialize it here.
 
-    private Map capabilities;
+    private Map<String, String> capabilities;
     // WARNING: capabilities may be initialized as a result of superclass
     //		constructor, don't initialize it here.
-    private List authmechs;
+    private List<String> authmechs;
     // WARNING: authmechs may be initialized as a result of superclass
     //		constructor, don't initialize it here.
 
@@ -198,8 +198,8 @@ public class IMAPProtocol extends Protocol {
         throw new ProtocolException(r[r.length-1].toString());
     }
 
-	capabilities = new HashMap(10);
-	authmechs = new ArrayList(5);
+	capabilities = new HashMap<String, String>(10);
+	authmechs = new ArrayList<String>(5);
 	for (int i = 0, len = r.length; i < len; i++) {
 	    if (!(r[i] instanceof IMAPResponse)) {
             continue;
@@ -234,8 +234,8 @@ public class IMAPProtocol extends Protocol {
 	if (!s.equalsIgnoreCase("CAPABILITY")) {
         return;
     }
-	capabilities = new HashMap(10);
-	authmechs = new ArrayList(5);
+	capabilities = new HashMap<String, String>(10);
+	authmechs = new ArrayList<String>(5);
 	parseCapabilities(r);
     }
 
@@ -263,7 +263,7 @@ public class IMAPProtocol extends Protocol {
 		 */
 		r.skipToken();
 	    } else {
-		capabilities.put(s.toUpperCase(Locale.ENGLISH), s);
+		capabilities.put(toUpperCase(s), s);
 		if (s.regionMatches(true, 0, "AUTH=", 0, 5)) {
 		    authmechs.add(s.substring(5));
 		    if (logger.isLoggable(Level.FINE))
@@ -345,18 +345,21 @@ public class IMAPProtocol extends Protocol {
      * this server. Returns <code>true</code> if so, otherwise
      * returns false.
      */
-    public boolean hasCapability(String c) {
+    public boolean hasCapability(String cap) {
+    if (null == cap)
+        return false;
+    String c = cap;
 	if (c.endsWith("*")) {
-	    c = c.substring(0, c.length() - 1).toUpperCase(Locale.ENGLISH);
-	    final Iterator it = capabilities.keySet().iterator();
+	    c = toUpperCase(c.substring(0, c.length() - 1));
+	    final Iterator<String> it = capabilities.keySet().iterator();
 	    while (it.hasNext()) {
-		if (((String)it.next()).startsWith(c)) {
+		if (it.next().startsWith(c)) {
             return true;
         }
 	    }
 	    return false;
 	}
-	return capabilities.containsKey(c.toUpperCase(Locale.ENGLISH));
+	return capabilities.containsKey(toUpperCase(c));
     }
 
     /**
@@ -373,7 +376,7 @@ public class IMAPProtocol extends Protocol {
      *
       * @since	JavaMail 1.4.1
      */
-    public Map getCapabilities() {
+    public Map<String, String> getCapabilities() {
 	return capabilities;
     }
 
@@ -386,10 +389,11 @@ public class IMAPProtocol extends Protocol {
     @Override
     public void disconnect() {
 	super.disconnect();
-	if (authenticated) {
+	if (!logoutSignaled) {
 	    try { authenticatedStatusChanging(false, null, null); } catch(Exception x) {/*ignore*/}
-	    authenticated = false;	// just in case
+	    logoutSignaled = true;
 	}
+	authenticated = false;	// just in case
     }
 
     /**
@@ -424,6 +428,7 @@ public class IMAPProtocol extends Protocol {
     boolean notified = false;
 	try {
 	    authenticatedStatusChanging(false, null, null);
+	    logoutSignaled = true;
 
 	    final Response[] r = command("LOGOUT", null);
 
@@ -825,10 +830,10 @@ public class IMAPProtocol extends Protocol {
 	}
 
 	// were any allowed mechanisms specified?
-	List v;
+	List<String> v;
 	if (allowed != null && allowed.length > 0) {
 	    // remove anything not supported by the server
-	    v = new ArrayList(allowed.length);
+	    v = new ArrayList<String>(allowed.length);
 	    for (int i = 0; i < allowed.length; i++) {
             if (authmechs.contains(allowed[i])) {
                 v.add(allowed[i]);
@@ -838,7 +843,7 @@ public class IMAPProtocol extends Protocol {
 	    // everything is allowed
 	    v = authmechs;
 	}
-	final String[] mechs = (String[])v.toArray(new String[v.size()]);
+	final String[] mechs = v.toArray(new String[v.size()]);
 
 	try {
 
@@ -964,9 +969,9 @@ public class IMAPProtocol extends Protocol {
      *
      * @see "RFC2060, section 6.3.2"
      */
-    public MailboxInfo examine(String mbox) throws ProtocolException {
+    public MailboxInfo examine(String mbox1) throws ProtocolException {
 	// encode the mbox as per RFC2060
-	mbox = BASE64MailboxEncoder.encode(mbox);
+	String mbox = BASE64MailboxEncoder.encode(mbox1);
 
 	final Argument args = new Argument();	
 	args.writeString(mbox);
@@ -1003,7 +1008,7 @@ public class IMAPProtocol extends Protocol {
      *
      * @see "RFC2060, section 6.3.10"
      */
-    public Status status(String mbox, String[] items) 
+    public Status status(String mbox1, String[] items1) 
 		throws ProtocolException {
 	if (!isREV1() && !hasCapability("IMAP4SUNVERSION")) {
         // STATUS is rev1 only, however the non-rev1 SIMS2.0 
@@ -1012,12 +1017,13 @@ public class IMAPProtocol extends Protocol {
     }
 
 	// encode the mbox as per RFC2060
-	mbox = BASE64MailboxEncoder.encode(mbox);
+	String mbox = BASE64MailboxEncoder.encode(mbox1);
 
 	final Argument args = new Argument();	
 	args.writeString(mbox);
 
 	final Argument itemArgs = new Argument();
+	String[] items = items1;
 	if (items == null) {
         items = Status.standardItems;
     }
@@ -1062,9 +1068,9 @@ public class IMAPProtocol extends Protocol {
      *
      * @see "RFC2060, section 6.3.3"
      */
-    public void create(String mbox) throws ProtocolException {
+    public void create(String mbox1) throws ProtocolException {
 	// encode the mbox as per RFC2060
-	mbox = BASE64MailboxEncoder.encode(mbox);
+	String mbox = BASE64MailboxEncoder.encode(mbox1);
 
 	final Argument args = new Argument();	
 	args.writeString(mbox);
@@ -1077,9 +1083,9 @@ public class IMAPProtocol extends Protocol {
      *
      * @see "RFC2060, section 6.3.4"
      */
-    public void delete(String mbox) throws ProtocolException {
+    public void delete(String mbox1) throws ProtocolException {
 	// encode the mbox as per RFC2060
-	mbox = BASE64MailboxEncoder.encode(mbox);
+	String mbox = BASE64MailboxEncoder.encode(mbox1);
 
 	final Argument args = new Argument();	
 	args.writeString(mbox);
@@ -1109,10 +1115,10 @@ public class IMAPProtocol extends Protocol {
      *
      * @see "RFC2060, section 6.3.6"
      */
-    public void subscribe(String mbox) throws ProtocolException {
+    public void subscribe(String mbox1) throws ProtocolException {
 	final Argument args = new Argument();	
 	// encode the mbox as per RFC2060
-	mbox = BASE64MailboxEncoder.encode(mbox);
+	String mbox = BASE64MailboxEncoder.encode(mbox1);
 	args.writeString(mbox);
 
 	simpleCommand("SUBSCRIBE", args);
@@ -1123,10 +1129,10 @@ public class IMAPProtocol extends Protocol {
      *
      * @see "RFC2060, section 6.3.7"
      */
-    public void unsubscribe(String mbox) throws ProtocolException {
+    public void unsubscribe(String mbox1) throws ProtocolException {
 	final Argument args = new Argument();	
 	// encode the mbox as per RFC2060
-	mbox = BASE64MailboxEncoder.encode(mbox);
+	String mbox = BASE64MailboxEncoder.encode(mbox1);
 	args.writeString(mbox);
 
 	simpleCommand("UNSUBSCRIBE", args);
@@ -1217,10 +1223,10 @@ public class IMAPProtocol extends Protocol {
 	return appenduid(mbox, f, d, data, true);
     }
 
-    public AppendUID appenduid(String mbox, Flags f, final Date d,
+    public AppendUID appenduid(String mbox1, Flags f, final Date d,
 			final Literal data, final boolean uid) throws ProtocolException {
 	// encode the mbox as per RFC2060
-	mbox = BASE64MailboxEncoder.encode(mbox);
+    String mbox = BASE64MailboxEncoder.encode(mbox1);
 
 	final Argument args = new Argument();	
 	args.writeString(mbox);
@@ -1804,10 +1810,10 @@ public class IMAPProtocol extends Protocol {
 		    mbox);
     }
 
-    private void copy(final String msgSequence, String mbox)
+    private void copy(final String msgSequence, String mbox1)
 			throws ProtocolException {
 	// encode the mbox as per RFC2060
-	mbox = BASE64MailboxEncoder.encode(mbox);
+    String mbox = BASE64MailboxEncoder.encode(mbox1);
 
 	final Argument args = new Argument();	
 	args.writeAtom(msgSequence);
@@ -2182,13 +2188,13 @@ public class IMAPProtocol extends Protocol {
      *
      * @see "RFC2087"
      */
-    public Quota[] getQuotaRoot(String mbox) throws ProtocolException {
+    public Quota[] getQuotaRoot(String mbox1) throws ProtocolException {
 	if (!hasCapability("QUOTA")) {
         throw new BadCommandException("GETQUOTAROOT not supported");
     }
 
 	// encode the mbox as per RFC2060
-	mbox = BASE64MailboxEncoder.encode(mbox);
+	String mbox = BASE64MailboxEncoder.encode(mbox1);
 
 	final Argument args = new Argument();	
 	args.writeString(mbox);
@@ -2197,7 +2203,7 @@ public class IMAPProtocol extends Protocol {
 
 	final Response response = r[r.length-1];
 
-	final Hashtable tab = new Hashtable();
+	final Hashtable<String, Quota> tab = new Hashtable<String, Quota>();
 
 	// Grab all QUOTAROOT and QUOTA responses
 	if (response.isOK()) { // command succesful 
@@ -2221,7 +2227,7 @@ public class IMAPProtocol extends Protocol {
 		    r[i] = null;
 		} else if (ir.keyEquals("QUOTA")) {
 		    final Quota quota = parseQuota(ir);
-		    final Quota q = (Quota)tab.get(quota.quotaRoot);
+		    final Quota q = tab.get(quota.quotaRoot);
 		    if (q != null && q.resources != null) {
 			// XXX - should merge resources
 		    }
@@ -2236,9 +2242,9 @@ public class IMAPProtocol extends Protocol {
 	handleResult(response);
 
 	final Quota[] qa = new Quota[tab.size()];
-	final Enumeration e = tab.elements();
+	final Enumeration<Quota> e = tab.elements();
 	for (int i = 0; e.hasMoreElements(); i++) {
-        qa[i] = (Quota)e.nextElement();
+        qa[i] = e.nextElement();
     }
 	return qa;
     }
@@ -2438,13 +2444,13 @@ public class IMAPProtocol extends Protocol {
      *
      * @see "RFC2086"
      */
-    public ACL[] getACL(String mbox) throws ProtocolException {
+    public ACL[] getACL(String mbox1) throws ProtocolException {
 	if (!hasCapability("ACL")) {
         throw new BadCommandException("ACL not supported");
     }
 
 	// encode the mbox as per RFC2060
-	mbox = BASE64MailboxEncoder.encode(mbox);
+	String mbox = BASE64MailboxEncoder.encode(mbox1);
 
 	final Argument args = new Argument();	
 	args.writeString(mbox);
@@ -2491,14 +2497,14 @@ public class IMAPProtocol extends Protocol {
      *
      * @see "RFC2086"
      */
-    public Rights[] listRights(String mbox, final String user)
+    public Rights[] listRights(String mbox1, final String user)
 				throws ProtocolException {
 	if (!hasCapability("ACL")) {
         throw new BadCommandException("ACL not supported");
     }
 
 	// encode the mbox as per RFC2060
-	mbox = BASE64MailboxEncoder.encode(mbox);
+	String mbox = BASE64MailboxEncoder.encode(mbox1);
 
 	final Argument args = new Argument();	
 	args.writeString(mbox);
@@ -2543,13 +2549,13 @@ public class IMAPProtocol extends Protocol {
      *
      * @see "RFC2086"
      */
-    public Rights myRights(String mbox) throws ProtocolException {
+    public Rights myRights(String mbox1) throws ProtocolException {
 	if (!hasCapability("ACL")) {
         throw new BadCommandException("ACL not supported");
     }
 
 	// encode the mbox as per RFC2060
-	mbox = BASE64MailboxEncoder.encode(mbox);
+	String mbox = BASE64MailboxEncoder.encode(mbox1);
 
 	final Argument args = new Argument();	
 	args.writeString(mbox);
@@ -2761,5 +2767,19 @@ public class IMAPProtocol extends Protocol {
      */
     protected void authenticatedStatusChanging(final boolean authenticate, final String u, final String p) throws ProtocolException {
         // Nothing
+    }
+
+    /** ASCII-wise to upper-case */
+    private static String toUpperCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+        }
+        return builder.toString();
     }
 }
