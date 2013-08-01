@@ -81,7 +81,7 @@ public class TaskParser extends CalendarParser {
 		}
 
 		if (hasElement(eProp.getChild(TaskFields.TARGET_COSTS, XmlServlet.NS))) {
-			taskObj.setTargetCosts(getValueAsFloat(eProp.getChild(TaskFields.TARGET_COSTS, XmlServlet.NS)));
+            taskObj.setTargetCosts(getValueAsBigDecimal(eProp.getChild(TaskFields.TARGET_COSTS, XmlServlet.NS)));
 		}
 
 		if (hasElement(eProp.getChild(TaskFields.ACTUAL_DURATION, XmlServlet.NS))) {
@@ -89,7 +89,7 @@ public class TaskParser extends CalendarParser {
 		}
 
 		if (hasElement(eProp.getChild(TaskFields.ACTUAL_COSTS, XmlServlet.NS))) {
-			taskObj.setActualCosts(getValueAsFloat(eProp.getChild(TaskFields.ACTUAL_COSTS, XmlServlet.NS)));
+            taskObj.setActualCosts(getValueAsBigDecimal(eProp.getChild(TaskFields.ACTUAL_COSTS, XmlServlet.NS)));
 		}
 
 		if (hasElement(eProp.getChild(TaskFields.DATE_COMPLETED, XmlServlet.NS))) {

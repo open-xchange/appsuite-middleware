@@ -1002,12 +1002,7 @@ public class JSONArray extends AbstractJSONValue {
                     ja.put(JSONObject.NULL);
                     break;
                 case VALUE_NUMBER_FLOAT:
-                    try {
-                        ja.put(jParser.getFloatValue());
-                    } catch (final JsonParseException e) {
-                        // Outside of range of Java float
-                        ja.put(jParser.getDoubleValue());
-                    }
+                    ja.put(jParser.getDecimalValue());
                     break;
                 case VALUE_NUMBER_INT:
                     try {

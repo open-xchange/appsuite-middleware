@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.admin.mysql;
+package com.openexchange.groupware.tasks.database;
 
 import com.openexchange.database.AbstractCreateTableImpl;
 
@@ -58,7 +58,7 @@ import com.openexchange.database.AbstractCreateTableImpl;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class CreateTaskTables extends AbstractCreateTableImpl {
-    
+
     private static final String taskTableName = "task";
     private static final String taskFolderTableName = "task_folder";
     private static final String taskParticipantTableName = "task_participant";
@@ -68,7 +68,7 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
     private static final String delTaskFolderTableName = "del_task_folder";
     private static final String delTaskParticipantTableName = "del_task_participant";
     private static final String delTaskEParticipantTableName = "del_task_eparticipant";
-    
+
     private static final String createTaskTable = "CREATE TABLE task ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "id INT4 UNSIGNED NOT NULL,"
@@ -108,8 +108,8 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "number_of_attachments INT1 UNSIGNED NOT NULL,"
        + "PRIMARY KEY (cid,id),"
        + "INDEX (cid,last_modified)"
-     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+
     private static final String createTaskFolderTable = "CREATE TABLE task_folder ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "id INT4 UNSIGNED NOT NULL,"
@@ -120,7 +120,7 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "FOREIGN KEY (cid, id) REFERENCES task (cid, id),"
        + "FOREIGN KEY (cid, folder) REFERENCES oxfolder_tree (cid, fuid)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createTaskParticipantTable = "CREATE TABLE task_participant ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "task INT4 UNSIGNED NOT NULL,"
@@ -131,8 +131,8 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "PRIMARY KEY (cid,task,user),"
        + "FOREIGN KEY (cid, task) REFERENCES task (cid, id),"
        + "FOREIGN KEY (cid,user) REFERENCES user (cid,id)"
-     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+
     private static final String createTaskEParticipantTable = "CREATE TABLE task_eparticipant ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "task INT4 UNSIGNED NOT NULL,"
@@ -140,8 +140,8 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "display_name VARCHAR(255),"
        + "PRIMARY KEY (cid,task,mail),"
        + "FOREIGN KEY (cid,task) REFERENCES task (cid,id)"
-     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+
     private static final String createTaskRemovedParticipantTable = "CREATE TABLE task_removedparticipant ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "task INT4 UNSIGNED NOT NULL,"
@@ -154,8 +154,8 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "INDEX (cid,folder),"
        + "FOREIGN KEY (cid, task) REFERENCES task (cid, id),"
        + "FOREIGN KEY (cid,user) REFERENCES user(cid,id)"
-     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+
     private static final String createDelTaskTable = "CREATE TABLE del_task ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "id INT4 UNSIGNED NOT NULL,"
@@ -195,8 +195,8 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "number_of_attachments INT1 UNSIGNED NOT NULL,"
        + "PRIMARY KEY (cid,id),"
        + "INDEX (cid,last_modified)"
-     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+
     private static final String createDelTaskFolderTable = "CREATE TABLE del_task_folder ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "id INT4 UNSIGNED NOT NULL,"
@@ -205,7 +205,7 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "PRIMARY KEY (cid,id,folder),"
        + "INDEX (cid,folder),"
        + "FOREIGN KEY (cid, id) REFERENCES del_task (cid, id)"
-     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     private static final String createDelTaskParticipantTable = "CREATE TABLE del_task_participant ("
        + "cid INT4 UNSIGNED NOT NULL,"
@@ -216,8 +216,8 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "description VARCHAR(255),"
        + "PRIMARY KEY (cid,task,user),"
        + "FOREIGN KEY (cid, task) REFERENCES del_task (cid, id)"
-     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+
     private static final String createDelTaskEParticipantTable = "CREATE TABLE del_task_eparticipant ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "task INT4 UNSIGNED NOT NULL,"
@@ -225,8 +225,8 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "display_name VARCHAR(255),"
        + "PRIMARY KEY (cid,task,mail),"
        + "FOREIGN KEY (cid, task) REFERENCES del_task (cid, id)"
-     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+
     /**
      * Initializes a new {@link CreateTaskTables}.
      */
@@ -234,17 +234,11 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.CreateTableService#requiredTables()
-     */
     @Override
     public String[] requiredTables() {
         return new String[] { "user", "oxfolder_tree" };
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.CreateTableService#tablesToCreate()
-     */
     @Override
     public String[] tablesToCreate() {
         return new String[] { taskTableName, taskFolderTableName, taskParticipantTableName, taskEParticipantTableName,
@@ -252,14 +246,10 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
             delTaskEParticipantTableName };
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.database.AbstractCreateTableImpl#getCreateStatements()
-     */
     @Override
     protected String[] getCreateStatements() {
         return new String[] { createTaskTable, createTaskFolderTable, createTaskParticipantTable, createTaskEParticipantTable,
             createTaskRemovedParticipantTable, createDelTaskTable, createDelTaskFolderTable, createDelTaskParticipantTable,
             createDelTaskEParticipantTable };
     }
-
 }

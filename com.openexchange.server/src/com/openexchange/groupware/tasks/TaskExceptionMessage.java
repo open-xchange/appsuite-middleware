@@ -204,9 +204,6 @@ public class TaskExceptionMessage implements LocalizableStrings {
     // Unknown participant type %1$d.
     public static final String UNKNOWN_PARTICIPANT_MSG = "Unknown participant type %1$d.";
 
-    // The entered value for costs is not within the allowed range. Please use a value from -130000.00 to 130000.00.
-    public static final String COSTS_OFF_LIMIT_MSG = "The value entered for costs is not within the allowed range. Please use a value from -130000.00 to 130000.00.";
-
     // In order to accomplish the search, %1$d or more characters are required.
     public static final String PATTERN_TOO_SHORT_MSG = "In order to accomplish the search, %1$d or more characters are required.";
 

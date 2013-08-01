@@ -51,6 +51,7 @@ package com.openexchange.groupware.tasks;
 
 import static com.openexchange.java.Autoboxing.F;
 import static com.openexchange.java.Autoboxing.L;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -84,8 +85,8 @@ public class Create {
         task.setCategories("Categories");
         task.setTargetDuration(L(1440));
         task.setActualDuration(L(1440));
-        task.setTargetCosts(F(1.0f));
-        task.setActualCosts(F(1.0f));
+        task.setTargetCosts(new BigDecimal("1.0"));
+        task.setActualCosts(new BigDecimal("1.0"));
         task.setCurrency("\u20ac");
         task.setTripMeter("trip meter");
         task.setBillingInformation("billing information");

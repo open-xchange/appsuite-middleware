@@ -69,7 +69,6 @@ import com.openexchange.admin.mysql.CreateMiscTables;
 import com.openexchange.admin.mysql.CreateOXFolderTables;
 import com.openexchange.admin.mysql.CreateSequencesTables;
 import com.openexchange.admin.mysql.CreateSettingsTables;
-import com.openexchange.admin.mysql.CreateTaskTables;
 import com.openexchange.admin.mysql.CreateVirtualFolderTables;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -160,7 +159,7 @@ public class Activator extends HousekeepingActivator {
         } catch (final InvalidSyntaxException e) {
             e.printStackTrace();
         }
-        
+
         //Register CreateTableServices
         registerService(CreateTableService.class, new CreateSequencesTables());
         registerService(CreateTableService.class, new CreateLdap2SqlTables());
@@ -169,7 +168,6 @@ public class Activator extends HousekeepingActivator {
         registerService(CreateTableService.class, new CreateSettingsTables());
         registerService(CreateTableService.class, new CreateCalendarTables());
         registerService(CreateTableService.class, new CreateContactsTables());
-        registerService(CreateTableService.class, new CreateTaskTables());
         registerService(CreateTableService.class, new CreateInfostoreTables());
         registerService(CreateTableService.class, new CreateAttachmentTables());
         registerService(CreateTableService.class, new CreateMiscTables());

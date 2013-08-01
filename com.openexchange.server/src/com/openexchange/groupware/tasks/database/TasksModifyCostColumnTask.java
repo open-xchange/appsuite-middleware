@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,60 @@
  *
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.groupware.tasks.database;
 
-import java.math.BigDecimal;
-import com.openexchange.ajax.task.actions.DeleteRequest;
-import com.openexchange.ajax.task.actions.GetRequest;
-import com.openexchange.ajax.task.actions.GetResponse;
-import com.openexchange.ajax.task.actions.InsertRequest;
-import com.openexchange.ajax.task.actions.InsertResponse;
-import com.openexchange.groupware.tasks.Task;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
+ * {@link TasksModifyCostColumnTask}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class FloatTest extends AbstractTaskTest {
+public final class TasksModifyCostColumnTask extends UpdateTaskAdapter {
 
-    /**
-     * @param name
-     */
-    public FloatTest(String name) {
-        super(name);
+    private DatabaseService service;
+
+    public TasksModifyCostColumnTask(DatabaseService service) {
+        super();
+        this.service = service;
     }
 
-    /**
-     * Tests if floats can be stored correctly.
-     * @throws Throwable if an error occurs.
-     */
-    public void testFloats() throws Throwable {
-        final Task task = new Task();
-        task.setActualCosts(new BigDecimal("1"));
-        task.setTargetCosts(new BigDecimal("1"));
-        task.setParentFolderID(getPrivateFolder());
-        final InsertResponse insertR = getClient().execute(new InsertRequest(task, getTimeZone()));
+    @Override
+    public String[] getDependencies() {
+        return new String[0];
+    }
 
-        GetResponse getR = getClient().execute(new GetRequest(insertR));
-        Task reload = getR.getTask(getTimeZone());
-        assertEquals("Actual duration differs.", task.getActualDuration(), reload.getActualDuration());
-        assertEquals("Target duration differs.", task.getTargetDuration(), reload.getTargetDuration());
-        assertEquals("Actual costs differs.", task.getActualCosts(), reload.getActualCosts());
-        assertEquals("Target costs differs.", task.getTargetCosts(), reload.getTargetCosts());
-
-        getClient().execute(new DeleteRequest(reload));
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        int contextID = params.getContextId();
+        Connection con = service.getForUpdateTask(contextID);
+        Column actualCostsColumn = new Column("actual_costs", "DECIMAL(12,2) DEFAULT NULL");
+        Column targetCostsColumn = new Column("target_costs", "DECIMAL(12,2) DEFAULT NULL");
+        try {
+            startTransaction(con);
+            Tools.checkAndModifyColumns(con, "task", actualCostsColumn, targetCostsColumn);
+            Tools.checkAndModifyColumns(con, "del_task", actualCostsColumn, targetCostsColumn);
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            rollback(con);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            autocommit(con);
+            service.backForUpdateTask(contextID, con);
+        }
     }
 }

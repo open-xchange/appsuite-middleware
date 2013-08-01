@@ -50,6 +50,7 @@
 package com.openexchange.groupware.tasks;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -71,29 +72,17 @@ public class Task extends CalendarObject {
     private static final long serialVersionUID = 3292310353395679976L;
 
     public static final int STATUS = 300;
-
     public static final int PERCENT_COMPLETED = 301;
-
     public static final int ACTUAL_COSTS = 302;
-
     public static final int ACTUAL_DURATION = 303;
-
     public static final int BILLING_INFORMATION = 305;
-
     public static final int PROJECT_ID = 306;
-
     public static final int TARGET_COSTS = 307;
-
     public static final int TARGET_DURATION = 308;
-
     public static final int PRIORITY = 309;
-
     public static final int CURRENCY = 312;
-
     public static final int TRIP_METER = 313;
-
     public static final int COMPANIES = 314;
-
     public static final int DATE_COMPLETED = 315;
 
     public static final int[] ALL_COLUMNS = {
@@ -117,19 +106,13 @@ public class Task extends CalendarObject {
         OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED};//, LAST_MODIFIED_UTC };
 
     public static final int LOW = 1;
-
     public static final int NORMAL = 2;
-
     public static final int HIGH = 3;
 
     public static final int NOT_STARTED = 1;
-
     public static final int IN_PROGRESS = 2;
-
     public static final int DONE = 3;
-
     public static final int WAITING = 4;
-
     public static final int DEFERRED = 5;
 
     /**
@@ -141,9 +124,9 @@ public class Task extends CalendarObject {
 
     private int projectId = 0;
 
-    private Float targetCosts;
+    private BigDecimal targetCosts;
 
-    private Float actualCosts;
+    private BigDecimal actualCosts;
 
     /**
      * The duration is measured by outlook in minutes. We do here the same.
@@ -214,11 +197,11 @@ public class Task extends CalendarObject {
         return projectId;
     }
 
-    public Float getTargetCosts() {
+    public BigDecimal getTargetCosts() {
         return targetCosts;
     }
 
-    public Float getActualCosts() {
+    public BigDecimal getActualCosts() {
         return actualCosts;
     }
 
@@ -282,13 +265,13 @@ public class Task extends CalendarObject {
         projectIdSet = true;
     }
 
-    public void setTargetCosts(final Float target_costs) {
-        this.targetCosts = target_costs;
+    public void setTargetCosts(final BigDecimal targetCosts) {
+        this.targetCosts = targetCosts;
         targetCostsSet = true;
     }
 
-    public void setActualCosts(final Float actual_costs) {
-        this.actualCosts = actual_costs;
+    public void setActualCosts(final BigDecimal actualCosts) {
+        this.actualCosts = actualCosts;
         actualCostsSet = true;
     }
 
@@ -587,7 +570,7 @@ public class Task extends CalendarObject {
             setDateCompleted((Date) value);
             break;
         case TARGET_COSTS:
-            setTargetCosts((Float) value);
+            setTargetCosts((BigDecimal) value);
             break;
         case PRIORITY:
             setPriority(((Integer) value).intValue());
@@ -608,7 +591,7 @@ public class Task extends CalendarObject {
             setCurrency((String) value);
             break;
         case ACTUAL_COSTS:
-            setActualCosts((Float) value);
+            setActualCosts((BigDecimal) value);
             break;
         case PROJECT_ID:
             setProjectID(((Integer) value).intValue());
