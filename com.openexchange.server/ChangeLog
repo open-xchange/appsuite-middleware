@@ -1,5 +1,6 @@
 * 2013-08-01 - tobias.friedrich@open-xchange.com
 
+ - Fix for bug 27975: Also try full login info as read from principal URL when resolving the user
  - Fix for bug 27901: Check for null before accessing a supplied parameter 
  
 * 2013-07-25 - marcus.klein@open-xchange.com
