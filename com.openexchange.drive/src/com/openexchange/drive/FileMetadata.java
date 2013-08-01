@@ -70,6 +70,13 @@ public interface FileMetadata extends FileVersion {
      *
      * @return The last modified date
      */
-    Date getLastModified();
+    Date getModified();
+
+    /**
+     * Gets the date of the creation.
+     *
+     * @return The creation date
+     */
+    Date getCreated();
 
 }

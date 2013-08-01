@@ -51,6 +51,7 @@ package com.openexchange.drive.json.action;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -108,17 +109,31 @@ public class UploadAction extends AbstractDriveAction {
         if (requestData.containsParameter("name")) {
             name = requestData.getParameter("name");
         }
-        long totalLength = -1;
+        long totalLength = -1L;
         if (requestData.containsParameter("totalLength")) {
             totalLength = requestData.getParameter("totalLength", Long.class).longValue();
         }
-        long offset = 0;
+        long offset = 0L;
         if (requestData.containsParameter("offset")) {
             offset = requestData.getParameter("offset", Long.class).longValue();
         }
         String contentType = "application/octet-stream";
         if (requestData.containsParameter("contentType")) {
             contentType = requestData.getParameter("contentType");
+        }
+        Date created = null;
+        if (requestData.containsParameter("created")) {
+            Long value = requestData.getParameter("created", Long.class);
+            if (null != value) {
+                created = new Date(value.longValue());
+            }
+        }
+        Date modified = null;
+        if (requestData.containsParameter("modified")) {
+            Long value = requestData.getParameter("modified", Long.class);
+            if (null != value) {
+                modified = new Date(value.longValue());
+            }
         }
         /*
          * construct referenced file versions from parameters
@@ -136,7 +151,7 @@ public class UploadAction extends AbstractDriveAction {
             if (null == uploadStream) {
                 throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
             }
-            syncResult = driveService.upload(session, rootFolderID, path, uploadStream, originalFile, newFile, contentType, offset, totalLength);
+            syncResult = driveService.upload(session, rootFolderID, path, uploadStream, originalFile, newFile, contentType, offset, totalLength, created, modified);
         } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {

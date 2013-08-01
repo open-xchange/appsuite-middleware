@@ -52,6 +52,7 @@ package com.openexchange.drive.internal;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.container.IFileHolder;
@@ -90,6 +91,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
@@ -224,16 +226,16 @@ public class DriveServiceImpl implements DriveService {
 
     @Override
     public SyncResult<FileVersion> upload(ServerSession session, String rootFolderID, String path, InputStream uploadStream,
-        FileVersion originalVersion, FileVersion newVersion, String contentType, long offset, long totalLength) throws OXException {
+        FileVersion originalVersion, FileVersion newVersion, String contentType, long offset, long totalLength, Date created, Date modified) throws OXException {
         DriveSession driveSession = createSession(session, rootFolderID);
         if (driveSession.isTraceEnabled()) {
             driveSession.trace("Handling upload: original version: " + originalVersion + ", new version: " + newVersion +
-                ", offset: " + offset + ", total length: " + totalLength);
+                ", offset: " + offset + ", total length: " + totalLength + ", created: " + created + ", modified: " + modified);
         }
         IntermediateSyncResult<FileVersion> syncResult = new IntermediateSyncResult<FileVersion>();
         File createdFile = null;
         try {
-            createdFile = new UploadHelper(driveSession).perform(path, originalVersion, newVersion, uploadStream, contentType, offset, totalLength);
+            createdFile = new UploadHelper(driveSession).perform(path, originalVersion, newVersion, uploadStream, contentType, offset, totalLength, created, modified);
         } catch (OXException e) {
             if ("FLS-0024".equals(e.getErrorCode())) {
                 /*
@@ -252,8 +254,7 @@ public class DriveServiceImpl implements DriveService {
                      * ... then download the server version afterwards
                      */
                     File serverFile = ServerFileVersion.valueOf(originalVersion, path, driveSession).getFile();
-                    syncResult.addActionForClient(new DownloadFileAction(null, originalVersion, null, path,
-                        serverFile.getFileSize(), serverFile.getFileMIMEType()));
+                    syncResult.addActionForClient(new DownloadFileAction(null, originalVersion, null, path, serverFile));
                 } else {
                     /*
                      * upload of new file, mark as error with quarantine flag
@@ -266,7 +267,7 @@ public class DriveServiceImpl implements DriveService {
         }
         if (null != createdFile) {
             /*
-             * store checksum
+             * store checksum, invalidate parent directory checksum
              */
             FileID fileID = new FileID(createdFile.getId());
             FolderID folderID = new FolderID(createdFile.getFolderId());
@@ -276,12 +277,13 @@ public class DriveServiceImpl implements DriveService {
             }
             FileChecksum fileChecksum = driveSession.getChecksumStore().insertFileChecksum(
                 fileID, createdFile.getVersion(), createdFile.getSequenceNumber(), newVersion.getChecksum());
+            driveSession.getChecksumStore().removeDirectoryChecksum(folderID);
             /*
              * check if created file still equals uploaded one
              */
             FileVersion createdVersion = new ServerFileVersion(createdFile, fileChecksum);
             if (newVersion.getName().equals(createdVersion.getName())) {
-                syncResult.addActionForClient(new AcknowledgeFileAction(originalVersion, createdVersion, null, path));
+                syncResult.addActionForClient(new AcknowledgeFileAction(originalVersion, createdVersion, null, path, createdFile));
             } else {
                 syncResult.addActionForClient(new EditFileAction(newVersion, createdVersion, null, path));
             }
@@ -432,15 +434,13 @@ public class DriveServiceImpl implements DriveService {
                 /*
                  * move all files to temp folder
                  */
-
-                // move all files to temp path
-                // TODO: optimize
-                List<ServerFileVersion> serverFileVersions = getServerFiles(session, action.getVersion().getPath());
-
-//                session.getChecksumStore().removeFileChecksumsInFolder(newFolderID)
-
-                for (ServerFileVersion serverFileVersion : serverFileVersions) {
-                    execute(session, action.getVersion().getPath(), new RemoveFileAction(serverFileVersion, null, action.getVersion().getPath()));
+                FileStoragePermission permission = session.getStorage().getOwnPermission(action.getVersion().getPath());
+                if (FileStoragePermission.DELETE_ALL_OBJECTS <= permission.getDeletePermission()) {
+                    // TODO: optimize
+                    List<ServerFileVersion> serverFileVersions = getServerFiles(session, action.getVersion().getPath());
+                    for (ServerFileVersion serverFileVersion : serverFileVersions) {
+                        execute(session, action.getVersion().getPath(), new RemoveFileAction(serverFileVersion, null, action.getVersion().getPath()));
+                    }
                 }
             }
             // delete empty directory
