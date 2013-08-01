@@ -65,8 +65,10 @@ import com.openexchange.java.Streams;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class TestCSVContactImporter extends CSVContactImporter {
-
+    
+    
     public TestCSVContactImporter() throws Exception {
+        super(null);
         final ConfigurationService conf = ImportExportServices.getConfigurationService();
         final String path = conf.getProperty("com.openexchange.import.mapper.path");
         final File dir = new File(path);

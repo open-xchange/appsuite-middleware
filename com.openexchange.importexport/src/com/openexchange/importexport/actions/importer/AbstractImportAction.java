@@ -64,10 +64,17 @@ import com.openexchange.importexport.importers.Importer;
 import com.openexchange.importexport.json.ImportRequest;
 import com.openexchange.importexport.json.ImportWriter;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 public abstract class AbstractImportAction implements AJAXActionService {
+    
+    protected ServiceLookup services;
 
+    public AbstractImportAction(ServiceLookup services) {
+        this.services = services;
+    }
+    
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
 
