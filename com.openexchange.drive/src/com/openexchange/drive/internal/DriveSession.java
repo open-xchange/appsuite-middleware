@@ -50,17 +50,16 @@
 package com.openexchange.drive.internal;
 
 import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import jonelo.jacksum.algorithm.MD;
 import org.apache.commons.logging.Log;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.checksum.ChecksumStore;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
+import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.java.util.TimeZones;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -73,7 +72,6 @@ public class DriveSession {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveSession.class);
 
     private final ServerSession session;
-
     private ChecksumStore checksumStore;
     private final String rootFolderID;
     private DriveStorage storage;
@@ -169,10 +167,8 @@ public class DriveSession {
                 LOG.trace(msg);
             }
             if (isDiagnostics()) {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                sdf.setTimeZone(TimeZones.UTC);
                 diagnosticsLog
-                    .append(sdf.format(new Date()))
+                    .append(DriveConstants.LOG_DATE_FORMAT.get().format(new Date()))
                     .append(" [").append(Thread.currentThread().getId()).append("] : ")
                     .append(msg.trim()).append("\n\n");
             }

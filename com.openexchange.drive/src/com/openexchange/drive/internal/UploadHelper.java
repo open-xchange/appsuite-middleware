@@ -57,14 +57,18 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.storage.DriveConstants;
+import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.drive.storage.StorageOperation;
+import com.openexchange.drive.sync.RenameTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
@@ -96,7 +100,7 @@ public class UploadHelper {
     }
 
     public File perform(final String path, final FileVersion originalVersion, final FileVersion newVersion, final InputStream uploadStream,
-        final String contentType, final long offset, final long totalLength) throws OXException {
+        final String contentType, final long offset, final long totalLength, final Date created, final Date modified) throws OXException {
         /*
          * save data
          */
@@ -126,21 +130,87 @@ public class UploadHelper {
              * save document at target path/name
              */
             uploadFile.setFileMD5Sum(checksum);
+            final String md5 = checksum;
             return session.getStorage().wrapInTransaction(new StorageOperation<File>() {
 
                 @Override
                 public File call() throws OXException {
+                    /*
+                     * prepare metadata
+                     */
+                    long sequenceNumber = uploadFile.getSequenceNumber();
+                    File file = new DefaultFile();
+                    List<Field> fields = new ArrayList<File.Field>();
+                    file.setFileName(newVersion.getName());
+                    fields.add(Field.FILENAME);
+                    file.setVersionComment(session.getStorage().getVersionComment());
+                    fields.add(Field.VERSION_COMMENT);
+                    file.setFileSize(uploadFile.getFileSize());
+                    fields.add(Field.FILE_SIZE);
+                    file.setFileMD5Sum(md5);
+                    fields.add(Field.FILE_MD5SUM);
+                    if (null != contentType) {
+                        file.setFileMIMEType(contentType);
+                        fields.add(Field.FILE_MIMETYPE);
+                    }
+                    if (null != created) {
+                        file.setCreated(created);
+                        fields.add(Field.CREATED);
+                    }
+                    if (null != modified) {
+                        file.setLastModified(modified);
+                        fields.add(Field.LAST_MODIFIED);
+                    }
+
                     if (null != originalVersion) {
                         File originalFile = session.getStorage().findFileByName(path, originalVersion.getName());
                         if (null != originalFile && ChecksumProvider.matches(session, originalFile, originalVersion.getChecksum())) {
+                            /*
+                             * move upload file as new version for existing item
+                             */
+                            file.setId(originalFile.getId());
+                            file.setFolderId(originalFile.getFolderId());
                             if (null != originalFile.getTitle() && originalFile.getTitle().equals(originalFile.getFileName())) {
-                                originalFile.setTitle(newVersion.getName());
+                                file.setTitle(newVersion.getName());
+                                fields.add(Field.TITLE);
                             }
-                            originalFile.setFileName(newVersion.getName());
-                            return session.getStorage().moveFile(uploadFile, originalFile);
+                            InputStream data = null;
+                            try {
+                                data = session.getStorage().getFileAccess().getDocument(uploadFile.getId(), uploadFile.getVersion());
+                                session.getStorage().getFileAccess().saveDocument(file, data, sequenceNumber, fields);
+                            } finally {
+                                Streams.close(data);
+                            }
+                            /*
+                             * delete upload file
+                             */
+                            session.getStorage().deleteFile(uploadFile);
+                            return file;
+                        } else {
+                            /*
+                             * update conflict, move file into target folder using an alternative name
+                             */
+                            file.setId(uploadFile.getId());
+                            file.setFolderId(session.getStorage().getFolderID(path, true));
+                            fields.add(Field.FOLDER_ID);
+                            String alternativeName = RenameTools.findRandomAlternativeName(newVersion.getName(), session.getDeviceName());
+                            file.setFileName(alternativeName);
+                            file.setTitle(alternativeName);
+                            fields.add(Field.TITLE);
+                            session.getStorage().getFileAccess().saveFileMetadata(file, sequenceNumber, fields);
+                            return file;
                         }
                     }
-                    return session.getStorage().moveFile(uploadFile, newVersion.getName(), path);
+                    /*
+                     * move upload file into target folder
+                     */
+                    file.setId(uploadFile.getId());
+                    file.setFolderId(session.getStorage().getFolderID(path, true));
+                    fields.add(Field.FOLDER_ID);
+                    file.setTitle(newVersion.getName());
+                    fields.add(Field.TITLE);
+                    session.getStorage().getFileAccess().saveFileMetadata(file, sequenceNumber, fields);
+                    return file;
                 }
             });
         } else {
@@ -247,10 +317,20 @@ public class UploadHelper {
             /*
              * create new upload file
              */
+            if (session.isTraceEnabled()) {
+                session.trace("Creating new upload file at: " + DriveStorage.combine(TEMP_PATH, uploadFileName));
+            }
             uploadFile = session.getStorage().createFile(TEMP_PATH, uploadFileName);
+            if (null != uploadFile && session.isTraceEnabled()) {
+                session.trace("Upload file created: [" + uploadFile.getFolderId() + '/' + uploadFile.getId() + ']');
+            }
+        } else if (null != uploadFile && session.isTraceEnabled()) {
+            session.trace("Using existing upload file at " + DriveStorage.combine(TEMP_PATH, uploadFileName) +
+                " [" + uploadFile.getFolderId() + '/' + uploadFile.getId() + "], current size: " + uploadFile.getFileSize() +
+                ", last modified: " + (null != uploadFile.getLastModified() ?
+                    DriveConstants.LOG_DATE_FORMAT.get().format(uploadFile.getLastModified()) : "(unknown)"));
         }
-//        return uploadFile;
-        return null == uploadFile ? null : new DefaultFile(uploadFile);//TODO: necessary due to ID interchanging when passing to file accesses
+        return null == uploadFile ? null : new DefaultFile(uploadFile);
     }
 
     private static String getUploadFilename(String checksum) {

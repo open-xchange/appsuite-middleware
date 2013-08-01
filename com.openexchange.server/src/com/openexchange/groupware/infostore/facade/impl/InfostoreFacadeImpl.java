@@ -971,7 +971,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     }
 
                     document.setCreatedBy(session.getUserId());
-                    document.setCreationDate(new Date());
+                    if (!updatedCols.contains(Metadata.CREATION_DATE_LITERAL)) {
+                        document.setCreationDate(new Date());
+                    }
+
                     // Set version
                     final UndoableAction action;
                     if (ignoreVersion) {

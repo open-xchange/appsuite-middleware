@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,62 +47,15 @@
  *
  */
 
-package com.openexchange.drive;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+package com.openexchange.login;
 
 /**
- * {@link DriveAction}
+ * {@link NonTransient} - Marker interface for {@link LoginHandlerService} implementations to signal that the associated
+ * {@code LoginHandlerService} should not be executed for transient sessions, i.e. short-living sessions.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface DriveAction<T extends DriveVersion> extends Comparable<DriveAction<T>> {
+public interface NonTransient {
 
-    static final String PARAMETER_PATH = "path";
-    static final String PARAMETER_MODIFIED = "modified";
-    static final String PARAMETER_CREATED = "created";
-    static final String PARAMETER_TOTAL_LENGTH = "totalLength";
-    static final String PARAMETER_OFFSET = "offset";
-    static final String PARAMETER_CONTENT_TYPE = "contentType";
-    static final String PARAMETER_ERROR = "error";
-    static final String PARAMETER_QUARANTINE = "quarantine";
-
-    static final Set<String> PARAMETER_NAMES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] {
-        PARAMETER_PATH, PARAMETER_TOTAL_LENGTH, PARAMETER_OFFSET, PARAMETER_CONTENT_TYPE, PARAMETER_ERROR, PARAMETER_QUARANTINE,
-        PARAMETER_MODIFIED, PARAMETER_CREATED
-    })));
-
-    /**
-     * Gets the action.
-     *
-     * @return The action
-     */
-    Action getAction();
-
-    /**
-     * Gets the version.
-     *
-     * @return The version, or <code>null</code> if not applicable
-     */
-    T getVersion();
-
-    /**
-     * Gets the new version.
-     *
-     * @return The new version, or <code>null</code> if not applicable
-     */
-    T getNewVersion();
-
-    /**
-     * Gets a map of additional parameters; possible parameters are defined in {@link DriveAction#PARAMETER_NAMES}.
-     *
-     * @return The parameters map
-     */
-    Map<String, Object> getParameters();
-
+    // Marker interface
 }
-

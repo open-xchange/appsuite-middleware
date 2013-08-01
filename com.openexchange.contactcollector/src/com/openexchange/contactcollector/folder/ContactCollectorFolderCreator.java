@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -61,8 +60,10 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.log.LogFactory;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
+import com.openexchange.login.NonTransient;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -77,7 +78,7 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ContactCollectorFolderCreator implements LoginHandlerService {
+public class ContactCollectorFolderCreator implements LoginHandlerService, NonTransient {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactCollectorFolderCreator.class));
 

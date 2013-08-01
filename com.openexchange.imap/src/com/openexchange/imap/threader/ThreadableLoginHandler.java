@@ -59,6 +59,7 @@ import com.openexchange.imap.IMAPProtocol;
 import com.openexchange.imap.threader.ThreadableCache.ThreadableCacheEntry;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
+import com.openexchange.login.NonTransient;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -75,7 +76,7 @@ import com.sun.mail.imap.IMAPFolder;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ThreadableLoginHandler implements LoginHandlerService {
+public final class ThreadableLoginHandler implements LoginHandlerService, NonTransient {
 
     private final ServiceLookup services;
 

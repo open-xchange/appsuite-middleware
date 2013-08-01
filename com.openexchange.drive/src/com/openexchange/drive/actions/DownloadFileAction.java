@@ -52,6 +52,7 @@ package com.openexchange.drive.actions;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.comparison.ThreeWayComparison;
+import com.openexchange.file.storage.File;
 
 /**
  * {@link DownloadFileAction}
@@ -60,11 +61,26 @@ import com.openexchange.drive.comparison.ThreeWayComparison;
  */
 public class DownloadFileAction extends AbstractAction<FileVersion> {
 
-    public DownloadFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, long totalLength, String contentType) {
+    public DownloadFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, long totalLength, String contentType, Long created, Long modified) {
         super(file, newFile, comparison);
         parameters.put(PARAMETER_TOTAL_LENGTH, Long.valueOf(totalLength));
         parameters.put(PARAMETER_PATH, path);
-        parameters.put(PARAMETER_CONTENT_TYPE, contentType);
+        if (null != contentType) {
+            parameters.put(PARAMETER_CONTENT_TYPE, contentType);
+        }
+        if (null != created) {
+            parameters.put(PARAMETER_CREATED, created);
+        }
+        if (null != modified) {
+            parameters.put(PARAMETER_MODIFIED, modified);
+        }
+    }
+
+    public DownloadFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, File serverFile) {
+        this(file, newFile, comparison, path, serverFile.getFileSize(), serverFile.getFileMIMEType(),
+            null != serverFile.getCreated() ? serverFile.getCreated().getTime() : null,
+            null != serverFile.getLastModified() ? serverFile.getLastModified().getTime() : null
+        );
     }
 
     @Override

@@ -49,9 +49,11 @@
 
 package com.openexchange.drive.storage;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.java.util.TimeZones;
 
 
 /**
@@ -86,7 +88,7 @@ public class DriveConstants {
      */
     public static final List<Field> FILE_FIELDS = Arrays.asList(new Field[] {
         Field.ID, Field.FOLDER_ID, Field.LAST_MODIFIED, Field.TITLE, Field.FILENAME, Field.FILE_MD5SUM, Field.FILE_SIZE, Field.VERSION,
-        Field.SEQUENCE_NUMBER, Field.FILE_MIMETYPE
+        Field.SEQUENCE_NUMBER, Field.FILE_MIMETYPE, Field.CREATED
     });
 
     /**
@@ -103,5 +105,19 @@ public class DriveConstants {
      * The base number of milliseconds to wait until retrying
      */
     public static final int RETRY_BASEDELAY = 1000;
+
+    /**
+     * Thread local {@link SimpleDateFormat} using "yyyy-MM-dd HH:mm:ss.SSS" as pattern.
+     */
+    public static final ThreadLocal<SimpleDateFormat> LOG_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+
+        @Override
+        protected SimpleDateFormat initialValue()
+        {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            dateFormat.setTimeZone(TimeZones.UTC);
+            return dateFormat;
+        }
+    };
 
 }
