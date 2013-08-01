@@ -7,3 +7,7 @@ com.openexchange.import.mapper.path=@rootinstalldir@/importCSV/
 # Note that this limit applies for each type, so you can have, for example, 10000 VEVENTS and 10000 VFREEBUSY entries in a single file. 
 # -1 means unlimited
 com.openexchange.import.ical.limit=10000
+
+# sets the limit on how many contacts can be imported at once
+# -1 means unlimited, defaults to -1
+#com.openexchange.import.contacts.limit=-1

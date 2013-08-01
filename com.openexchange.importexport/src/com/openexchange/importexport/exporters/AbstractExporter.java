@@ -46,41 +46,37 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.importexport.actions;
 
-import java.util.HashMap;
+package com.openexchange.importexport.exporters;
+
 import java.util.Map;
-
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.importexport.actions.importer.CSVImportAction;
-import com.openexchange.importexport.actions.importer.FacebookArchiveImportAction;
-import com.openexchange.importexport.actions.importer.FacebookFriendsImportAction;
-import com.openexchange.importexport.actions.importer.ICalImportAction;
-import com.openexchange.importexport.actions.importer.VCardImportAction;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
-public class ImportActionFactory extends AbstractIEActionFactory{
- 
-   /**
-     * Initializes a new {@link ImportActionFactory}.
-     * @param services
-     */
-    public ImportActionFactory(ServiceLookup services) {
-        super(services);
+
+/**
+ * {@link AbstractExporter}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public abstract class AbstractExporter implements Exporter {
+    protected ServiceLookup services;
+    
+    public AbstractExporter(ServiceLookup services) {
+        this.services = services;
     }
-
-    @Override
-    protected Map<Format, AJAXActionService> getActions(){
-    	return new HashMap<Format, AJAXActionService>(){{
-    		put(Format.CSV, new CSVImportAction(services));
-    		put(Format.OUTLOOK_CSV, new CSVImportAction(services));
-    		put(Format.VCARD, new VCardImportAction(services));
-    		put(Format.ICAL, new ICalImportAction(services));
-
-    		put(Format.FacebookArchive, new FacebookArchiveImportAction(services));
-    		put(Format.FacebookFriends, new FacebookFriendsImportAction(services));
-    	}};
+    
+    
+    public boolean acceptContact(Contact contact, ServerSession session) {
+        if (contact.getParentFolderID() == 6 && contact.getInternalUserId() == session.getContext().getMailadmin()) {
+            
+        }
+        return true;
     }
 
 }
