@@ -133,6 +133,14 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         return null == session ? null : new ServerSessionAdapter(session, context, user, userConfiguration);
     }
 
+    /**
+     * Creates a synthetic server session for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The synthetic server session
+     * @throws OXException If creation of server session fails
+     */
     public static ServerSession valueOf(int userId, int contextId) throws OXException {
         return new ServerSessionAdapter(userId, contextId);
     }
@@ -144,14 +152,21 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
     private volatile UserSettingMail userSettingMail;
     private final ServerSession serverSession;
 
+    /**
+     * Initializes a new {@link ServerSessionAdapter}.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If creation of server session fails
+     */
     public ServerSessionAdapter(final int userId, final int contextId) throws OXException {
         super();
 
         this.session = new SessionObject("synthetic") {
             @Override
-            public int getUserId() { return userId; };
+            public int getUserId() { return userId; }
             @Override
-            public int getContextId() {return contextId; };
+            public int getContextId() {return contextId; }
         };
         this.serverSession = null;
 

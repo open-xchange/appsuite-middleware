@@ -182,95 +182,99 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
         // ------------- Combined capabilities/permissions ------------ //
         if (!serverSession.isAnonymous()) {
+            // Obtain user permissions
             final UserPermissionBits userPermissionBits = services.getService(UserPermissionService.class).getUserPermissionBits(serverSession.getUserId(), serverSession.getContext());
-            userPermissionBits.setGroups(serverSession.getUser().getGroups());
             // Capabilities by user permission bits
             for (final Permission p: Permission.byBits(userPermissionBits.getPermissionBits())) {
                 capabilities.add(getCapability(toLowerCase(p.name())));
             }
-            // Portal
-            if (userPermissionBits.hasPortal()) {
-                capabilities.add(getCapability("portal"));
-                capabilities.remove(getCapability("deniedPortal"));
-            } else {
-                capabilities.remove(getCapability("portal"));
-                capabilities.add(getCapability("deniedPortal"));
-            }
-            // Free-Busy
-            if (userPermissionBits.hasFreeBusy()) {
-                capabilities.add(getCapability("freebusy"));
-            } else {
-                capabilities.remove(getCapability("freebusy"));
-            }
-            // Conflict-Handling
-            if (userPermissionBits.hasConflictHandling()) {
-                capabilities.add(getCapability("conflict_handling"));
-            } else {
-                capabilities.remove(getCapability("conflict_handling"));
-            }
-            // Participants-Dialog
-            if (userPermissionBits.hasParticipantsDialog()) {
-                capabilities.add(getCapability("participants_dialog"));
-            } else {
-                capabilities.remove(getCapability("participants_dialog"));
-            }
-            // Group-ware
-            if (userPermissionBits.hasGroupware()) {
-                capabilities.add(getCapability("groupware"));
-            } else {
-                capabilities.remove(getCapability("groupware"));
-            }
-            // PIM
-            if (userPermissionBits.hasPIM()) {
-                capabilities.add(getCapability("pim"));
-            } else {
-                capabilities.remove(getCapability("pim"));
-            }
-            // Spam
-            if (serverSession.getUserSettingMail().isSpamEnabled()) {
-                capabilities.add(getCapability("spam"));
-            } else {
-                capabilities.remove(getCapability("spam"));
-            }
-            // Global Address Book
-            if (userPermissionBits.isGlobalAddressBookEnabled(serverSession)) {
-                capabilities.add(getCapability("gab"));
-            } else {
-                capabilities.remove(getCapability("gab"));
-            }
+            // Apply capabilities for non-transient sessions
+            if (!serverSession.isTransient()) {
+                userPermissionBits.setGroups(serverSession.getUser().getGroups());
+                // Portal
+                if (userPermissionBits.hasPortal()) {
+                    capabilities.add(getCapability("portal"));
+                    capabilities.remove(getCapability("deniedPortal"));
+                } else {
+                    capabilities.remove(getCapability("portal"));
+                    capabilities.add(getCapability("deniedPortal"));
+                }
+                // Free-Busy
+                if (userPermissionBits.hasFreeBusy()) {
+                    capabilities.add(getCapability("freebusy"));
+                } else {
+                    capabilities.remove(getCapability("freebusy"));
+                }
+                // Conflict-Handling
+                if (userPermissionBits.hasConflictHandling()) {
+                    capabilities.add(getCapability("conflict_handling"));
+                } else {
+                    capabilities.remove(getCapability("conflict_handling"));
+                }
+                // Participants-Dialog
+                if (userPermissionBits.hasParticipantsDialog()) {
+                    capabilities.add(getCapability("participants_dialog"));
+                } else {
+                    capabilities.remove(getCapability("participants_dialog"));
+                }
+                // Group-ware
+                if (userPermissionBits.hasGroupware()) {
+                    capabilities.add(getCapability("groupware"));
+                } else {
+                    capabilities.remove(getCapability("groupware"));
+                }
+                // PIM
+                if (userPermissionBits.hasPIM()) {
+                    capabilities.add(getCapability("pim"));
+                } else {
+                    capabilities.remove(getCapability("pim"));
+                }
+                // Spam
+                if (serverSession.getUserSettingMail().isSpamEnabled()) {
+                    capabilities.add(getCapability("spam"));
+                } else {
+                    capabilities.remove(getCapability("spam"));
+                }
+                // Global Address Book
+                if (userPermissionBits.isGlobalAddressBookEnabled(serverSession)) {
+                    capabilities.add(getCapability("gab"));
+                } else {
+                    capabilities.remove(getCapability("gab"));
+                }
 
-            // permission properties
-            final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
-            if (configViews != null) {
-                final ConfigView view = configViews.getView(userId, contextId);
-                final String property = PERMISSION_PROPERTY;
-                for (final String scope : configViews.getSearchPath()) {
-                    final String permissions = view.property(property, String.class).precedence(scope).get();
-                    if (permissions != null) {
-                        for (final String permissionModifier : P_SPLIT.split(permissions)) {
-                            final char firstChar = permissionModifier.charAt(0);
-                            if ('-' == firstChar) {
-                                capabilities.remove(getCapability(permissionModifier.substring(1)));
-                            } else {
-                                if ('+' == firstChar) {
-                                    capabilities.add(getCapability(permissionModifier.substring(1)));
+                // permission properties
+                final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
+                if (configViews != null) {
+                    final ConfigView view = configViews.getView(userId, contextId);
+                    final String property = PERMISSION_PROPERTY;
+                    for (final String scope : configViews.getSearchPath()) {
+                        final String permissions = view.property(property, String.class).precedence(scope).get();
+                        if (permissions != null) {
+                            for (final String permissionModifier : P_SPLIT.split(permissions)) {
+                                final char firstChar = permissionModifier.charAt(0);
+                                if ('-' == firstChar) {
+                                    capabilities.remove(getCapability(permissionModifier.substring(1)));
                                 } else {
-                                    capabilities.add(getCapability(permissionModifier));
+                                    if ('+' == firstChar) {
+                                        capabilities.add(getCapability(permissionModifier.substring(1)));
+                                    } else {
+                                        capabilities.add(getCapability(permissionModifier));
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                Map<String, ComposedConfigProperty<String>> all = view.all();
-                for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
-                    if (entry.getKey().startsWith("com.openexchange.capability.")) {
-                        boolean value = Boolean.parseBoolean(entry.getValue().get());
-                        String name = entry.getKey().substring(28);
-                        if (value) {
-                            capabilities.add(getCapability(name));
-                        } else {
-                            capabilities.remove(getCapability(name));
+                    Map<String, ComposedConfigProperty<String>> all = view.all();
+                    for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
+                        if (entry.getKey().startsWith("com.openexchange.capability.")) {
+                            boolean value = Boolean.parseBoolean(entry.getValue().get());
+                            String name = entry.getKey().substring(28);
+                            if (value) {
+                                capabilities.add(getCapability(name));
+                            } else {
+                                capabilities.remove(getCapability(name));
+                            }
                         }
                     }
                 }
