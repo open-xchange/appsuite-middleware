@@ -277,7 +277,7 @@ public class IMAPProtocol extends Protocol {
      * Check the greeting when first connecting; look for PREAUTH response.
      */
     @Override
-    protected void processGreeting(final Response r) throws ProtocolException {
+    protected synchronized void processGreeting(final Response r) throws ProtocolException {
 	super.processGreeting(r);	// check if it's BAD
 	if (r.isOK()) {			// check if it's OK
 	    setCapabilities(r);
@@ -387,7 +387,7 @@ public class IMAPProtocol extends Protocol {
      * public.
      */
     @Override
-    public void disconnect() {
+    public synchronized void disconnect() {
 	try {
         super.disconnect();
     } finally {
@@ -427,7 +427,7 @@ public class IMAPProtocol extends Protocol {
      *
      * @see "RFC2060, section 6.1.3"
      */
-    public void logout() throws ProtocolException {
+    public synchronized void logout() throws ProtocolException {
     boolean notified = false;
 	try {
 	    authenticatedStatusChanging(false, null, null);
@@ -450,7 +450,7 @@ public class IMAPProtocol extends Protocol {
      * 
      * @see "RFC2060, section 6.2.2"
      */
-    public void login(final String u, final String p) throws ProtocolException {
+    public synchronized void login(final String u, final String p) throws ProtocolException {
     try {
         authenticatedStatusChanging(true, u, p);
         final Argument args = new Argument();
