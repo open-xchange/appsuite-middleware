@@ -1,5 +1,6 @@
 * 2013-08-01 - tobias.friedrich@open-xchange.com
 
+ - Fix for bug 27975: Also try full login info as read from principal URL when resolving the user
  - Fix for bug 27961: Catch & log hazelcast exceptions during OSGi event handling
 
 * 2013-08-01 - thorben.betten@open-xchange.com
