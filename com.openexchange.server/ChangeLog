@@ -1,3 +1,7 @@
+* 2013-08-01 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 27901: Check for null before accessing a supplied parameter 
+ 
 * 2013-07-25 - marcus.klein@open-xchange.com
 
  - Fix for bug 26607: Optimized JMX queries for certain MBeans using object names and removed multi threading.
