@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,42 +47,15 @@
  *
  */
 
-package com.openexchange.folder.json.osgi;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.folder.json.services.ServiceRegistry;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.login.LoginHandlerService;
-import com.openexchange.login.LoginResult;
-import com.openexchange.login.NonTransient;
-import com.openexchange.session.Session;
+package com.openexchange.login;
 
 /**
- * {@link FolderConsistencyLoginHandler}
+ * {@link NonTransient} - Marker interface for {@link LoginHandlerService} implementations to signal that the associated
+ * {@code LoginHandlerService} should not be executed for transient sessions, i.e. short-living sessions.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderConsistencyLoginHandler implements LoginHandlerService, NonTransient {
+public interface NonTransient {
 
-    /**
-     * Initializes a new {@link FolderConsistencyLoginHandler}.
-     */
-    public FolderConsistencyLoginHandler() {
-        super();
-    }
-
-    @Override
-    public void handleLogin(final LoginResult login) throws OXException {
-        final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        final Session session = login.getSession();
-        folderService.checkConsistency("1", session);
-        folderService.checkConsistency("0", session);
-        folderService.checkConsistency("20", session);
-    }
-
-    @Override
-    public void handleLogout(final LoginResult logout) throws OXException {
-        // Nothing to do
-    }
-
+    // Marker interface
 }
