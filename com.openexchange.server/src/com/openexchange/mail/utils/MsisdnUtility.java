@@ -54,9 +54,6 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.contact.ContactService;
 import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -89,29 +86,21 @@ public class MsisdnUtility {
      * @param session - session to get the current contact and receive the number.
      */
     public static void addMsisdnAddress(Set<InternetAddress> addresses, Session session) {
-        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
-        final int contactId = user.getContactId();
-
-        if (contactId > 0) {
-            final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
-            if (null != contactService) {
-                try {
-                    final Contact contact = contactService.getContact(
-                        session,
-                        Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID),
-                        Integer.toString(contactId));
-                    final Set<String> set = ContactUtil.gatherTelephoneNumbers(contact);
-                    for (final String number : set) {
-                        try {
-                            addresses.add(new QuotedInternetAddress(MsisdnCheck.cleanup(number)));
-                        } catch (final Exception e) {
-                            // Ignore invalid number
-                            e.printStackTrace();
-                        }
+        final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+        if (null != contactService) {
+            try {
+                final Contact contact = contactService.getUser(session, session.getUserId());
+                final Set<String> set = ContactUtil.gatherTelephoneNumbers(contact);
+                for (final String number : set) {
+                    try {
+                        addresses.add(new QuotedInternetAddress(MsisdnCheck.cleanup(number)));
+                    } catch (final Exception e) {
+                        // Ignore invalid number
+                        LOG.debug("Ignoring invalid number: " + number, e);
                     }
-                } catch (final Exception e) {
-                    LOG.warn("Could not check for valid MSISDN numbers.", e);
                 }
+            } catch (final Exception e) {
+                LOG.warn("Could not check for valid MSISDN numbers.", e);
             }
         }
     }
