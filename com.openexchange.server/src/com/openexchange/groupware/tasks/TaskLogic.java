@@ -53,7 +53,6 @@ import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
 import static com.openexchange.groupware.tasks.StorageType.DELETED;
 import static com.openexchange.groupware.tasks.StorageType.REMOVED;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.f;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.isTransactionRollbackException;
 import static com.openexchange.tools.sql.DBUtils.rollback;
@@ -67,8 +66,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
@@ -97,11 +94,6 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class TaskLogic {
-
-    /**
-     * Logger.
-     */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TaskLogic.class));
 
     /**
      * Prevent instantiation
@@ -225,13 +217,6 @@ public final class TaskLogic {
                     throw TaskExceptionCode.INVALID_DATA.create(result);
                 }
             }
-        }
-        final int limit = 130000;
-        if (task.containsActualCosts() && null != task.getActualCosts() && (limit < f(task.getActualCosts()) || -limit > f(task.getActualCosts()))) {
-            throw TaskExceptionCode.COSTS_OFF_LIMIT.create();
-        }
-        if (task.containsTargetCosts() && null != task.getTargetCosts() && (limit < f(task.getTargetCosts()) || -limit > f(task.getTargetCosts()))) {
-            throw TaskExceptionCode.COSTS_OFF_LIMIT.create();
         }
     }
 

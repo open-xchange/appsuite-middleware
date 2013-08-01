@@ -1,3 +1,8 @@
+* 2013-08-01 - marcus.klein@open-xchange.com
+
+ - Fix for bug 27840: Switched task types for actual and target costs to DECIMAL(12,2) in the database and BigDecimal in Java to be able to
+   store accurate monetary values.
+
 * 2013-08-01 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 27975: Also try full login info as read from principal URL when resolving the user

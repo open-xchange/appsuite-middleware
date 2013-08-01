@@ -51,10 +51,8 @@ package com.openexchange.ajax.writer;
 
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
+import java.math.BigDecimal;
 import java.util.Date;
-import java.util.Locale;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -79,9 +77,6 @@ public class DataWriter {
     static final TimeZone UTC = TimeZoneUtils.getTimeZone("UTC");
 
     protected JSONWriter jsonwriter;
-
-    private static final DecimalFormat floatFormat =
-        new DecimalFormat("#######0.##", new DecimalFormatSymbols(Locale.ENGLISH));
 
     /**
      * Constructor for subclasses.
@@ -229,20 +224,36 @@ public class DataWriter {
     }
 
     /**
-     * Conditionally puts given <code>float</code> value into specified JSON
-     * object.
+     * Puts given name-<code>Date</code>-pair into specified JSON object with respect to time zone
+     * provided that <code>Date</code> value is not <code>null</code>
+     *
      * @param name The value's name
-     * @param value The <code>float</code> value
-     * @param json The JSON object to put into
+     * @param value The <code>Date</code> value
+     * @param offsetDate The offset <code>Date</code> value
+     * @param timeZone The time zone
+     * @param jsonObj The JSON object to put into
      * @param condition <code>true</code> to put; otherwise <code>false</code> to omit value
-     * @throws JSONException If a JSON error occurs
+     * @throws JSONException If putting into JSON object fails
      */
-    public static void writeParameter(final String name, final Float value, final JSONObject json, final boolean condition) throws JSONException {
-        // Floats must be written as strings.
+    public static void writeParameter(String name, BigDecimal value, JSONObject jsonObj, boolean condition) throws JSONException {
+        if (condition) {
+            writeParameter(name, value, jsonObj);
+        }
+    }
+
+    /**
+     * Puts given name-{@link BigDecimal}-pair into specified JSON object provided that {@link BigDecimal} value is not <code>null</code>.
+     *
+     * @param name the value's name
+     * @param value the {@link BigDecimal} value
+     * @param jsonObj The JSON object to put into
+     * @throws JSONException If putting into JSON object fails
+     */
+    private static void writeParameter(String name, BigDecimal value, JSONObject jsonObj) throws JSONException {
         if (null == value) {
-            writeNull(name, json, condition);
+            jsonObj.put(name, JSONObject.NULL);
         } else {
-            writeParameter(name, floatFormat.format(value), json, condition);
+            jsonObj.put(name, value);
         }
     }
 
@@ -384,19 +395,16 @@ public class DataWriter {
     }
 
     /**
-     * Conditionally puts given <code>float</code> value into specified JSON
-     * array.
-     * @param value The <code>float</code> value
-     * @param jsonArray The JSON array to put into
-     * @param condition <code>true</code> to put; otherwise <code>false</code>
-     * to put {@link JSONObject#NULL}
+     * Conditionally puts given {@link BigDecimal} value into specified JSON array.
+     * @param value the {@link BigDecimal} value
+     * @param jsonArray the JSON array to put into
+     * @param condition <code>true</code> to put; otherwise <code>false</code> to put {@link JSONObject#NULL}
      */
-    public static void writeValue(final Float value, final JSONArray jsonArray, final boolean condition) {
-        // Floats must be written as strings
-        if (condition) {
-            writeValue(floatFormat.format(value), jsonArray);
+    public static void writeValue(BigDecimal value, JSONArray jsonArray, boolean condition) {
+        if (!condition || null == value) {
+            jsonArray.put(JSONObject.NULL);
         } else {
-            writeNull(jsonArray);
+            jsonArray.put(value);
         }
     }
 

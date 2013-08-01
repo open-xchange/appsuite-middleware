@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,45 +49,66 @@
 
 package com.openexchange.ajax.task;
 
+import static org.junit.Assert.assertThat;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.TimeZone;
+import org.hamcrest.CoreMatchers;
+import org.json.JSONException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
-import com.openexchange.ajax.task.actions.InsertResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 
-/**
- *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- */
-public class FloatTest extends AbstractTaskTest {
 
-    /**
-     * @param name
-     */
-    public FloatTest(String name) {
+/**
+ * {@link Bug27840Test}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public final class Bug27840Test extends AbstractTaskTest {
+
+    private AJAXClient client;
+    private Task task;
+    private TimeZone tz;
+
+    public Bug27840Test(String name) {
         super(name);
     }
 
-    /**
-     * Tests if floats can be stored correctly.
-     * @throws Throwable if an error occurs.
-     */
-    public void testFloats() throws Throwable {
-        final Task task = new Task();
-        task.setActualCosts(new BigDecimal("1"));
-        task.setTargetCosts(new BigDecimal("1"));
-        task.setParentFolderID(getPrivateFolder());
-        final InsertResponse insertR = getClient().execute(new InsertRequest(task, getTimeZone()));
+    @Before
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        client = getClient();
+        tz = getTimeZone();
+        task = Create.createWithDefaults(getPrivateFolder(), "Task to test for bug 27840");
+        // NUMERIC(12,2) in the database. The following should be the corresponding maximal and minimal possible values.
+        task.setTargetCosts(new BigDecimal( "9999999999.99"));
+        task.setActualCosts(new BigDecimal("-9999999999.99"));
+    }
 
-        GetResponse getR = getClient().execute(new GetRequest(insertR));
-        Task reload = getR.getTask(getTimeZone());
-        assertEquals("Actual duration differs.", task.getActualDuration(), reload.getActualDuration());
-        assertEquals("Target duration differs.", task.getTargetDuration(), reload.getTargetDuration());
-        assertEquals("Actual costs differs.", task.getActualCosts(), reload.getActualCosts());
-        assertEquals("Target costs differs.", task.getTargetCosts(), reload.getTargetCosts());
+    @After
+    @Override
+    protected void tearDown() throws Exception {
+        client.execute(new DeleteRequest(task));
+        super.tearDown();
+    }
 
-        getClient().execute(new DeleteRequest(reload));
+    @Test
+    public void testForBug() throws OXException, IOException, JSONException {
+        client.execute(new InsertRequest(task, tz)).fillTask(task);
+        GetResponse response = client.execute(new GetRequest(task));
+        Task test = response.getTask(tz);
+        assertThat("Actual costs not equal", test.getActualCosts(), CoreMatchers.equalTo(task.getActualCosts()));
+        assertThat("Target costs not equal", test.getTargetCosts(), CoreMatchers.equalTo(task.getTargetCosts()));
+        task = test;
     }
 }

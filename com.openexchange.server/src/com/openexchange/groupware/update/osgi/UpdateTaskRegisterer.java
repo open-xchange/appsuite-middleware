@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,85 +47,64 @@
  *
  */
 
-package com.openexchange.groupware.tasks.mapping;
+package com.openexchange.groupware.update.osgi;
 
-import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import com.openexchange.groupware.tasks.AttributeNames;
-import com.openexchange.groupware.tasks.Mapper;
-import com.openexchange.groupware.tasks.Task;
+import java.util.Collection;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * Implementation to map task attribute targetCosts to database target_costs and back.
+ * Registers update tasks if the {@link DatabaseService} becomes available. This allows writing update tasks not coupled to the
+ * {@link ServerServiceRegistry}.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class TargetCosts implements Mapper<BigDecimal> {
+@SuppressWarnings("deprecation")
+public abstract class UpdateTaskRegisterer implements ServiceTrackerCustomizer<DatabaseService, DatabaseService> {
 
-    public static final TargetCosts SINGLETON = new TargetCosts();
+    private BundleContext context;
+    private ServiceRegistration<UpdateTaskProviderService> registration;
 
-    protected TargetCosts() {
+    public UpdateTaskRegisterer(BundleContext context) {
         super();
+        this.context = context;
     }
 
     @Override
-    public int getId() {
-        return Task.TARGET_COSTS;
+    public DatabaseService addingService(ServiceReference<DatabaseService> reference) {
+        final DatabaseService service = context.getService(reference);
+        registration = context.registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
+            @Override
+            public Collection<? extends UpdateTask> getUpdateTasks() {
+                return createTasks(service);
+            }
+        }, null);
+        return service;
     }
 
     @Override
-    public boolean isSet(Task task) {
-        return task.containsTargetCosts();
+    public void modifiedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
+        // Nothing to do.
     }
 
     @Override
-    public String getDBColumnName() {
-        return "target_costs";
+    public void removedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
+        registration.unregister();
+        context.ungetService(reference);
     }
 
-    @Override
-    public String getDisplayName() {
-        return AttributeNames.TARGET_COSTS;
-    }
-
-    @Override
-    public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
-        if (null == task.getTargetCosts()) {
-            stmt.setNull(pos, Types.NUMERIC);
-        } else {
-            stmt.setBigDecimal(pos, task.getTargetCosts());
-        }
-    }
-
-    @Override
-    public void fromDB(ResultSet result, int pos, Task task) throws SQLException {
-        BigDecimal targetCosts = result.getBigDecimal(pos);
-        if (!result.wasNull()) {
-            task.setTargetCosts(targetCosts);
-        }
-    }
-
-    @Override
-    public boolean equals(Task task1, Task task2) {
-        if (task1.getTargetCosts() == null) {
-            return (task2.getTargetCosts() == null);
-        }
-        if (task2.getTargetCosts() == null) {
-            return (task1.getTargetCosts() == null);
-        }
-        return task1.getTargetCosts().equals(task2.getTargetCosts());
-    }
-
-    @Override
-    public BigDecimal get(Task task) {
-        return task.getTargetCosts();
-    }
-
-    @Override
-    public void set(Task task, BigDecimal value) {
-        task.setTargetCosts(value);
-    }
+    /**
+     * Overwrite this method and return your update tasks to register by instantiating them. Pass the {@link DatabaseService} to the
+     * constructor if your update tasks.
+     * @param service the database service discovered by this service tracker customizer.
+     * @return update tasks to be registered.
+     */
+    protected abstract Collection<? extends UpdateTaskV2> createTasks(DatabaseService service);
 }

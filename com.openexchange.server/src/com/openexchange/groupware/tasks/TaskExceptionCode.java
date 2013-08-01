@@ -213,12 +213,6 @@ public enum TaskExceptionCode implements OXExceptionCode {
     /** Unknown participant type %1$d. */
     UNKNOWN_PARTICIPANT(UNKNOWN_PARTICIPANT_MSG, Category.CATEGORY_ERROR, 49),
 
-    /**
-     * The entered value for costs is not within the allowed range. Please use a
-     * value from -130000.00 to 130000.00.
-     */
-    COSTS_OFF_LIMIT(COSTS_OFF_LIMIT_MSG, Category.CATEGORY_USER_INPUT, 50),
-
     /** In order to accomplish the search, %1$d or more characters are required. */
     PATTERN_TOO_SHORT(PATTERN_TOO_SHORT_MSG, Category.CATEGORY_USER_INPUT, 51),
 

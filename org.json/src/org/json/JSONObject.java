@@ -1360,12 +1360,7 @@ public class JSONObject extends AbstractJSONValue {
                     jo.put(fieldName, JSONObject.NULL);
                     break;
                 case VALUE_NUMBER_FLOAT:
-                    try {
-                        jo.put(fieldName, jParser.getFloatValue());
-                    } catch (final JsonParseException e) {
-                        // Outside of range of Java float
-                        jo.put(fieldName, jParser.getDoubleValue());
-                    }
+                    jo.put(fieldName, jParser.getDecimalValue());
                     break;
                 case VALUE_NUMBER_INT:
                     try {
