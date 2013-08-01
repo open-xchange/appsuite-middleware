@@ -62,7 +62,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -196,7 +195,7 @@ public class DispatcherServlet extends SessionServlet {
             update = new ArrayList<ResponseRenderer>(expect);
             update.add(renderer);
             Collections.sort(update, new Comparator<ResponseRenderer>() {
-                
+
                 @Override
                 public int compare(ResponseRenderer responseRenderer, ResponseRenderer anotherResponseRenderer) {
                     // Higher ranked first
@@ -221,7 +220,7 @@ public class DispatcherServlet extends SessionServlet {
             update = new ArrayList<ResponseRenderer>(expect);
             update.remove(renderer);
             Collections.sort(update, new Comparator<ResponseRenderer>() {
-                
+
                 @Override
                 public int compare(ResponseRenderer responseRenderer, ResponseRenderer anotherResponseRenderer) {
                     // Higher ranked first
@@ -326,7 +325,7 @@ public class DispatcherServlet extends SessionServlet {
      *            HTTP POST method); otherwise <code>false</code> to generate an appropriate {@link Object} from request's body
      * @throws IOException If an I/O error occurs
      */
-    protected void handle(final HttpServletRequest httpRequest, final HttpServletResponse httpResponse, final boolean preferStream) throws IOException {
+    public void handle(final HttpServletRequest httpRequest, final HttpServletResponse httpResponse, final boolean preferStream) throws IOException {
         httpResponse.setStatus(HttpServletResponse.SC_OK);
         httpResponse.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         Tools.disableCaching(httpResponse);
