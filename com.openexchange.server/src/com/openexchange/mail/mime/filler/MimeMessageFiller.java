@@ -140,7 +140,9 @@ import com.openexchange.mail.mime.utils.sourcedimage.SourcedImageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
@@ -603,13 +605,15 @@ public class MimeMessageFiller {
          * Reply-To
          */
         final String hdrReplyTo = mail.getFirstHeader("Reply-To");
-        if (null != hdrReplyTo) {
+        if (!isEmpty(hdrReplyTo) && !toLowerCase(hdrReplyTo).startsWith("null")) {
             InternetAddress[] replyTo = null;
+
             try {
                 replyTo = QuotedInternetAddress.parse(hdrReplyTo, true);
             } catch (final AddressException e) {
                 LOG.error("Specified Reply-To address cannot be parsed", e);
             }
+
             if (null != replyTo) {
                 mimeMessage.setReplyTo(replyTo);
             } else if (mail.containsFrom()) {
@@ -617,17 +621,22 @@ public class MimeMessageFiller {
             }
         } else if (isEmpty(usm.getReplyToAddr())) {
             InternetAddress[] replyTo = null;
+
             final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
             if (null != mass) {
-                final String sReplyTo = mass.getMailAccount(mail.getAccountId(), session.getUserId(), session.getContextId()).getReplyTo();
-                if (null != sReplyTo) {
-                    try {
-                        replyTo = QuotedInternetAddress.parse(sReplyTo, true);
-                    } catch (final AddressException e) {
-                        LOG.error("Default Reply-To address cannot be parsed", e);
+                final MailAccount mailAccount = mass.getMailAccount(mail.getAccountId(), session.getUserId(), session.getContextId());
+                if (!UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
+                    final String sReplyTo = mailAccount.getReplyTo();
+                    if (!isEmpty(sReplyTo) && !toLowerCase(sReplyTo).startsWith("null")) {
+                        try {
+                            replyTo = QuotedInternetAddress.parse(sReplyTo, true);
+                        } catch (final AddressException e) {
+                            LOG.error("Default Reply-To address cannot be parsed", e);
+                        }
                     }
                 }
             }
+
             if (null != replyTo) {
                 mimeMessage.setReplyTo(replyTo);
             } else if (mail.containsFrom()) {
