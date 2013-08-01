@@ -51,18 +51,22 @@ package com.openexchange.mail.json.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.Monitor;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.HashUtility;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -74,6 +78,9 @@ public final class AutosaveAction extends AbstractMailAction {
 
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AutosaveAction.class));
+
+    private static final String ATTACHMENTS = MailJSONField.ATTACHMENTS.getKey();
+    private static final String CONTENT = MailJSONField.CONTENT.getKey();
 
     /**
      * Initializes a new {@link AutosaveAction}.
@@ -94,10 +101,24 @@ public final class AutosaveAction extends AbstractMailAction {
             {
                 final JSONObject jsonMailObj = (JSONObject) req.getRequest().requireData();
                 /*
+                 * Monitor
+                 */
+                String sha256 = null;
+                {
+                    final JSONArray jAttachments = jsonMailObj.optJSONArray(ATTACHMENTS);
+                    if (null != jAttachments) {
+                        final JSONObject jAttachment = jAttachments.optJSONObject(0);
+                        if (null != jAttachment) {
+                            final String sContent = jAttachment.optString(CONTENT, null);
+                            sha256 = null == sContent ? null : HashUtility.getSha256(sContent, "hex");
+                        }
+                    }
+                }
+                /*
                  * Parse with default account's transport provider
                  */
                 final ComposedMailMessage composedMail =
-                    MessageParser.parse4Draft(jsonMailObj, (UploadEvent) null, session, MailAccount.DEFAULT_ID, warnings);
+                    MessageParser.parse4Draft(jsonMailObj, (UploadEvent) null, session, MailAccount.DEFAULT_ID, warnings, new Monitor(2).put(Monitor.PARAM_CHECKSUM, sha256));
                 if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == 0) {
                     LOG.warn("Missing \\Draft flag on action=autosave in JSON message object", new Throwable());
                     composedMail.setFlag(MailMessage.FLAG_DRAFT, true);

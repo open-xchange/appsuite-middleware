@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -65,11 +66,13 @@ import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.Monitor;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.HashUtility;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -83,6 +86,9 @@ public final class EditAction extends AbstractMailAction {
 
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(EditAction.class));
+
+    private static final String ATTACHMENTS = MailJSONField.ATTACHMENTS.getKey();
+    private static final String CONTENT = MailJSONField.CONTENT.getKey();
 
     /**
      * Initializes a new {@link EditAction}.
@@ -139,8 +145,19 @@ public final class EditAction extends AbstractMailAction {
                  * Parse with default account's transport provider
                  */
                 if (jsonMailObj.hasAndNotNull(MailJSONField.FLAGS.getKey()) && (jsonMailObj.getInt(MailJSONField.FLAGS.getKey()) & MailMessage.FLAG_DRAFT) > 0) {
+                    String sha256 = null;
+                    {
+                        final JSONArray jAttachments = jsonMailObj.optJSONArray(ATTACHMENTS);
+                        if (null != jAttachments) {
+                            final JSONObject jAttachment = jAttachments.optJSONObject(0);
+                            if (null != jAttachment) {
+                                final String sContent = jAttachment.optString(CONTENT, null);
+                                sha256 = null == sContent ? null : HashUtility.getSha256(sContent, "hex");
+                            }
+                        }
+                    }
                     final ComposedMailMessage composedMail =
-                        MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, MailAccount.DEFAULT_ID, warnings);
+                        MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, MailAccount.DEFAULT_ID, warnings, new Monitor(2).put(Monitor.PARAM_CHECKSUM, sha256));
                     /*
                      * ... and edit draft
                      */

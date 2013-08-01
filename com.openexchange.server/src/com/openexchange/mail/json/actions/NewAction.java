@@ -57,6 +57,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import org.apache.commons.logging.Log;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -85,6 +86,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.Monitor;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -98,6 +100,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.HashUtility;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
@@ -120,6 +123,8 @@ public final class NewAction extends AbstractMailAction {
 
     private static final String FLAGS = MailJSONField.FLAGS.getKey();
     private static final String FROM = MailJSONField.FROM.getKey();
+    private static final String ATTACHMENTS = MailJSONField.ATTACHMENTS.getKey();
+    private static final String CONTENT = MailJSONField.CONTENT.getKey();
     private static final String UPLOAD_FORMFIELD_MAIL = AJAXServlet.UPLOAD_FORMFIELD_MAIL;
 
     /**
@@ -161,6 +166,20 @@ public final class NewAction extends AbstractMailAction {
                 }
                 jMail = new JSONObject(json0);
             }
+            /*
+             * Monitor
+             */
+            String sha256 = null;
+            {
+                final JSONArray jAttachments = jMail.optJSONArray(ATTACHMENTS);
+                if (null != jAttachments) {
+                    final JSONObject jAttachment = jAttachments.optJSONObject(0);
+                    if (null != jAttachment) {
+                        final String sContent = jAttachment.optString(CONTENT, null);
+                        sha256 = null == sContent ? null : HashUtility.getSha256(sContent, "hex");
+                    }
+                }
+            }
             /*-
              * Parse
              *
@@ -194,7 +213,7 @@ public final class NewAction extends AbstractMailAction {
                 /*
                  * ... and save draft
                  */
-                final ComposedMailMessage composedMail = MessageParser.parse4Draft(jMail, uploadEvent, session, accountId, warnings);
+                final ComposedMailMessage composedMail = MessageParser.parse4Draft(jMail, uploadEvent, session, accountId, warnings, new Monitor(2).put(Monitor.PARAM_CHECKSUM, sha256));
                 msgIdentifier = mailInterface.saveDraft(composedMail, false, accountId);
                 if (msgIdentifier == null) {
                     throw MailExceptionCode.DRAFT_FAILED_UNKNOWN.create();
@@ -205,7 +224,7 @@ public final class NewAction extends AbstractMailAction {
                  * ... and send message
                  */
                 final String protocol = request.isSecure() ? "https://" : "http://";
-                final ComposedMailMessage[] composedMails = MessageParser.parse4Transport(jMail, uploadEvent, session, accountId, protocol, request.getHostname(), warnings);
+                final ComposedMailMessage[] composedMails = MessageParser.parse4Transport(jMail, uploadEvent, session, accountId, protocol, request.getHostname(), warnings, new Monitor(2).put(Monitor.PARAM_CHECKSUM, sha256));
                 ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
                 if (ComposeType.DRAFT.equals(sendType)) {
                     final boolean deleteDraftOnTransport = jMail.optBoolean("deleteDraftOnTransport", false);
@@ -218,6 +237,9 @@ public final class NewAction extends AbstractMailAction {
                         cm.setSendType(sendType);
                     }
                 }
+                /*
+                 * Check
+                 */
                 msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId);
                 for (int i = 1; i < composedMails.length; i++) {
                     final ComposedMailMessage cm = composedMails[i];
