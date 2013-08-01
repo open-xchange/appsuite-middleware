@@ -119,6 +119,13 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class ICalImporter extends AbstractImporter {
 
+    /**
+     * For testing only.
+     */
+    public ICalImporter() {
+        super(null);
+    }
+
     public ICalImporter(ServiceLookup services) {
         super(services);
     }

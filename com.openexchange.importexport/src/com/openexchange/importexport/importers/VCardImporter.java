@@ -99,12 +99,18 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(VCardImporter.class));
     private static final boolean DEBUG = LOG.isDebugEnabled();
-    
-    
+
+    /**
+     * For testing only.
+     */
+    public VCardImporter() {
+        super(null);
+    }
+
     public VCardImporter(ServiceLookup services) {
         super(services);
     }
-    
+
     @Override
     public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
         if (!format.equals(Format.VCARD)) {
@@ -210,9 +216,9 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                     final VersitDefinition.Reader versitReader = def.getReader(new UnsynchronizedByteArrayInputStream(chunk.getContent()), "UTF-8");
                     try {
                         final VersitObject versitObject = def.parse(versitReader);
-                        
+
                         if (limit <= 0 || count <= limit) {
-                            
+
                             importResult.setFolder(String.valueOf(contactFolderId));
 
                             final Contact contactObj = oxContainerConverter.convertContact(versitObject);
