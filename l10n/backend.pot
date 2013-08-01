@@ -5739,11 +5739,6 @@ msgid ""
 "file 'secret.properties'."
 msgstr ""
 
-#. Access to bundle %1$s is not permitted
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.security/src/com/openexchange/security/BundleAccessExceptionMessage.java:70
-msgid "Access to bundle %1$s is not permitted"
-msgstr ""
-
 #. *
 #. * Bad value %1$s in parameter %2$s
 #.
