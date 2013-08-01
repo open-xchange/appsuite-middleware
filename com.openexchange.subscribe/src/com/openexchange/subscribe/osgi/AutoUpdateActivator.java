@@ -61,6 +61,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.log.LogFactory;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
+import com.openexchange.login.NonTransient;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.SecretService;
 import com.openexchange.session.Session;
@@ -76,9 +77,9 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AutoUpdateActivator extends HousekeepingActivator implements BundleActivator {
-    
+
     private static final Log LOG = LogFactory.getLog(AutoUpdateActivator.class);
-    
+
     public static OSGiSubscriptionSourceDiscoveryCollector COLLECTOR;
 
     public static SubscriptionExecutionServiceImpl EXECUTOR;
@@ -90,58 +91,57 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
 
     @Override
     protected void startBundle() throws Exception {
-        LoginHandlerService listener = new LoginHandlerService() {
-            
-            @Override
-            public void handleLogin(LoginResult login) throws OXException {
-                try {
-                    if (COLLECTOR == null || EXECUTOR == null) {
-                        return;
-                    }
-                    ConfigView view = getService(ConfigViewFactory.class).getView(login.getUser().getId(), login.getContext().getContextId());
-                    
-                    if (!view.opt("com.openexchange.subscribe.autorun", boolean.class, false)) {
-                        return;
-                    }
-                    Context ctx = login.getContext();
-                    Session session = login.getSession();
-                    String secret = getService(SecretService.class).getSecret(session);
-                    long now = System.currentTimeMillis();
-                    
-                    
-                    List<SubscriptionSource> sources = COLLECTOR.getSources();
-                    List<Subscription> subscriptionsToRefresh = new ArrayList<Subscription>(10);
-                    
-                    for (SubscriptionSource subscriptionSource : sources) {
-                        String autorunName = subscriptionSource.getId()+".autorunInterval";
-                        Long interval = view.opt(autorunName, Long.class, 24 * 60 * 60 * 1000l);
-                        if (interval < 0) {
-                            continue;
-                        }
-                        Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(ctx, login.getUser().getId(), secret);
-                        for (Subscription subscription : subscriptions) {
-                            long lastUpdate = subscription.getLastUpdate();
-                            if (now - lastUpdate > interval) {
-                                subscriptionsToRefresh.add(subscription);
-                            }
-                        }
-                    }
-                    
-                    EXECUTOR.executeSubscriptions(subscriptionsToRefresh, ServerSessionAdapter.valueOf(session));
-                } catch (OXException e) {
-                    LOG.error(e.getMessage(), e);
-                }                
-            }
-
-            @Override
-            public void handleLogout(LoginResult logout) throws OXException {
-                // TODO Auto-generated method stub
-                
-            }
-        };
-        
-        registerService(LoginHandlerService.class, listener);
+        registerService(LoginHandlerService.class, new SubscriptionLoginHandler());
     }
-    
+
+
+    private final class SubscriptionLoginHandler implements LoginHandlerService, NonTransient {
+
+        @Override
+        public void handleLogin(LoginResult login) throws OXException {
+            try {
+                if (COLLECTOR == null || EXECUTOR == null) {
+                    return;
+                }
+                ConfigView view = getService(ConfigViewFactory.class).getView(login.getUser().getId(), login.getContext().getContextId());
+
+                if (!view.opt("com.openexchange.subscribe.autorun", boolean.class, false)) {
+                    return;
+                }
+                Context ctx = login.getContext();
+                Session session = login.getSession();
+                String secret = getService(SecretService.class).getSecret(session);
+                long now = System.currentTimeMillis();
+
+
+                List<SubscriptionSource> sources = COLLECTOR.getSources();
+                List<Subscription> subscriptionsToRefresh = new ArrayList<Subscription>(10);
+
+                for (SubscriptionSource subscriptionSource : sources) {
+                    String autorunName = subscriptionSource.getId()+".autorunInterval";
+                    Long interval = view.opt(autorunName, Long.class, 24 * 60 * 60 * 1000l);
+                    if (interval < 0) {
+                        continue;
+                    }
+                    Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(ctx, login.getUser().getId(), secret);
+                    for (Subscription subscription : subscriptions) {
+                        long lastUpdate = subscription.getLastUpdate();
+                        if (now - lastUpdate > interval) {
+                            subscriptionsToRefresh.add(subscription);
+                        }
+                    }
+                }
+
+                EXECUTOR.executeSubscriptions(subscriptionsToRefresh, ServerSessionAdapter.valueOf(session));
+            } catch (OXException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+
+        @Override
+        public void handleLogout(LoginResult logout) throws OXException {
+            // nothing to do
+        }
+    }
 
 }
