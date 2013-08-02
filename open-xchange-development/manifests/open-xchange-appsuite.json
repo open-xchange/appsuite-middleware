@@ -203,6 +203,11 @@
         "namespace": "io.ox/mail/actions"
     },
     {
+        "requires": "document_preview",
+        "path": "io.ox/office/preview/app/taskactions",
+        "namespace": "io.ox/tasks/actions"
+    },
+    {
         "title": "Portal",
         "company": "Open-Xchange",
         "icon": "portal.png",
