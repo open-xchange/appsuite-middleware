@@ -62,14 +62,10 @@ import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.apps.manifests.ServerConfigMatcherService;
 import com.openexchange.apps.manifests.json.ManifestActionFactory;
 import com.openexchange.apps.manifests.json.values.UIVersion;
-import com.openexchange.capabilities.Capability;
-import com.openexchange.capabilities.CapabilityFilter;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.groupware.userconfiguration.AvailabilityChecker;
-import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.groupware.userconfiguration.TrackerAvailabilityChecker;
+import com.openexchange.groupware.userconfiguration.osgi.PermissionRelevantServiceAddedTracker;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.NearRegistryServiceTracker;
@@ -84,8 +80,6 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 
     private static final Log LOG = LogFactory.getLog(ManifestJSONActivator.class);
 
-    private volatile AvailabilityChecker editPasswordChecker;
-
     /**
      * Initializes a new {@link ManifestJSONActivator}.
      */
@@ -93,58 +87,52 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
         super();
     }
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class<?>[]{ConfigurationService.class, CapabilityService.class, SimpleConverter.class};
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[]{ConfigurationService.class, CapabilityService.class, SimpleConverter.class};
+    }
 
-	@Override
-	protected void startBundle() throws Exception {
-	    final BundleContext context = this.context;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void startBundle() throws Exception {
+        final BundleContext context = this.context;
 
         UIVersion.UIVERSION = context.getBundle().getVersion().toString();
 
-        final AvailabilityChecker editPasswordChecker = TrackerAvailabilityChecker.getAvailabilityCheckerFor(PasswordChangeService.class, false, context);
-        this.editPasswordChecker = editPasswordChecker;
-        final String editPasswordName = Permission.EDIT_PASSWORD.name().toLowerCase();
-        final CapabilityFilter capabilityFilter = new CapabilityFilter() {
+        // Add tracker to identify if a PasswordChangeService was registered. If so, add to PermissionAvailabilityService
+        PermissionRelevantServiceAddedTracker<PasswordChangeService> serviceAddedTracker = new PermissionRelevantServiceAddedTracker<PasswordChangeService>(context, PasswordChangeService.class, null);
+        rememberTracker(serviceAddedTracker);
+
+        final NearRegistryServiceTracker<ServerConfigMatcherService> matcherTracker = new NearRegistryServiceTracker<ServerConfigMatcherService>(
+            context,
+            ServerConfigMatcherService.class);
+        rememberTracker(matcherTracker);
+
+        final NearRegistryServiceTracker<ComputedServerConfigValueService> computedValueTracker = new NearRegistryServiceTracker<ComputedServerConfigValueService>(
+            context,
+            ComputedServerConfigValueService.class);
+        rememberTracker(computedValueTracker);
+
+        registerModule(new ManifestActionFactory(this, readManifests(), new ServerConfigServicesLookup() {
 
             @Override
-            public boolean accept(final Capability capability) {
-                return (editPasswordChecker.isAvailable() || !editPasswordName.equals(capability.getId()));
+            public List<ServerConfigMatcherService> getMatchers() {
+                return Collections.unmodifiableList(matcherTracker.getServiceList());
             }
-        };
 
-	    final NearRegistryServiceTracker<ServerConfigMatcherService> matcherTracker = new NearRegistryServiceTracker<ServerConfigMatcherService>(context, ServerConfigMatcherService.class);
-	    rememberTracker(matcherTracker);
-	    final NearRegistryServiceTracker<ComputedServerConfigValueService> computedValueTracker = new NearRegistryServiceTracker<ComputedServerConfigValueService>(context, ComputedServerConfigValueService.class);
-	    rememberTracker(computedValueTracker);
+            @Override
+            public List<ComputedServerConfigValueService> getComputed() {
+                return Collections.unmodifiableList(computedValueTracker.getServiceList());
+            }
+        }), "apps/manifests");
 
-		registerModule(new ManifestActionFactory(this, readManifests(), new ServerConfigServicesLookup() {
-
-			@Override
-			public List<ServerConfigMatcherService> getMatchers() {
-				return Collections.unmodifiableList(matcherTracker.getServiceList());
-			}
-
-			@Override
-			public List<ComputedServerConfigValueService> getComputed() {
-				return Collections.unmodifiableList(computedValueTracker.getServiceList());
-			}
-		}, capabilityFilter), "apps/manifests");
-
-		openTrackers();
-	}
-
-	@Override
-	protected void stopBundle() throws Exception {
-	    final AvailabilityChecker editPasswordChecker = this.editPasswordChecker;
-	    if (null != editPasswordChecker) {
-            editPasswordChecker.close();
-            this.editPasswordChecker = null;
-        }
-	    super.stopBundle();
-	}
+        openTrackers();
+    }
 
     private JSONArray readManifests() {
         String[] paths;

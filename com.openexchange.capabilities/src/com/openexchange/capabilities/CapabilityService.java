@@ -62,24 +62,26 @@ public interface CapabilityService {
 
     /**
      * Gets the capabilities associated with given user.
-     *
+     * 
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @param filter An optional filter; pass <code>null</code> to retrieve all available capabilities
+     * @param computeCapabilityFilters boolean to indicate if filters should be computed. Use <code>false</code> to retrieve all available
+     *            capabilities
      * @return The capabilities
      * @throws OXException If capabilities cannot be determined
      */
-    Set<Capability> getCapabilities(int userId, int contextId, CapabilityFilter filter) throws OXException;
+    Set<Capability> getCapabilities(int userId, int contextId, boolean computeCapabilityFilters) throws OXException;
 
     /**
      * Gets the capabilities associated with given session.
-     *
+     * 
      * @param session The session
-     * @param filter An optional filter; pass <code>null</code> to retrieve all available capabilities
+     * @param computeCapabilityFilters boolean to indicate if filters should be computed. Use <code>false</code> to retrieve all available
+     *            capabilities
      * @return The capabilities
      * @throws OXException If capabilities cannot be determined
      */
-    Set<Capability> getCapabilities(Session session, CapabilityFilter filter) throws OXException;
+    Set<Capability> getCapabilities(Session session, boolean computeCapabilityFilters) throws OXException;
 
     /**
      * Gets the capabilities associated with given user.
