@@ -568,8 +568,10 @@ public class RdbUserStorage extends UserStorage {
                     throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
                 }
                 condition.resetTransactionRollbackException();
+                boolean rollback = false;
                 try {
                     startTransaction(con);
+                    rollback = true;
                     // Update attribute defined through UserMapper
                     UserField[] fields = MAPPER.getAssignedFields(user);
                     if (fields.length > 0) {
@@ -610,15 +612,15 @@ public class RdbUserStorage extends UserStorage {
                         }
                     }
                     con.commit();
+                    rollback = false;
                 } catch (final SQLException e) {
-                    rollback(con);
                     if (!condition.isFailedTransactionRollback(e)) {
                         throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
                     }
-                } catch (final OXException e) {
-                    rollback(con);
-                    throw e;
                 } finally {
+                    if (rollback) {
+                        rollback(con);
+                    }
                     autocommit(con);
                     DBPool.closeWriterSilent(context, con);
                 }
@@ -660,26 +662,42 @@ public class RdbUserStorage extends UserStorage {
         if (null == name) {
             throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("USR");
         }
-        final Connection con;
+
         try {
-            con = DBPool.pickupWriteable(context);
-        } catch (final OXException e) {
-            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
-        }
-        try {
-            con.setAutoCommit(false);
-            setAttribute(context.getContextId(), con, userId, name, value);
-            con.commit();
+            final DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
+            do {
+                final Connection con;
+                try {
+                    con = DBPool.pickupWriteable(context);
+                } catch (final OXException e) {
+                    throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
+                }
+                condition.resetTransactionRollbackException();
+                boolean rollback = false;
+                try {
+                    con.setAutoCommit(false); // BEGIN
+                    rollback = true;
+                    setAttribute(context.getContextId(), con, userId, name, value);
+                    con.commit(); // COMMIT
+                    rollback = false;
+                } catch (final SQLException e) {
+                    if (!condition.isFailedTransactionRollback(e)) {
+                        throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
+                    }
+                } catch (final RuntimeException e) {
+                    throw LdapExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage()).setPrefix("USR");
+                } finally {
+                    if (rollback) {
+                        rollback(con);
+                    }
+                    autocommit(con);
+                    DBPool.closeWriterSilent(context, con);
+                }
+            } while (condition.checkRetry());
         } catch (final SQLException e) {
-            rollback(con);
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
-        } catch (final Exception e) {
-            rollback(con);
-            throw LdapExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage()).setPrefix("USR");
-        } finally {
-            autocommit(con);
-            DBPool.closeWriterSilent(context, con);
         }
+
     }
 
     private static void setAttribute(int contextId, Connection con, int userId, String name, String value) throws SQLException, OXException {
