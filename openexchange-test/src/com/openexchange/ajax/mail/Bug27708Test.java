@@ -60,7 +60,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
@@ -102,6 +101,7 @@ public final class Bug27708Test extends AbstractMailTest {
         clients[2] = new AJAXClient(User.User3);
         clients[3] = new AJAXClient(User.User4);
         recipient = getClient().getValues().getSendAddress();
+        // Unique identifier for all threads, to be able to detect own and foreign content in mail body.
         identifier = new String[NUM_THREADS];
         for (int i = 0; i < identifier.length; i++) {
             identifier[i] = UUID.randomUUID().toString();
@@ -115,23 +115,20 @@ public final class Bug27708Test extends AbstractMailTest {
     @AfterClass
     @Override
     protected void tearDown() throws Exception {
+        // Delete sent mails.
         for (int i = 0; i < clients.length; i++) {
-            DeleteRequest[] requests = new DeleteRequest[sentMails[i].size()];
-            for (int j = 0; j < sentMails[i].size(); j++) {
-                requests[j] = new DeleteRequest(sentMails[i].get(j), true);
-            }
-            clients[i].execute(new MultipleRequest(requests));
+            clients[i].execute(new DeleteRequest(sentMails[i].toArray(new String[sentMails[i].size()][]), true));
         }
         // Delete received mails.
         String inboxFolder = getClient().getValues().getInboxFolder();
         AllRequest request = new AllRequest(inboxFolder, new int[] { 600 }, -1, null, true);
         AllResponse response = getClient().execute(request);
-        DeleteRequest[] delete = new DeleteRequest[response.size()];
+        final String[][] folderAndIDs = new String[response.size()][2];
         for (int i = 0; i < response.size(); i++) {
-            delete[i] = new DeleteRequest(inboxFolder, (String) response.getValue(i, 600), true);
+            folderAndIDs[i] = new String[] { inboxFolder, (String) response.getValue(i, 600) };
         }
-        getClient().execute(new MultipleRequest(delete));
-        // delete mails
+        getClient().execute(new DeleteRequest(folderAndIDs, true));
+        // Logout clients.
         if (null != clients) {
             for (AJAXClient client : clients) {
                 if (null != client) client.logout();
@@ -150,6 +147,7 @@ public final class Bug27708Test extends AbstractMailTest {
             threads[i] = new Thread(senders[i]);
             threads[i].start();
         }
+        // Wait until at least 3 died. The fourth will not die because no other can interfere its mail bodies.
         int running = 0;
         do {
             running = 0;
@@ -160,12 +158,14 @@ public final class Bug27708Test extends AbstractMailTest {
             }
             Thread.sleep(100);
         } while (running > 1);
+        // If 3 died, stop the fourth.
         for (MailSender sender : senders) {
             sender.stop();
         }
         for (int i = 0; i < threads.length; i++) {
             threads[i].join();
         }
+        // Write full output of mails of all failed threads, if some failed.
         StringBuilder sb = new StringBuilder();
         for (MailSender sender : senders) {
             Throwable t = sender.getThrowable();
