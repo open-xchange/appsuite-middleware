@@ -1,3 +1,9 @@
+open-xchange-xerces-sun (7.4.0-2) stable; urgency=low
+
+  * Second release candidate for 7.4.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 02 Aug 2013 13:41:50 +0200
+
 open-xchange-xerces-sun (7.4.0-1) stable; urgency=low
 
   * First release candidate for 7.4.0

@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -57,24 +57,22 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc imapau
 %doc com.openexchange.authentication.imap/ChangeLog
 
 %changelog
+* Fri Aug 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.4.0
 * Wed Jul 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.4.0
 * Tue Jul 16 2013 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.4.0
 * Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second build for patch  2013-07-18
+* Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-18
-* Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Second build for patch  2013-07-18
-* Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Second build for patch  2013-07-18
 * Fri Jul 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-18
 * Fri Jul 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-18
 * Thu Jul 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-10
-* Wed Jul 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-06-27
 * Mon Jul 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Third candidate for 7.2.2 release
 * Fri Jun 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
