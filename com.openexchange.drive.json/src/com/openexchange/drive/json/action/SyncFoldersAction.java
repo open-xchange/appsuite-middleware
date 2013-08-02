@@ -107,7 +107,7 @@ public class SyncFoldersAction extends AbstractDriveAction {
          * return json result
          */
         try {
-            if (includeDiagnostics()) {
+            if (isIncludeDiagnostics(session)) {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("diagnostics", syncResult.getDiagnostics());
                 jsonObject.put("actions", JsonDirectoryAction.serialize(syncResult.getActionsForClient(), getLocale(session)));
