@@ -192,6 +192,10 @@ public final class NewAction extends AbstractMailAction {
                  * ... and save draft
                  */
                 final ComposedMailMessage composedMail = MessageParser.parse4Draft(jMail, uploadEvent, session, accountId, warnings);
+                final ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : null;
+                if (null != sendType) {
+                    composedMail.setSendType(sendType);
+                }
                 msgIdentifier = mailInterface.saveDraft(composedMail, false, accountId);
                 if (msgIdentifier == null) {
                     throw MailExceptionCode.DRAFT_FAILED_UNKNOWN.create();
