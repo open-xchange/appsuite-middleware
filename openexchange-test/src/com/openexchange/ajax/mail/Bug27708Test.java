@@ -211,7 +211,7 @@ public final class Bug27708Test extends AbstractMailTest {
         @Override
         public void run() {
             try {
-                for (int j = 0; j < 100000 && running; j++) {
+                for (int j = 0; j < 1000 && running; j++) {
                     JSONObject json = createEMail(client, recipient, "Test Bug 27708", "TEXT/HTML", "<html><body style=\\u0022\\u0022><div>" + identifier + "</div></body></html>");
                     if (DRAFT) {
                         json.put(MailJSONField.FLAGS.getKey(), MailMessage.FLAG_DRAFT);
