@@ -281,8 +281,10 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
             }
         }
 
-        for (UserPermissionBits perms : load(cache, ctx, toLoad)) {
-            map.put(perms.getUserId(), perms);
+        if (!toLoad.isEmpty()) {
+            for (UserPermissionBits perms : load(cache, ctx, toLoad)) {
+                map.put(perms.getUserId(), perms);
+            }
         }
 
         UserPermissionBits[] retval = new UserPermissionBits[userIds.length];
