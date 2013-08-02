@@ -234,7 +234,8 @@ public final class LoginPerformer {
             ServerSession serverSession = ServerSessionAdapter.valueOf(session);
             serverSession.getUser();
             serverSession.getUserSettingMail();
-            serverSession.getUserConfiguration();
+            serverSession.getUserPermissionBits();
+            //serverSession.getUserConfiguration();
 
             // Trigger registered login handlers
             triggerLoginHandlers(retval);

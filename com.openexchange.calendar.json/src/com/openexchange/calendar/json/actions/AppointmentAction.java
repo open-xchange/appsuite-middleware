@@ -145,7 +145,7 @@ public abstract class AppointmentAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
-        if (!session.getUserConfiguration().hasCalendar()) {
+        if (!session.getUserPermissionBits().hasCalendar()) {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("calendar");
         }
         try {

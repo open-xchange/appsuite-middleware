@@ -184,7 +184,7 @@ public class CardDAV extends OXServlet {
     private boolean checkPermission(ServerSession session) {
         try {
             ComposedConfigProperty<Boolean> property = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.carddav.enabled", boolean.class);
-            return property.isDefined() && property.get() && session.getUserConfiguration().hasContact();
+            return property.isDefined() && property.get() && session.getUserPermissionBits().hasContact();
 
         } catch (OXException e) {
             return false;

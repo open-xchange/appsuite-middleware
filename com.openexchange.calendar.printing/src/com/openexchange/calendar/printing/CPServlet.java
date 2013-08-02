@@ -135,7 +135,7 @@ public class CPServlet extends PermissionServlet {
 
     @Override
     protected boolean hasModulePermission(final ServerSession session) {
-        return session.getUserConfiguration().hasCalendar();
+        return session.getUserPermissionBits().hasCalendar();
     }
 
     @Override

@@ -80,6 +80,7 @@ import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
@@ -344,6 +345,24 @@ public class OXFolderAccess {
         try {
             final FolderObject fo = getFolderObject(folderId);
             return fo.getEffectiveUserPermission(userId, userConfig, readCon);
+        } catch (final SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Determines user's effective permission on the folder matching given folder ID.
+     *
+     * @param folderId The folder ID
+     * @param userId The user ID
+     * @param userPermissionBits The user permission bits
+     * @return The user's effective permission
+     * @throws OXException If operation fails
+     */
+    public final EffectivePermission getFolderPermission(final int folderId, final int userId, final UserPermissionBits userPermissionBits) throws OXException {
+        try {
+            final FolderObject fo = getFolderObject(folderId);
+            return fo.getEffectiveUserPermission(userId, userPermissionBits, readCon);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }

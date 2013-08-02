@@ -367,12 +367,17 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             applyUIFilter(capabilities);
         }
 
+//        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+//        System.out.println("AbstractCapabilityService.getCapabilities()");
+//        new Throwable().printStackTrace(System.out);
+//        System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+
         return capabilities;
     }
 
     /**
      * Applies the filter on capabilities for JSON requests and if services (e. g. PasswordChangeService) are not available.
-     * 
+     *
      * @param capabilitiesToFilter - the capabilities the filter should be applied on
      */
     protected void applyUIFilter(Set<Capability> capabilitiesToFilter) {

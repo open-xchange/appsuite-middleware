@@ -458,7 +458,7 @@ public final class MemorizerWorker {
         boolean enabledRight = false;
         try {
             enabled = ServerUserSetting.getInstance().isContactCollectionEnabled(session.getContextId(), session.getUserId());
-            enabledRight = ServerSessionAdapter.valueOf(session).getUserConfiguration().isCollectEmailAddresses();
+            enabledRight = ServerSessionAdapter.valueOf(session).getUserPermissionBits().isCollectEmailAddresses();
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }

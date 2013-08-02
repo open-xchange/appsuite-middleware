@@ -64,7 +64,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaService;
@@ -85,14 +85,14 @@ public final class InsertData {
 
     private final Context ctx;
     private final User user;
-    private final UserConfiguration userConfig;
+    private final UserPermissionBits userConfig;
     private final FolderObject folder;
     private final Task task;
 
     private Set<TaskParticipant> parts;
     private Set<Folder> folders;
 
-    InsertData(Context ctx, User user, UserConfiguration userConfig, FolderObject folder, Task task) {
+    InsertData(Context ctx, User user, UserPermissionBits userConfig, FolderObject folder, Task task) {
         super();
         this.ctx = ctx;
         this.user = user;
@@ -103,7 +103,7 @@ public final class InsertData {
 
     /**
      * Sets {@link QuotaService} reference to given instance.
-     * 
+     *
      * @param quotaService The {@link QuotaService} instance or <code>null</code>
      */
     public static void setQuotaService(QuotaService quotaService) {

@@ -95,7 +95,7 @@ public final class SearchAction extends AbstractResourceAction {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( ResourceService.class.getName());
         }
 
-        if (!req.getSession().getUserConfiguration().hasGroupware()) {
+        if (!req.getSession().getUserPermissionBits().hasGroupware()) {
             return new AJAXRequestResult(new JSONArray(0), "json");
         }
 

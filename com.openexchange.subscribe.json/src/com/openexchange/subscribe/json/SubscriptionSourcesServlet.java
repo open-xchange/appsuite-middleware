@@ -79,7 +79,7 @@ public class SubscriptionSourcesServlet extends MultipleAdapterServlet {
     }
     @Override
     protected boolean hasModulePermission(ServerSession session) {
-        return session.getUserConfiguration().isSubscription();
+        return session.getUserPermissionBits().isSubscription();
     }
 
 

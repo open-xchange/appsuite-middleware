@@ -250,7 +250,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             final ServerSession serverSession = (ServerSession) session;
             ctx = serverSession.getContext();
             usm = serverSession.getUserSettingMail();
-            if (!serverSession.getUserConfiguration().hasWebMail()) {
+            if (!serverSession.getUserPermissionBits().hasWebMail()) {
                 throw MailExceptionCode.NO_MAIL_ACCESS.create();
             }
             user = serverSession.getUser();

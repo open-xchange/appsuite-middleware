@@ -65,7 +65,7 @@ import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -318,22 +318,22 @@ public class FolderWriter extends FolderChildWriter {
     private static class FullEnqueuer implements Enqueuer {
 
         protected final int userId;
-        protected final UserConfiguration userConf;
+        protected final UserPermissionBits userPermissionBits;
         protected final Queue<FolderObject> updatedQueue;
         protected final Queue<FolderObject> deletedQueue;
 
-        public FullEnqueuer(final Queue<FolderObject> updatedQueue, final Queue<FolderObject> deletedQueue, final UserConfiguration userConf) {
+        public FullEnqueuer(final Queue<FolderObject> updatedQueue, final Queue<FolderObject> deletedQueue, final UserPermissionBits userPermissionBits) {
             super();
             this.updatedQueue = updatedQueue;
             this.deletedQueue = deletedQueue;
-            this.userId = userConf.getUserId();
-            this.userConf = userConf;
+            this.userId = userPermissionBits.getUserId();
+            this.userPermissionBits = userPermissionBits;
         }
 
         @Override
         public void enqueue(final FolderObject fo) throws OXException {
             try {
-                if (fo.isVisible(userId, userConf)) {
+                if (fo.isVisible(userId, userPermissionBits)) {
                     updatedQueue.add(fo);
                 } else {
                     deletedQueue.add(fo);
@@ -347,14 +347,14 @@ public class FolderWriter extends FolderChildWriter {
 
     private static final class NoSharedAccessEnqueuer extends FullEnqueuer {
 
-        public NoSharedAccessEnqueuer(final Queue<FolderObject> updatedQueue, final Queue<FolderObject> deletedQueue, final UserConfiguration userConf) {
-            super(updatedQueue, deletedQueue, userConf);
+        public NoSharedAccessEnqueuer(final Queue<FolderObject> updatedQueue, final Queue<FolderObject> deletedQueue, final UserPermissionBits userPermissionBits) {
+            super(updatedQueue, deletedQueue, userPermissionBits);
         }
 
         @Override
         public void enqueue(final FolderObject fo) throws OXException {
             try {
-                if (fo.isVisible(userId, userConf)) {
+                if (fo.isVisible(userId, userPermissionBits)) {
                     if (fo.isShared(userId)) {
                         /*
                          * No shared folder access: Enqueue to deleted queue
@@ -375,14 +375,14 @@ public class FolderWriter extends FolderChildWriter {
 
     private static final class IgnoreDeletedFullEnqueuer extends FullEnqueuer {
 
-        public IgnoreDeletedFullEnqueuer(final Queue<FolderObject> updatedQueue, final UserConfiguration userConf) {
-            super(updatedQueue, null, userConf);
+        public IgnoreDeletedFullEnqueuer(final Queue<FolderObject> updatedQueue, final UserPermissionBits userPermissionBits) {
+            super(updatedQueue, null, userPermissionBits);
         }
 
         @Override
         public void enqueue(final FolderObject fo) throws OXException {
             try {
-                if (fo.isVisible(userId, userConf)) {
+                if (fo.isVisible(userId, userPermissionBits)) {
                     updatedQueue.add(fo);
                 }
             } catch (final RuntimeException e) {
@@ -394,14 +394,14 @@ public class FolderWriter extends FolderChildWriter {
 
     private static final class IgnoreDeletedNoSharedAccessEnqueuer extends FullEnqueuer {
 
-        public IgnoreDeletedNoSharedAccessEnqueuer(final Queue<FolderObject> updatedQueue, final UserConfiguration userConf) {
-            super(updatedQueue, null, userConf);
+        public IgnoreDeletedNoSharedAccessEnqueuer(final Queue<FolderObject> updatedQueue, final UserPermissionBits userPermissionBits) {
+            super(updatedQueue, null, userPermissionBits);
         }
 
         @Override
         public void enqueue(final FolderObject fo) throws OXException {
             try {
-                if (!fo.isShared(userId) && fo.isVisible(userId, userConf)) {
+                if (!fo.isShared(userId) && fo.isVisible(userId, userPermissionBits)) {
                     /*
                      * A visible, non-shared folder
                      */
@@ -414,17 +414,17 @@ public class FolderWriter extends FolderChildWriter {
 
     } // End of IgnoreDeletedNoSharedAccessEnqueuer class
 
-    private static Enqueuer getEnqueuer(final boolean ignoreDeleted, final UserConfiguration userConf, final Queue<FolderObject> updatedQueue, final Queue<FolderObject> deletedQueue) {
+    private static Enqueuer getEnqueuer(final boolean ignoreDeleted, final UserPermissionBits userPermissionBits, final Queue<FolderObject> updatedQueue, final Queue<FolderObject> deletedQueue) {
         if (ignoreDeleted) {
-            if (userConf.hasFullSharedFolderAccess()) {
-                return new IgnoreDeletedFullEnqueuer(updatedQueue, userConf);
+            if (userPermissionBits.hasFullSharedFolderAccess()) {
+                return new IgnoreDeletedFullEnqueuer(updatedQueue, userPermissionBits);
             }
-            return new IgnoreDeletedNoSharedAccessEnqueuer(updatedQueue, userConf);
+            return new IgnoreDeletedNoSharedAccessEnqueuer(updatedQueue, userPermissionBits);
         }
-        if (userConf.hasFullSharedFolderAccess()) {
-            return new FullEnqueuer(updatedQueue, deletedQueue, userConf);
+        if (userPermissionBits.hasFullSharedFolderAccess()) {
+            return new FullEnqueuer(updatedQueue, deletedQueue, userPermissionBits);
         }
-        return new NoSharedAccessEnqueuer(updatedQueue, deletedQueue, userConf);
+        return new NoSharedAccessEnqueuer(updatedQueue, deletedQueue, userPermissionBits);
     }
 
     private static UpdatesResult calculateUpdates(final FolderSQLInterface sqlInterface, final Date timestamp, final boolean ignoreDeleted, final ServerSession session) throws OXException {
@@ -437,7 +437,7 @@ public class FolderWriter extends FolderChildWriter {
         /*
          * Enqueue each folder in proper queue
          */
-        final Enqueuer enqueuer = getEnqueuer(ignoreDeleted, session.getUserConfiguration(), updatedQueue, deletedQueue);
+        final Enqueuer enqueuer = getEnqueuer(ignoreDeleted, session.getUserPermissionBits(), updatedQueue, deletedQueue);
         for (final FolderObject fo : queue) {
             enqueuer.enqueue(fo);
         }

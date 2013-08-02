@@ -208,9 +208,9 @@ public abstract class AbstractReminderAction implements AJAXActionService {
     protected static boolean hasModulePermission(final ReminderObject reminderObj, final ServerSession session) {
         switch (reminderObj.getModule()) {
         case Types.APPOINTMENT:
-            return session.getUserConfiguration().hasCalendar();
+            return session.getUserPermissionBits().hasCalendar();
         case Types.TASK:
-            return session.getUserConfiguration().hasTask();
+            return session.getUserPermissionBits().hasTask();
         default:
             return true;
         }

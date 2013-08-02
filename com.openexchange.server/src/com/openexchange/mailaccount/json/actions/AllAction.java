@@ -99,7 +99,7 @@ public final class AllAction extends AbstractMailAccountAction {
 
         MailAccount[] userMailAccounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
 
-        final boolean multipleEnabled = session.getUserConfiguration().isMultipleMailAccounts();
+        final boolean multipleEnabled = session.getUserPermissionBits().isMultipleMailAccounts();
         final List<MailAccount> tmp = new ArrayList<MailAccount>(userMailAccounts.length);
 
         for (final MailAccount userMailAccount : userMailAccounts) {
