@@ -55,7 +55,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.capabilities.Capability;
-import com.openexchange.capabilities.CapabilityFilter;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
@@ -69,22 +68,19 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class Capabilities implements ComputedServerConfigValueService {
 
-	private final ServiceLookup services;
-    private final CapabilityFilter capabilityFilter;
+    private final ServiceLookup services;
+
+    public Capabilities(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
 
 
-	public Capabilities(ServiceLookup services, final CapabilityFilter capabilityFilter) {
-		super();
-		this.services = services;
-		this.capabilityFilter = capabilityFilter;
-	}
-
-
-	@Override
-	public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException {
-		CapabilityService capabilityService = services.getService(CapabilityService.class);
-		Set<Capability> capabilities = capabilityService.getCapabilities(session.getUserId(), session.getContextId(), capabilityFilter);
-		serverConfig.put("capabilities", services.getService(SimpleConverter.class).convert("capability", "json", capabilities, session));
-	}
+    @Override
+    public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException {
+        CapabilityService capabilityService = services.getService(CapabilityService.class);
+        Set<Capability> capabilities = capabilityService.getCapabilities(session.getUserId(), session.getContextId(), true);
+        serverConfig.put("capabilities", services.getService(SimpleConverter.class).convert("capability", "json", capabilities, session));
+    }
 
 }

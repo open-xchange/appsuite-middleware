@@ -52,6 +52,7 @@ package com.openexchange.importexport.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
@@ -81,15 +82,16 @@ public class ImportExportActivator extends AJAXModuleActivator{
 			AppointmentSqlFactoryService.class,
 			CalendarCollectionService.class,
 			ConfigurationService.class,
-			ICalEmitter.class
+			ICalEmitter.class,
+			ConfigViewFactory.class
 		};
 	}
 
 	@Override
 	protected void startBundle() throws Exception {
 		ImportExportServices.LOOKUP.set(this);
-		registerModule(new ImportActionFactory(), "import");
-		registerModule(new ExportActionFactory(), "export");
+		registerModule(new ImportActionFactory(this), "import");
+		registerModule(new ExportActionFactory(this), "export");
 	}
 
 	@Override

@@ -54,6 +54,7 @@ import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.ldap.MockUser;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.mail.usersetting.UserSettingMail;
 
 /**
@@ -68,6 +69,7 @@ public class SimServerSession implements ServerSession {
     private User user;
     private UserConfiguration userConfig;
     private String login;
+    private UserPermissionBits userPermissionBits;
 
     public SimServerSession(final Context context, final User user, final UserConfiguration userConfig) {
         super();
@@ -94,6 +96,20 @@ public class SimServerSession implements ServerSession {
     @Override
     public UserConfiguration getUserConfiguration() {
         return userConfig;
+    }
+
+    /**
+     * Sets the user permission bits
+     *
+     * @param userPermissionBits The user permission bits to set
+     */
+    public void setUserPermissionBits(UserPermissionBits userPermissionBits) {
+        this.userPermissionBits = userPermissionBits;
+    }
+
+    @Override
+    public UserPermissionBits getUserPermissionBits() {
+        return userPermissionBits;
     }
 
     @Override

@@ -75,7 +75,7 @@ public abstract class AbstractICalImportTest extends AbstractContactTest {
         userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), ctx);
 	    sessObj = ServerSessionFactory.createServerSession(userId, ctx.getContextId(), "csv-tests");
 		userId = sessObj.getUserId();
-		imp = new ICalImporter();
+		imp = new ICalImporter(null);
 	}
 
     @AfterClass

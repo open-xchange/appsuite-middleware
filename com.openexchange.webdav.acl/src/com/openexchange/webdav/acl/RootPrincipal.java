@@ -53,8 +53,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.acl.mixins.PrincipalURL;
@@ -151,11 +151,30 @@ public class RootPrincipal extends AbstractCollection {
         }
         UserService users = factory.getUserService();
         try {
-            int userId = users.getUserId(name, factory.getContext());
-            User user = users.getUser(userId, factory.getContext());
+            /*
+             * resolve user ID
+             */
+            int userID = -1;
+            try {
+                userID = users.getUserId(name, factory.getContext());
+            } catch (OXException e) {
+                if (LdapExceptionCode.USER_NOT_FOUND.equals(e) && false == name.equals(url.name())) {
+                    // try full login name, too
+                    userID = users.getUserId(url.name(), factory.getContext());
+                } else {
+                    throw e;
+                }
+            }
+            if (-1 == userID) {
+                LdapExceptionCode.USER_NOT_FOUND.create(name, Integer.valueOf(factory.getContext().getContextId()));
+            }
+            /*
+             * create principal resource for user
+             */
+            User user = users.getUser(userID, factory.getContext());
             return new UserPrincipalResource(factory, user, url);
         } catch (OXException e) {
-            throw WebdavProtocolException.generalError(url, 500);
+            throw WebdavProtocolException.generalError(e, url, 500);
         }
     }
 

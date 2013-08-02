@@ -64,7 +64,6 @@ import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -94,7 +93,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 
     /**
      * Initializes a new {@link CachingUserConfigurationStorage}.
-     * @param capabilities 
+     * @param capabilities
      *
      * @throws OXException If an error occurs
      */
@@ -162,11 +161,12 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
      * @throws OXException If an error occurs
      */
     void initCache() throws OXException {
+        final Cache cache = this.cache;
         if (cache != null) {
             return;
         }
         try {
-            cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
+            this.cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
         } catch (final RuntimeException e) {
             throw UserConfigurationCodes.CACHE_INITIALIZATION_FAILED.create(e, CACHE_REGION_NAME);
         }
@@ -194,7 +194,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             this.cache = null;
         }
     }
-    
+
     @Override
     public UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx) throws OXException {
         final Cache cache = this.cache;
@@ -203,7 +203,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         }
         return getUserConfigurations(cache, ctx, new int[]{userId}, new int[][]{groups})[0];
     }
-    
+
     @Override
     public UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws OXException {
         final Cache cache = this.cache;
@@ -231,7 +231,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         loadUserConfiguration(cache, map, ctx, toLoad.toArray(), groupsToLoad.toArray(new int[groupsToLoad.size()][]));
         return convert(map, userIds);
     }
-    
+
     @Override
     public UserConfiguration[] getUserConfigurations(Context ctx, int[] userIds, int[][] groups) throws OXException {
         final Cache cache = this.cache;
@@ -240,7 +240,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         }
         return getUserConfigurations(cache, ctx, userIds, groups);
     }
-    
+
     private static TIntObjectMap<UserConfiguration> getCachedUserConfiguration(Cache cache, Context ctx, int[] userIds, boolean extendedPermissions) {
         TIntObjectMap<UserConfiguration> map = new TIntObjectHashMap<UserConfiguration>(userIds.length, 1);
         for (int i = 0; i < userIds.length; i++) {

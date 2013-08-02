@@ -62,7 +62,7 @@ import com.openexchange.exception.OXException;
 /**
  * This class implements the temporary memory of an AJAX client and provides some convenience methods to determine user specific values for
  * running some tests more easily.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AJAXClient {
@@ -162,6 +162,7 @@ public class AJAXClient {
             session.setId(null);
         }
         session.getConversation().clearContents();
+        session.getHttpClient().getConnectionManager().shutdown();
     }
 
     public String getHostname() {

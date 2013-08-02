@@ -133,7 +133,7 @@ public class TaskParser extends CalendarParser {
             return ;
         } else if (isTag(parser, TaskFields.TARGET_COSTS)) {
             try {
-                taskobject.setTargetCosts(getValueAsFloat(parser));
+                taskobject.setTargetCosts(getValueAsBigDecimal(parser));
             } catch (final NumberFormatException exc) {
                 throw WebdavExceptionCode.IO_ERROR.create(TaskFields.TARGET_COSTS + " is not a float");
             }
@@ -149,7 +149,7 @@ public class TaskParser extends CalendarParser {
             return ;
         } else if (isTag(parser, TaskFields.ACTUAL_COSTS)) {
             try {
-                taskobject.setActualCosts(getValueAsFloat(parser));
+                taskobject.setActualCosts(getValueAsBigDecimal(parser));
             } catch (final NumberFormatException exc) {
                 throw WebdavExceptionCode.IO_ERROR.create(TaskFields.ACTUAL_COSTS + " is not a float");
             }

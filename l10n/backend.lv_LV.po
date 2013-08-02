@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.lv_LV.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: DATE\n"
-"PO-Revision-Date: 2013-07-26 18:03+0200\n"
+"PO-Revision-Date: 2013-08-01 12:26+0200\n"
 "Last-Translator: Aivars Oliņš <aivars@adsl.lv>\n"
 "Language-Team: Latvian <LL@li.org>\n"
 "Language: lv\n"
@@ -1157,6 +1157,7 @@ msgstr "JSON kļūda: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:68
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:224
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:67
@@ -3351,6 +3352,687 @@ msgstr "Lūdzu pārbaudiet ka fails ir pareizi formatēts."
 msgid "Please make sure the file is readable by the groupware."
 msgstr "Lūdzu pārliecinieties ka fails ir nolasāms."
 
+#. *
+#. * No connection available to access mailbox
+#.
+#. No connection available to access mailbox
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:466
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:100
+msgid "No connection available to access mailbox"
+msgstr "Nav pieejamu pieslēgumu piekļuvei pie pasta"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:68
+msgid ""
+"No connection available to access mailbox on server %1$s with login %2$s "
+"(user=%3$s, context=%4$s)"
+msgstr ""
+"Nevar pieslēgties pasta kastei serverī %1$s ar pieslēgumu %2$s (lietotājs="
+"%3$s, konteksts=%4$s)"
+
+#. *
+#. * User %1$s has no mail module access due to user configuration
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:76
+msgid "User %1$s has no mail module access due to user configuration"
+msgstr ""
+"Lietotājam %1$s nav piekļuves pie pasta moduļa saskaņā ar konfigurāciju"
+
+#. *
+#. * No access to mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:80
+msgid "No access to mail folder %1$s"
+msgstr "Nav piekļuves pasta mapei %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:74
+msgid ""
+"No access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Nav piekļuves pasta mapei %1$s serverī %2$s ar pieslēgumu %3$s (lietotājs="
+"%4$s, konteksts=%5$s)"
+
+#. *
+#. * No lookup access to mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:84
+msgid "No lookup access to mail folder %1$s"
+msgstr "Nav apskata tiesību pasta mapei %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:78
+msgid ""
+"No lookup access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nav apskata tiesību pasta mapei %1$s serverī %2$s ar pieslēgumu %3$s "
+"(lietotājs=%4$s, konteksts=%5$s)"
+
+#. *
+#. * No read access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:88
+msgid "No read access to mail folder %1$s"
+msgstr "Nav lasīšanas tiesību pasta mapei %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:82
+msgid ""
+"No read access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nav lasīšanas tiesību pasta mapei %1$s serverī %2$s ar pieslēgumu %3$s "
+"(lietotājs=%4$s, konteksts=%5$s)"
+
+#. *
+#. * No delete access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:92
+msgid "No delete access to mail folder %1$s"
+msgstr "Nav dzēšanas tiesību pasta mapei %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:86
+msgid ""
+"No delete access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nav dzēšanas tiesību pasta mapei %1$s serverī %2$s ar pieslēgumu %3$s "
+"(lietotājs=%4$s, konteksts=%5$s)"
+
+#. *
+#. * No insert access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:96
+msgid "No insert access to mail folder %1$s"
+msgstr "Nav pievienošanas tiesību pasta mapei %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:90
+msgid ""
+"No insert access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nav pievienošanas tiesību pasta mapei %1$s serverī %2$s ar pieslēgumu %3$s "
+"(lietotājs=%4$s, konteksts=%5$s)"
+
+#. *
+#. * No administer access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:100
+msgid "No administer access to mail folder %1$s"
+msgstr "Nav administrēšanas tiesību uz pasta mapi %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:94
+msgid ""
+"No administer access to mail folder %1$s on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Nav administrēšanas tiesību uz pasta mapi %1$s serverī %2$s ar pieslēgumu "
+"%3$s (lietotājs=%4$s, konteksts=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:96
+msgid "No write access to IMAP folder %1$s"
+msgstr "Nav rakstīšanas tiesību IMAP mapei %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:98
+msgid ""
+"No write access to IMAP folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nav rakstīšanas tiesību IMAP mapei %1$s serverī %2$s ar pieslēgumu %3$s "
+"(lietotājs=%4$s, konteksts=%5$s)"
+
+#. *
+#. * No keep-seen access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:108
+msgid "No keep-seen access to mail folder %1$s"
+msgstr "Nepietiekamas tiesības uz pasta mapi %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:102
+msgid ""
+"No keep-seen access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nepietiekamas tiesības uz pasta mapi %1$s serverī %2$s ar pieslēgumu %3$s "
+"(lietotājs=%4$s, konteksts=%5$s)"
+
+#. *
+#. * Folder %1$s does not allow subfolders.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:112
+msgid "Folder %1$s does not allow subfolders."
+msgstr "Mape %1$s neatļauj apakšmapes."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:106
+msgid ""
+"Folder %1$s does not allow subfolders on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)."
+msgstr ""
+"Mape %1$s neatļauj apakšmapes serverī %2$s ar pieslēgumu %3$s (lietotājs="
+"%4$s, konteksts=%5$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:108
+msgid ""
+"Mail folder \"%1$s\" could not be created (maybe due to insufficient "
+"permission on parent folder %2$s or due to an invalid folder name)"
+msgstr ""
+"Pasta mape \"%1$s\" nevar tikt izveidota (iespējams dēļ nepietiekamām "
+"tiesībām uz virsmapi %2$s vai nederīga mapes vārda)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:110
+msgid ""
+"Mail folder \"%1$s\" could not be created (maybe due to insufficient "
+"permission on parent folder %2$s or due to an invalid folder name) on server "
+"%3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Nevar izveidot pasta mapi \"%1$s\" (iespējams dēļ nepietiekamām tiesībām uz "
+"virsmapi %2$s vai nederīga mapes vārda) serverī %3$s ar pieslēgumu %4$s "
+"(lietotājs=%5$s, konteksts=%6$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:112
+msgid ""
+"The composed rights could not be applied to new folder %1$s due to missing "
+"administer right in its initial rights specified by IMAP server. However, "
+"the folder has been created."
+msgstr ""
+"Apvienotās tiesības nevar tikt piešķirtas jaunajai mapei %1$s jo sākotnējās "
+"IMAP serverī norādītās tiesības nav administratora tiesības. Tomēr, mape ir "
+"izveidota."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:114
+msgid ""
+"The composed rights could not be applied to new folder %1$s due to missing "
+"administer right in its initial rights specified by IMAP server. However, "
+"the folder has been created on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)."
+msgstr ""
+"Apvienotās tiesības nevar tikt piešķirtas jaunajai mapei %1$s jo sākotnējās "
+"IMAP serverī norādītās tiesības nav administratora tiesības. Tomēr, mape "
+"serverī %2$s pieslēgumam %3$s (lietotājs=%4$s, konteksts=%5$s) ir izveidota."
+
+#. *
+#. * No admin permission specified for folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:125
+msgid "No administer permission specified for folder %1$s"
+msgstr "Mapei %1$s nav norādītas administrēšanas tiesības"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:118
+msgid ""
+"No administer permission specified for folder %1$s on server %2$s with login "
+"%3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Mapei %1$s nav norādītas administrēšanas tiesības serverī %2$s ar pieslēgumu "
+"%3$s (lietotājs=%4$s, konteksts=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:120
+msgid "Default folder %1$s must not be updated"
+msgstr "Noklusēto mapi %1$s nevar jaunināt"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:122
+msgid ""
+"Default folder %1$s must not be updated on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Noklusēto mapi %1$s nevar jaunināt serverī %2$s ar pieslēgumu %3$s "
+"(lietotājs=%4$s, konteksts=%5$s)"
+
+#. *
+#. * Deletion of folder %1$s failed
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:124
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:133
+msgid "Deletion of folder %1$s failed"
+msgstr "Kļūda pie mapes %1$s dzēšanas."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:126
+msgid ""
+"Deletion of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Kļūda pie mapes %1$s dzēšanas serverī %2$s ar pieslēgumu %3$s (lietotājs="
+"%4$s, konteksts=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:128
+msgid "IMAP default folder %1$s could not be created"
+msgstr "Nevar izveidot noklusēto IMAP mapi %1$s "
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:130
+msgid ""
+"IMAP default folder %1$s could not be created on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Nevar izveidot noklusēto IMAP mapi %1$s serverī %2$s ar pieslēgumu %3$s "
+"(lietotājs=%4$s, konteksts=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:132
+msgid "Missing default %1$s folder"
+msgstr "Iztrūkstoša noklusētā %1$s mape"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:134
+msgid ""
+"Missing default %1$s folder on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Iztrūkstoša noklusētā %1$s mape serverī %2$s ar pieslēgumu %3$s (lietotājs="
+"%4$s, konteksts=%5$s)"
+
+#. *
+#. * Update of folder %1$s failed
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:136
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:145
+msgid "Update of folder %1$s failed"
+msgstr "Kļūda pie mapes %1$s jaunināšanas"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:138
+msgid ""
+"Update of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Kļūda pie mapes %1$s jaunināšanas serverī %2$s ar pieslēgumu %3$s (lietotājs="
+"%4$s, konteksts=%5$s)"
+
+#. *
+#. * Folder %1$s must not be deleted
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:140
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:149
+msgid "Folder %1$s cannot be deleted"
+msgstr "Mape %1$s nevar tikt izdzēsta"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:142
+msgid ""
+"Folder %1$s cannot be deleted on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Mape %1$s nevar tikt izdzēsta serverī %2$s ar pieslēgumu %3$s (lietotājs="
+"%4$s, konteksts=%5$s)"
+
+#. *
+#. * Default folder %1$s must not be deleted
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:144
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:153
+msgid "Default folder %1$s cannot be deleted"
+msgstr "Noklusētā mape %1$s nevar tikt dzēsta"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:146
+msgid ""
+"Default folder %1$s cannot be deleted on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Noklusētā mape %1$s nevar tikt dzēsta serverī %2$s ar pieslēgumu %3$s "
+"(lietotājs=%4$s, konteksts=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:148
+msgid "Flag %1$s could not be changed due to following reason \"%2$s\""
+msgstr "Iezīme %1$s nevar tikt izmainīta sekojoša iemesla dēļ \"%2$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:150
+msgid ""
+"Flag %1$s could not be changed due to following reason \"%2$s\" on server "
+"%3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Iezīme %1$s nevar tikt izmainīta sekojoša iemesla dēļ \"%2$s\". Serveris "
+"%3$s, pieslēgums %4$s (lietotājs=%5$s, konteksts=%6$s)"
+
+#. *
+#. * Number of search fields (%d) do not match number of search patterns (%d)
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:152
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:161
+msgid ""
+"Number of search fields (%d) do not match number of search patterns (%d)"
+msgstr ""
+"Meklēšanas lauku skaits (%d) neatbilst meklēšanas struktūru skaitam (%d)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:154
+msgid ""
+"IMAP search failed due to reason \"%1$s\". Switching to application-based "
+"search"
+msgstr ""
+"Kļūda pie IMAP meklēšanas, iemesls \"%1$s\". Pārslēgšanās uz meklēšanu "
+"aplikācijas ietvaros."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:156
+msgid ""
+"IMAP search failed due to reason \"%1$s\" on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s). Switching to application-based search."
+msgstr ""
+"Kļūda pie IMAP meklēšanas, iemesls \"%1$s\", serveris %2$s, pieslēgums %3$s "
+"(lietotājs=%4$s, konteksts=%5$s). Pārslēgšanās uz meklēšanu aplikācijas "
+"ietvaros."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:158
+msgid ""
+"IMAP sort failed due to reason \"%1$s\". Switching to application-based "
+"sorting."
+msgstr ""
+"Kļūda pie IMAP kārtošanas, iemesls \"%1$s\". Pārslēgšanās uz kārtošanu "
+"aplikācijas ietvaros."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:160
+msgid ""
+"IMAP sort failed due to reason \"%1$s\" on server %2$s with login %3$s (user="
+"%4$s, context=%5$s). Switching to application-based sorting."
+msgstr ""
+"Kļūda pie IMAP kārtošanas, iemesls \"%1$s\", serveris %2$s, pieslēgums %3$s "
+"(lietotājs=%4$s, konteksts=%5$s). Pārslēgšanās uz kārtošanu aplikācijas "
+"ietvaros."
+
+#. *
+#. * Unknown search field: %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:173
+msgid "Unknown search field: %1$s"
+msgstr "Nezināms meklēšanas lauks: %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:164
+msgid ""
+"Unknown search field: %1$s on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Nezināms meklēšanas lauks: %1$s serverī %2$s ar pieslēgumu %3$s (lietotājs="
+"%4$s, konteksts=%5$s)"
+
+#. *
+#. * Mail folder %1$s must not be moved to subsequent folder %2$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:166
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:177
+msgid "Mail folder %1$s must not be moved to subsequent folder %2$s"
+msgstr "Pasta mapi %1$s nevar pārvietot uz mapi %2$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:168
+msgid ""
+"Mail folder %1$s must not be moved to subsequent folder %2$s on server %3$s "
+"with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Pasta mapi %1$s nevar pārvietot uz mapi %2$s serverī %3$s ar pieslēgumu %4$s "
+"(lietotājs=%5$s, konteksts=%6$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:170
+msgid ""
+"This message could not be moved to trash folder, possibly because your "
+"mailbox is nearly full.\n"
+"In that case, please try to empty your deleted items first, or delete "
+"smaller messages first."
+msgstr ""
+"Šis ziņojums nevar tikt pārvietots uz Atkritni. Iespējams, ka jūsu pasta "
+"kaste ir gandrīz pilna.\n"
+"Šadā gadījumā vispirms iztukšojiet izdzēstā pasta mapi, vai arī vispirms "
+"izdzēsiet mazākos ziņojumus."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:172
+msgid ""
+"This message could not be moved to trash folder on server %1$s with login "
+"%2$s (user=%3$s, context=%4$s), possibly because your mailbox is nearly "
+"full.\n"
+"In that case, please try to empty your deleted items first, or delete "
+"smaller messages first."
+msgstr ""
+"Šis ziņojums nevar tikt pārvietots uz Atkritnes mapi serverī %1$s ar "
+"pieslēgumu %2$s (lietotājs=%3$s, konteksts=%4$s). Iespējams, ka jūsu pasta "
+"kaste ir gandrīz pilna.\n"
+"Šadā gadījumā vispirms iztukšojiet izdzēstā pasta mapi, vai arī vispirms "
+"izdzēsiet mazākos ziņojumus."
+
+#. *
+#. * Missing %1$s folder in mail move operation
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:174
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:186
+msgid "Missing %1$s folder in mail move operation"
+msgstr "Iztrūkstoša %1$s mape pasta pārvietošanas operācijā"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:176
+msgid ""
+"Missing %1$s folder in mail move operation on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Iztrūkstoša %1$s mape pasta pārvietošanas operācijā serverī %2$s ar "
+"pieslēgumu %3$s (lietotājs=%4$s, konteksts=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:178
+msgid ""
+"Message move aborted for user %1$s. Source and destination folder are equal "
+"to \"%2$s\""
+msgstr ""
+"Ziņojumu pārvietošana lietotājam %1$s ir pārtraukta. Avota un saņēmēja mapes "
+"ir \"%2$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:180
+msgid ""
+"Message move aborted for user %1$s. Source and destination folder are equal "
+"to \"%2$s\" on server %3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Ziņojuma pārvietošana atcelta lietotājam %1$s. Avota un saņēmēja mapes ir "
+"\"%2$s\" serverī %3$s ar pieslēgumu %4$s (lietotājs=%5$s, konteksts=%6$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:182
+msgid "IMAP folder read-only check failed"
+msgstr "Kļūda pie IMAP mapes iestatīšans tikai lasīšanai"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:184
+msgid ""
+"Folder read-only check failed on server %1$s with login %2$s (user=%3$s, "
+"context=%4$s)"
+msgstr ""
+"Kļūda pie mapes iestatīšanas tikai lasīšanai serverī %1$s ar pieslēgumu %2$s "
+"(lietotājs=%3$s, konteksts=%4$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:186
+msgid "Unknown folder open mode %1$s"
+msgstr "Nezināms mapes atvēršanas režīms %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:188
+msgid ""
+"Unknown folder open mode %1$s on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Nezināms mapes atvēršanas režīms %1$s serverī %2$s ar pieslēgumu %3$s "
+"(lietotājs=%4$s, konteksts=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:190
+msgid ""
+"Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
+msgstr "Ziņojumi %1$s mapē %2$s nevar tikt izdzēsti, kļūda \"%3$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:192
+msgid ""
+"Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\" on "
+"server %4$s with login %5$s (user=%6$s, context=%7$s)"
+msgstr ""
+"Ziņojumi %1$s mapē %2$s nevar tikt izdzēsti, kļūda \"%3$s\" serverī %4$s ar "
+"pieslēgumu %5$s (lietotājs=%6$s, konteksts=%7$s)"
+
+#. *
+#. * Not allowed to open folder %1$s due to missing read access
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:194
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:206
+msgid "Not allowed to open folder %1$s due to missing read access"
+msgstr "Mapi %1$s nevar atvērt nepietiekamu lasīšanas tiesību dēļ"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:196
+msgid ""
+"Not allowed to open folder %1$s due to missing read access on server %2$s "
+"with login %3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Mapi %1$s nevar atvērt nepietiekamu lasīšanas tiesību dēļ serverī %2$s ar "
+"pieslēgumu %3$s (lietotājs=%4$s, konteksts=%5$s)"
+
+#. *
+#. * The raw content's input stream of message %1$s in folder %2$s cannot be read
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:198
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:210
+msgid ""
+"The raw content's input stream of message %1$s in folder %2$s cannot be read"
+msgstr "Nevar nolasīt satura ievada straumi ziņojumam %1$s mapē %2$s "
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:200
+msgid ""
+"The raw content's input stream of message %1$s in folder %2$s cannot be read "
+"on server %3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Nevar nolasīt satura ievada straumi ziņojumam %1$s mapē %2$s serverī %3$s ar "
+"pieslēgumu %4$s (lietotājs=%5$s, konteksts=%6$s)"
+
+#. *
+#. * No attachment was found with id %1$s in message
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:202
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:214
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:203
+msgid "No attachment was found with id %1$s in message"
+msgstr "Ziņojumā nav atrasts pievienojums ar id %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:204
+msgid ""
+"No attachment was found with id %1$s in message on server %2$s with login "
+"%3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Pievienojums ar id %1$s ziņojumā nav atrasts serverī %2$s ar pieslēgumu %3$s "
+"(lietotājs=%4$s, konteksts=%5$s)"
+
+#. *
+#. * Versit object %1$s could not be saved
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:206
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:218
+msgid "Versit object could not be saved"
+msgstr "Nevar saglabāt \"Versit\" objektu"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:208
+msgid "No support of capability \"THREAD=REFERENCES\""
+msgstr "Iespēja \"THREAD=REFERENCES\" netiek uzturēta"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:210
+msgid ""
+"No support of capability \"THREAD=REFERENCES\" on server %2$s with login "
+"%3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Iespēja \"THREAD=REFERENCES\" netiek uzturēta serverī %2$s ar pieslēgumu "
+"%3$s (lietotājs=%4$s, konteksts=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:212
+msgid ""
+"A protocol exception occurred during execution of IMAP request \"%1$s\".\n"
+"Error message: %2$s"
+msgstr ""
+"Protokola kļūda apstrādājot IMAP pieprasījumu \"%1$s\".\n"
+"Kļūdas paziņojums: %2$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:214
+msgid ""
+"Mailbox' root folder must not be source or the destination full name of a "
+"move operation."
+msgstr ""
+"Pasta saknes mapes vārds nevar būt pārvietošanas operācijas avota vai "
+"saņēmēja pilns vārds."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:216
+msgid "Sort field %1$s is not supported via IMAP SORT command"
+msgstr "Kārtošanas lauks %1$s netiek atbalstīts IMAP SORT komandā"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:218
+msgid ""
+"Sort field %1$s is not supported via IMAP SORT command on server %2$s with "
+"login %3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Kārtošanas lauks %1$s netiek uzturēts IMAP SORT komandā serverī %2$s ar "
+"pieslēgumu %3$s (lietotājs=%4$s, konteksts=%5$s)"
+
+#. *
+#. * Missing personal namespace
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:220
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:238
+msgid "Missing personal namespace"
+msgstr "Iztrūkstoša personīgā vārddotne"
+
+#. *
+#. * Parsing thread-sort string failed: %1$s.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:222
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:242
+msgid "Parsing thread-sort string failed: %1$s."
+msgstr "Kļūda pie teksta parsēšanas: %1$s."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:226
+msgid "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\"."
+msgstr "Kļūda \"%3$s\" pie mapes \"%1$s\" pārsaukšanas par \"%2$s\"."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:228
+msgid ""
+"Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\" on server %4$s "
+"with login %5$s (user=%6$s, context=%7$s)."
+msgstr ""
+"Kļūda \"%3$s\" pie mapes \"%1$s\" pārsaukšanas par\"%2$s\" serverī %4$s ar "
+"pieslēgumu %5$s (lietotājs= %6$s, konteksts=%7$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:230
+msgid "No rename access to mail folder %1$s"
+msgstr "Nav pārsaukšanas tiesību pasta mapei %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:232
+msgid ""
+"No rename access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nav pārsaukšanas tiesību pasta mapei %1$s serverī %2$s ar pieslēgumu %3$s "
+"(lietotājs=%4$s, konteksts=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:234
+msgid "Unable to parse IMAP server URI \"%1$s\"."
+msgstr "Nevar noparsēt IMAP servera URI \"%1$s\"."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:236
+msgid "Default folder %1$s must not be unsubscribed."
+msgstr "Noklusētās mapes %1$s abonementu nevar atcelt."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:238
+msgid ""
+"Default folder %1$s must not be unsubscribed on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Noklusētās mapes %1$s abonementu nevar atcelt serverī %2$s ar pieslēgumu "
+"%3$s (lietotājs=%4$s, konteksts=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:240
+msgid "IMAP server refuses to import one or more E-Mails."
+msgstr ""
+"Reģistrēts IMAP servera atteikums importēt vienu vai vairākus e-pastus."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:242
+msgid ""
+"IMAP server %1$s refuses to import one or more E-Mails with login %2$s (user="
+"%3$s, context=%4$s)"
+msgstr ""
+"IMAP servera %1$s attekums importēt vienu vai vairākus e-pastus pieslēgumam "
+"%2$s (lietotājs=%3$s, konteksts=%4$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:244
+msgid ""
+"Currently not possible to establish a new connection to server %1$s with "
+"login %2$s. Please try again."
+msgstr ""
+"Pašreiz nav iespējams izveidot jaunu pieslēgumu serverim %1$s lietotājam "
+"%2$s. Lūdzu mēģiniet vēlreiz."
+
 #. Implementing class could not be found
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:70
 msgid "Implementing class could not be found"
@@ -3969,7 +4651,7 @@ msgstr "Albūms"
 
 #. The internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:105
 msgid "Confirmed ham"
 msgstr "Apstiprināts \"ham\""
 
@@ -3979,7 +4661,7 @@ msgstr "Apstiprināta \"ham\" mape"
 
 #. The internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:97
 msgid "Confirmed spam"
 msgstr "Apstiprināta \"mēstule\""
 
@@ -3992,7 +4674,7 @@ msgstr "Apstiprināta \"spam\" mape"
 #. The name for the drafts folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:65
 msgid "Drafts"
 msgstr "Melnraksti"
@@ -4014,7 +4696,7 @@ msgstr "Nosūtīto mape"
 #. The name for the spam folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:89
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:166
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:71
 msgid "Spam"
 msgstr "Mēstules"
@@ -4028,7 +4710,7 @@ msgstr "Mēstuļu mape"
 #. The name for the trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:85
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:150
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:74
 msgid "Trash"
 msgstr "Atkritumi"
@@ -4499,85 +5181,11 @@ msgid "Unsupported action %1$s via %2$s request"
 msgstr "Neuzturēta darbība %1$s %2$s pieprasījumā"
 
 #. *
-#. * No connection available to access mailbox
-#.
-#. No connection available to access mailbox
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:466
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:100
-msgid "No connection available to access mailbox"
-msgstr "Nav pieejamu pieslēgumu piekļuvei pie pasta"
-
-#. *
-#. * User %1$s has no mail module access due to user configuration
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:76
-msgid "User %1$s has no mail module access due to user configuration"
-msgstr ""
-"Lietotājam %1$s nav piekļuves pie pasta moduļa saskaņā ar konfigurāciju"
-
-#. *
-#. * No access to mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:80
-msgid "No access to mail folder %1$s"
-msgstr "Nav piekļuves pasta mapei %1$s"
-
-#. *
-#. * No lookup access to mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:84
-msgid "No lookup access to mail folder %1$s"
-msgstr "Nav apskata tiesību pasta mapei %1$s"
-
-#. *
-#. * No read access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:88
-msgid "No read access to mail folder %1$s"
-msgstr "Nav lasīšanas tiesību pasta mapei %1$s"
-
-#. *
-#. * No delete access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:92
-msgid "No delete access to mail folder %1$s"
-msgstr "Nav dzēšanas tiesību pasta mapei %1$s"
-
-#. *
-#. * No insert access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:96
-msgid "No insert access to mail folder %1$s"
-msgstr "Nav pievienošanas tiesību pasta mapei %1$s"
-
-#. *
-#. * No administer access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:100
-msgid "No administer access to mail folder %1$s"
-msgstr "Nav administrēšanas tiesību uz pasta mapi %1$s"
-
-#. *
 #. * No write access to POP3 folder %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:104
 msgid "No write access to POP3 folder %1$s"
 msgstr "Nav rakstīšanas tiesību POP3 mapei %1$s"
-
-#. *
-#. * No keep-seen access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:108
-msgid "No keep-seen access to mail folder %1$s"
-msgstr "Nepietiekamas tiesības uz pasta mapi %1$s"
-
-#. *
-#. * Folder %1$s does not allow subfolders.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:112
-msgid "Folder %1$s does not allow subfolders."
-msgstr "Mape %1$s neatļauj apakšmapes."
 
 #. *
 #. * POP3 does not support mail folder creation
@@ -4601,25 +5209,11 @@ msgstr ""
 "administrēšanas tiesības. Tomēr, mape ir izveidota."
 
 #. *
-#. * No admin permission specified for folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:125
-msgid "No administer permission specified for folder %1$s"
-msgstr "Mapei %1$s nav norādītas administrēšanas tiesības"
-
-#. *
 #. * Default folder %1$s must not be updated
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:129
 msgid "Default folder %1$s cannot be updated"
 msgstr "Noklusētā mape %1$s nevar tikt jaunināta"
-
-#. *
-#. * Deletion of folder %1$s failed
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:133
-msgid "Deletion of folder %1$s failed"
-msgstr "Kļūda pie mapes %1$s dzēšanas."
 
 #. *
 #. * POP3 default folder %1$s could not be created
@@ -4637,41 +5231,11 @@ msgid "Missing default %1$s folder in user mail settings"
 msgstr "Iztrūkstoša noklusētā %1$s mape lietotāja e-pasta uzstādījumos"
 
 #. *
-#. * Update of folder %1$s failed
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:145
-msgid "Update of folder %1$s failed"
-msgstr "Kļūda pie mapes %1$s jaunināšanas"
-
-#. *
-#. * Folder %1$s must not be deleted
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:149
-msgid "Folder %1$s cannot be deleted"
-msgstr "Mape %1$s nevar tikt izdzēsta"
-
-#. *
-#. * Default folder %1$s must not be deleted
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:153
-msgid "Default folder %1$s cannot be deleted"
-msgstr "Noklusētā mape %1$s nevar tikt dzēsta"
-
-#. *
 #. * Flag %1$s could not be changed due to following reason: %2$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:157
 msgid "Flag %1$s could not be changed due to the following reason: %2$s"
 msgstr "Iezīme %1$s nevar tikt izmainīta sekojoša iemesla dēļ: %2$s"
-
-#. *
-#. * Number of search fields (%d) do not match number of search patterns (%d)
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:161
-msgid ""
-"Number of search fields (%d) do not match number of search patterns (%d)"
-msgstr ""
-"Meklēšanas lauku skaits (%d) neatbilst meklēšanas struktūru skaitam (%d)"
 
 #. *
 #. * POP3 search failed due to following reason: %1$s. Switching to application-based search
@@ -4696,20 +5260,6 @@ msgstr ""
 "aplikācijas ietvaros."
 
 #. *
-#. * Unknown search field: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:173
-msgid "Unknown search field: %1$s"
-msgstr "Nezināms meklēšanas lauks: %1$s"
-
-#. *
-#. * Mail folder %1$s must not be moved to subsequent folder %2$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:177
-msgid "Mail folder %1$s must not be moved to subsequent folder %2$s"
-msgstr "Pasta mapi %1$s nevar pārvietot uz mapi %2$s"
-
-#. *
 #. * This message could not be moved to trash folder, possibly because your mailbox is nearly full.<br>
 #. * In that case, please try to empty your deleted items first, or delete smaller messages first.
 #.
@@ -4728,13 +5278,6 @@ msgid ""
 msgstr ""
 "Šāda gadījumā lūdzu vispirms iztīriet izdēsto vēstuļu vienumus vai dzēšiet "
 "mazāka izmēra vēstules."
-
-#. *
-#. * Missing %1$s folder in mail move operation
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:186
-msgid "Missing %1$s folder in mail move operation"
-msgstr "Iztrūkstoša %1$s mape pasta pārvietošanas operācijā"
 
 #. *
 #. * Message move aborted for user %1$s. Source and destination folder are equal: %2$s
@@ -4771,36 +5314,6 @@ msgid ""
 msgstr "Ziņojumi %1$s mapē %2$s nevar tikt izdzēsti sekojošas kļūdas dēļ: %3$s"
 
 #. *
-#. * Not allowed to open folder %1$s due to missing read access
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:206
-msgid "Not allowed to open folder %1$s due to missing read access"
-msgstr "Mapi %1$s nevar atvērt nepietiekamu lasīšanas tiesību dēļ"
-
-#. *
-#. * The raw content's input stream of message %1$s in folder %2$s cannot be read
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:210
-msgid ""
-"The raw content's input stream of message %1$s in folder %2$s cannot be read"
-msgstr "Nevar nolasīt satura ievada straumi ziņojumam %1$s mapē %2$s "
-
-#. *
-#. * No attachment was found with id %1$s in message
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:214
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:203
-msgid "No attachment was found with id %1$s in message"
-msgstr "Ziņojumā nav atrasts pievienojums ar id %1$s"
-
-#. *
-#. * Versit object %1$s could not be saved
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:218
-msgid "Versit object could not be saved"
-msgstr "Nevar saglabāt \"Versit\" objektu"
-
-#. *
 #. * POP3 server does not support capability "THREAD=REFERENCES"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:222
@@ -4827,20 +5340,6 @@ msgstr "POP3 neatbalsta mapju pārvietošanu."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:234
 msgid "Sort field %1$s is not supported via POP3 SORT command"
 msgstr "Kārtošanas lauks %1$s netiek atbalstīts POP3 SORT komandā"
-
-#. *
-#. * Missing personal namespace
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:238
-msgid "Missing personal namespace"
-msgstr "Iztrūkstoša personīgā vārddotne"
-
-#. *
-#. * Parsing thread-sort string failed: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:242
-msgid "Parsing thread-sort string failed: %1$s."
-msgstr "Kļūda pie teksta parsēšanas: %1$s."
 
 #. *
 #. * POP3 does not support to create folders.
@@ -7073,7 +7572,7 @@ msgstr "Iesūtne"
 #. The internationalized name for the sent mail folder
 #. The name for trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
 msgid "Sent objects"
 msgstr "Nosūtītie objekti"
 
@@ -7084,18 +7583,25 @@ msgstr "Nosūtītie objekti"
 msgid "Sent items"
 msgstr "Nosūtītās vienības"
 
+#. The internationalized name for the archive mail folder
+#. The name for trash folder
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:170
+msgid "Archive"
+msgstr "Arhīvs"
+
 #. The alternative internationalized name for the confirmed-spam mail folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:101
 msgid "confirmed-spam"
 msgstr "Apstiprinātās mēstules"
 
 #. The alternative internationalized name for the confirmed-spam mail folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:105
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:109
 msgid "confirmed-ham"
 msgstr "Apstiprinātās mēstules"
 
 #. The internationalized subject for a read acknowledgement
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:114
 msgid "Read acknowledgement"
 msgstr "Lasīšanas apstiprinājums"
 
@@ -7103,7 +7609,7 @@ msgstr "Lasīšanas apstiprinājums"
 #. #DATE# is replaced with the sent date of referenced email
 #. #RECIPIENT# is replaced with personal and/or email address of recipient(s)
 #. #SUBJECT# is replaced with referenced email's subject
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:120
 msgid ""
 "This is a delivery receipt for the mail that you sent on #DATE# to "
 "#RECIPIENT# with subject \"#SUBJECT#\".\n"
@@ -7123,7 +7629,7 @@ msgstr ""
 #. #DATE# is replaced with the sent date of referenced email
 #. #TIME# is replaced with time of referenced email
 #. #SENDER# is replaced with personal and/or email address of the sender
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:122
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:126
 msgid "On #DATE# at #TIME# #SENDER# wrote:"
 msgstr "#DATE# plkst. #TIME# #SENDER# rakstīja:"
 
@@ -7135,7 +7641,7 @@ msgstr "#DATE# plkst. #TIME# #SENDER# rakstīja:"
 #. #DATE# is replaced with the sent date of referenced email
 #. #TIME# is replaced with time of referenced email
 #. #SUBJECT# is replaced with referenced email's subject
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:132
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:136
 msgid ""
 "---------- Original Message ----------\n"
 "From: #FROM#\n"
@@ -7149,13 +7655,13 @@ msgstr ""
 "Temats: #SUBJECT#"
 
 #. The internationalized default subject.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:135
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:139
 msgid "[No Subject]"
 msgstr "[Nav temata]"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Hints to the available attachments for affected message
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:139
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:143
 msgid ""
 "The available attachments for this E-Mail can be accessed via the links:"
 msgstr ""
@@ -7163,13 +7669,13 @@ msgstr ""
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the elapsed date for affected message's attachments
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:143
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:147
 msgid "The links will be deleted on #DATE#"
 msgstr "Saites pie #DATE# tiks dzēstas"
 
 #. The greeting used for form mails. E.g.
 #. "Dear Sir or Madam Jane Doe"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:147
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:151
 msgid "Dear Sir or Madam"
 msgstr "Cienījamie Kungi un Dāmas"
 
@@ -15207,13 +15713,6 @@ msgstr "Zulu"
 #~ msgid "%s"
 #~ msgstr "%s"
 
-#~ msgid ""
-#~ "A protocol exception occurred during execution of IMAP request \"%1$s\".\n"
-#~ "Error message: %2$s"
-#~ msgstr ""
-#~ "Protokola kļūda apstrādājot IMAP pieprasījumu \"%1$s\".\n"
-#~ "Kļūdas paziņojums: %2$s"
-
 #~ msgid "A server name cannot be found in the server URL \"%1$s\"."
 #~ msgstr "Servera vārds servera URL saitē \"%1$s\" nav atrasts."
 
@@ -15258,47 +15757,6 @@ msgstr "Zulu"
 #~ msgid "Couldn't reach the filestore"
 #~ msgstr "Nevar piekļūt failu glabātuvei"
 
-#~ msgid ""
-#~ "Currently not possible to establish a new connection to server %1$s with "
-#~ "login %2$s. Please try again."
-#~ msgstr ""
-#~ "Pašreiz nav iespējams izveidot jaunu pieslēgumu serverim %1$s lietotājam "
-#~ "%2$s. Lūdzu mēģiniet vēlreiz."
-
-#~ msgid ""
-#~ "Default folder %1$s cannot be deleted on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Noklusētā mape %1$s nevar tikt dzēsta serverī %2$s ar pieslēgumu %3$s "
-#~ "(lietotājs=%4$s, konteksts=%5$s)"
-
-#~ msgid ""
-#~ "Default folder %1$s must not be unsubscribed on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Noklusētās mapes %1$s abonementu nevar atcelt serverī %2$s ar pieslēgumu "
-#~ "%3$s (lietotājs=%4$s, konteksts=%5$s)"
-
-#~ msgid "Default folder %1$s must not be unsubscribed."
-#~ msgstr "Noklusētās mapes %1$s abonementu nevar atcelt."
-
-#~ msgid "Default folder %1$s must not be updated"
-#~ msgstr "Noklusēto mapi %1$s nevar jaunināt"
-
-#~ msgid ""
-#~ "Default folder %1$s must not be updated on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Noklusēto mapi %1$s nevar jaunināt serverī %2$s ar pieslēgumu %3$s "
-#~ "(lietotājs=%4$s, konteksts=%5$s)"
-
-#~ msgid ""
-#~ "Deletion of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Kļūda pie mapes %1$s dzēšanas serverī %2$s ar pieslēgumu %3$s (lietotājs="
-#~ "%4$s, konteksts=%5$s)"
-
 #~ msgid "Empty SEND_BODY_CHUNK package MUST NOT be sent"
 #~ msgstr "Tukša SEND_BODY_CHUNK pakotne NEVAR tikt nosūtīta"
 
@@ -15315,86 +15773,8 @@ msgstr "Zulu"
 #~ msgid "File is not a directory: %s"
 #~ msgstr "Fails nav direktorija: %s"
 
-#~ msgid "Flag %1$s could not be changed due to following reason \"%2$s\""
-#~ msgstr "Iezīme %1$s nevar tikt izmainīta sekojoša iemesla dēļ \"%2$s\""
-
-#~ msgid ""
-#~ "Flag %1$s could not be changed due to following reason \"%2$s\" on server "
-#~ "%3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Iezīme %1$s nevar tikt izmainīta sekojoša iemesla dēļ \"%2$s\". Serveris "
-#~ "%3$s, pieslēgums %4$s (lietotājs=%5$s, konteksts=%6$s)"
-
-#~ msgid ""
-#~ "Folder %1$s does not allow subfolders on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)."
-#~ msgstr ""
-#~ "Mape %1$s neatļauj apakšmapes serverī %2$s ar pieslēgumu %3$s (lietotājs="
-#~ "%4$s, konteksts=%5$s)."
-
 #~ msgid "Folder of the object is missing."
 #~ msgstr "Objektam nav norādīta mape."
-
-#~ msgid ""
-#~ "Folder read-only check failed on server %1$s with login %2$s (user=%3$s, "
-#~ "context=%4$s)"
-#~ msgstr ""
-#~ "Kļūda pie mapes iestatīšanas tikai lasīšanai serverī %1$s ar pieslēgumu "
-#~ "%2$s (lietotājs=%3$s, konteksts=%4$s)"
-
-#~ msgid "IMAP default folder %1$s could not be created"
-#~ msgstr "Nevar izveidot noklusēto IMAP mapi %1$s "
-
-#~ msgid ""
-#~ "IMAP default folder %1$s could not be created on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nevar izveidot noklusēto IMAP mapi %1$s serverī %2$s ar pieslēgumu %3$s "
-#~ "(lietotājs=%4$s, konteksts=%5$s)"
-
-#~ msgid "IMAP folder read-only check failed"
-#~ msgstr "Kļūda pie IMAP mapes iestatīšans tikai lasīšanai"
-
-#~ msgid ""
-#~ "IMAP search failed due to reason \"%1$s\" on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s). Switching to application-based search."
-#~ msgstr ""
-#~ "Kļūda pie IMAP meklēšanas, iemesls \"%1$s\", serveris %2$s, pieslēgums "
-#~ "%3$s (lietotājs=%4$s, konteksts=%5$s). Pārslēgšanās uz meklēšanu "
-#~ "aplikācijas ietvaros."
-
-#~ msgid ""
-#~ "IMAP search failed due to reason \"%1$s\". Switching to application-based "
-#~ "search"
-#~ msgstr ""
-#~ "Kļūda pie IMAP meklēšanas, iemesls \"%1$s\". Pārslēgšanās uz meklēšanu "
-#~ "aplikācijas ietvaros."
-
-#~ msgid ""
-#~ "IMAP server %1$s refuses to import one or more E-Mails with login %2$s "
-#~ "(user=%3$s, context=%4$s)"
-#~ msgstr ""
-#~ "IMAP servera %1$s attekums importēt vienu vai vairākus e-pastus "
-#~ "pieslēgumam %2$s (lietotājs=%3$s, konteksts=%4$s)"
-
-#~ msgid "IMAP server refuses to import one or more E-Mails."
-#~ msgstr ""
-#~ "Reģistrēts IMAP servera atteikums importēt vienu vai vairākus e-pastus."
-
-#~ msgid ""
-#~ "IMAP sort failed due to reason \"%1$s\" on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s). Switching to application-based sorting."
-#~ msgstr ""
-#~ "Kļūda pie IMAP kārtošanas, iemesls \"%1$s\", serveris %2$s, pieslēgums "
-#~ "%3$s (lietotājs=%4$s, konteksts=%5$s). Pārslēgšanās uz kārtošanu "
-#~ "aplikācijas ietvaros."
-
-#~ msgid ""
-#~ "IMAP sort failed due to reason \"%1$s\". Switching to application-based "
-#~ "sorting."
-#~ msgstr ""
-#~ "Kļūda pie IMAP kārtošanas, iemesls \"%1$s\". Pārslēgšanās uz kārtošanu "
-#~ "aplikācijas ietvaros."
 
 #~ msgid "Identifier of the object is missing."
 #~ msgstr "Iztrūkstošs objekta identifikators."
@@ -15417,38 +15797,8 @@ msgstr "Zulu"
 #~ msgid "Lexical error: %1$s"
 #~ msgstr "Leksikas kļūda: %1$s"
 
-#~ msgid ""
-#~ "Mail folder \"%1$s\" could not be created (maybe due to insufficient "
-#~ "permission on parent folder %2$s or due to an invalid folder name)"
-#~ msgstr ""
-#~ "Pasta mape \"%1$s\" nevar tikt izveidota (iespējams dēļ nepietiekamām "
-#~ "tiesībām uz virsmapi %2$s vai nederīga mapes vārda)"
-
-#~ msgid ""
-#~ "Mail folder \"%1$s\" could not be created (maybe due to insufficient "
-#~ "permission on parent folder %2$s or due to an invalid folder name) on "
-#~ "server %3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Nevar izveidot pasta mapi \"%1$s\" (iespējams dēļ nepietiekamām tiesībām "
-#~ "uz virsmapi %2$s vai nederīga mapes vārda) serverī %3$s ar pieslēgumu "
-#~ "%4$s (lietotājs=%5$s, konteksts=%6$s)"
-
-#~ msgid ""
-#~ "Mail folder %1$s must not be moved to subsequent folder %2$s on server "
-#~ "%3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Pasta mapi %1$s nevar pārvietot uz mapi %2$s serverī %3$s ar pieslēgumu "
-#~ "%4$s (lietotājs=%5$s, konteksts=%6$s)"
-
 #~ msgid "Mail(s)  could not be found in folder "
 #~ msgstr "Mapē nav atrastas e-pasta vēstules"
-
-#~ msgid ""
-#~ "Mailbox' root folder must not be source or the destination full name of a "
-#~ "move operation."
-#~ msgstr ""
-#~ "Pasta saknes mapes vārds nevar būt pārvietošanas operācijas avota vai "
-#~ "saņēmēja pilns vārds."
 
 #~ msgid "Mapping file \"%s\" not valid"
 #~ msgstr "Atbilstību fails \"%s\" nav derīgs"
@@ -15466,48 +15816,6 @@ msgstr "Zulu"
 #~ msgstr ""
 #~ "Ziņojums ir veiksmīgi nosūtīts, bet tā kopija nevar tikt saglabāta "
 #~ "nosūtīto ziņu mapē sakarā ar pārsniegtu kvotu."
-
-#~ msgid ""
-#~ "Message move aborted for user %1$s. Source and destination folder are "
-#~ "equal to \"%2$s\""
-#~ msgstr ""
-#~ "Ziņojumu pārvietošana lietotājam %1$s ir pārtraukta. Avota un saņēmēja "
-#~ "mapes ir \"%2$s\""
-
-#~ msgid ""
-#~ "Message move aborted for user %1$s. Source and destination folder are "
-#~ "equal to \"%2$s\" on server %3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Ziņojuma pārvietošana atcelta lietotājam %1$s. Avota un saņēmēja mapes ir "
-#~ "\"%2$s\" serverī %3$s ar pieslēgumu %4$s (lietotājs=%5$s, konteksts=%6$s)"
-
-#~ msgid ""
-#~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
-#~ msgstr "Ziņojumi %1$s mapē %2$s nevar tikt izdzēsti, kļūda \"%3$s\""
-
-#~ msgid ""
-#~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\" "
-#~ "on server %4$s with login %5$s (user=%6$s, context=%7$s)"
-#~ msgstr ""
-#~ "Ziņojumi %1$s mapē %2$s nevar tikt izdzēsti, kļūda \"%3$s\" serverī %4$s "
-#~ "ar pieslēgumu %5$s (lietotājs=%6$s, konteksts=%7$s)"
-
-#~ msgid ""
-#~ "Missing %1$s folder in mail move operation on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Iztrūkstoša %1$s mape pasta pārvietošanas operācijā serverī %2$s ar "
-#~ "pieslēgumu %3$s (lietotājs=%4$s, konteksts=%5$s)"
-
-#~ msgid "Missing default %1$s folder"
-#~ msgstr "Iztrūkstoša noklusētā %1$s mape"
-
-#~ msgid ""
-#~ "Missing default %1$s folder on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Iztrūkstoša noklusētā %1$s mape serverī %2$s ar pieslēgumu %3$s "
-#~ "(lietotājs=%4$s, konteksts=%5$s)"
 
 #~ msgid "Missing or wrong Interval value: %d"
 #~ msgstr "Iztrūkstoša vai nepareiza intervāla vērtība: %d"
@@ -15542,43 +15850,8 @@ msgstr "Zulu"
 #~ "Nav konfigurēts neviens UDP kanāls. Kļūdainā kanāla meklēšana tiks veikta "
 #~ "pie servera startēšanas."
 
-#~ msgid ""
-#~ "No access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Nav piekļuves pasta mapei %1$s serverī %2$s ar pieslēgumu %3$s (lietotājs="
-#~ "%4$s, konteksts=%5$s)"
-
-#~ msgid ""
-#~ "No administer access to mail folder %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nav administrēšanas tiesību uz pasta mapi %1$s serverī %2$s ar pieslēgumu "
-#~ "%3$s (lietotājs=%4$s, konteksts=%5$s)"
-
-#~ msgid ""
-#~ "No administer permission specified for folder %1$s on server %2$s with "
-#~ "login %3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Mapei %1$s nav norādītas administrēšanas tiesības serverī %2$s ar "
-#~ "pieslēgumu %3$s (lietotājs=%4$s, konteksts=%5$s)"
-
-#~ msgid ""
-#~ "No attachment was found with id %1$s in message on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Pievienojums ar id %1$s ziņojumā nav atrasts serverī %2$s ar pieslēgumu "
-#~ "%3$s (lietotājs=%4$s, konteksts=%5$s)"
-
 #~ msgid "No attribute name could be found for code: %1$d"
 #~ msgstr "Atribūta vārds nav atrasts kodam: %1$d"
-
-#~ msgid ""
-#~ "No connection available to access mailbox on server %1$s with login %2$s "
-#~ "(user=%3$s, context=%4$s)"
-#~ msgstr ""
-#~ "Nevar pieslēgties pasta kastei serverī %1$s ar pieslēgumu %2$s (lietotājs="
-#~ "%3$s, konteksts=%4$s)"
 
 #~ msgid ""
 #~ "No data provided from web server: input stream returned \"-1\" while "
@@ -15593,53 +15866,8 @@ msgstr "Zulu"
 #~ msgstr ""
 #~ "Serversīklietotnes klasei \"%s\" nav norādīts noklusētais konstruktors"
 
-#~ msgid ""
-#~ "No delete access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nav dzēšanas tiesību pasta mapei %1$s serverī %2$s ar pieslēgumu %3$s "
-#~ "(lietotājs=%4$s, konteksts=%5$s)"
-
-#~ msgid ""
-#~ "No insert access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nav pievienošanas tiesību pasta mapei %1$s serverī %2$s ar pieslēgumu "
-#~ "%3$s (lietotājs=%4$s, konteksts=%5$s)"
-
-#~ msgid ""
-#~ "No keep-seen access to mail folder %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nepietiekamas tiesības uz pasta mapi %1$s serverī %2$s ar pieslēgumu %3$s "
-#~ "(lietotājs=%4$s, konteksts=%5$s)"
-
-#~ msgid ""
-#~ "No lookup access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nav apskata tiesību pasta mapei %1$s serverī %2$s ar pieslēgumu %3$s "
-#~ "(lietotājs=%4$s, konteksts=%5$s)"
-
 #~ msgid "No parent recurring appointment found for series exception: %s"
 #~ msgstr "Sērijai nav atrasta atbilstoša regulārā tikšanās, kļūda: %s"
-
-#~ msgid ""
-#~ "No read access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nav lasīšanas tiesību pasta mapei %1$s serverī %2$s ar pieslēgumu %3$s "
-#~ "(lietotājs=%4$s, konteksts=%5$s)"
-
-#~ msgid "No rename access to mail folder %1$s"
-#~ msgstr "Nav pārsaukšanas tiesību pasta mapei %1$s"
-
-#~ msgid ""
-#~ "No rename access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nav pārsaukšanas tiesību pasta mapei %1$s serverī %2$s ar pieslēgumu %3$s "
-#~ "(lietotājs=%4$s, konteksts=%5$s)"
 
 #~ msgid ""
 #~ "No servlet class name found for key \"%s\". Please check servlet mappings."
@@ -15647,48 +15875,11 @@ msgstr "Zulu"
 #~ "Atslēgai \"%s\" nav atrasta serversīklietotnes klase. Lūdzu pārbaudiet "
 #~ "serversīklietotņu atbilstības."
 
-#~ msgid "No support of capability \"THREAD=REFERENCES\""
-#~ msgstr "Iespēja \"THREAD=REFERENCES\" netiek uzturēta"
-
-#~ msgid ""
-#~ "No support of capability \"THREAD=REFERENCES\" on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Iespēja \"THREAD=REFERENCES\" netiek uzturēta serverī %2$s ar pieslēgumu "
-#~ "%3$s (lietotājs=%4$s, konteksts=%5$s)"
-
-#~ msgid "No write access to IMAP folder %1$s"
-#~ msgstr "Nav rakstīšanas tiesību IMAP mapei %1$s"
-
-#~ msgid ""
-#~ "No write access to IMAP folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nav rakstīšanas tiesību IMAP mapei %1$s serverī %2$s ar pieslēgumu %3$s "
-#~ "(lietotājs=%4$s, konteksts=%5$s)"
-
-#~ msgid ""
-#~ "Not allowed to open folder %1$s due to missing read access on server %2$s "
-#~ "with login %3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Mapi %1$s nevar atvērt nepietiekamu lasīšanas tiesību dēļ serverī %2$s ar "
-#~ "pieslēgumu %3$s (lietotājs=%4$s, konteksts=%5$s)"
-
 #~ msgid "Problem with a thread."
 #~ msgstr "Problēma ar \"thread\"."
 
 #~ msgid "Property error: %s"
 #~ msgstr "Īpašības kļūda: %s"
-
-#~ msgid ""
-#~ "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\" on server %4$s "
-#~ "with login %5$s (user=%6$s, context=%7$s)."
-#~ msgstr ""
-#~ "Kļūda \"%3$s\" pie mapes \"%1$s\" pārsaukšanas par\"%2$s\" serverī %4$s "
-#~ "ar pieslēgumu %5$s (lietotājs= %6$s, konteksts=%7$s)."
-
-#~ msgid "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\"."
-#~ msgstr "Kļūda \"%3$s\" pie mapes \"%1$s\" pārsaukšanas par \"%2$s\"."
 
 #~ msgid "Response package exceeds max package size value of 8192k: %1$s"
 #~ msgstr "Atbildes pakotnes izmērs pārsniedz pieļauto maksimumu 8192k: %1$s"
@@ -15710,38 +15901,8 @@ msgstr "Zulu"
 #~ "Web-servera sokits ir aizvērts. Gaidīšana uz pakotnes #%1$d ieejas datiem "
 #~ "aizņēma %2$dmsec."
 
-#~ msgid "Sort field %1$s is not supported via IMAP SORT command"
-#~ msgstr "Kārtošanas lauks %1$s netiek atbalstīts IMAP SORT komandā"
-
-#~ msgid ""
-#~ "Sort field %1$s is not supported via IMAP SORT command on server %2$s "
-#~ "with login %3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Kārtošanas lauks %1$s netiek uzturēts IMAP SORT komandā serverī %2$s ar "
-#~ "pieslēgumu %3$s (lietotājs=%4$s, konteksts=%5$s)"
-
 #~ msgid "String parse exception: No ending 0x00 found"
 #~ msgstr "Kļūda pie teksta parsēšanas: nav atrasts beigu 0x00 "
-
-#~ msgid ""
-#~ "The composed rights could not be applied to new folder %1$s due to "
-#~ "missing administer right in its initial rights specified by IMAP server. "
-#~ "However, the folder has been created on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)."
-#~ msgstr ""
-#~ "Apvienotās tiesības nevar tikt piešķirtas jaunajai mapei %1$s jo "
-#~ "sākotnējās IMAP serverī norādītās tiesības nav administratora tiesības. "
-#~ "Tomēr, mape serverī %2$s pieslēgumam %3$s (lietotājs=%4$s, konteksts="
-#~ "%5$s) ir izveidota."
-
-#~ msgid ""
-#~ "The composed rights could not be applied to new folder %1$s due to "
-#~ "missing administer right in its initial rights specified by IMAP server. "
-#~ "However, the folder has been created."
-#~ msgstr ""
-#~ "Apvienotās tiesības nevar tikt piešķirtas jaunajai mapei %1$s jo "
-#~ "sākotnējās IMAP serverī norādītās tiesības nav administratora tiesības. "
-#~ "Tomēr, mape ir izveidota."
 
 #~ msgid ""
 #~ "The configuration requests a master password but none is given in the "
@@ -15781,16 +15942,6 @@ msgstr "Zulu"
 #~ msgstr "Nosacījuma pievienošanas pozīcija ir pārāk liela"
 
 #~ msgid ""
-#~ "The raw content's input stream of message %1$s in folder %2$s cannot be "
-#~ "read on server %3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Nevar nolasīt satura ievada straumi ziņojumam %1$s mapē %2$s serverī %3$s "
-#~ "ar pieslēgumu %4$s (lietotājs=%5$s, konteksts=%6$s)"
-
-#~ msgid "Unable to parse IMAP server URI \"%1$s\"."
-#~ msgstr "Nevar noparsēt IMAP servera URI \"%1$s\"."
-
-#~ msgid ""
 #~ "Unexpected empty body package received from web server. Total-Received: "
 #~ "%1$d | Content-Length: %2$d.\n"
 #~ "Corresponding AJP forward package:\n"
@@ -15804,32 +15955,8 @@ msgstr "Zulu"
 #~ msgid "Unknown Request Prefix Code: %1$s"
 #~ msgstr "Nezināms pieprsījuma prefiksa kods: %1$s"
 
-#~ msgid "Unknown folder open mode %1$s"
-#~ msgstr "Nezināms mapes atvēršanas režīms %1$s"
-
-#~ msgid ""
-#~ "Unknown folder open mode %1$s on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Nezināms mapes atvēršanas režīms %1$s serverī %2$s ar pieslēgumu %3$s "
-#~ "(lietotājs=%4$s, konteksts=%5$s)"
-
-#~ msgid ""
-#~ "Unknown search field: %1$s on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Nezināms meklēšanas lauks: %1$s serverī %2$s ar pieslēgumu %3$s "
-#~ "(lietotājs=%4$s, konteksts=%5$s)"
-
 #~ msgid "Unparseable header field %1$s in forward request package"
 #~ msgstr "Neatparsējams hedera lauks %1$s nosūtīšanas pieprasījuma pakotnē"
-
-#~ msgid ""
-#~ "Update of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Kļūda pie mapes %1$s jaunināšanas serverī %2$s ar pieslēgumu %3$s "
-#~ "(lietotājs=%4$s, konteksts=%5$s)"
 
 #~ msgid "mail filter servlet cannot be registered: %s"
 #~ msgstr "Nevar piereģistrēt pasta filtra servletu: %s"

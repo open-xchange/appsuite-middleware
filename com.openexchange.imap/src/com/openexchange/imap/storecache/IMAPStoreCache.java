@@ -135,9 +135,7 @@ public final class IMAPStoreCache {
     private final class ContainerCloseElapsedRunnable implements Runnable {
 
         private final IMAPStoreContainer container;
-
         private final long stamp;
-
         private final boolean debug;
 
         protected ContainerCloseElapsedRunnable(final IMAPStoreContainer container, final long stamp, final boolean debug) {

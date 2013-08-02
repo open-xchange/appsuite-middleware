@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.parser;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.TimeZone;
@@ -156,16 +157,20 @@ public abstract class DataParser {
         return jsonObj.getBoolean(name);
     }
 
-    public static Float parseFloat(final JSONObject jsonObj, final String name) throws JSONException, OXException {
+    public static BigDecimal parseBigDecimal(JSONObject jsonObj, String name) throws JSONException, OXException {
         if (!jsonObj.has(name)) {
             return null;
+        }
+        Object obj = jsonObj.get(name);
+        if (obj instanceof BigDecimal) {
+            return (BigDecimal) obj;
         }
         final String tmp = jsonObj.getString(name);
         if (isEmpty(tmp)|| jsonObj.isNull(name) || "null".equalsIgnoreCase(tmp)) {
             return null;
         }
         try {
-            return Float.valueOf(tmp);
+            return new BigDecimal(tmp);
         } catch (final NumberFormatException exc) {
             throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
@@ -392,7 +397,7 @@ public abstract class DataParser {
         return s;
     }
 
-    public static UUID parseUUID(final JSONObject jsonObj, final String name) throws OXException, OXException {
+    public static UUID parseUUID(final JSONObject jsonObj, final String name) throws OXException {
         final String tmp = parseString(jsonObj, name);
         if (tmp == null) {
             return null;

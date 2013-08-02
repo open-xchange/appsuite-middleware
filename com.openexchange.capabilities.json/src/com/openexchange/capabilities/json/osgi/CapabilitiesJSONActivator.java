@@ -51,14 +51,9 @@ package com.openexchange.capabilities.json.osgi;
 
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.Capability;
-import com.openexchange.capabilities.CapabilityFilter;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.json.Capability2JSON;
-import com.openexchange.capabilities.json.CapabilityActionFactory;
-import com.openexchange.groupware.userconfiguration.AvailabilityChecker;
-import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.groupware.userconfiguration.TrackerAvailabilityChecker;
+import com.openexchange.groupware.userconfiguration.osgi.PermissionRelevantServiceAddedTracker;
 import com.openexchange.passwordchange.PasswordChangeService;
 
 /**
@@ -68,38 +63,28 @@ import com.openexchange.passwordchange.PasswordChangeService;
  */
 public class CapabilitiesJSONActivator extends AJAXModuleActivator {
 
-    private volatile AvailabilityChecker editPasswordChecker;
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { CapabilityService.class };
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void startBundle() throws Exception {
-        final AvailabilityChecker editPasswordChecker = TrackerAvailabilityChecker.getAvailabilityCheckerFor(PasswordChangeService.class, false, context);
-        this.editPasswordChecker = editPasswordChecker;
-        final String editPasswordName = Permission.EDIT_PASSWORD.name().toLowerCase();
-        final CapabilityFilter capabilityFilter = new CapabilityFilter() {
+        // Add tracker to identify if a PasswordChangeService was registered. If so, add to PermissionAvailabilityService
+        PermissionRelevantServiceAddedTracker<PasswordChangeService> serviceAddedTracker = new PermissionRelevantServiceAddedTracker<PasswordChangeService>(
+            context,
+            PasswordChangeService.class,
+            null);
+        rememberTracker(serviceAddedTracker);
 
-            @Override
-            public boolean accept(final Capability capability) {
-                return (!editPasswordName.equals(capability.getId()) || editPasswordChecker.isAvailable());
-            }
-        };
+        openTrackers();
 
         registerService(ResultConverter.class, new Capability2JSON());
-        registerModule(new CapabilityActionFactory(this, capabilityFilter), "capabilities");
     }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        final AvailabilityChecker editPasswordChecker = this.editPasswordChecker;
-        if (null != editPasswordChecker) {
-            editPasswordChecker.close();
-            this.editPasswordChecker = null;
-        }
-        super.stopBundle();
-    }
-
 }

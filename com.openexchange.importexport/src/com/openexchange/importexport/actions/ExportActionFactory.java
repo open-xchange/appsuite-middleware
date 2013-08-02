@@ -56,8 +56,13 @@ import com.openexchange.importexport.actions.exporter.CsvExportAction;
 import com.openexchange.importexport.actions.exporter.ICalExportAction;
 import com.openexchange.importexport.actions.exporter.VCardExportAction;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.server.ServiceLookup;
 
 public class ExportActionFactory  extends AbstractIEActionFactory{
+
+    public ExportActionFactory(ServiceLookup services) {
+        super(services);
+    }
 
     @Override
     protected Map<Format, AJAXActionService> getActions(){

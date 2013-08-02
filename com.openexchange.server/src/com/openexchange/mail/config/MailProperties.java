@@ -401,12 +401,12 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            final String tmp = configuration.getProperty("com.openexchange.mail.mailAccessCacheIdleSeconds", "7").trim();
+            final String tmp = configuration.getProperty("com.openexchange.mail.mailAccessCacheIdleSeconds", "4").trim();
             try {
                 mailAccessCacheIdleSeconds = Integer.parseInt(tmp);
                 logBuilder.append("\tMail Access Cache idle seconds: ").append(mailAccessCacheIdleSeconds).append('\n');
             } catch (final NumberFormatException e) {
-                mailAccessCacheIdleSeconds = 7;
+                mailAccessCacheIdleSeconds = 4;
                 logBuilder.append("\tMail Access Cache idle seconds: Non parseable value \"").append(tmp).append(fallbackPrefix).append(
                     mailAccessCacheIdleSeconds).append('\n');
             }

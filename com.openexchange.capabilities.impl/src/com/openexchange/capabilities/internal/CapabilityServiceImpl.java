@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,20 +47,45 @@
  *
  */
 
-package com.openexchange.capabilities;
+package com.openexchange.capabilities.internal;
+
+import java.util.List;
+import java.util.Map;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.osgi.CapabilityCheckerRegistry;
+import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
+import com.openexchange.osgi.NearRegistryServiceTracker;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link CapabilityFilter} - A filter for capabilities.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * Implementation of the {@link AbstractCapabilityService}
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  */
-public interface CapabilityFilter {
+public final class CapabilityServiceImpl extends AbstractCapabilityService {
 
     /**
-     * Tests whether or not the specified capability should be included in a capability list.
-     *
-     * @param capability The capability to be tested
-     * @return <code>true</code> if and only if <code>capability</code> should be included
+     * Provides the {@link CapabilityChecker}
      */
-    boolean accept(Capability capability);
+    private final CapabilityCheckerRegistry capCheckers;
+
+    /**
+     * Initializes a new {@link CapabilityServiceImpl}.
+     * 
+     * @param services - {@link ServiceLookup} to search for services
+     * @param capCheckers - {@link CapabilityCheckerRegistry} to provide the {@link CapabilityChecker}
+     * @param tracker - {@link NearRegistryServiceTracker} with the {@link PermissionAvailabilityService} to check if JSON bundles are available
+     */
+    public CapabilityServiceImpl(ServiceLookup services, CapabilityCheckerRegistry capCheckers, NearRegistryServiceTracker<PermissionAvailabilityService> tracker) {
+        super(services, tracker);
+        this.capCheckers = capCheckers;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Map<String, List<CapabilityChecker>> getCheckers() {
+        return capCheckers.getCheckers();
+    }
 }

@@ -59,7 +59,8 @@ import com.openexchange.osgi.CompositeBundleActivator;
  */
 public class Activator extends CompositeBundleActivator {
 
-    private static final BundleActivator[] ACTIVATORS = {new SubscribeActivator(), new PreferencesActivator(), new I18nActivator()};
+    private static final BundleActivator[] ACTIVATORS = {
+        new SubscribeActivator(), new PreferencesActivator(), new I18nActivator(), new ServiceActivator() };
 
     public Activator() {
         super();

@@ -277,7 +277,7 @@ public class IMAPProtocol extends Protocol {
      * Check the greeting when first connecting; look for PREAUTH response.
      */
     @Override
-    protected void processGreeting(final Response r) throws ProtocolException {
+    protected synchronized void processGreeting(final Response r) throws ProtocolException {
 	super.processGreeting(r);	// check if it's BAD
 	if (r.isOK()) {			// check if it's OK
 	    setCapabilities(r);
@@ -387,13 +387,16 @@ public class IMAPProtocol extends Protocol {
      * public.
      */
     @Override
-    public void disconnect() {
-	super.disconnect();
-	if (!logoutSignaled) {
-	    try { authenticatedStatusChanging(false, null, null); } catch(Exception x) {/*ignore*/}
-	    logoutSignaled = true;
-	}
-	authenticated = false;	// just in case
+    public synchronized void disconnect() {
+	try {
+        super.disconnect();
+    } finally {
+        if (!logoutSignaled) {
+            try { authenticatedStatusChanging(false, null, null); } catch(Exception x) {/*ignore*/}
+            logoutSignaled = true;
+        }
+        authenticated = false;	// just in case
+    }
     }
 
     /**
@@ -424,7 +427,7 @@ public class IMAPProtocol extends Protocol {
      *
      * @see "RFC2060, section 6.1.3"
      */
-    public void logout() throws ProtocolException {
+    public synchronized void logout() throws ProtocolException {
     boolean notified = false;
 	try {
 	    authenticatedStatusChanging(false, null, null);
@@ -447,34 +450,37 @@ public class IMAPProtocol extends Protocol {
      * 
      * @see "RFC2060, section 6.2.2"
      */
-    public void login(final String u, final String p) throws ProtocolException {
-    authenticatedStatusChanging(true, u, p);
-	final Argument args = new Argument();
-	args.writeString(u);
-	args.writeString(p);
-
-	Response[] r = null;
-	try {
-	    if (noauthdebug && isTracing()) {
-		logger.fine("LOGIN command trace suppressed");
-		suspendTracing();
-	    }
-	    r = command("LOGIN", args);
-	} finally {
-	    resumeTracing();
-	}
-
-	// dispatch untagged responses
-	notifyResponseHandlers(r);
-
-	// Handle result of this command
-	if (noauthdebug && isTracing())
-	    logger.fine("LOGIN command result: " + r[r.length-1]);
-	handleResult(r[r.length-1]);
-	// If the response includes a CAPABILITY response code, process it
-	setCapabilities(r[r.length-1]);
-	// if we get this far without an exception, we're authenticated
-	authenticated = true;
+    public synchronized void login(final String u, final String p) throws ProtocolException {
+    try {
+        authenticatedStatusChanging(true, u, p);
+        final Argument args = new Argument();
+        args.writeString(u);
+        args.writeString(p);
+        Response[] r = null;
+        try {
+            if (noauthdebug && isTracing()) {
+                logger.fine("LOGIN command trace suppressed");
+                suspendTracing();
+            }
+            r = command("LOGIN", args);
+        } finally {
+            resumeTracing();
+        }
+        // dispatch untagged responses
+        notifyResponseHandlers(r);
+        // Handle result of this command
+        if (noauthdebug && isTracing())
+            logger.fine("LOGIN command result: " + r[r.length - 1]);
+        handleResult(r[r.length - 1]);
+        // If the response includes a CAPABILITY response code, process it
+        setCapabilities(r[r.length - 1]);
+        // if we get this far without an exception, we're authenticated
+        authenticated = true;
+    } finally {
+        if (!authenticated) {
+            authenticatedStatusChanging(false, u, p);
+        }
+    }
     }
 
     /**
@@ -485,104 +491,110 @@ public class IMAPProtocol extends Protocol {
     public synchronized void authlogin(final String u, final String p)
 				throws ProtocolException {
     authenticatedStatusChanging(true, u, p);
-    final List<Response> v = new ArrayList<Response>();
-	String tag = null;
-	Response r = null;
-	boolean done = false;
+    try {
+        final List<Response> v = new ArrayList<Response>();
+        String tag = null;
+        Response r = null;
+        boolean done = false;
 
-	try {
+        try {
 
-	if (noauthdebug && isTracing()) {
-	    logger.fine("AUTHENTICATE LOGIN command trace suppressed");
-	    suspendTracing();
-	}
-
-	try {
-	    tag = writeCommand("AUTHENTICATE LOGIN", null);
-	} catch (final Exception ex) {
-	    // Convert this into a BYE response
-	    r = Response.byeResponse(ex);
-	    done = true;
-	}
-
-	final OutputStream os = getOutputStream(); // stream to IMAP server
-
-	/* Wrap a BASE64Encoder around a ByteArrayOutputstream
-	 * to craft b64 encoded username and password strings
-	 *
-	 * Note that the encoded bytes should be sent "as-is" to the
-	 * server, *not* as literals or quoted-strings.
-	 *
-	 * Also note that unlike the B64 definition in MIME, CRLFs 
-	 * should *not* be inserted during the encoding process. So, I
-	 * use Integer.MAX_VALUE (0x7fffffff (> 1G)) as the bytesPerLine,
-	 * which should be sufficiently large !
-	 *
-	 * Finally, format the line in a buffer so it can be sent as
-	 * a single packet, to avoid triggering a bug in SUN's SIMS 2.0
-	 * server caused by patch 105346.
-	 */
-
-	final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-	final OutputStream b64os = new BASE64EncoderStream(bos, Integer.MAX_VALUE);
-	boolean first = true;
-
-	while (!done) { // loop till we are done
-	    try {
-		r = readResponse();
-	    	if (r.isContinuation()) {
-		    // Server challenge ..
-		    String s;
-		    if (first) { // Send encoded username
-			s = u;
-			first = false;
-		    } else 	// Send encoded password
-			s = p;
-		    
-		    // obtain b64 encoded bytes
-		    b64os.write(ASCIIUtility.getBytes(s));
-		    b64os.flush(); 	// complete the encoding
-
-		    bos.write(CRLF); 	// CRLF termination
-		    os.write(bos.toByteArray()); // write out line
-		    os.flush(); 	// flush the stream
-		    bos.reset(); 	// reset buffer
-		} else if (r.isTagged() && r.getTag().equals(tag)) {
-            // Ah, our tagged response
-		    done = true;
-        } else if (r.isBYE()) {
-            done = true;
-        } else {
-            v.add(r);
+        if (noauthdebug && isTracing()) {
+            logger.fine("AUTHENTICATE LOGIN command trace suppressed");
+            suspendTracing();
         }
-	    } catch (final Exception ioex) {
-		// convert this into a BYE response
-		r = Response.byeResponse(ioex);
-		done = true;
-	    }
-	}
 
-	} finally {
-	    resumeTracing();
-	}
+        try {
+            tag = writeCommand("AUTHENTICATE LOGIN", null);
+        } catch (final Exception ex) {
+            // Convert this into a BYE response
+            r = Response.byeResponse(ex);
+            done = true;
+        }
 
-	/* Dispatch untagged responses.
-	 * NOTE: in our current upper level IMAP classes, we add the
-	 * responseHandler to the Protocol object only *after* the 
-	 * connection has been authenticated. So, for now, the below
-	 * code really ends up being just a no-op.
-	 */
-	final Response[] responses = v.toArray(new Response[v.size()]);
-	notifyResponseHandlers(responses);
+        final OutputStream os = getOutputStream(); // stream to IMAP server
 
-	// Handle the final OK, NO, BAD or BYE response
-	if (noauthdebug && isTracing())
-	    logger.fine("AUTHENTICATE LOGIN command result: " + r);
-	handleResult(r);
-	// If the response includes a CAPABILITY response code, process it
-	setCapabilities(r);
-	// if we get this far without an exception, we're authenticated
-	authenticated = true;
+        /* Wrap a BASE64Encoder around a ByteArrayOutputstream
+         * to craft b64 encoded username and password strings
+         *
+         * Note that the encoded bytes should be sent "as-is" to the
+         * server, *not* as literals or quoted-strings.
+         *
+         * Also note that unlike the B64 definition in MIME, CRLFs 
+         * should *not* be inserted during the encoding process. So, I
+         * use Integer.MAX_VALUE (0x7fffffff (> 1G)) as the bytesPerLine,
+         * which should be sufficiently large !
+         *
+         * Finally, format the line in a buffer so it can be sent as
+         * a single packet, to avoid triggering a bug in SUN's SIMS 2.0
+         * server caused by patch 105346.
+         */
+
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        final OutputStream b64os = new BASE64EncoderStream(bos, Integer.MAX_VALUE);
+        boolean first = true;
+
+        while (!done) { // loop till we are done
+            try {
+        	r = readResponse();
+            	if (r.isContinuation()) {
+        	    // Server challenge ..
+        	    String s;
+        	    if (first) { // Send encoded username
+        		s = u;
+        		first = false;
+        	    } else 	// Send encoded password
+        		s = p;
+        	    
+        	    // obtain b64 encoded bytes
+        	    b64os.write(ASCIIUtility.getBytes(s));
+        	    b64os.flush(); 	// complete the encoding
+
+        	    bos.write(CRLF); 	// CRLF termination
+        	    os.write(bos.toByteArray()); // write out line
+        	    os.flush(); 	// flush the stream
+        	    bos.reset(); 	// reset buffer
+        	} else if (r.isTagged() && r.getTag().equals(tag)) {
+                // Ah, our tagged response
+        	    done = true;
+            } else if (r.isBYE()) {
+                done = true;
+            } else {
+                v.add(r);
+            }
+            } catch (final Exception ioex) {
+        	// convert this into a BYE response
+        	r = Response.byeResponse(ioex);
+        	done = true;
+            }
+        }
+
+        } finally {
+            resumeTracing();
+        }
+
+        /* Dispatch untagged responses.
+         * NOTE: in our current upper level IMAP classes, we add the
+         * responseHandler to the Protocol object only *after* the 
+         * connection has been authenticated. So, for now, the below
+         * code really ends up being just a no-op.
+         */
+        final Response[] responses = v.toArray(new Response[v.size()]);
+        notifyResponseHandlers(responses);
+
+        // Handle the final OK, NO, BAD or BYE response
+        if (noauthdebug && isTracing())
+            logger.fine("AUTHENTICATE LOGIN command result: " + r);
+        handleResult(r);
+        // If the response includes a CAPABILITY response code, process it
+        setCapabilities(r);
+        // if we get this far without an exception, we're authenticated
+        authenticated = true;
+    } finally {
+        if (!authenticated) {
+            authenticatedStatusChanging(false, u, p);
+        }
+    }
     }
 
 
@@ -600,101 +612,103 @@ public class IMAPProtocol extends Protocol {
      */
     public synchronized void authplain(final String authzid, final String u, final String p)
 				throws ProtocolException {
-    authenticatedStatusChanging(true, u, p);
-    final List<Response> v = new ArrayList<Response>();
-	String tag = null;
-	Response r = null;
-	boolean done = false;
+    try {
+        authenticatedStatusChanging(true, u, p);
+        final List<Response> v = new ArrayList<Response>();
+        String tag = null;
+        Response r = null;
+        boolean done = false;
+        try {
 
-	try {
+            if (noauthdebug && isTracing()) {
+                logger.fine("AUTHENTICATE PLAIN command trace suppressed");
+                suspendTracing();
+            }
 
-	if (noauthdebug && isTracing()) {
-	    logger.fine("AUTHENTICATE PLAIN command trace suppressed");
-	    suspendTracing();
-	}
+            try {
+                tag = writeCommand("AUTHENTICATE PLAIN", null);
+            } catch (final Exception ex) {
+                // Convert this into a BYE response
+                r = Response.byeResponse(ex);
+                done = true;
+            }
 
-	try {
-	    tag = writeCommand("AUTHENTICATE PLAIN", null);
-	} catch (final Exception ex) {
-	    // Convert this into a BYE response
-	    r = Response.byeResponse(ex);
-	    done = true;
-	}
+            final OutputStream os = getOutputStream(); // stream to IMAP server
 
-	final OutputStream os = getOutputStream(); // stream to IMAP server
+            /* Wrap a BASE64Encoder around a ByteArrayOutputstream
+             * to craft b64 encoded username and password strings
+             *
+             * Note that the encoded bytes should be sent "as-is" to the
+             * server, *not* as literals or quoted-strings.
+             *
+             * Also note that unlike the B64 definition in MIME, CRLFs
+             * should *not* be inserted during the encoding process. So, I
+             * use Integer.MAX_VALUE (0x7fffffff (> 1G)) as the bytesPerLine,
+             * which should be sufficiently large !
+             *
+             * Finally, format the line in a buffer so it can be sent as
+             * a single packet, to avoid triggering a bug in SUN's SIMS 2.0
+             * server caused by patch 105346.
+             */
 
-	/* Wrap a BASE64Encoder around a ByteArrayOutputstream
-	 * to craft b64 encoded username and password strings
-	 *
-	 * Note that the encoded bytes should be sent "as-is" to the
-	 * server, *not* as literals or quoted-strings.
-	 *
-	 * Also note that unlike the B64 definition in MIME, CRLFs
-	 * should *not* be inserted during the encoding process. So, I
-	 * use Integer.MAX_VALUE (0x7fffffff (> 1G)) as the bytesPerLine,
-	 * which should be sufficiently large !
-	 *
-	 * Finally, format the line in a buffer so it can be sent as
-	 * a single packet, to avoid triggering a bug in SUN's SIMS 2.0
-	 * server caused by patch 105346.
-	 */
+            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            final OutputStream b64os = new BASE64EncoderStream(bos, Integer.MAX_VALUE);
 
-	final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-	final OutputStream b64os = new BASE64EncoderStream(bos, Integer.MAX_VALUE);
+            while (!done) { // loop till we are done
+                try {
+                    r = readResponse();
+                    if (r.isContinuation()) {
+                        // Server challenge ..
+                        final String nullByte = "\0";
+                        final String s = (authzid == null ? "" : authzid) + nullByte + u + nullByte + p;
 
-	while (!done) { // loop till we are done
-	    try {
-		r = readResponse();
-		if (r.isContinuation()) {
-		    // Server challenge ..
-		    final String nullByte = "\0";
-		    final String s = (authzid == null ? "" : authzid) +
-				    nullByte + u + nullByte + p;
+                        // obtain b64 encoded bytes
+                        b64os.write(ASCIIUtility.getBytes(s));
+                        b64os.flush(); // complete the encoding
 
-		    // obtain b64 encoded bytes
-		    b64os.write(ASCIIUtility.getBytes(s));
-		    b64os.flush(); 	// complete the encoding
+                        bos.write(CRLF); // CRLF termination
+                        os.write(bos.toByteArray()); // write out line
+                        os.flush(); // flush the stream
+                        bos.reset(); // reset buffer
+                    } else if (r.isTagged() && r.getTag().equals(tag)) {
+                        // Ah, our tagged response
+                        done = true;
+                    } else if (r.isBYE()) {
+                        done = true;
+                    } else {
+                        v.add(r);
+                    }
+                } catch (final Exception ioex) {
+                    // convert this into a BYE response
+                    r = Response.byeResponse(ioex);
+                    done = true;
+                }
+            }
 
-		    bos.write(CRLF); 	// CRLF termination
-		    os.write(bos.toByteArray()); // write out line
-		    os.flush(); 	// flush the stream
-		    bos.reset(); 	// reset buffer
-		} else if (r.isTagged() && r.getTag().equals(tag)) {
-            // Ah, our tagged response
-		    done = true;
-        } else if (r.isBYE()) {
-            done = true;
-        } else {
-            v.add(r);
+        } finally {
+            resumeTracing();
         }
-	    } catch (final Exception ioex) {
-		// convert this into a BYE response
-		r = Response.byeResponse(ioex);
-		done = true;
-	    }
-	}
-
-	} finally {
-	    resumeTracing();
-	}
-
-	/* Dispatch untagged responses.
-	 * NOTE: in our current upper level IMAP classes, we add the
-	 * responseHandler to the Protocol object only *after* the
-	 * connection has been authenticated. So, for now, the below
-	 * code really ends up being just a no-op.
-	 */
-	final Response[] responses = v.toArray(new Response[v.size()]);
-	notifyResponseHandlers(responses);
-
-	// Handle the final OK, NO, BAD or BYE response
-	if (noauthdebug && isTracing())
-	    logger.fine("AUTHENTICATE PLAIN command result: " + r);
-	handleResult(r);
-	// If the response includes a CAPABILITY response code, process it
-	setCapabilities(r);
-	// if we get this far without an exception, we're authenticated
-	authenticated = true;
+        /* Dispatch untagged responses.
+         * NOTE: in our current upper level IMAP classes, we add the
+         * responseHandler to the Protocol object only *after* the
+         * connection has been authenticated. So, for now, the below
+         * code really ends up being just a no-op.
+         */
+        final Response[] responses = v.toArray(new Response[v.size()]);
+        notifyResponseHandlers(responses);
+        // Handle the final OK, NO, BAD or BYE response
+        if (noauthdebug && isTracing())
+            logger.fine("AUTHENTICATE PLAIN command result: " + r);
+        handleResult(r);
+        // If the response includes a CAPABILITY response code, process it
+        setCapabilities(r);
+        // if we get this far without an exception, we're authenticated
+        authenticated = true;
+    } finally {
+        if (!authenticated) {
+            authenticatedStatusChanging(false, u, p);
+        }
+    }
     }
 
     /**
@@ -712,89 +726,89 @@ public class IMAPProtocol extends Protocol {
     public synchronized void authntlm(final String authzid, final String u, final String p)
 				throws ProtocolException {
     authenticatedStatusChanging(true, u, p);
-    final List<Response> v = new ArrayList<Response>();
-	String tag = null;
-	Response r = null;
-	boolean done = false;
+    try {
+        final List<Response> v = new ArrayList<Response>();
+        String tag = null;
+        Response r = null;
+        boolean done = false;
+        final String type1Msg = null;
+        final int flags = PropUtil.getIntProperty(props, "mail." + name + ".auth.ntlm.flags", 0);
+        final String domain = props.getProperty("mail." + name + ".auth.ntlm.domain", "");
+        Ntlm ntlm = new Ntlm(domain, getLocalHost(), u, p, logger);
+        try {
 
-	final String type1Msg = null;
-	final int flags = PropUtil.getIntProperty(props,
-	    "mail." + name + ".auth.ntlm.flags", 0);
-	final String domain = props.getProperty(
-	    "mail." + name + ".auth.ntlm.domain", "");
-	Ntlm ntlm = new Ntlm(domain, getLocalHost(), u, p, logger);
+            if (noauthdebug && isTracing()) {
+                logger.fine("AUTHENTICATE NTLM command trace suppressed");
+                suspendTracing();
+            }
 
-	try {
+            try {
+                tag = writeCommand("AUTHENTICATE NTLM", null);
+            } catch (final Exception ex) {
+                // Convert this into a BYE response
+                r = Response.byeResponse(ex);
+                done = true;
+            }
 
-	if (noauthdebug && isTracing()) {
-	    logger.fine("AUTHENTICATE NTLM command trace suppressed");
-	    suspendTracing();
-	}
+            final OutputStream os = getOutputStream(); // stream to IMAP server
+            boolean first = true;
 
-	try {
-	    tag = writeCommand("AUTHENTICATE NTLM", null);
-	} catch (final Exception ex) {
-	    // Convert this into a BYE response
-	    r = Response.byeResponse(ex);
-	    done = true;
-	}
+            while (!done) { // loop till we are done
+                try {
+                    r = readResponse();
+                    if (r.isContinuation()) {
+                        // Server challenge ..
+                        String s;
+                        if (first) {
+                            s = ntlm.generateType1Msg(flags);
+                            first = false;
+                        } else {
+                            s = ntlm.generateType3Msg(r.getRest());
+                        }
 
-	final OutputStream os = getOutputStream(); // stream to IMAP server
-	boolean first = true;
+                        os.write(ASCIIUtility.getBytes(s));
+                        os.write(CRLF); // CRLF termination
+                        os.flush(); // flush the stream
+                    } else if (r.isTagged() && r.getTag().equals(tag)) {
+                        // Ah, our tagged response
+                        done = true;
+                    } else if (r.isBYE()) {
+                        done = true;
+                    } else {
+                        v.add(r);
+                    }
+                } catch (final Exception ioex) {
+                    // convert this into a BYE response
+                    r = Response.byeResponse(ioex);
+                    done = true;
+                }
+            }
 
-	while (!done) { // loop till we are done
-	    try {
-		r = readResponse();
-	    	if (r.isContinuation()) {
-		    // Server challenge ..
-		    String s;
-		    if (first) {
-			s = ntlm.generateType1Msg(flags);
-			first = false;
-		    } else {
-			s = ntlm.generateType3Msg(r.getRest());
-		    }
- 
-		    os.write(ASCIIUtility.getBytes(s));
-		    os.write(CRLF); 	// CRLF termination
-		    os.flush(); 	// flush the stream
-		} else if (r.isTagged() && r.getTag().equals(tag)) {
-            // Ah, our tagged response
-		    done = true;
-        } else if (r.isBYE()) {
-            done = true;
-        } else {
-            v.add(r);
+        } finally {
+            resumeTracing();
         }
-	    } catch (final Exception ioex) {
-		// convert this into a BYE response
-		r = Response.byeResponse(ioex);
-		done = true;
-	    }
-	}
-
-	} finally {
-	    resumeTracing();
-	}
-
-	/*
-	 * Dispatch untagged responses.
-	 * NOTE: in our current upper level IMAP classes, we add the
-	 * responseHandler to the Protocol object only *after* the
-	 * connection has been authenticated. So, for now, the below
-	 * code really ends up being just a no-op.
-	 */
-	final Response[] responses = v.toArray(new Response[v.size()]);
-	notifyResponseHandlers(responses);
-
-	// Handle the final OK, NO, BAD or BYE response
-	if (noauthdebug && isTracing())
-	    logger.fine("AUTHENTICATE NTLM command result: " + r);
-	handleResult(r);
-	// If the response includes a CAPABILITY response code, process it
-	setCapabilities(r);
-	// if we get this far without an exception, we're authenticated
-	authenticated = true;
+        /*
+         * Dispatch untagged responses.
+         * NOTE: in our current upper level IMAP classes, we add the
+         * responseHandler to the Protocol object only *after* the
+         * connection has been authenticated. So, for now, the below
+         * code really ends up being just a no-op.
+         */
+        final Response[] responses = v.toArray(new Response[v.size()]);
+        notifyResponseHandlers(responses);
+        // Handle the final OK, NO, BAD or BYE response
+        if (noauthdebug && isTracing())
+            logger.fine("AUTHENTICATE NTLM command result: " + r);
+        handleResult(r);
+        // If the response includes a CAPABILITY response code, process it
+        setCapabilities(r);
+        // if we get this far without an exception, we're authenticated
+        authenticated = true;
+    } finally {
+        if (!authenticated) {
+            authenticatedStatusChanging(false, u, p);
+        }
+    }
     }
 
     /**

@@ -51,10 +51,15 @@ package com.openexchange.importexport.actions.importer;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.importers.Importer;
 import com.openexchange.importexport.importers.VCardImporter;
+import com.openexchange.server.ServiceLookup;
 
 public class VCardImportAction extends AbstractImportAction {
 
-	private VCardImporter importer;
+    public VCardImportAction(ServiceLookup services) {
+        super(services);
+    }
+
+    private VCardImporter importer;
 
 	@Override
 	public Format getFormat() {
@@ -64,7 +69,7 @@ public class VCardImportAction extends AbstractImportAction {
 	@Override
 	public Importer getImporter() {
 		if(this.importer == null) {
-            this.importer = new VCardImporter();
+            this.importer = new VCardImporter(services);
         }
 		return importer;
 	}

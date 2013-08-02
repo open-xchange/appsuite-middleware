@@ -95,6 +95,7 @@ import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.log.LogFactory;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
@@ -117,7 +118,12 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  *         Prinz</a> (changes to new interface, bugfixes, maintenance)
  */
 public class ICalImporter extends AbstractImporter {
-	private static final int APP = 0;
+
+    public ICalImporter(ServiceLookup services) {
+        super(services);
+    }
+
+    private static final int APP = 0;
 	private static final int TASK = 1;
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ICalImporter.class));

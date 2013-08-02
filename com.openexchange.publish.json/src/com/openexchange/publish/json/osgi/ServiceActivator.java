@@ -47,26 +47,33 @@
  *
  */
 
-package com.openexchange.security;
+package com.openexchange.publish.json.osgi;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link BundleAccessExceptionMessage}
- *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * Activator for the services
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
  */
-public class BundleAccessExceptionMessage implements LocalizableStrings {
+public class ServiceActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link BundleAccessExceptionMessage}.
+     * {@inheritDoc}
      */
-    private BundleAccessExceptionMessage() {
-        super();
+    @Override
+    protected void startBundle() throws Exception {
+        context.registerService(PermissionAvailabilityService.class, new PermissionAvailabilityService(Permission.PUBLICATION), null);
     }
 
-    // Access to bundle %1$s is not permitted
-    public final static String ACCESS_DENIED = "Access to bundle %1$s is not permitted";
-
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    }
 }

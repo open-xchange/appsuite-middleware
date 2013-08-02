@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.task;
 
+import static com.openexchange.java.Autoboxing.L;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.TimeZone;
 import junit.framework.AssertionFailedError;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -69,6 +72,7 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class TaskDurationAndCostsTest extends AbstractAJAXSession {
 
+    @SuppressWarnings("hiding")
     private AJAXClient client;
 
     private Task task;
@@ -90,10 +94,10 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
         task = new Task();
         task.setParentFolderID(client.getValues().getPrivateTaskFolder());
         task.setTitle("Set task duration and costs test");
-        task.setActualDuration(2L);
-        task.setActualCosts(2.0f);
-        task.setTargetDuration(10L);
-        task.setTargetCosts(10.0f);
+        task.setActualDuration(L(2));
+        task.setActualCosts(new BigDecimal("2.0"));
+        task.setTargetDuration(L(10));
+        task.setTargetCosts(new BigDecimal("10.0"));
         InsertRequest request = new InsertRequest(task, tz);
         InsertResponse response = client.execute(request);
         response.fillTask(task);
@@ -106,10 +110,10 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
     }
 
     public void testDurationAndCosts() throws Exception {
-        task.setTargetCosts(11.5f);
-        task.setActualCosts(4.728f);
-        task.setActualDuration(7L);
-        task.setTargetDuration(15L);
+        task.setTargetCosts(new BigDecimal("11.5"));
+        task.setActualCosts(new BigDecimal("4.728"));
+        task.setActualDuration(L(7));
+        task.setTargetDuration(L(15));
         UpdateRequest req = new UpdateRequest(task, tz, false);
         try {
             UpdateResponse response = client.execute(req);
@@ -121,10 +125,11 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
         GetResponse response = client.execute(request);
         task.setLastModified(response.getTimestamp());
         Task test = response.getTask(tz);
-        assertEquals("Actual costs not equal", test.getActualCosts(), task.getActualCosts(), 0.01f);
-        assertEquals("Target costs not equal", test.getTargetCosts(), task.getTargetCosts(), 0.01f);
-        assertEquals("Actual duration not equal", test.getActualDuration(), task.getActualDuration());
-        assertEquals("Target duration not equal", test.getTargetDuration(), task.getTargetDuration());
+        // We have in the database NUMERIC(12,2). So round to 3 valid digits in this case. Rounding is necessary because JSON internally
+        // parses a float value to java.lang.Double causing rounding issues.
+        assertEquals("Actual costs not equal", task.getActualCosts().round(new MathContext(3)), test.getActualCosts().round(new MathContext(3)));
+        assertEquals("Target costs not equal", task.getTargetCosts(), test.getTargetCosts());
+        assertEquals("Actual duration not equal", task.getActualDuration(), test.getActualDuration());
+        assertEquals("Target duration not equal", task.getTargetDuration(), test.getTargetDuration());
     }
-
 }

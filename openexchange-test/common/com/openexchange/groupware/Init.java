@@ -334,7 +334,7 @@ public final class Init {
 
         new GroupInit() };
 
-	private static boolean databaseUpdateinitialized = false;
+    private static boolean databaseUpdateinitialized = false;
 
     public static void injectProperty() {
         final String propDir1 = TestInit.getTestProperty("openexchange.propdir");
@@ -420,14 +420,14 @@ public final class Init {
             public <S> S getOptionalService(final Class<? extends S> clazz) {
                 return null;
             }
-        }) {
+        }, null) {
 
             @Override
             protected Map<String, List<CapabilityChecker>> getCheckers() {
                 return Collections.emptyMap();
             }
         };
-        
+
         services.put(CapabilityService.class, c);
         TestServiceRegistry.getInstance().addService(CapabilityService.class, c);
     }
@@ -521,7 +521,7 @@ public final class Init {
 
     private static final OXException getWrappingOXException(final Exception cause) {
         final String message = cause.getMessage();
-        final Component c = new Component() {
+        new Component() {
             private static final long serialVersionUID = 2411378382745647554L;
             @Override
             public String getAbbreviation() {
@@ -529,9 +529,9 @@ public final class Init {
             }
         };
         return new OXException(
-        		9999,
-        		null == message ? "[Not available]" : message,
-        		cause);
+            9999,
+            null == message ? "[Not available]" : message,
+                cause);
     }
 
     private static void startAndInjectCalendarServices() {
@@ -554,19 +554,19 @@ public final class Init {
                      * Compose cache configuration
                      */
                     final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
-                            "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
-                            "jcs.region."+regionName+".cacheattributes.MaxObjects="+maxObjects+"\n" +
-                            "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
-                            "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
-                            "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds="+idleTimeSeconds+"\n" +
-                            "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds="+shrinkerIntervalSeconds+"\n" +
-                            "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
-                            "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
-                            "jcs.region."+regionName+".elementattributes.MaxLifeSeconds="+maxLifeSeconds+"\n" +
-                            "jcs.region."+regionName+".elementattributes.IdleTime="+idleTimeSeconds+"\n" +
-                            "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
-                            "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
-                            "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+                        "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                        "jcs.region."+regionName+".cacheattributes.MaxObjects="+maxObjects+"\n" +
+                        "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                        "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                        "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds="+idleTimeSeconds+"\n" +
+                        "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds="+shrinkerIntervalSeconds+"\n" +
+                        "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                        "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                        "jcs.region."+regionName+".elementattributes.MaxLifeSeconds="+maxLifeSeconds+"\n" +
+                        "jcs.region."+regionName+".elementattributes.IdleTime="+idleTimeSeconds+"\n" +
+                        "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                        "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                        "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
                     final CacheService cacheService = TestServiceRegistry.getInstance().getService(CacheService.class);
                     cacheService.loadConfiguration(new ByteArrayInputStream(ccf));
                     CalendarVolatileCache.initInstance(cacheService.getCache(regionName));
@@ -663,8 +663,8 @@ public final class Init {
         final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
         final String directory_name = config.getProperty("i18n.language.path");
         if (directory_name == null) {
-        	LOG.error("Tried to load i18n files and did not find a property");
-        	return;
+            LOG.error("Tried to load i18n files and did not find a property");
+            return;
         }
         final File dir = new File(directory_name);
         final I18nServices i18nServices = I18nServices.getInstance();
@@ -721,12 +721,12 @@ public final class Init {
     }
 
     public static void startAndInjectDatabaseUpdate() throws OXException {
-    	if(databaseUpdateinitialized ) {
+        if(databaseUpdateinitialized ) {
             return;
         }
-    	// ConfigurationService config = TestServiceRegistry.getInstance().getService(ConfigurationService.class);
-    	InternalList.getInstance().start();
-    	databaseUpdateinitialized = true;
+        // ConfigurationService config = TestServiceRegistry.getInstance().getService(ConfigurationService.class);
+        InternalList.getInstance().start();
+        databaseUpdateinitialized = true;
     }
 
     private static void startAndInjectMonitoringBundle() {
@@ -759,7 +759,7 @@ public final class Init {
             reg.addService(ContextService.class, services.get(ContextService.class));
             reg.addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
             reg.addService(UserService.class, services.get(UserService.class));
-//            reg.addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
+            //            reg.addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
             reg.addService(ContactService.class, services.get(ContactService.class));
         }
     }
@@ -931,9 +931,9 @@ public final class Init {
         // for (final Initialization init: started) {
         // init.stop();
         // }
-//        stopMailBundle();
-//        stopDatabaseBundle();
-//        stopThreadPoolBundle();
+        //        stopMailBundle();
+        //        stopDatabaseBundle();
+        //        stopThreadPoolBundle();
         if (!running.compareAndSet(true, false)) {
             /*
              * Already stopped

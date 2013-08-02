@@ -102,7 +102,7 @@ public class TaskParser extends CalendarParser {
         }
         if (json.has(TaskFields.ACTUAL_COSTS)) {
             try {
-                taskobject.setActualCosts(parseFloat(json, TaskFields.ACTUAL_COSTS));
+                taskobject.setActualCosts(parseBigDecimal(json, TaskFields.ACTUAL_COSTS));
             } catch (OXException e) {
                 throw handleParseException(e, parseString(json, TaskFields.ACTUAL_COSTS), Task.ACTUAL_COSTS, locale);
             }
@@ -125,7 +125,7 @@ public class TaskParser extends CalendarParser {
         }
         if (json.has(TaskFields.TARGET_COSTS)) {
             try {
-                taskobject.setTargetCosts(parseFloat(json, TaskFields.TARGET_COSTS));
+                taskobject.setTargetCosts(parseBigDecimal(json, TaskFields.TARGET_COSTS));
             } catch (OXException e) {
                 throw handleParseException(e, parseString(json, TaskFields.TARGET_COSTS), Task.TARGET_COSTS, locale);
             }

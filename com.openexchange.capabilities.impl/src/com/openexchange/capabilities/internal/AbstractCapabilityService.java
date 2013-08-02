@@ -55,7 +55,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,7 +67,6 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityExceptionCodes;
-import com.openexchange.capabilities.CapabilityFilter;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.DependentCapabilityChecker;
 import com.openexchange.config.ConfigurationService;
@@ -80,7 +78,9 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -118,13 +118,21 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     private volatile Boolean autologin;
 
     /**
-     * Initializes a new {@link AbstractCapabilityService}.
+     * Tracker that provides the registered JSON bundles to check for permissions
      */
-    public AbstractCapabilityService(final ServiceLookup services) {
+    private volatile NearRegistryServiceTracker<PermissionAvailabilityService> tracker = null;
+
+    /**
+     * Initializes a new {@link AbstractCapabilityService}.
+     * 
+     * @param tracker that provides the services for the registered JSON bundles
+     */
+    public AbstractCapabilityService(final ServiceLookup services, NearRegistryServiceTracker<PermissionAvailabilityService> tracker) {
         super();
         this.services = services;
         capabilities = new ConcurrentHashMap<String, Capability>();
         declaredCapabilities = new ConcurrentHashMap<String, Object>();
+        this.tracker = tracker;
     }
 
     private Cache optContextCache() {
@@ -170,7 +178,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     }
 
     @Override
-    public Set<Capability> getCapabilities(final int userId, final int contextId, final CapabilityFilter filter) throws OXException {
+    public Set<Capability> getCapabilities(final int userId, final int contextId, final boolean computeCapabilityFilters) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(userId, contextId);
 
         Set<Capability> capabilities = new HashSet<Capability>(64);
@@ -182,95 +190,99 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
         // ------------- Combined capabilities/permissions ------------ //
         if (!serverSession.isAnonymous()) {
+            // Obtain user permissions
             final UserPermissionBits userPermissionBits = services.getService(UserPermissionService.class).getUserPermissionBits(serverSession.getUserId(), serverSession.getContext());
-            userPermissionBits.setGroups(serverSession.getUser().getGroups());
             // Capabilities by user permission bits
             for (final Permission p: Permission.byBits(userPermissionBits.getPermissionBits())) {
                 capabilities.add(getCapability(toLowerCase(p.name())));
             }
-            // Portal
-            if (userPermissionBits.hasPortal()) {
-                capabilities.add(getCapability("portal"));
-                capabilities.remove(getCapability("deniedPortal"));
-            } else {
-                capabilities.remove(getCapability("portal"));
-                capabilities.add(getCapability("deniedPortal"));
-            }
-            // Free-Busy
-            if (userPermissionBits.hasFreeBusy()) {
-                capabilities.add(getCapability("freebusy"));
-            } else {
-                capabilities.remove(getCapability("freebusy"));
-            }
-            // Conflict-Handling
-            if (userPermissionBits.hasConflictHandling()) {
-                capabilities.add(getCapability("conflict_handling"));
-            } else {
-                capabilities.remove(getCapability("conflict_handling"));
-            }
-            // Participants-Dialog
-            if (userPermissionBits.hasParticipantsDialog()) {
-                capabilities.add(getCapability("participants_dialog"));
-            } else {
-                capabilities.remove(getCapability("participants_dialog"));
-            }
-            // Group-ware
-            if (userPermissionBits.hasGroupware()) {
-                capabilities.add(getCapability("groupware"));
-            } else {
-                capabilities.remove(getCapability("groupware"));
-            }
-            // PIM
-            if (userPermissionBits.hasPIM()) {
-                capabilities.add(getCapability("pim"));
-            } else {
-                capabilities.remove(getCapability("pim"));
-            }
-            // Spam
-            if (serverSession.getUserSettingMail().isSpamEnabled()) {
-                capabilities.add(getCapability("spam"));
-            } else {
-                capabilities.remove(getCapability("spam"));
-            }
-            // Global Address Book
-            if (userPermissionBits.isGlobalAddressBookEnabled(serverSession)) {
-                capabilities.add(getCapability("gab"));
-            } else {
-                capabilities.remove(getCapability("gab"));
-            }
+            // Apply capabilities for non-transient sessions
+            if (!serverSession.isTransient()) {
+                userPermissionBits.setGroups(serverSession.getUser().getGroups());
+                // Portal
+                if (userPermissionBits.hasPortal()) {
+                    capabilities.add(getCapability("portal"));
+                    capabilities.remove(getCapability("deniedPortal"));
+                } else {
+                    capabilities.remove(getCapability("portal"));
+                    capabilities.add(getCapability("deniedPortal"));
+                }
+                // Free-Busy
+                if (userPermissionBits.hasFreeBusy()) {
+                    capabilities.add(getCapability("freebusy"));
+                } else {
+                    capabilities.remove(getCapability("freebusy"));
+                }
+                // Conflict-Handling
+                if (userPermissionBits.hasConflictHandling()) {
+                    capabilities.add(getCapability("conflict_handling"));
+                } else {
+                    capabilities.remove(getCapability("conflict_handling"));
+                }
+                // Participants-Dialog
+                if (userPermissionBits.hasParticipantsDialog()) {
+                    capabilities.add(getCapability("participants_dialog"));
+                } else {
+                    capabilities.remove(getCapability("participants_dialog"));
+                }
+                // Group-ware
+                if (userPermissionBits.hasGroupware()) {
+                    capabilities.add(getCapability("groupware"));
+                } else {
+                    capabilities.remove(getCapability("groupware"));
+                }
+                // PIM
+                if (userPermissionBits.hasPIM()) {
+                    capabilities.add(getCapability("pim"));
+                } else {
+                    capabilities.remove(getCapability("pim"));
+                }
+                // Spam
+                if (serverSession.getUserSettingMail().isSpamEnabled()) {
+                    capabilities.add(getCapability("spam"));
+                } else {
+                    capabilities.remove(getCapability("spam"));
+                }
+                // Global Address Book
+                if (userPermissionBits.isGlobalAddressBookEnabled(serverSession)) {
+                    capabilities.add(getCapability("gab"));
+                } else {
+                    capabilities.remove(getCapability("gab"));
+                }
 
-            // permission properties
-            final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
-            if (configViews != null) {
-                final ConfigView view = configViews.getView(userId, contextId);
-                final String property = PERMISSION_PROPERTY;
-                for (final String scope : configViews.getSearchPath()) {
-                    final String permissions = view.property(property, String.class).precedence(scope).get();
-                    if (permissions != null) {
-                        for (final String permissionModifier : P_SPLIT.split(permissions)) {
-                            final char firstChar = permissionModifier.charAt(0);
-                            if ('-' == firstChar) {
-                                capabilities.remove(getCapability(permissionModifier.substring(1)));
-                            } else {
-                                if ('+' == firstChar) {
-                                    capabilities.add(getCapability(permissionModifier.substring(1)));
+                // permission properties
+                final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
+                if (configViews != null) {
+                    final ConfigView view = configViews.getView(userId, contextId);
+                    final String property = PERMISSION_PROPERTY;
+                    for (final String scope : configViews.getSearchPath()) {
+                        final String permissions = view.property(property, String.class).precedence(scope).get();
+                        if (permissions != null) {
+                            for (final String permissionModifier : P_SPLIT.split(permissions)) {
+                                final char firstChar = permissionModifier.charAt(0);
+                                if ('-' == firstChar) {
+                                    capabilities.remove(getCapability(permissionModifier.substring(1)));
                                 } else {
-                                    capabilities.add(getCapability(permissionModifier));
+                                    if ('+' == firstChar) {
+                                        capabilities.add(getCapability(permissionModifier.substring(1)));
+                                    } else {
+                                        capabilities.add(getCapability(permissionModifier));
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                Map<String, ComposedConfigProperty<String>> all = view.all();
-                for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
-                    if (entry.getKey().startsWith("com.openexchange.capability.")) {
-                        boolean value = Boolean.parseBoolean(entry.getValue().get());
-                        String name = entry.getKey().substring(28);
-                        if (value) {
-                            capabilities.add(getCapability(name));
-                        } else {
-                            capabilities.remove(getCapability(name));
+                    Map<String, ComposedConfigProperty<String>> all = view.all();
+                    for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
+                        if (entry.getKey().startsWith("com.openexchange.capability.")) {
+                            boolean value = Boolean.parseBoolean(entry.getValue().get());
+                            String name = entry.getKey().substring(28);
+                            if (value) {
+                                capabilities.add(getCapability(name));
+                            } else {
+                                capabilities.remove(getCapability(name));
+                            }
                         }
                     }
                 }
@@ -335,22 +347,48 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             }
         }
 
-        // Apply filter if not null
-        if (filter != null) {
-            final Iterator<Capability> it = capabilities.iterator();
-            for (int i = capabilities.size(); i-- > 0;) {
-                if (!filter.accept(it.next())) {
-                    it.remove();
-                }
-            }
+        if (computeCapabilityFilters) {
+            applyUIFilter(capabilities);
         }
 
         return capabilities;
     }
 
+    /**
+     * Applies the filter on capabilities for JSON requests and if services (e. g. PasswordChangeService) are not available.
+     * 
+     * @param capabilitiesToFilter - the capabilities the filter should be applied on
+     */
+    protected void applyUIFilter(Set<Capability> capabilitiesToFilter) {
+        if (this.tracker != null) {
+            List<PermissionAvailabilityService> serviceList = this.tracker.getServiceList();
+
+            for (Permission permission : PermissionAvailabilityService.controlledPermissions) {
+                boolean bundleStarted = false;
+                for (PermissionAvailabilityService service : serviceList) {
+                    if (service.getRegisteredPermission().equals(permission)) {
+                        bundleStarted = true;
+                    }
+                }
+                if (!bundleStarted) {
+                    loop:
+                        for (Capability cap : capabilitiesToFilter) {
+                            if (cap.getId().equalsIgnoreCase(permission.toString())) {
+                                capabilitiesToFilter.remove(cap);
+                                break loop;
+                            }
+                        }
+                }
+            }
+        }
+        else {
+            LOG.warn("Tracker not initialized. Cannot check permissions for JSON requests");
+        }
+    }
+
     @Override
     public Set<Capability> getCapabilities(final int userId, final int contextId) throws OXException {
-        return getCapabilities(userId, contextId, null);
+        return getCapabilities(userId, contextId, false);
     }
 
     @Override
@@ -359,8 +397,8 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     }
 
     @Override
-    public Set<Capability> getCapabilities(final Session session, final CapabilityFilter filter) throws OXException {
-        return getCapabilities(session.getUserId(), session.getContextId(), filter);
+    public Set<Capability> getCapabilities(final Session session, final boolean computeCapabilityFilters) throws OXException {
+        return getCapabilities(session.getUserId(), session.getContextId(), computeCapabilityFilters);
     }
 
     private boolean check(String cap, ServerSession session, Set<Capability> allCapabilities) throws OXException {

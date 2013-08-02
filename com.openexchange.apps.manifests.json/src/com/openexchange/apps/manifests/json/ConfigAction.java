@@ -71,7 +71,6 @@ import com.openexchange.apps.manifests.json.values.Languages;
 import com.openexchange.apps.manifests.json.values.Manifests;
 import com.openexchange.apps.manifests.json.values.ServerVersion;
 import com.openexchange.apps.manifests.json.values.UIVersion;
-import com.openexchange.capabilities.CapabilityFilter;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -87,37 +86,36 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(noSession = true)
 public class ConfigAction implements AJAXActionService {
 
-	private final ServiceLookup services;
-	private final ServerConfigServicesLookup registry;
-	private final ComputedServerConfigValueService[] computedValues;
+    private final ServiceLookup services;
+    private final ServerConfigServicesLookup registry;
+    private final ComputedServerConfigValueService[] computedValues;
 
-	public ConfigAction(ServiceLookup services, JSONArray manifests, ServerConfigServicesLookup registry, final CapabilityFilter capabilityFilter) {
-		super();
-		this.services = services;
-		this.registry = registry;
+    public ConfigAction(ServiceLookup services, JSONArray manifests, ServerConfigServicesLookup registry) {
+        super();
+        this.services = services;
+        this.registry = registry;
 
-		computedValues = new ComputedServerConfigValueService[]{
-				new Manifests(services, manifests, capabilityFilter),
-				new Capabilities(services, capabilityFilter),
-				new Hosts(),
-				new ServerVersion(),
-				new Languages(services),
-				new UIVersion()
-		};
-	}
+        computedValues = new ComputedServerConfigValueService[]{
+            new Manifests(services, manifests), new Capabilities(services),
+            new Hosts(),
+            new ServerVersion(),
+            new Languages(services),
+            new UIVersion()
+        };
+    }
 
-	@Override
-	public AJAXRequestResult perform(AJAXRequestData requestData,
-			ServerSession session) throws OXException {
-		try {
-			JSONObject serverconfig = getFromConfiguration(requestData, session);
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData,
+        ServerSession session) throws OXException {
+        try {
+            JSONObject serverconfig = getFromConfiguration(requestData, session);
 
-			addComputedValues(serverconfig, requestData, session);
+            addComputedValues(serverconfig, requestData, session);
 
-			return new AJAXRequestResult(serverconfig, "json");
-		} catch (JSONException x) {
-			throw AjaxExceptionCodes.JSON_ERROR.create(x.toString());
-		}
+            return new AJAXRequestResult(serverconfig, "json");
+        } catch (JSONException x) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(x.toString());
+        }
     }
 
     @SuppressWarnings("unchecked")

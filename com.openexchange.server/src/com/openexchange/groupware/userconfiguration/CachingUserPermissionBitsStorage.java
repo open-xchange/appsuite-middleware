@@ -153,13 +153,18 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
      * @throws OXException If an error occurs
      */
     void initCache() throws OXException {
-        if (cache != null) {
-            return;
-        }
-        try {
-            cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
-        } catch (final RuntimeException e) {
-            throw UserConfigurationCodes.CACHE_INITIALIZATION_FAILED.create(e, CACHE_REGION_NAME);
+        Cache cache = this.cache;
+        if (null == cache) {
+            synchronized (this) {
+                cache = this.cache;
+                if (null == cache) {
+                    try {
+                        this.cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
+                    } catch (final RuntimeException e) {
+                        throw UserConfigurationCodes.CACHE_INITIALIZATION_FAILED.create(e, CACHE_REGION_NAME);
+                    }
+                }
+            }
         }
     }
 
@@ -189,6 +194,7 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
 
     @Override
     public UserPermissionBits getUserPermissionBits(int userId, Context ctx) throws OXException {
+        final Cache cache = this.cache;
         if (cache == null) {
             return getFallback().getUserPermissionBits(userId, ctx);
         }
@@ -197,6 +203,7 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
 
     @Override
     public UserPermissionBits[] getUserPermissionBits(Context ctx, User[] users) throws OXException {
+        final Cache cache = this.cache;
         if (cache == null) {
             return getFallback().getUserPermissionBits(ctx, users);
         }
@@ -210,7 +217,10 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
 
     @Override
     public UserPermissionBits[] getUserPermissionBits(Context ctx, int[] userIds) throws OXException {
-        if (cache == null) { return getFallback().getUserPermissionBits(ctx, userIds); }
+        final Cache cache = this.cache;
+        if (cache == null) {
+            return getFallback().getUserPermissionBits(ctx, userIds);
+        }
         return get(cache, ctx, userIds);
     }
 
@@ -235,9 +245,12 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
 
     @Override
     public void removeUserPermissionBits(int userId, Context ctx) throws OXException {
-        if (cache == null) { return; }
+        final Cache cache = this.cache;
+        if (cache == null) {
+            return;
+        }
+        cacheWriteLock.lock();
         try {
-            cacheWriteLock.lock();
             cache.remove(getKey(userId, ctx, cache));
         } finally {
             cacheWriteLock.unlock();
@@ -264,17 +277,19 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
             if (object == null) {
                 toLoad.add(id);
             } else {
-                map.put(id, (UserPermissionBits) object);
+                map.put(id, ((UserPermissionBits) object).clone());
             }
         }
 
-        for(UserPermissionBits perms: load(cache, ctx, toLoad)) {
-            map.put(perms.getUserId(), perms);
+        if (!toLoad.isEmpty()) {
+            for (UserPermissionBits perms : load(cache, ctx, toLoad)) {
+                map.put(perms.getUserId(), perms);
+            }
         }
 
         UserPermissionBits[] retval = new UserPermissionBits[userIds.length];
 
-        for(int i = 0; i < userIds.length; i++) {
+        for (int i = 0; i < userIds.length; i++) {
             retval[i] = map.get(userIds[i]);
         }
 
@@ -287,7 +302,7 @@ public class CachingUserPermissionBitsStorage extends UserPermissionBitsStorage 
         cacheWriteLock.lock();
         try {
             for (UserPermissionBits userPermissionBits : perms) {
-                cache.put(getKey(userPermissionBits.getUserId(), ctx, cache), userPermissionBits, false);
+                cache.put(getKey(userPermissionBits.getUserId(), ctx, cache), userPermissionBits.clone(), false);
             }
         } finally {
             cacheWriteLock.unlock();

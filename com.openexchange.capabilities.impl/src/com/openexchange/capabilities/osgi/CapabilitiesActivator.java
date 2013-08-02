@@ -50,18 +50,15 @@
 package com.openexchange.capabilities.osgi;
 
 import java.io.ByteArrayInputStream;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
-import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.groupware.CapabilityCreateTableService;
 import com.openexchange.capabilities.groupware.CapabilityCreateTableTask;
 import com.openexchange.capabilities.groupware.CapabilityDeleteListener;
-import com.openexchange.capabilities.internal.AbstractCapabilityService;
+import com.openexchange.capabilities.internal.CapabilityServiceImpl;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.CreateTableService;
@@ -69,28 +66,15 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.TimerService;
 import com.openexchange.userconf.UserPermissionService;
 
 public class CapabilitiesActivator extends HousekeepingActivator {
-
-    private static final class CapabilityServiceImpl extends AbstractCapabilityService {
-
-        private final CapabilityCheckerRegistry capCheckers;
-
-        CapabilityServiceImpl(ServiceLookup services, CapabilityCheckerRegistry capCheckers) {
-            super(services);
-            this.capCheckers = capCheckers;
-        }
-
-        @Override
-        protected Map<String, List<CapabilityChecker>> getCheckers() {
-            return capCheckers.getCheckers();
-        }
-    }
 
     /** The service look-up */
     public static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
@@ -103,13 +87,19 @@ public class CapabilitiesActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         SERVICES.set(this);
+
+        NearRegistryServiceTracker<PermissionAvailabilityService> tracker = new NearRegistryServiceTracker<PermissionAvailabilityService>(
+            context,
+            PermissionAvailabilityService.class);
+        track(PermissionAvailabilityService.class, tracker);
+
         final CapabilityCheckerRegistry capCheckers = new CapabilityCheckerRegistry(context);
         rememberTracker(capCheckers);
 
         /*
          * Create & register CapabilityService
          */
-        final CapabilityServiceImpl capService = new CapabilityServiceImpl(this, capCheckers);
+        final CapabilityServiceImpl capService = new CapabilityServiceImpl(this, capCheckers, tracker);
         registerService(CapabilityService.class, capService);
 
         track(Capability.class, new SimpleRegistryListener<Capability>() {
@@ -139,37 +129,37 @@ public class CapabilitiesActivator extends HousekeepingActivator {
         {
             final String regionName = "CapabilitiesContext";
             final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
-                    "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
-                    "jcs.region."+regionName+".cacheattributes.MaxObjects=10000\n" +
-                    "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
-                    "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
-                    "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=300\n" +
-                    "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
-                    "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
-                    "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
-                    "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
-                    "jcs.region."+regionName+".elementattributes.IdleTime=300\n" +
-                    "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
-                    "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
-                    "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+                "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxObjects=10000\n" +
+                "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=300\n" +
+                "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
+                "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
+                "jcs.region."+regionName+".elementattributes.IdleTime=300\n" +
+                "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
             getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
         }
         {
             final String regionName = "CapabilitiesUser";
             final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
-                    "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
-                    "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +
-                    "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
-                    "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
-                    "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=300\n" +
-                    "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
-                    "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
-                    "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
-                    "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
-                    "jcs.region."+regionName+".elementattributes.IdleTime=300\n" +
-                    "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
-                    "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
-                    "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+                "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +
+                "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=300\n" +
+                "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
+                "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
+                "jcs.region."+regionName+".elementattributes.IdleTime=300\n" +
+                "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
             getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
         }
 

@@ -47,67 +47,30 @@
  *
  */
 
-package com.openexchange.security;
+package com.openexchange.groupware.userconfiguration;
 
-import java.util.Collection;
-import com.openexchange.exception.OXException;
-import com.openexchange.security.permission.BundleAccessPermission;
-import com.openexchange.security.permission.BundleAccessPermissionCollection;
 
 /**
- * {@link BundleAccessSecurityService} - Security service for bundle access.
+ * {@link AllowAllUserPermissionBits} - Allows all.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
-public interface BundleAccessSecurityService {
+public class AllowAllUserPermissionBits extends UserPermissionBits {
 
-	/**
-	 * Checks if the specified desired path is covered by given paths.
-	 * <p>
-	 * This method is supposed to create the appropriate instances of
-	 * {@link BundleAccessPermissionCollection} and
-	 * {@link BundleAccessPermission} from specified arguments to delegate to
-	 * {@link #checkPermission(BundleAccessPermissionCollection, BundleAccessPermission)}.
-	 *
-	 * @param paths
-	 *            The paths of permitted bundles such as "a.b.*", or "*".
-	 * @param desiredPath
-	 *            The desired path such as "a.b.c"
-	 * @exception OXException
-	 *                If bundle access is not permitted
-	 */
-	public void checkPermission(Collection<String> paths, String desiredPath) throws OXException;
+    public AllowAllUserPermissionBits(final int userId, final int[] groups, final int contextId) {
+        super(0, userId, groups, contextId);
+    }
 
-	/**
-	 * Checks if the specified desired path is covered by given paths.
-	 * <p>
-	 * This method is supposed to create the appropriate instances of
-	 * {@link BundleAccessPermissionCollection} and
-	 * {@link BundleAccessPermission} from specified arguments to delegate to
-	 * {@link #checkPermission(BundleAccessPermissionCollection, BundleAccessPermission)}.
-	 *
-	 * @param paths
-	 *            The paths of permitted bundles such as "a.b.*", or "*".
-	 * @param desiredPath
-	 *            The desired path such as "a.b.c"
-	 * @exception OXException
-	 *                If bundle access is not permitted
-	 */
-	public void checkPermission(String[] paths, String desiredPath) throws OXException;
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Checks if the specified permission is implied by given permissions
-	 *
-	 * @param permissions
-	 *            A collection of permissions
-	 * @param desiredPermission
-	 *            The desired permission
-	 * @throws OXException
-	 *             If bundle access is not permitted
-	 * @throws NullPointerException
-	 *             If permissions is <code>null</code>
-	 */
-	public void checkPermission(BundleAccessPermissionCollection permissions, BundleAccessPermission desiredPermission)
-			throws OXException;
+    @Override
+    public boolean hasPermission(final int permissionBit) {
+        return true;
+    }
+
+    @Override
+    public boolean hasPermission(final Permission permission) {
+        return true;
+    }
+
 }

@@ -49,11 +49,10 @@
 
 package com.openexchange.webdav.xml.task;
 
-import static com.openexchange.java.Autoboxing.F;
 import static com.openexchange.java.Autoboxing.L;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Locale;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.xml.TaskTest;
@@ -133,7 +132,7 @@ public class ListTest extends TaskTest {
         taskObj.setLabel(2);
         taskObj.setNote("note");
         taskObj.setCategories("testcat1,testcat2,testcat3");
-        taskObj.setActualCosts(1.5F);
+        taskObj.setActualCosts(new BigDecimal("1.5"));
         taskObj.setActualDuration(L(210));
         taskObj.setBillingInformation("billing information");
         taskObj.setCompanies("companies");
@@ -142,7 +141,7 @@ public class ListTest extends TaskTest {
         taskObj.setPercentComplete(50);
         taskObj.setPriority(Task.HIGH);
         taskObj.setStatus(Task.IN_PROGRESS);
-        taskObj.setTargetCosts(5.5F);
+        taskObj.setTargetCosts(new BigDecimal("5.5"));
         taskObj.setTargetDuration(L(450));
         taskObj.setTripMeter("trip meter");
 
@@ -181,7 +180,7 @@ public class ListTest extends TaskTest {
         taskObj.setLabel(2);
         taskObj.setNote("note");
         taskObj.setCategories("testcat1,testcat2,testcat3");
-        taskObj.setActualCosts(F(1.5f));
+        taskObj.setActualCosts(new BigDecimal("1.5"));
         taskObj.setActualDuration(L(210));
         taskObj.setBillingInformation("billing information");
         taskObj.setCompanies("companies");
@@ -190,7 +189,7 @@ public class ListTest extends TaskTest {
         taskObj.setPercentComplete(50);
         taskObj.setPriority(Task.HIGH);
         taskObj.setStatus(Task.IN_PROGRESS);
-        taskObj.setTargetCosts(F(5.5f));
+        taskObj.setTargetCosts(new BigDecimal("5.5"));
         taskObj.setTargetDuration(L(450));
         taskObj.setTripMeter("trip meter");
         taskObj.setParentFolderID(taskFolderId);

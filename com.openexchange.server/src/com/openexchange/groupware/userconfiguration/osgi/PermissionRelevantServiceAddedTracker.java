@@ -47,84 +47,48 @@
  *
  */
 
-package com.openexchange.security;
+package com.openexchange.groupware.userconfiguration.osgi;
 
-import com.openexchange.exception.Category;
-import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
-import com.openexchange.exception.OXExceptionFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
+import com.openexchange.passwordchange.PasswordChangeService;
 
-public enum BundleAccessExceptionCode implements OXExceptionCode {
+/**
+ * The {@link PermissionRelevantServiceAddedTracker} is used to track services which availability have got impact for the user interface (e.
+ * g. {@link PasswordChangeService}). If the service is available it the availability will be registered for the
+ * {@link PermissionAvailabilityService} to analyze it for the user interface.
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
+ */
+public class PermissionRelevantServiceAddedTracker<S> extends ServiceTracker<S, S> {
 
-	/**
-	 * Access to bundle %1$s is not permitted
-	 */
-	ACCESS_DENIED(BundleAccessExceptionMessage.ACCESS_DENIED, CATEGORY_PERMISSION_DENIED, 1);
-
-	private final String message;
-
-	private final int detailNumber;
-
-	private final Category category;
-
-	private BundleAccessExceptionCode(final String message, final Category category, final int detailNumber) {
-		this.message = message;
-		this.detailNumber = detailNumber;
-		this.category = category;
-	}
-
-	@Override
-    public String getPrefix() {
-	    return "SECURITY";
-	}
-
-	@Override
-    public Category getCategory() {
-		return category;
-	}
-
-	@Override
-    public int getNumber() {
-		return detailNumber;
-	}
-
-	@Override
-    public String getMessage() {
-		return message;
-	}
-
-	@Override
-    public boolean equals(final OXException e) {
-        return OXExceptionFactory.getInstance().equals(this, e);
+    /**
+     * Initializes a new {@link PermissionRelevantServiceAddedTracker}.
+     * 
+     * @param context - the context
+     * @param clazz - the class to track
+     * @param customizer - optional customizer
+     */
+    public PermissionRelevantServiceAddedTracker(BundleContext context, Class<S> clazz, ServiceTrackerCustomizer<S, S> customizer) {
+        super(context, clazz, customizer);
     }
 
     /**
-     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
-     * @return The newly created {@link OXException} instance
+     * {@inheritDoc}
      */
-    public OXException create() {
-        return OXExceptionFactory.getInstance().create(this, new Object[0]);
-    }
+    @Override
+    public S addingService(ServiceReference<S> reference) {
+        final S service = context.getService(reference);
 
-    /**
-     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
-     * @param args The message arguments in case of printf-style message
-     * @return The newly created {@link OXException} instance
-     */
-    public OXException create(final Object... args) {
-        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
-    }
+        if (service instanceof PasswordChangeService) {
+            context.registerService(PermissionAvailabilityService.class, new PermissionAvailabilityService(Permission.EDIT_PASSWORD), null);
+        }
 
-    /**
-     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
-     * @param cause The optional initial cause
-     * @param args The message arguments in case of printf-style message
-     * @return The newly created {@link OXException} instance
-     */
-    public OXException create(final Throwable cause, final Object... args) {
-        return OXExceptionFactory.getInstance().create(this, cause, args);
+        return super.addingService(reference);
     }
 }

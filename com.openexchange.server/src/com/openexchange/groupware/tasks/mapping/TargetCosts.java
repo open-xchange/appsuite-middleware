@@ -49,8 +49,7 @@
 
 package com.openexchange.groupware.tasks.mapping;
 
-import static com.openexchange.java.Autoboxing.F;
-import static com.openexchange.java.Autoboxing.f;
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -59,7 +58,12 @@ import com.openexchange.groupware.tasks.AttributeNames;
 import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Task;
 
-public final class TargetCosts implements Mapper<Float> {
+/**
+ * Implementation to map task attribute targetCosts to database target_costs and back.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public final class TargetCosts implements Mapper<BigDecimal> {
 
     public static final TargetCosts SINGLETON = new TargetCosts();
 
@@ -90,17 +94,17 @@ public final class TargetCosts implements Mapper<Float> {
     @Override
     public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
         if (null == task.getTargetCosts()) {
-            stmt.setNull(pos, Types.FLOAT);
+            stmt.setNull(pos, Types.NUMERIC);
         } else {
-            stmt.setDouble(pos, f(task.getTargetCosts()));
+            stmt.setBigDecimal(pos, task.getTargetCosts());
         }
     }
 
     @Override
     public void fromDB(ResultSet result, int pos, Task task) throws SQLException {
-        float targetCosts = result.getFloat(pos);
+        BigDecimal targetCosts = result.getBigDecimal(pos);
         if (!result.wasNull()) {
-            task.setTargetCosts(F(targetCosts));
+            task.setTargetCosts(targetCosts);
         }
     }
 
@@ -116,12 +120,12 @@ public final class TargetCosts implements Mapper<Float> {
     }
 
     @Override
-    public Float get(Task task) {
+    public BigDecimal get(Task task) {
         return task.getTargetCosts();
     }
 
     @Override
-    public void set(Task task, Float value) {
+    public void set(Task task, BigDecimal value) {
         task.setTargetCosts(value);
     }
 }

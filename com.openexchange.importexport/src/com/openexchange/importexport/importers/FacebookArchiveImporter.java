@@ -62,11 +62,18 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.java.Streams;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 public class FacebookArchiveImporter extends AbstractImporter {
 
-    protected FacebookFriendsImporter delegate = new FacebookFriendsImporter();
+
+    public FacebookArchiveImporter(ServiceLookup services) {
+        super(services);
+        delegate = new FacebookFriendsImporter(services);
+    }
+
+    protected FacebookFriendsImporter delegate = null;
 
     @Override
     protected String getNameForFieldInTruncationError(final int id, final OXException dataTruncation) {

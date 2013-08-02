@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,49 +47,51 @@
  *
  */
 
-package com.openexchange.groupware.userconfiguration;
+package com.openexchange.groupware.userconfiguration.service;
 
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.passwordchange.PasswordChangeService;
 
 /**
- * {@link AvailabilityChecker} - Checks for availability for a certain capability and/or permission.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * Use {@link PermissionAvailabilityService} if you would like to register a JSON bundle (or any other Service, e. g. {@link PasswordChangeService} TODO for permissions. If the capabilities will be requested by
+ * the frontend it will be checked, which of the controlled JSON bundles (in
+ * {@link com.openexchange.tools.service.PermissionAvailabilityService.controlledPermissions}) registered this service. If not registered the
+ * permission will be deleted from the capabilities.
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
  */
-public interface AvailabilityChecker {
+public class PermissionAvailabilityService {
 
     /**
-     * Indicates if associated {@link Permission permission}'s service is available.
-     *
-     * @return <code>true</code> if available; otherwise <code>false</code>
+     * These permissions (better: the associated json bundles or services) are currently controlled by the service<br>
+     * - Permission.EDIT_PASSWORD: based on {@link PasswordChangeService} <br>
+     * - Permission.PUBLICATION: bundle 'com.openexchange.publish.json'<br>
+     * - Permission.SUBSCRIPTION: bundle 'com.openexchange.subscribe.json'
      */
-    boolean isAvailable();
+    public static Permission[] controlledPermissions = { Permission.EDIT_PASSWORD, Permission.PUBLICATION, Permission.SUBSCRIPTION };
 
     /**
-     * Open this {@code AvailabilityChecker}.
+     * The {@link Permission} the service is registered for.
      */
-    void open();
+    private Permission registeredPermission = null;
 
     /**
-     * Close this {@code AvailabilityChecker}.
+     * Initializes a new {@link PermissionAvailabilityService}.
+     * 
+     * @param permission the json bundle will register for
      */
-    void close();
+    public PermissionAvailabilityService(Permission permission) {
+        super();
+        this.registeredPermission = permission;
+    }
 
-    /** Returns always <code>true</code> */
-    public static final AvailabilityChecker TRUE_AVAILABILITY_CHECKER = new AvailabilityChecker() {
-
-        @Override
-        public boolean isAvailable(){
-            return true;
-        }
-
-        @Override
-        public void open() {
-            // Nope
-        }
-
-        @Override
-        public void close() {
-            // Nope
-        }
-    };
+    /**
+     * Gets the registeredPermission
+     * 
+     * @return The registeredPermission
+     */
+    public Permission getRegisteredPermission() {
+        return registeredPermission;
+    }
 }

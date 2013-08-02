@@ -57,7 +57,7 @@ import com.openexchange.realtime.client.impl.config.ConfigurationProvider;
 
 
 /**
- * {@link TracerInjector} 
+ * {@link TracerInjector}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -66,7 +66,7 @@ public class TracerInjector {
     /**
      * Decides based on the structure of the message and client configuration if it can and should be extended with a tracer and adds a
      * generated UUID to the message.
-     * 
+     *
      * @param json the message to extend with a tracer key
      * @return the extended message
      * @throws JSONException
@@ -74,11 +74,11 @@ public class TracerInjector {
     public static JSONObject injectTracer(JSONObject json) {
         return injectTracer(json, null);
     }
-    
+
     /**
      * Decides based on the structure of the message and client configuration if it can and should be extended with a tracer and adds either
      * the given tracer or a generated UUID to the message.
-     * 
+     *
      * @param json the message to extend with a tracer key
      * @param tracer An optional tracer that identifies the message on it's way through the server backend
      * @return the extended message
