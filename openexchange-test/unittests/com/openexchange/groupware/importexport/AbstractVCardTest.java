@@ -68,7 +68,7 @@ public class AbstractVCardTest extends AbstractContactTest {
 
 	public final Format format = Format.VCARD;
 	@SuppressWarnings("hiding")
-	public final Importer imp = new VCardImporter();
+	public final Importer imp = new VCardImporter(null);
     protected static Context ctx;
 
     public static junit.framework.Test suite() {

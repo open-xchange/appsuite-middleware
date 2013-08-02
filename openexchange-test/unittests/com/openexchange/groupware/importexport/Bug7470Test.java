@@ -97,7 +97,7 @@ public class Bug7470Test extends AbstractContactTest {
 	    sessObj = ServerSessionFactory.createServerSession(userId, 1, "csv-tests");
 
         userId = sessObj.getUserId();
-		imp = new ICalImporter();
+		imp = new ICalImporter(null);
 	}
 
     @AfterClass
