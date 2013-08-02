@@ -70,12 +70,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractDriveAction implements AJAXActionService {
 
-    protected Boolean diagnostics;
-
-    protected boolean includeDiagnostics() {
-        return null != diagnostics;
-    }
-
     protected Locale getLocale(ServerSession session) {
         Locale locale = null;
         if (null != session) {
@@ -109,8 +103,7 @@ public abstract class AbstractDriveAction implements AJAXActionService {
          */
         String diagnostics = requestData.getParameter("diagnostics");
         if (false == Strings.isEmpty(diagnostics)) {
-            this.diagnostics = Boolean.valueOf(diagnostics);
-            session.setParameter("com.openexchange.drive.diagnostics", this.diagnostics);
+            session.setParameter("com.openexchange.drive.diagnostics", Boolean.valueOf(diagnostics));
         } else {
             session.setParameter("com.openexchange.drive.diagnostics", null);
         }
@@ -118,6 +111,11 @@ public abstract class AbstractDriveAction implements AJAXActionService {
          * perform
          */
         return doPerform(requestData, session);
+    }
+
+    protected boolean isIncludeDiagnostics(ServerSession session) {
+        Object parameter = session.getParameter("com.openexchange.drive.diagnostics");
+        return null != parameter;
     }
 
     /**
