@@ -93,6 +93,7 @@ import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeSmilFixer;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -270,7 +271,16 @@ public final class MimeForward {
             /*
              * Inline-Forward
              */
-            final MailMessage originalMsg = origMsgs[0];
+            final MailMessage originalMsg;
+            {
+                final MailMessage omm = origMsgs[0];
+                final ContentType contentType = omm.getContentType();
+                if (contentType.startsWith("multipart/related") && ("application/smil".equals(contentType.getParameter(toLowerCase("type"))))) {
+                    originalMsg = MimeSmilFixer.getInstance().process(omm);
+                } else {
+                    originalMsg = omm;
+                }
+            }
             final String owner = MimeProcessingUtility.getFolderOwnerIfShared(originalMsg.getFolder(), originalMsg.getAccountId(), session);
             if (null != owner) {
                 final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
@@ -894,6 +904,19 @@ public final class MimeForward {
             isWhitespace = Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

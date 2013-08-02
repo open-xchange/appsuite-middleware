@@ -103,6 +103,7 @@ import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeSmilFixer;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -239,7 +240,15 @@ public final class MimeReply {
     private static MailMessage getReplyMail(final MailMessage originalMsg, final MailPath msgref, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail) throws OXException {
         try {
             originalMsg.setAccountId(accountId);
-            final MailMessage origMsg = ManagedMimeMessage.clone(originalMsg);
+            final MailMessage origMsg;
+            {
+                final ContentType contentType = originalMsg.getContentType();
+                if (contentType.startsWith("multipart/related") && ("application/smil".equals(contentType.getParameter(toLowerCase("type"))))) {
+                    origMsg = MimeSmilFixer.getInstance().process(originalMsg);
+                } else {
+                    origMsg = ManagedMimeMessage.clone(originalMsg);
+                }
+            }
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
             final UserSettingMail usm = userSettingMail == null ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : userSettingMail;
             /*

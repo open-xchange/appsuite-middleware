@@ -81,6 +81,7 @@ import net.freeutils.tnef.mime.TNEFMime;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
@@ -95,6 +96,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeFilter;
+import com.openexchange.mail.mime.MimeSmilFixer;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.TNEFBodyPart;
@@ -310,7 +312,12 @@ public final class MailMessageParser {
             /*
              * Parse content
              */
-            parseMailContent(mail, handler, prefix, 1);
+            final ContentType contentType = mail.getContentType();
+            if (contentType.startsWith("multipart/related") && ("application/smil".equals(contentType.getParameter(toLowerCase("type"))))) {
+                parseMailContent(MimeSmilFixer.getInstance().process(mail), handler, prefix, 1);
+            } else {
+                parseMailContent(mail, handler, prefix, 1);
+            }
         } catch (final IOException e) {
             final String mailId = mail.getMailId();
             final String folder = mail.getFolder();
@@ -1089,6 +1096,19 @@ public final class MailMessageParser {
         }
         final String toCheck = LocaleTools.toLowerCase(fileName);
         return toCheck.startsWith("winmail", 0) && toCheck.endsWith(".dat");
+    }
+
+    static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }
