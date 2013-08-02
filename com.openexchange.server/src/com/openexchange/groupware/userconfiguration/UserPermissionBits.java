@@ -58,6 +58,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
@@ -67,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class UserPermissionBits implements Serializable{
+public class UserPermissionBits implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -4210686154175384469L;
 
@@ -258,6 +259,20 @@ public class UserPermissionBits implements Serializable{
         this.groups = groups;
         this.contextId = contextId;
         this.permissionBits = permissions;
+    }
+
+    @Override
+    public UserPermissionBits clone() {
+        try {
+            final UserPermissionBits clone = (UserPermissionBits) super.clone();
+            if (groups != null) {
+                clone.groups = new int[groups.length];
+                System.arraycopy(groups, 0, clone.groups, 0, groups.length);
+            }
+            return clone;
+        } catch (final CloneNotSupportedException e) {
+            throw new InternalError(e.getMessage());
+        }
     }
 
     /**
@@ -980,7 +995,11 @@ public class UserPermissionBits implements Serializable{
      * @return The groups
      */
     public int[] getGroups() {
-        return groups;
+        int[] thisGroups = groups;
+        if (null == thisGroups) {
+            thisGroups = groups = UserStorage.getStorageUser(userId, contextId).getGroups();
+        }
+        return thisGroups;
     }
 
     /**

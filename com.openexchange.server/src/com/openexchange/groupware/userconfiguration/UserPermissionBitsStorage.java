@@ -59,7 +59,7 @@ import com.openexchange.groupware.ldap.User;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class UserPermissionBitsStorage {
-    
+
     private static UserPermissionBitsStorage singleton;
 
     /**
@@ -110,7 +110,7 @@ public abstract class UserPermissionBitsStorage {
         stopInternal();
         started = false;
     }
-    
+
     /**
      * Retrieve the permission bits for the given user
      */
@@ -125,7 +125,7 @@ public abstract class UserPermissionBitsStorage {
      * Retrieve the permission bits for the given users
      */
     public abstract UserPermissionBits[] getUserPermissionBits(Context ctx, int[] userIds) throws OXException;
-    
+
     /**
      * Forget any locally cached entries
      */
@@ -141,13 +141,13 @@ public abstract class UserPermissionBitsStorage {
      */
     public abstract void saveUserPermissionBits(final int permissionBits, final int userId, final Context ctx) throws OXException;
 
-    
+
     protected void startInternal() throws OXException {
-        
+        // Nope
     }
 
     protected void stopInternal() throws OXException {
-        
+        // Nope
     }
 
 
