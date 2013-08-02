@@ -47,27 +47,45 @@
  *
  */
 
-package com.openexchange.publish.json.osgi;
+package com.openexchange.capabilities.internal;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.osgi.CompositeBundleActivator;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.osgi.CapabilityCheckerRegistry;
+import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
+import com.openexchange.osgi.NearRegistryServiceTracker;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link Activator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * Implementation of the {@link AbstractCapabilityService}
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  */
-public class Activator extends CompositeBundleActivator {
+public final class CapabilityServiceImpl extends AbstractCapabilityService {
 
-    private static final BundleActivator[] ACTIVATORS = {
-        new ServletActivator(),
-        new PreferencesActivator(),
-        new TrackerActivator(),
-        new ServiceActivator()        
-    };
+    /**
+     * Provides the {@link CapabilityChecker}
+     */
+    private final CapabilityCheckerRegistry capCheckers;
 
+    /**
+     * Initializes a new {@link CapabilityServiceImpl}.
+     * 
+     * @param services - {@link ServiceLookup} to search for services
+     * @param capCheckers - {@link CapabilityCheckerRegistry} to provide the {@link CapabilityChecker}
+     * @param tracker - {@link NearRegistryServiceTracker} with the {@link PermissionAvailabilityService} to check if JSON bundles are available
+     */
+    public CapabilityServiceImpl(ServiceLookup services, CapabilityCheckerRegistry capCheckers, NearRegistryServiceTracker<PermissionAvailabilityService> tracker) {
+        super(services, tracker);
+        this.capCheckers = capCheckers;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    protected Map<String, List<CapabilityChecker>> getCheckers() {
+        return capCheckers.getCheckers();
     }
 }

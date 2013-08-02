@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,49 +47,48 @@
  *
  */
 
-package com.openexchange.groupware.userconfiguration;
+package com.openexchange.groupware.userconfiguration.osgi;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
+import com.openexchange.passwordchange.PasswordChangeService;
 
 /**
- * {@link AvailabilityChecker} - Checks for availability for a certain capability and/or permission.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * The {@link PermissionRelevantServiceAddedTracker} is used to track services which availability have got impact for the user interface (e.
+ * g. {@link PasswordChangeService}). If the service is available it the availability will be registered for the
+ * {@link PermissionAvailabilityService} to analyze it for the user interface.
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
  */
-public interface AvailabilityChecker {
+public class PermissionRelevantServiceAddedTracker<S> extends ServiceTracker<S, S> {
 
     /**
-     * Indicates if associated {@link Permission permission}'s service is available.
-     *
-     * @return <code>true</code> if available; otherwise <code>false</code>
+     * Initializes a new {@link PermissionRelevantServiceAddedTracker}.
+     * 
+     * @param context - the context
+     * @param clazz - the class to track
+     * @param customizer - optional customizer
      */
-    boolean isAvailable();
+    public PermissionRelevantServiceAddedTracker(BundleContext context, Class<S> clazz, ServiceTrackerCustomizer<S, S> customizer) {
+        super(context, clazz, customizer);
+    }
 
     /**
-     * Open this {@code AvailabilityChecker}.
+     * {@inheritDoc}
      */
-    void open();
+    @Override
+    public S addingService(ServiceReference<S> reference) {
+        final S service = context.getService(reference);
 
-    /**
-     * Close this {@code AvailabilityChecker}.
-     */
-    void close();
-
-    /** Returns always <code>true</code> */
-    public static final AvailabilityChecker TRUE_AVAILABILITY_CHECKER = new AvailabilityChecker() {
-
-        @Override
-        public boolean isAvailable(){
-            return true;
+        if (service instanceof PasswordChangeService) {
+            context.registerService(PermissionAvailabilityService.class, new PermissionAvailabilityService(Permission.EDIT_PASSWORD), null);
         }
 
-        @Override
-        public void open() {
-            // Nope
-        }
-
-        @Override
-        public void close() {
-            // Nope
-        }
-    };
+        return super.addingService(reference);
+    }
 }

@@ -49,25 +49,31 @@
 
 package com.openexchange.publish.json.osgi;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.osgi.CompositeBundleActivator;
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link Activator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * Activator for the services
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
  */
-public class Activator extends CompositeBundleActivator {
+public class ServiceActivator extends HousekeepingActivator {
 
-    private static final BundleActivator[] ACTIVATORS = {
-        new ServletActivator(),
-        new PreferencesActivator(),
-        new TrackerActivator(),
-        new ServiceActivator()        
-    };
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected BundleActivator[] getActivators() {
-        return ACTIVATORS;
+    protected void startBundle() throws Exception {
+        context.registerService(PermissionAvailabilityService.class, new PermissionAvailabilityService(Permission.PUBLICATION), null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 }

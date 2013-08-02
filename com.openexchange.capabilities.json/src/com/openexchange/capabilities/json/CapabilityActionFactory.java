@@ -53,7 +53,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.capabilities.CapabilityFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -72,9 +71,9 @@ public class CapabilityActionFactory implements AJAXActionServiceFactory {
      *
      * @param services The service look-up
      */
-    public CapabilityActionFactory(final ServiceLookup services, final CapabilityFilter capabilityFilter) {
+    public CapabilityActionFactory(final ServiceLookup services) {
         super();
-        this.allAction = new CapabilityAllAction(services, capabilityFilter);
+        this.allAction = new CapabilityAllAction(services);
     }
 
     @Override

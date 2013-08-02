@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,20 +47,51 @@
  *
  */
 
-package com.openexchange.capabilities;
+package com.openexchange.groupware.userconfiguration.service;
+
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.passwordchange.PasswordChangeService;
 
 /**
- * {@link CapabilityFilter} - A filter for capabilities.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * Use {@link PermissionAvailabilityService} if you would like to register a JSON bundle (or any other Service, e. g. {@link PasswordChangeService} TODO for permissions. If the capabilities will be requested by
+ * the frontend it will be checked, which of the controlled JSON bundles (in
+ * {@link com.openexchange.tools.service.PermissionAvailabilityService.controlledPermissions}) registered this service. If not registered the
+ * permission will be deleted from the capabilities.
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
  */
-public interface CapabilityFilter {
+public class PermissionAvailabilityService {
 
     /**
-     * Tests whether or not the specified capability should be included in a capability list.
-     *
-     * @param capability The capability to be tested
-     * @return <code>true</code> if and only if <code>capability</code> should be included
+     * These permissions (better: the associated json bundles or services) are currently controlled by the service<br>
+     * - Permission.EDIT_PASSWORD: based on {@link PasswordChangeService} <br>
+     * - Permission.PUBLICATION: bundle 'com.openexchange.publish.json'<br>
+     * - Permission.SUBSCRIPTION: bundle 'com.openexchange.subscribe.json'
      */
-    boolean accept(Capability capability);
+    public static Permission[] controlledPermissions = { Permission.EDIT_PASSWORD, Permission.PUBLICATION, Permission.SUBSCRIPTION };
+
+    /**
+     * The {@link Permission} the service is registered for.
+     */
+    private Permission registeredPermission = null;
+
+    /**
+     * Initializes a new {@link PermissionAvailabilityService}.
+     * 
+     * @param permission the json bundle will register for
+     */
+    public PermissionAvailabilityService(Permission permission) {
+        super();
+        this.registeredPermission = permission;
+    }
+
+    /**
+     * Gets the registeredPermission
+     * 
+     * @return The registeredPermission
+     */
+    public Permission getRegisteredPermission() {
+        return registeredPermission;
+    }
 }

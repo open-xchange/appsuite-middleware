@@ -55,7 +55,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,7 +67,6 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityExceptionCodes;
-import com.openexchange.capabilities.CapabilityFilter;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.DependentCapabilityChecker;
 import com.openexchange.config.ConfigurationService;
@@ -80,7 +78,9 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -118,13 +118,21 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     private volatile Boolean autologin;
 
     /**
-     * Initializes a new {@link AbstractCapabilityService}.
+     * Tracker that provides the registered JSON bundles to check for permissions
      */
-    public AbstractCapabilityService(final ServiceLookup services) {
+    private volatile NearRegistryServiceTracker<PermissionAvailabilityService> tracker = null;
+
+    /**
+     * Initializes a new {@link AbstractCapabilityService}.
+     * 
+     * @param tracker that provides the services for the registered JSON bundles
+     */
+    public AbstractCapabilityService(final ServiceLookup services, NearRegistryServiceTracker<PermissionAvailabilityService> tracker) {
         super();
         this.services = services;
         capabilities = new ConcurrentHashMap<String, Capability>();
         declaredCapabilities = new ConcurrentHashMap<String, Object>();
+        this.tracker = tracker;
     }
 
     private Cache optContextCache() {
@@ -170,7 +178,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     }
 
     @Override
-    public Set<Capability> getCapabilities(final int userId, final int contextId, final CapabilityFilter filter) throws OXException {
+    public Set<Capability> getCapabilities(final int userId, final int contextId, final boolean computeCapabilityFilters) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(userId, contextId);
 
         Set<Capability> capabilities = new HashSet<Capability>(64);
@@ -339,22 +347,48 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             }
         }
 
-        // Apply filter if not null
-        if (filter != null) {
-            final Iterator<Capability> it = capabilities.iterator();
-            for (int i = capabilities.size(); i-- > 0;) {
-                if (!filter.accept(it.next())) {
-                    it.remove();
-                }
-            }
+        if (computeCapabilityFilters) {
+            applyUIFilter(capabilities);
         }
 
         return capabilities;
     }
 
+    /**
+     * Applies the filter on capabilities for JSON requests and if services (e. g. PasswordChangeService) are not available.
+     * 
+     * @param capabilitiesToFilter - the capabilities the filter should be applied on
+     */
+    protected void applyUIFilter(Set<Capability> capabilitiesToFilter) {
+        if (this.tracker != null) {
+            List<PermissionAvailabilityService> serviceList = this.tracker.getServiceList();
+
+            for (Permission permission : PermissionAvailabilityService.controlledPermissions) {
+                boolean bundleStarted = false;
+                for (PermissionAvailabilityService service : serviceList) {
+                    if (service.getRegisteredPermission().equals(permission)) {
+                        bundleStarted = true;
+                    }
+                }
+                if (!bundleStarted) {
+                    loop:
+                        for (Capability cap : capabilitiesToFilter) {
+                            if (cap.getId().equalsIgnoreCase(permission.toString())) {
+                                capabilitiesToFilter.remove(cap);
+                                break loop;
+                            }
+                        }
+                }
+            }
+        }
+        else {
+            LOG.warn("Tracker not initialized. Cannot check permissions for JSON requests");
+        }
+    }
+
     @Override
     public Set<Capability> getCapabilities(final int userId, final int contextId) throws OXException {
-        return getCapabilities(userId, contextId, null);
+        return getCapabilities(userId, contextId, false);
     }
 
     @Override
@@ -363,8 +397,8 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     }
 
     @Override
-    public Set<Capability> getCapabilities(final Session session, final CapabilityFilter filter) throws OXException {
-        return getCapabilities(session.getUserId(), session.getContextId(), filter);
+    public Set<Capability> getCapabilities(final Session session, final boolean computeCapabilityFilters) throws OXException {
+        return getCapabilities(session.getUserId(), session.getContextId(), computeCapabilityFilters);
     }
 
     private boolean check(String cap, ServerSession session, Set<Capability> allCapabilities) throws OXException {
