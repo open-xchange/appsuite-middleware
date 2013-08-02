@@ -198,6 +198,11 @@
         "namespace": "io.ox/files/actions"
     },
     {
+        "requires": "document_preview",
+        "path": "io.ox/office/preview/app/mailactions",
+        "namespace": "io.ox/mail/actions"
+    },
+    {
         "title": "Portal",
         "company": "Open-Xchange",
         "icon": "portal.png",
