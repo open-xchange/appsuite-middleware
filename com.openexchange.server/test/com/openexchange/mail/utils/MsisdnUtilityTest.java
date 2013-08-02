@@ -24,7 +24,7 @@ import com.openexchange.session.Session;
 
 /**
  * Tests for class {@link MsisdnUtility}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.2.2
  */
@@ -57,6 +57,9 @@ public class MsisdnUtilityTest extends TestCase {
         PowerMockito.when(serverServiceRegistry.getService(ContactService.class)).thenReturn(contactService);
         PowerMockito.when(
             contactService.getContact(mockedSession, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), Integer.toString(1))).thenReturn(
+            contact);
+        PowerMockito.when(
+            contactService.getUser(mockedSession, 1)).thenReturn(
             contact);
         PowerMockito.when(UserStorage.getStorageUser(1, 1)).thenReturn(mockedUser);
         PowerMockito.when(ServerServiceRegistry.getInstance()).thenReturn(serverServiceRegistry);
