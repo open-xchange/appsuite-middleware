@@ -254,11 +254,12 @@ public final class EffectivePermission implements Permission {
     }
 
     private UserPermissionBits getUserPermissionBits() {
+        UserPermissionBits userPermissionBits = this.userPermissionBits;
         if (null == userPermissionBits) {
             try {
-                userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(getEntity(), context);
+                userPermissionBits = this.userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(getEntity(), context);
             } catch (final OXException e) {
-                userPermissionBits = new AllowAllUserPermissionBits(getEntity(), null, context.getContextId());
+                userPermissionBits = this.userPermissionBits = new AllowAllUserPermissionBits(getEntity(), null, context.getContextId());
             }
         }
         return userPermissionBits;
