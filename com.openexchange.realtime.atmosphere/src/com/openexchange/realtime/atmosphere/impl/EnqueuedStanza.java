@@ -58,31 +58,32 @@ import com.openexchange.realtime.packet.Stanza;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class EnqueuedStanza implements Comparable<EnqueuedStanza>{
-    
-    static final int INFINITY = Integer.MAX_VALUE;
-    
-    public Stanza stanza;
-    public long sequenceNumber;
-    public int count;
-    
+
+    private static final int INFINITY = Integer.MAX_VALUE;
+
+    protected Stanza stanza;
+    protected long sequenceNumber;
+    protected int count;
+
+    protected EnqueuedStanza() {
+        super();
+    }
+
     public EnqueuedStanza(Stanza stanza) {
+        super();
         this.stanza = stanza;
         this.sequenceNumber = stanza.getSequenceNumber();
         this.count = 0;
     }
-    
-    public EnqueuedStanza(long sequenceNumber) {
-        this.sequenceNumber = sequenceNumber;
-    }
-    
+
     /**
-     * Increment the counter of this enqueued Stanza until the configured maximum count was reached. 
+     * Increment the counter of this enqueued Stanza until the configured maximum count was reached.
      * @return true if the counter could be incremented, false if incrementing the counter would exceed the configured limit.
      */
     public boolean incCounter() {
         synchronized(stanza) {
             count++;
-            if (count > INFINITY) {
+            if (count > getInfinity()) {
                 return false;
             }
             return true;
@@ -93,9 +94,13 @@ public class EnqueuedStanza implements Comparable<EnqueuedStanza>{
     public int compareTo(EnqueuedStanza o) {
         return (int) (sequenceNumber - o.sequenceNumber);
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         return ((EnqueuedStanza)obj).sequenceNumber == sequenceNumber;
+    }
+
+    protected int getInfinity() {
+        return INFINITY;
     }
 }
