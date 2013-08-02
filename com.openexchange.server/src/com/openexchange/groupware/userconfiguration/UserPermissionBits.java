@@ -58,6 +58,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
@@ -1006,9 +1007,11 @@ public class UserPermissionBits implements Serializable, Cloneable {
      * Sets the groups
      *
      * @param groups The groups to set
+     * @return This user permission bits with groups applied
      */
-    public void setGroups(final int[] groups) {
+    public UserPermissionBits setGroups(final int[] groups) {
         this.groups = groups;
+        return this;
     }
 
     /**
@@ -1030,13 +1033,28 @@ public class UserPermissionBits implements Serializable, Cloneable {
         int bits = 0;
         if (null != capabilities) {
             for (final String string : capabilities) {
-                final Permission permission = Permission.valueOf(string);
+                final Permission permission = Permission.get(string);
                 if (permission != null) {
                     bits = bits | permission.bit;
                 }
             }
         }
         return bits;
+    }
+
+    /**
+     * Gets the context associated with this user permission bits.
+     * <p>
+     * Helper method that invokes {@link ContextStorage#getStorageContext(int)}.
+     *
+     * @return The context
+     */
+    public Context getContext() {
+        try {
+            return ContextStorage.getStorageContext(contextId);
+        } catch (OXException e) {
+            return null;
+        }
     }
 
 }

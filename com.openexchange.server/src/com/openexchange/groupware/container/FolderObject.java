@@ -60,9 +60,11 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
@@ -882,7 +884,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             } else if (objectId == SYSTEM_USER_INFOSTORE_FOLDER_ID || objectId == SYSTEM_PRIVATE_FOLDER_ID || objectId == VIRTUAL_LIST_CALENDAR_FOLDER_ID || objectId == VIRTUAL_LIST_CONTACT_FOLDER_ID || objectId == VIRTUAL_LIST_TASK_FOLDER_ID || objectId == VIRTUAL_LIST_INFOSTORE_FOLDER_ID) {
                 return subfolderFlag;
             }
-            return (iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig, null)).hasNext();
+            return (iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig.getUserPermissionBits(), null)).hasNext();
         } catch (final OXException e) {
             throw e;
         } catch (final SQLException e) {
@@ -952,16 +954,16 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         SearchIterator<FolderObject> iter = null;
         try {
             if (objectId == VIRTUAL_LIST_TASK_FOLDER_ID) {
-                iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(FolderObject.TASK, userId, groups, userConfig, ctx, null);
+                iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(FolderObject.TASK, userId, groups, userConfig.getUserPermissionBits(), ctx, null);
             } else if (objectId == VIRTUAL_LIST_CALENDAR_FOLDER_ID) {
-                iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(FolderObject.CALENDAR, userId, groups, userConfig, ctx, null);
+                iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(FolderObject.CALENDAR, userId, groups, userConfig.getUserPermissionBits(), ctx, null);
             } else if (objectId == VIRTUAL_LIST_CONTACT_FOLDER_ID) {
-                iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(FolderObject.CONTACT, userId, groups, userConfig, ctx, null);
+                iter = OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(FolderObject.CONTACT, userId, groups, userConfig.getUserPermissionBits(), ctx, null);
             } else if (objectId == VIRTUAL_LIST_INFOSTORE_FOLDER_ID) {
                 iter =
-                    OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(FolderObject.INFOSTORE, userId, groups, userConfig, ctx, null);
+                    OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(FolderObject.INFOSTORE, userId, groups, userConfig.getUserPermissionBits(), ctx, null);
             } else {
-                iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig, null);
+                iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(objectId, userId, groups, ctx, userConfig.getUserPermissionBits(), null);
             }
             if (iter.size() != -1) {
                 final int size = iter.size();
@@ -1182,8 +1184,30 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     /**
      * @return <code>true</code> if given user has READ access to this folder, <code>false</code> otherwise
      */
+    public final boolean isVisible(final int userId, final UserPermissionBits userPerm) throws OXException {
+        return (getEffectiveUserPermission(userId, userPerm).isFolderVisible());
+    }
+
+    /**
+     * @return <code>true</code> if given user has READ access to this folder, <code>false</code> otherwise
+     */
     public final boolean isVisible(final int userId, final UserConfiguration userConfig) throws OXException {
         return (getEffectiveUserPermission(userId, userConfig).isFolderVisible());
+    }
+
+    /**
+     * This methods yields the effective OCL permission for the currently logged in user by determining the max. OCL permission which the
+     * user has on folder and applying the user configuration profile.
+     */
+    public final EffectivePermission getEffectiveUserPermission(final int userId, final UserPermissionBits userPerm) throws OXException {
+        if (!containsPermissions()) {
+            try {
+                setPermissionsAsArray(FolderObject.getFolderPermissions(getObjectID(), ContextStorage.getStorageContext(userPerm.getContextId()), null));
+            } catch (final SQLException e) {
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            }
+        }
+        return calcEffectiveUserPermission(userId, userPerm);
     }
 
     /**
@@ -1205,11 +1229,68 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * This methods yields the effective OCL permission for the currently logged in user by determining the max. OCL permission which the
      * user has on folder and applying the user configuration profile.
      */
+    public final EffectivePermission getEffectiveUserPermission(final int userId, final UserPermissionBits upb, final Connection readConArg) throws SQLException, OXException {
+        if (!containsPermissions()) {
+            setPermissionsAsArray(FolderObject.getFolderPermissions(getObjectID(), upb.getContext(), readConArg));
+        }
+        return calcEffectiveUserPermission(userId, upb);
+    }
+
+    /**
+     * This methods yields the effective OCL permission for the currently logged in user by determining the max. OCL permission which the
+     * user has on folder and applying the user configuration profile.
+     */
     public final EffectivePermission getEffectiveUserPermission(final int userId, final UserConfiguration userConfig, final Connection readConArg) throws SQLException, OXException {
         if (!containsPermissions()) {
             setPermissionsAsArray(FolderObject.getFolderPermissions(getObjectID(), userConfig.getContext(), readConArg));
         }
         return calcEffectiveUserPermission(userId, userConfig);
+    }
+
+    private final EffectivePermission calcEffectiveUserPermission(final int userId, final UserPermissionBits userPermissionBits) {
+        final EffectivePermission maxPerm = new EffectivePermission(userId, getObjectID(), getType(userId), getModule(), getCreatedBy(), userPermissionBits);
+        final int[] idArr;
+        {
+            final int[] groups = userPermissionBits.getGroups();
+            idArr = new int[groups.length + 1];
+            idArr[0] = userId;
+            System.arraycopy(groups, 0, idArr, 1, groups.length);
+            Arrays.sort(idArr);
+        }
+        int fp = 0;
+        int orp = 0;
+        int owp = 0;
+        int odp = 0;
+        boolean admin = false;
+        for (final OCLPermission oclPerm : getPermissions()) {
+            if (Arrays.binarySearch(idArr, oclPerm.getEntity()) >= 0) {
+                // Folder permission
+                int cur = oclPerm.getFolderPermission();
+                if (cur > fp) {
+                    fp = cur;
+                }
+                // Read permission
+                cur = oclPerm.getReadPermission();
+                if (cur > orp) {
+                    orp = cur;
+                }
+                // Write permission
+                cur = oclPerm.getWritePermission();
+                if (cur > owp) {
+                    owp = cur;
+                }
+                // Delete permission
+                cur = oclPerm.getDeletePermission();
+                if (cur > odp) {
+                    odp = cur;
+                }
+                // Admin flag
+                admin |= oclPerm.isFolderAdmin();
+            }
+        }
+        maxPerm.setAllPermission(fp, orp, owp, odp);
+        maxPerm.setFolderAdmin(admin);
+        return maxPerm;
     }
 
     private final EffectivePermission calcEffectiveUserPermission(final int userId, final UserConfiguration userConfig) {

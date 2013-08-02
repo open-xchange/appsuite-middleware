@@ -119,8 +119,8 @@ import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -825,13 +825,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserConfiguration userConfiguration;
+            final UserPermissionBits userConfiguration;
             {
                 final Session s = storageParameters.getSession();
                 if (s instanceof ServerSession) {
-                    userConfiguration = ((ServerSession) s).getUserConfiguration();
+                    userConfiguration = ((ServerSession) s).getUserPermissionBits();
                 } else {
-                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                    userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                 }
             }
 
@@ -926,13 +926,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
         try {
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserConfiguration userConfiguration;
+            final UserPermissionBits userConfiguration;
             {
                 final Session s = storageParameters.getSession();
                 if (s instanceof ServerSession) {
-                    userConfiguration = ((ServerSession) s).getUserConfiguration();
+                    userConfiguration = ((ServerSession) s).getUserPermissionBits();
                 } else {
-                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                    userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                 }
             }
             final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
@@ -1060,13 +1060,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final User user = storageParameters.getUser();
             final int userId = user.getId();
             final Context ctx = storageParameters.getContext();
-            final UserConfiguration userConfiguration;
+            final UserPermissionBits userConfiguration;
             {
                 final Session s = storageParameters.getSession();
                 if (s instanceof ServerSession) {
-                    userConfiguration = ((ServerSession) s).getUserConfiguration();
+                    userConfiguration = ((ServerSession) s).getUserPermissionBits();
                 } else {
-                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
+                    userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                 }
             }
             final int iType = getTypeByFolderTypeWithShared(type);
@@ -1174,13 +1174,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
             if (DatabaseFolderStorageUtility.hasSharedPrefix(parentIdentifier)) {
                 final User user = storageParameters.getUser();
                 final Context ctx = storageParameters.getContext();
-                final UserConfiguration userConfiguration;
+                final UserPermissionBits userConfiguration;
                 {
                     final Session s = storageParameters.getSession();
                     if (s instanceof ServerSession) {
-                        userConfiguration = ((ServerSession) s).getUserConfiguration();
+                        userConfiguration = ((ServerSession) s).getUserPermissionBits();
                     } else {
-                        userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                        userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                     }
                 }
                 final List<FolderIdNamePair> subfolderIds =
@@ -1211,13 +1211,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  */
                 final User user = storageParameters.getUser();
                 final Context ctx = storageParameters.getContext();
-                final UserConfiguration userConfiguration;
+                final UserPermissionBits userConfiguration;
                 {
                     final Session s = storageParameters.getSession();
                     if (s instanceof ServerSession) {
-                        userConfiguration = ((ServerSession) s).getUserConfiguration();
+                        userConfiguration = ((ServerSession) s).getUserPermissionBits();
                     } else {
-                        userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                        userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                     }
                 }
                 final List<String[]> subfolderIds =
@@ -1237,13 +1237,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  */
                 final User user = storageParameters.getUser();
                 final Context ctx = storageParameters.getContext();
-                final UserConfiguration userConfiguration;
+                final UserPermissionBits userConfiguration;
                 {
                     final Session s = storageParameters.getSession();
                     if (s instanceof ServerSession) {
-                        userConfiguration = ((ServerSession) s).getUserConfiguration();
+                        userConfiguration = ((ServerSession) s).getUserPermissionBits();
                     } else {
-                        userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                        userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                     }
                 }
                 final List<String[]> subfolderIds = SystemPrivateFolder.getSystemPrivateFolderSubfolders(user, userConfiguration, ctx, con);
@@ -1262,13 +1262,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  */
                 final User user = storageParameters.getUser();
                 final Context ctx = storageParameters.getContext();
-                final UserConfiguration userConfiguration;
+                final UserPermissionBits userConfiguration;
                 {
                     final Session s = storageParameters.getSession();
                     if (s instanceof ServerSession) {
-                        userConfiguration = ((ServerSession) s).getUserConfiguration();
+                        userConfiguration = ((ServerSession) s).getUserPermissionBits();
                     } else {
-                        userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                        userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                     }
                 }
                 final List<String[]> subfolderIds = SystemSharedFolder.getSystemSharedFolderSubfolder(user, userConfiguration, ctx, con);
@@ -1287,13 +1287,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  */
                 final User user = storageParameters.getUser();
                 final Context ctx = storageParameters.getContext();
-                final UserConfiguration userConfiguration;
+                final UserPermissionBits userConfiguration;
                 {
                     final Session s = storageParameters.getSession();
                     if (s instanceof ServerSession) {
-                        userConfiguration = ((ServerSession) s).getUserConfiguration();
+                        userConfiguration = ((ServerSession) s).getUserPermissionBits();
                     } else {
-                        userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                        userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                     }
                 }
                 final List<String[]> subfolderIds = SystemPublicFolder.getSystemPublicFolderSubfolders(user, userConfiguration, ctx, con);
@@ -1312,13 +1312,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  */
                 final User user = storageParameters.getUser();
                 final Context ctx = storageParameters.getContext();
-                final UserConfiguration userConfiguration;
+                final UserPermissionBits userConfiguration;
                 {
                     final Session s = storageParameters.getSession();
                     if (s instanceof ServerSession) {
-                        userConfiguration = ((ServerSession) s).getUserConfiguration();
+                        userConfiguration = ((ServerSession) s).getUserPermissionBits();
                     } else {
-                        userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                        userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                     }
                 }
                 final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
@@ -1640,13 +1640,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserConfiguration userConfiguration;
+            final UserPermissionBits userConfiguration;
             {
                 final Session s = storageParameters.getSession();
                 if (s instanceof ServerSession) {
-                    userConfiguration = ((ServerSession) s).getUserConfiguration();
+                    userConfiguration = ((ServerSession) s).getUserPermissionBits();
                 } else {
-                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                    userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                 }
             }
 
@@ -1756,13 +1756,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserConfiguration userConfiguration;
+            final UserPermissionBits userConfiguration;
             {
                 final Session s = storageParameters.getSession();
                 if (s instanceof ServerSession) {
-                    userConfiguration = ((ServerSession) s).getUserConfiguration();
+                    userConfiguration = ((ServerSession) s).getUserPermissionBits();
                 } else {
-                    userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+                    userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                 }
             }
 

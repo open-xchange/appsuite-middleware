@@ -56,13 +56,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UserConfiguration} - Represents a user configuration.
@@ -830,6 +827,14 @@ public class UserConfiguration implements Serializable, Cloneable {
         return capabilities;
     }
 
+    /**
+     * Gets the appropriate user permission bits for this user configuration.
+     *
+     * @return The user permission bits
+     */
+    public UserPermissionBits getUserPermissionBits() {
+        return new UserPermissionBits(getPermissionBits(), userId, ctx.getContextId()).setGroups(groups);
+    }
 
     /**
      * Calculates this user configuration's extended permissions.

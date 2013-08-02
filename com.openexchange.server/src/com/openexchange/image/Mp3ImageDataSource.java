@@ -324,7 +324,7 @@ public final class Mp3ImageDataSource implements ImageDataSource {
     }
 
     private static com.openexchange.file.storage.File optFile(final String fileId, final String folderId, final ServerSession session) throws OXException {
-        if (!session.getUserConfiguration().hasInfostore()) {
+        if (!session.getUserPermissionBits().hasInfostore()) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(fileId, folderId);
         }
         final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
@@ -352,7 +352,7 @@ public final class Mp3ImageDataSource implements ImageDataSource {
     }
 
     private static ManagedFile optData(final String fileId, final String folderId, final ServerSession session, final ManagedFileManagement fileManagement) throws OXException {
-        if (!session.getUserConfiguration().hasInfostore()) {
+        if (!session.getUserPermissionBits().hasInfostore()) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(fileId, folderId);
         }
         final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();

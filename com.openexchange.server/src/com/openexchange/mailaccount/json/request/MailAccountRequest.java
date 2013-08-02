@@ -174,7 +174,7 @@ public final class MailAccountRequest {
                 Integer.valueOf(session.getContextId()));
         }
 
-        if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
+        if (!session.getUserPermissionBits().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
             throw MailAccountExceptionCodes.NOT_ENABLED.create(
                 Integer.valueOf(session.getUserId()),
                 Integer.valueOf(session.getContextId()));
@@ -200,7 +200,7 @@ public final class MailAccountRequest {
                 Integer.valueOf(session.getContextId()));
         }
 
-        if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
+        if (!session.getUserPermissionBits().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
             throw MailAccountExceptionCodes.NOT_ENABLED.create(
                 Integer.valueOf(session.getUserId()),
                 Integer.valueOf(session.getContextId()));
@@ -215,7 +215,7 @@ public final class MailAccountRequest {
         final int[] ids = DataParser.checkJSONIntArray(jsonObject, AJAXServlet.PARAMETER_DATA);
 
         final JSONArray jsonArray = new JSONArray();
-        if (!session.getUserConfiguration().isMultipleMailAccounts()) {
+        if (!session.getUserPermissionBits().isMultipleMailAccounts()) {
             for (final int id : ids) {
                 if (MailAccount.DEFAULT_ID != id) {
                     throw MailAccountExceptionCodes.NOT_ENABLED.create(
@@ -243,7 +243,7 @@ public final class MailAccountRequest {
     private JSONObject actionNew(final JSONObject jsonObject) throws OXException, JSONException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObject, AJAXServlet.PARAMETER_DATA);
 
-        if (!session.getUserConfiguration().isMultipleMailAccounts()) {
+        if (!session.getUserPermissionBits().isMultipleMailAccounts()) {
             throw MailAccountExceptionCodes.NOT_ENABLED.create(
                 Integer.valueOf(session.getUserId()),
                 Integer.valueOf(session.getContextId()));
@@ -280,7 +280,7 @@ public final class MailAccountRequest {
     private Object actionValidate(final JSONObject jsonObject) throws OXException, OXException, JSONException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObject, AJAXServlet.PARAMETER_DATA);
 
-        if (!session.getUserConfiguration().isMultipleMailAccounts()) {
+        if (!session.getUserPermissionBits().isMultipleMailAccounts()) {
             throw MailAccountExceptionCodes.NOT_ENABLED.create(
                 Integer.valueOf(session.getUserId()),
                 Integer.valueOf(session.getContextId()));
@@ -537,7 +537,7 @@ public final class MailAccountRequest {
         final MailAccountDescription accountDescription = new MailAccountDescription();
         final Set<Attribute> fieldsToUpdate = MailAccountParser.getInstance().parse(accountDescription, jData, new LinkedList<OXException>());
 
-        if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(accountDescription)) {
+        if (!session.getUserPermissionBits().isMultipleMailAccounts() && !isDefaultMailAccount(accountDescription)) {
             throw MailAccountExceptionCodes.NOT_ENABLED.create(
                 Integer.valueOf(session.getUserId()),
                 Integer.valueOf(session.getContextId()));
@@ -611,7 +611,7 @@ public final class MailAccountRequest {
 
         MailAccount[] userMailAccounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
 
-        final boolean multipleEnabled = session.getUserConfiguration().isMultipleMailAccounts();
+        final boolean multipleEnabled = session.getUserPermissionBits().isMultipleMailAccounts();
         final List<MailAccount> tmp = new ArrayList<MailAccount>(userMailAccounts.length);
 
         for (final MailAccount userMailAccount : userMailAccounts) {
@@ -650,7 +650,7 @@ public final class MailAccountRequest {
 
         final JSONArray ids = request.getJSONArray(AJAXServlet.PARAMETER_DATA);
 
-        final boolean multipleEnabled = session.getUserConfiguration().isMultipleMailAccounts();
+        final boolean multipleEnabled = session.getUserPermissionBits().isMultipleMailAccounts();
         final List<MailAccount> accounts = new ArrayList<MailAccount>();
 
         for (int i = 0, size = ids.length(); i < size; i++) {

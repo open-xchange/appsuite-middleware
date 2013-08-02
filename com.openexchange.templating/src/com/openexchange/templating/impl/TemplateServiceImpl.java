@@ -376,7 +376,7 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     private boolean isUserTemplatingEnabled(final ServerSession session) {
-        return "true".equalsIgnoreCase(config.getProperty(USER_TEMPLATING_PROPERTY, "true")) && session.getUserConfiguration().hasInfostore();
+        return "true".equalsIgnoreCase(config.getProperty(USER_TEMPLATING_PROPERTY, "true")) && session.getUserPermissionBits().hasInfostore();
     }
 
     protected boolean existsInFilesystem(final String templateName) {

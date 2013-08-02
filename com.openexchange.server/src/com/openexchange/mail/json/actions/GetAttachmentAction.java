@@ -287,7 +287,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             fileData.put("mailFolder", folderPath);
             fileData.put("mailUID", uid);
             try {
-                if (!session.getUserConfiguration().hasInfostore()) {
+                if (!session.getUserPermissionBits().hasInfostore()) {
                     throw MailExceptionCode.NO_MAIL_ACCESS.create();
                 }
                 final MailPart mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, false);

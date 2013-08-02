@@ -108,7 +108,7 @@ public final class GetAction extends AbstractMailAccountAction implements MailAc
                     Integer.valueOf(session.getContextId()));
             }
 
-            if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
+            if (!session.getUserPermissionBits().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
                 throw MailAccountExceptionCodes.NOT_ENABLED.create(
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));

@@ -82,7 +82,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -111,7 +111,7 @@ public final class TaskLogic {
      * @param userConfig groupware configuration of the user that wants to create the task.
      * @throws OXException if the task can't be created.
      */
-    static void checkNewTask(final Task task, final int userId, final UserConfiguration userConfig, final Set<TaskParticipant> participants) throws OXException {
+    static void checkNewTask(final Task task, final int userId, final UserPermissionBits userConfig, final Set<TaskParticipant> participants) throws OXException {
         checkMissingAttributes(task, userId);
         checkData(task);
         checkDates(task);
@@ -135,7 +135,7 @@ public final class TaskLogic {
      * @param oldParts participants of the original task.
      * @throws OXException if the check fails.
      */
-    static void checkUpdateTask(final Task task, final Task oldTask, final User user, final UserConfiguration userConfig, final Set<TaskParticipant> newParts, final Set<TaskParticipant> oldParts) throws OXException {
+    static void checkUpdateTask(final Task task, final Task oldTask, final User user, final UserPermissionBits userConfig, final Set<TaskParticipant> newParts, final Set<TaskParticipant> oldParts) throws OXException {
         if (task.containsUid()) {
             if (!oldTask.getUid().equals(task.getUid())) {
                 throw TaskExceptionCode.NO_UID_CHANGE.create();

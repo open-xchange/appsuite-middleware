@@ -54,7 +54,6 @@ import java.sql.Connection;
 import java.util.Date;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -64,7 +63,8 @@ import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.log.LogFactory;
 
 /**
  * This class collects all information for getting tasks. It is also able to
@@ -84,7 +84,7 @@ public final class GetTask {
 
     private User user;
 
-    private UserConfiguration userConfig;
+    private UserPermissionBits userConfig;
 
     private final int folderId;
 
@@ -118,14 +118,14 @@ public final class GetTask {
     /**
      * Use this constructor if you want permission checks.
      */
-    GetTask(final Context ctx, final User user, final UserConfiguration userConfig, final int folderId, final int taskId, final StorageType type) {
+    GetTask(final Context ctx, final User user, final UserPermissionBits userConfig, final int folderId, final int taskId, final StorageType type) {
         this(ctx, null, user, userConfig, folderId, taskId, type);
     }
 
     /**
      * Use this constructor if you want permission checks.
      */
-    GetTask(final Context ctx, final Connection con, final User user, final UserConfiguration userConfig, final int folderId, final int taskId, final StorageType type) {
+    GetTask(final Context ctx, final Connection con, final User user, final UserPermissionBits userConfig, final int folderId, final int taskId, final StorageType type) {
         super();
         this.ctx = ctx;
         this.con = con;

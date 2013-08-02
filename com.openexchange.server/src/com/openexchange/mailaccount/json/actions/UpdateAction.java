@@ -165,7 +165,7 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
         final Set<Attribute> notAllowed = new HashSet<Attribute>(fieldsToUpdate);
         notAllowed.removeAll(WEBMAIL_ALLOWED);
         final int contextId = session.getContextId();
-        if (!session.getUserConfiguration().isMultipleMailAccounts() && (!isDefaultMailAccount(accountDescription) || (!notAllowed.isEmpty()))) {
+        if (!session.getUserPermissionBits().isMultipleMailAccounts() && (!isDefaultMailAccount(accountDescription) || (!notAllowed.isEmpty()))) {
             throw
                 MailAccountExceptionCodes.NOT_ENABLED.create(
                 Integer.valueOf(session.getUserId()),

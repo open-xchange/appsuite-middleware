@@ -53,6 +53,8 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -190,13 +192,55 @@ public enum Permission {
         byBit.forEachEntry(new AdderProcedure(bits, set));
     }
 
-    public Permission get(String name) {
+    /**
+     * Gets the permission bits from specified permissions.
+     *
+     * @param col The permissions
+     * @return The permission bits
+     */
+    public static int toBits(final Collection<Permission> col) {
+        if (null == col) {
+            return 0;
+        }
+        final Iterator<Permission> iterator = col.iterator();
+        int bits = 0;
+        for (int i = col.size(); i-- > 0;) {
+            bits = bits | iterator.next().bit;
+        }
+        return bits;
+    }
+
+    /**
+     * Gets the permission by specified identifier.
+     *
+     * @param name The identifier
+     * @return The permission or <code>null</code>
+     */
+    public static Permission get(String name) {
+        if (null == name) {
+            return null;
+        }
+        final String upperCase = toUpperCase(name);
         for (Permission p: values()) {
-            if (p.name().equalsIgnoreCase(name)) {
+            if (p.name().equals(upperCase)) {
                 return p;
             }
         }
         return null;
+    }
+
+    /** ASCII-wise to upper-case */
+    private static String toUpperCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+        }
+        return builder.toString();
     }
 
 } // End of Permission class

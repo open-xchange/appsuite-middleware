@@ -380,7 +380,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
         if (REAL_TREE_ID.equals(treeId) ? PRIVATE_FOLDER_ID.equals(parentId) : INFOSTORE.equals(parentId)) {
             /*-
              * TODO:
-             * 1. Check for file storage permission; e.g. session.getUserConfiguration().isMultipleMailAccounts()
+             * 1. Check for file storage permission; e.g. session.getUserPermissionBits().isMultipleMailAccounts()
              *    Add primary only if not enabled
              * 2. Strip Unified-FileStorage account from obtained list
              */

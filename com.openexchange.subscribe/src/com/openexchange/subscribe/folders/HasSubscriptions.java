@@ -103,7 +103,7 @@ public class HasSubscriptions implements AdditionalFolderField {
 
      @Override
     public List<Object> getValues(final List<FolderObject> folder, final ServerSession session) {
-         if (!session.getUserConfiguration().isSubscription()) {
+         if (!session.getUserPermissionBits().isSubscription()) {
              return allFalse(folder.size());
          }
          final List<String> folderIdsToQuery = new ArrayList<String>(folder.size());

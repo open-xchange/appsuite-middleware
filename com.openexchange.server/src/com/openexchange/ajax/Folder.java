@@ -112,8 +112,8 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.LogFactory;
@@ -340,7 +340,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                      * Ignore 'system' and 'ox folder' folder
                      */
                     continue NextRootFolder;
-                } else if (rootFolder.getObjectID() == FolderObject.SYSTEM_SHARED_FOLDER_ID && !session.getUserConfiguration().hasFullSharedFolderAccess()) {
+                } else if (rootFolder.getObjectID() == FolderObject.SYSTEM_SHARED_FOLDER_ID && !session.getUserPermissionBits().hasFullSharedFolderAccess()) {
                     /*
                      * User does not hold READ_CREATE_SHARED_FOLDERS in user configuration; mark system shared folder to have no subfolders
                      */
@@ -531,7 +531,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         }
                     }
                 } else if (parentId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
-                    if (!session.getUserConfiguration().hasInfostore()) {
+                    if (!session.getUserPermissionBits().hasInfostore()) {
                         throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(getUserName(session),
                             folderModule2String(FolderObject.INFOSTORE),
                             Integer.valueOf(ctx.getContextId()));
@@ -657,12 +657,12 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         /*
                          * Append mail root folders to system 'private' folder
                          */
-                        if (session.getUserConfiguration().hasWebMail() && !ignoreMailfolder) {
+                        if (session.getUserPermissionBits().hasWebMail() && !ignoreMailfolder) {
                             /*
                              * Get all user mail accounts
                              */
                             final List<MailAccount> accounts;
-                            if (session.getUserConfiguration().isMultipleMailAccounts()) {
+                            if (session.getUserPermissionBits().isMultipleMailAccounts()) {
                                 final MailAccountStorageService storageService =
                                     ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
                                 final MailAccount[] accountsArr =
@@ -1395,13 +1395,13 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             int size = q.size();
             Iterator<FolderObject> iter = q.iterator();
             {
-                final UserConfiguration userConf = session.getUserConfiguration();
+                final UserPermissionBits userPerm = session.getUserPermissionBits();
                 final UserStorage us = UserStorage.getInstance();
                 final StringHelper strHelper = StringHelper.valueOf(session.getUser().getLocale());
-                final boolean sharedFolderAccess = userConf.hasFullSharedFolderAccess();
+                final boolean sharedFolderAccess = userPerm.hasFullSharedFolderAccess();
                 for (int i = 0; i < size; i++) {
                     final FolderObject fo = iter.next();
-                    if (fo.isVisible(session.getUserId(), userConf)) {
+                    if (fo.isVisible(session.getUserId(), userPerm)) {
                         if (fo.isShared(session.getUserId())) {
                             if (sharedFolderAccess) {
                                 /*
@@ -1429,7 +1429,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 }
                             }
                         } else if (FolderObject.PUBLIC == fo.getType()) {
-                            if (access.getFolderPermission(fo.getParentFolderID(), session.getUserId(), userConf).isFolderVisible()) {
+                            if (access.getFolderPermission(fo.getParentFolderID(), session.getUserId(), userPerm).isFolderVisible()) {
                                 /*
                                  * Parent is already visible: Add real parent
                                  */
@@ -1454,22 +1454,22 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                  * Check virtual list folders
                  */
                 if (checkVirtualListFolders && !ignoreDeleted) {
-                    if (userConf.hasTask() && !foldersqlinterface.getNonTreeVisiblePublicTaskFolders().hasNext()) {
+                    if (userPerm.hasTask() && !foldersqlinterface.getNonTreeVisiblePublicTaskFolders().hasNext()) {
                         final FolderObject virtualTasks = new FolderObject(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
                         virtualTasks.setLastModified(DATE_0);
                         deletedQueue.add(virtualTasks);
                     }
-                    if (userConf.hasCalendar() && !foldersqlinterface.getNonTreeVisiblePublicCalendarFolders().hasNext()) {
+                    if (userPerm.hasCalendar() && !foldersqlinterface.getNonTreeVisiblePublicCalendarFolders().hasNext()) {
                         final FolderObject virtualCalendar = new FolderObject(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID);
                         virtualCalendar.setLastModified(DATE_0);
                         deletedQueue.add(virtualCalendar);
                     }
-                    if (userConf.hasContact() && !foldersqlinterface.getNonTreeVisiblePublicContactFolders().hasNext()) {
+                    if (userPerm.hasContact() && !foldersqlinterface.getNonTreeVisiblePublicContactFolders().hasNext()) {
                         final FolderObject virtualContact = new FolderObject(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID);
                         virtualContact.setLastModified(DATE_0);
                         deletedQueue.add(virtualContact);
                     }
-                    if (userConf.hasInfostore() && !foldersqlinterface.getNonTreeVisiblePublicInfostoreFolders().hasNext()) {
+                    if (userPerm.hasInfostore() && !foldersqlinterface.getNonTreeVisiblePublicInfostoreFolders().hasNext()) {
                         final FolderObject virtualInfostore = new FolderObject(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
                         virtualInfostore.setLastModified(DATE_0);
                         deletedQueue.add(virtualInfostore);
@@ -1539,7 +1539,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                  * Get all user mail accounts
                  */
                 final List<MailAccount> accounts;
-                if (session.getUserConfiguration().isMultipleMailAccounts()) {
+                if (session.getUserPermissionBits().isMultipleMailAccounts()) {
                     final MailAccountStorageService storageService =
                         ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
                     final MailAccount[] accountsArr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
@@ -1866,7 +1866,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
                 final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
                 FolderObject fo = new FolderObject(updateFolderId);
-                new FolderParser(session.getUserConfiguration()).parse(fo, jsonObj);
+                new FolderParser(session.getUserPermissionBits()).parse(fo, jsonObj);
                 fo = foldersqlinterface.saveFolderObject(fo, timestamp);
                 retval = Integer.toString(fo.getObjectID());
                 lastModifiedDate = fo.getLastModified();
@@ -2000,7 +2000,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session);
                 FolderObject fo = new FolderObject();
                 fo.setParentFolderID(parentFolderId);
-                new FolderParser(session.getUserConfiguration()).parse(fo, jsonObj);
+                new FolderParser(session.getUserPermissionBits()).parse(fo, jsonObj);
                 fo = foldersqlinterface.saveFolderObject(fo, null);
                 retval = Integer.toString(fo.getObjectID());
                 lastModifiedDate = fo.getLastModified();
@@ -2144,7 +2144,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     } else {
                         final MessagingFolderIdentifier mfi = MessagingFolderIdentifier.parseFQN(deleteIdentifier);
                         if (null == mfi) {
-                            if (session.getUserConfiguration().hasWebMail()) {
+                            if (session.getUserPermissionBits().hasWebMail()) {
                                 if (mailInterface == null) {
                                     mailInterface = MailServletInterface.getInstance(session);
                                 }

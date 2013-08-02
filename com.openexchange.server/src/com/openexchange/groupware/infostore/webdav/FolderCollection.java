@@ -74,6 +74,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
@@ -636,7 +638,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			}
 			final ServerSession session = getSession();
 			final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
-			final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext());
+			final UserPermissionBits userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), session.getContext());
 			final Context ctx = session.getContext();
 
 			final SearchIterator<FolderObject> iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(id, user.getId(),user.getGroups(), ctx, userConfig, new Timestamp(0));

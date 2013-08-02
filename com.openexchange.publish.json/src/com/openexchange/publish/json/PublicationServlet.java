@@ -84,7 +84,7 @@ public class PublicationServlet extends MultipleAdapterServlet {
 
     @Override
     protected boolean hasModulePermission(ServerSession session) {
-        return session.getUserConfiguration().isPublication();
+        return session.getUserPermissionBits().isPublication();
     }
 
     @Override

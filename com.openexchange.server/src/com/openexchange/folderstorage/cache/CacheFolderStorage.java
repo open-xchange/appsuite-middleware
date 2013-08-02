@@ -305,7 +305,7 @@ public final class CacheFolderStorage implements FolderStorage {
                                 final long st = debugEnabled ? System.currentTimeMillis() : 0L;
                                 final StorageParameters params = newStorageParameters(storageParameters);
                                 params.putParameter(MailFolderType.getInstance(), StorageParameters.PARAM_ACCESS_FAST, Boolean.FALSE);
-                                if (session.getUserConfiguration().isMultipleMailAccounts()) {
+                                if (session.getUserPermissionBits().isMultipleMailAccounts()) {
                                     final MailAccountStorageService storageService =
                                         serviceRegistry.getService(MailAccountStorageService.class, true);
                                     final MailAccount[] accounts =

@@ -134,8 +134,8 @@ import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.FullnameArgument;
@@ -2113,13 +2113,13 @@ public final class OutlookFolderStorage implements FolderStorage {
         /*
          * User configuration
          */
-        final UserConfiguration userConfiguration;
+        final UserPermissionBits userConfiguration;
         {
             final Session s = parameters.getSession();
             if (s instanceof ServerSession) {
-                userConfiguration = ((ServerSession) s).getUserConfiguration();
+                userConfiguration = ((ServerSession) s).getUserPermissionBits();
             } else {
-                userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), parameters.getContext());
+                userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), parameters.getContext());
             }
         }
         /*
