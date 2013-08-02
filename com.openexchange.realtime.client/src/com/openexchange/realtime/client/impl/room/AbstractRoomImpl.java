@@ -255,7 +255,7 @@ public abstract class AbstractRoomImpl implements RTRoom {
     protected void send(JSONObject objectToSend) throws RTException {
         try {
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Handing message {} too connection.send()", objectToSend);
+                LOG.debug("Handing message {} to connection.send()", objectToSend);
             }
             this.connection.sendBlocking(objectToSend, 1L, TimeUnit.MINUTES);
             this.resetTimer();

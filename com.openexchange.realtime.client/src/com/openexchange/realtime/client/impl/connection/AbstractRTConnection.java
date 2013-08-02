@@ -329,15 +329,21 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
                         throw new RTException("Array must only contain JSONObjects");
                     }
                     JSONObject stanza = (JSONObject) next;
-                    RTMessageHandler handlerForSelector = getHandlerForSelector(stanza);
-                    if (protocol.handleIncoming(stanza) && handlerForSelector != null) {
+                    if (protocol.handleIncoming(stanza)) {
+                        RTMessageHandler handlerForSelector = getHandlerForSelector(stanza);
+                        if(handlerForSelector == null) {
+                            throw new RTException("Couldn't find handler for received message: " + stanza.toString());
+                        }
                         handlerForSelector.onMessage(stanza);
                     }
                 }
             } else if(json.isObject()){
                 JSONObject stanza = (JSONObject)json;
-                RTMessageHandler handlerForSelector = getHandlerForSelector(stanza);
-                if (protocol.handleIncoming(stanza) && handlerForSelector != null) {
+                if (protocol.handleIncoming(stanza)) {
+                    RTMessageHandler handlerForSelector = getHandlerForSelector(stanza);
+                    if(handlerForSelector == null) {
+                        throw new RTException("Couldn't find handler for received message: " + stanza.toString());
+                    }
                     handlerForSelector.onMessage(stanza);
                 }
             } else {
