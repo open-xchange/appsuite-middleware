@@ -98,6 +98,8 @@ public final class Bug27708Test extends AbstractMailTest {
 
     public void testBug27708() throws Exception {
 
+
+
         for (int i = 0; i < 100; i++) {
             final CountDownLatch startUpLatch = new CountDownLatch(1);
             final CountDownLatch finishedLatch = new CountDownLatch(2);
@@ -108,9 +110,10 @@ public final class Bug27708Test extends AbstractMailTest {
                     @Override
                     public void run() {
                         try {
+                            String sendAddress = client.getValues().getSendAddress();
                             final JSONObject jMail =
                                 new JSONObject(
-                                    "{\"from\":\"Thorben Betten <thorben.betten@premium>\"," + "\"to\":\"Thorben Betten <thorben.betten@premium>\"," + "\"cc\":\"\",\"bcc\":\"\"," + "\"subject\":\"AAAA\"," + "\"priority\":\"3\"," + "\"attachments\":" + "[" + "{\"content_type\":\"ALTERNATIVE\",\"content\":\"<html><body style=\\u0022\\u0022><div>AAAA AAAA AAAA AAAA AAAA</div>\\u000a<div>AAAA AAAA AAAA AAAA AAAA</div>\\u000a<div>AAAA AAAA AAAA AAAA AAAA</div>\\u000a<div>AAAAAAAA AAAA AAAA AAAA</div>\\u000a<div>AAAA AAAA AAAA AAAA AAAA</div>\\u000a<div>AAAA AAAA AAAA AAAA AAAA</div>\\u000a<div>AAAA AAAA AAAA AAAA AAAA</div>\\u000a<div>AAAA AAAA AAAA AAAA AAAA</div></body></html>\"}" + "]," + "\"datasources\":[]}");
+                                    "{\"from\":\""+sendAddress+"\"," + "\"to\":\""+sendAddress+"\"," + "\"cc\":\"\",\"bcc\":\"\"," + "\"subject\":\"AAAA\"," + "\"priority\":\"3\"," + "\"attachments\":" + "[" + "{\"content_type\":\"ALTERNATIVE\",\"content\":\"<html><body style=\\u0022\\u0022><div>AAAA AAAA AAAA AAAA AAAA</div>\\u000a<div>AAAA AAAA AAAA AAAA AAAA</div>\\u000a<div>AAAA AAAA AAAA AAAA AAAA</div>\\u000a<div>AAAAAAAA AAAA AAAA AAAA</div>\\u000a<div>AAAA AAAA AAAA AAAA AAAA</div>\\u000a<div>AAAA AAAA AAAA AAAA AAAA</div>\\u000a<div>AAAA AAAA AAAA AAAA AAAA</div>\\u000a<div>AAAA AAAA AAAA AAAA AAAA</div></body></html>\"}" + "]," + "\"datasources\":[]}");
 
                             final String mailObject_25kb = jMail.toString();
                             final SendRequest sendRequest = new SendRequest(mailObject_25kb);
@@ -148,9 +151,10 @@ public final class Bug27708Test extends AbstractMailTest {
                     @Override
                     public void run() {
                         try {
+                            String sendAddress = client.getValues().getSendAddress();
                             final JSONObject jMail =
                                 new JSONObject(
-                                    "{\"from\":\"Thorben Betten <thorben.betten@premium>\"," + "\"to\":\"Thorben Betten <thorben.betten@premium>\"," + "\"cc\":\"\",\"bcc\":\"\"," + "\"subject\":\"BBBB\"," + "\"priority\":\"3\"," + "\"attachments\":" + "[" + "{\"content_type\":\"ALTERNATIVE\",\"content\":\"<html><body style=\\u0022\\u0022><div>BBBB BBBB BBBB BBBB BBBB</div>\\u000a<div>BBBB BBBB BBBB BBBB BBBB</div>\\u000a<div>BBBB BBBB BBBB BBBB BBBB</div>\\u000a<div>BBBBBBBB BBBB BBBB BBBB</div>\\u000a<div>BBBB BBBB BBBB BBBB BBBB</div>\\u000a<div>BBBB BBBB BBBB BBBB BBBB</div>\\u000a<div>BBBB BBBB BBBB BBBB BBBB</div>\\u000a<div>BBBB BBBB BBBB BBBB BBBB</div></body></html>\"}" + "]," + "\"datasources\":[]}");
+                                    "{\"from\":\""+sendAddress+"\"," + "\"to\":\""+sendAddress+"\"," + "\"cc\":\"\",\"bcc\":\"\"," + "\"subject\":\"BBBB\"," + "\"priority\":\"3\"," + "\"attachments\":" + "[" + "{\"content_type\":\"ALTERNATIVE\",\"content\":\"<html><body style=\\u0022\\u0022><div>BBBB BBBB BBBB BBBB BBBB</div>\\u000a<div>BBBB BBBB BBBB BBBB BBBB</div>\\u000a<div>BBBB BBBB BBBB BBBB BBBB</div>\\u000a<div>BBBBBBBB BBBB BBBB BBBB</div>\\u000a<div>BBBB BBBB BBBB BBBB BBBB</div>\\u000a<div>BBBB BBBB BBBB BBBB BBBB</div>\\u000a<div>BBBB BBBB BBBB BBBB BBBB</div>\\u000a<div>BBBB BBBB BBBB BBBB BBBB</div></body></html>\"}" + "]," + "\"datasources\":[]}");
 
                             jMail.put(MailJSONField.FLAGS.getKey(), MailMessage.FLAG_DRAFT);
 
