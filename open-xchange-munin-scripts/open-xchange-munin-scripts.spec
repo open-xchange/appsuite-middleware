@@ -16,6 +16,7 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Open-Xchange Munin scripts
 Requires:	   open-xchange-core >= @OXVERSION@
 Requires:      munin-node
+Conflicts:     open-xchange-munin-scripts-jolokia
 
 %description
 Munin is a highly flexible and powerful solution used to create graphs of
