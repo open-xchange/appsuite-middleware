@@ -406,7 +406,7 @@ public final class Init {
     }
 
     /**
-     * 
+     *
      */
     private static void startAndInjectCapabilitiesServices() {
         AbstractCapabilityService c = new AbstractCapabilityService(new ServiceLookup() {
@@ -433,11 +433,12 @@ public final class Init {
     }
 
     /**
-     * 
+     *
      */
     private static void startAndInjectFullPrimaryKeySupportService() {
         FullPrimaryKeySupportImpl s = new FullPrimaryKeySupportImpl(null);
         services.put(FullPrimaryKeySupportService.class, s);
+        FullPrimaryKeySupportService.SERVICE_REFERENCE.set(s);
         TestServiceRegistry.getInstance().addService(FullPrimaryKeySupportService.class, s);
     }
 
