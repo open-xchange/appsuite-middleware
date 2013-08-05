@@ -1,3 +1,7 @@
+* 2013-08-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28039: Added null guard to SOAP call
+
 * 2013-08-01 - marcus.klein@open-xchange.com
 
  - Fix for bug 27840: Switched task types for actual and target costs to DECIMAL(12,2) in the database and BigDecimal in Java to be able to

@@ -58,7 +58,11 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
     public Publication getPublication(final GetPublication parameters) throws RemoteException_Exception, MissingServiceException_Exception, NoSuchPublicationException_Exception {
         final OXPublicationInterface publicationInterface = getPublicationInterface();
         try {
-            final com.openexchange.admin.rmi.dataobjects.Publication pub = publicationInterface.getPublication(new com.openexchange.admin.rmi.dataobjects.Context(Integer.valueOf(parameters.getContextid())), parameters.getUrl(), soap2Credentials(parameters.getAuth()));
+            final String contextid = parameters.getContextid();
+            if (isEmpty(contextid)) {
+                throw new RemoteException_Exception("Missing context identifier.");
+            }
+            final com.openexchange.admin.rmi.dataobjects.Publication pub = publicationInterface.getPublication(new com.openexchange.admin.rmi.dataobjects.Context(Integer.valueOf(contextid)), parameters.getUrl(), soap2Credentials(parameters.getAuth()));
             if (null == pub) {
                 throw new NoSuchPublicationException("No such publication with URL \"" + parameters.getUrl() + "\" found");
             }
@@ -76,7 +80,11 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
     public void deletePublication(final DeletePublication parameters) throws RemoteException_Exception, MissingServiceException_Exception, NoSuchPublicationException_Exception {
         final OXPublicationInterface publicationInterface = getPublicationInterface();
         try {
-            final boolean success = publicationInterface.deletePublication(new com.openexchange.admin.rmi.dataobjects.Context(Integer.valueOf(parameters.getContextid())), parameters.getUrl(), soap2Credentials(parameters.getAuth()));
+            final String contextid = parameters.getContextid();
+            if (isEmpty(contextid)) {
+                throw new RemoteException_Exception("Missing context identifier.");
+            }
+            final boolean success = publicationInterface.deletePublication(new com.openexchange.admin.rmi.dataobjects.Context(Integer.valueOf(contextid)), parameters.getUrl(), soap2Credentials(parameters.getAuth()));
             if (!success) {
                 throw new RemoteException("Failed deleting publication with URL \""+parameters.getUrl()+"\" for any reason.");
             }
@@ -88,7 +96,7 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
             throw new MissingServiceException_Exception(e.getMessage(), e);
         }
     }
-    
+
     private static com.openexchange.admin.rmi.dataobjects.Credentials soap2Credentials(final Credentials soapCredentials) {
         if (null == soapCredentials) {
             return null;
