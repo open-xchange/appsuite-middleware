@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.update;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 
 /**
  * This class provides the information if full primary key support should be used. The feature should only exist before OX version 7.6,
@@ -59,6 +61,9 @@ package com.openexchange.groupware.update;
  * @since 7.4
  */
 public interface FullPrimaryKeySupportService {
+
+    /** The service reference */
+    public static final AtomicReference<FullPrimaryKeySupportService> SERVICE_REFERENCE = new AtomicReference<FullPrimaryKeySupportService>();
 
     /**
      * Checks if full primary key is supported.

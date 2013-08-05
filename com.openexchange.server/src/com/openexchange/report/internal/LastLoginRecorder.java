@@ -65,6 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
+import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
@@ -193,11 +194,21 @@ public class LastLoginRecorder implements LoginHandlerService {
                 stmt.setBytes(5, UUIDs.toByteArray(UUID.randomUUID()));
                 stmt.executeUpdate();
             } else {
-                stmt = con.prepareStatement("UPDATE user_attribute SET value=? WHERE cid=? AND uuid=?");
-                stmt.setString(1, Long.toString(stamp));
-                stmt.setInt(2, contextId);
-                stmt.setBytes(3, UUIDs.toByteArray(uuid));
-                stmt.executeUpdate();
+                final FullPrimaryKeySupportService fullPrimaryKeySupportService = FullPrimaryKeySupportService.SERVICE_REFERENCE.get();
+                if (null != fullPrimaryKeySupportService && fullPrimaryKeySupportService.isFullPrimaryKeySupported()) {
+                    stmt = con.prepareStatement("UPDATE user_attribute SET value=? WHERE cid=? AND uuid=?");
+                    stmt.setString(1, Long.toString(stamp));
+                    stmt.setInt(2, contextId);
+                    stmt.setBytes(3, UUIDs.toByteArray(uuid));
+                    stmt.executeUpdate();
+                } else {
+                    stmt = con.prepareStatement("UPDATE user_attribute SET value=? WHERE cid=? AND id=? AND key=?");
+                    stmt.setString(1, Long.toString(stamp));
+                    stmt.setInt(2, contextId);
+                    stmt.setInt(3, userId);
+                    stmt.setString(4, key);
+                    stmt.executeUpdate();
+                }
             }
 
         } catch (final SQLException e) {

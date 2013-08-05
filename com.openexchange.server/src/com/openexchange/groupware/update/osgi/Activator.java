@@ -88,6 +88,7 @@ public class Activator extends HousekeepingActivator {
         final FullPrimaryKeySupportImpl fullPrimaryKeySupport = new FullPrimaryKeySupportImpl(configService);
         registerService(FullPrimaryKeySupportService.class, fullPrimaryKeySupport);
         ServerServiceRegistry.getInstance().addService(FullPrimaryKeySupportService.class, fullPrimaryKeySupport);
+        FullPrimaryKeySupportService.SERVICE_REFERENCE.set(fullPrimaryKeySupport);
 
         ExcludedList.getInstance().configure(configService);
         InternalList.getInstance().start();
@@ -96,7 +97,7 @@ public class Activator extends HousekeepingActivator {
         rememberTracker(new ServiceTracker<CacheService, CacheService>(context, CacheService.class.getName(), new CacheCustomizer(context)));
 
         openTrackers();
-        
+
         registerService(CreateTableService.class, new CreateUpdateTaskTable(fullPrimaryKeySupport));
     }
 
