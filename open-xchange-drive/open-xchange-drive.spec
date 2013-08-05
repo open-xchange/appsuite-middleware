@@ -42,8 +42,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/etc/
 %config(noreplace) /opt/open-xchange/etc/drive.properties
-%config(noreplace) /opt/open-xchange/etc/driveapn.properties
-%config(noreplace) /opt/open-xchange/etc/drivegcm.properties
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 
