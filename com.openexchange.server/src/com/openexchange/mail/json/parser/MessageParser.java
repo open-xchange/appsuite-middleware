@@ -106,7 +106,6 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.DataMailPart;
 import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
-import com.openexchange.mail.dataobjects.compose.Monitor;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
@@ -170,8 +169,8 @@ public final class MessageParser {
      * @return A corresponding instance of {@link ComposedMailMessage}
      * @throws OXException If parsing fails
      */
-    public static ComposedMailMessage parse4Draft(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, final List<OXException> warnings, Monitor monitor) throws OXException {
-        return parse(jsonObj, uploadEvent, session, accountId, null, null, false, warnings, monitor)[0];
+    public static ComposedMailMessage parse4Draft(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, final List<OXException> warnings) throws OXException {
+        return parse(jsonObj, uploadEvent, session, accountId, null, null, false, warnings)[0];
     }
 
     /**
@@ -189,8 +188,8 @@ public final class MessageParser {
      * @return The corresponding instances of {@link ComposedMailMessage}
      * @throws OXException If parsing fails
      */
-    public static ComposedMailMessage[] parse4Transport(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, final String protocol, final String hostName, final List<OXException> warnings, Monitor monitor) throws OXException {
-        return parse(jsonObj, uploadEvent, session, accountId, protocol, hostName, true, warnings, monitor);
+    public static ComposedMailMessage[] parse4Transport(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, final String protocol, final String hostName, final List<OXException> warnings) throws OXException {
+        return parse(jsonObj, uploadEvent, session, accountId, protocol, hostName, true, warnings);
     }
 
     /**
@@ -210,12 +209,11 @@ public final class MessageParser {
      * @return The corresponding instances of {@link ComposedMailMessage}
      * @throws OXException If parsing fails
      */
-    private static ComposedMailMessage[] parse(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, final String protocol, final String hostName, final boolean prepare4Transport, final List<OXException> warnings, Monitor monitor) throws OXException {
+    private static ComposedMailMessage[] parse(final JSONObject jsonObj, final UploadEvent uploadEvent, final Session session, final int accountId, final String protocol, final String hostName, final boolean prepare4Transport, final List<OXException> warnings) throws OXException {
         try {
             final TransportProvider provider = TransportProviderRegistry.getTransportProviderBySession(session, accountId);
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
             final ComposedMailMessage composedMail = provider.getNewComposedMailMessage(session, ctx);
-            composedMail.setMonitor(monitor);
             composedMail.setAccountId(accountId);
             /*
              * Select appropriate handler
@@ -436,7 +434,6 @@ public final class MessageParser {
                     {
                         final JSONObject tmp = attachmentArray.getJSONObject(0);
                         sContent = tmp.getString(CONTENT);
-                        Monitor.compareChecksum(sContent, transportMail.getMonitor());
                         final TextBodyMailPart part = provider.getNewTextBodyPart(sContent);
                         final String contentType = parseContentType(tmp.getString(CONTENT_TYPE));
                         part.setContentType(contentType);
@@ -445,7 +442,6 @@ public final class MessageParser {
                         }
                         transportMail.setContentType(part.getContentType());
                         // Add text part
-                        Monitor.compareAndSetChecksum(sContent, part.getHTML(), transportMail.getMonitor());
                         attachmentHandler.setTextPart(part);
                     }
                     /*

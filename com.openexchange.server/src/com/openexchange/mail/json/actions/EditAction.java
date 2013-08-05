@@ -66,7 +66,6 @@ import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.dataobjects.compose.Monitor;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.mime.MimeMailException;
@@ -157,7 +156,7 @@ public final class EditAction extends AbstractMailAction {
                         }
                     }
                     final ComposedMailMessage composedMail =
-                        MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, MailAccount.DEFAULT_ID, warnings, new Monitor(2).put(Monitor.PARAM_CHECKSUM, sha256));
+                        MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, MailAccount.DEFAULT_ID, warnings);
                     /*
                      * ... and edit draft
                      */

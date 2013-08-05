@@ -89,7 +89,6 @@ public abstract class ComposedMailMessage extends MailMessage {
     private ComposeType sendType;
     private transient MimeMessageFiller filler;
     private final Set<InternetAddress> recipients;
-    private volatile Monitor monitor;
 
     /**
      * Default constructor
@@ -99,24 +98,6 @@ public abstract class ComposedMailMessage extends MailMessage {
         this.session = session;
         this.ctx = ctx;
         recipients = new HashSet<InternetAddress>();
-    }
-
-    /**
-     * Sets the monitor
-     *
-     * @param monitor The monitor to set
-     */
-    public void setMonitor(final Monitor monitor) {
-        this.monitor = monitor;
-    }
-
-    /**
-     * Gets the monitor
-     *
-     * @return The monitor
-     */
-    public Monitor getMonitor() {
-        return monitor;
     }
 
     /**

@@ -122,7 +122,6 @@ import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartType;
-import com.openexchange.mail.dataobjects.compose.Monitor;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -908,9 +907,9 @@ public class MimeMessageFiller {
                          * Well-formed HTML
                          */
                         // final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
-                        primaryMultipart.addBodyPart(createTextBodyPart(toArray(content, content), charset, false, true, type, mail.getMonitor()), 0);
+                        primaryMultipart.addBodyPart(createTextBodyPart(toArray(content, content), charset, false, true, type), 0);
                     } else {
-                        primaryMultipart.addBodyPart(createTextBodyPart(toArray(plainText, plainText), charset, false, false, type, mail.getMonitor()), 0);
+                        primaryMultipart.addBodyPart(createTextBodyPart(toArray(plainText, plainText), charset, false, false, type), 0);
                     }
                 } else {
                     /*-
@@ -919,7 +918,7 @@ public class MimeMessageFiller {
                      * Well-formed HTML
                      */
                     final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
-                    primaryMultipart.addBodyPart(createHtmlBodyPart(wellFormedHTMLContent, charset, mail.getMonitor()));
+                    primaryMultipart.addBodyPart(createHtmlBodyPart(wellFormedHTMLContent, charset));
                 }
             }
             /*
@@ -1277,7 +1276,7 @@ public class MimeMessageFiller {
              */
             final String wellFormedHTMLContent = htmlService.getConformHTML(mailBody, charset);
             htmlContent = wellFormedHTMLContent;
-            final BodyPart html = createHtmlBodyPart(wellFormedHTMLContent, charset, mail.getMonitor());
+            final BodyPart html = createHtmlBodyPart(wellFormedHTMLContent, charset);
             /*
              * Add HTML part to superior multipart
              */
@@ -1288,9 +1287,9 @@ public class MimeMessageFiller {
          */
         final String plainText = textBodyPart.getPlainText();
         if (null == plainText) {
-            alternativeMultipart.addBodyPart(createTextBodyPart(toArray(htmlContent, mailBody), charset, true, true, type, mail.getMonitor()), 0);
+            alternativeMultipart.addBodyPart(createTextBodyPart(toArray(htmlContent, mailBody), charset, true, true, type), 0);
         } else {
-            alternativeMultipart.addBodyPart(createTextBodyPart(toArray(plainText, plainText), charset, true, false, type, mail.getMonitor()), 0);
+            alternativeMultipart.addBodyPart(createTextBodyPart(toArray(plainText, plainText), charset, true, false, type), 0);
         }
         return alternativeMultipart;
     }
@@ -1324,7 +1323,7 @@ public class MimeMessageFiller {
         /*
          * Process referenced local image files and insert returned html content as a new body part to first index
          */
-        relatedMultipart.addBodyPart(createHtmlBodyPart(htmlContent[0], charset, mail.getMonitor()), 0);
+        relatedMultipart.addBodyPart(createHtmlBodyPart(htmlContent[0], charset), 0);
         /*
          * Traverse Content-IDs occurring in original HTML content
          */
@@ -1577,7 +1576,7 @@ public class MimeMessageFiller {
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If a processing error occurs
      */
-    protected final BodyPart createTextBodyPart(final String[] contents, final String charset, final boolean appendHref, final boolean isHtml, final ComposeType type, final Monitor monitor) throws MessagingException, OXException {
+    protected final BodyPart createTextBodyPart(final String[] contents, final String charset, final boolean appendHref, final boolean isHtml, final ComposeType type) throws MessagingException, OXException {
         /*
          * Convert HTML content to regular text. First: Create a body part for text content
          */
@@ -1626,7 +1625,7 @@ public class MimeMessageFiller {
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If a processing error occurs
      */
-    protected final BodyPart createHtmlBodyPart(final String wellFormedHTMLContent, final String charset, final Monitor monitor) throws MessagingException, OXException {
+    protected final BodyPart createHtmlBodyPart(final String wellFormedHTMLContent, final String charset) throws MessagingException, OXException {
         try {
             final String contentType = PAT_HTML_CT.replaceFirst(REPLACE_CS, com.openexchange.java.Strings.quoteReplacement(charset));
             final MimeBodyPart html = new MimeBodyPart();

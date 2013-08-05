@@ -61,7 +61,6 @@ import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.dataobjects.compose.Monitor;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mailaccount.MailAccount;
@@ -118,7 +117,7 @@ public final class AutosaveAction extends AbstractMailAction {
                  * Parse with default account's transport provider
                  */
                 final ComposedMailMessage composedMail =
-                    MessageParser.parse4Draft(jsonMailObj, (UploadEvent) null, session, MailAccount.DEFAULT_ID, warnings, new Monitor(2).put(Monitor.PARAM_CHECKSUM, sha256));
+                    MessageParser.parse4Draft(jsonMailObj, (UploadEvent) null, session, MailAccount.DEFAULT_ID, warnings);
                 if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == 0) {
                     LOG.warn("Missing \\Draft flag on action=autosave in JSON message object", new Throwable());
                     composedMail.setFlag(MailMessage.FLAG_DRAFT, true);

@@ -75,6 +75,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
@@ -86,7 +87,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
-import com.openexchange.mail.dataobjects.compose.Monitor;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -176,6 +176,7 @@ public final class NewAction extends AbstractMailAction {
                     final JSONObject jAttachment = jAttachments.optJSONObject(0);
                     if (null != jAttachment) {
                         final String sContent = jAttachment.optString(CONTENT, null);
+                        Strings.outCodePoints(sContent);
                         sha256 = null == sContent ? null : HashUtility.getSha256(sContent, "hex");
                     }
                 }
@@ -213,7 +214,7 @@ public final class NewAction extends AbstractMailAction {
                 /*
                  * ... and save draft
                  */
-                final ComposedMailMessage composedMail = MessageParser.parse4Draft(jMail, uploadEvent, session, accountId, warnings, new Monitor(2).put(Monitor.PARAM_CHECKSUM, sha256));
+                final ComposedMailMessage composedMail = MessageParser.parse4Draft(jMail, uploadEvent, session, accountId, warnings);
                 final ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : null;
                 if (null != sendType) {
                     composedMail.setSendType(sendType);
@@ -228,7 +229,7 @@ public final class NewAction extends AbstractMailAction {
                  * ... and send message
                  */
                 final String protocol = request.isSecure() ? "https://" : "http://";
-                final ComposedMailMessage[] composedMails = MessageParser.parse4Transport(jMail, uploadEvent, session, accountId, protocol, request.getHostname(), warnings, new Monitor(2).put(Monitor.PARAM_CHECKSUM, sha256));
+                final ComposedMailMessage[] composedMails = MessageParser.parse4Transport(jMail, uploadEvent, session, accountId, protocol, request.getHostname(), warnings);
                 ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
                 if (ComposeType.DRAFT.equals(sendType)) {
                     final boolean deleteDraftOnTransport = jMail.optBoolean("deleteDraftOnTransport", false);
