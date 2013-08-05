@@ -51,7 +51,7 @@ package com.openexchange.realtime.client;
 
 /**
  * {@link RTConnectionProperties} are used to configure a {@link RTConnection}.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class RTConnectionProperties {
@@ -74,13 +74,15 @@ public class RTConnectionProperties {
 
     private boolean secure = true;
 
+    private boolean traceMessages = false;
+
     private RTConnectionProperties() {
         super();
     }
 
     /**
      * Gets the user
-     * 
+     *
      * @return The user
      */
     public String getUser() {
@@ -89,7 +91,7 @@ public class RTConnectionProperties {
 
     /**
      * Gets the password
-     * 
+     *
      * @return The password
      */
     public String getPassword() {
@@ -98,7 +100,7 @@ public class RTConnectionProperties {
 
     /**
      * Gets the unique resource identifying the client.
-     * 
+     *
      * @return the resource
      */
     public String getResource() {
@@ -107,7 +109,7 @@ public class RTConnectionProperties {
 
     /**
      * Gets the type
-     * 
+     *
      * @return The type
      */
     public RTConnectionType getType() {
@@ -116,7 +118,7 @@ public class RTConnectionProperties {
 
     /**
      * Gets the host
-     * 
+     *
      * @return The host
      */
     public String getHost() {
@@ -125,7 +127,7 @@ public class RTConnectionProperties {
 
     /**
      * Gets the port
-     * 
+     *
      * @return The port
      */
     public int getPort() {
@@ -134,7 +136,7 @@ public class RTConnectionProperties {
 
     /**
      * Gets the connection type.
-     * 
+     *
      * @return The connection type.
      */
     public RTConnectionType getConnectionType() {
@@ -143,7 +145,7 @@ public class RTConnectionProperties {
 
     /**
      * Get if the connection should be secure.
-     * 
+     *
      * @return true if the connection should be secure
      */
     public boolean getSecure() {
@@ -151,8 +153,15 @@ public class RTConnectionProperties {
     }
 
     /**
+     * If messages should contain a tracer string that helps to identify them within log files.
+     */
+    public boolean traceMessages() {
+        return traceMessages;
+    }
+
+    /**
      * Factory method for creating a new {@link Builder}.
-     * 
+     *
      * @param username The OX username.
      * @param password The password.
      * @parm resource the resource
@@ -176,7 +185,7 @@ public class RTConnectionProperties {
 
         /**
          * Sets the connection type.
-         * 
+         *
          * @param type The connection type.
          */
         public Builder setConnectionType(RTConnectionType type) {
@@ -186,7 +195,7 @@ public class RTConnectionProperties {
 
         /**
          * Sets the OX host.
-         * 
+         *
          * @param host The host.
          */
         public Builder setHost(String host) {
@@ -196,7 +205,7 @@ public class RTConnectionProperties {
 
         /**
          * Sets the port.
-         * 
+         *
          * @param port The port.
          */
         public Builder setPort(int port) {
@@ -206,11 +215,21 @@ public class RTConnectionProperties {
 
         /**
          * Sets if we want to use a secure connection
-         * 
+         *
          * @param secure true (by default) for a secure connection, false for an unsafe connection
          */
         public Builder setSecure(boolean secure) {
             properties.secure = secure;
+            return this;
+        }
+
+        /**
+         * Sets if messages should contain a generated string to trace thier flow within log files.
+         *
+         * @param traceMessages default: false
+         */
+        public Builder setTraceMessages(boolean traceMessages) {
+            properties.traceMessages = traceMessages;
             return this;
         }
 

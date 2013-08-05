@@ -76,10 +76,19 @@ public interface RTRoom {
      * String, RTMessageHandler) your message will be transferred to all users joined the room.
      *
      * @param message - the message to send.
+     * @return A string to trace the message if tracing has been enabled on the underlying {@link RTConnection}.
      */
-    public void say(String message) throws RTException;
+    public String say(String message) throws RTException;
 
-    public void sendCommand(String command, String content) throws RTException;
+    /**
+     * Use this method to send a message to a specified command of the room.
+     *
+     * @param command The command
+     * @param content The message
+     * @return A string to trace the message if tracing has been enabled on the underlying {@link RTConnection}.
+     * @throws RTException
+     */
+    public String sendMessage(String command, String message) throws RTException;
 
     /**
      * Use this to leave the room joined with com.openexchange.realtime.client.room.RTRoom.join(String, String, RTMessageHandler) before.

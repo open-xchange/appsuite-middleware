@@ -91,7 +91,7 @@ public class TooBigForOnePackageTest {
                 latch.countDown();
             }
         });
-        loadTestRoom.sendCommand("floodMe", "murks");
+        loadTestRoom.sendMessage("floodMe", "murks");
         if (latch.await(1, TimeUnit.MINUTES)) {
             connection.close();
         } else {

@@ -98,6 +98,8 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
 
     protected AtomicBoolean isActive = new AtomicBoolean(false);
 
+    protected TracerInjector tracerInjector;
+
 
     protected AbstractRTConnection() {
         super();
@@ -106,6 +108,7 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
     protected void init(RTConnectionProperties connectionProperties, RTMessageHandler messageHandler) throws RTException {
         Validate.notNull(connectionProperties, "ConnectionProperties are needed to create a new Connection");
         this.connectionProperties = connectionProperties;
+        tracerInjector = new TracerInjector(connectionProperties);
         delivererRef = new AtomicReference<Thread>();
         messageHandlers = new ConcurrentHashMap<String, RTMessageHandler>();
         resendBuffer = new ResendBuffer(this);
@@ -140,13 +143,14 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
     }
 
     @Override
-    public void sendBlocking(JSONObject message, long timeout, TimeUnit unit) throws RTException, TimeoutException, InterruptedException {
+    public String sendBlocking(JSONObject message, long timeout, TimeUnit unit) throws RTException, TimeoutException, InterruptedException {
         if (!isActive.get()) {
             LOG.warn("Connection is already closed. Message getting lost: " + message.toString());
-            return;
+            // TODO: This should rather throw an exception. But then we have to ensure proper handling down the whole stack.
+            return null;
         }
 
-        TracerInjector.injectTracer(message);
+        String tracer = tracerInjector.injectTracer(message);
         long seq = protocol.addSequence(message);
         LOG.debug("Sending message: {}", message);
         Future<MessageState> sent = resendBuffer.put(seq, message);
@@ -156,35 +160,43 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
         } catch (ExecutionException e) {
             LOG.error(e.getMessage(), e);
         }
+
+        return tracer;
     }
 
     @Override
-    public void send(JSONObject message) throws RTException {
+    public String send(JSONObject message) throws RTException {
         if (!isActive.get()) {
             LOG.warn("Connection is already closed. Message getting lost: " + message.toString());
-            return;
+            // TODO: This should rather throw an exception. But then we have to ensure proper handling down the whole stack.
+            return null;
         }
-        TracerInjector.injectTracer(message);
+
+        String tracer = tracerInjector.injectTracer(message);
         long seq = protocol.addSequence(message);
         if(LOG.isDebugEnabled()) {
             LOG.debug("Sending message: {}", message);
         }
         resendBuffer.put(seq, message);
         protocol.resetPingTimeout();
+        return tracer;
     }
 
     @Override
-    public void post(JSONObject message) throws RTException {
+    public String post(JSONObject message) throws RTException {
         if (!isActive.get()) {
             LOG.warn("Connection is already closed. Message getting lost: " + message.toString());
-            return;
+            // TODO: This should rather throw an exception. But then we have to ensure proper handling down the whole stack.
+            return null;
         }
-        TracerInjector.injectTracer(message);
+
+        String tracer = tracerInjector.injectTracer(message);
         if(LOG.isDebugEnabled()) {
             LOG.debug("Sending message: {}", message);
         }
         doSend(message);
         protocol.resetPingTimeout();
+        return tracer;
     }
 
     @Override
@@ -228,6 +240,11 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
     @Override
     public void onTimeout() {
         try {
+            if (!isActive.get()) {
+                LOG.warn("Connection is already closed. Avoiding reconnect...");
+                return;
+            }
+
             LOG.info("PONG timeout. Reconnecting...");
             reconnect();
         } catch (RTException e) {
@@ -238,6 +255,11 @@ public abstract class AbstractRTConnection implements RTConnection, RTProtocolCa
     @Override
     public void onSessionInvalid() {
         try {
+            if (!isActive.get()) {
+                LOG.warn("Connection is already closed. Avoiding relogin...");
+                return;
+            }
+
             LOG.info("Received invalid session error. Reconnecting...");
             login(null);
             reconnect();

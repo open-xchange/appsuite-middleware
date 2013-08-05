@@ -53,7 +53,7 @@ import java.util.UUID;
 import org.apache.commons.lang.Validate;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.realtime.client.impl.config.ConfigurationProvider;
+import com.openexchange.realtime.client.RTConnectionProperties;
 
 
 /**
@@ -63,16 +63,27 @@ import com.openexchange.realtime.client.impl.config.ConfigurationProvider;
  */
 public class TracerInjector {
 
+    private final RTConnectionProperties properties;
+
+    public TracerInjector(RTConnectionProperties properties) {
+        super();
+        this.properties = properties;
+    }
+
     /**
      * Decides based on the structure of the message and client configuration if it can and should be extended with a tracer and adds a
      * generated UUID to the message.
      *
      * @param json the message to extend with a tracer key
-     * @return the extended message
+     * @return the injected tracer string
      * @throws JSONException
      */
-    public static JSONObject injectTracer(JSONObject json) {
-        return injectTracer(json, null);
+    public String injectTracer(JSONObject json) {
+        if (properties.traceMessages()) {
+            return injectTracer(json, null);
+        }
+
+        return null;
     }
 
     /**
@@ -84,10 +95,7 @@ public class TracerInjector {
      * @return the extended message
      * @throws JSONException
      */
-    public static JSONObject injectTracer(JSONObject json, String tracer) {
-        if(!ConfigurationProvider.getInstance().isTraceEnabled()) {
-            return json;
-        }
+    private static String injectTracer(JSONObject json, String tracer) {
         Validate.notNull(json, "json must not be null");
         if(shouldInject(json)) {
             if(tracer == null) {
@@ -98,8 +106,11 @@ public class TracerInjector {
             } catch (JSONException e) {
                 //can't happen
             }
+
+            return tracer;
         }
-        return json;
+
+        return null;
     }
 
     private static boolean shouldInject(JSONObject json) {

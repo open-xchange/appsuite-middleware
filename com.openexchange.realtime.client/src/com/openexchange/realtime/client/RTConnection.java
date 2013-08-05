@@ -89,26 +89,32 @@ public interface RTConnection {
      * It's not guaranteed that the message arrives. This call returns immediately.
      *
      * @param message The message.
+     * @return An optional string for tracing the message within log files. See also {@link RTConnectionProperties.Builder#setTraceMessages(boolean)}.
+     * <code>null</code> is always returned if {@link RTConnectionProperties#traceMessages()} returns true.
      * @throws RTException
      */
-    void post(JSONObject message) throws RTException;
+    String post(JSONObject message) throws RTException;
 
     /**
      * Sends a message to the server. This method must be used for reliable delivery.
      *
      * @param message The message.
+     * @return An optional string for tracing the message within log files. See also {@link RTConnectionProperties.Builder#setTraceMessages(boolean)}.
+     * <code>null</code> is always returned if {@link RTConnectionProperties#traceMessages()} returns true.
      * @throws RTException
      */
-    void send(JSONObject message) throws RTException;
+    String send(JSONObject message) throws RTException;
 
     /**
      * Sends a message to the server. This method must be used for reliable delivery.
      *
      * @param message The message.
+     * @return An optional string for tracing the message within log files. See also {@link RTConnectionProperties.Builder#setTraceMessages(boolean)}.
+     * <code>null</code> is always returned if {@link RTConnectionProperties#traceMessages()} returns true.
      * @throws RTException
      * @throws InterruptedException
      */
-    void sendBlocking(JSONObject message, long timeout, TimeUnit unit) throws RTException, TimeoutException, InterruptedException;
+    String sendBlocking(JSONObject message, long timeout, TimeUnit unit) throws RTException, TimeoutException, InterruptedException;
 
     /**
      * Closes the connection and frees all resources. The underlying user session will also be closed.
