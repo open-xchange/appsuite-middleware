@@ -50,13 +50,12 @@
 package com.openexchange.capabilities.osgi;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
+import com.openexchange.java.ConcurrentEnumMap;
 
 /**
  * {@link PermissionAvailabilityServiceRegistry} - A registry service tracker for <code>PermissionAvailabilityService</code>.
@@ -65,7 +64,7 @@ import com.openexchange.groupware.userconfiguration.service.PermissionAvailabili
  */
 public final class PermissionAvailabilityServiceRegistry extends ServiceTracker<PermissionAvailabilityService, PermissionAvailabilityService> {
 
-    private final ConcurrentMap<Permission, PermissionAvailabilityService> services;
+    private final ConcurrentEnumMap<Permission, PermissionAvailabilityService> services;
 
     /**
      * Initializes a new {@link PermissionAvailabilityServiceRegistry}.
@@ -75,7 +74,7 @@ public final class PermissionAvailabilityServiceRegistry extends ServiceTracker<
      */
     public PermissionAvailabilityServiceRegistry(final BundleContext context) {
         super(context, PermissionAvailabilityService.class, null);
-        services = new ConcurrentHashMap<Permission, PermissionAvailabilityService>(8);
+        services = new ConcurrentEnumMap<Permission, PermissionAvailabilityService>(Permission.class);
     }
 
     /**
