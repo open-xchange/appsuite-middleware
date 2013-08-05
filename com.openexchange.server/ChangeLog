@@ -7,6 +7,10 @@
 
  - Fix for bug 26607: Optimized JMX queries for certain MBeans using object names and removed multi threading.
 
+* 2013-07-16 - marc.arens@open-xchange.com
+
+ - Fix for bug 27469: Stop checking aliases as soon as a valid match was found
+
 * 2013-07-01 - marc.arens@open-xchange.com
 
  - Fix for bug 26681: Repair broken state in HazelcastResourceDirectory
