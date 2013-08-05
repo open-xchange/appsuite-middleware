@@ -90,6 +90,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.folderstorage.AfterReadAwareFolderStorage.Mode;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -2700,7 +2701,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         final ConnectionMode con = storageParameters.<ConnectionMode> getParameter(
             DatabaseFolderType.getInstance(),
             DatabaseParameterConstants.PARAM_CONNECTION);
-        if (null != con && con.readWrite) {
+        if (null != con && con.supports(Mode.WRITE)) {
             return con.connection;
         }
         return null;
