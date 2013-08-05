@@ -480,12 +480,10 @@ for opt in "-XX:+DisableExplicitGC" "-server" "-Djava.awt.headless=true" \
             opt="-XX:NewRatio=3"
         fi
         if [ "$opt" == "-XX:+UseConcMarkSweepGC" -o "$opt" == "-XX:+UseParNewGC" -o "$opt" == "-XX:CMSInitiatingOccupancyFraction=75" -o "$opt" == "-XX:+UseCMSInitiatingOccupancyOnly" ]; then
-            echo "oha"
             if ! echo $nopts | grep -- "-XX:+UseParallelGC" > /dev/null && ! echo $nopts | grep -- "-XX:+UseParallelOldGC" > /dev/null; then
                 nopts="$nopts $opt"
             fi
         else
-            echo "np"
             nopts="$nopts $opt"
         fi
     fi
