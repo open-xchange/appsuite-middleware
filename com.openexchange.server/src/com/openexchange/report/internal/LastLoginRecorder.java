@@ -202,7 +202,7 @@ public class LastLoginRecorder implements LoginHandlerService {
                     stmt.setBytes(3, UUIDs.toByteArray(uuid));
                     stmt.executeUpdate();
                 } else {
-                    stmt = con.prepareStatement("UPDATE user_attribute SET value=? WHERE cid=? AND id=? AND key=?");
+                    stmt = con.prepareStatement("UPDATE user_attribute SET value=? WHERE cid=? AND id=? AND name=?");
                     stmt.setString(1, Long.toString(stamp));
                     stmt.setInt(2, contextId);
                     stmt.setInt(3, userId);
