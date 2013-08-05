@@ -75,7 +75,6 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
@@ -176,7 +175,6 @@ public final class NewAction extends AbstractMailAction {
                     final JSONObject jAttachment = jAttachments.optJSONObject(0);
                     if (null != jAttachment) {
                         final String sContent = jAttachment.optString(CONTENT, null);
-                        Strings.outCodePoints(sContent);
                         sha256 = null == sContent ? null : HashUtility.getSha256(sContent, "hex");
                     }
                 }
