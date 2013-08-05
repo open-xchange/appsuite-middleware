@@ -61,6 +61,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -158,7 +159,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
-            Database.back(contextId, true, writeCon);
+            Database.backAfterReading(contextId, writeCon);
         }
     }
 
@@ -419,10 +420,12 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
     }
 
     private static void checkAndInsertMailAccountSequence(final Context ctx) throws OXException {
+        final DatabaseService databaseService = Database.getDatabaseService();
         final int cid = ctx.getContextId();
-        final Connection con = Database.get(cid, true);
+        final Connection con = databaseService.getWritable(cid);
         PreparedStatement stmt = null;
         ResultSet rs = null;
+        boolean modified = false;
         try {
             stmt = con.prepareStatement("SELECT * FROM sequence_mail_service WHERE cid = ?");
             stmt.setLong(1, cid);
@@ -437,11 +440,16 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
             stmt.setLong(1, cid);
             stmt.setLong(2, 0);
             stmt.executeUpdate();
+            modified = true;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
-            Database.back(cid, true, con);
+            if (modified) {
+                databaseService.backWritable(cid, con);
+            } else {
+                databaseService.backWritableAfterReading(cid, con);
+            }
         }
     }
 }

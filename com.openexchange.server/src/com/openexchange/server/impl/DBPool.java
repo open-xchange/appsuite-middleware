@@ -127,4 +127,10 @@ public class DBPool  {
             Database.back(context, true, con);
         }
     }
+
+    public static final void closeWriterAfterReading(final Context context, final Connection con) {
+        if (null != con) {
+            Database.backAfterReading(context, con);
+        }
+    }
 }

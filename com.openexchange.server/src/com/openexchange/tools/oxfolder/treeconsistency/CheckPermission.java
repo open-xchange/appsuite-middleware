@@ -126,7 +126,7 @@ abstract class CheckPermission {
                 return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
             } finally {
                 if (wc != null) {
-                    DBPool.closeWriterSilent(ctx, wc);
+                    DBPool.closeWriterAfterReading(ctx, wc);
                 }
             }
         }

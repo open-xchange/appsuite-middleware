@@ -463,7 +463,7 @@ public final class MemoryTable {
         try {
             return initializeFolder(folderId, treeId, userId, contextId, con);
         } finally {
-            databaseService.backWritable(contextId, con);
+            databaseService.backWritableAfterReading(contextId, con);
         }
     }
 

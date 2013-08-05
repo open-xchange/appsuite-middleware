@@ -729,7 +729,7 @@ public class RdbUserStorage extends UserStorage {
         } catch (final Exception e) {
             throw LdapExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage()).setPrefix("USR");
         } finally {
-            DBPool.closeWriterSilent(context, con);
+            DBPool.closeReaderSilent(context, con);
         }
     }
 
