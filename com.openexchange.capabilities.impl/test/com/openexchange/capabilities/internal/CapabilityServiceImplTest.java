@@ -1,6 +1,7 @@
 package com.openexchange.capabilities.internal;
 
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -8,42 +9,42 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.osgi.CapabilityCheckerRegistry;
+import com.openexchange.capabilities.osgi.PermissionAvailabilityServiceRegistry;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
 import com.openexchange.java.ConcurrentHashSet;
-import com.openexchange.java.ConcurrentList;
 import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.test.mock.test.AbstractMockTest;
 
 /**
  * Unit tests for {@link CapabilityServiceImpl}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-@PrepareForTest({ NearRegistryServiceTracker.class })
+@PrepareForTest({ PermissionAvailabilityServiceRegistry.class })
 public class CapabilityServiceImplTest extends AbstractMockTest {
 
     /**
      * Class under test
      */
-    private CapabilityServiceImpl capabilityServiceImpl = null;
+    private CapabilityServiceImpl capabilityServiceImpl;
 
     /**
      * Mock of {@link ServiceLookup}
      */
-    private ServiceLookup serviceLookup = null;
+    private ServiceLookup serviceLookup;
 
     /**
      * Mock of {@link CapabilityCheckerRegistry}
      */
-    private CapabilityCheckerRegistry capabilityCheckerRegistry = null;
+    private CapabilityCheckerRegistry capabilityCheckerRegistry;
 
     /**
      * Mock of {@link NearRegistryServiceTracker}
      */
-    private NearRegistryServiceTracker<PermissionAvailabilityService> nearRegistryServiceTracker = null;
+    private PermissionAvailabilityServiceRegistry registry;
 
     /**
      * The capabilities that should be filtered
@@ -57,16 +58,16 @@ public class CapabilityServiceImplTest extends AbstractMockTest {
     public void setUp() throws Exception {
         this.serviceLookup = Mockito.mock(ServiceLookup.class);
         this.capabilityCheckerRegistry = Mockito.mock(CapabilityCheckerRegistry.class);
-        this.nearRegistryServiceTracker = PowerMockito.mock(NearRegistryServiceTracker.class);
+        this.registry = PowerMockito.mock(PermissionAvailabilityServiceRegistry.class);
 
         this.capabilities = new ConcurrentHashSet<Capability>(64);
-        this.capabilities.add(new Capability(Permission.CALDAV.toString()));
-        this.capabilities.add(new Capability(Permission.CARDDAV.toString()));
-        this.capabilities.add(new Capability(Permission.INFOSTORE.toString()));
-        this.capabilities.add(new Capability(Permission.EDIT_PASSWORD.toString()));
-        this.capabilities.add(new Capability(Permission.SUBSCRIPTION.toString()));
-        this.capabilities.add(new Capability(Permission.PUBLICATION.toString()));
-        this.capabilities.add(new Capability(Permission.WEBMAIL.toString()));
+        this.capabilities.add(CapabilityServiceImpl.getCapability(Permission.CALDAV.toString().toLowerCase()));
+        this.capabilities.add(CapabilityServiceImpl.getCapability(Permission.CARDDAV.toString().toLowerCase()));
+        this.capabilities.add(CapabilityServiceImpl.getCapability(Permission.INFOSTORE.toString().toLowerCase()));
+        this.capabilities.add(CapabilityServiceImpl.getCapability(Permission.EDIT_PASSWORD.toString().toLowerCase()));
+        this.capabilities.add(CapabilityServiceImpl.getCapability(Permission.SUBSCRIPTION.toString().toLowerCase()));
+        this.capabilities.add(CapabilityServiceImpl.getCapability(Permission.PUBLICATION.toString().toLowerCase()));
+        this.capabilities.add(CapabilityServiceImpl.getCapability(Permission.WEBMAIL.toString().toLowerCase()));
     }
 
     @Test
@@ -85,9 +86,9 @@ public class CapabilityServiceImplTest extends AbstractMockTest {
         this.capabilityServiceImpl = new CapabilityServiceImpl(
             this.serviceLookup,
             this.capabilityCheckerRegistry,
-            this.nearRegistryServiceTracker);
+            this.registry);
 
-        Mockito.when(this.nearRegistryServiceTracker.getServiceList()).thenReturn(new ConcurrentList<PermissionAvailabilityService>());
+        Mockito.when(this.registry.getServiceMap()).thenReturn(new ConcurrentHashMap<Permission, PermissionAvailabilityService>());
 
         this.capabilityServiceImpl.applyUIFilter(this.capabilities);
 
@@ -99,7 +100,7 @@ public class CapabilityServiceImplTest extends AbstractMockTest {
         this.capabilityServiceImpl = new CapabilityServiceImpl(
             this.serviceLookup,
             this.capabilityCheckerRegistry,
-            this.nearRegistryServiceTracker);
+            this.registry);
 
         PermissionAvailabilityService jsonEditPassword = Mockito.mock(PermissionAvailabilityService.class);
         Mockito.when(jsonEditPassword.getRegisteredPermission()).thenReturn(Permission.EDIT_PASSWORD);
@@ -108,12 +109,12 @@ public class CapabilityServiceImplTest extends AbstractMockTest {
         PermissionAvailabilityService jsonPublication = Mockito.mock(PermissionAvailabilityService.class);
         Mockito.when(jsonPublication.getRegisteredPermission()).thenReturn(Permission.PUBLICATION);
 
-        ConcurrentList<PermissionAvailabilityService> registeredServices = new ConcurrentList<PermissionAvailabilityService>();
-        registeredServices.add(jsonEditPassword);
-        registeredServices.add(jsonSubscription);
-        registeredServices.add(jsonPublication);
+        ConcurrentHashMap<Permission, PermissionAvailabilityService> registeredServices = new ConcurrentHashMap<Permission, PermissionAvailabilityService>();
+        registeredServices.put(Permission.EDIT_PASSWORD, jsonEditPassword);
+        registeredServices.put(Permission.SUBSCRIPTION, jsonSubscription);
+        registeredServices.put(Permission.PUBLICATION, jsonPublication);
 
-        Mockito.when(this.nearRegistryServiceTracker.getServiceList()).thenReturn(registeredServices);
+        Mockito.when(this.registry.getServiceMap()).thenReturn(registeredServices);
 
         this.capabilityServiceImpl.applyUIFilter(this.capabilities);
 
@@ -125,15 +126,15 @@ public class CapabilityServiceImplTest extends AbstractMockTest {
         this.capabilityServiceImpl = new CapabilityServiceImpl(
             this.serviceLookup,
             this.capabilityCheckerRegistry,
-            this.nearRegistryServiceTracker);
+            this.registry);
 
         PermissionAvailabilityService jsonSubscription = Mockito.mock(PermissionAvailabilityService.class);
         Mockito.when(jsonSubscription.getRegisteredPermission()).thenReturn(Permission.SUBSCRIPTION);
 
-        ConcurrentList<PermissionAvailabilityService> registeredServices = new ConcurrentList<PermissionAvailabilityService>();
-        registeredServices.add(jsonSubscription);
+        ConcurrentHashMap<Permission, PermissionAvailabilityService> registeredServices = new ConcurrentHashMap<Permission, PermissionAvailabilityService>();
+        registeredServices.put(Permission.SUBSCRIPTION, jsonSubscription);
 
-        Mockito.when(this.nearRegistryServiceTracker.getServiceList()).thenReturn(registeredServices);
+        Mockito.when(this.registry.getServiceMap()).thenReturn(registeredServices);
 
         this.capabilityServiceImpl.applyUIFilter(this.capabilities);
 
@@ -145,18 +146,18 @@ public class CapabilityServiceImplTest extends AbstractMockTest {
         this.capabilityServiceImpl = new CapabilityServiceImpl(
             this.serviceLookup,
             this.capabilityCheckerRegistry,
-            this.nearRegistryServiceTracker);
+            this.registry);
 
         PermissionAvailabilityService jsonSubscription = Mockito.mock(PermissionAvailabilityService.class);
         Mockito.when(jsonSubscription.getRegisteredPermission()).thenReturn(Permission.SUBSCRIPTION);
         PermissionAvailabilityService jsonEditPassword = Mockito.mock(PermissionAvailabilityService.class);
         Mockito.when(jsonEditPassword.getRegisteredPermission()).thenReturn(Permission.EDIT_PASSWORD);
 
-        ConcurrentList<PermissionAvailabilityService> registeredServices = new ConcurrentList<PermissionAvailabilityService>();
-        registeredServices.add(jsonSubscription);
-        registeredServices.add(jsonEditPassword);
+        ConcurrentHashMap<Permission, PermissionAvailabilityService> registeredServices = new ConcurrentHashMap<Permission, PermissionAvailabilityService>();
+        registeredServices.put(Permission.EDIT_PASSWORD, jsonEditPassword);
+        registeredServices.put(Permission.SUBSCRIPTION, jsonSubscription);
 
-        Mockito.when(this.nearRegistryServiceTracker.getServiceList()).thenReturn(registeredServices);
+        Mockito.when(this.registry.getServiceMap()).thenReturn(registeredServices);
 
         this.capabilityServiceImpl.applyUIFilter(this.capabilities);
 

@@ -51,8 +51,8 @@ package com.openexchange.groupware.userconfiguration.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
 import com.openexchange.passwordchange.PasswordChangeService;
@@ -61,21 +61,22 @@ import com.openexchange.passwordchange.PasswordChangeService;
  * The {@link PermissionRelevantServiceAddedTracker} is used to track services which availability have got impact for the user interface (e.
  * g. {@link PasswordChangeService}). If the service is available it the availability will be registered for the
  * {@link PermissionAvailabilityService} to analyze it for the user interface.
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
 public class PermissionRelevantServiceAddedTracker<S> extends ServiceTracker<S, S> {
 
+    private volatile ServiceRegistration<PermissionAvailabilityService> serviceRegistration;
+
     /**
      * Initializes a new {@link PermissionRelevantServiceAddedTracker}.
-     * 
+     *
      * @param context - the context
      * @param clazz - the class to track
-     * @param customizer - optional customizer
      */
-    public PermissionRelevantServiceAddedTracker(BundleContext context, Class<S> clazz, ServiceTrackerCustomizer<S, S> customizer) {
-        super(context, clazz, customizer);
+    public PermissionRelevantServiceAddedTracker(BundleContext context, Class<S> clazz) {
+        super(context, clazz, null);
     }
 
     /**
@@ -84,11 +85,18 @@ public class PermissionRelevantServiceAddedTracker<S> extends ServiceTracker<S, 
     @Override
     public S addingService(ServiceReference<S> reference) {
         final S service = context.getService(reference);
-
-        if (service instanceof PasswordChangeService) {
-            context.registerService(PermissionAvailabilityService.class, new PermissionAvailabilityService(Permission.EDIT_PASSWORD), null);
-        }
-
-        return super.addingService(reference);
+        serviceRegistration = context.registerService(PermissionAvailabilityService.class, new PermissionAvailabilityService(Permission.EDIT_PASSWORD), null);
+        return service;
     }
+
+    @Override
+    public void removedService(ServiceReference<S> reference, S service) {
+        final ServiceRegistration<PermissionAvailabilityService> serviceRegistration = this.serviceRegistration;
+        if (null != serviceRegistration) {
+            serviceRegistration.unregister();
+            this.serviceRegistration = null;
+        }
+        super.removedService(reference, service);
+    }
+
 }
