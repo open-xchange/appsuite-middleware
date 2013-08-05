@@ -57,7 +57,6 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import org.apache.commons.logging.Log;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -99,7 +98,6 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.HashUtility;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
@@ -164,20 +162,6 @@ public final class NewAction extends AbstractMailAction {
                     throw MailExceptionCode.PROCESSING_ERROR.create(MailExceptionCode.MISSING_PARAM.create(UPLOAD_FORMFIELD_MAIL), new Object[0]);
                 }
                 jMail = new JSONObject(json0);
-            }
-            /*
-             * Monitor
-             */
-            String sha256 = null;
-            {
-                final JSONArray jAttachments = jMail.optJSONArray(ATTACHMENTS);
-                if (null != jAttachments) {
-                    final JSONObject jAttachment = jAttachments.optJSONObject(0);
-                    if (null != jAttachment) {
-                        final String sContent = jAttachment.optString(CONTENT, null);
-                        sha256 = null == sContent ? null : HashUtility.getSha256(sContent, "hex");
-                    }
-                }
             }
             /*-
              * Parse
