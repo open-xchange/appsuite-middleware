@@ -51,6 +51,7 @@ package com.openexchange.java;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
@@ -521,6 +522,39 @@ public class Strings {
             return s.substring(1, s.length() - 1);
         }
         return s;
+    }
+
+    /**
+     * Generates a string of code points for given string
+     *
+     * @param str The string
+     * @return The code points
+     */
+    public static String toCodePoints(final String str) {
+        if (null == str) {
+            return null;
+        }
+        final int length = str.length();
+        final StringAllocator sb = new StringAllocator(length << 1);
+        for (int i = 0; i < length; i++) {
+            sb.append(' ').append(str.codePointAt(i));
+        }
+        return sb.deleteCharAt(0).toString();
+    }
+
+    /**
+     * Generates a string of code points for given string
+     *
+     * @param str The string
+     * @param out The print stream to print to
+     * @return The code points
+     */
+    public static void outCodePoints(final String str, final PrintStream out) {
+        if (null == out) {
+            System.out.println(toCodePoints(str));
+        } else {
+            out.println(toCodePoints(str));
+        }
     }
 
 }
