@@ -52,6 +52,7 @@ package com.openexchange.drive.sync.optimize;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.actions.AbstractAction;
@@ -100,6 +101,15 @@ public class DirectoryRemoveOptimizer extends DirectoryActionOptimizer {
             for (int j = i + 1; j < removeActions.size(); j++) {
                 if (removeActions.get(j).getVersion().getPath().startsWith(prefix)) {
                     redundantRemoves.add(removeActions.get(j));
+                    List<AbstractAction<DirectoryVersion>> nestedRemoves;
+                    Map<String, Object> parameters = removeActions.get(i).getParameters();
+                    if (parameters.containsKey("nestedRemoves")) {
+                        nestedRemoves = (List<AbstractAction<DirectoryVersion>>)removeActions.get(i).getParameters().get("nestedRemoves");
+                    } else {
+                        nestedRemoves = new ArrayList<AbstractAction<DirectoryVersion>>();
+                        parameters.put("nestedRemoves", nestedRemoves);
+                    }
+                    nestedRemoves.add(removeActions.get(j));
                 }
             }
         }

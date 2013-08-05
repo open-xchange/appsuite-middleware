@@ -56,14 +56,11 @@ import org.apache.commons.logging.Log;
 import com.google.android.gcm.server.Message;
 import com.google.android.gcm.server.MulticastResult;
 import com.google.android.gcm.server.Sender;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.Subscription;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 
 /**
  * {@link GCMDriveEventPublisher}
@@ -81,10 +78,6 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
     public GCMDriveEventPublisher(String key) {
         super();
         this.sender = new Sender(key);
-    }
-
-    public GCMDriveEventPublisher() throws OXException {
-        this(getKey());
     }
 
     @Override
@@ -133,15 +126,6 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
             .addData("action", "sync")
 //            .addData("folders", event.getFolderIDs().toString())
         .build();
-    }
-
-    private static String getKey() throws OXException {
-        String property = "com.openexchange.drive.events.gcm.key";
-        String key = Services.getService(ConfigurationService.class, true).getProperty(property);
-        if (Strings.isEmpty(key)) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property);
-        }
-        return key;
     }
 
 }
