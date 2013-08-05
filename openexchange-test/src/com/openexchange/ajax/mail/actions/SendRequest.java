@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail.actions;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
@@ -72,7 +73,7 @@ public class SendRequest implements AJAXRequest<SendResponse> {
 
     private final String mailStr;
 
-    private final InputStream upload;
+    private final List<InputStream> uploads;
 
     /*
      * Mail object settings
@@ -80,7 +81,7 @@ public class SendRequest implements AJAXRequest<SendResponse> {
 
     private String recipientTo;
 
-    private boolean failOnError;
+    private final boolean failOnError;
 
     /**
      * Initializes a new {@link SendRequest}
@@ -90,15 +91,18 @@ public class SendRequest implements AJAXRequest<SendResponse> {
     public SendRequest(final String mailStr) {
         this(mailStr, null);
     }
-    
+
     public SendRequest(String mailStr, boolean failOnError) {
         this(mailStr, null, failOnError);
     }
-    
+
     public SendRequest(String mailStr, InputStream upload, boolean failOnError) {
         super();
         this.mailStr = mailStr;
-        this.upload = upload;
+        this.uploads = new LinkedList<InputStream>();
+        if (null != upload) {
+            this.uploads.add(upload);
+        }
         this.failOnError = failOnError;
     }
 
@@ -110,6 +114,15 @@ public class SendRequest implements AJAXRequest<SendResponse> {
      */
     public SendRequest(final String mailStr, final InputStream upload) {
         this(mailStr, upload, true);
+    }
+
+    /**
+     * Adds an upload
+     *
+     * @param upload The upload
+     */
+    public void addUpload(final InputStream upload) {
+        this.uploads.add(upload);
     }
 
     @Override
@@ -132,8 +145,12 @@ public class SendRequest implements AJAXRequest<SendResponse> {
         final List<Parameter> params = new ArrayList<AJAXRequest.Parameter>(4);
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW));
         params.add(new FieldParameter("json_0", mailStr));
-        if (null != upload) {
-            params.add(new FileParameter("file_0", "text.txt", upload, "text/plain; charset=us-ascii"));
+        if (null != uploads) {
+            final int size = uploads.size();
+            for (int i = 0; i < size; i++) {
+                final String sNum = Integer.toString(i + 1);
+                params.add(new FileParameter("file_" + sNum, "text"+sNum+".txt", uploads.get(i), "text/plain; charset=us-ascii"));
+            }
         }
         return params.toArray(new Parameter[params.size()]);
     }

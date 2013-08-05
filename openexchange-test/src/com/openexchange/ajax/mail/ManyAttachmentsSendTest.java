@@ -51,20 +51,17 @@ package com.openexchange.ajax.mail;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.ajax.mail.contenttypes.MailContentType;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.mail.actions.SendRequest;
+import com.openexchange.ajax.mail.actions.SendResponse;
 
 /**
- * {@link MaxMailSizeTest} Tests the Parameter com.openexchange.mail.maxMailSize with a value of 5000000 (Must be set at server startup).
+ * {@link ManyAttachmentsSendTest}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - tests with manager
  */
-public class MaxMailSizeTest extends AbstractMailTest {
+public final class ManyAttachmentsSendTest extends AbstractMailTest {
 
     private MailTestManager manager;
 
@@ -73,14 +70,14 @@ public class MaxMailSizeTest extends AbstractMailTest {
      *
      * @param name Name of this test.
      */
-    public MaxMailSizeTest(String name) {
+    public ManyAttachmentsSendTest(final String name) {
         super(name);
     }
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        manager = new MailTestManager(client, true);
+        manager = new MailTestManager(client, false);
     }
 
     @Override
@@ -89,17 +86,17 @@ public class MaxMailSizeTest extends AbstractMailTest {
         super.tearDown();
     }
 
-    public void testSendWithManager() throws OXException, IOException, SAXException, JSONException {
-        UserValues values = client.getValues();
-
-        // Should work
-        TestMail mail = new TestMail();
-        mail.setSubject("Test MaxMailSize");
-        mail.setFrom(values.getSendAddress());
-        mail.setTo(Arrays.asList(new String[] { values.getSendAddress() }));
-        mail.setContentType(MailContentType.PLAIN.toString());
-        mail.setBody("Test Mail");
-        mail.sanitize();
+    /**
+     * Tests the <code>action=new</code> request on INBOX folder
+     *
+     * @throws Throwable
+     */
+    public void testSend() throws Throwable {
+        /*
+         * Create JSON mail object
+         */
+        final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
+        final SendRequest sendRequest = new SendRequest(mailObject_25kb);
 
         class FooInputStream extends InputStream {
 
@@ -114,29 +111,17 @@ public class MaxMailSizeTest extends AbstractMailTest {
 
             @Override
             public int read() throws IOException {
-                return read++ < size ? 'a' : -1;
+                return read++ < size ? (read % 76 == 0 ? '\n' : 'a') : -1;
             }
 
         }
 
-        TestMail inSentBox = manager.send(mail, new FooInputStream(3500000L)); // Results in approx. 4800000 Byte Mail Size
-        assertFalse("Sending resulted in error.", manager.getLastResponse().hasError());
-        assertEquals("Mail went into inbox", values.getSentFolder(), inSentBox.getFolder());
+        for (int i = 0; i < 100; i++) {
+            sendRequest.addUpload(new FooInputStream(8192));
+        }
 
-        // Should fail
-        mail = new TestMail();
-        mail.setSubject("Test MaxMailSize");
-        mail.setFrom(values.getSendAddress());
-        mail.setTo(Arrays.asList(new String[] { values.getSendAddress() }));
-        mail.setContentType(MailContentType.PLAIN.toString());
-        mail.setBody("Test Mail");
-        mail.sanitize();
-
-        manager.setFailOnError(false);
-        manager.send(mail, new FooInputStream(3800000L)); // Results in > 5000000 Byte Mail Size
-        assertTrue("Should not pass", manager.getLastResponse().hasError());
-        OXException exception = manager.getLastResponse().getException();
-        assertEquals("Wrong exception.", MailExceptionCode.MAX_MESSAGE_SIZE_EXCEEDED.getNumber(), exception.getCode());
+        final SendResponse response = Executor.execute(getSession(), sendRequest);
+        assertTrue("Send request failed", response.getFolderAndID() != null && response.getFolderAndID().length > 0);
     }
 
 }
