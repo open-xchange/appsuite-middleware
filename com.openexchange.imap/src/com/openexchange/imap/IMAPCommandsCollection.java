@@ -2776,6 +2776,10 @@ public final class IMAPCommandsCollection {
                 return toMailPart(byteArray, bid.bodystructure, imapFolder.getFullName());
             }
 
+            private boolean isApplicationSmil(final BODYSTRUCTURE bodystructure) {
+                return bodystructure.isMulti() && "related".equals(toLowerCase(bodystructure.subtype)) && "application/smil".equals(toLowerCase(bodystructure.cParams.get("type")));
+            }
+
         }));
     }
 
@@ -3512,10 +3516,6 @@ public final class IMAPCommandsCollection {
             this.sectionId = sectionId;
         }
 
-    }
-
-    static boolean isApplicationSmil(final BODYSTRUCTURE bodystructure) {
-        return bodystructure.isMulti() && "related".equals(toLowerCase(bodystructure.subtype)) && "application/smil".equals(toLowerCase(bodystructure.cParams.get("type")));
     }
 
     static String toLowerCase(final CharSequence chars) {
