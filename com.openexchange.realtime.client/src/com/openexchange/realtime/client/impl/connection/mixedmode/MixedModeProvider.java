@@ -50,8 +50,6 @@
 package com.openexchange.realtime.client.impl.connection.mixedmode;
 
 import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.AsyncHttpClientConfig;
-import com.ning.http.client.providers.grizzly.GrizzlyAsyncHttpProvider;
 import com.openexchange.realtime.client.RTConnection;
 import com.openexchange.realtime.client.RTConnectionProperties;
 import com.openexchange.realtime.client.RTException;

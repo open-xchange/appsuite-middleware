@@ -26,7 +26,7 @@ Import-Package: com.google.common.annotations,
  org.slf4j.helpers,
  org.slf4j.spi
 Export-Package: com.openexchange.realtime.client,
- com.openexchange.realtime.client.impl.config,
+ com.openexchange.realtime.client.config,
  com.openexchange.realtime.client.room,
  com.openexchange.realtime.client.room.chinese,
  com.openexchange.realtime.client.room.loadtest
