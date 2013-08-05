@@ -116,6 +116,13 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
                             EditDirectoryAction renameDirectoryAction = new EditDirectoryAction(serverAction.getVersion(), clientSync.getVersion(), null);
                             optimizedActionsForServer.add(renameDirectoryAction);
                             renameActionsForServer.add(renameDirectoryAction);
+                            /*
+                             * restore any nested removes that are no longer valid after rename
+                             */
+                            if (serverAction.getParameters().containsKey("nestedRemoves")) {
+                                restoreNestedRemoves((List<AbstractAction<DirectoryVersion>>)serverAction.getParameters().get("nestedRemoves"),
+                                    optimizedActionsForServer);
+                            }
                             continue;
                         }
                     }
@@ -165,6 +172,18 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
          */
         return new IntermediateSyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient);
 
+    }
+
+    private static int restoreNestedRemoves(List<AbstractAction<DirectoryVersion>> nestedRemoves, List<AbstractAction<DirectoryVersion>> originalActions) {
+        int restored = 0;
+        if (null != nestedRemoves && 0 < nestedRemoves.size()) {
+            for (AbstractAction<DirectoryVersion> nestedRemove : nestedRemoves) {
+                if (originalActions.add(nestedRemove)) {
+                    restored++;
+                }
+            }
+        }
+        return restored;
     }
 
     private static AbstractAction<DirectoryVersion> findBestMatchingAction(List<AbstractAction<DirectoryVersion>> driveActions,

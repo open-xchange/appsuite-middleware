@@ -51,10 +51,12 @@ package com.openexchange.drive.events.gcm.osgi;
 
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.drive.events.gcm.internal.GCMDriveEventPublisher;
 import com.openexchange.drive.events.gcm.internal.Services;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
+import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -82,7 +84,17 @@ public class GCMActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.drive.events.gcm");
         Services.set(this);
-        getService(DriveEventService.class).registerPublisher(new GCMDriveEventPublisher());
+        ConfigurationService configService = Services.getService(ConfigurationService.class, true);
+        if (configService.getBoolProperty("com.openexchange.drive.events.gcm.enabled", false)) {
+            String property = "com.openexchange.drive.events.gcm.key";
+            String key = configService.getProperty(property);
+            if (Strings.isEmpty(key)) {
+                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property);
+            }
+            getService(DriveEventService.class).registerPublisher(new GCMDriveEventPublisher(key));
+        } else {
+            LOG.info("Drive events via GCM are disabled, skipping publisher registration.");
+        }
     }
 
     @Override

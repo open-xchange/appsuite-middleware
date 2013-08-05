@@ -107,6 +107,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
             @Override
             public void run() {
                 try {
+//                    LOG.debug("Checking for buffered events...");
                     Iterator<FolderBuffer> iterator = folderBuffers.values().iterator();
                     while (iterator.hasNext()) {
                         FolderBuffer buffer = iterator.next();

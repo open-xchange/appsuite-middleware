@@ -55,6 +55,7 @@ import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.actions.EditDirectoryAction;
+import com.openexchange.drive.actions.RemoveDirectoryAction;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.sync.IntermediateSyncResult;
@@ -92,10 +93,15 @@ public class DirectoryOrderOptimizer extends DirectoryActionOptimizer {
                 String newPath = actions.get(i).getNewVersion().getPath();
                 for (int j = i + 1; j < actions.size(); j++) {
                     if (Action.EDIT.equals(actions.get(j).getAction()) &&
-                        actions.get(j).getVersion().getPath().startsWith(oldPath +'/')) {
+                        actions.get(j).getVersion().getPath().startsWith(oldPath + '/')) {
                         String newOldPath = newPath + actions.get(j).getVersion().getPath().substring(oldPath.length());
                         DirectoryVersion modifiedOldVersion = new SimpleDirectoryVersion(newOldPath, actions.get(j).getVersion().getChecksum());
                         actions.set(j, new EditDirectoryAction(modifiedOldVersion, actions.get(j).getNewVersion(), actions.get(j).getComparison()));
+                    } else if (Action.REMOVE.equals(actions.get(j).getAction()) &&
+                        actions.get(j).getVersion().getPath().startsWith(oldPath + '/')) {
+                        String newOldPath = newPath + actions.get(j).getVersion().getPath().substring(oldPath.length());
+                        DirectoryVersion modifiedOldVersion = new SimpleDirectoryVersion(newOldPath, actions.get(j).getVersion().getChecksum());
+                        actions.set(j, new RemoveDirectoryAction(modifiedOldVersion, actions.get(j).getComparison()));
                     }
                 }
             }

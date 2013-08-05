@@ -86,11 +86,15 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.drive.events.apn");
         com.openexchange.drive.events.apn.internal.Services.set(this);
-        getService(DriveEventService.class).registerPublisher(new APNDriveEventPublisher(getAccess()));
+        ConfigurationService configService = Services.getService(ConfigurationService.class, true);
+        if (configService.getBoolProperty("com.openexchange.drive.events.apn.enabled", false)) {
+            getService(DriveEventService.class).registerPublisher(new APNDriveEventPublisher(getAccess(configService)));
+        } else {
+            LOG.info("Drive events via APN are disabled, skipping publisher registration.");
+        }
     }
 
-    private static APNAccess getAccess() throws OXException {
-        ConfigurationService configService = Services.getService(ConfigurationService.class, true);
+    private static APNAccess getAccess(ConfigurationService configService) throws OXException {
         String property = "com.openexchange.drive.events.apn.keystore";
         String keystore = configService.getProperty(property);
         if (Strings.isEmpty(keystore)) {
