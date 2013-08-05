@@ -481,7 +481,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 return folderObj;
             } finally {
                 if (create && wc != null) {
-                    DBPool.closeWriterSilent(ctx, wc);
+                    DBPool.closeWriterAfterReading(ctx, wc);
                     wc = null;
                 }
             }
@@ -612,7 +612,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 return fo;
             } finally {
                 if (create && wc != null) {
-                    DBPool.closeWriterSilent(ctx, wc);
+                    DBPool.closeWriterAfterReading(ctx, wc);
                     wc = null;
                 }
             }
@@ -899,7 +899,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
                 } finally {
                     if (wc != null) {
-                        DBPool.closeWriterSilent(ctx, wc);
+                        DBPool.closeWriterAfterReading(ctx, wc);
                     }
                 }
             }

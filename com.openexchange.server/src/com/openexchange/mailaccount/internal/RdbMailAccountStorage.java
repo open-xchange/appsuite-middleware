@@ -2277,6 +2277,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement updateStmt = null;
         ResultSet rs = null;
         boolean rollback = false;
+        boolean modified = false;
         try {
             con = Database.get(cid, true);
             con.setAutoCommit(false); // BEGIN
@@ -2312,6 +2313,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
             if (null != updateStmt) {
                 updateStmt.executeBatch();
+                modified = true;
                 DBUtils.closeSQLStuff(updateStmt);
                 updateStmt = null;
             }
@@ -2351,6 +2353,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
             if (null != updateStmt) {
                 updateStmt.executeBatch();
+                modified = false;
                 DBUtils.closeSQLStuff(updateStmt);
                 updateStmt = null;
             }
@@ -2368,11 +2371,15 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             DBUtils.closeSQLStuff(updateStmt);
             if (con != null) {
                 DBUtils.autocommit(con);
-                Database.back(cid, true, con);
+                if (modified) {
+                    Database.getDatabaseService().backWritable(cid, con);
+                } else {
+                    Database.getDatabaseService().backWritableAfterReading(cid, con);
+                }
             }
         }
     }
-    
+
     @Override
     public void removeUnrecoverableItems(String secret, Session session) throws OXException {
         final int user = session.getUserId();
@@ -2476,7 +2483,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 DBUtils.autocommit(con);
                 Database.back(cid, true, con);
             }
-        }    
+        }
         cleanUp(user, cid);
     }
 

@@ -255,6 +255,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         Connection con = null;
         boolean close = true;
         boolean readOnly = true;
+        boolean modified = false;
         try {
             {
                 final ConnectionMode conMode = optParameter(ConnectionMode.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
@@ -312,6 +313,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                             shared.add(folderId);
                         } else {
                             manager.deleteValidatedFolder(folderId, now, -1, true);
+                            modified = true;
                         }
                     }
                 }
@@ -332,7 +334,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 if (readOnly) {
                     databaseService.backReadOnly(contextId, con);
                 } else {
-                    databaseService.backWritable(contextId, con);
+                    if (modified) {
+                        databaseService.backWritable(contextId, con);
+                    } else {
+                        databaseService.backWritableAfterReading(contextId, con);
+                    }
                 }
             }
             STAMPS.put(contextId, Long.valueOf(now));
