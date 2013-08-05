@@ -53,13 +53,14 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.osgi.CapabilityCheckerRegistry;
+import com.openexchange.capabilities.osgi.PermissionAvailabilityServiceRegistry;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
 import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.server.ServiceLookup;
 
 /**
  * Implementation of the {@link AbstractCapabilityService}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  */
 public final class CapabilityServiceImpl extends AbstractCapabilityService {
@@ -71,13 +72,13 @@ public final class CapabilityServiceImpl extends AbstractCapabilityService {
 
     /**
      * Initializes a new {@link CapabilityServiceImpl}.
-     * 
+     *
      * @param services - {@link ServiceLookup} to search for services
      * @param capCheckers - {@link CapabilityCheckerRegistry} to provide the {@link CapabilityChecker}
-     * @param tracker - {@link NearRegistryServiceTracker} with the {@link PermissionAvailabilityService} to check if JSON bundles are available
+     * @param registry - {@link NearRegistryServiceTracker} with the {@link PermissionAvailabilityService} to check if JSON bundles are available
      */
-    public CapabilityServiceImpl(ServiceLookup services, CapabilityCheckerRegistry capCheckers, NearRegistryServiceTracker<PermissionAvailabilityService> tracker) {
-        super(services, tracker);
+    public CapabilityServiceImpl(ServiceLookup services, CapabilityCheckerRegistry capCheckers, PermissionAvailabilityServiceRegistry registry) {
+        super(services, registry);
         this.capCheckers = capCheckers;
     }
 

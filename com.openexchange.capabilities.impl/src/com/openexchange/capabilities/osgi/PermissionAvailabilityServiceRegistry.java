@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,60 @@
  *
  */
 
-package com.openexchange.capabilities.json.osgi;
+package com.openexchange.capabilities.osgi;
 
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.capabilities.json.Capability2JSON;
-import com.openexchange.groupware.userconfiguration.osgi.PermissionRelevantServiceAddedTracker;
-import com.openexchange.passwordchange.PasswordChangeService;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
 
 /**
- * {@link CapabilitiesJSONActivator}
+ * {@link PermissionAvailabilityServiceRegistry} - A registry service tracker for <code>PermissionAvailabilityService</code>.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CapabilitiesJSONActivator extends AJAXModuleActivator {
+public final class PermissionAvailabilityServiceRegistry extends ServiceTracker<PermissionAvailabilityService, PermissionAvailabilityService> {
+
+    private final ConcurrentMap<Permission, PermissionAvailabilityService> services;
 
     /**
-     * {@inheritDoc}
+     * Initializes a new {@link PermissionAvailabilityServiceRegistry}.
+     *
+     * @param context The bundle context
+     * @param clazz The service class
      */
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CapabilityService.class };
+    public PermissionAvailabilityServiceRegistry(final BundleContext context) {
+        super(context, PermissionAvailabilityService.class, null);
+        services = new ConcurrentHashMap<Permission, PermissionAvailabilityService>(8);
     }
 
     /**
-     * {@inheritDoc}
+     * Gets the service list
+     *
+     * @return The service list
      */
-    @Override
-    protected void startBundle() throws Exception {
-        // Add tracker to identify if a PasswordChangeService was registered. If so, add to PermissionAvailabilityService
-        rememberTracker(new PermissionRelevantServiceAddedTracker<PasswordChangeService>(context, PasswordChangeService.class));
-        openTrackers();
-
-        registerService(ResultConverter.class, new Capability2JSON());
+    public Map<Permission, PermissionAvailabilityService> getServiceMap() {
+        return services;
     }
+
+    @Override
+    public PermissionAvailabilityService addingService(final ServiceReference<PermissionAvailabilityService> reference) {
+        final PermissionAvailabilityService service = context.getService(reference);
+        if (null == services.putIfAbsent(service.getRegisteredPermission(), service)) {
+            return service;
+        }
+        context.ungetService(reference);
+        return null;
+    }
+
+    @Override
+    public void removedService(final ServiceReference<PermissionAvailabilityService> reference, final PermissionAvailabilityService service) {
+        services.remove(service.getRegisteredPermission());
+        context.ungetService(reference);
+    }
+
 }

@@ -105,8 +105,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
         UIVersion.UIVERSION = context.getBundle().getVersion().toString();
 
         // Add tracker to identify if a PasswordChangeService was registered. If so, add to PermissionAvailabilityService
-        PermissionRelevantServiceAddedTracker<PasswordChangeService> serviceAddedTracker = new PermissionRelevantServiceAddedTracker<PasswordChangeService>(context, PasswordChangeService.class, null);
-        rememberTracker(serviceAddedTracker);
+        rememberTracker(new PermissionRelevantServiceAddedTracker<PasswordChangeService>(context, PasswordChangeService.class));
 
         final NearRegistryServiceTracker<ServerConfigMatcherService> matcherTracker = new NearRegistryServiceTracker<ServerConfigMatcherService>(
             context,

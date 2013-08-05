@@ -69,6 +69,7 @@ import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityExceptionCodes;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.DependentCapabilityChecker;
+import com.openexchange.capabilities.osgi.PermissionAvailabilityServiceRegistry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -80,7 +81,6 @@ import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -89,8 +89,6 @@ import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link AbstractCapabilityService}
- *
- * {@link CapabilityServiceImpl}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -109,7 +107,26 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     private static final Pattern P_SPLIT = Pattern.compile("\\s*[, ]\\s*");
 
-    private final ConcurrentMap<String, Capability> capabilities;
+    // ------------------------------------------------------------------------------------------------ //
+
+    private static final ConcurrentMap<String, Capability> capabilities = new ConcurrentHashMap<String, Capability>(96);
+
+    /**
+     * Gets the singleton capability for given identifier
+     *
+     * @param id The identifier
+     * @return The singleton capability
+     */
+    public static Capability getCapability(final String id) {
+        Capability capability = capabilities.get(id);
+        if (capability != null) {
+            return capability;
+        }
+        final Capability existingCapability = capabilities.putIfAbsent(id, capability = new Capability(id, false));
+        return existingCapability == null ? capability : existingCapability;
+    }
+
+    // ------------------------------------------------------------------------------------------------ //
 
     private final ConcurrentMap<String, Object> declaredCapabilities;
 
@@ -118,21 +135,20 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     private volatile Boolean autologin;
 
     /**
-     * Tracker that provides the registered JSON bundles to check for permissions
+     * Registry that provides the registered JSON bundles to check for permissions
      */
-    private volatile NearRegistryServiceTracker<PermissionAvailabilityService> tracker = null;
+    private final PermissionAvailabilityServiceRegistry registry;
 
     /**
      * Initializes a new {@link AbstractCapabilityService}.
-     * 
-     * @param tracker that provides the services for the registered JSON bundles
+     *
+     * @param registry that provides the services for the registered JSON bundles
      */
-    public AbstractCapabilityService(final ServiceLookup services, NearRegistryServiceTracker<PermissionAvailabilityService> tracker) {
+    public AbstractCapabilityService(final ServiceLookup services, PermissionAvailabilityServiceRegistry registry) {
         super();
         this.services = services;
-        capabilities = new ConcurrentHashMap<String, Capability>();
-        declaredCapabilities = new ConcurrentHashMap<String, Object>();
-        this.tracker = tracker;
+        declaredCapabilities = new ConcurrentHashMap<String, Object>(32);
+        this.registry = registry;
     }
 
     private Cache optContextCache() {
@@ -360,29 +376,16 @@ public abstract class AbstractCapabilityService implements CapabilityService {
      * @param capabilitiesToFilter - the capabilities the filter should be applied on
      */
     protected void applyUIFilter(Set<Capability> capabilitiesToFilter) {
-        if (this.tracker != null) {
-            List<PermissionAvailabilityService> serviceList = this.tracker.getServiceList();
-
-            for (Permission permission : PermissionAvailabilityService.controlledPermissions) {
-                boolean bundleStarted = false;
-                for (PermissionAvailabilityService service : serviceList) {
-                    if (service.getRegisteredPermission().equals(permission)) {
-                        bundleStarted = true;
-                    }
-                }
-                if (!bundleStarted) {
-                    loop:
-                        for (Capability cap : capabilitiesToFilter) {
-                            if (cap.getId().equalsIgnoreCase(permission.toString())) {
-                                capabilitiesToFilter.remove(cap);
-                                break loop;
-                            }
-                        }
+        final PermissionAvailabilityServiceRegistry registry = this.registry;
+        if (registry != null) {
+            final Map<Permission, PermissionAvailabilityService> serviceList = registry.getServiceMap();
+            for (final Permission p : PermissionAvailabilityService.CONTROLLED_PERMISSIONS) {
+                if (!serviceList.containsKey(p)) {
+                    capabilitiesToFilter.remove(getCapability(toLowerCase(p.name())));
                 }
             }
-        }
-        else {
-            LOG.warn("Tracker not initialized. Cannot check permissions for JSON requests");
+        } else {
+            LOG.warn("Registry not initialized. Cannot check permissions for JSON requests");
         }
     }
 
@@ -443,21 +446,6 @@ public abstract class AbstractCapabilityService implements CapabilityService {
      */
     public Set<Capability> getAllKnownCapabilities() throws OXException {
         return new HashSet<Capability>(capabilities.values());
-    }
-
-    /**
-     * Gets the singleton capability for given identifier
-     *
-     * @param id The identifier
-     * @return The singleton capability
-     */
-    public Capability getCapability(final String id) {
-        Capability capability = capabilities.get(id);
-        if (capability != null) {
-            return capability;
-        }
-        final Capability existingCapability = capabilities.putIfAbsent(id, capability = new Capability(id, false));
-        return existingCapability == null ? capability : existingCapability;
     }
 
     @Override

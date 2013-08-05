@@ -47,39 +47,38 @@
  *
  */
 
-package com.openexchange.capabilities.json.osgi;
+package com.openexchange.capabilities.internal;
 
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.capabilities.json.Capability2JSON;
-import com.openexchange.groupware.userconfiguration.osgi.PermissionRelevantServiceAddedTracker;
-import com.openexchange.passwordchange.PasswordChangeService;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.powermock.modules.junit4.PowerMockRunner;
+
 
 /**
- * {@link CapabilitiesJSONActivator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * Each unit test written should extend this class.<br>
+ * <br>
+ * Globally required mocks can be inserted into the list of @PrepareForTest({ ... }) and be mocked in
+ * com.openexchange.test.mock.test.AbstractMockTest.AbstractMockTest().
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
  */
-public class CapabilitiesJSONActivator extends AJAXModuleActivator {
+@RunWith(PowerMockRunner.class)
+public abstract class AbstractMockTest {
 
     /**
-     * {@inheritDoc}
+     * Initializes a new {@link AbstractMockTest}.
      */
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CapabilityService.class };
+    public AbstractMockTest() {
+        super();
     }
 
     /**
-     * {@inheritDoc}
+     * Setup all mocks that are required for this test
+     * 
+     * @throws Exception - thrown when no mock could be created.
      */
-    @Override
-    protected void startBundle() throws Exception {
-        // Add tracker to identify if a PasswordChangeService was registered. If so, add to PermissionAvailabilityService
-        rememberTracker(new PermissionRelevantServiceAddedTracker<PasswordChangeService>(context, PasswordChangeService.class));
-        openTrackers();
+    @Before
+    public abstract void setUp() throws Exception;
 
-        registerService(ResultConverter.class, new Capability2JSON());
-    }
 }

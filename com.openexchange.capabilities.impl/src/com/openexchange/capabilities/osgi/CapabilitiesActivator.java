@@ -68,7 +68,6 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.TimerService;
@@ -88,9 +87,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         SERVICES.set(this);
 
-        NearRegistryServiceTracker<PermissionAvailabilityService> tracker = new NearRegistryServiceTracker<PermissionAvailabilityService>(
-            context,
-            PermissionAvailabilityService.class);
+        PermissionAvailabilityServiceRegistry tracker = new PermissionAvailabilityServiceRegistry(context);
         track(PermissionAvailabilityService.class, tracker);
 
         final CapabilityCheckerRegistry capCheckers = new CapabilityCheckerRegistry(context);
