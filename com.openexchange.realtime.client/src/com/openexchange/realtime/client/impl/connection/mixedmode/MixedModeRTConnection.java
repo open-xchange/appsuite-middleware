@@ -264,9 +264,13 @@ public class MixedModeRTConnection extends AbstractRTConnection {
         decoders.remove(0);
         decoders.remove(0);
 
-        socket = atmosphereClient.create(
-            (DefaultOptions) atmosphereClient.newOptionsBuilder().runtime(asyncHttpClient, true).reconnect(true).build()
-        );
+        socket = atmosphereClient.create((DefaultOptions) atmosphereClient.newOptionsBuilder()
+                .runtime(asyncHttpClient, true)
+                .waitBeforeUnlocking(100)
+                .pauseBeforeReconnectInSeconds(0)
+                .requestTimeoutInSeconds(60)
+                .reconnect(true)
+                .build());
         try {
             socket.on(Event.MESSAGE.name(), new Function<String>() {
 
