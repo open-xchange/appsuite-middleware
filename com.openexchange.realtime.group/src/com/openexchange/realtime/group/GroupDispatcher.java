@@ -381,6 +381,7 @@ public class GroupDispatcher implements ComponentHandle {
         Stanza copy = stanza.newInstance();
         copy.setTo(to);
         copy.setFrom(stanza.getFrom());
+        copy.setTracer(stanza.getTracer());
         copyPayload(stanza, copy);
 
         return copy;
