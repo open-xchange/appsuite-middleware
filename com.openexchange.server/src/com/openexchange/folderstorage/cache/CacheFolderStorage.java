@@ -76,6 +76,8 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.AfterReadAwareFolderStorage;
+import com.openexchange.folderstorage.AfterReadAwareFolderStorage.Mode;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -1264,7 +1266,7 @@ public final class CacheFolderStorage implements FolderStorage {
             if (null == folderStorage) {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
             }
-            final boolean started = folderStorage.startTransaction(storageParameters, true);
+            final boolean started = startTransaction(Mode.WRITE_AFTER_READ, storageParameters, folderStorage);
             try {
                 final SortableId[] ret = folderStorage.getVisibleFolders(treeId, contentType, type, storageParameters);
                 if (started) {
@@ -1552,7 +1554,7 @@ public final class CacheFolderStorage implements FolderStorage {
             if (null == storage) {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
             }
-            final boolean started = storage.startTransaction(storageParameters, true);
+            final boolean started = startTransaction(Mode.WRITE_AFTER_READ, storageParameters, storage);
             try {
                 final boolean contains = storage.containsFolder(treeId, folderId, storageType, storageParameters);
                 if (started) {
@@ -1578,6 +1580,13 @@ public final class CacheFolderStorage implements FolderStorage {
     /*-
      * ++++++++++++++++++++++++++++++++++++ ++ + HELPERS + ++ ++++++++++++++++++++++++++++++++++++
      */
+
+    private boolean startTransaction(final Mode mode, final StorageParameters storageParameters, final FolderStorage storage) throws OXException {
+        if (storage instanceof AfterReadAwareFolderStorage) {
+            return ((AfterReadAwareFolderStorage) storage).startTransaction(storageParameters, mode);
+        }
+        return storage.startTransaction(storageParameters, Mode.READ.equals(mode) ? false : true);
+    }
 
     /**
      * Creates the cache key for specified folder ID and tree ID pair.
