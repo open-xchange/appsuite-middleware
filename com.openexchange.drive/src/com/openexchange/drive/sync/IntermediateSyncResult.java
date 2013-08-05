@@ -123,4 +123,34 @@ public class IntermediateSyncResult<T extends DriveVersion> {
         }
         return stringAllocator.toString();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof IntermediateSyncResult)) {
+            return false;
+        }
+        IntermediateSyncResult<T> other = (IntermediateSyncResult<T>) obj;
+        if (actionsForClient == null) {
+            if (other.actionsForClient != null) {
+                return false;
+            }
+        } else if (!actionsForClient.equals(other.actionsForClient)) {
+            return false;
+        }
+        if (actionsForServer == null) {
+            if (other.actionsForServer != null) {
+                return false;
+            }
+        } else if (!actionsForServer.equals(other.actionsForServer)) {
+            return false;
+        }
+        return true;
+    }
+
 }

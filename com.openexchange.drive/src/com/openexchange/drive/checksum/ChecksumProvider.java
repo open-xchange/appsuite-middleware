@@ -233,7 +233,7 @@ public class ChecksumProvider {
         if (null == filesInFolder || 0 == filesInFolder.size()) {
             checksum = DriveConstants.EMPTY_MD5;
             if (null != trace) {
-                trace.append(" no files in folder, using empty MD5");
+                trace.append(" no files in folder, using empty MD5\n");
             }
         } else {
             Set<File> files = new TreeSet<File>(FILENAME_COMPARATOR);

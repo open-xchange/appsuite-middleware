@@ -77,9 +77,37 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
 
     @Override
     public IntermediateSyncResult<DirectoryVersion> optimize(DriveSession session, IntermediateSyncResult<DirectoryVersion> result) {
+        IntermediateSyncResult<DirectoryVersion> unoptimizedResult = result;
+        IntermediateSyncResult<DirectoryVersion> optimizedResult = null;
+        int optimizationCount = 0;
+        boolean hasChanged;
+        do {
+            optimizedResult = optimizeServerRenames(optimizeClientRenames(unoptimizedResult));
+            hasChanged = false == optimizedResult.equals(unoptimizedResult);
+            unoptimizedResult = optimizedResult;
+        } while (hasChanged && ++optimizationCount < 100);
+        return optimizedResult;
+    }
+
+    /**
+     * Detects and optimizes renamed directories at the client, i.e. the following pattern
+     * <p/><code>
+     * Server: REMOVE [version=/heinz | d41d8cd98f00b204e9800998ecf8427e [79348], newVersion=null, parameters={}]
+     * Client: ACKNOWLEDGE [version=/heinz | d41d8cd98f00b204e9800998ecf8427e, newVersion=null, parameters={}]
+     * Client: SYNC [version=/otto | d41d8cd98f00b204e9800998ecf8427e, newVersion=null, parameters={}]
+     * </code><p/>
+     * is detected and transformed to
+     * <p/><code>
+     * Server: EDIT [version=/heinz | d41d8cd98f00b204e9800998ecf8427e [79348], newVersion=/otto | d41d8cd98f00b204e9800998ecf8427e, parameters={}]
+     * Client: ACKNOWLEDGE [version=/heinz | d41d8cd98f00b204e9800998ecf8427e, newVersion=/otto | d41d8cd98f00b204e9800998ecf8427e, parameters={}]
+     * </code><p/>
+     *
+     * @param result The current intermediate sync result
+     * @return The optimized intermediate sync result
+     */
+    private IntermediateSyncResult<DirectoryVersion> optimizeClientRenames(IntermediateSyncResult<DirectoryVersion> result) {
         List<AbstractAction<DirectoryVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForClient());
         List<AbstractAction<DirectoryVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForServer());
-        List<AbstractAction<DirectoryVersion>> renameActionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>();
         List<AbstractAction<DirectoryVersion>> renameActionsForServer = new ArrayList<AbstractAction<DirectoryVersion>>();
         /*
          * Move of subfolder at client: check for client ACKNOWLEDGE / client SYNC / server REMOVE of identical version
@@ -95,7 +123,8 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
                  * ACKNOWLEDGE [version={"path":"/vorher","checksum":"d41d8cd98f00b204e9800998ecf8427e"}, newVersion=null, parameters={}]
                  */
                 for (AbstractAction<DirectoryVersion> clientAction : result.getActionsForClient()) {
-                    if (Action.ACKNOWLEDGE.equals(clientAction.getAction()) && clientAction.wasCausedBy(Change.DELETED, Change.NONE) &&
+                    if (Action.ACKNOWLEDGE.equals(clientAction.getAction()) && null == clientAction.getNewVersion() &&
+                        clientAction.wasCausedBy(Change.DELETED, Change.NONE) &&
                         matchesByPathAndChecksum(clientAction.getVersion(), serverAction.getVersion())) {
                         /*
                          * find best matching client SYNC caused by a new matching directory at client
@@ -119,16 +148,43 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
                             /*
                              * restore any nested removes that are no longer valid after rename
                              */
-                            if (serverAction.getParameters().containsKey("nestedRemoves")) {
-                                restoreNestedRemoves((List<AbstractAction<DirectoryVersion>>)serverAction.getParameters().get("nestedRemoves"),
-                                    optimizedActionsForServer);
-                            }
+                            restoreNestedRemoves(serverAction, optimizedActionsForServer);
                             continue;
                         }
                     }
                 }
             }
         }
+        /*
+         * remove redundant rename actions
+         */
+        if (0 < renameActionsForServer.size()) {
+            optimizedActionsForServer.removeAll(getRedundantRenames(renameActionsForServer));
+        }
+        /*
+         * return new sync results
+         */
+        return new IntermediateSyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient);
+    }
+
+    /**
+     * Detects and optimizes renamed directories at the server, i.e. the following pattern
+     * <p/><code>
+     * Client: REMOVE [version=/test | c8c44ca5d3461855fb6a6bcae3ae2336, newVersion=null, parameters={}]
+     * Client: SYNC [version=/test2 | c8c44ca5d3461855fb6a6bcae3ae2336 [79859], newVersion=null, parameters={}]
+     * </code><p/>
+     * is detected and transformed to
+     * <p/><code>
+     * Client: EDIT [version=/test | c8c44ca5d3461855fb6a6bcae3ae2336, newVersion=/test2 | c8c44ca5d3461855fb6a6bcae3ae2336 [79859], parameters={}]
+     * </code><p/>
+     *
+     * @param result The current intermediate sync result
+     * @return The optimized intermediate sync result
+     */
+    private IntermediateSyncResult<DirectoryVersion> optimizeServerRenames(IntermediateSyncResult<DirectoryVersion> result) {
+        List<AbstractAction<DirectoryVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForClient());
+        List<AbstractAction<DirectoryVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForServer());
+        List<AbstractAction<DirectoryVersion>> renameActionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>();
         /*
          * Move of subfolder at server: check for client REMOVE / client SYNC of identical version
          */
@@ -154,6 +210,10 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
                     EditDirectoryAction renameDirectoryAction = new EditDirectoryAction(clientAction.getVersion(), clientSync.getVersion(), null);
                     optimizedActionsForClient.add(renameDirectoryAction);
                     renameActionsForClient.add(renameDirectoryAction);
+                    /*
+                     * restore any nested removes that are no longer valid after rename
+                     */
+                    restoreNestedRemoves(clientAction, optimizedActionsForClient);
                     continue;
                 }
             }
@@ -161,25 +221,30 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
         /*
          * remove redundant rename actions
          */
-        if (0 < renameActionsForServer.size()) {
-            optimizedActionsForServer.removeAll(getRedundantRenames(renameActionsForServer));
-        }
         if (0 < renameActionsForClient.size()) {
-            optimizedActionsForClient.removeAll(getRedundantRenames(renameActionsForClient));
+            // TODO check if necessary
+            optimizedActionsForServer.removeAll(getRedundantRenames(renameActionsForClient));
         }
         /*
          * return new sync results
          */
         return new IntermediateSyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient);
-
     }
 
-    private static int restoreNestedRemoves(List<AbstractAction<DirectoryVersion>> nestedRemoves, List<AbstractAction<DirectoryVersion>> originalActions) {
+    private static int restoreNestedRemoves(AbstractAction<DirectoryVersion> parentAction, List<AbstractAction<DirectoryVersion>> originalActions) {
         int restored = 0;
-        if (null != nestedRemoves && 0 < nestedRemoves.size()) {
-            for (AbstractAction<DirectoryVersion> nestedRemove : nestedRemoves) {
-                if (originalActions.add(nestedRemove)) {
-                    restored++;
+        if (parentAction.getParameters().containsKey("nestedRemoves")) {
+            List<AbstractAction<DirectoryVersion>> nestedRemoves =
+                (List<AbstractAction<DirectoryVersion>>)parentAction.getParameters().get("nestedRemoves");
+            if (null != nestedRemoves && 0 < nestedRemoves.size()) {
+                for (AbstractAction<DirectoryVersion> nestedRemove : nestedRemoves) {
+                    if (false == originalActions.contains(nestedRemove)) {
+                        if (originalActions.add(nestedRemove)) {
+                            restored++;
+                        }
+                        // recursive
+                        restored += restoreNestedRemoves(nestedRemove, originalActions);
+                    }
                 }
             }
         }
