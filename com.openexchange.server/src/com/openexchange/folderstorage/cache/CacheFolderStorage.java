@@ -1643,7 +1643,7 @@ public final class CacheFolderStorage implements FolderStorage {
         if (null == storage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        final boolean started = storage.startTransaction(storageParameters, readWrite);
+        final boolean started = startTransaction(readWrite ? Mode.WRITE_AFTER_READ : Mode.READ, storageParameters, storage);
         try {
             final Folder folder = storage.getFolder(treeId, folderId, storageType, storageParameters);            
             if (started) {
