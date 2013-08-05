@@ -113,7 +113,7 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator {
         try {
             LOG.info("Registering jolokia servlet.");
             usedServletName = myConfig.getServletName();
-            httpService.registerServlet(usedServletName, jolServlet, null, getHttpContext());
+            httpService.registerServlet(usedServletName, jolServlet, myConfig.getJolokiaConfiguration(), getHttpContext());
             
         } catch (final ServletException e) {
             LOG.error("Registering jolokia servlet failed.", e);

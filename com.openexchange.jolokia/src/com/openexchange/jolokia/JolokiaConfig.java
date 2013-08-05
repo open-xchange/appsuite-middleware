@@ -49,10 +49,14 @@
 
 package com.openexchange.jolokia;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.jolokia.osgi.Services;
@@ -89,6 +93,9 @@ public class JolokiaConfig implements Initialization {
     /** The password for authentication */
     private String password;
 
+    //internal Jolokia options
+    private Dictionary<String,String> pConfig = new Hashtable<String,String>();
+    
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
@@ -118,6 +125,9 @@ public class JolokiaConfig implements Initialization {
         this.user = configService.getProperty("com.openexchange.jolokia.user");
         this.password = configService.getProperty("com.openexchange.jolokia.password", "secret");
 
+        // Map<String,String> pConfig = new HashMap<String, String>();
+        pConfig.put(ConfigKey.MAX_OBJECTS.getKeyValue(), configService.getProperty("com.openexchange.jolokia.maxObjects", "0"));
+        pConfig.put(ConfigKey.MAX_DEPTH.getKeyValue(), configService.getProperty("com.openexchange.jolokia.maxDepth", "0"));
     }
 
     /**
@@ -155,4 +165,8 @@ public class JolokiaConfig implements Initialization {
         return password;
     }
 
+    // Customizer for registering servlet at a HttpService
+    public Dictionary<String,String> getJolokiaConfiguration() {
+        return pConfig;
+    }
 }
