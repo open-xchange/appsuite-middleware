@@ -426,8 +426,8 @@ public final class MessageUtility {
             if (retval.indexOf(UNKNOWN) < 0) {
                 return retval;
             }
-            // SJIS_0213
-            return new String(bytes, Charsets.forName("SJIS_0213"));
+            // MS932
+            return new String(bytes, Charsets.forName("MS932"));
         }
         final String retval = readStream0(streamProvider.getInputStream(), charset);
         if (true || retval.indexOf(UNKNOWN) < 0) {
@@ -505,8 +505,8 @@ public final class MessageUtility {
             if (retval.indexOf(UNKNOWN) < 0) {
                 return retval;
             }
-            // SJIS_0213
-            return new String(bytes, Charsets.forName("SJIS_0213"));
+            // MS932
+            return new String(bytes, Charsets.forName("MS932"));
         }
         return readStream0(inStream, charset);
     }
