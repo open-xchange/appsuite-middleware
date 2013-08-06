@@ -126,7 +126,7 @@ public class Capability {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof CapabilityService)) {
+        if (!(obj instanceof Capability)) {
             return false;
         }
         Capability other = (Capability) obj;
