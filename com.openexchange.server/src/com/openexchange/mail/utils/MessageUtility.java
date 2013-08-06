@@ -427,7 +427,7 @@ public final class MessageUtility {
                 return retval;
             }
             // MS932
-            return new String(bytes, Charsets.forName("MS932"));
+            return CP932EmojiMapping.getInstance().replaceIn(new String(bytes, Charsets.forName("MS932")));
         }
         final String retval = readStream0(streamProvider.getInputStream(), charset);
         if (true || retval.indexOf(UNKNOWN) < 0) {
@@ -506,7 +506,7 @@ public final class MessageUtility {
                 return retval;
             }
             // MS932
-            return new String(bytes, Charsets.forName("MS932"));
+            return CP932EmojiMapping.getInstance().replaceIn(new String(bytes, Charsets.forName("MS932")));
         }
         return readStream0(inStream, charset);
     }
