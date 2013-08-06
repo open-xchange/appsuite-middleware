@@ -262,15 +262,17 @@ public final class CachingJSlobStorage implements JSlobStorage {
         if (!toLoad.isEmpty()) {
             final List<JSlob> loaded = delegate.list(toLoad);
             for (final JSlob jSlob : loaded) {
-                final JSlobId id = jSlob.getId();
-                cache.putInGroup(id.getId(), groupName(id), jSlob, false);
-                map.put(id.getId(), jSlob.clone());
+                if (null != jSlob) {
+                    final JSlobId id = jSlob.getId();
+                    cache.putInGroup(id.getId(), groupName(id), jSlob, false);
+                    map.put(id.getId(), jSlob.clone());
+                }
             }
         }
 
         final List<JSlob> ret = new ArrayList<JSlob>(size);
         for (final JSlobId id : ids) {
-            ret.add(map.get(id.getId()));
+            ret.add(null == id ? null : map.get(id.getId()));
         }
         return ret;
     }
