@@ -1,3 +1,9 @@
+open-xchange-realtime-client (7.4.0-2) stable; urgency=low
+
+  * Third release candidate for 7.4.0
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 06 Aug 2013 11:43:03 +0200
+
 open-xchange-realtime-client (7.4.0-1) stable; urgency=low
 
   * Second release candidate for 7.4.0
