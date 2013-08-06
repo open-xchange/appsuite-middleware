@@ -66,6 +66,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.UUID;
 import org.apache.commons.logging.Log;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
@@ -256,13 +257,13 @@ public class ICalImporter extends AbstractImporter {
 					warnings);
 		}
 		if (taskFolderId != -1) {
-			importTask(is, taskFolderId, taskInterface, parser, ctx, defaultTz,
+			importTask(is, optionalParams, taskFolderId, taskInterface, parser, ctx, defaultTz,
 					list, errors, warnings);
 		}
 		return list;
 	}
 
-	private void importTask(final InputStream is, final int taskFolderId,
+	private void importTask(final InputStream is, final Map<String, String[]> optionalParams, final int taskFolderId,
 			final TasksSQLInterface taskInterface, final ICalParser parser,
 			final Context ctx, final TimeZone defaultTz,
 			final List<ImportResult> list, final List<ConversionError> errors,
@@ -287,6 +288,8 @@ public class ICalImporter extends AbstractImporter {
 			warningList.add(warning);
 		}
 
+        boolean ignoreUIDs = isIgnoreUIDs(optionalParams);
+        Map<String, String> uidReplacements = ignoreUIDs ? new HashMap<String, String>() : null;
 		int index = 0;
 		final Iterator<Task> iter = tasks.iterator();
 		while (iter.hasNext()) {
@@ -300,6 +303,16 @@ public class ICalImporter extends AbstractImporter {
 				// TODO: Verify This
 				final Task task = iter.next();
 				task.setParentFolderID(taskFolderId);
+                if (ignoreUIDs && task.containsUid()) {
+                    // perform fixed UID replacement to keep recurring task relations
+                    String originalUID = task.getUid();
+                    String replacedUID = uidReplacements.get(originalUID);
+                    if (null == replacedUID) {
+                        replacedUID = UUID.randomUUID().toString();
+                        uidReplacements.put(originalUID, replacedUID);
+                    }
+                    task.setUid(replacedUID);
+                }
 				try {
 					taskInterface.insertTaskObject(task);
 					importResult.setObjectId(String.valueOf(task
@@ -376,6 +389,8 @@ public class ICalImporter extends AbstractImporter {
 
 		final boolean suppressNotification = (optionalParams != null && optionalParams
 				.containsKey("suppressNotification"));
+		boolean ignoreUIDs = isIgnoreUIDs(optionalParams);
+		Map<String, String> uidReplacements = ignoreUIDs ? new HashMap<String, String>() : null;
 		while (iter.hasNext()) {
 			final ImportResult importResult = new ImportResult();
 			final ConversionError error = errorMap.get(index);
@@ -387,6 +402,16 @@ public class ICalImporter extends AbstractImporter {
 				appointmentObj.setContext(session.getContext());
 				appointmentObj.setParentFolderID(appointmentFolderId);
 				appointmentObj.setIgnoreConflicts(true);
+				if (ignoreUIDs && appointmentObj.containsUid()) {
+				    // perform fixed UID replacement to keep recurring appointment relations
+				    String originalUID = appointmentObj.getUid();
+				    String replacedUID = uidReplacements.get(originalUID);
+				    if (null == replacedUID) {
+				        replacedUID = UUID.randomUUID().toString();
+				        uidReplacements.put(originalUID, replacedUID);
+				    }
+				    appointmentObj.setUid(replacedUID);
+				}
 				OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
 				FolderObject folder = folderAccess.getFolderObject(appointmentFolderId);
 				if (folder.getType() == FolderObject.PUBLIC) {
@@ -681,6 +706,22 @@ public class ICalImporter extends AbstractImporter {
             newParticipants[newParticipants.length - 1] = userParticipant;
             appointment.setParticipants(newParticipants);
             return true;
+        }
+        return false;
+    }
+
+    /**
+     * Gets a value whether the supplied parameters indicate that UIDs should be ignored during import or not.
+     *
+     * @param optionalParams The optional parameters as passed from the import request, may be <code>null</code>
+     * @return <code>true</code> if UIDs should be ignored, <code>false</code>, otherwise
+     */
+    private static boolean isIgnoreUIDs(Map<String, String[]> optionalParams) {
+        if (null != optionalParams) {
+            String[] value = optionalParams.get("ignoreUIDs");
+            if (null != value && 0 < value.length) {
+                return Boolean.valueOf(value[0]).booleanValue();
+            }
         }
         return false;
     }
