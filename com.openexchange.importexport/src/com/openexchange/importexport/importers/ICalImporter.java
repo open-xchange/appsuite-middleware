@@ -374,6 +374,9 @@ public class ICalImporter extends AbstractImporter {
 		for (final ConversionError error : errors) {
 			errorMap.put(error.getIndex(), error);
 		}
+		if (null == appointments || 0 == appointments.size()) {
+		    return; // nothing to import
+		}
 
 		sortSeriesMastersFirst(appointments);
 		final Map<Integer, Integer> pos2Master = handleChangeExceptions(appointments);
