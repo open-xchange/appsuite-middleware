@@ -52,7 +52,6 @@ package com.openexchange.html.internal;
 import gnu.inet.encoding.IDNAException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -95,6 +94,7 @@ import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.StringBuilderStringer;
@@ -975,12 +975,12 @@ public final class HtmlServiceImpl implements HtmlService {
             /*
              * Clean...
              */
-            final TagNode htmlNode = HTML_CLEANER.clean(htmlContent);
+            final TagNode htmlNode = newHtmlCleaner().clean(htmlContent);
             /*
              * Serialize
              */
-            final StringWriter writer = new StringWriter(htmlContent.length());
-            SERIALIZER.write(htmlNode, writer, "UTF-8");
+            final AllocatingStringWriter writer = new AllocatingStringWriter(htmlContent.length());
+            newSerializer().write(htmlNode, writer, "UTF-8");
             return writer.toString();
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
@@ -1638,6 +1638,8 @@ public final class HtmlServiceImpl implements HtmlService {
         return PAT_HEX_NBSP.matcher(validated).replaceAll("&nbsp;");
     }
 
+    // ----------------------------- JSoup stuff ----------------------------- //
+
     /**
      * The white-list of permitted HTML elements for <a href="http://jsoup.org/">jsoup</a> library.
      */
@@ -1653,19 +1655,14 @@ public final class HtmlServiceImpl implements HtmlService {
         return Jsoup.parse(htmlContent).toString();
     }
 
-    /**
-     * The {@link HtmlCleaner} constant which is safe being used by multiple threads as of <a
-     * href="http://htmlcleaner.sourceforge.net/javause.php#example2">this example</a>.
-     */
-    private static final HtmlCleaner HTML_CLEANER;
+    // -------------------------- HtmlCleaner stuff -------------------------- //
 
     /**
-     * The {@link Serializer} constant which is safe being used by multiple threads as of <a
-     * href="http://htmlcleaner.sourceforge.net/javause.php#example2">this example</a>.
+     * Generates new {@link CleanerProperties} instance.
+     *
+     * @return The new {@link CleanerProperties}
      */
-    private static final Serializer SERIALIZER;
-
-    static {
+    private static CleanerProperties newCleanerProperties() {
         final CleanerProperties props = new CleanerProperties();
         props.setOmitDoctypeDeclaration(true);
         props.setOmitXmlDeclaration(true);
@@ -1678,8 +1675,25 @@ public final class HtmlServiceImpl implements HtmlService {
         props.setIgnoreQuestAndExclam(false);
         props.setUseCdataForScriptAndStyle(false);
         props.setIgnoreQuestAndExclam(true);
-        HTML_CLEANER = new HtmlCleaner(props);
-        SERIALIZER = new SimpleHtmlSerializer(props); // (props, " ");
+        return props;
+    }
+
+    /**
+     * Creates a new {@link HtmlCleaner} instance.
+     *
+     * @return The instance
+     */
+    private static HtmlCleaner newHtmlCleaner() {
+        return new HtmlCleaner(newCleanerProperties());
+    }
+
+    /**
+     * Creates a new {@link Serializer} instance.
+     *
+     * @return The instance
+     */
+    private static Serializer newSerializer() {
+        return new SimpleHtmlSerializer(newCleanerProperties());
     }
 
     private static final String DOCTYPE_DECL = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n\r\n";
@@ -1693,7 +1707,7 @@ public final class HtmlServiceImpl implements HtmlService {
              */
             String preprocessed = preprocessWithJSoup(htmlContent);
             preprocessed = replaceSpecialEntities(preprocessed);
-            final TagNode htmlNode = HTML_CLEANER.clean(preprocessed);
+            final TagNode htmlNode = newHtmlCleaner().clean(preprocessed);
             /*
              * Check for presence of HTML namespace
              */
@@ -1706,7 +1720,7 @@ public final class HtmlServiceImpl implements HtmlService {
              * Serialize
              */
             final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());
-            SERIALIZER.write(htmlNode, writer, "UTF-8");
+            newSerializer().write(htmlNode, writer, "UTF-8");
             final StringAllocator buffer = writer.getBuffer();
             /*
              * Insert DOCTYPE if absent
