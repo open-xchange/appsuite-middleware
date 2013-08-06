@@ -86,6 +86,16 @@ public interface JSlobService {
     JSlob get(String id, Session session) throws OXException;
 
     /**
+     * Gets the JSlob associated with given user in given context.
+     *
+     * @param ids The identifiers of the JSlobs
+     * @param userId session An active session
+     * @return The JSlobs
+     * @throws OXException If JSlobs cannot be returned
+     */
+    List<JSlob> get(List<String> ids, Session session) throws OXException;
+
+    /**
      * Gets the shared JSlob.
      *
      * @param id The identifier of the JSlob
