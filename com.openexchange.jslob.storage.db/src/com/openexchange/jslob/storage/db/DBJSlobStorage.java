@@ -442,6 +442,9 @@ public final class DBJSlobStorage implements JSlobStorage {
                 final String sId = rs.getString(2);
                 map.put(sId, new DefaultJSlob(new JSONObject(new AsciiReader(rs.getBinaryStream(1)))).setId(new JSlobId(serviceId, sId, user, contextId)));
             } while (rs.next());
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
             // Generate list
             final List<JSlob> list = new ArrayList<JSlob>(size);
             for (final JSlobId jSlobId : ids) {
