@@ -47,40 +47,77 @@
  *
  */
 
-package com.openexchange.drive.internal;
+package com.openexchange.drive.json.internal;
 
-import com.openexchange.drive.DirectoryMetadata;
-import com.openexchange.drive.comparison.ServerDirectoryVersion;
+import com.openexchange.drive.DriveSession;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link DefaultDirectoryMetadata}
+ * {@link DefaultDriveSession}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DefaultDirectoryMetadata implements DirectoryMetadata {
+public class DefaultDriveSession implements DriveSession {
 
-    private final SyncSession session;
-    private final ServerDirectoryVersion directoryVersion;
+    private final String rootFolderID;
+    private final ServerSession session;
+    private String deviceName;
+    private Boolean diagnostics;
 
-    public DefaultDirectoryMetadata(SyncSession session, ServerDirectoryVersion directoryVersion) {
+    /**
+     * Initializes a new {@link DefaultDriveSession}.
+     *
+     * @param session The session
+     * @param rootFolderID The root folder ID
+     */
+    public DefaultDriveSession(ServerSession session, String rootFolderID) {
         super();
         this.session = session;
-        this.directoryVersion = directoryVersion;
+        this.rootFolderID = rootFolderID;
+    }
+
+    /**
+     * Sets the diagnostics
+     *
+     * @param diagnostics The diagnostics to set
+     */
+    public void setDiagnostics(Boolean diagnostics) {
+        this.diagnostics = diagnostics;
+    }
+
+    /**
+     * Sets the deviceName
+     *
+     * @param deviceName The deviceName to set
+     */
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
     }
 
     @Override
-    public String getPath() {
-        return directoryVersion.getPath();
+    public String getRootFolderID() {
+        return rootFolderID;
     }
 
     @Override
-    public String getChecksum() {
-        return directoryVersion.getChecksum();
+    public ServerSession getServerSession() {
+        return session;
     }
 
     @Override
-    public String getDirectLink() {
-        return session.getLinkGenerator().getDirectoryLink(directoryVersion.getDirectoryChecksum().getFolderID().toUniqueID());
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    @Override
+    public Boolean isDiagnostics() {
+        return diagnostics;
+    }
+
+    @Override
+    public String toString() {
+        return "DriveSession [sessionID=" + session.getSessionID() + ", rootFolderID=" + rootFolderID + ", contextID=" +
+            session.getContextId() + ", deviceName=" + deviceName + ", diagnostics=" + diagnostics + "]";
     }
 
 }

@@ -87,14 +87,14 @@ import com.openexchange.java.Streams;
  */
 public class UploadHelper {
 
-    private final DriveSession session;
+    private final SyncSession session;
 
     /**
      * Initializes a new {@link UploadHelper}.
      *
-     * @param session The drive session
+     * @param session The sync session
      */
-    public UploadHelper(DriveSession session) {
+    public UploadHelper(SyncSession session) {
         super();
         this.session = session;
     }

@@ -49,38 +49,68 @@
 
 package com.openexchange.drive.internal;
 
-import com.openexchange.drive.DirectoryMetadata;
-import com.openexchange.drive.comparison.ServerDirectoryVersion;
+import java.util.Date;
+import org.apache.commons.logging.Log;
+import com.openexchange.drive.storage.DriveConstants;
+import com.openexchange.java.StringAllocator;
 
 /**
- * {@link DefaultDirectoryMetadata}
+ * {@link Tracer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DefaultDirectoryMetadata implements DirectoryMetadata {
+public class Tracer {
 
-    private final SyncSession session;
-    private final ServerDirectoryVersion directoryVersion;
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Tracer.class);
+    private final StringAllocator traceLog;
 
-    public DefaultDirectoryMetadata(SyncSession session, ServerDirectoryVersion directoryVersion) {
+    /**
+     * Initializes a new {@link Tracer}.
+     *
+     * @param diagnostics Whether to write a diagnostics log or not.
+     */
+    public Tracer(Boolean diagnostics) {
         super();
-        this.session = session;
-        this.directoryVersion = directoryVersion;
+        this.traceLog = null != diagnostics && diagnostics.booleanValue() ? new StringAllocator() : null;
     }
 
-    @Override
-    public String getPath() {
-        return directoryVersion.getPath();
+    /**
+     * Appends a new line for the supplied message into the trace log.
+     *
+     * @param message The message to trace
+     */
+    public void trace(Object message) {
+        if (isTraceEnabled()) {
+            String msg = String.valueOf(message);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(msg);
+            }
+            if (null != traceLog) {
+                traceLog
+                    .append(DriveConstants.LOG_DATE_FORMAT.get().format(new Date()))
+                    .append(" [").append(Thread.currentThread().getId()).append("] : ")
+                    .append(msg.trim()).append("\n\n");
+            }
+        }
     }
 
-    @Override
-    public String getChecksum() {
-        return directoryVersion.getChecksum();
+    /**
+     * Gets the recorded trace log.
+     *
+     * @return
+     */
+    public String getTraceLog() {
+        return null != traceLog ? traceLog.toString() : null;
     }
 
-    @Override
-    public String getDirectLink() {
-        return session.getLinkGenerator().getDirectoryLink(directoryVersion.getDirectoryChecksum().getFolderID().toUniqueID());
+    /**
+     * Gets a value indicating whether tracing is enabled either in the named logger instance or the drive-internal diagnostics log
+     * generator.
+     *
+     * @return <code>true</code> if tracing is enabled, <code>false</code>, otherwise
+     */
+    public boolean isTraceEnabled() {
+        return LOG.isTraceEnabled() || null != traceLog;
     }
 
 }
