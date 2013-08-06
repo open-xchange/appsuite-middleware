@@ -49,23 +49,17 @@
 
 package com.openexchange.report.internal;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
-import com.openexchange.java.util.UUIDs;
+import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
@@ -131,7 +125,6 @@ public class LastLoginRecorder implements LoginHandlerService {
         if (context.isReadOnly()) {
             return;
         }
-        final int userId = origUser.getId();
         // Retrieve existing ones
         final Map<String, Set<String>> attributes;
         {
@@ -141,7 +134,7 @@ public class LastLoginRecorder implements LoginHandlerService {
                 int count = 0;
                 for (final String origKey : origAttributes.keySet()) {
                     if (origKey.startsWith("client:") && ++count > maxClientCount) {
-                        throw UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(Integer.valueOf(context.getContextId()), Integer.valueOf(userId));
+                        throw UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(Integer.valueOf(context.getContextId()), Integer.valueOf(origUser.getId()));
                     }
                 }
                 attributes = new HashMap<String, Set<String>>(origAttributes);
@@ -149,62 +142,17 @@ public class LastLoginRecorder implements LoginHandlerService {
                 attributes = new HashMap<String, Set<String>>(origUser.getAttributes());
             }
         }
-
         // Add current time stamp
-        updateTimeStamp(key, System.currentTimeMillis(), userId, context.getContextId());
-
-        {
-            UserService service = ServerServiceRegistry.getInstance().getService(UserService.class, true);
-            service.invalidateUser(context, userId);
-        }
-    }
-
-    private static void updateTimeStamp(final String key, final long stamp, final int userId, final int contextId) throws OXException {
-        final DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
-        final Connection con = databaseService.getWritable(contextId);
-        PreparedStatement stmt = null;
+        attributes.put(key, new HashSet<String>(Arrays.asList(Long.toString(System.currentTimeMillis()))));
+        final UserImpl newUser = new UserImpl();
+        newUser.setId(origUser.getId());
+        newUser.setAttributes(attributes);
+        UserService service;
         try {
-            UUID uuid = null;
-
-            {
-                ResultSet rs = null;
-                try {
-                    stmt = con.prepareStatement("SELECT uuid FROM user_attribute WHERE cid=? AND id=? AND name=?");
-                    stmt.setInt(1, contextId);
-                    stmt.setInt(2, userId);
-                    stmt.setString(3, key);
-                    rs = stmt.executeQuery();
-                    if (rs.next()) {
-                        uuid = UUIDs.toUUID(rs.getBytes(1));
-                    }
-                } finally {
-                    Databases.closeSQLStuff(rs, stmt);
-                    stmt = null;
-                }
-            }
-
-            // INSERT or UPDATE
-            if (null == uuid) {
-                stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value,uuid) VALUES (?,?,?,?,?)");
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, userId);
-                stmt.setString(3, key);
-                stmt.setString(4, Long.toString(stamp));
-                stmt.setBytes(5, UUIDs.toByteArray(UUID.randomUUID()));
-                stmt.executeUpdate();
-            } else {
-                stmt = con.prepareStatement("UPDATE user_attribute SET value=? WHERE cid=? AND uuid=?");
-                stmt.setString(1, Long.toString(stamp));
-                stmt.setInt(2, contextId);
-                stmt.setBytes(3, UUIDs.toByteArray(uuid));
-                stmt.executeUpdate();
-            }
-
-        } catch (final SQLException e) {
-            throw UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(e, I(contextId), I(userId));
-        } finally {
-            Databases.closeSQLStuff(stmt);
-            databaseService.backWritable(contextId, con);
+            service = ServerServiceRegistry.getInstance().getService(UserService.class, true);
+            service.updateUser(newUser, context);
+        } catch (final OXException e) {
+            throw e;
         }
     }
 
