@@ -836,6 +836,13 @@ public final class MimeMessageUtility {
                             decodeWord = MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "GB18030"));
                         }
                         sb.append(decodeWord);
+                    } else if (MessageUtility.isShiftJis(charset)) {
+                        final String encodedWord = m.group();
+                        String decodeWord = MimeUtility.decodeWord(encodedWord);
+                        if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
+                            decodeWord = MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "MS932"));
+                        }
+                        sb.append(decodeWord);
                     } else {
                         sb.append(MimeUtility.decodeWord(m.group()));
                     }
