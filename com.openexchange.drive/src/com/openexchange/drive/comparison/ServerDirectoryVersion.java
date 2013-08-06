@@ -55,7 +55,7 @@ import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.checksum.DirectoryChecksum;
-import com.openexchange.drive.internal.DriveSession;
+import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.exception.OXException;
 
 
@@ -101,11 +101,11 @@ public class ServerDirectoryVersion implements DirectoryVersion {
      *
      * @param directoryVersion The directory version to match
      * @param path The path to the directory
-     * @param session The drive session
+     * @param session The sync session
      * @return The matching server directory version, never <code>null</code>
      * @throws OXException If the directory version not exists
      */
-    public static ServerDirectoryVersion valueOf(DirectoryVersion directoryVersion, DriveSession session) throws OXException {
+    public static ServerDirectoryVersion valueOf(DirectoryVersion directoryVersion, SyncSession session) throws OXException {
         if (ServerDirectoryVersion.class.isInstance(directoryVersion)) {
             return (ServerDirectoryVersion)directoryVersion;
         }

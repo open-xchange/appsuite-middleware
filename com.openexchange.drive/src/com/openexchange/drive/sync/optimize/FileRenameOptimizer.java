@@ -61,7 +61,7 @@ import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
 import com.openexchange.drive.actions.EditFileAction;
 import com.openexchange.drive.comparison.VersionMapper;
-import com.openexchange.drive.internal.DriveSession;
+import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.sync.RenameTools;
 import com.openexchange.drive.sync.SimpleFileVersion;
 import com.openexchange.drive.sync.IntermediateSyncResult;
@@ -82,7 +82,7 @@ public class FileRenameOptimizer extends FileActionOptimizer {
     }
 
     @Override
-    public IntermediateSyncResult<FileVersion> optimize(DriveSession session, IntermediateSyncResult<FileVersion> result) {
+    public IntermediateSyncResult<FileVersion> optimize(SyncSession session, IntermediateSyncResult<FileVersion> result) {
         List<AbstractAction<FileVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<FileVersion>>(result.getActionsForClient());
         List<AbstractAction<FileVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<FileVersion>>(result.getActionsForServer());
         for (AbstractAction<FileVersion> clientAction : result.getActionsForClient()) {
@@ -227,7 +227,7 @@ Actions for client:
         return optimizedList;
     }
 
-    private FileVersion getRenamedVersion(DriveSession session, FileVersion conflictingVersion) {
+    private FileVersion getRenamedVersion(SyncSession session, FileVersion conflictingVersion) {
         String alternativeName = RenameTools.findAlternativeName(conflictingVersion.getName(), usedFilenames, session.getDeviceName());
         if (null != usedFilenames) {
             usedFilenames.add(alternativeName);

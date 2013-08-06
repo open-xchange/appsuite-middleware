@@ -52,10 +52,10 @@ package com.openexchange.drive.json.action;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.DriveSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -66,7 +66,12 @@ import com.openexchange.tools.session.ServerSession;
 public class UpdateTokenAction extends AbstractDriveAction {
 
     @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException {
+    protected boolean requiresRootFolderID() {
+        return false;
+    }
+
+    @Override
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
         /*
          * get parameters
          */
@@ -85,7 +90,7 @@ public class UpdateTokenAction extends AbstractDriveAction {
         /*
          * update token
          */
-        getSubscriptionStore().updateToken(session, serviceID, token, newToken);
+        getSubscriptionStore().updateToken(session.getServerSession(), serviceID, token, newToken);
         /*
          * return empty json object to indicate success
          */

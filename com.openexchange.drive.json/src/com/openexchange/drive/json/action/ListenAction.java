@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.json.internal.ListenerRegistrar;
@@ -66,7 +67,6 @@ import com.openexchange.drive.json.json.JsonDriveAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -77,14 +77,10 @@ import com.openexchange.tools.session.ServerSession;
 public class ListenAction extends AbstractDriveAction {
 
     @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, final ServerSession session) throws OXException {
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
         /*
          * get request data
          */
-        String rootFolderID = requestData.getParameter("root");
-        if (Strings.isEmpty(rootFolderID)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
-        }
         long timeout;
         String timeoutValue = requestData.getParameter("timeout");
         if (false == Strings.isEmpty(timeoutValue)) {
@@ -101,7 +97,7 @@ public class ListenAction extends AbstractDriveAction {
          */
         DriveEvent event = null;
         try {
-            LongPollingListener listener = ListenerRegistrar.getInstance().getOrCreate(session, rootFolderID);
+            LongPollingListener listener = ListenerRegistrar.getInstance().getOrCreate(session.getServerSession(), session.getRootFolderID());
             event = listener.await(timeout);
         } catch (ExecutionException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -115,7 +111,7 @@ public class ListenAction extends AbstractDriveAction {
         List<DriveAction<? extends DriveVersion>> actions = null != event ? event.getActions() :
             new ArrayList<DriveAction<? extends DriveVersion>>(0);
         try {
-            return new AJAXRequestResult(JsonDriveAction.serialize(actions, getLocale(session)), "json");
+            return new AJAXRequestResult(JsonDriveAction.serialize(actions, getLocale(session.getServerSession())), "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

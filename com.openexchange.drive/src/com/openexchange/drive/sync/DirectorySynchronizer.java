@@ -60,7 +60,7 @@ import com.openexchange.drive.actions.SyncDirectoryAction;
 import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.ThreeWayComparison;
 import com.openexchange.drive.comparison.VersionMapper;
-import com.openexchange.drive.internal.DriveSession;
+import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStoragePermission;
@@ -71,9 +71,9 @@ import com.openexchange.file.storage.FileStoragePermission;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DirectorySynchronizer extends Synchronizer<DirectoryVersion>{
+public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
 
-    public DirectorySynchronizer(DriveSession session, VersionMapper<DirectoryVersion> mapper) throws OXException {
+    public DirectorySynchronizer(SyncSession session, VersionMapper<DirectoryVersion> mapper) throws OXException {
         super(session, mapper);
     }
 

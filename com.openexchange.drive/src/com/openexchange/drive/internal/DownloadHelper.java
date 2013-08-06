@@ -69,14 +69,14 @@ import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
  */
 public class DownloadHelper {
 
-    private final DriveSession session;
+    private final SyncSession session;
 
     /**
      * Initializes a new {@link DownloadHelper}.
      *
-     * @param session The drive session
+     * @param session The sync session
      */
-    public DownloadHelper(DriveSession session) {
+    public DownloadHelper(SyncSession session) {
         super();
         this.session = session;
     }

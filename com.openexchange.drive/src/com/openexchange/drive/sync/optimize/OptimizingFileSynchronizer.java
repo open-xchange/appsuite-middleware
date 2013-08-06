@@ -51,7 +51,7 @@ package com.openexchange.drive.sync.optimize;
 
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.comparison.VersionMapper;
-import com.openexchange.drive.internal.DriveSession;
+import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.sync.FileSynchronizer;
 import com.openexchange.drive.sync.IntermediateSyncResult;
 import com.openexchange.exception.OXException;
@@ -64,7 +64,7 @@ import com.openexchange.exception.OXException;
  */
 public class OptimizingFileSynchronizer extends FileSynchronizer {
 
-    public OptimizingFileSynchronizer(DriveSession session, VersionMapper<FileVersion> mapper, String path) throws OXException {
+    public OptimizingFileSynchronizer(SyncSession session, VersionMapper<FileVersion> mapper, String path) throws OXException {
         super(session, mapper, path);
     }
 

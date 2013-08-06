@@ -67,13 +67,13 @@ public class DirectLinkGenerator {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(DirectLinkGenerator.class);
 
-    private final DriveSession session;
+    private final SyncSession session;
     private String hostName;
 
     /**
      * Initializes a new {@link DirectLinkGenerator}.
      */
-    public DirectLinkGenerator(DriveSession session) {
+    public DirectLinkGenerator(SyncSession session) {
         super();
         this.session = session;
     }

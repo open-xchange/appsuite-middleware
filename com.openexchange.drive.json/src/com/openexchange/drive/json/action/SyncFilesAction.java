@@ -55,6 +55,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveService;
+import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.json.internal.Services;
@@ -63,7 +64,6 @@ import com.openexchange.drive.json.json.JsonFileVersion;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SyncFilesAction}
@@ -73,14 +73,10 @@ import com.openexchange.tools.session.ServerSession;
 public class SyncFilesAction extends AbstractDriveAction {
 
     @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException {
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
         /*
          * get request data
          */
-        String rootFolderID = requestData.getParameter("root");
-        if (Strings.isEmpty(rootFolderID)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
-        }
         String path = requestData.getParameter("path");
         if (Strings.isEmpty(path)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
@@ -105,18 +101,18 @@ public class SyncFilesAction extends AbstractDriveAction {
          * determine sync actions
          */
         DriveService driveService = Services.getService(DriveService.class, true);
-        SyncResult<FileVersion> syncResult = driveService.syncFiles(session, rootFolderID, path, originalFiles, clientFiles);
+        SyncResult<FileVersion> syncResult = driveService.syncFiles(session, path, originalFiles, clientFiles);
         /*
          * return json result
          */
         try {
-            if (isIncludeDiagnostics(session)) {
+            if (null != session.isDiagnostics()) {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("diagnostics", syncResult.getDiagnostics());
-                jsonObject.put("actions", JsonFileAction.serialize(syncResult.getActionsForClient(), getLocale(session)));
+                jsonObject.put("actions", JsonFileAction.serialize(syncResult.getActionsForClient(), getLocale(session.getServerSession())));
                 return new AJAXRequestResult(jsonObject, "json");
             }
-            return new AJAXRequestResult(JsonFileAction.serialize(syncResult.getActionsForClient(), getLocale(session)), "json");
+            return new AJAXRequestResult(JsonFileAction.serialize(syncResult.getActionsForClient(), getLocale(session.getServerSession())), "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

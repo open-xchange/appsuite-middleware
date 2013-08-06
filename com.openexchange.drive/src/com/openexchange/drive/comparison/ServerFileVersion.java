@@ -53,7 +53,7 @@ import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.checksum.FileChecksum;
-import com.openexchange.drive.internal.DriveSession;
+import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 
@@ -121,11 +121,11 @@ public class ServerFileVersion implements FileVersion {
      *
      * @param fileVersion The file version to match
      * @param path The path the file version is located in
-     * @param session The drive session
+     * @param session The sync session
      * @return The matching server file version, never <code>null</code>
      * @throws OXException If the file version not exists
      */
-    public static ServerFileVersion valueOf(FileVersion fileVersion, String path, DriveSession session) throws OXException {
+    public static ServerFileVersion valueOf(FileVersion fileVersion, String path, SyncSession session) throws OXException {
         if (ServerFileVersion.class.isInstance(fileVersion)) {
             return (ServerFileVersion)fileVersion;
         }

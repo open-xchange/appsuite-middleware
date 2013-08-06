@@ -55,11 +55,11 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveQuota;
+import com.openexchange.drive.DriveSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
 public class QuotaAction extends AbstractDriveAction {
 
     @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException {
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
         /*
          * get request data
          */
@@ -81,7 +81,7 @@ public class QuotaAction extends AbstractDriveAction {
         /*
          * determine quota
          */
-        DriveQuota quota = getDriveService().getQuota(session, rootFolderID);
+        DriveQuota quota = getDriveService().getQuota(session);
         /*
          * return json result
          */

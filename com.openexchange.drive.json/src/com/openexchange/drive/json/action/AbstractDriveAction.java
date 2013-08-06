@@ -55,11 +55,14 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveService;
+import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
+import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.session.ServerSession;
 
@@ -89,33 +92,40 @@ public abstract class AbstractDriveAction implements AJAXActionService {
         return Services.getService(DriveSubscriptionStore.class, true);
     }
 
-    protected abstract AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException;
+    protected abstract AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException;
+
+    protected boolean requiresRootFolderID() {
+        return true;
+    }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         /*
+         * Create drive session
+         */
+        String rootFolderID = requestData.getParameter("root");
+        if (requiresRootFolderID() && Strings.isEmpty(rootFolderID)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
+        }
+        DefaultDriveSession driveSession = new DefaultDriveSession(session, rootFolderID);
+        /*
          * extract device name information if present
          */
         String device = requestData.getParameter("device");
-        session.setParameter("com.openexchange.drive.device", Strings.isEmpty(device) ? null : device);
+        if (false == Strings.isEmpty(device)) {
+            driveSession.setDeviceName(device);
+        }
         /*
          * extract diagnostics parameter if present
          */
         String diagnostics = requestData.getParameter("diagnostics");
         if (false == Strings.isEmpty(diagnostics)) {
-            session.setParameter("com.openexchange.drive.diagnostics", Boolean.valueOf(diagnostics));
-        } else {
-            session.setParameter("com.openexchange.drive.diagnostics", null);
+            driveSession.setDiagnostics(Boolean.valueOf(diagnostics));
         }
         /*
          * perform
          */
-        return doPerform(requestData, session);
-    }
-
-    protected boolean isIncludeDiagnostics(ServerSession session) {
-        Object parameter = session.getParameter("com.openexchange.drive.diagnostics");
-        return null != parameter;
+        return doPerform(requestData, driveSession);
     }
 
     /**

@@ -60,10 +60,10 @@ import com.openexchange.drive.comparison.ServerFileVersion;
  */
 public class DefaultFileMetadata implements FileMetadata {
 
-    private final DriveSession session;
+    private final SyncSession session;
     private final ServerFileVersion fileVersion;
 
-    public DefaultFileMetadata(DriveSession session, ServerFileVersion fileVersion) {
+    public DefaultFileMetadata(SyncSession session, ServerFileVersion fileVersion) {
         super();
         this.session = session;
         this.fileVersion = fileVersion;

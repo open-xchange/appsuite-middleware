@@ -63,7 +63,7 @@ import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.comparison.ThreeWayComparison;
 import com.openexchange.drive.comparison.VersionMapper;
-import com.openexchange.drive.internal.DriveSession;
+import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.internal.UploadHelper;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -81,7 +81,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     private final String path;
     private FileStoragePermission folderPermission;
 
-    public FileSynchronizer(DriveSession session, VersionMapper<FileVersion> mapper, String path) throws OXException {
+    public FileSynchronizer(SyncSession session, VersionMapper<FileVersion> mapper, String path) throws OXException {
         super(session, mapper);
         this.path = path;
     }
@@ -314,7 +314,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
         }
     }
 
-    protected FileVersion getRenamedVersion(DriveSession session, FileVersion conflictingVersion) {
+    protected FileVersion getRenamedVersion(SyncSession session, FileVersion conflictingVersion) {
         String alternativeName = RenameTools.findAlternativeName(conflictingVersion.getName(), usedFilenames, session.getDeviceName());
         if (null != usedFilenames) {
             usedFilenames.add(alternativeName);

@@ -58,7 +58,7 @@ import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.VersionMapper;
-import com.openexchange.drive.internal.DriveSession;
+import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.sync.IntermediateSyncResult;
 
 
@@ -74,7 +74,7 @@ public class FileMultipleUploadsOptimizer extends FileActionOptimizer {
     }
 
     @Override
-    public IntermediateSyncResult<FileVersion> optimize(DriveSession session, IntermediateSyncResult<FileVersion> result) {
+    public IntermediateSyncResult<FileVersion> optimize(SyncSession session, IntermediateSyncResult<FileVersion> result) {
         /*
          * filter out all non-conflicting, duplicate UPLOAD actions so that those can be ACKNOWLEDGEd directly during next
          * synchronization cycle

@@ -55,7 +55,6 @@ import java.util.List;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Quota;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -69,34 +68,29 @@ public interface DriveService {
      * Synchronizes the folder hierarchy.
      *
      * @param session The session
-     * @param rootFolderID The identifier of the referenced root folder on the server
      * @param originalVersions A list of directory versions previously known by the client
      * @param clientVersions The current list of client directory versions
      * @return A list of resulting actions to execute on the client afterwards
      * @throws OXException
      */
-    SyncResult<DirectoryVersion> syncFolders(ServerSession session, String rootFolderID, List<DirectoryVersion> originalVersions,
-        List<DirectoryVersion> clientVersions) throws OXException;
+    SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions, List<DirectoryVersion> clientVersions) throws OXException;
 
     /**
      * Synchronizes the files in a folder.
      *
      * @param session The session
-     * @param rootFolderID The identifier of the referenced root folder on the server
      * @param path The path to the synchronized folder, relative to the root folder
      * @param originalVersions A list of file versions previously known by the client
      * @param clientVersions The current list of client file versions
      * @return A list of resulting actions to execute on the client afterwards
      * @throws OXException
      */
-    SyncResult<FileVersion> syncFiles(ServerSession session, String rootFolderID, String path, List<FileVersion> originalVersions,
-        List<FileVersion> clientVersions) throws OXException;
+    SyncResult<FileVersion> syncFiles(DriveSession session, String path, List<FileVersion> originalVersions, List<FileVersion> clientVersions) throws OXException;
 
     /**
      * Processes a file upload to the server.
      *
      * @param session The session
-     * @param rootFolderID The identifier of the referenced root folder on the server
      * @param path The path to the target folder, relative to the root folder
      * @param uploadStream An input stream for the file data (not closed by the service)
      * @param originalVersion The original file version to be updated, or <code>null</code> for new file uploads
@@ -109,14 +103,13 @@ public interface DriveService {
      * @return A list of resulting file actions to execute on the client afterwards
      * @throws OXException
      */
-    SyncResult<FileVersion> upload(ServerSession session, String rootFolderID, String path, InputStream uploadStream,
+    SyncResult<FileVersion> upload(DriveSession session, String path, InputStream uploadStream,
         FileVersion originalVersion, FileVersion newVersion, String contentType, long offset, long totalLength, Date created, Date modified) throws OXException;
 
     /**
      * Processes a file download from the server.
      *
      * @param session The session
-     * @param rootFolderID The identifier of the referenced root folder on the server
      * @param path The path to the file's parent folder, relative to the root folder
      * @param fileVersion The file version to download
      * @param offset The start offset in bytes for the download, or <code>0</code> when initially starting
@@ -124,43 +117,39 @@ public interface DriveService {
      * @return The binary content wrapped into a file holder
      * @throws OXException
      */
-    IFileHolder download(ServerSession session, String rootFolderID, String path, FileVersion fileVersion, long offset, long length)
-        throws OXException;
+    IFileHolder download(DriveSession session, String path, FileVersion fileVersion, long offset, long length) throws OXException;
 
     /**
      * Gets the quota limits and current usage for the storage the supplied root folder belongs to. This includes both restrictions on
      * the number of allowed files and the size of the files in bytes. If there's no limit, {@link Quota#UNLIMITED} is returned.
      *
      * @param session The session
-     * @param rootFolderID The identifier of the referenced root folder on the server
      * @return The quota
      * @throws OXException
      */
-    DriveQuota getQuota(ServerSession session, String rootFolderID) throws OXException;
+    DriveQuota getQuota(DriveSession session) throws OXException;
 
     /**
      * Gets file metadata for the supplied file versions
      *
      * @param session The session
-     * @param rootFolderID The identifier of the referenced root folder on the server
      * @param path The path to the file's parent folder, relative to the root folder
      * @param fileVersions A list of file versions to get the metadata for, or <code>null</code> to get metadata for all files in the
      *        denoted directory
      * @return The available file metadata
      * @throws OXException
      */
-    List<FileMetadata> getFileMetadata(ServerSession session, String rootFolderID, String path, List<FileVersion> fileVersions) throws OXException;
+    List<FileMetadata> getFileMetadata(DriveSession session, String path, List<FileVersion> fileVersions) throws OXException;
 
     /**
      * Gets directory metadata for the supplied directory
      *
      * @param session The session
-     * @param rootFolderID The identifier of the referenced root folder on the server
      * @param path The path to the folder, relative to the root folder
      * @return The directory metadata
      * @throws OXException
      */
-    DirectoryMetadata getDirectoryMetadata(ServerSession session, String rootFolderID, String path) throws OXException;
+    DirectoryMetadata getDirectoryMetadata(DriveSession session, String path) throws OXException;
 
 }
 

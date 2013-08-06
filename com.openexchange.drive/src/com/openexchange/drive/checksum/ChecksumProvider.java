@@ -61,7 +61,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.drive.DriveExceptionCodes;
-import com.openexchange.drive.internal.DriveSession;
+import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -84,12 +84,12 @@ public class ChecksumProvider {
      * checksum storage, and, if not yet known, by calculating the checksum on demand. Newly calculated checksums are pushed back
      * automatically to the storage.
      *
-     * @param session The drive session
+     * @param session The sync session
      * @param file The file
      * @return The checksum, never <code>null</code>
      * @throws OXException
      */
-    public static FileChecksum getChecksum(DriveSession session, File file) throws OXException {
+    public static FileChecksum getChecksum(SyncSession session, File file) throws OXException {
         FileID fileID = new FileID(file.getId());
         FolderID folderID = new FolderID(file.getFolderId());
         if (null == fileID.getFolderId()) {
@@ -108,13 +108,13 @@ public class ChecksumProvider {
      * not yet known, by calculating the missing checksums on demand. Newly calculated checksums are pushed back automatically to the
      * storage.
      *
-     * @param session The drive session
+     * @param session The sync session
      * @param folderID The ID of all file's parent folder
      * @param files The list of files to get the checksum for
      * @return The list of checksums, in an equal order as the passed files
      * @throws OXException
      */
-    public static List<FileChecksum> getChecksums(DriveSession session, String folderID, List<File> files) throws OXException {
+    public static List<FileChecksum> getChecksums(SyncSession session, String folderID, List<File> files) throws OXException {
         List<FileChecksum> checksums = new ArrayList<FileChecksum>(files.size());
         List<FileChecksum> storedChecksums = session.getChecksumStore().getFileChecksums(new FolderID(folderID));
         List<FileChecksum> newChecksums = new ArrayList<FileChecksum>();
@@ -140,12 +140,12 @@ public class ChecksumProvider {
      * known or no longer up-to-date, by calculating the checksum on demand. Newly calculated checksums are pushed back automatically to
      * the storage, outdated ones are removed.
      *
-     * @param session The drive session
+     * @param session The sync session
      * @param folderIDs The list of folder IDs to get the checksum for
      * @return The list of checksums, in an equal order as the passed folder IDs
      * @throws OXException
      */
-    public static List<DirectoryChecksum> getChecksums(DriveSession session, List<String> folderIDs) throws OXException {
+    public static List<DirectoryChecksum> getChecksums(SyncSession session, List<String> folderIDs) throws OXException {
         StringAllocator trace = session.isTraceEnabled() ? new StringAllocator("Directory checksums:\n") : null;
         List<FolderID> fids = new ArrayList<FolderID>(folderIDs.size());
         for (String folderID : folderIDs) {
@@ -208,17 +208,17 @@ public class ChecksumProvider {
     /**
      * Checks whether the supplied file's checksum matches a given checksum.
      *
-     * @param session The drive session
+     * @param session The sync session
      * @param file The file to check
      * @param checksum The checksum to match
      * @return <code>true</code>, if the checksum matches, <code>false</code>, otherwise
      * @throws OXException
      */
-    public static boolean matches(DriveSession session, File file, String checksum) throws OXException {
+    public static boolean matches(SyncSession session, File file, String checksum) throws OXException {
         return checksum.equals(getChecksum(session, file).getChecksum());
     }
 
-    private static List<DirectoryChecksum> calculateDirectoryChecksums(DriveSession session, List<FolderID> folderIDs) throws OXException {
+    private static List<DirectoryChecksum> calculateDirectoryChecksums(SyncSession session, List<FolderID> folderIDs) throws OXException {
         List<DirectoryChecksum> checksums = new ArrayList<DirectoryChecksum>(folderIDs.size());
         for (FolderID folderID : folderIDs) {
             checksums.add(new DirectoryChecksum(folderID, -1, calculateMD5(session, folderID)));
@@ -226,7 +226,7 @@ public class ChecksumProvider {
         return checksums;
     }
 
-    private static String calculateMD5(DriveSession session, FolderID folderID) throws OXException {
+    private static String calculateMD5(SyncSession session, FolderID folderID) throws OXException {
         StringAllocator trace = session.isTraceEnabled() ? new StringAllocator("File checksums in folder " + folderID + ":\n") : null;
         String checksum;
         List<File> filesInFolder = session.getStorage().getFilesInFolder(folderID.toUniqueID());
@@ -269,7 +269,7 @@ public class ChecksumProvider {
         return checksum;
     }
 
-    private static FileChecksum calculateFileChecksum(DriveSession session, File file) throws OXException {
+    private static FileChecksum calculateFileChecksum(SyncSession session, File file) throws OXException {
         String md5 = Strings.isEmpty(file.getFileMD5Sum()) ? calculateMD5(session, file) : file.getFileMD5Sum();
         if (null == md5) {
             throw DriveExceptionCodes.NO_CHECKSUM_FOR_FILE.create(file);
@@ -288,7 +288,7 @@ public class ChecksumProvider {
         return fileChecksum;
     }
 
-    private static String calculateMD5(DriveSession session, File file) throws OXException {
+    private static String calculateMD5(SyncSession session, File file) throws OXException {
         InputStream document = null;
         try {
             document = session.getStorage().getDocument(file);

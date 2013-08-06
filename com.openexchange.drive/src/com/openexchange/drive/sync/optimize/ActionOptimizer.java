@@ -50,7 +50,7 @@
 package com.openexchange.drive.sync.optimize;
 
 import com.openexchange.drive.DriveVersion;
-import com.openexchange.drive.internal.DriveSession;
+import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.sync.IntermediateSyncResult;
 
 
@@ -61,6 +61,6 @@ import com.openexchange.drive.sync.IntermediateSyncResult;
  */
 public interface ActionOptimizer<T extends DriveVersion> {
 
-    IntermediateSyncResult<T> optimize(DriveSession session, IntermediateSyncResult<T> result);
+    IntermediateSyncResult<T> optimize(SyncSession session, IntermediateSyncResult<T> result);
 
 }
