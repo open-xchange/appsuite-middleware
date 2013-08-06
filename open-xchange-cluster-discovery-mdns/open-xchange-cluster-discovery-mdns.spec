@@ -14,14 +14,14 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       Module for a cluster discovery service implementation based on Zeroconf
+Summary:       Module for a cluster discovery service implementation based on Multicast
 Requires:      open-xchange-core >= @OXVERSION@
 Provides:      open-xchange-cluster-discovery
 Conflicts:     open-xchange-cluster-discovery-static
 
 %description
  This package installs the OSGi bundle implementing the OSGi ClusterDiscoveryService. 
- The implementation uses the Zerconf implementation provided by open-xchange-mdns to find all nodes within the cluster.
+ The implementation configures hazelcast for multicast cluster discovery to find all nodes within the cluster.
  This cluster discovery module is mutually exclusive with any other cluster discovery module. 
  Only one cluster discovery module can be installed on the backend.
 
