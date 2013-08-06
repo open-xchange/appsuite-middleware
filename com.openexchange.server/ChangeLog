@@ -7,6 +7,7 @@
 
  - Fix for bug 27849: Add an option to specify characters that are not allowed to be contained in a mailbox name
  - Fix for bug 28070: Retry with "MS932" charset if "Shift-JIS" charset yields \ufffd
+ - Fix for bug 28087: Properly resolve "Unified Mail"-encoded message path
 
 * 2013-08-05 - thorben.betten@open-xchange.com
 
