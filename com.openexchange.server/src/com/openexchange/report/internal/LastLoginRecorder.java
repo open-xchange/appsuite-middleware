@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -133,6 +134,7 @@ public class LastLoginRecorder implements LoginHandlerService {
         }
         final int userId = origUser.getId();
         // Retrieve existing ones
+        final Map<String, Set<String>> attributes;
         {
             final int maxClientCount = maxClientCount();
             if (maxClientCount > 0) {
@@ -143,6 +145,9 @@ public class LastLoginRecorder implements LoginHandlerService {
                         throw UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(Integer.valueOf(context.getContextId()), Integer.valueOf(userId));
                     }
                 }
+                attributes = new HashMap<String, Set<String>>(origAttributes);
+            } else {
+                attributes = new HashMap<String, Set<String>>(origUser.getAttributes());
             }
         }
 
