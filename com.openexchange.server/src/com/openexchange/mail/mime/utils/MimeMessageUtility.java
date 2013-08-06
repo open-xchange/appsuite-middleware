@@ -840,7 +840,7 @@ public final class MimeMessageUtility {
                         final String encodedWord = m.group();
                         String decodeWord = MimeUtility.decodeWord(encodedWord);
                         if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
-                            decodeWord = MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "MS932"));
+                            decodeWord = MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "SJIS_0213"));
                         }
                         sb.append(decodeWord);
                     } else {
