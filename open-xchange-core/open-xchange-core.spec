@@ -215,6 +215,13 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1559
+pfile=/opt/open-xchange/etc/mail.properties
+VALUE=$(ox_read_property com.openexchange.mail.mailAccessCacheIdleSeconds $pfile)
+if [ "$VALUE" == "7" ]; then
+    ox_set_property com.openexchange.mail.mailAccessCacheIdleSeconds 4 $pfile
+fi
+
 # SoftwareChange_Request-1557
 pfile=/opt/open-xchange/etc/mail.properties
 if ! ox_exists_property com.openexchange.mail.maxForwardCount $pfile; then
