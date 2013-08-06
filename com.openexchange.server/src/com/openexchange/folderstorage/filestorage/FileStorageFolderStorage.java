@@ -189,7 +189,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
         final DefaultFileStorageFolder fsFolder = new DefaultFileStorageFolder();
         fsFolder.setExists(false);
         final String parentId = fsfi.getFolderId();
-        fsFolder.setParentId(parentId);
+        fsFolder.setParentId(folder.getParentID());
         // Other
         fsFolder.setName(folder.getName());
         fsFolder.setSubscribed(folder.isSubscribed());
