@@ -129,6 +129,7 @@ import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
+import com.openexchange.mail.utils.CP932EmojiMapping;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -840,7 +841,7 @@ public final class MimeMessageUtility {
                         final String encodedWord = m.group();
                         String decodeWord = MimeUtility.decodeWord(encodedWord);
                         if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
-                            decodeWord = MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "MS932"));
+                            decodeWord = CP932EmojiMapping.getInstance().replaceIn(MimeUtility.decodeWord(encodedWord.replaceFirst(Pattern.quote(charset), "MS932")));
                         }
                         sb.append(decodeWord);
                     } else {
