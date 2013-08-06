@@ -1,3 +1,7 @@
+* 2013-08-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28071: Optionally ignore UID during iCal import
+
 * 2013-08-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 27849: Add an option to specify characters that are not allowed to be contained in a mailbox name

@@ -68,13 +68,13 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 public abstract class AbstractImportAction implements AJAXActionService {
-    
+
     protected ServiceLookup services;
 
     public AbstractImportAction(ServiceLookup services) {
         this.services = services;
     }
-    
+
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
 
@@ -88,7 +88,7 @@ public abstract class AbstractImportAction implements AJAXActionService {
     private AJAXRequestResult perform(ImportRequest req) throws OXException {
         try {
             final List<ImportResult> importResult =
-                getImporter().importData(req.getSession(), getFormat(), req.getImportFileAsStream(), req.getFolders(), null);
+                getImporter().importData(req.getSession(), getFormat(), req.getImportFileAsStream(), req.getFolders(), req.getOptionalParams());
             OXJSONWriter jsonWriter = new OXJSONWriter();
             try {
                 new ImportWriter(jsonWriter, req.getSession()).writeObjects(importResult);

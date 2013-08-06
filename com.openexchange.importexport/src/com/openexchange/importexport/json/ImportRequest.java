@@ -53,8 +53,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
@@ -121,5 +124,25 @@ public class ImportRequest {
 
 	public InputStream getImportFileAsStream() {
 		return this.inputStream;
+	}
+
+	/**
+	 * Gets all optional parameters as found in the underlying request wrapped into a set.
+	 *
+	 * @return The optional parameters
+	 */
+	public Map<String, String[]> getOptionalParams() {
+	    Set<String> defaultParameters = new HashSet<String>(Arrays.asList(
+	        "callback", AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_ACTION, AJAXServlet.PARAMETER_SESSION));
+	    Map<String, String[]> optionalParameters = new HashMap<String, String[]>();
+	    Map<String, String> parameters = this.request.getParameters();
+	    if (null != parameters) {
+	        for (Map.Entry<String, String> parameter : parameters.entrySet()) {
+	            if (false == defaultParameters.contains(parameter.getKey())) {
+	                optionalParameters.put(parameter.getKey(), new String[] { parameter.getValue() });
+	            }
+            }
+	    }
+        return optionalParameters;
 	}
 }
