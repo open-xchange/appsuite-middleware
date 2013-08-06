@@ -74,6 +74,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.autoconfig.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.management.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.messaging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.modules.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.modules.model"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.modules.storage"/>
