@@ -310,18 +310,6 @@ if ! ox_exists_property com.openexchange.log.maxMessageLength $pfile; then
     ox_set_property com.openexchange.log.maxMessageLength -1 $pfile
 fi
 
-# SoftwareChange_Request-1358
-# -----------------------------------------------------------------------
-if [ ${1:-0} -eq 2 ]; then
-   # updating?
-   pfile=/opt/open-xchange/etc/mdns.properties
-   mdnsjar=/opt/open-xchange/bundles/com.openexchange.cluster.discovery.mdns.jar
-   # open-xchange-cluster-discovery-mdns installed? if not, disable
-   if [ ! -e $mdnsjar ]; then
-       ox_set_property com.openexchange.mdns.enabled false $pfile
-   fi
-fi
-
 # SoftwareChange_Request-1365
 pfile=/opt/open-xchange/etc/configdb.properties
 if ! ox_exists_property com.openexchange.database.replicationMonitor $pfile; then
@@ -333,13 +321,6 @@ fi
 pfile=/opt/open-xchange/etc/foldercache.properties
 if ! ox_exists_property com.openexchange.folderstorage.database.preferDisplayName $pfile; then
     ox_set_property com.openexchange.folderstorage.database.preferDisplayName false $pfile
-fi
-
-# SoftwareChange_Request-1328
-# -----------------------------------------------------------------------
-pfile=/opt/open-xchange/etc/mdns.properties
-if ! ox_exists_property com.openexchange.mdns.interface $pfile; then
-    ox_set_property com.openexchange.mdns.interface '' $pfile
 fi
 
 # SoftwareChange_Request-1335
