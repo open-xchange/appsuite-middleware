@@ -193,6 +193,10 @@
  - Fix for bug 27309: Remove 'days' property when changing recurrence rule from weekly to daily   
  - Fix for bug 27300: Pass down changed folder ID when updating referenced distribution list members   
 
+* 2013-07-16 - marc.arens@open-xchange.com
+
+ - Fix for bug 27469: Stop checking aliases as soon as a valid match was found
+
 * 2013-07-01 - marc.arens@open-xchange.com
 
  - Fix for bug 26681: Repair broken state in HazelcastResourceDirectory
