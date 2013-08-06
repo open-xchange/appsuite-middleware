@@ -707,6 +707,8 @@ done
 Second release candidate for 7.4.0
 * Mon Jul 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-22
+* Mon Jul 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-07-22
 * Wed Jul 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.4.0
 * Tue Jul 16 2013 Marcus Klein <marcus.klein@open-xchange.com>
