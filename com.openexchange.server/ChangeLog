@@ -1,5 +1,6 @@
 * 2013-08-06 - tobias.friedrich@open-xchange.com
 
+ - Fix for bug 28021: Try and detect charset when delivering text/plain files
  - Fix for bug 28071: Optionally ignore UID during iCal import
 
 * 2013-08-06 - thorben.betten@open-xchange.com

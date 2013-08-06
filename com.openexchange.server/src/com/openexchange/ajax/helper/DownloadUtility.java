@@ -283,6 +283,20 @@ public final class DownloadUtility {
                     sz = tmp.length;
                     in = Streams.newByteArrayInputStream(tmp);
                 }
+            } else if (null == contentType.getCharsetParameter() && contentType.startsWith("text/plain")) {
+                /*
+                 * Try and detect charset for plain text files
+                 */
+                ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(in);
+                String cs = CharsetDetector.detectCharset(Streams.asInputStream(baos));
+                if ("US-ASCII".equalsIgnoreCase(cs)) {
+                    cs = "ISO-8859-1";
+                }
+                contentType.setCharsetParameter(cs);
+                String textContent = baos.toString(cs);
+                final byte[] tmp = textContent.getBytes(Charsets.forName(cs));
+                sz = tmp.length;
+                in = Streams.newByteArrayInputStream(tmp);
             }
             /*
              * Create return value
