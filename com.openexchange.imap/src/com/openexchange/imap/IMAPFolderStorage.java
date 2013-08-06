@@ -52,7 +52,6 @@ package com.openexchange.imap;
 import static com.openexchange.java.Strings.quoteReplacement;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
-import static com.openexchange.mail.utils.MailFolderUtility.isEmpty;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -105,6 +104,7 @@ import com.openexchange.imap.entity2acl.UserGroupID;
 import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
 import com.openexchange.mail.api.MailFolderStorage;
@@ -957,45 +957,28 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     if (createMe.exists()) {
                         throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, createMe.getFullName());
                     }
-                    final int ftype;
-                    if (mboxEnabled) {
-                        /*
-                         * Determine folder creation type dependent on folder name
-                         */
-                        ftype = getNameOf(createMe).endsWith(String.valueOf(separator)) ? Folder.HOLDS_FOLDERS : Folder.HOLDS_MESSAGES;
-                    } else {
-                        ftype = FOLDER_TYPE;
-                    }
+                    final int ftype = mboxEnabled ? getNameOf(createMe).endsWith(String.valueOf(separator)) ? Folder.HOLDS_FOLDERS : Folder.HOLDS_MESSAGES : FOLDER_TYPE;
                     try {
                         if (!(created = createMe.create(ftype))) {
-                            throw IMAPException.create(
-                                IMAPException.Code.FOLDER_CREATION_FAILED,
-                                imapConfig,
-                                session,
-                                createMe.getFullName(),
-                                isParentDefault ? DEFAULT_FOLDER_ID : parent.getFullName());
+                            throw IMAPException.create(IMAPException.Code.FOLDER_CREATION_FAILED, imapConfig, session, createMe.getFullName(), isParentDefault ? DEFAULT_FOLDER_ID : parent.getFullName());
                         }
                     } catch (final MessagingException e) {
-                        if ("Unsupported type".equals(e.getMessage())) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn(
-                                    "IMAP folder creation failed due to unsupported type." + " Going to retry with fallback type HOLDS-MESSAGES.",
-                                    e);
+                        if (!"Unsupported type".equals(e.getMessage())) {
+                            if (e.getNextException() instanceof com.sun.mail.iap.BadCommandException) {
+                                // Bad input for associated IMAP server
+                                throw IMAPException.create(IMAPException.Code.FOLDER_CREATION_FAILED, imapConfig, session, e, createMe.getFullName(), isParentDefault ? DEFAULT_FOLDER_ID : parent.getFullName());
                             }
-                            if (!(created = createMe.create(Folder.HOLDS_MESSAGES))) {
-                                throw IMAPException.create(
-                                    IMAPException.Code.FOLDER_CREATION_FAILED,
-                                    imapConfig,
-                                    session,
-                                    e,
-                                    createMe.getFullName(),
-                                    isParentDefault ? DEFAULT_FOLDER_ID : parent.getFullName());
-                            }
-                            if (LOG.isInfoEnabled()) {
-                                LOG.info("IMAP folder created with fallback type HOLDS_MESSAGES");
-                            }
-                        } else {
+
                             throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", createMe.getFullName()));
+                        }
+                        if (LOG.isWarnEnabled()) {
+                            LOG.warn("IMAP folder creation failed due to unsupported type." + " Going to retry with fallback type HOLDS-MESSAGES.", e);
+                        }
+                        if (!(created = createMe.create(Folder.HOLDS_MESSAGES))) {
+                            throw IMAPException.create(IMAPException.Code.FOLDER_CREATION_FAILED, imapConfig, session, e, createMe.getFullName(), isParentDefault ? DEFAULT_FOLDER_ID : parent.getFullName());
+                        }
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info("IMAP folder created with fallback type HOLDS_MESSAGES");
                         }
                     }
                     /*
@@ -1028,11 +1011,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                         }
                                     }
                                     if (!adminFound) {
-                                        throw IMAPException.create(
-                                            IMAPException.Code.NO_ADMIN_ACL,
-                                            imapConfig,
-                                            session,
-                                            createMe.getFullName());
+                                        throw IMAPException.create(IMAPException.Code.NO_ADMIN_ACL, imapConfig, session, createMe.getFullName());
                                     }
                                     /*
                                      * Apply new ACLs
@@ -1056,11 +1035,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                     /*
                                      * Add a warning
                                      */
-                                    imapAccess.addWarnings(Collections.<OXException> singletonList(IMAPException.create(
-                                        IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL,
-                                        imapConfig,
-                                        session,
-                                        createMe.getFullName())));
+                                    imapAccess.addWarnings(Collections.<OXException> singletonList(IMAPException.create(IMAPException.Code.NO_ADMINISTER_ACCESS_ON_INITIAL, imapConfig, session, createMe.getFullName())));
                                 }
                             }
                         }
@@ -3006,6 +2981,35 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     private static final TIntSet WILDCARDS = new TIntHashSet(Arrays.asList(Integer.valueOf('%'), Integer.valueOf('*')));
 
+    private static volatile TIntSet invalidChars;
+    private static TIntSet invalidChars() {
+        TIntSet tmp = invalidChars;
+        if (null == tmp) {
+            synchronized (IMAPFolderStorage.class) {
+                tmp = invalidChars;
+                if (null == tmp) {
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
+                    if (null == service) {
+                        return new TIntHashSet(0);
+                    }
+                    final String invalids = service.getProperty("com.openexchange.imap.invalidMailboxNameCharacters");
+                    if (isEmpty(invalids)) {
+                        tmp = new TIntHashSet(0);
+                    } else {
+                        final String[] sa = Strings.splitByWhitespaces(Strings.unquote(invalids));
+                        final int length = sa.length;
+                        tmp = new TIntHashSet(length);
+                        for (int i = 0; i < length; i++) {
+                            tmp.add(sa[i].charAt(0));
+                        }
+                    }
+                    invalidChars = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
     /**
      * Checks id specified folder name is allowed to be used on folder creation. The folder name is valid if the separator character does
      * not appear or provided that MBox format is enabled may only appear at name's end.
@@ -3016,21 +3020,30 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
      * @return <code>true</code> if folder name is valid; otherwise <code>false</code>
      */
     private static boolean checkFolderNameValidity(final String name, final char separator, final boolean mboxEnabled) {
-        WILDCARDS.forEach(new TIntProcedure() {
+        final TIntProcedure procedure = new TIntProcedure() {
 
             @Override
             public boolean execute(final int value) {
                 return name.indexOf(value) < 0;
             }
-        });
-        final int pos = name.indexOf(separator);
-        if (mboxEnabled) {
-            /*
-             * Allow trailing separator
-             */
-            return (pos < 0) || (pos == name.length() - 1);
+        };
+
+        // Check for possibly contained wild-cards
+        if (!WILDCARDS.forEach(procedure)) {
+            return false;
         }
-        return (pos < 0);
+
+        // Check for possibly contained invalid characters (as per configuration)
+        final TIntSet invalidChars = invalidChars();
+        if (null != invalidChars && !invalidChars.isEmpty()) {
+            if (!invalidChars.forEach(procedure)) {
+                return false;
+            }
+        }
+
+        // Check for possibly contained separator character (dependent on mbox format)
+        final int pos = name.indexOf(separator);
+        return mboxEnabled ? (pos < 0) || (pos == name.length() - 1) : (pos < 0);
     }
 
     private static final String REGEX_TEMPL = "[\\S\\p{Blank}&&[^\\p{Cntrl}#SEP#]]+(?:\\Q#SEP#\\E[\\S\\p{Blank}&&[^\\p{Cntrl}#SEP#]]+)*";
@@ -3152,6 +3165,19 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             map.put(pairs[i], pairs[i+1]);
         }
         return map;
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }
