@@ -52,8 +52,8 @@ package com.openexchange.test.mock.objects.context;
 import org.powermock.api.mockito.PowerMockito;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.mock.main.util.MockDefaultValues;
 import com.openexchange.test.mock.objects.AbstractMock;
-import com.openexchange.test.mock.util.MockDefaultValues;
 
 /**
  * Mock for {@link ContextService}
@@ -107,26 +107,5 @@ public class ContextServiceMock<T extends ContextService> extends AbstractMock {
     @Override
     protected void defineMockSpecificBehaviour() throws OXException {
         PowerMockito.when(this.contextService.getContextId(anyString())).thenReturn(MockDefaultValues.DEFAULT_CONTEXT_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        StringBuilder result = new StringBuilder();
-        String newLine = System.getProperty("line.separator");
-
-        result.append("State for: " + this.getClass().getSimpleName() + newLine);
-        result.append("{" + newLine);
-        try {
-            result.append(" getContextId(...): " + this.contextService.getContextId(MockDefaultValues.DEFAULT_ANY_STRING) + newLine);
-        } catch (OXException oxException) {
-            LOG.warn("Cannot get context", oxException);
-        }
-        // add more values here
-        result.append("}");
-
-        return result.toString();
     }
 }

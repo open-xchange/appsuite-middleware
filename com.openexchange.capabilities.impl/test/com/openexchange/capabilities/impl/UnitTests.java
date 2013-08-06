@@ -53,16 +53,18 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.capabilities.internal.CapabilityServiceImplTest;
+import com.openexchange.capabilities.osgi.CapabilitiesActivatorTest;
 
 /**
- * Unit tests for the bundle javax.mail
+ * Unit tests for the bundle com.openexchange.capabilities.impl
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
 @RunWith(Suite.class)
 @SuiteClasses({
- CapabilityServiceImplTest.class
+    CapabilityServiceImplTest.class,
+    CapabilitiesActivatorTest.class
 })
 public class UnitTests {
 

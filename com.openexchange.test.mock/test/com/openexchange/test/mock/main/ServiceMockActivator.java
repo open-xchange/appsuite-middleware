@@ -47,61 +47,66 @@
  *
  */
 
-package com.openexchange.test.mock.objects.hazelcast.configuration;
+package com.openexchange.test.mock.main;
 
-import org.powermock.api.mockito.PowerMockito;
-import com.openexchange.exception.OXException;
-import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
-import com.openexchange.test.mock.objects.AbstractMock;
-
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleContext;
+import com.openexchange.osgi.ServiceProvider;
+import com.openexchange.osgi.SimpleServiceProvider;
+import com.openexchange.test.mock.main.util.InjectionFieldConstants;
+import com.openexchange.test.mock.main.util.MockUtils;
 
 /**
- * Mock for the {@link HazelcastConfigurationService}
+ * {@link ServiceMockActivator} activates mocking for the provided classes.
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-public class HazelcastConfigurationServiceMock<T extends HazelcastConfigurationService> extends AbstractMock {
+public class ServiceMockActivator {
 
     /**
-     * The mocked {@link HazelcastConfigurationService}
+     * Logger for this class
      */
-    private T hazelcastConfigurationService;
+    protected final static Log LOG = com.openexchange.log.Log.loggerFor(ServiceMockActivator.class);
 
     /**
-     * {@inheritDoc}
+     * Creates the bundle context and activates the service mocks for the given class.
+     * 
+     * @param activator - the activator the services should be activated for
+     * @param clazz - the (service) classes which should be activated for the activator
+     * @return Map with the activated class - service mapping
      */
-    @Override
-    public <T> T get() {
-        return (T) this.hazelcastConfigurationService;
-    }
+    public static ConcurrentMap<Class<?>, ServiceProvider<?>> activateServiceMocks(Object activator, Class... clazz) {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void createMocks() throws Exception {
-        this.hazelcastConfigurationService = (T) PowerMockito.mock(HazelcastConfigurationService.class);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void initializeMembers() {
-        // nothing to do yet
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void defineMockSpecificBehaviour() {
+        ConcurrentMap<Class<?>, ServiceProvider<?>> services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(clazz.length);
         try {
-            PowerMockito.when(this.hazelcastConfigurationService.getConfig()).thenReturn(new com.hazelcast.config.Config());
-            PowerMockito.when(this.hazelcastConfigurationService.isEnabled()).thenReturn(true);
-        } catch (OXException oxException) {
-            LOG.error("Not able to define mock specific behaviour", oxException);
+            BundleContext context = MockFactory.getMock(BundleContext.class);
+            MockUtils.injectValueIntoPrivateField(activator, InjectionFieldConstants.CONTEXT, context);
+
+            for (Class<?> currentClass : clazz) {
+                services.putIfAbsent(currentClass, new SimpleServiceProvider(MockFactory.getMock(currentClass)));
+            }
+        } catch (Exception exception) {
+            LOG.error("Not able to add the mock to available services!", exception);
         }
+
+        MockUtils.injectValueIntoPrivateField(activator, InjectionFieldConstants.SERVICES, services);
+
+        return services;
+    }
+
+    /**
+     * Returns the service which was created with com.openexchange.test.mock.main.ServiceMockActivator.activateServicesForBundleActivator(Object,
+     * Class...)
+     * 
+     * @param clazz - the class the service should be returned for
+     * @param services - the list of services to search within
+     * @return Service that is required
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getActivatedService(Class<T> clazz, ConcurrentMap<Class<?>, ServiceProvider<?>> services) {
+        return (T) services.get(clazz).getService();
     }
 }

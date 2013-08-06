@@ -49,6 +49,7 @@
 
 package com.openexchange.test.mock.objects;
 
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.logging.Log;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
@@ -122,7 +123,7 @@ public abstract class AbstractMock extends Mockito {
     protected abstract void initializeMembers() throws Exception;
 
     /**
-     * Define the behavior of your mock. Use com.openexchange.test.mock.util.MockDefaultValues to return consistent values.
+     * Define the behavior of your mock. Use com.openexchange.test.mock.main.util.MockDefaultValues to return consistent values.
      */
     protected abstract void defineMockSpecificBehaviour() throws Exception;
 
@@ -132,5 +133,7 @@ public abstract class AbstractMock extends Mockito {
      * @return The default configuration of this mock.
      */
     @Override
-    public abstract String toString();
+    public String toString() {
+        return ReflectionToStringBuilder.toString(this);
+    }
 }

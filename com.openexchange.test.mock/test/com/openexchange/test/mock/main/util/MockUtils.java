@@ -47,61 +47,38 @@
  *
  */
 
-package com.openexchange.test.mock.objects.hazelcast.configuration;
+package com.openexchange.test.mock.main.util;
 
-import org.powermock.api.mockito.PowerMockito;
-import com.openexchange.exception.OXException;
-import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
-import com.openexchange.test.mock.objects.AbstractMock;
-
+import org.powermock.reflect.Whitebox;
 
 /**
- * Mock for the {@link HazelcastConfigurationService}
+ * This class offers some nice options to change behavior in the classes to test, for verification or other helpful stuff.
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-public class HazelcastConfigurationServiceMock<T extends HazelcastConfigurationService> extends AbstractMock {
+public class MockUtils {
 
     /**
-     * The mocked {@link HazelcastConfigurationService}
+     * Inject a value you would like to have for your test case into the field name of the provided object
+     * 
+     * @param objectToModify - the object the value should be changed for
+     * @param fieldNameInClass - the name of the field that should be changed
+     * @param newValue - the new value for the field of the object
      */
-    private T hazelcastConfigurationService;
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> T get() {
-        return (T) this.hazelcastConfigurationService;
+    public static void injectValueIntoPrivateField(Object objectToModify, String fieldNameInClass, Object newValue) {
+        Whitebox.setInternalState(objectToModify, fieldNameInClass, newValue);
     }
 
     /**
-     * {@inheritDoc}
+     * Get the value of a private field e. g. if it is not visible and does not have a getter.
+     * 
+     * @param objectToGetState - the object you would like to get the value from
+     * @param fieldNameInClass - the name of the field you would like to get the value for
+     * @return Object with the value of the field from the given object
      */
-    @Override
-    protected void createMocks() throws Exception {
-        this.hazelcastConfigurationService = (T) PowerMockito.mock(HazelcastConfigurationService.class);
+    public static Object getValueFromField(Object objectToGetState, String fieldNameInClass) {
+        return Whitebox.getInternalState(objectToGetState, fieldNameInClass);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void initializeMembers() {
-        // nothing to do yet
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void defineMockSpecificBehaviour() {
-        try {
-            PowerMockito.when(this.hazelcastConfigurationService.getConfig()).thenReturn(new com.hazelcast.config.Config());
-            PowerMockito.when(this.hazelcastConfigurationService.isEnabled()).thenReturn(true);
-        } catch (OXException oxException) {
-            LOG.error("Not able to define mock specific behaviour", oxException);
-        }
-    }
 }

@@ -56,8 +56,8 @@ import org.powermock.api.mockito.PowerMockito;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.WildcardFilter;
+import com.openexchange.test.mock.main.util.MockDefaultValues;
 import com.openexchange.test.mock.objects.AbstractMock;
-import com.openexchange.test.mock.util.MockDefaultValues;
 
 
 /**
@@ -146,39 +146,5 @@ public class ConfigurationServiceMock<T extends ConfigurationService> extends Ab
             MockDefaultValues.DEFAULT_STRING_PROPERTY_VALUE);
         PowerMockito.when(this.configurationService.getText(anyString())).thenReturn(MockDefaultValues.DEFAULT_STRING_PROPERTY_VALUE);
         PowerMockito.when(this.configurationService.size()).thenReturn(MockDefaultValues.DEFAULT_INT_PROPERTY_VALUE);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder result = new StringBuilder();
-        String newLine = System.getProperty("line.separator");
-
-        result.append("State for: " + this.getClass().getSimpleName() + newLine);
-        result.append("{" + newLine);
-        result.append(" getYaml(...): " + this.configurationService.getYaml(MockDefaultValues.DEFAULT_ANY_STRING) + newLine);
-        result.append(" getBoolProperty(...): " + this.configurationService.getBoolProperty(MockDefaultValues.DEFAULT_ANY_STRING, true) + newLine);
-        result.append(" getFilterFromProperty(...): " + this.configurationService.getFilterFromProperty(MockDefaultValues.DEFAULT_ANY_STRING) + newLine);
-        result.append(" getIntProperty(...): " + this.configurationService.getIntProperty(
-            MockDefaultValues.DEFAULT_ANY_STRING,
-            MockDefaultValues.DEFAULT_INTEGER_VALUE) + newLine);
-        result.append(" getPropertiesInFolder(...): " + this.configurationService.getPropertiesInFolder(MockDefaultValues.DEFAULT_ANY_STRING) + newLine);
-        result.append(" getProperty(...): " + this.configurationService.getProperty(MockDefaultValues.DEFAULT_ANY_STRING) + newLine);
-        result.append(" getPropertiesInFolder(...): " + this.configurationService.getPropertiesInFolder(MockDefaultValues.DEFAULT_ANY_STRING) + newLine);
-        result.append(" getProperty(..., ...): " + this.configurationService.getProperty(
-            MockDefaultValues.DEFAULT_ANY_STRING,
-            this.propertyListener) + newLine);
-        result.append(" getProperty(String, String): " + this.configurationService.getProperty(
-            MockDefaultValues.DEFAULT_ANY_STRING,
-            MockDefaultValues.DEFAULT_ANY_STRING) + newLine);
-        result.append(" getProperty(String, String, listener): " + this.configurationService.getProperty(
-            MockDefaultValues.DEFAULT_ANY_STRING,
-            MockDefaultValues.DEFAULT_ANY_STRING,
-            this.propertyListener) + newLine);
-        result.append(" getText(...): " + this.configurationService.getText(MockDefaultValues.DEFAULT_ANY_STRING) + newLine);
-        result.append(" size(): " + this.configurationService.size() + newLine);
-        // add more values here
-        result.append("}");
-
-        return result.toString();
     }
 }

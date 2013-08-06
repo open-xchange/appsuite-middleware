@@ -47,41 +47,48 @@
  *
  */
 
-package com.openexchange.test.mock.objects.hazelcast.configuration;
+package com.openexchange.test.mock.objects.external.javax.servlet.http;
 
+import java.io.IOException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import org.powermock.api.mockito.PowerMockito;
-import com.openexchange.exception.OXException;
-import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.test.mock.main.util.MockDefaultValues;
 import com.openexchange.test.mock.objects.AbstractMock;
 
-
 /**
- * Mock for the {@link HazelcastConfigurationService}
+ * Mock for {@link HttpServletResponse}
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-public class HazelcastConfigurationServiceMock<T extends HazelcastConfigurationService> extends AbstractMock {
+public class HttpServletResponseMock<T extends HttpServletResponse> extends AbstractMock {
 
     /**
-     * The mocked {@link HazelcastConfigurationService}
+     * The mock for {@link HttpServletResponse}
      */
-    private T hazelcastConfigurationService;
+    private T httpServletResponse;
+
+    /**
+     * Mock for the {@link ServletOutputStream}
+     */
+    private ServletOutputStream servletOutputStream;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public <T> T get() {
-        return (T) this.hazelcastConfigurationService;
+        return (T) this.httpServletResponse;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void createMocks() throws Exception {
-        this.hazelcastConfigurationService = (T) PowerMockito.mock(HazelcastConfigurationService.class);
+    protected void createMocks() {
+        this.httpServletResponse = (T) PowerMockito.mock(HttpServletResponse.class);
+        this.servletOutputStream = PowerMockito.mock(ServletOutputStream.class);
     }
 
     /**
@@ -98,10 +105,16 @@ public class HazelcastConfigurationServiceMock<T extends HazelcastConfigurationS
     @Override
     protected void defineMockSpecificBehaviour() {
         try {
-            PowerMockito.when(this.hazelcastConfigurationService.getConfig()).thenReturn(new com.hazelcast.config.Config());
-            PowerMockito.when(this.hazelcastConfigurationService.isEnabled()).thenReturn(true);
-        } catch (OXException oxException) {
-            LOG.error("Not able to define mock specific behaviour", oxException);
+            PowerMockito.when(this.httpServletResponse.getOutputStream()).thenReturn(this.servletOutputStream);
+        } catch (IOException ioException) {
+            LOG.warn("Cannot mock getOutputStream()", ioException);
         }
+        PowerMockito.when(this.httpServletResponse.containsHeader(anyString())).thenReturn(false);
+        PowerMockito.when(this.httpServletResponse.encodeURL(anyString())).thenReturn(MockDefaultValues.DEFAULT_ENCODED_URL);
+        PowerMockito.when(this.httpServletResponse.getBufferSize()).thenReturn(1024);
+        PowerMockito.when(this.httpServletResponse.getCharacterEncoding()).thenReturn(MockDefaultValues.DEFAULT_CHARACTER_ENCODING);
+        PowerMockito.when(this.httpServletResponse.getContentType()).thenReturn(MockDefaultValues.DEFAULT_CONTENT_TYPE);
+        PowerMockito.when(this.httpServletResponse.getLocale()).thenReturn(MockDefaultValues.DEFAULT_LOCALE);
+        PowerMockito.when(this.httpServletResponse.isCommitted()).thenReturn(false);
     }
 }

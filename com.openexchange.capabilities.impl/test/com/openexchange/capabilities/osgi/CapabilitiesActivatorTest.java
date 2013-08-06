@@ -47,61 +47,71 @@
  *
  */
 
-package com.openexchange.test.mock.objects.hazelcast.configuration;
+package com.openexchange.capabilities.osgi;
 
-import org.powermock.api.mockito.PowerMockito;
-import com.openexchange.exception.OXException;
-import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
-import com.openexchange.test.mock.objects.AbstractMock;
-
+import org.junit.Test;
+import com.openexchange.caching.CacheService;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.test.mock.main.ServiceMockActivator;
+import com.openexchange.test.mock.main.ServiceMockActivatorAsserter;
+import com.openexchange.test.mock.main.test.AbstractMockTest;
 
 /**
- * Mock for the {@link HazelcastConfigurationService}
+ * Unit tests for {@link CapabilitiesActivator}
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-public class HazelcastConfigurationServiceMock<T extends HazelcastConfigurationService> extends AbstractMock {
+public class CapabilitiesActivatorTest extends AbstractMockTest {
 
     /**
-     * The mocked {@link HazelcastConfigurationService}
+     * Instance to test
      */
-    private T hazelcastConfigurationService;
+    private CapabilitiesActivator capabilitiesActivator = null;
+
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public <T> T get() {
-        return (T) this.hazelcastConfigurationService;
+    public void setUp() throws Exception {
+        this.capabilitiesActivator = new CapabilitiesActivator();
+
+        ServiceMockActivator.activateServiceMocks(this.capabilitiesActivator, CacheService.class, ConfigurationService.class);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void createMocks() throws Exception {
-        this.hazelcastConfigurationService = (T) PowerMockito.mock(HazelcastConfigurationService.class);
+    @Test
+    public void testStartBundle_EverythingFine_AllServicesRegistered() throws Exception {
+        this.capabilitiesActivator.startBundle();
+
+        ServiceMockActivatorAsserter.verifyAllServicesRegistered(this.capabilitiesActivator, 4);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void initializeMembers() {
-        // nothing to do yet
+    @Test
+    public void testStartBundle_EverythingFine_AllTrackersRegistered() throws Exception {
+        this.capabilitiesActivator.startBundle();
+
+        ServiceMockActivatorAsserter.verifyAllServiceTrackersRegistered(this.capabilitiesActivator, 3);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void defineMockSpecificBehaviour() {
-        try {
-            PowerMockito.when(this.hazelcastConfigurationService.getConfig()).thenReturn(new com.hazelcast.config.Config());
-            PowerMockito.when(this.hazelcastConfigurationService.isEnabled()).thenReturn(true);
-        } catch (OXException oxException) {
-            LOG.error("Not able to define mock specific behaviour", oxException);
-        }
+    @Test
+    public void testStartBundle_EverythingFine_AllTrackersOpened() throws Exception {
+        this.capabilitiesActivator.startBundle();
+
+        ServiceMockActivatorAsserter.verifyAllServiceTrackersOpened(this.capabilitiesActivator);
+    }
+
+    @Test
+    public void testStopBundle_EverythingFine_AllTrackersClosed() throws Exception {
+        this.capabilitiesActivator.stopBundle();
+
+        ServiceMockActivatorAsserter.verifyAllServiceTrackersClosed(this.capabilitiesActivator);
+    }
+
+    @Test
+    public void testStopBundle_EverythingFine_AllServicesClosed() throws Exception {
+        this.capabilitiesActivator.stopBundle();
+
+        ServiceMockActivatorAsserter.verifyAllServicesDeregistered(this.capabilitiesActivator);
     }
 }

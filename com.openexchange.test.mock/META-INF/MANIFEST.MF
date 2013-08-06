@@ -10,6 +10,9 @@ Bundle-ClassPath: .,
  lib/powermock-mockito-1.5-full.jar
 Import-Package: 
  com.hazelcast.config,
+ com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.caching,
+ com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.context,
  com.openexchange.exception,
@@ -18,7 +21,10 @@ Import-Package:
  com.openexchange.osgi,
  com.openexchange.session,
  com.openexchange.sessiond,
- javax.servlet;version="2.5.0",
- javax.servlet.http;version="2.5.0",
- org.apache.commons.logging;version="1.1.1",
- org.osgi.framework;version="1.7.0"
+ com.openexchange.tools.session,
+ javax.servlet,
+ javax.servlet.http,
+ org.apache.commons.lang.builder,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker

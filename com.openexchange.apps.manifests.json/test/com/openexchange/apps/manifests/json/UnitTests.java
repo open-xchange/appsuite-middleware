@@ -47,61 +47,28 @@
  *
  */
 
-package com.openexchange.test.mock.objects.hazelcast.configuration;
+package com.openexchange.apps.manifests.json;
 
-import org.powermock.api.mockito.PowerMockito;
-import com.openexchange.exception.OXException;
-import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
-import com.openexchange.test.mock.objects.AbstractMock;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.apps.manifests.json.osgi.ManifestJSONActivatorTest;
 
 /**
- * Mock for the {@link HazelcastConfigurationService}
+ * Unit tests for the bundle com.openexchange.apps.manifests.json
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-public class HazelcastConfigurationServiceMock<T extends HazelcastConfigurationService> extends AbstractMock {
+@RunWith(Suite.class)
+@SuiteClasses({
+    AllActionTest.class,
+    ConfigActionTest.class,
+    ManifestActionFactoryTest.class,
+    ManifestJSONActivatorTest.class
+})
+public class UnitTests {
 
-    /**
-     * The mocked {@link HazelcastConfigurationService}
-     */
-    private T hazelcastConfigurationService;
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> T get() {
-        return (T) this.hazelcastConfigurationService;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void createMocks() throws Exception {
-        this.hazelcastConfigurationService = (T) PowerMockito.mock(HazelcastConfigurationService.class);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void initializeMembers() {
-        // nothing to do yet
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void defineMockSpecificBehaviour() {
-        try {
-            PowerMockito.when(this.hazelcastConfigurationService.getConfig()).thenReturn(new com.hazelcast.config.Config());
-            PowerMockito.when(this.hazelcastConfigurationService.isEnabled()).thenReturn(true);
-        } catch (OXException oxException) {
-            LOG.error("Not able to define mock specific behaviour", oxException);
-        }
+    public UnitTests() {
     }
 }

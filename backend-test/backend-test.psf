@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
+
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.apps.manifests.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caldav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.calendar"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.calendar.printing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.capabilities.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.capabilities.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.common"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.configread"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.config.cascade"/>

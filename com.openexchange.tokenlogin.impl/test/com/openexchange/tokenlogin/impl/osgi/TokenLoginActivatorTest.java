@@ -49,25 +49,19 @@
 
 package com.openexchange.tokenlogin.impl.osgi;
 
-import static org.junit.Assert.assertTrue;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.ServiceProvider;
-import com.openexchange.test.mock.ServiceMockActivator;
-import com.openexchange.test.mock.test.AbstractMockTest;
-import com.openexchange.test.mock.util.MockUtils;
+import com.openexchange.test.mock.main.ServiceMockActivator;
+import com.openexchange.test.mock.main.ServiceMockActivatorAsserter;
+import com.openexchange.test.mock.main.test.AbstractMockTest;
 import com.openexchange.tokenlogin.impl.Services;
-
 
 /**
  * Unit tests for {@link TokenLoginActivator}
@@ -84,6 +78,11 @@ public class TokenLoginActivatorTest extends AbstractMockTest {
     private TokenLoginActivator tokenLoginActivator = null;
 
     /**
+     * The activated mocks for the required services
+     */
+    private ConcurrentMap<Class<?>, ServiceProvider<?>> activatedServiceMocks = null;
+
+    /**
      * @throws java.lang.Exception
      */
     @Override
@@ -91,59 +90,58 @@ public class TokenLoginActivatorTest extends AbstractMockTest {
     public void setUp() throws Exception {
         PowerMockito.mockStatic(Services.class);
 
-    }
-
-    @Test
-    public void testStartBundle_HazelcastDisabled_Registered2ServicesAndNoTracker() throws Exception {
         this.tokenLoginActivator = new TokenLoginActivator();
 
-        ConcurrentMap<Class<?>, ServiceProvider<?>> activateServicesFor = ServiceMockActivator.activateServiceMocks(
+        this.activatedServiceMocks = ServiceMockActivator.activateServiceMocks(
             this.tokenLoginActivator,
             HazelcastConfigurationService.class,
             ConfigurationService.class);
+    }
 
+    @Test
+    public void testStartBundle_EverythingFine_TwoServicesRegistered() throws Exception {
         HazelcastConfigurationService hazelcastService = ServiceMockActivator.getActivatedService(
             HazelcastConfigurationService.class,
-            activateServicesFor);
+            this.activatedServiceMocks);
         PowerMockito.when(hazelcastService.isEnabled()).thenReturn(false);
 
         this.tokenLoginActivator.startBundle();
 
+        ServiceMockActivatorAsserter.verifyAllServicesRegistered(this.tokenLoginActivator, 2);
         Mockito.verify(hazelcastService, Mockito.times(1)).isEnabled();
-
-        Map<Object, ServiceRegistration<?>> serviceRegistrations = (Map<Object, ServiceRegistration<?>>) MockUtils.getValueFromField(
-            this.tokenLoginActivator,
-            "serviceRegistrations");
-
-        assertTrue(2 == serviceRegistrations.size());
-
-        List<ServiceTracker<?, ?>> serviceTrackers = (List<ServiceTracker<?, ?>>) MockUtils.getValueFromField(
-            this.tokenLoginActivator, "serviceTrackers");
-
-        assertTrue(0 == serviceTrackers.size());
     }
 
     @Test
-    public void testStartBundle_HazelcastEnabled_Registered2ServicesAnd1Tracker() throws Exception {
-        this.tokenLoginActivator = new TokenLoginActivator();
-
-        ServiceMockActivator.activateServiceMocks(
-            this.tokenLoginActivator,
+    public void testStartBundle_HazelcastDisabled_NoTrackerRegistered() throws Exception {
+        HazelcastConfigurationService hazelcastService = ServiceMockActivator.getActivatedService(
             HazelcastConfigurationService.class,
-            ConfigurationService.class);
+            this.activatedServiceMocks);
+        PowerMockito.when(hazelcastService.isEnabled()).thenReturn(false);
 
         this.tokenLoginActivator.startBundle();
 
-        Map<Object, ServiceRegistration<?>> serviceRegistrations = (Map<Object, ServiceRegistration<?>>) MockUtils.getValueFromField(
-            this.tokenLoginActivator,
-            "serviceRegistrations");
+        ServiceMockActivatorAsserter.verifyAllServiceTrackersClosed(this.tokenLoginActivator);
+        Mockito.verify(hazelcastService, Mockito.times(1)).isEnabled();
+    }
 
-        assertTrue(2 == serviceRegistrations.size());
+    @Test
+    public void testStartBundle_HazelcastEnabled_OneTrackerOpened() throws Exception {
+        this.tokenLoginActivator.startBundle();
 
-        List<ServiceTracker<?, ?>> serviceTrackers = (List<ServiceTracker<?, ?>>) MockUtils.getValueFromField(
-            this.tokenLoginActivator,
-            "serviceTrackers");
+        ServiceMockActivatorAsserter.verifyAllServiceTrackersOpened(this.tokenLoginActivator);
+    }
 
-        assertTrue(1 == serviceTrackers.size());
+    @Test
+    public void testStartBundle_HazelcastEnabled_OneTrackerRegistered() throws Exception {
+        this.tokenLoginActivator.startBundle();
+
+        ServiceMockActivatorAsserter.verifyAllServiceTrackersRegistered(this.tokenLoginActivator, 1);
+    }
+
+    @Test
+    public void testStopBundle_EverythingFine_AllTrackersClosed() throws Exception {
+        this.tokenLoginActivator.stopBundle();
+
+        ServiceMockActivatorAsserter.verifyAllServiceTrackersClosed(this.tokenLoginActivator);
     }
 }

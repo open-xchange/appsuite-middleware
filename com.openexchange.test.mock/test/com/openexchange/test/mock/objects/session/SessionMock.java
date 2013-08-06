@@ -51,8 +51,8 @@ package com.openexchange.test.mock.objects.session;
 
 import org.powermock.api.mockito.PowerMockito;
 import com.openexchange.session.Session;
+import com.openexchange.test.mock.main.util.MockDefaultValues;
 import com.openexchange.test.mock.objects.AbstractMock;
-import com.openexchange.test.mock.util.MockDefaultValues;
 
 
 /**
@@ -106,23 +106,5 @@ public class SessionMock<T extends Session> extends AbstractMock {
     protected void defineMockSpecificBehaviour() {
         PowerMockito.when(session.getContextId()).thenReturn(MockDefaultValues.DEFAULT_CONTEXT_ID);
         PowerMockito.when(session.getSessionID()).thenReturn(MockDefaultValues.DEFAULT_SESSION_ID);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        StringBuilder result = new StringBuilder();
-        String newLine = System.getProperty("line.separator");
-
-        result.append("State for: " + this.getClass().getSimpleName() + newLine);
-        result.append("{" + newLine);
-        result.append(" getContextId(): " + this.session.getContextId() + newLine);
-        result.append(" getSessionID(): " + this.session.getSessionID() + newLine);
-        // add more values here
-        result.append("}");
-
-        return result.toString();
     }
 }

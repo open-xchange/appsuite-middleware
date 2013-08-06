@@ -47,61 +47,24 @@
  *
  */
 
-package com.openexchange.test.mock.objects.hazelcast.configuration;
+package com.openexchange.test.mock.main.util;
 
-import org.powermock.api.mockito.PowerMockito;
-import com.openexchange.exception.OXException;
-import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
-import com.openexchange.test.mock.objects.AbstractMock;
+import com.openexchange.osgi.HousekeepingActivator;
 
 
 /**
- * Mock for the {@link HazelcastConfigurationService}
+ * Class that defines member names of {@link HousekeepingActivator} and other available activators for re-usage of injection.
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-public class HazelcastConfigurationServiceMock<T extends HazelcastConfigurationService> extends AbstractMock {
+public class InjectionFieldConstants {
 
-    /**
-     * The mocked {@link HazelcastConfigurationService}
-     */
-    private T hazelcastConfigurationService;
+    public static final String SERVICES = "services";
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> T get() {
-        return (T) this.hazelcastConfigurationService;
-    }
+    public static final String CONTEXT = "context";
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void createMocks() throws Exception {
-        this.hazelcastConfigurationService = (T) PowerMockito.mock(HazelcastConfigurationService.class);
-    }
+    public static final String SERVICE_REGISTRATIONS = "serviceRegistrations";
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void initializeMembers() {
-        // nothing to do yet
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void defineMockSpecificBehaviour() {
-        try {
-            PowerMockito.when(this.hazelcastConfigurationService.getConfig()).thenReturn(new com.hazelcast.config.Config());
-            PowerMockito.when(this.hazelcastConfigurationService.isEnabled()).thenReturn(true);
-        } catch (OXException oxException) {
-            LOG.error("Not able to define mock specific behaviour", oxException);
-        }
-    }
+    public static final String SERVICE_TRACKERS = "serviceTrackers";
 }

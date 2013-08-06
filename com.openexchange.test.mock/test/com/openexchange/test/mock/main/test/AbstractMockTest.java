@@ -47,61 +47,38 @@
  *
  */
 
-package com.openexchange.test.mock.objects.hazelcast.configuration;
+package com.openexchange.test.mock.main.test;
 
-import org.powermock.api.mockito.PowerMockito;
-import com.openexchange.exception.OXException;
-import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
-import com.openexchange.test.mock.objects.AbstractMock;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 
 /**
- * Mock for the {@link HazelcastConfigurationService}
+ * Each unit test written should extend this class.<br>
+ * <br>
+ * Globally required mocks can be inserted into the list of @PrepareForTest({ ... }) and be mocked in
+ * com.openexchange.test.mock.main.test.AbstractMockTest.AbstractMockTest().
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-public class HazelcastConfigurationServiceMock<T extends HazelcastConfigurationService> extends AbstractMock {
+@RunWith(PowerMockRunner.class)
+public abstract class AbstractMockTest {
 
     /**
-     * The mocked {@link HazelcastConfigurationService}
+     * Initializes a new {@link AbstractMockTest}.
      */
-    private T hazelcastConfigurationService;
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> T get() {
-        return (T) this.hazelcastConfigurationService;
+    public AbstractMockTest() {
+        super();
     }
 
     /**
-     * {@inheritDoc}
+     * Setup all mocks that are required for this test
+     * 
+     * @throws Exception - thrown when no mock could be created.
      */
-    @Override
-    protected void createMocks() throws Exception {
-        this.hazelcastConfigurationService = (T) PowerMockito.mock(HazelcastConfigurationService.class);
-    }
+    @Before
+    public abstract void setUp() throws Exception;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void initializeMembers() {
-        // nothing to do yet
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void defineMockSpecificBehaviour() {
-        try {
-            PowerMockito.when(this.hazelcastConfigurationService.getConfig()).thenReturn(new com.hazelcast.config.Config());
-            PowerMockito.when(this.hazelcastConfigurationService.isEnabled()).thenReturn(true);
-        } catch (OXException oxException) {
-            LOG.error("Not able to define mock specific behaviour", oxException);
-        }
-    }
 }

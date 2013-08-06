@@ -47,33 +47,37 @@
  *
  */
 
-package com.openexchange.test.mock.objects.hazelcast.configuration;
+package com.openexchange.test.mock.objects.capabilities;
 
+import java.util.HashSet;
+import java.util.Set;
+import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
-import com.openexchange.exception.OXException;
-import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.test.mock.objects.AbstractMock;
 
 
 /**
- * Mock for the {@link HazelcastConfigurationService}
+ * Mock for the {@link CapabilityService}
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-public class HazelcastConfigurationServiceMock<T extends HazelcastConfigurationService> extends AbstractMock {
+public class CapabilityServiceMock<T extends CapabilityService> extends AbstractMock {
 
     /**
-     * The mocked {@link HazelcastConfigurationService}
+     * The {@link ConfigurationService} that will be mocked with this class
      */
-    private T hazelcastConfigurationService;
+    private T capabilityService;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public <T> T get() {
-        return (T) this.hazelcastConfigurationService;
+        return (T) this.capabilityService;
     }
 
     /**
@@ -81,27 +85,25 @@ public class HazelcastConfigurationServiceMock<T extends HazelcastConfigurationS
      */
     @Override
     protected void createMocks() throws Exception {
-        this.hazelcastConfigurationService = (T) PowerMockito.mock(HazelcastConfigurationService.class);
+        this.capabilityService = (T) PowerMockito.mock(CapabilityService.class);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void initializeMembers() {
-        // nothing to do yet
+    protected void initializeMembers() throws Exception {
+        // nothing to to yet
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void defineMockSpecificBehaviour() {
-        try {
-            PowerMockito.when(this.hazelcastConfigurationService.getConfig()).thenReturn(new com.hazelcast.config.Config());
-            PowerMockito.when(this.hazelcastConfigurationService.isEnabled()).thenReturn(true);
-        } catch (OXException oxException) {
-            LOG.error("Not able to define mock specific behaviour", oxException);
-        }
+    protected void defineMockSpecificBehaviour() throws Exception {
+        Set<Capability> capabilities = new HashSet<Capability>(64);
+        capabilities.add(new Capability("CapabilityId", true));
+        Mockito.when(this.capabilityService.getCapabilities(Mockito.anyInt(), Mockito.anyInt(), Mockito.anyBoolean())).thenReturn(
+            capabilities);
     }
 }

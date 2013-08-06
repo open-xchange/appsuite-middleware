@@ -55,8 +55,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.test.mock.MockFactory;
-import com.openexchange.test.mock.test.AbstractMockTest;
+import com.openexchange.test.mock.main.MockFactory;
+import com.openexchange.test.mock.main.test.AbstractMockTest;
 
 /**
  * Unit tests for {@link TestServlet}

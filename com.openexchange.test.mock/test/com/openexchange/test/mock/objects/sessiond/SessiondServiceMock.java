@@ -97,22 +97,4 @@ public class SessiondServiceMock<T extends SessiondService> extends AbstractMock
     protected void defineMockSpecificBehaviour() {
         // nothing to do yet
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        StringBuilder result = new StringBuilder();
-        String newLine = System.getProperty("line.separator");
-
-        result.append("State for: " + this.getClass().getSimpleName() + newLine);
-        result.append("{" + newLine);
-        result.append(" getNumberOfActiveSessions(): " + this.sessiondService.getNumberOfActiveSessions() + newLine);
-        // add more values here
-        result.append("}");
-
-        return result.toString();
-    }
-
 }

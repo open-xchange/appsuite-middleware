@@ -47,33 +47,31 @@
  *
  */
 
-package com.openexchange.test.mock.objects.hazelcast.configuration;
+package com.openexchange.test.mock.objects.external.javax.servlet.http;
 
+import javax.servlet.http.HttpSession;
 import org.powermock.api.mockito.PowerMockito;
-import com.openexchange.exception.OXException;
-import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.test.mock.objects.AbstractMock;
 
-
 /**
- * Mock for the {@link HazelcastConfigurationService}
+ * Mock for the {@link HttpSession}
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-public class HazelcastConfigurationServiceMock<T extends HazelcastConfigurationService> extends AbstractMock {
+public class HttpSessionMock<T extends HttpSession> extends AbstractMock {
 
     /**
-     * The mocked {@link HazelcastConfigurationService}
+     * The mock for {@link HttpSession}
      */
-    private T hazelcastConfigurationService;
+    private T httpSession;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public <T> T get() {
-        return (T) this.hazelcastConfigurationService;
+        return (T) this.httpSession;
     }
 
     /**
@@ -81,7 +79,7 @@ public class HazelcastConfigurationServiceMock<T extends HazelcastConfigurationS
      */
     @Override
     protected void createMocks() throws Exception {
-        this.hazelcastConfigurationService = (T) PowerMockito.mock(HazelcastConfigurationService.class);
+        this.httpSession = (T) PowerMockito.mock(HttpSession.class);
     }
 
     /**
@@ -97,11 +95,6 @@ public class HazelcastConfigurationServiceMock<T extends HazelcastConfigurationS
      */
     @Override
     protected void defineMockSpecificBehaviour() {
-        try {
-            PowerMockito.when(this.hazelcastConfigurationService.getConfig()).thenReturn(new com.hazelcast.config.Config());
-            PowerMockito.when(this.hazelcastConfigurationService.isEnabled()).thenReturn(true);
-        } catch (OXException oxException) {
-            LOG.error("Not able to define mock specific behaviour", oxException);
-        }
+        // nothing to do yet
     }
 }

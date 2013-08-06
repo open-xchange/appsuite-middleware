@@ -68,10 +68,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.test.mock.MockFactory;
-import com.openexchange.test.mock.test.AbstractMockTest;
-import com.openexchange.test.mock.util.MockDefaultValues;
-import com.openexchange.test.mock.util.MockUtils;
+import com.openexchange.test.mock.main.MockFactory;
+import com.openexchange.test.mock.main.test.AbstractMockTest;
+import com.openexchange.test.mock.main.util.MockDefaultValues;
+import com.openexchange.test.mock.main.util.MockUtils;
 import com.openexchange.tokenlogin.DefaultTokenLoginSecret;
 import com.openexchange.tokenlogin.TokenLoginSecret;
 
