@@ -33,6 +33,26 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
+%post
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    # SoftwareChange_Request-1539
+    pfile=/opt/open-xchange/etc/hazelcast/rtResourceDirectory.properties
+    VALUE=$(ox_read_property com.openexchange.hazelcast.configuration.map.name $pfile)
+    if [ "$VALUE" == "rtResourceDirectory-0" ]; then
+        ox_set_property com.openexchange.hazelcast.configuration.map.name rtResourceDirectory-1 $pfile
+    fi
+    VALUE=$(ox_read_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds $pfile)
+    if [ "$VALUE" == "0" ]; then
+        ox_set_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds 3600 $pfile
+    fi
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
 
