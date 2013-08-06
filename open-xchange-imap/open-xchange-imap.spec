@@ -62,6 +62,12 @@ if [ ${1:-0} -eq 2 ]; then
     if ! ox_exists_property com.openexchange.imap.umlautFilterThreshold $pfile; then
         ox_set_property com.openexchange.imap.umlautFilterThreshold 50 $pfile
     fi
+
+    # SoftwareChange_Request-1566
+    pfile=/opt/open-xchange/etc/imap.properties
+    if ! ox_exists_property com.openexchange.imap.invalidMailboxNameCharacters $pfile; then
+        ox_set_property com.openexchange.imap.invalidMailboxNameCharacters "" $pfile
+    fi
 fi
 
 %clean
