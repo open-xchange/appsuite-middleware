@@ -54,6 +54,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
@@ -100,6 +101,12 @@ public abstract class AbstractDriveAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        /*
+         * check module permissions
+         */
+        if (false == Services.getService(CapabilityService.class).getCapabilities(session).contains(DriveService.CAPABILITY_DRIVE)) {
+            throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("drive");
+        }
         /*
          * Create drive session
          */
