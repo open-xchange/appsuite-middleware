@@ -53,7 +53,7 @@ import java.io.Serializable;
 
 /**
  * {@link JSlobId} - The JSlob identifier.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSlobId implements Serializable {
@@ -68,7 +68,7 @@ public final class JSlobId implements Serializable {
 
     /**
      * Initializes a new {@link JSlobId}.
-     * 
+     *
      * @param serviceId The JSlob service identifier
      * @param id The JSlob identifier
      * @param user The user identifier
@@ -129,7 +129,7 @@ public final class JSlobId implements Serializable {
 
     /**
      * Gets the user identifier.
-     * 
+     *
      * @return The user identifier
      */
     public int getUser() {
@@ -138,7 +138,7 @@ public final class JSlobId implements Serializable {
 
     /**
      * Gets the context identifier.
-     * 
+     *
      * @return The context identifier
      */
     public int getContext() {
@@ -147,7 +147,7 @@ public final class JSlobId implements Serializable {
 
     /**
      * Gets the JSlob service identifier.
-     * 
+     *
      * @return The JSlob service identifier
      */
     public String getServiceId() {
@@ -156,7 +156,7 @@ public final class JSlobId implements Serializable {
 
     /**
      * Gets the JSlob identifier.
-     * 
+     *
      * @return The JSlob identifier
      */
     public String getId() {

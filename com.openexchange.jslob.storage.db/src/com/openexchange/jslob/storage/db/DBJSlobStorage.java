@@ -54,10 +54,13 @@ import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -70,6 +73,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.AsciiReader;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobExceptionCodes;
@@ -391,7 +395,76 @@ public final class DBJSlobStorage implements JSlobStorage {
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
-        
+
+    }
+
+    @Override
+    public List<JSlob> list(final List<JSlobId> ids) throws OXException {
+        if (null == ids || ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        rlock.lock();
+        try {
+            final DatabaseService databaseService = getDatabaseService();
+            final int contextId = ids.get(0).getContext();
+            final Connection con = databaseService.getReadOnly(contextId);
+            try {
+                return loadThem(ids, contextId, con);
+            } finally {
+                databaseService.backReadOnly(contextId, con);
+            }
+        } finally {
+            rlock.unlock();
+        }
+    }
+
+    private List<JSlob> loadThem(final List<JSlobId> ids, final int contextId, final Connection con) throws OXException {
+        if (false && checkLocked(ids.get(0), false, con)) {
+            throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(ids.get(0));
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            final JSlobId id = ids.get(0);
+            final String serviceId = id.getServiceId();
+            final int user = id.getUser();
+            stmt = con.prepareStatement("SELECT data, id FROM jsonStorage WHERE cid = ? AND user = ? AND serviceId = ? AND id IN " + getInString(ids));
+            stmt.setLong(1, contextId);
+            stmt.setLong(2, user);
+            stmt.setString(3, serviceId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return Collections.emptyList();
+            }
+            final int size = ids.size();
+            final Map<String, JSlob> map = new HashMap<String, JSlob>(size);
+            do {
+                final String sId = rs.getString(2);
+                map.put(sId, new DefaultJSlob(new JSONObject(new AsciiReader(rs.getBinaryStream(1)))).setId(new JSlobId(serviceId, sId, user, contextId)));
+            } while (rs.next());
+            // Generate list
+            final List<JSlob> list = new ArrayList<JSlob>(size);
+            for (final JSlobId jSlobId : ids) {
+                list.add(map.get(jSlobId.getId()));
+            }
+            return list;
+        } catch (final SQLException e) {
+            throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final JSONException e) {
+            throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private String getInString(final List<JSlobId> ids) {
+        final int size = ids.size();
+        final StringAllocator sb = new StringAllocator(size << 2);
+        sb.append('(').append('\'').append(ids.get(0).getId()).append('\'');
+        for (int i = 1; i < size; i++) {
+            sb.append(',').append('\'').append(ids.get(i).getId()).append('\'');
+        }
+        return sb.append(')').toString();
     }
 
     @Override

@@ -100,7 +100,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link ConfigJSlobService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConfigJSlobService implements JSlobService {
@@ -136,7 +136,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     /**
      * Initializes a new {@link ConfigJSlobService}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public ConfigJSlobService(final ServiceLookup services) throws OXException {
@@ -158,7 +158,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     /**
      * Gets the service look-up.
-     * 
+     *
      * @return The service look-up
      */
     public ServiceLookup getServices() {
@@ -247,7 +247,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     /**
      * Gets the <code>SessiondService</code>.
-     * 
+     *
      * @return The <code>SessiondService</code>
      */
     private SessiondService getSessiondService() {
@@ -263,7 +263,7 @@ public final class ConfigJSlobService implements JSlobService {
         final List<JSlob> ret = new ArrayList<JSlob>(list.size() << 1);
         boolean coreIncluded = false;
         for (final JSlob jSlob : list) {
-            
+
             addConfigTreeToJslob(session, new DefaultJSlob(jSlob));
             ret.add(get(jSlob.getId().getId(), session));
             if (jSlob.getId().getId().equals(CORE)) {
@@ -331,6 +331,53 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     @Override
+    public List<JSlob> get(List<String> ids, Session session) throws OXException {
+        final int userId = session.getUserId();
+        final int contextId = session.getContextId();
+        final int size = ids.size();
+
+        final List<JSlob> jSlobs;
+        {
+            final List<JSlobId> jSlobIds = new ArrayList<JSlobId>(size);
+            for (final String sId : ids) {
+                jSlobIds.add(new JSlobId(SERVICE_ID, sId, userId, contextId));
+            }
+            jSlobs = getStorage().list(jSlobIds);
+        }
+
+        final List<JSlob> ret = new ArrayList<JSlob>(size);
+        for (int i = 0; i < size; i++) {
+            final JSlob opt = jSlobs.get(i);
+            final String id = ids.get(i);
+            final DefaultJSlob jsonJSlob;
+            {
+                if (null == opt) {
+                    jsonJSlob = new DefaultJSlob(new JSONObject());
+                    jsonJSlob.setId(new JSlobId(SERVICE_ID, id, userId, contextId));
+                } else {
+                    jsonJSlob = new DefaultJSlob(opt);
+                }
+            }
+            /*
+             * Fill with config cascade settings
+             */
+            final Map<String, AttributedProperty> attributes = preferenceItems.get(id);
+            if (null != attributes) {
+                final ConfigView view = getConfigViewFactory().getView(userId, contextId);
+                for (final AttributedProperty attributedProperty : attributes.values()) {
+                    add2JSlob(attributedProperty, jsonJSlob, view);
+                }
+            }
+
+            addConfigTreeToJslob(session, jsonJSlob);
+
+            ret.add(jsonJSlob);
+        }
+
+        return ret;
+    }
+
+    @Override
     public JSlob getShared(final String id) {
         // final Set<String> keySet = sharedJSlobs.keySet();
         return sharedJSlobs.get(id);
@@ -338,7 +385,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     /**
      * Adds data from config-tree to jslob mappings.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The {@link DefaultJSlob} instance.
@@ -380,7 +427,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     /**
      * Converts a tree of settings into the according java script objects.
-     * 
+     *
      * @param setting Tree of settings.
      * @return java script object representing the setting tree.
      * @throws JSONException if the conversion to java script objects fails.
@@ -518,7 +565,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     /**
      * Splits a value for a not leaf setting into its sub-settings and stores them.
-     * 
+     *
      * @param storage setting storage.
      * @param setting actual setting.
      * @throws OXException If an error occurs.
@@ -885,7 +932,7 @@ public final class ConfigJSlobService implements JSlobService {
      * Converts given String to a regular JSON-supported value.
      * <p>
      * The value can be a Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object.
-     * 
+     *
      * @param propertyValue The value to convert
      * @return The resulting value; either Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object
      */

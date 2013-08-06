@@ -51,7 +51,9 @@ package com.openexchange.jslob.storage.db.cache;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
@@ -66,7 +68,7 @@ import com.openexchange.jslob.storage.db.osgi.DBJSlobStorageActivcator;
 
 /**
  * {@link CachingJSlobStorage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CachingJSlobStorage implements JSlobStorage {
@@ -79,7 +81,7 @@ public final class CachingJSlobStorage implements JSlobStorage {
 
     /**
      * Sets the {@link CacheService}.
-     * 
+     *
      * @param service The service
      */
     public static void setCacheService(final CacheService service) {
@@ -102,7 +104,7 @@ public final class CachingJSlobStorage implements JSlobStorage {
 
     /**
      * Gets the instance
-     * 
+     *
      * @return The instance
      */
     public static synchronized CachingJSlobStorage getInstance() {
@@ -135,7 +137,7 @@ public final class CachingJSlobStorage implements JSlobStorage {
 
     /**
      * Drops all JSlob entries associated with specified user.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      */
@@ -235,6 +237,42 @@ public final class CachingJSlobStorage implements JSlobStorage {
         }
         cache.putInGroup(id.getId(), groupName, opt, false);
         return opt.clone();
+    }
+
+    @Override
+    public List<JSlob> list(List<JSlobId> ids) throws OXException {
+        final Cache cache = optCache();
+        if (null == cache) {
+            return delegate.list(ids);
+        }
+
+        final int size = ids.size();
+        final Map<String, JSlob> map = new HashMap<String, JSlob>(size);
+        final List<JSlobId> toLoad = new ArrayList<JSlobId>(size);
+        for (int i = 0; i < size; i++) {
+            final JSlobId id = ids.get(i);
+            final Object object = cache.getFromGroup(id.getId(), groupName(id));
+            if (object instanceof JSlob) {
+                map.put(id.getId(), (JSlob) object);
+            } else {
+                toLoad.add(id);
+            }
+        }
+
+        if (!toLoad.isEmpty()) {
+            final List<JSlob> loaded = delegate.list(toLoad);
+            for (final JSlob jSlob : loaded) {
+                final JSlobId id = jSlob.getId();
+                cache.putInGroup(id.getId(), groupName(id), jSlob, false);
+                map.put(id.getId(), jSlob.clone());
+            }
+        }
+
+        final List<JSlob> ret = new ArrayList<JSlob>(size);
+        for (final JSlobId id : ids) {
+            ret.add(map.get(id.getId()));
+        }
+        return ret;
     }
 
     @Override

@@ -53,10 +53,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -70,9 +66,6 @@ import com.openexchange.jslob.JSlobExceptionCodes;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.json.JSlobRequest;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.threadpool.ThreadPoolCompletionService;
-import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ListAction}
@@ -113,48 +106,12 @@ public final class ListAction extends JSlobAction {
                 return new AJAXRequestResult(Collections.<JSlob> singletonList(jslobService.get(ids.getString(0), jslobRequest.getSession())), "jslob");
             }
             // More than one to load
-            final ServerSession session = jslobRequest.getSession();
-            // Create completion service and result map
-            final CompletionService<Void> completionService = new ThreadPoolCompletionService<Void>(ThreadPools.getThreadPool());
-            final ConcurrentMap<String, JSlob> results = new ConcurrentHashMap<String, JSlob>(length);
-            // Submit tasks
-            final int numTasks = length - 1;
-            for (int i = 0; i < numTasks; i++) {
-                final String id = ids.getString(i);
-                completionService.submit(new Callable<Void>() {
-
-                    @Override
-                    public Void call() throws OXException {
-                        try {
-                            results.put(id, jslobService.get(id, session));
-                            return null;
-                        } catch (final RuntimeException e) {
-                            throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-                        }
-                    }
-                });
-            }
-            // Perform last with current thread
-            {
-                final String id = ids.getString(numTasks);
-                results.put(id, jslobService.get(id, session));
-            }
-            // Await completion
-            for (int i = 0; i < numTasks; i++) {
-                completionService.take();
-            }
-            // Assign to list
-            final List<JSlob> jslobs = new ArrayList<JSlob>(length);
+            final List<String> sIds = new ArrayList<String>(length);
             for (int i = 0; i < length; i++) {
-                final JSlob jSlob = results.get(ids.getString(i));
-                if (null != jSlob) {
-                    jslobs.add(jSlob);
-                }
+                sIds.add(ids.getString(i));
             }
-            return new AJAXRequestResult(jslobs, "jslob");
-        } catch (final InterruptedException e) {
-            // Keep interrupted status
-            Thread.currentThread().interrupt();
+            return new AJAXRequestResult(jslobService.get(sIds, jslobRequest.getSession()), "jslob");
+        } catch (final RuntimeException e) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
