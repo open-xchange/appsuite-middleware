@@ -90,6 +90,15 @@ public class CP932EmojiMapping {
     }
 
     /**
+     * Gets the character representing an unknown character.
+     *
+     * @return The unknown character
+     */
+    public char getUnknown() {
+        return UNKNOWN;
+    }
+
+    /**
      * Replaces all occurrences in specified content.
      *
      * @param content The content
