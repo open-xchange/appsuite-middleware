@@ -73,27 +73,27 @@ public interface FileStorageFolder extends FileStorageConstants {
     /**
      * The capability identifier for permissions support.
      */
-    public static final String CAPABILITY_PERMISSIONS = "PERMISSIONS";
+    public static final String CAPABILITY_PERMISSIONS = "permissions";
 
     /**
      * The capability identifier for quota support.
      */
-    public static final String CAPABILITY_QUOTA = "QUOTA";
+    public static final String CAPABILITY_QUOTA = "quota";
 
     /**
      * The capability identifier for sort support.
      */
-    public static final String CAPABILITY_SORT = "SORT";
+    public static final String CAPABILITY_SORT = "sort";
 
     /**
      * The capability identifier for subscription support.
      */
-    public static final String CAPABILITY_SUBSCRIPTION = "SUBSCRIPTION";
+    public static final String CAPABILITY_SUBSCRIPTION = "subscription";
 
     /**
      * The capability identifier for publication support.
      */
-    public static final String CAPABILITY_PUBLICATION = "PUBLICATION";
+    public static final String CAPABILITY_PUBLICATION = "publication";
 
     /**
      * All known capabilities in a set.
