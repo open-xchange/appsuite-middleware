@@ -55,7 +55,7 @@ import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.ThreeWayComparison;
 import com.openexchange.drive.comparison.VersionMapper;
-import com.openexchange.drive.internal.DriveSession;
+import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.exception.OXException;
 
 
@@ -68,10 +68,10 @@ public abstract class Synchronizer<T extends DriveVersion> {
 
     protected static final Log LOG = com.openexchange.log.Log.loggerFor(Synchronizer.class);
 
-    protected final DriveSession session;
+    protected final SyncSession session;
     protected final VersionMapper<T> mapper;
 
-    public Synchronizer(DriveSession session, VersionMapper<T> mapper) throws OXException {
+    public Synchronizer(SyncSession session, VersionMapper<T> mapper) throws OXException {
         super();
         this.session = session;
         this.mapper = mapper;

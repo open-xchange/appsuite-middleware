@@ -47,40 +47,44 @@
  *
  */
 
-package com.openexchange.drive.internal;
+package com.openexchange.drive;
 
-import com.openexchange.drive.DirectoryMetadata;
-import com.openexchange.drive.comparison.ServerDirectoryVersion;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link DefaultDirectoryMetadata}
+ * {@link DriveSession}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DefaultDirectoryMetadata implements DirectoryMetadata {
+public interface DriveSession {
 
-    private final SyncSession session;
-    private final ServerDirectoryVersion directoryVersion;
+    /**
+     * Gets the underlying server session.
+     *
+     * @return The server session
+     */
+    ServerSession getServerSession();
 
-    public DefaultDirectoryMetadata(SyncSession session, ServerDirectoryVersion directoryVersion) {
-        super();
-        this.session = session;
-        this.directoryVersion = directoryVersion;
-    }
+    /**
+     * Get the identifier of the referenced root folder on the server.
+     *
+     * @return The root folder ID.
+     */
+    String getRootFolderID();
 
-    @Override
-    public String getPath() {
-        return directoryVersion.getPath();
-    }
+    /**
+     * Gets a friendly name identifying the client device from a user's point of view, e.g. "My Tablet PC".
+     *
+     * @return The devie name, or <code>null</code> if not defined
+     */
+    String getDeviceName();
 
-    @Override
-    public String getChecksum() {
-        return directoryVersion.getChecksum();
-    }
-
-    @Override
-    public String getDirectLink() {
-        return session.getLinkGenerator().getDirectoryLink(directoryVersion.getDirectoryChecksum().getFolderID().toUniqueID());
-    }
+    /**
+     * Gets a value indicating whether the diagnostics trace is requested from the client or not.
+     *
+     * @return <code>Boolean.TRUE</code> if tracing is enabled, <code>null</code> or <code>Boolean.FALSE</code>, othwerwise.
+     */
+    Boolean isDiagnostics();
 
 }
+

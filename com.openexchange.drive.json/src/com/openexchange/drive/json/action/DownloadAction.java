@@ -56,12 +56,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveService;
+import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.JsonFileVersion;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 public class DownloadAction extends AbstractDriveAction {
 
     @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException {
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
         try {
             /*
              * no limits for download
@@ -82,10 +82,6 @@ public class DownloadAction extends AbstractDriveAction {
             /*
              * get parameters
              */
-            String rootFolderID = requestData.getParameter("root");
-            if (Strings.isEmpty(rootFolderID)) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
-            }
             String path = requestData.getParameter("path");
             if (Strings.isEmpty(path)) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
@@ -110,7 +106,7 @@ public class DownloadAction extends AbstractDriveAction {
              * get data
              */
             DriveService driveService = Services.getService(DriveService.class, true);
-            IFileHolder fileHolder = driveService.download(session, rootFolderID, path, new JsonFileVersion(checksum, name), offset, length);
+            IFileHolder fileHolder = driveService.download(session, path, new JsonFileVersion(checksum, name), offset, length);
             if (null == fileHolder) {
                 throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(name, checksum, path);
             }

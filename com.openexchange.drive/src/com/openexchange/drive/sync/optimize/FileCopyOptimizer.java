@@ -64,7 +64,7 @@ import com.openexchange.drive.actions.DownloadFileAction;
 import com.openexchange.drive.checksum.FileChecksum;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.comparison.VersionMapper;
-import com.openexchange.drive.internal.DriveSession;
+import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.sync.IntermediateSyncResult;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -87,7 +87,7 @@ public class FileCopyOptimizer extends FileActionOptimizer {
     }
 
     @Override
-    public IntermediateSyncResult<FileVersion> optimize(DriveSession session, IntermediateSyncResult<FileVersion> result) {
+    public IntermediateSyncResult<FileVersion> optimize(SyncSession session, IntermediateSyncResult<FileVersion> result) {
         List<AbstractAction<FileVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<FileVersion>>(result.getActionsForClient());
         List<AbstractAction<FileVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<FileVersion>>(result.getActionsForServer());
         /*
@@ -139,7 +139,7 @@ public class FileCopyOptimizer extends FileActionOptimizer {
         return null;
     }
 
-    private Map<String, ServerFileVersion> findByChecksum(DriveSession session, List<String> checksums) {
+    private Map<String, ServerFileVersion> findByChecksum(SyncSession session, List<String> checksums) {
         if (null == checksums || 0 == checksums.size()) {
             return Collections.emptyMap();
         }
@@ -177,7 +177,7 @@ public class FileCopyOptimizer extends FileActionOptimizer {
         return true;
     }
 
-    private static Map<String, ServerFileVersion> getMatchingFileVersions(DriveSession session, List<String> checksums) throws OXException {
+    private static Map<String, ServerFileVersion> getMatchingFileVersions(SyncSession session, List<String> checksums) throws OXException {
         Map<String, ServerFileVersion> matchingFileVersions = new HashMap<String, ServerFileVersion>();
         List<FileChecksum> checksumsToInvalidate = new ArrayList<FileChecksum>();
         Map<String, List<FileChecksum>> storedFileChecksums = session.getChecksumStore().getMatchingFileChecksums(checksums);

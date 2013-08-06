@@ -54,7 +54,7 @@ import java.util.List;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.comparison.VersionMapper;
-import com.openexchange.drive.internal.DriveSession;
+import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.sync.IntermediateSyncResult;
 
 
@@ -75,7 +75,7 @@ public class FileOrderOptimizer extends FileActionOptimizer {
     }
 
     @Override
-    public IntermediateSyncResult<FileVersion> optimize(DriveSession session, IntermediateSyncResult<FileVersion> result) {
+    public IntermediateSyncResult<FileVersion> optimize(SyncSession session, IntermediateSyncResult<FileVersion> result) {
         List<AbstractAction<FileVersion>> actionsForClient = result.getActionsForClient();
         Collections.sort(actionsForClient);
         List<AbstractAction<FileVersion>> actionsForServer = result.getActionsForServer();

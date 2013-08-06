@@ -50,45 +50,42 @@
 package com.openexchange.drive.internal;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.Date;
 import jonelo.jacksum.algorithm.MD;
-import org.apache.commons.logging.Log;
 import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.checksum.ChecksumStore;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
-import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link DriveSession}
+ * {@link SyncSession}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DriveSession {
+public class SyncSession {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveSession.class);
-
-    private final ServerSession session;
+    private final DriveSession session;
+    private final Tracer tracer;
     private ChecksumStore checksumStore;
-    private final String rootFolderID;
     private DriveStorage storage;
     private DirectLinkGenerator linkGenerator;
-    private StringAllocator diagnosticsLog;
-    private Boolean diagnostics;
 
     /**
-     * Initializes a new {@link DriveSession}.
+     * Initializes a new {@link SyncSession}.
      *
-     * @param session The underlying server session
-     * @param rootFolderID The root folder ID
+     * @param session The underlying drive session
      */
-    public DriveSession(ServerSession session, String rootFolderID) {
+    public SyncSession(DriveSession session) {
         super();
         this.session = session;
-        this.rootFolderID = rootFolderID;
+        this.tracer = new Tracer(session.isDiagnostics());
+        if (isTraceEnabled()) {
+            trace("Creating new sync session for user " + session.getServerSession().getLoginName() + " (" +
+                session.getServerSession().getUserId() + ") in context " + session.getServerSession().getContextId() +
+                ", root folder ID is " + session.getRootFolderID());
+        }
     }
 
     /**
@@ -97,7 +94,7 @@ public class DriveSession {
      * @return The server session
      */
     public ServerSession getServerSession() {
-        return session;
+        return session.getServerSession();
     }
 
     /**
@@ -107,9 +104,13 @@ public class DriveSession {
      */
     public DriveStorage getStorage() {
         if (null == storage) {
-            storage = new DriveStorage(this, rootFolderID);
+            storage = new DriveStorage(this);
         }
         return storage;
+    }
+
+    public String getRootFolderID() {
+        return session.getRootFolderID();
     }
 
     /**
@@ -144,8 +145,7 @@ public class DriveSession {
      * @return The device name, or <code>null</code> if not set
      */
     public String getDeviceName() {
-        Object parameter = getServerSession().getParameter("com.openexchange.drive.device");
-        return null != parameter && String.class.isInstance(parameter) ? (String)parameter : null;
+        return session.getDeviceName();
     }
 
     public DirectLinkGenerator getLinkGenerator() {
@@ -161,22 +161,11 @@ public class DriveSession {
      * @param message The message to trace
      */
     public void trace(Object message) {
-        if (LOG.isTraceEnabled() || isDiagnostics()) {
-            String msg = String.valueOf(message);
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(msg);
-            }
-            if (isDiagnostics()) {
-                diagnosticsLog
-                    .append(DriveConstants.LOG_DATE_FORMAT.get().format(new Date()))
-                    .append(" [").append(Thread.currentThread().getId()).append("] : ")
-                    .append(msg.trim()).append("\n\n");
-            }
-        }
+        tracer.trace(message);
     }
 
     public String getDiagnosticsLog() {
-        return null != diagnosticsLog ? diagnosticsLog.toString() : null;
+        return tracer.getTraceLog();
     }
 
     /**
@@ -186,18 +175,7 @@ public class DriveSession {
      * @return <code>true</code> if tracing is enabled, <code>false</code>, otherwise
      */
     public boolean isTraceEnabled() {
-        return LOG.isTraceEnabled() || isDiagnostics();
-    }
-
-    private boolean isDiagnostics() {
-        if (null == diagnostics) {
-            Object parameter = getServerSession().getParameter("com.openexchange.drive.diagnostics");
-            diagnostics = null != parameter && Boolean.class.isInstance(parameter) ? diagnostics = (Boolean)parameter : Boolean.FALSE;
-            if (diagnostics.booleanValue()) {
-                diagnosticsLog = new StringAllocator();
-            }
-        }
-        return diagnostics.booleanValue();
+        return tracer.isTraceEnabled();
     }
 
 }

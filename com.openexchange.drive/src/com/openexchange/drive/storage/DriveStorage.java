@@ -63,7 +63,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.internal.DriveServiceLookup;
-import com.openexchange.drive.internal.DriveSession;
+import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.storage.filter.FileNameFilter;
 import com.openexchange.drive.storage.filter.Filter;
 import com.openexchange.exception.OXException;
@@ -96,7 +96,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 public class DriveStorage {
 
     private final FolderID rootFolderID;
-    private final DriveSession session;
+    private final SyncSession session;
     private final FolderCache knownFolders;
 
     private IDBasedFileAccess fileAccess;
@@ -108,10 +108,10 @@ public class DriveStorage {
      * @param session The drive session
      * @param rootFolderID The ID of the root folder
      */
-    public DriveStorage(DriveSession session, String rootFolderID) {
+    public DriveStorage(SyncSession session) {
         super();
         this.session = session;
-        this.rootFolderID = new FolderID(rootFolderID);
+        this.rootFolderID = new FolderID(session.getRootFolderID());
         this.knownFolders = new FolderCache();
     }
 

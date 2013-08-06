@@ -53,11 +53,11 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DirectoryMetadata;
+import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.json.json.JsonDirectoryMetadata;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -68,14 +68,10 @@ import com.openexchange.tools.session.ServerSession;
 public class DirectoryMetadataAction extends AbstractDriveAction {
 
     @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException {
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
         /*
          * get parameters
          */
-        String rootFolderID = requestData.getParameter("root");
-        if (Strings.isEmpty(rootFolderID)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
-        }
         String path = requestData.getParameter("path");
         if (Strings.isEmpty(path)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
@@ -83,7 +79,7 @@ public class DirectoryMetadataAction extends AbstractDriveAction {
         /*
          * get metadata
          */
-        DirectoryMetadata directoryMetadata = getDriveService().getDirectoryMetadata(session, rootFolderID, path);
+        DirectoryMetadata directoryMetadata = getDriveService().getDirectoryMetadata(session, path);
         /*
          * return json result
          */

@@ -55,6 +55,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.FileMetadata;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.json.json.JsonFileMetadata;
@@ -62,7 +63,6 @@ import com.openexchange.drive.json.json.JsonFileVersion;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -73,15 +73,11 @@ import com.openexchange.tools.session.ServerSession;
 public class FileMetadataAction extends AbstractDriveAction {
 
     @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException {
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
         try {
             /*
              * get parameters
              */
-            String rootFolderID = requestData.getParameter("root");
-            if (Strings.isEmpty(rootFolderID)) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
-            }
             String path = requestData.getParameter("path");
             if (Strings.isEmpty(path)) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
@@ -95,7 +91,7 @@ public class FileMetadataAction extends AbstractDriveAction {
                     throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
                 }
                 List<FileVersion> fileVersions = JsonFileVersion.deserialize((JSONArray)data);
-                List<FileMetadata> fileMetadata = getDriveService().getFileMetadata(session, rootFolderID, path, fileVersions);
+                List<FileMetadata> fileMetadata = getDriveService().getFileMetadata(session, path, fileVersions);
                 return new AJAXRequestResult(JsonFileMetadata.serialize(fileMetadata), "json");
             } else if (requestData.containsParameter("name")) {
                 /*
@@ -111,13 +107,13 @@ public class FileMetadataAction extends AbstractDriveAction {
                 }
                 List<FileVersion> fileVersions = new ArrayList<FileVersion>(1);
                 fileVersions.add(new JsonFileVersion(checksum, name));
-                FileMetadata fileMetadata = getDriveService().getFileMetadata(session, rootFolderID, path, fileVersions).get(0);
+                FileMetadata fileMetadata = getDriveService().getFileMetadata(session, path, fileVersions).get(0);
                 return new AJAXRequestResult(JsonFileMetadata.serialize(fileMetadata), "json");
             } else {
                 /*
                  * get all available metadata
                  */
-                List<FileMetadata> fileMetadata = getDriveService().getFileMetadata(session, rootFolderID, path, null);
+                List<FileMetadata> fileMetadata = getDriveService().getFileMetadata(session, path, null);
                 return new AJAXRequestResult(JsonFileMetadata.serialize(fileMetadata), "json");
             }
         } catch (JSONException e) {

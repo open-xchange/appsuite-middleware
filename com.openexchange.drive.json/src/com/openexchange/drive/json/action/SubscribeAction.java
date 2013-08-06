@@ -52,12 +52,12 @@ package com.openexchange.drive.json.action;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -68,14 +68,10 @@ import com.openexchange.tools.session.ServerSession;
 public class SubscribeAction extends AbstractDriveAction {
 
     @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException {
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
         /*
          * get parameters
          */
-        String rootFolderID = requestData.getParameter("root");
-        if (Strings.isEmpty(rootFolderID)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
-        }
         String token = requestData.getParameter("token");
         if (Strings.isEmpty(token)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("token");
@@ -88,7 +84,7 @@ public class SubscribeAction extends AbstractDriveAction {
          * add subscription
          */
         DriveSubscriptionStore subscriptionStore = Services.getService(DriveSubscriptionStore.class, true);
-        subscriptionStore.subscribe(session, serviceID, token, rootFolderID);
+        subscriptionStore.subscribe(session.getServerSession(), serviceID, token, session.getRootFolderID());
         /*
          * return empty json object to indicate success
          */

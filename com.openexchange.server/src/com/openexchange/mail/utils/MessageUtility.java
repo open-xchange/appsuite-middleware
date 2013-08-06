@@ -56,7 +56,9 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.Locale;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 import javax.activation.DataContentHandler;
 import javax.activation.DataHandler;
@@ -84,7 +86,7 @@ import com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvide
 
 /**
  * {@link MessageUtility} - Provides various helper methods for message processing.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessageUtility {
@@ -118,7 +120,7 @@ public final class MessageUtility {
 
     /**
      * Gets a valid charset-encoding for specified textual part; meaning its content type matches <code>text/&#42;</code>.
-     * 
+     *
      * @param p The part to detect a charset for
      * @param ct The part's content type
      * @return A valid charset-encoding for specified textual part.
@@ -143,7 +145,7 @@ public final class MessageUtility {
 
     /**
      * Gets a valid charset-encoding for specified textual part; meaning its content type matches <code>text/&#42;</code>.
-     * 
+     *
      * @param p The part to detect a charset for
      * @param ct The part's content type
      * @return A valid charset-encoding for specified textual part.
@@ -167,7 +169,7 @@ public final class MessageUtility {
 
     /**
      * Gets the input stream of specified part.
-     * 
+     *
      * @param p The part whose input stream shall be returned
      * @return The part's input stream.
      */
@@ -214,7 +216,7 @@ public final class MessageUtility {
      * Reads the string out of MIME part's input stream. On first try the input stream retrieved by
      * <code>javax.mail.Part.getInputStream()</code> is used. If an I/O error occurs (<code>java.io.IOException</code>) then the next try is
      * with part's raw input stream. If everything fails an empty string is returned.
-     * 
+     *
      * @param p The <code>javax.mail.Part</code> object
      * @param ct The part's content type
      * @return The string read from part's input stream or the empty string "" if everything failed
@@ -235,7 +237,7 @@ public final class MessageUtility {
      * Reads the string out of MIME part's input stream. On first try the input stream retrieved by
      * <code>javax.mail.Part.getInputStream()</code> is used. If an I/O error occurs (<code>java.io.IOException</code>) then the next try is
      * with part's raw input stream. If everything fails an empty string is returned.
-     * 
+     *
      * @param p The <code>javax.mail.Part</code> object
      * @param charset The charset
      * @return The string read from part's input stream or the empty string "" if everything failed
@@ -305,7 +307,7 @@ public final class MessageUtility {
 
     /**
      * Reads the stream content from given mail part.
-     * 
+     *
      * @param mailPart The mail part
      * @param charset The charset encoding used to generate a {@link String} object from raw bytes
      * @return the <code>String</code> read from mail part's stream
@@ -336,7 +338,7 @@ public final class MessageUtility {
 
     /**
      * Reads a string from given input stream using direct buffering.
-     * 
+     *
      * @param bytes The bytes to read
      * @param charset The charset
      * @return The <code>String</code> read from input stream
@@ -362,7 +364,7 @@ public final class MessageUtility {
 
     /**
      * Reads a string from given input stream using direct buffering.
-     * 
+     *
      * @param streamProvider The input stream provider
      * @param charset The charset
      * @return The <code>String</code> read from input stream
@@ -392,11 +394,11 @@ public final class MessageUtility {
             if (bytes.length == 0) {
                 return STR_EMPTY;
             }
-            String retval = new String(bytes, "GB2312");
+            String retval = new String(bytes, Charsets.forName("GB2312"));
             if (retval.indexOf(UNKNOWN) < 0) {
                 return retval;
             }
-            retval = new String(bytes, "GB18030");
+            retval = new String(bytes, Charsets.forName("GB18030"));
             if (retval.indexOf(UNKNOWN) < 0) {
                 return retval;
             }
@@ -410,7 +412,22 @@ public final class MessageUtility {
             if (isBig5(detectedCharset)) {
                 return readBig5Bytes(bytes);
             }
-            return new String(bytes, detectedCharset);
+            return new String(bytes, Charsets.forName(detectedCharset));
+        }
+        if (isShiftJis(charset)) {
+            /*
+             * Special treatment for Shift-JIS
+             */
+            final byte[] bytes = getBytesFrom(streamProvider.getInputStream());
+            if (bytes.length == 0) {
+                return STR_EMPTY;
+            }
+            String retval = new String(bytes, Charsets.forName(charset));
+            if (retval.indexOf(UNKNOWN) < 0) {
+                return retval;
+            }
+            // MS932
+            return new String(bytes, Charsets.forName("MS932"));
         }
         final String retval = readStream0(streamProvider.getInputStream(), charset);
         if (true || retval.indexOf(UNKNOWN) < 0) {
@@ -426,7 +443,7 @@ public final class MessageUtility {
 
     /**
      * Reads a string from given input stream using direct buffering.
-     * 
+     *
      * @param inStream The input stream
      * @param charset The charset
      * @return The <code>String</code> read from input stream
@@ -475,6 +492,21 @@ public final class MessageUtility {
                 return readBig5Bytes(bytes);
             }
             return new String(bytes, Charsets.forName(detectedCharset));
+        }
+        if (isShiftJis(charset)) {
+            /*
+             * Special treatment for Shift-JIS
+             */
+            final byte[] bytes = getBytesFrom(inStream);
+            if (bytes.length == 0) {
+                return STR_EMPTY;
+            }
+            String retval = new String(bytes, Charsets.forName(charset));
+            if (retval.indexOf(UNKNOWN) < 0) {
+                return retval;
+            }
+            // MS932
+            return new String(bytes, Charsets.forName("MS932"));
         }
         return readStream0(inStream, charset);
     }
@@ -581,7 +613,7 @@ public final class MessageUtility {
 
     /**
      * Checks if specified charset name can be considered as BIG5.
-     * 
+     *
      * @param charset The charset name to check
      * @return <code>true</code> if charset name can be considered as BIG5; otherwise <code>false</code>
      */
@@ -589,7 +621,7 @@ public final class MessageUtility {
         if (null == charset) {
             return false;
         }
-        final String lc = charset.toLowerCase(Locale.US);
+        final String lc = toLowerCase(charset);
         if (!lc.startsWith("big", 0)) {
             return false;
         }
@@ -601,7 +633,7 @@ public final class MessageUtility {
 
     /**
      * Checks if specified charset name can be considered as GB2312.
-     * 
+     *
      * @param charset The charset name to check
      * @return <code>true</code> if charset name can be considered as GB2312; otherwise <code>false</code>
      */
@@ -609,12 +641,27 @@ public final class MessageUtility {
         if (null == charset) {
             return false;
         }
-        return GB2312.equals(charset.toLowerCase(Locale.US));
+        return GB2312.equals(toLowerCase(charset));
+    }
+
+    private static final Set<String> SHIFT_JIS = new HashSet<String>(Arrays.asList("shift_jis", "shift-jis", "sjis"));
+
+    /**
+     * Checks if specified charset name can be considered as <i>Shift-JIS</i>.
+     *
+     * @param charset The charset name to check
+     * @return <code>true</code> if charset name can be considered as <i>Shift-JIS</i>; otherwise <code>false</code>
+     */
+    public static boolean isShiftJis(final String charset) {
+        if (null == charset) {
+            return false;
+        }
+        return SHIFT_JIS.contains(toLowerCase(charset));
     }
 
     /**
      * Gets the byte content from specified input stream.
-     * 
+     *
      * @param in The input stream to get the byte content from
      * @return The byte content
      * @throws IOException If an I/O error occurs
@@ -650,7 +697,7 @@ public final class MessageUtility {
 
     /**
      * Check if specified bytes contain ascii-only content.
-     * 
+     *
      * @param bytes The bytes to check
      * @return <code>true</code> if bytes are ascii-only; otherwise <code>false</code>
      */
@@ -670,7 +717,7 @@ public final class MessageUtility {
 
     /**
      * Detects possible duplicate &lt;html&gt; tags and removes all but last.
-     * 
+     *
      * @param html The HTML content
      * @return The HTML content with duplicate &lt;html&gt; tags removed
      */
@@ -831,7 +878,7 @@ public final class MessageUtility {
 
     /**
      * Creates a new {@code DataHandler} with specified {@code DataSource}, {@code DataContentHandler}, object and MIME type set.
-     * 
+     *
      * @param dataSource The data source
      * @param dch The data content handler (<i>optional</i>; <code>null</code> is accepted)
      * @param object The object (<i>optional</i>; <code>null</code> is accepted)
@@ -845,7 +892,7 @@ public final class MessageUtility {
 
     /**
      * Sets the message content
-     * 
+     *
      * @param message The message to set
      * @param part The part
      * @throws MessagingException If setting content fails
@@ -859,7 +906,7 @@ public final class MessageUtility {
 
     /**
      * Sets the multipart content
-     * 
+     *
      * @param multipart The multipart to set
      * @param part The part
      * @throws MessagingException If setting content fails
@@ -870,7 +917,7 @@ public final class MessageUtility {
 
     /**
      * Sets the multipart content
-     * 
+     *
      * @param multipart The multipart to set
      * @param contentType The content type
      * @param part The part
@@ -886,7 +933,7 @@ public final class MessageUtility {
 
     /**
      * Convenience method that sets the given String as this part's content, with a primary MIME type of "text/plain; charset=us-ascii".
-     * 
+     *
      * @param text The text content to set
      * @param charset The charset to use for the text
      * @exception MessagingException If an error occurs
@@ -900,7 +947,7 @@ public final class MessageUtility {
      * <p>
      * The given Unicode string will be charset-encoded using the specified charset. The charset is also used to set the "charset"
      * parameter.
-     * 
+     *
      * @param text The text content to set
      * @param charset The charset to use for the text
      * @exception MessagingException If an error occurs
@@ -917,7 +964,7 @@ public final class MessageUtility {
      * <p>
      * The given Unicode string will be charset-encoded using the specified charset. The charset is also used to set the "charset"
      * parameter.
-     * 
+     *
      * @param text The text content to set
      * @param charset The charset to use for the text
      * @param subtype The MIME subtype to use (e.g., "html")
