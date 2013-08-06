@@ -66,6 +66,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.UUID;
 import org.apache.commons.logging.Log;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
@@ -295,6 +296,7 @@ public class ICalImporter extends AbstractImporter {
 		}
 
         boolean ignoreUIDs = isIgnoreUIDs(optionalParams);
+        Map<String, String> uidReplacements = ignoreUIDs ? new HashMap<String, String>() : null;
 		int index = 0;
 		final Iterator<Task> iter = tasks.iterator();
 		while (iter.hasNext()) {
@@ -308,9 +310,16 @@ public class ICalImporter extends AbstractImporter {
 				// TODO: Verify This
 				final Task task = iter.next();
 				task.setParentFolderID(taskFolderId);
-				if (ignoreUIDs) {
-				    task.removeUid();
-				}
+                if (ignoreUIDs && task.containsUid()) {
+                    // perform fixed UID replacement to keep recurring task relations
+                    String originalUID = task.getUid();
+                    String replacedUID = uidReplacements.get(originalUID);
+                    if (null == replacedUID) {
+                        replacedUID = UUID.randomUUID().toString();
+                        uidReplacements.put(originalUID, replacedUID);
+                    }
+                    task.setUid(replacedUID);
+                }
 				try {
 					taskInterface.insertTaskObject(task);
 					importResult.setObjectId(String.valueOf(task
@@ -388,6 +397,7 @@ public class ICalImporter extends AbstractImporter {
 		final boolean suppressNotification = (optionalParams != null && optionalParams
 				.containsKey("suppressNotification"));
 		boolean ignoreUIDs = isIgnoreUIDs(optionalParams);
+		Map<String, String> uidReplacements = ignoreUIDs ? new HashMap<String, String>() : null;
 		while (iter.hasNext()) {
 			final ImportResult importResult = new ImportResult();
 			final ConversionError error = errorMap.get(index);
@@ -399,8 +409,15 @@ public class ICalImporter extends AbstractImporter {
 				appointmentObj.setContext(session.getContext());
 				appointmentObj.setParentFolderID(appointmentFolderId);
 				appointmentObj.setIgnoreConflicts(true);
-				if (ignoreUIDs) {
-				    appointmentObj.removeUid();
+				if (ignoreUIDs && appointmentObj.containsUid()) {
+				    // perform fixed UID replacement to keep recurring appointment relations
+				    String originalUID = appointmentObj.getUid();
+				    String replacedUID = uidReplacements.get(originalUID);
+				    if (null == replacedUID) {
+				        replacedUID = UUID.randomUUID().toString();
+				        uidReplacements.put(originalUID, replacedUID);
+				    }
+				    appointmentObj.setUid(replacedUID);
 				}
 				OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
 				FolderObject folder = folderAccess.getFolderObject(appointmentFolderId);
