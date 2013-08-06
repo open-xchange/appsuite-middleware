@@ -52,6 +52,7 @@ package com.openexchange.html;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.html.internal.Bug27708Test;
 
 /**
  * Test suite for all integrated unit tests of the HTMLService implementation.

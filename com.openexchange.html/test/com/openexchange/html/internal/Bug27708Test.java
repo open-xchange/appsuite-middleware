@@ -47,21 +47,14 @@
  *
  */
 
-package com.openexchange.html;
+package com.openexchange.html.internal;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import junit.framework.TestCase;
-import org.htmlcleaner.CleanerProperties;
-import org.htmlcleaner.HtmlCleaner;
-import org.htmlcleaner.Serializer;
-import org.htmlcleaner.SimpleHtmlSerializer;
-import org.htmlcleaner.TagNode;
-import com.openexchange.html.internal.UnsynchronizedStringWriter;
 
 
 /**
@@ -73,27 +66,8 @@ public class Bug27708Test extends TestCase {
 
     private static final int NUM_THREADS = 20;
     private static final int NUM_RUNS = 100;
-    private static final HtmlCleaner HTML_CLEANER;
-    private static final Serializer SERIALIZER;
     private static final Pattern uidPattern = Pattern.compile(
         "\\b[A-F0-9]{8}(?:-[A-F0-9]{4}){3}-[A-Z0-9]{12}\\b", Pattern.CASE_INSENSITIVE);
-
-    static {
-        final CleanerProperties props = new CleanerProperties();
-        props.setOmitDoctypeDeclaration(true);
-        props.setOmitXmlDeclaration(true);
-        props.setPruneTags("script");
-        props.setTranslateSpecialEntities(true);
-        props.setTransSpecialEntitiesToNCR(true);
-        props.setTransResCharsToNCR(true);
-        props.setRecognizeUnicodeChars(false);
-        props.setUseEmptyElementTags(false);
-        props.setIgnoreQuestAndExclam(false);
-        props.setUseCdataForScriptAndStyle(false);
-        props.setIgnoreQuestAndExclam(true);
-        HTML_CLEANER = new HtmlCleaner(props);
-        SERIALIZER = new SimpleHtmlSerializer(props);
-    }
 
     /**
      * Initializes a new {@link Bug27708Test}.
@@ -120,7 +94,7 @@ public class Bug27708Test extends TestCase {
 
     private static final class CheckHtmlCleaner implements Runnable {
 
-        boolean onlyDetectForeignMarkers = true;
+        boolean onlyDetectForeignMarkers = false;
         List<AssertionError> errors = new ArrayList<AssertionError>();
 
         @Override
@@ -160,10 +134,7 @@ public class Bug27708Test extends TestCase {
                 ;
 
                 try {
-                    TagNode htmlNode = HTML_CLEANER.clean(html);
-                    UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter();
-                    SERIALIZER.write(htmlNode, writer, "UTF-8");
-                    String cleanedHtml = writer.getBuffer().toString();
+                    String cleanedHtml = HtmlServiceImpl.validateWithHtmlCleaner(html);
                     assertNotNull(cleanedHtml);
                     Matcher matcher = uidPattern.matcher(cleanedHtml);
                     if (onlyDetectForeignMarkers) {
@@ -174,7 +145,7 @@ public class Bug27708Test extends TestCase {
                         assertTrue("Cleaned HTML contains no marker", matcher.find());
                         assertEquals("Cleaned HTML contains foreign marker", marker, matcher.group());
                         assertTrue("Cleaned HTML appears to be too short", cleanedHtml.length() > 600);
-                        assertTrue("Cleaned HTML appears to be too long", cleanedHtml.length() < 700);
+                        assertTrue("Cleaned HTML appears to be too long", cleanedHtml.length() < 900);
                     }
                 } catch (AssertionError e) {
                     errors.add(e);
@@ -182,8 +153,6 @@ public class Bug27708Test extends TestCase {
                 } catch (RuntimeException e) {
                     // we want to find assertion errors
                     continue;
-                } catch (IOException e) {
-                    fail(e.getMessage());
                 }
             }
         }

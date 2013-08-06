@@ -1698,7 +1698,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
     private static final String DOCTYPE_DECL = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n\r\n";
 
-    private static String validateWithHtmlCleaner(final String htmlContent) {
+    protected static String validateWithHtmlCleaner(final String htmlContent) {
         try {
             /*-
              * http://stackoverflow.com/questions/238036/java-html-parsing
