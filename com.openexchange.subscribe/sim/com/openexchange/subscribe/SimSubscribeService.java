@@ -185,4 +185,9 @@ public class SimSubscribeService implements SubscribeService {
         
     }
 
+    @Override
+    public void removeUnrecoverableItems(String secret, Session session) throws OXException {
+        // Ignore        
+    }
+    
 }

@@ -67,6 +67,8 @@ fi
 %changelog
 * Tue Aug 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Third release candidate for 7.4.0
+* Mon Aug 05 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-08-09
 * Fri Aug 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 7.4.0
 * Wed Jul 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
