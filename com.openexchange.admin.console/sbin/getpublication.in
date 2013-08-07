@@ -85,4 +85,10 @@ JAVA_OPTS="${JAVA_OXCMD_OPTS} \
 
 CLASSPATH="-classpath @classpath@"
 
-exec $JAVA_BIN $JAVA_OPTS $CLASSPATH $JAVAMAIN "$@"
+test -z "$LIBPATH" && LIBPATH=${PREFIX}/lib
+
+ADMINCP=$(for jar in $LIBPATH/*.jar; do
+    echo -n "${jar}:"
+    done)
+
+exec $JAVA_BIN $JAVA_OPTS $CLASSPATH:$ADMINCP $JAVAMAIN "$@"
