@@ -11,6 +11,7 @@
  - Fix for bug 27745: Restore old lenient behavior of Apache CXG on SOAP request handling
  - Fix for bug 28090: Don't show "Infostore" folder below private folder
  - Fix for bug 27414: Escape white-space characters in site name to keep an intact URL string
+ - Fix for bug 28094: Remove insecure href content from HTML content
 
 * 2013-08-06 - tobias.friedrich@open-xchange.com
 
