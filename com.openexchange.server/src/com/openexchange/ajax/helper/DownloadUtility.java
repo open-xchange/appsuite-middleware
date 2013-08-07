@@ -66,6 +66,7 @@ import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.encoding.Helper;
@@ -180,6 +181,49 @@ public final class DownloadUtility {
                     sz = tmp.length;
                     in = Streams.newByteArrayInputStream(tmp);
                 }
+            } else if (contentType.startsWith("text/plain")) {
+                /*-
+                 * Text content requested for download...
+                 *
+                 * Check for possibly missing charset parameter
+                 */
+                if (null == contentType.getCharsetParameter()) {
+                    /*
+                     * Try and detect charset for plain text files
+                     */
+                    ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(in);
+                    String cs = CharsetDetector.detectCharset(Streams.asInputStream(baos));
+                    if ("US-ASCII".equalsIgnoreCase(cs)) {
+                        cs = "ISO-8859-1";
+                    }
+                    contentType.setCharsetParameter(cs);
+                    String textContent = baos.toString(cs);
+                    final byte[] tmp = textContent.getBytes(Charsets.forName(cs));
+                    sz = tmp.length;
+                    in = Streams.newByteArrayInputStream(tmp);
+                }
+                /*
+                 * Safe reading of content if appropriate
+                 */
+                if (null == sContentDisposition) {
+                    sContentDisposition = "attachment";
+                } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
+                    /*
+                     * Sanitizing of text content needed
+                     */
+                    final ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(in);
+                    String cs = contentType.getCharsetParameter();
+                    if (!CharsetDetector.isValid(cs)) {
+                        cs = CharsetDetector.detectCharset(Streams.asInputStream(baos));
+                        if ("US-ASCII".equalsIgnoreCase(cs)) {
+                            cs = "ISO-8859-1";
+                        }
+                    }
+                    final String content = MessageUtility.readStream(Streams.asInputStream(baos), cs);
+                    final byte[] tmp = content.getBytes(Charsets.forName(cs));
+                    sz = tmp.length;
+                    in = Streams.newByteArrayInputStream(tmp);
+                }
             } else if (contentType.startsWith("image/") || fileNameImpliesImage(fileName)) {
                 /*
                  * Image content requested for download...
@@ -283,20 +327,6 @@ public final class DownloadUtility {
                     sz = tmp.length;
                     in = Streams.newByteArrayInputStream(tmp);
                 }
-            } else if (null == contentType.getCharsetParameter() && contentType.startsWith("text/plain")) {
-                /*
-                 * Try and detect charset for plain text files
-                 */
-                ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(in);
-                String cs = CharsetDetector.detectCharset(Streams.asInputStream(baos));
-                if ("US-ASCII".equalsIgnoreCase(cs)) {
-                    cs = "ISO-8859-1";
-                }
-                contentType.setCharsetParameter(cs);
-                String textContent = baos.toString(cs);
-                final byte[] tmp = textContent.getBytes(Charsets.forName(cs));
-                sz = tmp.length;
-                in = Streams.newByteArrayInputStream(tmp);
             }
             /*
              * Create return value
