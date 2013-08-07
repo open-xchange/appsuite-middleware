@@ -590,7 +590,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 				return;
 			}
 			organizer = loaded.getOrganizer();
-			if (organizer == null || appointment.getOrganizerId() > 0 || appointment.getPrincipalId() > 0) {
+			if (organizer == null || organizer.trim().equals("") || appointment.getOrganizerId() > 0 || appointment.getPrincipalId() > 0) {
 				appointment.setExternalOrganizer(false);
 				return;
 			}
