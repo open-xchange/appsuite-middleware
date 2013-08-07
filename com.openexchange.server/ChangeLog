@@ -5,6 +5,7 @@
 * 2013-08-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 27911: Fixed possible ArrayIndexOutOfBoundsException when transferring bytes from ByteChunk to a byte array
+ - Fix for bug 28099: Check for missing members in SOAP request
 
 * 2013-08-06 - tobias.friedrich@open-xchange.com
 
