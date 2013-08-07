@@ -7,7 +7,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-freebusy-ews"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-indexing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-preview"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-realtime-client"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-munin-scripts-jolokia"/>
 </provider>
 </psf>
