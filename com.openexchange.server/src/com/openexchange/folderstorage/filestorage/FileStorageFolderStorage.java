@@ -58,6 +58,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -96,7 +97,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link FileStorageFolderStorage} - The file storage folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FileStorageFolderStorage implements FolderStorage {
@@ -358,6 +359,8 @@ public final class FileStorageFolderStorage implements FolderStorage {
 
     @Override
     public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
+
+
         final ServerSession session;
         {
             final Session s = storageParameters.getSession();
@@ -375,22 +378,32 @@ public final class FileStorageFolderStorage implements FolderStorage {
         if (null == folderAccess) {
             throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(PARAM);
         }
-        final FileStorageFolder[] rootFolders = folderAccess.getRootFolders(session.getUser().getLocale());
 
-        if (REAL_TREE_ID.equals(treeId) ? PRIVATE_FOLDER_ID.equals(parentId) : INFOSTORE.equals(parentId)) {
+        final boolean isRealTree = REAL_TREE_ID.equals(treeId);
+        if (isRealTree ? PRIVATE_FOLDER_ID.equals(parentId) : INFOSTORE.equals(parentId)) {
             /*-
              * TODO:
              * 1. Check for file storage permission; e.g. session.getUserPermissionBits().isMultipleMailAccounts()
              *    Add primary only if not enabled
              * 2. Strip Unified-FileStorage account from obtained list
              */
-            final int size = rootFolders.length;
+
+            final List<FileStorageFolder> rootFolders = new ArrayList<FileStorageFolder>(Arrays.asList(folderAccess.getRootFolders(session.getUser().getLocale())));
+            if (isRealTree) {
+                for (final Iterator<FileStorageFolder> it = rootFolders.iterator(); it.hasNext();) {
+                    if (INFOSTORE.equals(it.next().getId())) {
+                        it.remove();
+                    }
+                }
+            }
+
+            final int size = rootFolders.size();
             if (size <= 0) {
                 return new SortableId[0];
             }
             final List<SortableId> list = new ArrayList<SortableId>(size);
             for (int j = 0; j < size; j++) {
-                list.add(new FileStorageId(rootFolders[j].getId(), j, null));
+                list.add(new FileStorageId(rootFolders.get(j).getId(), j, null));
             }
             return list.toArray(new SortableId[list.size()]);
         }
