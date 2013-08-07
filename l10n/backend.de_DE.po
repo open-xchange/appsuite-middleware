@@ -54,7 +54,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2013-08-01 10:28+0200\n"
+"PO-Revision-Date: 2013-08-07 11:42+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -3777,8 +3777,8 @@ msgid ""
 "Folder %1$s cannot be deleted on server %2$s with login %3$s (user=%4$s, "
 "context=%5$s)"
 msgstr ""
-"Der Ordner %1$s kann auf dem Server %2$s mit dem Login %3$s nicht "
-"gelöscht werden (Benutzer=%4$s, Kontext=%5$s)."
+"Der Ordner %1$s kann auf dem Server %2$s mit dem Login %3$s nicht gelöscht "
+"werden (Benutzer=%4$s, Kontext=%5$s)."
 
 #. *
 #. * Default folder %1$s must not be deleted
@@ -3824,8 +3824,8 @@ msgid ""
 "IMAP search failed due to reason \"%1$s\". Switching to application-based "
 "search"
 msgstr ""
-"Die IMAP-Suche ist aus folgendem Grund fehlgeschlagen: \"%1$s\". "
-"Es wird auf applikationsbasierte Suche umgeschaltet."
+"Die IMAP-Suche ist aus folgendem Grund fehlgeschlagen: \"%1$s\". Es wird auf "
+"applikationsbasierte Suche umgeschaltet."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:156
 msgid ""
@@ -3841,8 +3841,8 @@ msgid ""
 "IMAP sort failed due to reason \"%1$s\". Switching to application-based "
 "sorting."
 msgstr ""
-"IMAP-Sortierung ist aus folgendem Grund fehlgeschlagen: \"%1$s\". "
-"Es wird auf applikationsbasierte Sortierung umgeschaltet."
+"IMAP-Sortierung ist aus folgendem Grund fehlgeschlagen: \"%1$s\". Es wird "
+"auf applikationsbasierte Sortierung umgeschaltet."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:160
 msgid ""
@@ -3897,8 +3897,8 @@ msgid ""
 msgstr ""
 "Die Nachricht konnte nicht in den Papierkorb verschoben werden. "
 "Wahrscheinlich ist Ihre Mailbox fast voll.\n"
-"Entfernen Sie in diesem Fall Ihre gelöschten Objekte oder löschen "
-"Sie zuerst kleinere Nachrichten."
+"Entfernen Sie in diesem Fall Ihre gelöschten Objekte oder löschen Sie zuerst "
+"kleinere Nachrichten."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:172
 msgid ""
@@ -3909,10 +3909,10 @@ msgid ""
 "smaller messages first."
 msgstr ""
 "Die Nachricht konnte auf dem Server %1$s mit dem Login %2$s nicht in den "
-"Papierkorb verschoben werden. (Benutzer=%3$s, Kontext=%4$s)"
-"Wahrscheinlich ist Ihre Mailbox fast voll.\n"
-"Entfernen Sie in diesem Fall Ihre gelöschten Objekte oder löschen "
-"Sie zuerst kleinere Nachrichten."
+"Papierkorb verschoben werden. (Benutzer=%3$s, Kontext=%4$s)Wahrscheinlich "
+"ist Ihre Mailbox fast voll.\n"
+"Entfernen Sie in diesem Fall Ihre gelöschten Objekte oder löschen Sie zuerst "
+"kleinere Nachrichten."
 
 #. *
 #. * Missing %1$s folder in mail move operation
@@ -3935,8 +3935,8 @@ msgid ""
 "Message move aborted for user %1$s. Source and destination folder are equal "
 "to \"%2$s\""
 msgstr ""
-"Das Verschieben der Nachricht wurde für den Benutzer %1$s abgebrochen. "
-"Der Quell- und Ziel-Ordner sind identisch: \"%2$s\""
+"Das Verschieben der Nachricht wurde für den Benutzer %1$s abgebrochen. Der "
+"Quell- und Ziel-Ordner sind identisch: \"%2$s\""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:180
 msgid ""
@@ -4115,8 +4115,9 @@ msgid ""
 "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\" on server %4$s "
 "with login %5$s (user=%6$s, context=%7$s)."
 msgstr ""
-"Das Umbenennen des Ordners \"%1$s\" nach \"%2$s\" ist auf dem Server %4$s mit "
-"dem Login %5$s  fehlgeschlagen. Fehler: \"%3$s\" (Benutzer=%5$s, Kontext=%6$s)"
+"Das Umbenennen des Ordners \"%1$s\" nach \"%2$s\" ist auf dem Server %4$s "
+"mit dem Login %5$s  fehlgeschlagen. Fehler: \"%3$s\" (Benutzer=%5$s, Kontext="
+"%6$s)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:230
 msgid "No rename access to mail folder %1$s"
@@ -4157,16 +4158,15 @@ msgid ""
 "%3$s, context=%4$s)"
 msgstr ""
 "Der IMAP-Server %1$s verweigert das Importieren einer oder mehrerer E-Mails "
-"mit "
-"dem Login %2$s (Benutzer=%3$s, Kontext=%4$s)."
+"mit dem Login %2$s (Benutzer=%3$s, Kontext=%4$s)."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:244
 msgid ""
 "Currently not possible to establish a new connection to server %1$s with "
 "login %2$s. Please try again."
 msgstr ""
-"Derzeit kann keine neue Verbindung zum Server %1$s mit dem Login "
-"%2$s hergestellt werden. Bitte versuchen Sie es erneut."
+"Derzeit kann keine neue Verbindung zum Server %1$s mit dem Login %2$s "
+"hergestellt werden. Bitte versuchen Sie es erneut."
 
 #. Implementing class could not be found
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:70
@@ -4448,6 +4448,13 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:161
 msgid "Could not create: %s"
 msgstr "Erstellung fehlgeschlagen: %s"
+
+#. Could not create: %s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:164
+msgid "Import limit exceeded. Only imported the first %1$s contacts"
+msgstr ""
+"Das Limit für den Import wurde überschritten. Es wurden nur die ersten %1$s "
+"Kontakte importiert."
 
 #. No IndexAccess implementation was found for module %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index.solr/src/com/openexchange/index/solr/SolrIndexExceptionMessages.java:70
@@ -4806,7 +4813,7 @@ msgstr "Album"
 
 #. The internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:105
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:101
 msgid "Confirmed ham"
 msgstr "Bestätigter Ham"
 
@@ -4816,7 +4823,7 @@ msgstr "Ordner 'Bestätigter Ham'"
 
 #. The internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
 msgid "Confirmed spam"
 msgstr "Bestätigter Spam"
 
@@ -4829,7 +4836,7 @@ msgstr "Ordner 'Bestätigter Spam'"
 #. The name for the drafts folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:65
 msgid "Drafts"
 msgstr "Entwürfe"
@@ -4851,7 +4858,7 @@ msgstr "Ordner 'Gesendet'"
 #. The name for the spam folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:89
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:166
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:71
 msgid "Spam"
 msgstr "Spam"
@@ -4865,7 +4872,7 @@ msgstr "Ordner 'Spam'"
 #. The name for the trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:85
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:150
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:74
 msgid "Trash"
 msgstr "Papierkorb"
@@ -6203,11 +6210,6 @@ msgstr ""
 "tragen Sie in der Datei 'secret.properties' eine gültige Quelle für Secret "
 "ein. "
 
-#. Access to bundle %1$s is not permitted
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.security/src/com/openexchange/security/BundleAccessExceptionMessage.java:70
-msgid "Access to bundle %1$s is not permitted"
-msgstr "Ein Zugriff auf das Bundle %1$s nicht erlaubt"
-
 #. *
 #. * Bad value %1$s in parameter %2$s
 #.
@@ -7266,7 +7268,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:341
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:147
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:211
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:208
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:436
 msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
@@ -7797,7 +7799,7 @@ msgstr "Posteingang"
 #. The internationalized name for the sent mail folder
 #. The name for trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
 msgid "Sent objects"
 msgstr "Gesendete Objekte"
 
@@ -7808,25 +7810,18 @@ msgstr "Gesendete Objekte"
 msgid "Sent items"
 msgstr "Gesendete Objekte"
 
-#. The internationalized name for the archive mail folder
-#. The name for trash folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:170
-msgid "Archive"
-msgstr "Archiv"
-
 #. The alternative internationalized name for the confirmed-spam mail folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:97
 msgid "confirmed-spam"
 msgstr "Bestätigter Spam"
 
 #. The alternative internationalized name for the confirmed-spam mail folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:109
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:105
 msgid "confirmed-ham"
 msgstr "Bestätigter Ham"
 
 #. The internationalized subject for a read acknowledgement
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:114
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:110
 msgid "Read acknowledgement"
 msgstr "Lesebestätigung"
 
@@ -7834,7 +7829,7 @@ msgstr "Lesebestätigung"
 #. #DATE# is replaced with the sent date of referenced email
 #. #RECIPIENT# is replaced with personal and/or email address of recipient(s)
 #. #SUBJECT# is replaced with referenced email's subject
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:120
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:116
 msgid ""
 "This is a delivery receipt for the mail that you sent on #DATE# to "
 "#RECIPIENT# with subject \"#SUBJECT#\".\n"
@@ -7855,7 +7850,7 @@ msgstr ""
 #. #DATE# is replaced with the sent date of referenced email
 #. #TIME# is replaced with time of referenced email
 #. #SENDER# is replaced with personal and/or email address of the sender
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:126
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:122
 msgid "On #DATE# at #TIME# #SENDER# wrote:"
 msgstr "#SENDER# hat am #DATE# um #TIME# geschrieben:"
 
@@ -7867,7 +7862,7 @@ msgstr "#SENDER# hat am #DATE# um #TIME# geschrieben:"
 #. #DATE# is replaced with the sent date of referenced email
 #. #TIME# is replaced with time of referenced email
 #. #SUBJECT# is replaced with referenced email's subject
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:136
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:132
 msgid ""
 "---------- Original Message ----------\n"
 "From: #FROM#\n"
@@ -7882,13 +7877,13 @@ msgstr ""
 "Betreff: #SUBJECT#"
 
 #. The internationalized default subject.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:139
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:135
 msgid "[No Subject]"
 msgstr "[Kein Betreff]"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Hints to the available attachments for affected message
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:143
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:139
 msgid ""
 "The available attachments for this E-Mail can be accessed via the links:"
 msgstr ""
@@ -7896,13 +7891,13 @@ msgstr ""
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the elapsed date for affected message's attachments
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:147
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:143
 msgid "The links will be deleted on #DATE#"
 msgstr "Die Links werden am #DATE# gelöscht"
 
 #. The greeting used for form mails. E.g.
 #. "Dear Sir or Madam Jane Doe"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:151
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:147
 msgid "Dear Sir or Madam"
 msgstr "Sehr geehrte(r) Dame/Herr"
 
@@ -9933,35 +9928,26 @@ msgstr "Die Aufgabe %1$d ist nicht im Ordner %2$s (%3$d) gespeichert."
 msgid "Unknown participant type %1$d."
 msgstr "Unbekannter Teilnehmer-Typ: %1$d"
 
-#. The entered value for costs is not within the allowed range. Please use a value from -130000.00 to 130000.00.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:208
-msgid ""
-"The value entered for costs is not within the allowed range. Please use a "
-"value from -130000.00 to 130000.00."
-msgstr ""
-"Der eingegebene Kostenwert liegt nicht im zulässigen Bereich. Bitte "
-"verwenden Sie einen Wert von -130000.00 bis 130000.00."
-
 #. Group %1$d is empty. You can't add an empty group to a task.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:214
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:211
 msgid "Group %1$d is empty. You can not add an empty group to a task."
 msgstr ""
 "Die Gruppe %1$d ist leer. Eine leere Gruppe kann nicht zu einer Aufgabe "
 "hinzugefügt werden."
 
 #. UID of tasks can not be changed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:217
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:214
 msgid "Tasks uids can not be changed."
 msgstr "Die UIDs von Aufgaben können nicht geändert werden."
 
 #. Into a numeric attribute something non numeric has been entered. %2$s will name the attribute that contains non digit characters.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:220
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:217
 msgid "Value \"%1$s\" of attribute \"%2$s\" contains non digit characters."
 msgstr "Der Wert \"%1$s\" des Attributs \"%2$s\" darf nur Zahlen enthalten."
 
 #. A participant changed his confirmation state of a delegated task and we are not able to determine who delegated the task. %1$d is
 #. replaced with the identifier of the task for further investigations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:224
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:221
 msgid "Can not determine delegator of task %1$d."
 msgstr "Delegierender für Aufgabe %1$d kann nicht bestimmt werden."
 
@@ -15979,6 +15965,19 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Access to bundle %1$s is not permitted"
+#~ msgstr "Ein Zugriff auf das Bundle %1$s nicht erlaubt"
+
+#~ msgid "Archive"
+#~ msgstr "Archiv"
+
+#~ msgid ""
+#~ "The value entered for costs is not within the allowed range. Please use a "
+#~ "value from -130000.00 to 130000.00."
+#~ msgstr ""
+#~ "Der eingegebene Kostenwert liegt nicht im zulässigen Bereich. Bitte "
+#~ "verwenden Sie einen Wert von -130000.00 bis 130000.00."
 
 #~ msgid ""
 #~ "Unable to calculate given position. Seems to be a delete exception or "
