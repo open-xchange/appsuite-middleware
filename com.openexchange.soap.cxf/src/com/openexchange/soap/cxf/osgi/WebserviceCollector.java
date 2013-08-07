@@ -213,19 +213,37 @@ public class WebserviceCollector implements ServiceListener {
             {
                 // Alter server's in-stream interceptors
                 final org.apache.cxf.endpoint.Endpoint serverEndpoint = (org.apache.cxf.endpoint.Endpoint) endpoint.getProperties();
-                final List<Interceptor<? extends Message>> inInterceptors = serverEndpoint.getBinding().getInInterceptors();
-                boolean found = false;
-                int index = 0;
-                for (final Interceptor<? extends Message> interceptor : inInterceptors) {
-                    if (interceptor instanceof DocLiteralInInterceptor) {
-                        found = true;
-                        break;
+                {
+                    final List<Interceptor<? extends Message>> inInterceptors = serverEndpoint.getBinding().getInInterceptors();
+                    boolean found = false;
+                    int index = 0;
+                    for (final Interceptor<? extends Message> interceptor : inInterceptors) {
+                        if (interceptor instanceof DocLiteralInInterceptor) {
+                            found = true;
+                            break;
+                        }
+                        index++;
                     }
-                    index++;
+                    if (found) {
+                        inInterceptors.remove(index);
+                        inInterceptors.add(index, new com.openexchange.soap.cxf.interceptor.DocLiteralInInterceptor());
+                    }
                 }
-                if (found) {
-                    inInterceptors.remove(index);
-                    inInterceptors.add(index, new com.openexchange.soap.cxf.interceptor.DocLiteralInInterceptor());
+                {
+                    final List<Interceptor<? extends Message>> inInterceptors = serverEndpoint.getBinding().getInInterceptors();
+                    boolean found = false;
+                    int index = 0;
+                    for (final Interceptor<? extends Message> interceptor : inInterceptors) {
+                        if (interceptor instanceof org.apache.cxf.binding.soap.interceptor.SoapActionInInterceptor) {
+                            found = true;
+                            break;
+                        }
+                        index++;
+                    }
+                    if (found) {
+                        inInterceptors.remove(index);
+                        inInterceptors.add(index, new com.openexchange.soap.cxf.interceptor.SoapActionInInterceptor());
+                    }
                 }
                 // Add logging interceptors
                 serverEndpoint.getInInterceptors().add(new LoggingInInterceptor());
