@@ -2,6 +2,7 @@
 
  - Fix for bug 26475: Bad calculation of recurrence date position of a change exception on delete.
  - Fix for bug 27238: Handle empty organizer field on delete.
+ - Fix for bug 28059: Remove Appointments in shared folder if organizer is external.
 
 * 2013-08-07 - thorben.betten@open-xchange.com
 
