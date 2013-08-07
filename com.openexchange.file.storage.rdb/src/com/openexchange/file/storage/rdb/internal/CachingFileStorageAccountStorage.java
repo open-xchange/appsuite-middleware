@@ -233,5 +233,9 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
     public void cleanUp(final FileStorageService parentService, final String secret, final Session session) throws OXException {
         delegatee.cleanUp(parentService, secret, session);
     }
+    
+    public void removeUnrecoverableItems(final FileStorageService parentService, final String secret, final Session session) throws OXException {
+        delegatee.removeUnrecoverableItems(parentService, secret, session);
+    }
 
 }

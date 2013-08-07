@@ -765,6 +765,53 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
             }
         }
     }
+    
+    public void removeUnrecoverableItems(MessagingService parentService, String secret, Session session) throws OXException {
+        final Set<String> secretProperties = parentService.getSecretProperties();
+        if (secretProperties.isEmpty()) {
+            return;
+        }
+        final String serviceId = parentService.getId();
+        final TIntIntMap confId2AccountMap = getConfIdToAccountMappingForUser(session.getContextId(), session.getUserId(), serviceId);
+        final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
+        final CryptoService cryptoService = getService(CryptoService.class);
+        // Proceed...
+        final Context ctx = getContext(session);
+        final Map<String, Object> content = new HashMap<String, Object>();
+        
+        List<MessagingAccount> accountsToDelete = new ArrayList<MessagingAccount>(confId2AccountMap.size());
+        TIntArrayList confIdsToDelete = new TIntArrayList(confId2AccountMap.size());
+        
+        for (final int confId : confId2AccountMap.keys()) {
+            content.clear();
+            genericConfStorageService.fill(ctx, confId, content);
+            for (final Map.Entry<String, Object> entry : content.entrySet()) {
+                final String field = entry.getKey();
+                if (secretProperties.contains(field)) {
+                    final String encrypted = entry.getValue().toString();
+                    if (!isEmpty(encrypted)) {
+                        try {
+                            // Check it
+                            cryptoService.decrypt(encrypted, secret);
+                        } catch (final OXException x) {
+                            // Discard
+                            if (!confIdsToDelete.contains(confId)) {
+                                confIdsToDelete.add(confId);
+                                DefaultMessagingAccount account = new DefaultMessagingAccount();
+                                account.setId(confId2AccountMap.get(confId));
+                                account.setServiceId(serviceId);
+                                account.setMessagingService(parentService);
+                                accountsToDelete.add(account);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        deleteAccounts(serviceId, accountsToDelete.toArray(new MessagingAccount[accountsToDelete.size()]), confIdsToDelete.toArray(), session, null);
+    }
+
 
     private static boolean isEmpty(final String string) {
         if (null == string) {
@@ -777,5 +824,6 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
         }
         return isWhitespace;
     }
+
 
 }

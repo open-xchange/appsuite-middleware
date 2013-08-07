@@ -848,7 +848,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		 */
 		final EffectivePermission permission = Tools.getPermission(contextID, folderID, currentUserID);
 		QueryFields queryFields;
-		if (permission.canReadAllObjects() || 1 == userIDs.length && currentUserID == userIDs[0]) {
+		if (permission.canReadAllObjects() || null != userIDs && 1 == userIDs.length && currentUserID == userIDs[0]) {
 			// no limitation
 			queryFields = new QueryFields(fields);
 		} else {
@@ -899,7 +899,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		 */
 		final EffectivePermission permission = Tools.getPermission(contextID, folderID, currentUserID);
 		QueryFields queryFields;
-		if (permission.canReadAllObjects() || 1 == userIDs.length && currentUserID == userIDs[0]) {
+		if (permission.canReadAllObjects() || null != userIDs && 1 == userIDs.length && currentUserID == userIDs[0]) {
 			// no limitation
 			queryFields = new QueryFields(fields);
 		} else {
@@ -989,7 +989,7 @@ public class ContactServiceImpl extends DefaultContactService {
          */
         return perform(tasks, session, queryFields.needsAttachmentInfo(), sOptions);
     }
-    
+
     @Override
     protected int doCountContacts(Session session, String folderId) throws OXException {
         int contextId = session.getContextId();

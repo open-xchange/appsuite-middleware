@@ -93,4 +93,6 @@ public interface SubscribeService {
      */
     public void cleanUp(String secret, Session session) throws OXException;
 
-}
+    public void removeUnrecoverableItems(String secret, Session session) throws OXException;
+
+    }

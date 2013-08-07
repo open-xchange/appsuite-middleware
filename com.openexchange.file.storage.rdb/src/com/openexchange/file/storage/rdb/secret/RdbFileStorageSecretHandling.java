@@ -101,6 +101,15 @@ public abstract class RdbFileStorageSecretHandling implements EncryptedItemDetec
             accountManager.cleanUp(secret, session);
         }
     }
+    
+    @Override
+    public void removeUnrecoverableItems(String secret, ServerSession session) throws OXException {
+        final Collection<FileStorageService> messagingServices = getFileStorageServices();
+        for (final FileStorageService messagingService : messagingServices) {
+            final FileStorageAccountManager accountManager = messagingService.getAccountManager();
+            accountManager.removeUnrecoverableItems(secret, session);
+        }        
+    }
 
     /**
      * Gets the known file storage services.

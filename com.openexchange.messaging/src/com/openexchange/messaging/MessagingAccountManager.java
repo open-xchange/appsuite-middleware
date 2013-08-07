@@ -127,8 +127,11 @@ public interface MessagingAccountManager {
      */
     public void cleanUp(String secret, Session session) throws OXException;
 
+    public void removeUnrecoverableItems(String secret, Session session) throws OXException;
+
     /**
      * Has the owner of this session an account?
      */
     public boolean hasAccount(Session session) throws OXException;
+
 }

@@ -172,4 +172,9 @@ public class SimAccountManager implements MessagingAccountManager {
         // Ignore
     }
 
+    @Override
+    public void removeUnrecoverableItems(String secret, Session session) {
+        // Ignore        
+    }
+
 }

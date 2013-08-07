@@ -110,7 +110,6 @@ public final class UserizedFolderImpl implements UserizedFolder {
         if (null == folder) {
             throw new IllegalArgumentException("Folder is null.");
         }
-        // TODO: clone folder?
         this.folder = folder;
         this.session = session;
         this.user = user;

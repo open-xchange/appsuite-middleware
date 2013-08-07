@@ -91,7 +91,7 @@ public final class DeleteAction extends AbstractFolderAction {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    protected AJAXRequestResult doPerform(final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
         /*
          * Parse parameters
          */
@@ -123,29 +123,25 @@ public final class DeleteAction extends AbstractFolderAction {
         /*
          * Delete
          */
-        try {
-            final JSONArray responseArray = new JSONArray();
-            final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-            final List<OXException> warnings = new LinkedList<OXException>();
-            for (int i = 0; i < len; i++) {
-                final String folderId = jsonArray.getString(i);
-                try {
-                    folderService.deleteFolder(treeId, folderId, timestamp, session);
-                } catch (final OXException e) {
-                    final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DeleteAction.class));
-                    log.error(e.getMessage(), e);
-                    e.setCategory(Category.CATEGORY_WARNING);
-                    warnings.add(e);
-                    responseArray.put(folderId);
-                }
+        final JSONArray responseArray = new JSONArray();
+        final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
+        final List<OXException> warnings = new LinkedList<OXException>();
+        for (int i = 0; i < len; i++) {
+            final String folderId = jsonArray.getString(i);
+            try {
+                folderService.deleteFolder(treeId, folderId, timestamp, session);
+            } catch (final OXException e) {
+                final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DeleteAction.class));
+                log.error(e.getMessage(), e);
+                e.setCategory(Category.CATEGORY_WARNING);
+                warnings.add(e);
+                responseArray.put(folderId);
             }
-            /*
-             * Return appropriate result
-             */
-            return new AJAXRequestResult(responseArray).addWarnings(warnings);
-        } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+        /*
+         * Return appropriate result
+         */
+        return new AJAXRequestResult(responseArray).addWarnings(warnings);
     }
 
 }

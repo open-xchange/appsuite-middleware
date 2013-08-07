@@ -107,5 +107,14 @@ public class MessagingSecretHandling implements EncryptedItemDetectorService, Se
             accountManager.cleanUp(secret, session);
         }
     }
+    
+    @Override
+    public void removeUnrecoverableItems(final String secret, final ServerSession session) throws OXException {
+        final Collection<MessagingService> messagingServices = getMessagingServices();
+        for (final MessagingService messagingService : messagingServices) {
+            final MessagingAccountManager accountManager = messagingService.getAccountManager();
+            accountManager.removeUnrecoverableItems(secret, session);
+        }
+    }
 
 }
