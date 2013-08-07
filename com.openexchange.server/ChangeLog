@@ -8,6 +8,7 @@
  - Fix for bug 27911: Fixed possible ArrayIndexOutOfBoundsException when transferring bytes from ByteChunk to a byte array
  - Fix for bug 28099: Check for missing members in SOAP request
  - Fix for bug 27745: Restore old lenient behavior of Apache CXG on SOAP request handling
+ - Fix for bug 28090: Don't show "Infostore" folder below private folder
 
 * 2013-08-06 - tobias.friedrich@open-xchange.com
 
