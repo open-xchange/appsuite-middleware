@@ -91,10 +91,19 @@ public abstract class StanzaSequenceGate {
     }
 
     /**
-     * Ensures a correct order of sequence numbers of incoming Stanzas. <li"Expected Sequence %">Stanzas that don't carry a sequence number are directly handed
-     * over to handleInternal of the components that makes use of this StanzaSequenceGate and have to adapt the logic of the Stanza handling
-     * of the received Stanzas.</li> <li>Stanzas that carry a sequence number are enqueued until a correct sequence is established. Stanza
-     * that already passed this gate are discarded. If the buffer for creating a valid sequence is full Stanzas are discarded.</li> </p>
+     * Ensures a correct order of sequence numbers of incoming Stanzas.
+     * 
+     * <ul>
+     *   <li>Stanzas that don't carry a sequence number are directly handed over to the specific
+     *   {@link StanzaSequenceGate#handleInternal(Stanza, ID)} implementation of the components that makes use of this StanzaSequenceGate
+     *   and have to adapt the logic of the Stanza handling of the received Stanzas.</li>
+     *   <li>Stanzas that carry a sequence number are enqueued until a correct sequence is established.
+     *     <ul>
+     *       <li>Stanzas that already passed this gate are discarded and an acknowledgement is sent again for the discarded stanza so the client
+     *       finally stops resending.</li>
+     *       <li>If the buffer for creating a valid sequence is full Stanzas are discarded.</li>
+     *     </ul>
+     * </ul>
      * 
      * @param stanza the incoming stanza
      * @param recipient the recipient of the incoming Stanza
@@ -108,10 +117,19 @@ public abstract class StanzaSequenceGate {
     }
 
     /**
-     * Ensures a correct order of sequence numbers of incoming Stanzas. <li>Stanzas that don't carry a sequence number are directly handed
-     * over to handleInternal of the components that makes use of this StanzaSequenceGate and have to adapt the logic of the Stanza handling
-     * of the received Stanzas.</li> <li>Stanzas that carry a sequence number are enqueued until a correct sequence is established. Stanza
-     * that already passed this gate are discarded. If the buffer for creating a valid sequence is full Stanzas are discarded.</li> </p>
+     * Ensures a correct order of sequence numbers of incoming Stanzas.
+     * 
+     * <ul>
+     *   <li>Stanzas that don't carry a sequence number are directly handed over to the specific
+     *   {@link StanzaSequenceGate#handleInternal(Stanza, ID)} implementation of the components that makes use of this StanzaSequenceGate
+     *   and have to adapt the logic of the Stanza handling of the received Stanzas.</li>
+     *   <li>Stanzas that carry a sequence number are enqueued until a correct sequence is established.
+     *     <ul>
+     *       <li>Stanzas that already passed this gate are discarded and an acknowledgement is sent again for the discarded stanza so the client
+     *       finally stops resending.</li>
+     *       <li>If the buffer for creating a valid sequence is full Stanzas are discarded.</li>
+     *     </ul>
+     * </ul>
      * 
      * @param stanza the incoming stanza
      * @param recipient the recipient of the incoming Stanza
@@ -210,13 +228,12 @@ public abstract class StanzaSequenceGate {
                 }
 
                 return true;
-            } else {
+            } else { // We didn't hit the best case, either the Stanza was already received or the sequence number is too high
                 if(LOG.isDebugEnabled()) {
                     LOG.debug(String.format("Expected sequence %d but got %d", threshold.get(), stanza.getSequenceNumber()));
                 }
                 /* Stanzas got out of sync, enqueue until we receive the Stanza matching threshold */
                 if (threshold.get() > stanza.getSequenceNumber()) {
-                    // Discard as this stanza already passed the gate once
                     stanza.trace("Discarded as this sequence number has already successfully passed this gate: " + stanza.getSequenceNumber());
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("Discarded as this sequence number has already successfully passed this gate: " + stanza.getSequenceNumber());
@@ -241,13 +258,27 @@ public abstract class StanzaSequenceGate {
                         throw RealtimeExceptionCodes.SEQUENCE_INVALID.create();
                     }
                     //Try to buffer up a valid sequence of Stanzas
-                    stanza.trace("Not in sequence, enqueing");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Stanzas not in sequence, Threshold: " + threshold.get() + " SequenceNumber: " + stanza.getSequenceNumber());
+                    boolean alreadyContained = false;
+                    for (StanzaWithCustomAction stanzaWithCustomAction : inbox) {
+                        if(stanzaWithCustomAction.sequenceNumber == stanza.getSequenceNumber()) {
+                            alreadyContained = true;
+                            break;
+                        }
                     }
-
-                    inbox.add(new StanzaWithCustomAction(stanza, customAction));
-                    return true;
+                    if(!alreadyContained) {
+                        stanza.trace("Not in sequence, enqueing");
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Stanzas not in sequence, Threshold: " + threshold.get() + " SequenceNumber: " + stanza.getSequenceNumber());
+                        }
+                        inbox.add(new StanzaWithCustomAction(stanza, customAction));
+                        return true;
+                    } else {
+                        stanza.trace("Not in sequence but already enqueued, discarding.");
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Stanzas not in sequence, Threshold: " + threshold.get() + " SequenceNumber: " + stanza.getSequenceNumber() + " but already buffered, discarding.");
+                        }
+                        return true;
+                    }
                 } else {
                     stanza.trace("Buffer full, instructing client to reset sequence");
                     if (LOG.isDebugEnabled()) {
@@ -299,6 +330,7 @@ public abstract class StanzaSequenceGate {
 
     protected final class StanzaWithCustomAction {
 
+        public long sequenceNumber=0;
         public Stanza stanza;
 
         public CustomGateAction action;
@@ -307,6 +339,7 @@ public abstract class StanzaSequenceGate {
             super();
             this.stanza = stanza;
             this.action = action;
+            this.sequenceNumber=stanza.getSequenceNumber();
         }
 
     }
