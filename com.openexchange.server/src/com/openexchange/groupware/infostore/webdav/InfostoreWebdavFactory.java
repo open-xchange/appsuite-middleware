@@ -82,7 +82,6 @@ import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
@@ -299,8 +298,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         final Context ctx = session.getContext();
         try {
             final Resolved resolved = resolver.resolve(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, url, session
-                    .getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()), UserConfigurationStorage.getInstance()
-                    .getUserConfigurationSafe(session.getUserId(), session.getContext()));
+                    .getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()), session.getUserPermissionBits());
             if(resolved.isFolder()) {
 
                 return loadCollection(url, resolved.getId(), s);
@@ -502,9 +500,8 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         final SearchIterator<DocumentMetadata> iter = database.getDocuments(
                 folderId,
                 session.getContext(),
-                UserStorage.getStorageUser(session.getUserId(), session.getContext()),
-                UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-                        session.getContext())).results();
+                session.getUser(),
+                session.getUserPermissionBits()).results();
         final List<OXWebdavResource> retVal = new ArrayList<OXWebdavResource>();
 
         while(iter.hasNext()) {

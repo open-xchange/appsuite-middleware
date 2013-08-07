@@ -70,7 +70,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
@@ -81,7 +81,7 @@ import com.openexchange.tools.servlet.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 
 
 /**
@@ -100,20 +100,20 @@ public class InfostorePublicationServlet extends HttpServlet {
 
     private static final String DESTROY_DOCUMENT = "destroyDocument";
 
-    private static PublicationDataLoaderService loader = null;
-    private static InfostoreDocumentPublicationService publisher = null;
-    private static ContextService contexts = null;
-    private static UserService users = null;
-    private static UserConfigurationService userConfigs = null;
+    private static volatile PublicationDataLoaderService loader;
+    private static volatile InfostoreDocumentPublicationService publisher;
+    private static volatile ContextService contexts;
+    private static volatile UserService users;
+    private static volatile UserPermissionService userConfigs;
 
-    private static InfostoreFacade infostore = null;
+    private static volatile InfostoreFacade infostore;
 
     public static void setUserService(final UserService service) {
         users = service;
     }
 
-    public static void setUserConfigService(final UserConfigurationService service) {
-        userConfigs = service;
+    public static void setUserConfigService(final UserPermissionService userConfigs2) {
+        userConfigs = userConfigs2;
     }
 
     public static void setInfostoreFacade(final InfostoreFacade service) {
@@ -240,7 +240,7 @@ public class InfostorePublicationServlet extends HttpServlet {
             final int version = InfostoreFacade.CURRENT_VERSION;
             final Context ctx = publication.getContext();
             final User user = loadUser(publication);
-            final UserConfiguration userConfig = loadUserConfig(publication);
+            final UserPermissionBits userConfig = loadUserConfig(publication);
 
             return infostore.getDocumentMetadata(id, version, ctx, user, userConfig);
         } catch (final RuntimeException e) {
@@ -248,8 +248,8 @@ public class InfostorePublicationServlet extends HttpServlet {
         }
     }
 
-    private static UserConfiguration loadUserConfig(final Publication publication) throws OXException {
-        return userConfigs.getUserConfiguration(publication.getUserId(), publication.getContext());
+    private static UserPermissionBits loadUserConfig(final Publication publication) throws OXException {
+        return userConfigs.getUserPermissionBits(publication.getUserId(), publication.getContext());
     }
 
     private static User loadUser(final Publication publication) throws OXException {

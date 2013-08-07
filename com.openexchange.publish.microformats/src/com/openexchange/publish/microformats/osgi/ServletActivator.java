@@ -71,6 +71,7 @@ import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link ServletActivator}
@@ -97,7 +98,7 @@ public class ServletActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             HttpService.class, PublicationDataLoaderService.class, ContextService.class, TemplateService.class, ContactService.class,
-            UserConfigurationService.class, UserService.class, InfostoreFacade.class, ConfigurationService.class, HtmlService.class, ImageTransformationService.class};
+            UserPermissionService.class, UserService.class, InfostoreFacade.class, ConfigurationService.class, HtmlService.class, ImageTransformationService.class};
     }
 
     @Override
@@ -134,20 +135,20 @@ public class ServletActivator extends HousekeepingActivator {
         final TemplateService templates = getService(TemplateService.class);
         final ContactService contacts = getService(ContactService.class);
         final InfostoreFacade infostore = getService(InfostoreFacade.class);
-        final UserConfigurationService userConfigs = getService(UserConfigurationService.class);
+        final UserPermissionService userPermissions = getService(UserPermissionService.class);
         final UserService users = getService(UserService.class);
         final ConfigurationService configService = getService(ConfigurationService.class);
         final HtmlService htmlService = getService(HtmlService.class);
         final ImageTransformationService imageScalingService = getService(ImageTransformationService.class);
 
-        if (null == httpService || null == dataLoader || null == contexts || null == templates || null == contacts || null == userConfigs || null == users || configService == null || htmlService == null || imageScalingService == null) {
+        if (null == httpService || null == dataLoader || null == contexts || null == templates || null == contacts || null == userPermissions || null == users || configService == null || htmlService == null || imageScalingService == null) {
             return;
         }
 
         activator.setTemplateService(templates);
 
         OnlinePublicationServlet.setContextService(contexts);
-        OnlinePublicationServlet.setUserConfigurationService(userConfigs);
+        OnlinePublicationServlet.setUserPermissionService(userPermissions);
 
         MicroformatServlet.setPublicationDataLoaderService(dataLoader);
         MicroformatServlet.setUserService(users);
@@ -159,7 +160,7 @@ public class ServletActivator extends HousekeepingActivator {
         ContactPictureServlet.setContactService(contacts);
         MicroformatServlet.setContactService(contacts);
 
-        InfostoreFileServlet.setUserConfigs(userConfigs);
+        InfostoreFileServlet.setUserPermissions(userPermissions);
         InfostoreFileServlet.setUsers(users);
         InfostoreFileServlet.setInfostore(infostore);
 

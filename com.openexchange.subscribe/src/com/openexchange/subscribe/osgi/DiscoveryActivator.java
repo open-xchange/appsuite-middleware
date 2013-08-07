@@ -88,6 +88,7 @@ import com.openexchange.subscribe.secret.SubscriptionSecretHandling;
 import com.openexchange.subscribe.sql.SubscriptionSQLStorage;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -105,7 +106,7 @@ public class DiscoveryActivator extends HousekeepingActivator {
         final WhiteboardContextService contextService = new WhiteboardContextService(context);
         this.contextService = contextService;
         final UserService users = getService(UserService.class);
-        final UserConfigurationService userConfigs = getService(UserConfigurationService.class);
+        final UserPermissionService userPermissions = getService(UserPermissionService.class);
         final InfostoreFacade infostore = getService(InfostoreFacade.class);
         final FolderService folders = getService(FolderService.class);
 
@@ -124,13 +125,13 @@ public class DiscoveryActivator extends HousekeepingActivator {
         folderUpdaters.add(new StrategyFolderUpdaterService<Task>(new TaskFolderUpdaterStrategy()));
         folderUpdaters.add(new StrategyFolderUpdaterService<DocumentMetadataHolder>(new DocumentMetadataHolderFolderUpdaterStrategy(
             users,
-            userConfigs,
+            userPermissions,
             infostore)));
 
         final SubscriptionExecutionServiceImpl executor = new SubscriptionExecutionServiceImpl(collector, folderUpdaters, contextService);
         registerService(SubscriptionExecutionService.class, executor);
         registerService(FolderUpdaterRegistry.class, executor);
-        
+
         AutoUpdateActivator.EXECUTOR = executor;
 
         final DBProvider provider = getService(DBProvider.class);
@@ -143,7 +144,7 @@ public class DiscoveryActivator extends HousekeepingActivator {
         AbstractSubscribeService.ENCRYPTION_FACTORY.set(getService(SecretEncryptionFactoryService.class));
         AbstractSubscribeService.CRYPTO_SERVICE.set(getService(CryptoService.class));
         AbstractSubscribeService.FOLDERS.set(folders);
-        AbstractSubscribeService.USER_CONFIGS.set(userConfigs);
+        AbstractSubscribeService.USER_PERMISSIONS.set(userPermissions);
 
         final SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener();
         listener.setStorageService(genconfStorage);
@@ -179,12 +180,12 @@ public class DiscoveryActivator extends HousekeepingActivator {
         AbstractSubscribeService.ENCRYPTION_FACTORY.set(null);
         AbstractSubscribeService.CRYPTO_SERVICE.set(null);
         AbstractSubscribeService.FOLDERS.set(null);
-        AbstractSubscribeService.USER_CONFIGS.set(null);
+        AbstractSubscribeService.USER_PERMISSIONS.set(null);
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { UserService.class, UserConfigurationService.class, InfostoreFacade.class, FolderService.class, DBProvider.class, SecretEncryptionFactoryService.class, CryptoService.class };
+        return new Class[] { UserService.class, UserPermissionService.class, InfostoreFacade.class, FolderService.class, DBProvider.class, SecretEncryptionFactoryService.class, CryptoService.class };
     }
 
 }

@@ -61,7 +61,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.TransactionAware;
@@ -93,12 +93,12 @@ public interface InfostoreFacade extends TransactionAware {
      * @param version The version
      * @param ctx The context
      * @param user The user
-     * @param userConfig The user configuration
+     * @param userPermissions The user permissions
      * @return <code>true</code> if exists; otherwise <code>false</code>
      * @throws OXException If checking for existence fails
      * @see #CURRENT_VERSION
      */
-    public boolean exists(int id, int version, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+    public boolean exists(int id, int version, Context ctx, User user, UserPermissionBits userPermissons) throws OXException;
 
     /**
      * Gets the denoted document's meta data information.
@@ -107,12 +107,12 @@ public interface InfostoreFacade extends TransactionAware {
      * @param version The version
      * @param ctx The context
      * @param user The user
-     * @param userConfig The user configuration
+     * @param userPermissions The user permissions
      * @return The meta data
      * @throws OXException If operation fails
      * @see #CURRENT_VERSION
      */
-    public DocumentMetadata getDocumentMetadata(int id, int version, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+    public DocumentMetadata getDocumentMetadata(int id, int version, Context ctx, User user, UserPermissionBits userPermissons) throws OXException;
 
     /**
      * Saves given document meta data.
@@ -144,12 +144,12 @@ public interface InfostoreFacade extends TransactionAware {
      * @param version The version
      * @param ctx The context
      * @param user The user
-     * @param userConfig The user configuration
+     * @param userPermissions The user permissions
      * @return The document's binary content
      * @throws OXException If retrieving binary content fails
      * @see #CURRENT_VERSION
      */
-    public InputStream getDocument(int id, int version, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+    public InputStream getDocument(int id, int version, Context ctx, User user, UserPermissionBits userPermissons) throws OXException;
 
     /**
      * Saves given document meta data and binary content (if not <code>null</code>).
@@ -225,11 +225,11 @@ public interface InfostoreFacade extends TransactionAware {
      * @param folderId The folder identifier
      * @param ctx The context
      * @param user The user
-     * @param userConfig The user configuration
+     * @param userPermissions The user permissions
      * @return The folder's documents
      * @throws OXException If retrieval fails
      */
-    public TimedResult<DocumentMetadata> getDocuments(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+    public TimedResult<DocumentMetadata> getDocuments(long folderId, Context ctx, User user, UserPermissionBits userPermissons) throws OXException;
 
     /**
      * Gets the folder's documents.
@@ -238,11 +238,11 @@ public interface InfostoreFacade extends TransactionAware {
      * @param columns The columns to set in returned documents
      * @param ctx The context
      * @param user The user
-     * @param userConfig The user configuration
+     * @param userPermissions The user permissions
      * @return The folder's documents
      * @throws OXException If retrieval fails
      */
-    public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+    public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Context ctx, User user, UserPermissionBits userPermissons) throws OXException;
 
     /**
      * Gets the sorted folder's documents.
@@ -253,11 +253,11 @@ public interface InfostoreFacade extends TransactionAware {
      * @param order The order; see {@link #ASC} or {@link #DESC}
      * @param ctx The context
      * @param user The user
-     * @param userConfig The user configuration
+     * @param userPermissions The user permissions
      * @return The folder's documents
      * @throws OXException If retrieval fails
      */
-    public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+    public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, Context ctx, User user, UserPermissionBits userPermissons) throws OXException;
 
     /**
      * Gets the document's versions.
@@ -265,11 +265,11 @@ public interface InfostoreFacade extends TransactionAware {
      * @param id The document identifier
      * @param ctx The context
      * @param user The user
-     * @param userConfig The user configuration
+     * @param userPermissions The user permissions
      * @return The document's version
      * @throws OXException If retrieval fails
      */
-    public TimedResult<DocumentMetadata> getVersions(int id, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+    public TimedResult<DocumentMetadata> getVersions(int id, Context ctx, User user, UserPermissionBits userPermissons) throws OXException;
 
     /**
      * Gets the document's versions.
@@ -278,11 +278,11 @@ public interface InfostoreFacade extends TransactionAware {
      * @param columns The columns to set in returned documents
      * @param ctx The context
      * @param user The user
-     * @param userConfig The user configuration
+     * @param userPermissions The user permissions
      * @return The document's versions
      * @throws OXException If retrieval fails
      */
-    public TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+    public TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, Context ctx, User user, UserPermissionBits userPermissons) throws OXException;
 
     /**
      * Gets the document's versions.
@@ -293,11 +293,11 @@ public interface InfostoreFacade extends TransactionAware {
      * @param order The order; see {@link #ASC} or {@link #DESC}
      * @param ctx The context
      * @param user The user
-     * @param userConfig The user configuration
+     * @param userPermissions The user permissions
      * @return The document's versions
      * @throws OXException If retrieval fails
      */
-    public TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, Metadata sort, int order, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+    public TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, Metadata sort, int order, Context ctx, User user, UserPermissionBits userPermissons) throws OXException;
 
     /**
      * Gets the specified documents.
@@ -306,11 +306,11 @@ public interface InfostoreFacade extends TransactionAware {
      * @param columns The columns to set in returned documents
      * @param ctx The context
      * @param user The user
-     * @param userConfig The user configuration
+     * @param userPermissions The user permissions
      * @return The documents
      * @throws OXException If retrieval fails
      */
-    public TimedResult<DocumentMetadata> getDocuments(int[] ids, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws IllegalAccessException, OXException;
+    public TimedResult<DocumentMetadata> getDocuments(int[] ids, Metadata[] columns, Context ctx, User user, UserPermissionBits userPermissons) throws IllegalAccessException, OXException;
 
     /**
      * Gets the folder's updated & deleted documents.
@@ -321,11 +321,11 @@ public interface InfostoreFacade extends TransactionAware {
      * @param ignoreDeleted Whether to ignore deleted ones
      * @param ctx The context
      * @param user The user
-     * @param userConfig The user configuration
+     * @param userPermissions The user permissions
      * @return The matching changed/deleted documents
      * @throws OXException If retrieval fails
      */
-    public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+    public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, boolean ignoreDeleted, Context ctx, User user, UserPermissionBits userPermissons) throws OXException;
 
     /**
      * Gets the folder's updated & deleted documents.
@@ -338,11 +338,11 @@ public interface InfostoreFacade extends TransactionAware {
      * @param ignoreDeleted Whether to ignore deleted ones
      * @param ctx The context
      * @param user The user
-     * @param userConfig The user configuration
+     * @param userPermissions The user permissions
      * @return The matching changed/deleted documents
      * @throws OXException If retrieval fails
      */
-    public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, Metadata sort, int order, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+    public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, Metadata sort, int order, boolean ignoreDeleted, Context ctx, User user, UserPermissionBits userPermissons) throws OXException;
 
     /**
      * Gets the sequence numbers for the contents of the supplied folders to quickly determine which folders contain changes. An updated
@@ -352,11 +352,11 @@ public interface InfostoreFacade extends TransactionAware {
      * @param versionsOnly <code>true</code> to only take documents with at least one version into account, <code>false</code>, otherwise
      * @param ctx The context
      * @param user The user
-     * @param userConfig The user configuration
+     * @param userPermissions The user permissions
      * @return A map holding the resulting sequence numbers to each requested folder ID
      * @throws OXException
      */
-    Map<Long, Long> getSequenceNumbers(List<Long> folderIds, boolean versionsOnly, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+    Map<Long, Long> getSequenceNumbers(List<Long> folderIds, boolean versionsOnly, Context ctx, User user, UserPermissionBits userPermissons) throws OXException;
 
     /**
      * Gets the number of documents in given folder.
@@ -364,11 +364,11 @@ public interface InfostoreFacade extends TransactionAware {
      * @param folderId The folder identifier
      * @param ctx The context
      * @param user The user
-     * @param userConfig The user configuration
+     * @param userPermissions The user permissions
      * @return The number of documents
      * @throws OXException If operation fails
      */
-    public int countDocuments(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+    public int countDocuments(long folderId, Context ctx, User user, UserPermissionBits userPermissons) throws OXException;
 
     /**
      * Signals if denoted folder contains documents not owned by specified user.
@@ -376,11 +376,11 @@ public interface InfostoreFacade extends TransactionAware {
      * @param folderId The folder identifier
      * @param ctx The context
      * @param user The user
-     * @param userConfig The user configuration
+     * @param userPermissions The user permissions
      * @return <code>true</code> if folder contains documents not owned by specified user; otherwise <code>false</code>
      * @throws OXException If operation fails
      */
-    public boolean hasFolderForeignObjects(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+    public boolean hasFolderForeignObjects(long folderId, Context ctx, User user, UserPermissionBits userPermissons) throws OXException;
 
     /**
      * Checks if denoted folder is empty.
@@ -463,11 +463,11 @@ public interface InfostoreFacade extends TransactionAware {
      * @param length The number of bytes to read from the document, or <code>-1</code> to read the stream until the end
      * @param ctx The context
      * @param user The user
-     * @param userConfig the user configuration
+     * @param userPermissions The user permissions
      * @return An input stream for the content
      * @throws OXException
      */
-    InputStream getDocument(int id, int version, long offset, long length, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+    InputStream getDocument(int id, int version, long offset, long length, Context ctx, User user, UserPermissionBits userPermissons) throws OXException;
 
     /**
      * Save file metadata and content. Since the actual version is modified, the version number is not increased.

@@ -79,7 +79,7 @@ import com.openexchange.service.indexing.impl.internal.nonclustered.IndexingServ
 import com.openexchange.service.indexing.impl.internal.nonclustered.JobMonitoringMBeanImpl;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 
 
 /**
@@ -108,7 +108,7 @@ public class IndexingActivator extends HousekeepingActivator {
             InfostoreFacade.class,
             ContextService.class,
             UserService.class,
-            UserConfigurationService.class,
+            UserPermissionService.class,
             IndexManagementService.class,
             ConfigViewFactory.class,
             ThreadPoolService.class };
@@ -118,7 +118,7 @@ public class IndexingActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: com.openexchange.service.indexing");
         Services.setServiceLookup(this);
-        
+
         /*
          * Preconfigure scheduler
          */
@@ -129,7 +129,7 @@ public class IndexingActivator extends HousekeepingActivator {
         SchedulerConfig.setStart(true);
         QuartzService quartzService = getService(QuartzService.class);
         Scheduler scheduler = quartzService.getScheduler(SchedulerConfig.getSchedulerName(), SchedulerConfig.start(), SchedulerConfig.getThreadCount());
-        
+
         serviceImpl = new IndexingServiceImpl();
         addService(IndexingService.class, serviceImpl);
         registerService(IndexingService.class, serviceImpl);

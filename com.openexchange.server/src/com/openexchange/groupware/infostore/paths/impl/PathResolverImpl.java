@@ -75,6 +75,7 @@ import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.infostore.webdav.URLCache;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 public class PathResolverImpl extends AbstractPathResolver implements URLCache {
@@ -106,28 +107,28 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
 
     @Override
     public WebdavPath getPathForDocument(final int relativeToFolder, final int documentId,
-            final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+            final Context ctx, final User user, final UserPermissionBits userPerms) throws OXException {
         final TIntObjectMap<WebdavPath> cache = docPathCache.get();
         final Map<WebdavPath, Resolved> resCache = resolveCache.get();
         if(cache.containsKey(documentId)) {
-            return relative(relativeToFolder, cache.get(documentId), ctx, user, userConfig);
+            return relative(relativeToFolder, cache.get(documentId), ctx, user, userPerms);
         }
 
-        final DocumentMetadata dm = database.getDocumentMetadata(documentId, InfostoreFacade.CURRENT_VERSION, ctx, user, userConfig);
+        final DocumentMetadata dm = database.getDocumentMetadata(documentId, InfostoreFacade.CURRENT_VERSION, ctx, user, userPerms);
         if(dm.getFileName() == null || dm.getFileName().equals("")) {
             throw InfostoreExceptionCodes.DOCUMENT_CONTAINS_NO_FILE.create(Integer.valueOf(documentId));
         }
-        final WebdavPath path = getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, (int)dm.getFolderId(),ctx,user,userConfig).dup().append(dm.getFileName());
+        final WebdavPath path = getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, (int)dm.getFolderId(),ctx,user,userPerms).dup().append(dm.getFileName());
 
         cache.put(documentId, path);
         resCache.put(path, new ResolvedImpl(path, documentId, true));
-        return relative(relativeToFolder,path, ctx, user, userConfig);
+        return relative(relativeToFolder,path, ctx, user, userPerms);
 
     }
 
     @Override
     public WebdavPath getPathForFolder(final int relativeToFolder, final int folderId,
-            final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+            final Context ctx, final User user, final UserPermissionBits userPerms) throws OXException {
         if(folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
             return new WebdavPath();
         }
@@ -138,7 +139,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
         final Map<WebdavPath, Resolved> resCache = resolveCache.get();
         final TIntObjectMap<WebdavPath> cache = folderPathCache.get();
         if(cache.containsKey(folderId)) {
-            return relative(relativeToFolder, cache.get(folderId), ctx, user, userConfig);
+            return relative(relativeToFolder, cache.get(folderId), ctx, user, userPerms);
         }
 
         final List<FolderObject> path = new ArrayList<FolderObject>();
@@ -172,16 +173,16 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
         }
 
 
-        return relative(relativeToFolder, thePath, ctx, user, userConfig);
+        return relative(relativeToFolder, thePath, ctx, user, userPerms);
     }
 
     @Override
     public Resolved resolve(final int relativeToFolder, final WebdavPath path, final Context ctx,
-            final User user, final UserConfiguration userConfig) throws OXException {
+            final User user, final UserPermissionBits userPerms) throws OXException {
 
         final Map<WebdavPath, Resolved> cache = resolveCache.get();
 
-        final WebdavPath absolutePath = absolute(relativeToFolder, path, ctx, user, userConfig);
+        final WebdavPath absolutePath = absolute(relativeToFolder, path, ctx, user, userPerms);
 
         if(cache.containsKey(absolutePath)) {
             return cache.get(absolutePath);
@@ -191,7 +192,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
-        final WebdavPath relpath = getPathForFolder(0, relativeToFolder, ctx, user, userConfig);
+        final WebdavPath relpath = getPathForFolder(0, relativeToFolder, ctx, user, userPerms);
 
         Resolved resolved = new ResolvedImpl(relpath,relativeToFolder, false);
         cache.put(resolved.getPath(), resolved);

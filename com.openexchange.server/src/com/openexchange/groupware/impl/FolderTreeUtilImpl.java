@@ -59,7 +59,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 public class FolderTreeUtilImpl implements FolderTreeUtil {
 
@@ -70,8 +69,7 @@ public class FolderTreeUtilImpl implements FolderTreeUtil {
     }
 
     @Override
-    public List<Integer> getPath(final int folderid, final Context ctx, final User user,
-            final UserConfiguration userConfig) throws OXException {
+    public List<Integer> getPath(final int folderid, final Context ctx, final User user) throws OXException {
         final List<Integer> path = new ArrayList<Integer>();
         try {
             FolderObject folder = getFolder(folderid, ctx);

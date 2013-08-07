@@ -53,9 +53,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-
 import junit.framework.TestCase;
-
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.event.CommonEvent;
@@ -69,7 +67,8 @@ import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -86,7 +85,7 @@ public class InfostoreDowngradeTest extends TestCase {
     private int userId;
     private InfostoreFacade database;
     private ServerSession session;
-    private UserConfiguration userConfig;
+    private UserPermissionBits userConfig;
     private User user;
 
     private final List<DocumentMetadata> clean = new ArrayList<DocumentMetadata>();
@@ -99,7 +98,7 @@ public class InfostoreDowngradeTest extends TestCase {
         ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
         userId = UserStorage.getInstance().getUserId(AJAXConfig.getProperty(AJAXConfig.Property.LOGIN), ctx);
         user = UserStorage.getInstance().getUser(userId, ctx);
-        userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
+        userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
 
         final OXFolderAccess access = new OXFolderAccess(ctx);
         final FolderObject fo = access.getDefaultFolder(userId, FolderObject.INFOSTORE);

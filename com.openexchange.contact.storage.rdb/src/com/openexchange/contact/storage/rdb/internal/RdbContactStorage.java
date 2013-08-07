@@ -192,7 +192,7 @@ public class RdbContactStorage extends DefaultContactStorage {
              */
             FolderObject folder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(parse(folderId), false);
             EffectivePermission permission = folder.getEffectiveUserPermission(
-                serverSession.getUserId(), serverSession.getUserConfiguration(), connection);
+                serverSession.getUserId(), serverSession.getUserPermissionBits(), connection);
             if (false == permission.canCreateObjects()) {
                 throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(Integer.valueOf(parse(folderId)), Integer.valueOf(contextID), Integer.valueOf(serverSession.getUserId()));
             }

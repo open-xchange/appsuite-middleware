@@ -122,6 +122,7 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexDocument;
@@ -204,9 +205,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
-    public boolean exists(final int id, final int version, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public boolean exists(final int id, final int version, final Context ctx, final User user, final UserPermissionBits userPermissons) throws OXException {
         try {
-            return security.getInfostorePermission(id, ctx, user, userConfig).canReadObject();
+            return security.getInfostorePermission(id, ctx, user, userPermissons).canReadObject();
         } catch (final OXException x) {
             if (InfostoreExceptionCodes.NOT_EXIST.equals(x)) {
                 return false;
@@ -216,18 +217,18 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
-    public DocumentMetadata getDocumentMetadata(final int id, final int version, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, ctx, user, userConfig);
+    public DocumentMetadata getDocumentMetadata(final int id, final int version, final Context ctx, final User user, final UserPermissionBits userPermissons) throws OXException {
+        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, ctx, user, userPermissons);
 
         if (!infoPerm.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
 
-        final List<Lock> locks = lockManager.findLocks(id, ctx, user, userConfig);
+        final List<Lock> locks = lockManager.findLocks(id, ctx, user);
         final Map<Integer, List<Lock>> allLocks = new HashMap<Integer, List<Lock>>();
         allLocks.put(Integer.valueOf(id), locks);
 
-        return addNumberOfVersions(addLocked(load(id, version, ctx), allLocks, ctx, user, userConfig), ctx);
+        return addNumberOfVersions(addLocked(load(id, version, ctx), allLocks, ctx, user), ctx);
     }
 
     DocumentMetadata load(final int id, final int version, final Context ctx) throws OXException {
@@ -256,13 +257,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
-    public InputStream getDocument(final int id, final int version, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        return getDocument(id, version, 0L, -1L, ctx, user, userConfig);
+    public InputStream getDocument(final int id, final int version, final Context ctx, final User user, final UserPermissionBits userPermissons) throws OXException {
+        return getDocument(id, version, 0L, -1L, ctx, user, userPermissons);
     }
 
     @Override
-    public InputStream getDocument(int id, int version, long offset, long length, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, ctx, user, userConfig);
+    public InputStream getDocument(int id, int version, long offset, long length, Context ctx, User user, UserPermissionBits userPermissons) throws OXException {
+        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, ctx, user, userPermissons);
         if (!infoPerm.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
@@ -285,12 +286,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             id,
             context,
             getUser(session),
-            getUserConfiguration(session));
+            session.getUserPermissionBits());
         if (!infoPerm.canWriteObject()) {
             throw InfostoreExceptionCodes.WRITE_PERMS_FOR_LOCK_MISSING.create();
         }
         final DocumentMetadata document = checkWriteLock(id, session);
-        if (lockManager.isLocked(document.getId(), session.getContext(), getUser(session), getUserConfiguration(session))) {
+        if (lockManager.isLocked(document.getId(), session.getContext(), getUser(session))) {
             // Already locked by this user
             return;
         }
@@ -308,8 +309,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             Type.WRITE,
             session.getUserlogin(),
             context,
-            getUser(session),
-            getUserConfiguration(session));
+            getUser(session));
         touch(id, session);
     }
 
@@ -320,12 +320,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             id,
             context,
             getUser(session),
-            getUserConfiguration(session));
+            session.getUserPermissionBits());
         if (!infoPerm.canWriteObject()) {
             throw InfostoreExceptionCodes.WRITE_PERMS_FOR_UNLOCK_MISSING.create();
         }
         checkMayUnlock(id, session);
-        lockManager.removeAll(id, context, getUser(session), getUserConfiguration(session));
+        lockManager.removeAll(id, context, getUser(session));
         touch(id, session);
     }
 
@@ -400,9 +400,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return new com.openexchange.file.storage.Quota(limit, usage, com.openexchange.file.storage.Quota.Type.STORAGE);
     }
 
-    private Delta<DocumentMetadata> addLocked(final Delta<DocumentMetadata> delta, final Map<Integer, List<Lock>> locks, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    private Delta<DocumentMetadata> addLocked(final Delta<DocumentMetadata> delta, final Map<Integer, List<Lock>> locks, final Context ctx, final User user) throws OXException {
         try {
-            return new LockDelta(delta, locks, ctx, user, userConfig);
+            return new LockDelta(delta, locks, ctx, user);
         } catch (final OXException e) {
             throw InfostoreExceptionCodes.ITERATE_FAILED.create(e);
         }
@@ -420,9 +420,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return new NumberOfVersionsTimedResult(tr, ctx);
     }
 
-    private TimedResult<DocumentMetadata> addLocked(final TimedResult<DocumentMetadata> tr, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    private TimedResult<DocumentMetadata> addLocked(final TimedResult<DocumentMetadata> tr, final Context ctx, final User user) throws OXException {
         try {
-            return new LockTimedResult(tr, ctx, user, userConfig);
+            return new LockTimedResult(tr, ctx, user);
         } catch (final OXException e) {
             throw InfostoreExceptionCodes.ITERATE_FAILED.create(e);
         }
@@ -455,12 +455,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
     }
 
-    private DocumentMetadata addLocked(final DocumentMetadata document, final Map<Integer, List<Lock>> allLocks, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    private DocumentMetadata addLocked(final DocumentMetadata document, final Map<Integer, List<Lock>> allLocks, final Context ctx, final User user) throws OXException {
         List<Lock> locks = null;
         if (allLocks != null) {
             locks = allLocks.get(Integer.valueOf(document.getId()));
         } else {
-            locks = lockManager.findLocks(document.getId(), ctx, user, userConfig);
+            locks = lockManager.findLocks(document.getId(), ctx, user);
         }
         if (locks == null) {
             locks = Collections.emptyList();
@@ -490,7 +490,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return new SearchIteratorAdapter<DocumentMetadata>(list.iterator());
     }
 
-    SearchIterator<DocumentMetadata> lockedUntilIterator(final SearchIterator<?> iter, final Map<Integer, List<Lock>> locks, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    SearchIterator<DocumentMetadata> lockedUntilIterator(final SearchIterator<?> iter, final Map<Integer, List<Lock>> locks, final Context ctx, final User user) throws OXException {
         final List<DocumentMetadata> list = new ArrayList<DocumentMetadata>();
         while (iter.hasNext()) {
             final DocumentMetadata m = (DocumentMetadata) iter.next();
@@ -502,7 +502,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
          * hasNext() already obtains a pooled connection which is only released on final call to next().
          */
         for (final DocumentMetadata m : list) {
-            addLocked(m, locks, ctx, user, userConfig);
+            addLocked(m, locks, ctx, user);
         }
         return new SearchIteratorAdapter<DocumentMetadata>(list.iterator());
     }
@@ -518,7 +518,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             return;
         }
 
-        if (lockManager.isLocked(document.getId(), session.getContext(), getUser(session), getUserConfiguration(session))) {
+        if (lockManager.isLocked(document.getId(), session.getContext(), getUser(session))) {
             throw InfostoreExceptionCodes.ALREADY_LOCKED.create();
         }
     }
@@ -528,7 +528,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         if (document.getCreatedBy() == session.getUserId() || document.getModifiedBy() == session.getUserId()) {
             return;
         }
-        final List<Lock> locks = lockManager.findLocks(id, session.getContext(), getUser(session), getUserConfiguration(session));
+        final List<Lock> locks = lockManager.findLocks(id, session.getContext(), getUser(session));
         if (locks.size() > 0) {
             throw InfostoreExceptionCodes.LOCKED_BY_ANOTHER.create();
         }
@@ -546,7 +546,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 document.getFolderId(),
                 context,
                 getUser(session),
-                getUserConfiguration(session));
+                session.getUserPermissionBits());
             if (!isperm.canCreateObjects()) {
                 throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
             }
@@ -846,7 +846,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     document.getId(),
                     context,
                     getUser(session),
-                    getUserConfiguration(session));
+                    session.getUserPermissionBits());
                 if (!infoPerm.canWriteObject()) {
                     throw InfostoreExceptionCodes.NO_WRITE_PERMISSION.create();
                 }
@@ -856,7 +856,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                         document.getFolderId(),
                         context,
                         getUser(session),
-                        getUserConfiguration(session));
+                        session.getUserPermissionBits());
                     if (!(isperm.canCreateObjects())) {
                         throw InfostoreExceptionCodes.NO_TARGET_CREATE_PERMISSION.create();
                     }
@@ -1246,7 +1246,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                         m.getFolderId(),
                         context,
                         getUser(session),
-                        getUserConfiguration(session));
+                        session.getUserPermissionBits());
                     perms.put(m.getFolderId(), p);
                 }
                 final EffectiveInfostorePermission infoPerm = new EffectiveInfostorePermission(p, m, getUser(session));
@@ -1297,7 +1297,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             metadata,
             context,
             getUser(session),
-            getUserConfiguration(session));
+            session.getUserPermissionBits());
         if (!infoPerm.canDeleteObject()) {
             throw InfostoreExceptionCodes.NO_DELETE_PERMISSION_FOR_VERSION.create();
         }
@@ -1436,20 +1436,20 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        return getDocuments(folderId, Metadata.HTTPAPI_VALUES_ARRAY, null, 0, ctx, user, userConfig);
+    public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Context ctx, final User user, final UserPermissionBits userPermissons) throws OXException {
+        return getDocuments(folderId, Metadata.HTTPAPI_VALUES_ARRAY, null, 0, ctx, user, userPermissons);
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Metadata[] columns, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        return getDocuments(folderId, columns, null, 0, ctx, user, userConfig);
+    public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Metadata[] columns, final Context ctx, final User user, final UserPermissionBits userPermissons) throws OXException {
+        return getDocuments(folderId, columns, null, 0, ctx, user, userPermissons);
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getDocuments(final long folderId, Metadata[] columns, final Metadata sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public TimedResult<DocumentMetadata> getDocuments(final long folderId, Metadata[] columns, final Metadata sort, final int order, final Context ctx, final User user, final UserPermissionBits userPermissons) throws OXException {
         Metadata[] cols = addLastModifiedIfNeeded(columns);
         boolean onlyOwn = false;
-        final EffectivePermission isperm = security.getFolderPermission(folderId, ctx, user, userConfig);
+        final EffectivePermission isperm = security.getFolderPermission(folderId, ctx, user, userPermissons);
         if (isperm.getReadPermission() == OCLPermission.NO_PERMISSIONS) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         } else if (isperm.getReadPermission() == OCLPermission.READ_OWN_OBJECTS) {
@@ -1476,7 +1476,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         }
         TimedResult<DocumentMetadata> tr = new InfostoreTimedResult(iter);
         if (addLocked) {
-            tr = addLocked(tr, ctx, user, userConfig);
+            tr = addLocked(tr, ctx, user);
         }
         if (addNumberOfVersions) {
             tr = addNumberOfVersions(tr, ctx);
@@ -1485,18 +1485,18 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getVersions(final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        return getVersions(id, Metadata.HTTPAPI_VALUES_ARRAY, null, 0, ctx, user, userConfig);
+    public TimedResult<DocumentMetadata> getVersions(final int id, final Context ctx, final User user, final UserPermissionBits userPermissons) throws OXException {
+        return getVersions(id, Metadata.HTTPAPI_VALUES_ARRAY, null, 0, ctx, user, userPermissons);
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        return getVersions(id, columns, null, 0, ctx, user, userConfig);
+    public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, final Context ctx, final User user, final UserPermissionBits userPermissons) throws OXException {
+        return getVersions(id, columns, null, 0, ctx, user, userPermissons);
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getVersions(final int id, Metadata[] columns, final Metadata sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, ctx, user, userConfig);
+    public TimedResult<DocumentMetadata> getVersions(final int id, Metadata[] columns, final Metadata sort, final int order, final Context ctx, final User user, final UserPermissionBits userPermissons) throws OXException {
+        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, ctx, user, userPermissons);
         if (!infoPerm.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
@@ -1512,17 +1512,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         final TimedResult<DocumentMetadata> tr = new InfostoreTimedResult(iter);
 
         if (addLocked) {
-            return addLocked(tr, ctx, user, userConfig);
+            return addLocked(tr, ctx, user);
         }
         return tr;
 
     }
 
     @Override
-    public TimedResult<DocumentMetadata> getDocuments(final int[] ids, Metadata[] columns, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public TimedResult<DocumentMetadata> getDocuments(final int[] ids, Metadata[] columns, final Context ctx, final User user, final UserPermissionBits userPermissons) throws OXException {
 
         try {
-            security.injectInfostorePermissions(ids, ctx, user, userConfig, null, new Injector<Object, EffectiveInfostorePermission>() {
+            security.injectInfostorePermissions(ids, ctx, user, userPermissons, null, new Injector<Object, EffectiveInfostorePermission>() {
 
                 @Override
                 public Object inject(final Object list, final EffectiveInfostorePermission element) {
@@ -1542,7 +1542,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
         for (final Metadata m : cols) {
             if (m == Metadata.LOCKED_UNTIL_LITERAL) {
-                tr = addLocked(tr, ctx, user, userConfig);
+                tr = addLocked(tr, ctx, user);
             }
             if (m == Metadata.NUMBER_OF_VERSIONS_LITERAL) {
                 tr = addNumberOfVersions(tr, ctx);
@@ -1553,14 +1553,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
-    public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        return getDelta(folderId, updateSince, columns, null, 0, ignoreDeleted, ctx, user, userConfig);
+    public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns, final boolean ignoreDeleted, final Context ctx, final User user, final UserPermissionBits userPermissons) throws OXException {
+        return getDelta(folderId, updateSince, columns, null, 0, ignoreDeleted, ctx, user, userPermissons);
     }
 
     @Override
-    public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, Metadata[] columns, final Metadata sort, final int order, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, Metadata[] columns, final Metadata sort, final int order, final boolean ignoreDeleted, final Context ctx, final User user, final UserPermissionBits userPermissons) throws OXException {
         boolean onlyOwn = false;
-        final EffectivePermission isperm = security.getFolderPermission(folderId, ctx, user, userConfig);
+        final EffectivePermission isperm = security.getFolderPermission(folderId, ctx, user, userPermissons);
         if (isperm.getReadPermission() == OCLPermission.NO_PERMISSIONS) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         } else if (isperm.getReadPermission() == OCLPermission.READ_OWN_OBJECTS) {
@@ -1579,7 +1579,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             }
         }
 
-        final Map<Integer, List<Lock>> locks = loadLocksInFolderAndExpireOldLocks(folderId, ctx, user, userConfig);
+        final Map<Integer, List<Lock>> locks = loadLocksInFolderAndExpireOldLocks(folderId, ctx, user);
 
         final DBProvider reuse = new ReuseReadConProvider(getProvider());
 
@@ -1612,7 +1612,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         Delta<DocumentMetadata> delta = new DeltaImpl<DocumentMetadata>(newIter, modIter, it, System.currentTimeMillis());
 
         if (addLocked) {
-            delta = addLocked(delta, locks, ctx, user, userConfig);
+            delta = addLocked(delta, locks, ctx, user);
         }
         if (addNumberOfVersions) {
             delta = addNumberOfVersions(delta, ctx);
@@ -1621,7 +1621,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
-    public Map<Long, Long> getSequenceNumbers(List<Long> folderIds, boolean versionsOnly, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+    public Map<Long, Long> getSequenceNumbers(List<Long> folderIds, boolean versionsOnly, Context ctx, User user, UserPermissionBits userPermissons) throws OXException {
         if (0 == folderIds.size()) {
             return Collections.emptyMap();
         }
@@ -1659,7 +1659,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return sequenceNumbers;
     }
 
-    private Map<Integer, List<Lock>> loadLocksInFolderAndExpireOldLocks(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    private Map<Integer, List<Lock>> loadLocksInFolderAndExpireOldLocks(final long folderId, final Context ctx, final User user) throws OXException {
         final Map<Integer, List<Lock>> locks = new HashMap<Integer, List<Lock>>();
         final InfostoreIterator documents = InfostoreIterator.documents(
             folderId,
@@ -1671,7 +1671,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         try {
             while (documents.hasNext()) {
                 final DocumentMetadata document = documents.next();
-                lockManager.findLocks(document.getId(), ctx, user, userConfig);
+                lockManager.findLocks(document.getId(), ctx, user);
             }
         } finally {
             documents.close();
@@ -1680,9 +1680,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
-    public int countDocuments(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public int countDocuments(final long folderId, final Context ctx, final User user, final UserPermissionBits userPermissons) throws OXException {
         boolean onlyOwn = false;
-        final EffectivePermission isperm = security.getFolderPermission(folderId, ctx, user, userConfig);
+        final EffectivePermission isperm = security.getFolderPermission(folderId, ctx, user, userPermissons);
         if (!(isperm.canReadAllObjects()) && !(isperm.canReadOwnObjects())) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         } else if (isperm.canReadOwnObjects()) {
@@ -1692,7 +1692,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
-    public boolean hasFolderForeignObjects(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public boolean hasFolderForeignObjects(final long folderId, final Context ctx, final User user, final UserPermissionBits userPermissons) throws OXException {
         return db.hasFolderForeignObjects(folderId, ctx, user);
     }
 
@@ -1897,10 +1897,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
         private final SearchIterator<DocumentMetadata> results;
 
-        public LockTimedResult(final TimedResult<DocumentMetadata> delegate, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        public LockTimedResult(final TimedResult<DocumentMetadata> delegate, final Context ctx, final User user) throws OXException {
             sequenceNumber = delegate.sequenceNumber();
 
-            this.results = lockedUntilIterator(delegate.results(), null, ctx, user, userConfig);
+            this.results = lockedUntilIterator(delegate.results(), null, ctx, user);
         }
 
         @Override
@@ -1925,13 +1925,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
         private SearchIterator<DocumentMetadata> deleted;
 
-        public LockDelta(final Delta<DocumentMetadata> delegate, final Map<Integer, List<Lock>> locks, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        public LockDelta(final Delta<DocumentMetadata> delegate, final Map<Integer, List<Lock>> locks, final Context ctx, final User user) throws OXException {
             final SearchIterator<DocumentMetadata> deleted = delegate.getDeleted();
             if (null != deleted) {
-                this.deleted = lockedUntilIterator(deleted, locks, ctx, user, userConfig);
+                this.deleted = lockedUntilIterator(deleted, locks, ctx, user);
             }
-            this.modified = lockedUntilIterator(delegate.getModified(), locks, ctx, user, userConfig);
-            this.newIter = lockedUntilIterator(delegate.getNew(), locks, ctx, user, userConfig);
+            this.modified = lockedUntilIterator(delegate.getModified(), locks, ctx, user);
+            this.newIter = lockedUntilIterator(delegate.getNew(), locks, ctx, user);
             this.sequenceNumber = delegate.sequenceNumber();
         }
 

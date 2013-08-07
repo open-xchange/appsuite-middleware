@@ -163,7 +163,7 @@ public abstract class LockHelper {
 		loadedLocks = true;
 		try {
             final ServerSession session = getSession();
-		    final List<Lock> locks = lockManager.findLocks(id, session.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
+		    final List<Lock> locks = lockManager.findLocks(id, session.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()));
 			final List<Lock> cleanedLocks = new ArrayList<Lock>();
 			for(final Lock lock : locks) {
 				if (!removedLockIDs.contains(Integer.valueOf(lock.getId()))) {
@@ -191,7 +191,7 @@ public abstract class LockHelper {
 		final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
 		final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext());
 		for(final int id : removedLockIDs) {
-			lockManager.unlock(id, ctx, user, userConfig);
+			lockManager.unlock(id, ctx, user);
 		}
 		removedLocks.clear();
 		removedLockIDs.clear();
@@ -199,7 +199,7 @@ public abstract class LockHelper {
 
 	public void deleteLocks() throws OXException {
 		final ServerSession session = getSession();
-		lockManager.removeAll(id, session.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
+		lockManager.removeAll(id, session.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()));
 	}
 
 	public void transferLock(final WebdavLock lock) throws OXException {

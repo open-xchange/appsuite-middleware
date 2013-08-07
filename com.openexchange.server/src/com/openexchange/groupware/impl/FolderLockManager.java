@@ -55,19 +55,18 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.webdav.LockManager;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 public interface FolderLockManager extends LockManager{
 
 	@Override
-    void unlock(int id, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+    void unlock(int id, Context ctx, User user) throws OXException;
 
-	int lock(int entity, long timeout, Scope exclusive, Type write, int depth, String ownerDesc, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	int lock(int entity, long timeout, Scope exclusive, Type write, int depth, String ownerDesc, Context ctx, User user) throws OXException;
 
-	List<FolderLock> findFolderLocks(int entity, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	List<FolderLock> findFolderLocks(int entity, Context ctx, User user) throws OXException;
 
-	List<FolderLock> findAllLocks(int entity, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	List<FolderLock> findAllLocks(int entity, Context ctx, User user) throws OXException;
 
-	Map<Integer, List<FolderLock>> loadOwnLocks(List<Integer> name, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	Map<Integer, List<FolderLock>> loadOwnLocks(List<Integer> name, Context ctx, User user) throws OXException;
 
 }
