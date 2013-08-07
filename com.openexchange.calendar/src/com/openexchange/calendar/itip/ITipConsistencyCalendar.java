@@ -61,6 +61,7 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -71,6 +72,9 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 public class ITipConsistencyCalendar extends ITipCalendarWrapper implements AppointmentSQLInterface {
@@ -161,22 +165,17 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 		}
 
 		@Override
-        public void delete(final CalendarDataObject appointmentObject, final int inFolder,
-				final Date clientLastModified, final boolean checkPermissions)
-				throws OXException {
+        public void delete(final CalendarDataObject appointmentObject, final int inFolder, final Date clientLastModified, final boolean checkPermissions) throws OXException {
 			try {
-				final CalendarDataObject original = delegate
-						.getObjectById(appointmentObject.getObjectID());
+				final CalendarDataObject original = delegate.getObjectById(appointmentObject.getObjectID(), inFolder);
 				if (onlyOneParticipantRemaining(original)) {
 				    cleanOccurrencesAndUnitl(original);
-					delegate.deleteAppointmentObject(appointmentObject,
-							inFolder, clientLastModified, checkPermissions);
+					delegate.deleteAppointmentObject(appointmentObject, inFolder, clientLastModified, checkPermissions);
 				} else {
 					removeCurrentUserFromParticipants(original);
 					original.setExternalOrganizer(true);
 					original.setIgnoreConflicts(true);
-					delegate.updateAppointmentObject(original, inFolder,
-							clientLastModified, checkPermissions);
+					delegate.updateAppointmentObject(original, inFolder, clientLastModified, checkPermissions);
 				}
 			} catch (final SQLException e) {
 				throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
@@ -189,10 +188,10 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 		    }
         }
 
-        private void removeCurrentUserFromParticipants(
-				final CalendarDataObject original) {
+        private void removeCurrentUserFromParticipants(final CalendarDataObject original) {
 			// New participants are all externals + all resources + all resolved
 			// users from user participants - the current user participant
+            int folderOwner = getSharedFolderOwner(original, session);
 			final List<Participant> participants = new ArrayList<Participant>();
 			final Participant[] p = original.getParticipants();
 			if (p != null) {
@@ -209,7 +208,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 
 			if (u != null) {
 				for (final UserParticipant userParticipant : u) {
-					if (userParticipant.getIdentifier() != session.getUserId()) {
+					if (userParticipant.getIdentifier() != folderOwner) {
 						participants.add(userParticipant);
 						newUserParticipants.add(userParticipant);
 					}
@@ -220,13 +219,27 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 			original.setUsers(newUserParticipants);
 		}
 
+        private int getSharedFolderOwner(final CalendarDataObject cdao, final Session session) {
+            if (cdao.getFolderType() != FolderObject.SHARED) {
+                return session.getUserId();
+            }
+            try {
+                final OXFolderAccess oxfa = new OXFolderAccess(new ServerSessionAdapter(session).getContext());
+                return oxfa.getFolderOwner(cdao.getParentFolderID());
+            } catch (final OXException e) {
+                e.printStackTrace();
+                return session.getUserId();
+            }
+        }
+
 		private boolean onlyOneParticipantRemaining(final CalendarDataObject original) {
+		    int user = getSharedFolderOwner(original, session);
 			final Participant[] participants = original.getParticipants();
 			if (participants != null) {
 				for (final Participant p : participants) {
 					if (p instanceof UserParticipant) {
 						final UserParticipant up = (UserParticipant) p;
-						if (up.getIdentifier() != session.getUserId()) {
+						if (up.getIdentifier() != user) {
 							return false;
 						}
 					}
@@ -245,7 +258,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 				}
 
 				final UserParticipant up = userParticipants[0];
-				return up.getIdentifier() == session.getUserId();
+				return up.getIdentifier() == user;
 			}
 			return true;
 		}
