@@ -19,6 +19,7 @@ Import-Package:
  com.openexchange.hazelcast.configuration,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.server,
  com.openexchange.session,
  com.openexchange.sessiond,
  com.openexchange.tools.session,

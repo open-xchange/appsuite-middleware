@@ -58,7 +58,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.ServiceProvider;
-import com.openexchange.test.mock.main.ServiceMockActivator;
+import com.openexchange.test.mock.main.ContextAndServicesActivator;
 import com.openexchange.test.mock.main.ServiceMockActivatorAsserter;
 import com.openexchange.test.mock.main.test.AbstractMockTest;
 import com.openexchange.tokenlogin.impl.Services;
@@ -92,7 +92,7 @@ public class TokenLoginActivatorTest extends AbstractMockTest {
 
         this.tokenLoginActivator = new TokenLoginActivator();
 
-        this.activatedServiceMocks = ServiceMockActivator.activateServiceMocks(
+        this.activatedServiceMocks = ContextAndServicesActivator.activateContextAndServiceMocks(
             this.tokenLoginActivator,
             HazelcastConfigurationService.class,
             ConfigurationService.class);
@@ -100,7 +100,7 @@ public class TokenLoginActivatorTest extends AbstractMockTest {
 
     @Test
     public void testStartBundle_EverythingFine_TwoServicesRegistered() throws Exception {
-        HazelcastConfigurationService hazelcastService = ServiceMockActivator.getActivatedService(
+        HazelcastConfigurationService hazelcastService = ContextAndServicesActivator.getActivatedService(
             HazelcastConfigurationService.class,
             this.activatedServiceMocks);
         PowerMockito.when(hazelcastService.isEnabled()).thenReturn(false);
@@ -113,7 +113,7 @@ public class TokenLoginActivatorTest extends AbstractMockTest {
 
     @Test
     public void testStartBundle_HazelcastDisabled_NoTrackerRegistered() throws Exception {
-        HazelcastConfigurationService hazelcastService = ServiceMockActivator.getActivatedService(
+        HazelcastConfigurationService hazelcastService = ContextAndServicesActivator.getActivatedService(
             HazelcastConfigurationService.class,
             this.activatedServiceMocks);
         PowerMockito.when(hazelcastService.isEnabled()).thenReturn(false);

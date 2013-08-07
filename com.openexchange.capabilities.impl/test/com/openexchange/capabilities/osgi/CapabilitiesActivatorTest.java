@@ -52,7 +52,7 @@ package com.openexchange.capabilities.osgi;
 import org.junit.Test;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.test.mock.main.ServiceMockActivator;
+import com.openexchange.test.mock.main.ContextAndServicesActivator;
 import com.openexchange.test.mock.main.ServiceMockActivatorAsserter;
 import com.openexchange.test.mock.main.test.AbstractMockTest;
 
@@ -77,7 +77,7 @@ public class CapabilitiesActivatorTest extends AbstractMockTest {
     public void setUp() throws Exception {
         this.capabilitiesActivator = new CapabilitiesActivator();
 
-        ServiceMockActivator.activateServiceMocks(this.capabilitiesActivator, CacheService.class, ConfigurationService.class);
+        ContextAndServicesActivator.activateContextAndServiceMocks(this.capabilitiesActivator, CacheService.class, ConfigurationService.class);
     }
 
     @Test

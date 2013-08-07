@@ -92,7 +92,7 @@ public class MockFactory {
         Object mockObject = Class.forName(mockName).newInstance();
 
         if (mockObject instanceof AbstractMock) {
-            AbstractMock mock = (AbstractMock) Class.forName(mockName).newInstance();
+            AbstractMock mock = (AbstractMock) mockObject;
 
             return mock.get();
         }

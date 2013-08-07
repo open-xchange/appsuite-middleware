@@ -47,66 +47,58 @@
  *
  */
 
-package com.openexchange.test.mock.main;
+package com.openexchange.test.mock.objects.external.org.osgi.framework;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
+import org.mockito.Mockito;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import com.openexchange.osgi.ServiceProvider;
-import com.openexchange.osgi.SimpleServiceProvider;
-import com.openexchange.test.mock.main.util.InjectionFieldConstants;
-import com.openexchange.test.mock.main.util.MockUtils;
+import org.osgi.framework.Version;
+import org.powermock.api.mockito.PowerMockito;
+import com.openexchange.test.mock.objects.AbstractMock;
+
 
 /**
- * {@link ServiceMockActivator} activates mocking for the provided classes.
+ * Mock for {@link Bundle}
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
-public class ServiceMockActivator {
+public class BundleMock<T extends Bundle> extends AbstractMock {
 
     /**
-     * Logger for this class
+     * The mock for {@link BundleContext}
      */
-    protected final static Log LOG = com.openexchange.log.Log.loggerFor(ServiceMockActivator.class);
+    private T bundle;
 
     /**
-     * Creates the bundle context and activates the service mocks for the given class.
-     * 
-     * @param activator - the activator the services should be activated for
-     * @param clazz - the (service) classes which should be activated for the activator
-     * @return Map with the activated class - service mapping
+     * {@inheritDoc}
      */
-    public static ConcurrentMap<Class<?>, ServiceProvider<?>> activateServiceMocks(Object activator, Class... clazz) {
-
-        ConcurrentMap<Class<?>, ServiceProvider<?>> services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(clazz.length);
-        try {
-            BundleContext context = MockFactory.getMock(BundleContext.class);
-            MockUtils.injectValueIntoPrivateField(activator, InjectionFieldConstants.CONTEXT, context);
-
-            for (Class<?> currentClass : clazz) {
-                services.putIfAbsent(currentClass, new SimpleServiceProvider(MockFactory.getMock(currentClass)));
-            }
-        } catch (Exception exception) {
-            LOG.error("Not able to add the mock to available services!", exception);
-        }
-
-        MockUtils.injectValueIntoPrivateField(activator, InjectionFieldConstants.SERVICES, services);
-
-        return services;
+    @Override
+    public <T> T get() {
+        return (T) this.bundle;
     }
 
     /**
-     * Returns the service which was created with com.openexchange.test.mock.main.ServiceMockActivator.activateServicesForBundleActivator(Object,
-     * Class...)
-     * 
-     * @param clazz - the class the service should be returned for
-     * @param services - the list of services to search within
-     * @return Service that is required
+     * {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
-    public static <T> T getActivatedService(Class<T> clazz, ConcurrentMap<Class<?>, ServiceProvider<?>> services) {
-        return (T) services.get(clazz).getService();
+    @Override
+    protected void createMocks() throws Exception {
+        this.bundle = (T) PowerMockito.mock(Bundle.class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void initializeMembers() {
+        // nothing to do yet
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void defineMockSpecificBehaviour() {
+        Mockito.when(this.bundle.getVersion()).thenReturn(new Version(1, 1, 1));
     }
 }

@@ -51,6 +51,8 @@ package com.openexchange.test.mock.objects.config;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import org.powermock.api.mockito.PowerMockito;
 import com.openexchange.config.ConfigurationService;
@@ -130,7 +132,12 @@ public class ConfigurationServiceMock<T extends ConfigurationService> extends Ab
             LOG.warn("Not able to create a new folder and/or file", ioException);
         }
 
-        PowerMockito.when(this.configurationService.getYaml(anyString())).thenReturn(MockDefaultValues.DEFAULT_YML_FILENAME);
+        Map<String, Object> defaultMap = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("key", "value");
+        defaultMap.put("default", map);
+
+        PowerMockito.when(this.configurationService.getYaml(anyString())).thenReturn(defaultMap);
         PowerMockito.when(this.configurationService.getBoolProperty(anyString(), anyBoolean())).thenReturn(true);
         PowerMockito.when(this.configurationService.getFilterFromProperty(anyString())).thenReturn(new WildcardFilter("Filter"));
         PowerMockito.when(this.configurationService.getIntProperty(anyString(), anyInt())).thenReturn(

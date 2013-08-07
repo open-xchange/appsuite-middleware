@@ -49,8 +49,11 @@
 
 package com.openexchange.test.mock.objects.ajax.requesthandler.osgiservice;
 
+import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.test.mock.main.MockFactory;
 import com.openexchange.test.mock.objects.AbstractMock;
 
 
@@ -68,6 +71,11 @@ public class AJAXModuleActivatorMock<T extends AJAXModuleActivator> extends Abst
     private T ajaxModuleActivator;
 
     /**
+     * The mock for {@link ConfigurationService}
+     */
+    private ConfigurationService configurationService = null;
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -81,6 +89,8 @@ public class AJAXModuleActivatorMock<T extends AJAXModuleActivator> extends Abst
     @Override
     protected void createMocks() throws Exception {
         this.ajaxModuleActivator = (T) PowerMockito.mock(AJAXModuleActivator.class);
+
+        this.configurationService = MockFactory.getMock(ConfigurationService.class);
     }
 
     /**
@@ -96,6 +106,6 @@ public class AJAXModuleActivatorMock<T extends AJAXModuleActivator> extends Abst
      */
     @Override
     protected void defineMockSpecificBehaviour() throws Exception {
-        // nothing to do yet
+        Mockito.when(this.ajaxModuleActivator.getService(ConfigurationService.class)).thenReturn(this.configurationService);
     }
 }

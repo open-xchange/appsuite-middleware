@@ -86,7 +86,7 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(noSession = true)
 public class ConfigAction implements AJAXActionService {
 
-    private final ServiceLookup services;
+    private ServiceLookup services;
     private final ServerConfigServicesLookup registry;
     private final ComputedServerConfigValueService[] computedValues;
 
@@ -119,7 +119,7 @@ public class ConfigAction implements AJAXActionService {
     }
 
     @SuppressWarnings("unchecked")
-    private JSONObject getFromConfiguration(AJAXRequestData requestData, ServerSession session) throws JSONException, OXException {
+    protected JSONObject getFromConfiguration(AJAXRequestData requestData, ServerSession session) throws JSONException, OXException {
 
         Map<String, Object> serverConfigs = (Map<String, Object>) services.getService(ConfigurationService.class).getYaml("as-config.yml");
 
@@ -142,7 +142,7 @@ public class ConfigAction implements AJAXActionService {
         return (JSONObject) JSONCoercion.coerceToJSON(serverConfig);
     }
 
-    private boolean looksApplicable(Map<String, Object> value, AJAXRequestData requestData, ServerSession session) throws OXException {
+    protected boolean looksApplicable(Map<String, Object> value, AJAXRequestData requestData, ServerSession session) throws OXException {
         if (value == null) {
             return false;
         }
@@ -175,7 +175,7 @@ public class ConfigAction implements AJAXActionService {
         return false;
     }
 
-    private void addComputedValues(JSONObject serverconfig, AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
+    protected void addComputedValues(JSONObject serverconfig, AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         for (ComputedServerConfigValueService computed : computedValues) {
             computed.addValue(serverconfig, requestData, session);
         }

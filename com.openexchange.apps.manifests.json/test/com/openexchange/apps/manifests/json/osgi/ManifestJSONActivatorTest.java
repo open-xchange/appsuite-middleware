@@ -49,8 +49,9 @@
 
 package com.openexchange.apps.manifests.json.osgi;
 
-import static org.junit.Assert.fail;
 import org.junit.Test;
+import com.openexchange.test.mock.main.ContextAndServicesActivator;
+import com.openexchange.test.mock.main.ServiceMockActivatorAsserter;
 import com.openexchange.test.mock.main.test.AbstractMockTest;
 
 
@@ -62,18 +63,41 @@ import com.openexchange.test.mock.main.test.AbstractMockTest;
  */
 public class ManifestJSONActivatorTest extends AbstractMockTest {
 
+    /**
+     * Instance to test
+     */
+    private ManifestJSONActivator manifestJSONActivator = null;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public void setUp() throws Exception {
-        // nothing to do yet
+        this.manifestJSONActivator = new ManifestJSONActivator();
+
+        ContextAndServicesActivator.activateContextAndServiceMocks(
+            this.manifestJSONActivator,
+            this.manifestJSONActivator.getNeededServices());
     }
 
     @Test
-    public void test() {
-        fail("Not yet implemented");
+    public void testStartBundle_EverythingFine_AllServicesRegistered() throws Exception {
+        this.manifestJSONActivator.startBundle();
+
+        ServiceMockActivatorAsserter.verifyAllServicesRegistered(this.manifestJSONActivator, 1);
     }
 
+    @Test
+    public void testStartBundle_EverythingFine_AllTrackersRegistered() throws Exception {
+        this.manifestJSONActivator.startBundle();
+
+        ServiceMockActivatorAsserter.verifyAllServiceTrackersRegistered(this.manifestJSONActivator, 3);
+    }
+
+    @Test
+    public void testStartBundle_EverythingFine_AllTrackersOpened() throws Exception {
+        this.manifestJSONActivator.startBundle();
+
+        ServiceMockActivatorAsserter.verifyAllServiceTrackersOpened(this.manifestJSONActivator);
+    }
 }

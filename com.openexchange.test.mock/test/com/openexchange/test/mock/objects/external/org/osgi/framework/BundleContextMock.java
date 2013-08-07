@@ -49,8 +49,11 @@
 
 package com.openexchange.test.mock.objects.external.org.osgi.framework;
 
+import org.mockito.Mockito;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.powermock.api.mockito.PowerMockito;
+import com.openexchange.test.mock.main.MockFactory;
 import com.openexchange.test.mock.objects.AbstractMock;
 
 
@@ -68,6 +71,11 @@ public class BundleContextMock<T extends BundleContext> extends AbstractMock {
     private T bundleContext;
 
     /**
+     * The mock for {@link Bundle}
+     */
+    private Bundle bundle = null;
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -81,6 +89,8 @@ public class BundleContextMock<T extends BundleContext> extends AbstractMock {
     @Override
     protected void createMocks() throws Exception {
         this.bundleContext = (T) PowerMockito.mock(BundleContext.class);
+
+        this.bundle = MockFactory.getMock(Bundle.class);
     }
 
     /**
@@ -96,6 +106,6 @@ public class BundleContextMock<T extends BundleContext> extends AbstractMock {
      */
     @Override
     protected void defineMockSpecificBehaviour() {
-        // nothing to do yet
+        Mockito.when(this.bundleContext.getBundle()).thenReturn(this.bundle);
     }
 }

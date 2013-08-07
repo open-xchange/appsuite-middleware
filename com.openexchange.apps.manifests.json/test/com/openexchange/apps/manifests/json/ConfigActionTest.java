@@ -49,9 +49,26 @@
 
 package com.openexchange.apps.manifests.json;
 
-import static org.junit.Assert.fail;
+import java.util.HashMap;
+import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.apps.manifests.json.osgi.ServerConfigServicesLookup;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.test.mock.main.ContextAndServicesActivator;
+import com.openexchange.test.mock.main.MockFactory;
 import com.openexchange.test.mock.main.test.AbstractMockTest;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -63,17 +80,130 @@ import com.openexchange.test.mock.main.test.AbstractMockTest;
 public class ConfigActionTest extends AbstractMockTest {
 
     /**
+     * Instance under test
+     */
+    private ConfigAction configAction = null;
+
+    /**
+     * Mock for {@link ServerConfigServicesLookup}
+     */
+    private ServerConfigServicesLookup serverConfigServicesLookup = null;
+
+    private JSONArray manifests = new JSONArray();
+
+    /**
+     * Mock for the service lookup
+     */
+    private AJAXModuleActivator serviceLookup = null;
+
+    /**
+     * Mock for the ServerSession
+     */
+    private ServerSession serverSession = null;
+
+    private AJAXRequestData ajaxRequestData = null;
+
+    /**
      * {@inheritDoc}
      */
     @Override
     public void setUp() throws Exception {
-        // nothing to do yet
+        this.serverConfigServicesLookup = Mockito.mock(ServerConfigServicesLookup.class);
+        this.serviceLookup = MockFactory.getMock(AJAXModuleActivator.class);
+        this.serverSession = MockFactory.getMock(ServerSession.class);
+        this.ajaxRequestData = Mockito.mock(AJAXRequestData.class);
     }
 
 
     @Test
-    public void test() {
-        fail("Not yet implemented");
+    public void testPerform_EverythingFine_ReturnEmptyRequestResult() throws OXException {
+
+        this.configAction = new ConfigAction(serviceLookup, manifests, serverConfigServicesLookup) {
+
+            @Override
+            protected void addComputedValues(JSONObject serverconfig, AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
+                return;
+            }
+
+            @Override
+            protected JSONObject getFromConfiguration(AJAXRequestData requestData, ServerSession session) throws JSONException, OXException {
+                return new JSONObject();
+            }
+        };
+
+        AJAXRequestResult ajaxRequestResult = this.configAction.perform(this.ajaxRequestData, this.serverSession);
+
+        Assert.assertNotNull(ajaxRequestResult.getResultObject());
     }
 
+    @Test
+    public void testGetFromConfiguration_ConfigurationFound_ReturnJSON() throws JSONException, OXException {
+        this.configAction = new ConfigAction(serviceLookup, manifests, serverConfigServicesLookup);
+        ContextAndServicesActivator.activateServiceLookupMocks(this.configAction, ConfigurationService.class);
+
+        JSONObject jsonObject = this.configAction.getFromConfiguration(this.ajaxRequestData, this.serverSession);
+
+        Assert.assertEquals("Wrong number of configurations returned", 1, jsonObject.length());
+    }
+
+    @Test
+    public void testGetFromConfiguration_NoConfigurationFound_ReturnEmptyJSON() throws JSONException, OXException {
+        this.configAction = new ConfigAction(serviceLookup, manifests, serverConfigServicesLookup);
+        ServiceLookup lServiceLookup = ContextAndServicesActivator.activateServiceLookupMocks(this.configAction, ConfigurationService.class);
+        Mockito.when(lServiceLookup.getService(ConfigurationService.class).getYaml(Matchers.anyString())).thenReturn(null);
+
+        JSONObject jsonObject = this.configAction.getFromConfiguration(this.ajaxRequestData, this.serverSession);
+
+        Assert.assertEquals("Wrong number of configurations returned", 0, jsonObject.length());
+    }
+
+    @Test
+    public void testLooksApplicable_NotApplicable_ReturnFalse() throws OXException {
+        this.configAction = new ConfigAction(serviceLookup, manifests, serverConfigServicesLookup);
+        Map<String, Object> defaultMap = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("key", "value");
+        defaultMap.put("default", map);
+
+        boolean applicable = this.configAction.looksApplicable(defaultMap,
+            this.ajaxRequestData,
+            this.serverSession);
+
+        Assert.assertFalse(applicable);
+    }
+
+    @Test
+    public void testLooksApplicable_ValueNull_ReturnFalse() throws OXException {
+        this.configAction = new ConfigAction(serviceLookup, manifests, serverConfigServicesLookup);
+
+        boolean applicable = this.configAction.looksApplicable(null, this.ajaxRequestData, this.serverSession);
+
+        Assert.assertFalse(applicable);
+    }
+
+    @Test
+    public void testLooksApplicable_RequestDataNull_ReturnFalse() throws OXException {
+        this.configAction = new ConfigAction(serviceLookup, manifests, serverConfigServicesLookup);
+        Map<String, Object> defaultMap = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("key", "value");
+        defaultMap.put("default", map);
+
+        boolean applicable = this.configAction.looksApplicable(defaultMap, null, this.serverSession);
+
+        Assert.assertFalse(applicable);
+    }
+
+    @Test
+    public void testLooksApplicable_ServerSessionNull_ReturnFalse() throws OXException {
+        this.configAction = new ConfigAction(serviceLookup, manifests, serverConfigServicesLookup);
+        Map<String, Object> defaultMap = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("key", "value");
+        defaultMap.put("default", map);
+
+        boolean applicable = this.configAction.looksApplicable(defaultMap, this.ajaxRequestData, null);
+
+        Assert.assertFalse(applicable);
+    }
 }
