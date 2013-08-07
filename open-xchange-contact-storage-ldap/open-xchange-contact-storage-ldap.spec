@@ -1,21 +1,23 @@
 
-Name:           open-xchange-contact-storage-ldap
-BuildArch:	    noarch
-#!BuildIgnore:  post-build-checks
+Name:          open-xchange-contact-storage-ldap
+BuildArch:     noarch
+#!BuildIgnore: post-build-checks
 BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
-Version:	@OXVERSION@
-%define		ox_release 10
-Release:	%{ox_release}_<CI_CNT>.<B_CNT>
-Group:          Applications/Productivity
-License:        GPL-2.0
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
+Version:       @OXVERSION@
+%define        ox_release 10
+Release:       %{ox_release}_<CI_CNT>.<B_CNT>
+Group:         Applications/Productivity
+License:       GPL-2.0
+BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
-Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        Contact storage provider using a LDAP server as backend
+Source:        %{name}_%{version}.orig.tar.bz2
+Summary:       Contact storage provider using a LDAP server as backend
 Requires:      open-xchange-core >= @OXVERSION@
+Provides:      open-xchange-contacts-ldap = %{version}
+Obsoletes:     open-xchange-contacts-ldap <= %{version}
 
 %description
 Contact storage provider using a LDAP server as backend
