@@ -1,3 +1,7 @@
+* 2013-08-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27911: Fixed possible ArrayIndexOutOfBoundsException when transferring bytes from ByteChunk to a byte array
+
 * 2013-08-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 28021: Try and detect charset when delivering text/plain files
