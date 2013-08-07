@@ -220,7 +220,8 @@ public final class DownloadUtility {
                         }
                     }
                     final String content = MessageUtility.readStream(Streams.asInputStream(baos), cs);
-                    final byte[] tmp = content.getBytes(Charsets.forName(cs));
+                    final byte[] tmp = content.getBytes(Charsets.UTF_8);
+                    contentType.setCharsetParameter("UTF-8");
                     sz = tmp.length;
                     in = Streams.newByteArrayInputStream(tmp);
                 }
