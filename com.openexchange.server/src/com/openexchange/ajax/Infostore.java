@@ -95,7 +95,7 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
 import com.openexchange.json.OXJSONWriter;
@@ -148,7 +148,7 @@ public class Infostore extends PermissionServlet {
 
     @Override
     protected boolean hasModulePermission(final ServerSession session) {
-        return InfostoreRequest.hasPermission(session.getUserConfiguration());
+        return InfostoreRequest.hasPermission(session.getUserPermissionBits());
     }
 
     @Override
@@ -159,7 +159,7 @@ public class Infostore extends PermissionServlet {
 
         final Context ctx = session.getContext();
         final User user = session.getUser();
-        final UserConfiguration userConfig = session.getUserConfiguration();
+        final UserPermissionBits userConfig = session.getUserPermissionBits();
 
         final String action = req.getParameter(PARAMETER_ACTION);
         if (action == null) {
@@ -272,7 +272,7 @@ public class Infostore extends PermissionServlet {
 
         final Context ctx = session.getContext();
         final User user = session.getUser();
-        final UserConfiguration userConfig = session.getUserConfiguration();
+        final UserPermissionBits userConfig = session.getUserPermissionBits();
 
         final String action = req.getParameter(PARAMETER_ACTION);
         if (action == null) {
@@ -386,7 +386,7 @@ public class Infostore extends PermissionServlet {
      */
 
     // Handlers
-    protected void newDocument(final DocumentMetadata newDocument, final HttpServletResponse res, final UploadFile upload, final Context ctx, final User user, final UserConfiguration userConfig, final ServerSession session) {
+    protected void newDocument(final DocumentMetadata newDocument, final HttpServletResponse res, final UploadFile upload, final Context ctx, final User user, final UserPermissionBits userConfig, final ServerSession session) {
         // System.out.println("------> "+newDocument.getFolderId());
         res.setContentType(MIME_TEXT_HTML);
 
@@ -449,7 +449,7 @@ public class Infostore extends PermissionServlet {
         return upload != null;
     }
 
-    protected void update(final HttpServletResponse res, final int id, final DocumentMetadata updated, final long timestamp, final Metadata[] presentFields, final UploadFile upload, final Context ctx, final User user, final UserConfiguration userConfig, final ServerSession session) {
+    protected void update(final HttpServletResponse res, final int id, final DocumentMetadata updated, final long timestamp, final Metadata[] presentFields, final UploadFile upload, final Context ctx, final User user, final UserPermissionBits userConfig, final ServerSession session) {
 
         boolean version = false;
         for (final Metadata m : presentFields) {
@@ -510,7 +510,7 @@ public class Infostore extends PermissionServlet {
         }
     }
 
-    protected void copy(final HttpServletResponse res, final int id, final DocumentMetadata updated, final long timestamp, final Metadata[] presentFields, final UploadFile upload, final Context ctx, final User user, final UserConfiguration userConfig, final ServerSession session) {
+    protected void copy(final HttpServletResponse res, final int id, final DocumentMetadata updated, final long timestamp, final Metadata[] presentFields, final UploadFile upload, final Context ctx, final User user, final UserPermissionBits userConfig, final ServerSession session) {
 
         res.setContentType(MIME_TEXT_HTML);
 
@@ -588,7 +588,7 @@ public class Infostore extends PermissionServlet {
         }
     }
 
-    protected void document(final HttpServletResponse res, final String userAgent, final int id, final int version, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig, final Session session) throws IOException {
+    protected void document(final HttpServletResponse res, final String userAgent, final int id, final int version, final String contentType, final Context ctx, final User user, final UserPermissionBits userConfig, final Session session) throws IOException {
         final InfostoreFacade infostore = getInfostore();
         OutputStream os = null;
         InputStream documentData = null;

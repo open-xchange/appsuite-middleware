@@ -62,8 +62,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.test.TestInit;
@@ -86,8 +85,8 @@ public class AbstractInfostoreTest extends TestCase{
     protected User user = null;
     protected User user2 = null;
 
-    protected UserConfiguration userConfig = null;
-    protected UserConfiguration userConfig2 = null;
+    protected UserPermissionBits userConfig = null;
+    protected UserPermissionBits userConfig2 = null;
 
     protected int folderId;
     protected int folderId2;
@@ -109,7 +108,6 @@ public class AbstractInfostoreTest extends TestCase{
         Init.startServer();
 
         ContextStorage.getInstance();
-        final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
 
         final TestConfig config = new TestConfig();
         final String userName = config.getUser();
@@ -124,8 +122,8 @@ public class AbstractInfostoreTest extends TestCase{
         session = ServerSessionFactory.createServerSession(user.getId(), ctx, "blupp");
         session2 = ServerSessionFactory.createServerSession(user2.getId(), ctx, "blupp2");
 
-        userConfig = userConfigStorage.getUserConfiguration(session.getUserId(), ctx);
-        userConfig2 =  userConfigStorage.getUserConfiguration(session2.getUserId(), ctx);
+        userConfig = session.getUserPermissionBits();
+        userConfig2 = session2.getUserPermissionBits();
 
         folderId = getPrivateInfostoreFolder(ctx,user,session);
         folderId2 = getPrivateInfostoreFolder(ctx, user2, session2);
@@ -182,11 +180,11 @@ public class AbstractInfostoreTest extends TestCase{
         return user2;
     }
 
-    public UserConfiguration getUserConfig() {
+    public UserPermissionBits getUserPermissionBits() {
         return userConfig;
     }
 
-    public UserConfiguration getUserConfig2() {
+    public UserPermissionBits getUserPermissionBits2() {
         return userConfig2;
     }
 

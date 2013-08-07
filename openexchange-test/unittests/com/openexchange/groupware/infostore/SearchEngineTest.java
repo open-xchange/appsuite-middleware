@@ -64,8 +64,8 @@ import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.test.TestInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -82,8 +82,8 @@ public class SearchEngineTest extends TestCase {
     private User user = null;
     private User user2 = null;
 
-    private UserConfiguration userConfig = null;
-    private UserConfiguration userConfig2 = null;
+    private UserPermissionBits userConfig = null;
+    private UserPermissionBits userConfig2 = null;
 
     private int folderId;
     private int folderId2;
@@ -106,7 +106,7 @@ public class SearchEngineTest extends TestCase {
         Init.startServer();
 
         final ContextStorage ctxstor = ContextStorage.getInstance();
-        final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
+        final UserPermissionBitsStorage userConfigStorage = UserPermissionBitsStorage.getInstance();
 
         final int contextId = ctxstor.getContextId("defaultcontext");
         ctx = ctxstor.getContext(contextId);
@@ -117,8 +117,8 @@ public class SearchEngineTest extends TestCase {
         session = ServerSessionFactory.createServerSession(user.getId(), ctx, "blupp");
         session2 = ServerSessionFactory.createServerSession(user2.getId(), ctx, "blupp2");
 
-        userConfig = userConfigStorage.getUserConfiguration(session.getUserId(), ctx);
-        userConfig2 =  userConfigStorage.getUserConfiguration(session2.getUserId(), ctx);
+        userConfig = userConfigStorage.getUserPermissionBits(session.getUserId(), ctx);
+        userConfig2 = userConfigStorage.getUserPermissionBits(session2.getUserId(), ctx);
 
         folderId = _getPrivateInfostoreFolder(ctx,user,session);
         folderId2 = _getPrivateInfostoreFolder(ctx, user2, session2);

@@ -420,8 +420,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
             if(propertyHelper.mustWrite()) {
                 final ServerSession session = getSession();
                 final EffectivePermission perm = security.getFolderPermission(getId(),session.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()),
-					UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-							session.getContext()));
+					UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), session.getContext()));
                 if(!perm.isFolderAdmin()) {
                     throw WebdavProtocolException.Code.NO_WRITE_PERMISSION.create(getUrl(), HttpServletResponse.SC_FORBIDDEN);
                 }

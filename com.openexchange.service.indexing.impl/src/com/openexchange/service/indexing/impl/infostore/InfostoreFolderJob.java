@@ -65,7 +65,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tools.chunk.ChunkPerformer;
 import com.openexchange.groupware.tools.chunk.Performable;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
@@ -80,7 +80,7 @@ import com.openexchange.service.indexing.JobInfo;
 import com.openexchange.service.indexing.impl.internal.Services;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 
 
 /**
@@ -121,10 +121,10 @@ public class InfostoreFolderJob implements IndexingJob {
 
             ContextService contextService = Services.getService(ContextService.class);
             UserService userService = Services.getService(UserService.class);
-            UserConfigurationService userConfigurationService = Services.getService(UserConfigurationService.class);
+            UserPermissionService userConfigurationService = Services.getService(UserPermissionService.class);
             Context context = contextService.getContext(info.contextId);
             User user = userService.getUser(info.userId, context);
-            UserConfiguration userConfig = userConfigurationService.getUserConfiguration(info.userId, context);
+            UserPermissionBits userConfig = userConfigurationService.getUserPermissionBits(info.userId, context);
             IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
             final IndexAccess<DocumentMetadata> infostoreIndex = indexFacade.acquireIndexAccess(
                 Types.INFOSTORE,
@@ -166,7 +166,7 @@ public class InfostoreFolderJob implements IndexingJob {
         attachmentIndex.deleteByQuery(attachmentAllQuery);
     }
 
-    private void indexFolder(InfostoreJobInfo info, Context context, User user, UserConfiguration userConfig, final IndexAccess<DocumentMetadata> infostoreIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
+    private void indexFolder(InfostoreJobInfo info, Context context, User user, UserPermissionBits userConfig, final IndexAccess<DocumentMetadata> infostoreIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
         InfostoreFacade infostoreFacade = Services.getService(InfostoreFacade.class);
         TimedResult<DocumentMetadata> documents = infostoreFacade.getDocuments(info.folder, context, user, userConfig);
         final List<IndexDocument<DocumentMetadata>> indexDocuments = new ArrayList<IndexDocument<DocumentMetadata>>();

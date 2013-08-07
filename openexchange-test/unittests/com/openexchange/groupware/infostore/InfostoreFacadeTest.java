@@ -187,7 +187,7 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
     }
 
     private DocumentMetadata load(final int id, final ServerSession session) throws OXException {
-        return infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session.getContext(), session.getUser(), session.getUserConfiguration());
+        return infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session.getContext(), session.getUser(), session.getUserPermissionBits());
     }
 
     private DocumentMetadata createEntry(final int fid) throws OXException {

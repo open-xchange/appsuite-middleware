@@ -74,33 +74,33 @@ public class EntityLockManagerImpl extends LockManagerImpl<Lock> implements
 	}
 
 	@Override
-    public List<Lock> findLocks(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public List<Lock> findLocks(final int entity, final Context ctx, final User user) throws OXException {
 		return findLocksByEntity(Arrays.asList(Integer.valueOf(entity)), ctx).get(Integer.valueOf(entity));
 	}
 
 	@Override
-    public boolean isLocked(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public boolean isLocked(final int entity, final Context ctx, final User user) throws OXException {
 		return existsLockForEntity(Arrays.asList(new Integer[]{Integer.valueOf(entity)}), ctx);
 	}
 
 
 	@Override
-    public int lock(final int entity, final long timeout, final Scope scope, final Type type, final String ownerDesc, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public int lock(final int entity, final long timeout, final Scope scope, final Type type, final String ownerDesc, final Context ctx, final User user) throws OXException {
 		return createLock(entity, timeout, scope, type, ownerDesc, ctx, user);
 	}
 
 	@Override
-    public void unlock(final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public void unlock(final int id, final Context ctx, final User user) throws OXException {
 		removeLock(id, ctx);
 	}
 
 	@Override
-    public void removeAll(final int entity, final Context context, final User userObject, final UserConfiguration userConfiguration) throws OXException {
+    public void removeAll(final int entity, final Context context, final User userObject) throws OXException {
 		removeAllFromEntity(entity,context);
 	}
 
 	@Override
-    public void relock(final int lockId, final long timeout, final Scope scope, final Type write, final String owner, final Context context, final User userObject, final UserConfiguration userConfiguration) throws OXException {
+    public void relock(final int lockId, final long timeout, final Scope scope, final Type write, final String owner, final Context context, final User userObject) throws OXException {
 		updateLock(lockId, timeout, scope, write, owner, context);
 	}
 

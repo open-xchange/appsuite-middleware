@@ -57,7 +57,6 @@ import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.impl.FolderLockManager;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -80,7 +79,7 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
     public void folderDeleted(final FolderObject folderObj, final Session session) {
 		try {
             final ServerSession sessionObj = ServerSessionAdapter.valueOf(session);
-            folderLockManager.removeAll(folderObj.getObjectID(), sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
+            folderLockManager.removeAll(folderObj.getObjectID(), sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()));
 		} catch (final OXException e) {
 			LOG.fatal("Couldn't remove folder locks from folder "+folderObj.getObjectID()+" in context "+session.getContextId()+". Run the consistency tool.");
 		}
@@ -108,8 +107,7 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
                     infoLockManager.removeAll(
                         id,
                         session.getContext(),
-                        UserStorage.getStorageUser(session.getUserId(), session.getContext()),
-                        UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
+                        UserStorage.getStorageUser(session.getUserId(), session.getContext()));
                 } catch (OXException e) {
                     LOG.fatal("Couldn't remove locks from infoitem. Run the consistency tool.", e);
                 } catch (NumberFormatException e) {

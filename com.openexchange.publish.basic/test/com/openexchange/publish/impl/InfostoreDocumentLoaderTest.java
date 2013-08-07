@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.services.SimInfostoreFacade;
 
@@ -102,7 +102,7 @@ public class InfostoreDocumentLoaderTest extends TestCase {
             }
 
             @Override
-            protected UserConfiguration loadUserConfiguration(Context ctx, int userId) throws OXException {
+            protected UserPermissionBits loadUserPermissionBits(Context ctx, int userId) throws OXException {
                 return null;
             }
         };

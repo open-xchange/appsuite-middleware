@@ -294,7 +294,7 @@ public class Links {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 try {
                     return DATABASE.exists(oid, InfostoreFacade.CURRENT_VERSION, ct, UserStorage.getStorageUser(so
-                            .getUserId(), ct), UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+                            .getUserId(), ct), UserPermissionBitsStorage.getInstance().getUserPermissionBits(
                             so.getUserId(), ct));
                 } catch (final OXException e) {
                     LOG.error("UNABLE TO CHECK INFOSTORE READRIGHT FOR LINK", e);

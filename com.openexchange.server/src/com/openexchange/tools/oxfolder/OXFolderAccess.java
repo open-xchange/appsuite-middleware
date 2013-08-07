@@ -81,6 +81,7 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
@@ -549,12 +550,12 @@ public class OXFolderAccess {
             } else if (module == FolderObject.INFOSTORE) {
                 final InfostoreFacade db =
                     new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
-                final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(userId, ctx);
+                final UserPermissionBits userPermissionBits = getUserPermissions(session, ctx, userId, null);
                 return db.hasFolderForeignObjects(
                     folder.getObjectID(),
                     ctx,
                     UserStorage.getStorageUser(session.getUserId(), ctx),
-                    userConfig);
+                    userPermissionBits);
             } else {
                 throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(module), Integer.valueOf(ctx.getContextId()));
             }
@@ -655,8 +656,8 @@ public class OXFolderAccess {
                 try {
                     final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
                     final User user = getUser(session, ctx, userId);
-                    final UserConfiguration userConf = getUserConfig(session, ctx, userId, user);
-                    return db.countDocuments(folder.getObjectID(), ctx, user, userConf);
+                    final UserPermissionBits userPermissionBits = getUserPermissions(session, ctx, userId, user);
+                    return db.countDocuments(folder.getObjectID(), ctx, user, userPermissionBits);
                 } catch (final OXException e) {
                     if (InfostoreExceptionCodes.NO_READ_PERMISSION.equals(e)) {
                         return 0;
@@ -671,11 +672,15 @@ public class OXFolderAccess {
         }
     }
 
-    private UserConfiguration getUserConfig(final Session session, final Context ctx, final int userId, final User user) throws OXException {
+    private UserPermissionBits getUserPermissions(final Session session, final Context ctx, final int userId, final User user) throws OXException {
         if (session instanceof ServerSession) {
-            return ((ServerSession) session).getUserConfiguration();
+            return ((ServerSession) session).getUserPermissionBits();
         }
-        return UserConfigurationStorage.getInstance().getUserConfiguration(userId, user.getGroups(), ctx);
+        final UserPermissionBits bits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
+        if (null != user) {
+            bits.setGroups(user.getGroups());
+        }
+        return bits;
     }
 
     private User getUser(final Session session, final Context ctx, final int userId) {

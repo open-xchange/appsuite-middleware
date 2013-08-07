@@ -71,7 +71,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
@@ -80,7 +80,7 @@ import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 
 
 /**
@@ -113,19 +113,19 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         infostore = service;
     }
 
-    private static UserService users  = null;
+    private static volatile UserService users;
 
     public static void setUsers(final UserService service) {
         users = service;
     }
 
-    private static UserConfigurationService userConfigs = null;
+    private static volatile UserPermissionService userPermissions;
 
-    public static void setUserConfigs(final UserConfigurationService service) {
-        userConfigs = service;
+    public static void setUserPermissions(final UserPermissionService service) {
+        userPermissions = service;
     }
 
-    private static FileResponseRenderer fileResponseRenderer = null;
+    private static volatile FileResponseRenderer fileResponseRenderer;
 
     public static void setFileResponseRenderer(final FileResponseRenderer renderer) {
     	fileResponseRenderer = renderer;
@@ -154,11 +154,11 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             final int infoId = Integer.parseInt(args.get(INFOSTORE_ID));
 
             final User user = getUser(publication);
-            final UserConfiguration userConfig = getUserConfiguration(publication);
+            final UserPermissionBits userPerms = getUserPermissionBits(publication);
 
-            final DocumentMetadata metadata = loadMetadata(publication, infoId, user, userConfig);
+            final DocumentMetadata metadata = loadMetadata(publication, infoId, user, userPerms);
 
-            final InputStream fileData = loadFile(publication, infoId, user, userConfig);
+            final InputStream fileData = loadFile(publication, infoId, user, userPerms);
 
             startedWriting = true;
             writeFile(new PublicationSession(publication), metadata, fileData, req, resp);
@@ -177,14 +177,14 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         return users.getUser(publication.getUserId(), publication.getContext());
     }
 
-    private UserConfiguration getUserConfiguration(final Publication publication) throws OXException, OXException {
-        return userConfigs.getUserConfiguration(publication.getUserId(), publication.getContext());
+    private UserPermissionBits getUserPermissionBits(final Publication publication) throws OXException {
+        return userPermissions.getUserPermissionBits(publication.getUserId(), publication.getContext());
     }
 
 
-    private DocumentMetadata loadMetadata(final Publication publication, final int infoId, final User user, final UserConfiguration userConfig) throws OXException {
+    private DocumentMetadata loadMetadata(final Publication publication, final int infoId, final User user, final UserPermissionBits userPermissions) throws OXException {
         try {
-            return infostore.getDocumentMetadata(infoId, InfostoreFacade.CURRENT_VERSION, publication.getContext(), user, userConfig);
+            return infostore.getDocumentMetadata(infoId, InfostoreFacade.CURRENT_VERSION, publication.getContext(), user, userPermissions);
         } catch (final OXException e) {
             if (InfostoreExceptionCodes.NOT_EXIST.equals(e)) {
                 throw PublicationErrorMessage.NotExist.create(e, new Object[0]);
@@ -205,8 +205,8 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         return null != userAgent && userAgent.contains("MSIE");
     }
 
-    private InputStream loadFile(final Publication publication, final int infoId, final User user, final UserConfiguration userConfig) throws OXException {
-        return infostore.getDocument(infoId, InfostoreFacade.CURRENT_VERSION, publication.getContext(), user, userConfig);
+    private InputStream loadFile(final Publication publication, final int infoId, final User user, final UserPermissionBits userPermissions) throws OXException {
+        return infostore.getDocument(infoId, InfostoreFacade.CURRENT_VERSION, publication.getContext(), user, userPermissions);
     }
 
     private Map<String, String> getPublicationArguments(final HttpServletRequest req) throws UnsupportedEncodingException {

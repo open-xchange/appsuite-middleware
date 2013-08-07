@@ -62,11 +62,11 @@ public interface LockManager extends TransactionAware{
 
 	public static final int INFINITE = -1;
 
-	List<Lock> findLocks(int id, Context context, User userObject, UserConfiguration userConfiguration) throws OXException;
+	List<Lock> findLocks(int id, Context context, User userObject) throws OXException;
 
-	void unlock(int lockId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	void unlock(int lockId, Context ctx, User user) throws OXException;
 
-	void removeAll(int id, Context context, User userObject, UserConfiguration userConfiguration) throws OXException;
+	void removeAll(int id, Context context, User userObject) throws OXException;
 
 	void insertLock(int entity, Lock lock, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 

@@ -76,7 +76,7 @@ import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
@@ -119,7 +119,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
     }
 
     @Override
-    public SearchIterator<DocumentMetadata> search(String query, final Metadata[] cols, final int folderId, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    public SearchIterator<DocumentMetadata> search(String query, final Metadata[] cols, final int folderId, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
 
         List<Integer> all = new ArrayList<Integer>();
         List<Integer> own = new ArrayList<Integer>();
@@ -135,11 +135,11 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 	                final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
 	                    userId,
 	                    user.getGroups(),
-	                    userConfig.getAccessibleModules(),
+	                    userPermissions.getAccessibleModules(),
 	                    FolderObject.INFOSTORE,
 	                    ctx, con)).asQueue();
 	                for (final FolderObject folder : queue) {
-                        final EffectivePermission perm = folder.getEffectiveUserPermission(userId, userConfig);
+                        final EffectivePermission perm = folder.getEffectiveUserPermission(userId, userPermissions);
                         if (perm.canReadAllObjects()) {
                             all.add(Integer.valueOf(folder.getObjectID()));
                         } else if (perm.canReadOwnObjects()) {
@@ -147,7 +147,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                         }
 	                }
 	            } else {
-	                final EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userConfig, con);
+	                final EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userPermissions, con);
 	                if (perm.canReadAllObjects()) {
                         all.add(Integer.valueOf(folderId));
                     } else if (perm.canReadOwnObjects()) {
@@ -301,12 +301,12 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
     }
 
     @Override
-    public void index(final DocumentMetadata document, final Context ctx, final User user, final UserConfiguration userConfig) {
+    public void index(final DocumentMetadata document, final Context ctx, final User user, final UserPermissionBits userPermissions) {
         // Nothing to do.
     }
 
     @Override
-    public void unIndex0r(final int id, final Context ctx, final User user, final UserConfiguration userConfig) {
+    public void unIndex0r(final int id, final Context ctx, final User user, final UserPermissionBits userPermissions) {
         // Nothing to do.
     }
 

@@ -53,10 +53,9 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 public interface FolderTreeUtil {
 
-	List<Integer> getPath(int folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	List<Integer> getPath(int folderId, Context ctx, User user) throws OXException;
 
 }

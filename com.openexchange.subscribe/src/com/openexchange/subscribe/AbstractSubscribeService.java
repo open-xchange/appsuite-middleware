@@ -62,7 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
 import com.openexchange.server.impl.EffectivePermission;
@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link AbstractSubscribeService}
@@ -88,7 +88,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     public static final AtomicReference<FolderService> FOLDERS = new AtomicReference<FolderService>();
 
-    public static final AtomicReference<UserConfigurationService> USER_CONFIGS = new AtomicReference<UserConfigurationService>();
+    public static final AtomicReference<UserPermissionService> USER_PERMISSIONS = new AtomicReference<UserPermissionService>();
 
     @Override
     public Collection<Subscription> loadSubscriptions(final Context ctx, final String folderId, final String secret) throws OXException {
@@ -191,7 +191,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         }
         return false;
     }
-    
+
     @Override
     public void touch(Context ctx, int subscriptionId) throws OXException {
         STORAGE.get().touch(ctx, subscriptionId, System.currentTimeMillis());
@@ -336,9 +336,9 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         final List<Subscription> allSubscriptions = STORAGE.get().getSubscriptionsOfUser(serverSession.getContext(), session.getUserId());
         final String id = subscriptionSource.getId();
         final CryptoService cryptoService = CRYPTO_SERVICE.get();
-        
+
         List<Subscription> subscriptionsToDelete = new ArrayList<Subscription>(allSubscriptions.size());
-        
+
         for (final Subscription subscription : allSubscriptions) {
             if (id.equals(getSubscriptionSourceId(subscription))) {
                 final Map<String, Object> configuration = subscription.getConfiguration();
@@ -359,7 +359,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                 }
             }
         }
-        
+
         for (Subscription subscription : subscriptionsToDelete) {
             unsubscribe(subscription);
         }
@@ -411,13 +411,12 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     }
 
     private OCLPermission loadFolderPermission(final Subscription subscription) throws OXException {
-        final int folderId = Integer.valueOf(subscription.getFolderId());
+        final int folderId = Integer.parseInt(subscription.getFolderId());
         final int userId = subscription.getSession().getUserId();
         final Context ctx = subscription.getContext();
-        final UserConfiguration userConfig = USER_CONFIGS.get().getUserConfiguration(userId, ctx);
+        final UserPermissionBits userPerm = USER_PERMISSIONS.get().getUserPermissionBits(userId, ctx);
 
-
-        return new OXFolderAccess(ctx).getFolderPermission(folderId, userId, userConfig);
+        return new OXFolderAccess(ctx).getFolderPermission(folderId, userId, userPerm);
     }
 
     private static boolean isEmpty(final String string) {
