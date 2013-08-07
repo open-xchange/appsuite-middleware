@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -62,6 +62,12 @@ if [ ${1:-0} -eq 2 ]; then
     if ! ox_exists_property com.openexchange.imap.umlautFilterThreshold $pfile; then
         ox_set_property com.openexchange.imap.umlautFilterThreshold 50 $pfile
     fi
+
+    # SoftwareChange_Request-1566
+    pfile=/opt/open-xchange/etc/imap.properties
+    if ! ox_exists_property com.openexchange.imap.invalidMailboxNameCharacters $pfile; then
+        ox_set_property com.openexchange.imap.invalidMailboxNameCharacters "" $pfile
+    fi
 fi
 
 %clean
@@ -77,6 +83,10 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Aug 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.4.0
+* Mon Aug 05 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-08-09
 * Fri Aug 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 7.4.0
 * Wed Jul 17 2013 Marcus Klein <marcus.klein@open-xchange.com>

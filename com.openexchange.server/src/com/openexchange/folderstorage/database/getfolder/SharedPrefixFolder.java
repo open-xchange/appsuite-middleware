@@ -70,7 +70,7 @@ import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
@@ -140,7 +140,7 @@ public final class SharedPrefixFolder {
      * @return <code>true</code> if specified folder identifier starting with shared prefix exists; otherwise <code>false</code>
      * @throws OXException If checking existence fails
      */
-    public static boolean existsSharedPrefixFolder(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
+    public static boolean existsSharedPrefixFolder(final String folderIdentifier, final User user, final UserPermissionBits userConfiguration, final Context ctx, final Connection con) throws OXException {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
@@ -206,7 +206,7 @@ public final class SharedPrefixFolder {
      * @return The corresponding database folder with subfolders set
      * @throws OXException If returning corresponding database folder fails
      */
-    public static int[] getSharedPrefixFolderSubfoldersAsInt(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
+    public static int[] getSharedPrefixFolderSubfoldersAsInt(final String folderIdentifier, final User user, final UserPermissionBits userConfiguration, final Context ctx, final Connection con) throws OXException {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
@@ -248,13 +248,13 @@ public final class SharedPrefixFolder {
      *
      * @param folderIdentifier The folder identifier starting with shared prefix
      * @param user The user
-     * @param userConfiguration The user configuration
+     * @param userPermissionBits The user configuration
      * @param ctx The context
      * @param con The connection
      * @return The corresponding database folder with subfolders set
      * @throws OXException If returning corresponding database folder fails
      */
-    public static List<FolderIdNamePair> getSharedPrefixFolderSubfolders(final String folderIdentifier, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
+    public static List<FolderIdNamePair> getSharedPrefixFolderSubfolders(final String folderIdentifier, final User user, final UserPermissionBits userPermissionBits, final Context ctx, final Connection con) throws OXException {
         final int sharedOwner;
         try {
             sharedOwner = Integer.parseInt(folderIdentifier.substring(2));
@@ -265,7 +265,7 @@ public final class SharedPrefixFolder {
                 ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleSharedFolders(
                     user.getId(),
                     user.getGroups(),
-                    userConfiguration.getAccessibleModules(),
+                    userPermissionBits.getAccessibleModules(),
                     sharedOwner,
                     ctx,
                     null,

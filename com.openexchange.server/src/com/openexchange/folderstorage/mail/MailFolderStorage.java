@@ -241,7 +241,7 @@ public final class MailFolderStorage implements FolderStorage {
             } else {
                 final List<MailAccount> accountList;
                 final Object property = decorator.getProperty("mailRootFolders");
-                if (property != null && Boolean.parseBoolean(property.toString()) && session.getUserConfiguration().isMultipleMailAccounts()) {
+                if (property != null && Boolean.parseBoolean(property.toString()) && session.getUserPermissionBits().isMultipleMailAccounts()) {
                     final MailAccountStorageService mass = MailServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
                     final MailAccount[] accounts = mass.getUserMailAccounts(storageParameters.getUserId(), storageParameters.getContextId());
                     accountList = new ArrayList<MailAccount>(accounts.length);
@@ -894,7 +894,7 @@ public final class MailFolderStorage implements FolderStorage {
                  */
                 final List<MailAccount> accounts;
                 final ServiceRegistry serviceRegistry = MailServiceRegistry.getServiceRegistry();
-                if (session.getUserConfiguration().isMultipleMailAccounts()) {
+                if (session.getUserPermissionBits().isMultipleMailAccounts()) {
                     final MailAccountStorageService storageService = serviceRegistry.getService(MailAccountStorageService.class, true);
                     final MailAccount[] accountsArr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
                     final List<MailAccount> tmp = new ArrayList<MailAccount>(accountsArr.length);

@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -33,6 +33,26 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
+%post
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    # SoftwareChange_Request-1539
+    pfile=/opt/open-xchange/etc/hazelcast/rtResourceDirectory.properties
+    VALUE=$(ox_read_property com.openexchange.hazelcast.configuration.map.name $pfile)
+    if [ "$VALUE" == "rtResourceDirectory-0" ]; then
+        ox_set_property com.openexchange.hazelcast.configuration.map.name rtResourceDirectory-1 $pfile
+    fi
+    VALUE=$(ox_read_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds $pfile)
+    if [ "$VALUE" == "0" ]; then
+        ox_set_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds 3600 $pfile
+    fi
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -48,6 +68,10 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/hazelcast/rtIDMapping.properties
 
 %changelog
+* Tue Aug 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.4.0
+* Mon Aug 05 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-08-09
 * Fri Aug 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 7.4.0
 * Wed Jul 17 2013 Marcus Klein <marcus.klein@open-xchange.com>

@@ -56,7 +56,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -68,6 +67,9 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
@@ -221,6 +223,10 @@ public final class Tools {
 
     static UserConfiguration getUserConfiguration(final Context ctx, final int userId) throws OXException {
         return UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
+    }
+
+    static UserPermissionBits getUserPermissionBits(final Context ctx, final int userId) throws OXException {
+        return UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
     }
 
     static User getUser(final Context ctx, final int userId) throws OXException {

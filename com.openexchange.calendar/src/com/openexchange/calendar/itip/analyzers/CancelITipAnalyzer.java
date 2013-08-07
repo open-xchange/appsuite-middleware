@@ -150,7 +150,7 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer{
         if (toDelete == null) {
             return null;
         }
-        if (appointment.containsRecurrenceDatePosition() && toDelete.containsDeleteExceptions()) {
+        if (appointment.containsRecurrenceDatePosition() && toDelete.containsDeleteExceptions() && toDelete.getDeleteException() != null) {
             for (Date deleteException : toDelete.getDeleteException()) {
                 if (deleteException.equals(appointment.getRecurrenceDatePosition())) {
                     return null;

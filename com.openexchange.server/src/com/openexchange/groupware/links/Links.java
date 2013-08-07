@@ -75,8 +75,9 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
@@ -216,7 +217,7 @@ public class Links {
             public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so)
                     throws OXException {
                 final Context ctx = ContextStorage.getStorageContext(so.getContextId());
-                final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx);
+                final UserPermissionBits userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(so.getUserId(), ctx);
                 if (!userConfig.hasTask()) {
                     return false;
                 }
@@ -235,7 +236,7 @@ public class Links {
             @Override
             public boolean isReadableByID(final int oid, final int user, final int[] group, final Session so) throws OXException {
                 final Context ctx = ContextStorage.getStorageContext(so.getContextId());
-                final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx);
+                final UserPermissionBits userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(so.getUserId(), ctx);
                 if (!userConfig.hasTask()) {
                     return false;
                 }

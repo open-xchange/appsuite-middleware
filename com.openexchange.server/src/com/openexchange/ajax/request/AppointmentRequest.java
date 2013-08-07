@@ -170,7 +170,7 @@ public class AppointmentRequest extends CalendarRequest {
     }
 
     public JSONValue action(final String action, final JSONObject jsonObject) throws  JSONException, OXException{
-        if (!session.getUserConfiguration().hasCalendar()) {
+        if (!session.getUserPermissionBits().hasCalendar()) {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("calendar");
         }
         if (AJAXServlet.ACTION_CONFIRM.equalsIgnoreCase(action)) {
@@ -1268,11 +1268,11 @@ public class AppointmentRequest extends CalendarRequest {
         if (!cdao.getPrivateFlag()) {
             return false;
         }
-        
+
         if (cdao.getCreatedBy() == uid) {
             return false;
         }
-        
+
         for (UserParticipant user : cdao.getUsers()) {
             if (user.getIdentifier() == uid) {
                 return false;

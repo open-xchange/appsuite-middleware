@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -683,6 +683,14 @@ if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $p
    ox_set_property com.openexchange.contactcollector.folder.deleteDenied false $pfile
 fi
 
+# SoftwareChange_Request-1556
+pfile=/opt/open-xchange/etc/excludedupdatetasks.properties
+if ! grep "com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask" >/dev/null $pfile; then
+    echo -e "\n# v7.4.0 update tasks start here\n" >> $pfile
+    echo "# Changes the columns actual_costs and target_costs for tasks from float to NUMERIC(12, 2)" >> $pfile
+    echo "!com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask" >> $pfile
+fi
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT
 do
@@ -726,14 +734,16 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Tue Aug 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.4.0
+* Mon Aug 05 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-08-09
 * Fri Aug 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-02
 * Fri Aug 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 7.4.0
 * Fri Jul 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-07-26
-* Wed Jul 24 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-08-02
 * Wed Jul 24 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-02
 * Wed Jul 17 2013 Marcus Klein <marcus.klein@open-xchange.com>

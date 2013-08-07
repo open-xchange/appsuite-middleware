@@ -1,3 +1,9 @@
+open-xchange-drive (7.4.0-3) stable; urgency=low
+
+  * Third release candidate for 7.4.0
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Tue, 06 Aug 2013 11:42:13 +0200
+
 open-xchange-drive (7.4.0-2) stable; urgency=low
 
   * Second release candidate for 7.4.0

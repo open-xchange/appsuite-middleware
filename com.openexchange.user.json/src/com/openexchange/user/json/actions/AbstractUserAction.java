@@ -304,7 +304,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
 
     private static boolean canSeeGlobalAddressBook(final ServerSession session) throws OXException {
         final OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
-        final EffectivePermission folderPermission = folderAccess.getFolderPermission(FolderObject.SYSTEM_LDAP_FOLDER_ID, session.getUserId(), session.getUserConfiguration());
+        final EffectivePermission folderPermission = folderAccess.getFolderPermission(FolderObject.SYSTEM_LDAP_FOLDER_ID, session.getUserId(), session.getUserPermissionBits());
         return folderPermission.canReadAllObjects() && folderPermission.isFolderVisible();
     }
 }

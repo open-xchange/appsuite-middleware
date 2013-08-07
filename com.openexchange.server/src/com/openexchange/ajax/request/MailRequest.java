@@ -277,7 +277,7 @@ public final class MailRequest {
      * @param mailInterface - the instance of <code>{@link MailServletInterface}</code> to access mail module
      */
     public void action(final String action, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
-        if (!session.getUserConfiguration().hasWebMail()) {
+        if (!session.getUserPermissionBits().hasWebMail()) {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail");
         }
         if (null == action) {

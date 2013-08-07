@@ -65,7 +65,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
@@ -111,7 +111,7 @@ public final class SystemPublicFolder {
      * @return The database folder representing system public folder
      * @throws OXException If the database folder cannot be returned
      */
-    public static int[] getSystemPublicFolderSubfoldersAsInt(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
+    public static int[] getSystemPublicFolderSubfoldersAsInt(final User user, final UserPermissionBits userConfiguration, final Context ctx, final Connection con) throws OXException {
         try {
             /*
              * The system public folder
@@ -191,7 +191,7 @@ public final class SystemPublicFolder {
      * @return The database folder representing system public folder
      * @throws OXException If the database folder cannot be returned
      */
-    public static List<String[]> getSystemPublicFolderSubfolders(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
+    public static List<String[]> getSystemPublicFolderSubfolders(final User user, final UserPermissionBits userConfiguration, final Context ctx, final Connection con) throws OXException {
         try {
             /*
              * The system public folder

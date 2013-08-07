@@ -92,7 +92,7 @@ public final class ListAction extends AbstractMailAccountAction {
 
         final JSONArray ids = jData.toArray();
         final int len = ids.length();
-        final boolean multipleEnabled = session.getUserConfiguration().isMultipleMailAccounts();
+        final boolean multipleEnabled = session.getUserPermissionBits().isMultipleMailAccounts();
         final List<MailAccount> accounts = new ArrayList<MailAccount>(len);
 
         for (int i = 0, size = len; i < size; i++) {

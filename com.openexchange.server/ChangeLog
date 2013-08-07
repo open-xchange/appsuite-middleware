@@ -1,6 +1,28 @@
+* 2013-08-07 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 26475: Bad calculation of recurrence date position of a change exception on delete.
+ - Fix for bug 27238: Handle empty organizer field on delete.
+ - Fix for bug 28059: Remove Appointments in shared folder if organizer is external.
+
+* 2013-08-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27911: Fixed possible ArrayIndexOutOfBoundsException when transferring bytes from ByteChunk to a byte array
+ - Fix for bug 28099: Check for missing members in SOAP request
+ - Fix for bug 27745: Restore old lenient behavior of Apache CXG on SOAP request handling
+ - Fix for bug 28090: Don't show "Infostore" folder below private folder
+ - Fix for bug 27414: Escape white-space characters in site name to keep an intact URL string
+ - Fix for bug 28094: Remove insecure href content from HTML content
+
+* 2013-08-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28021: Try and detect charset when delivering text/plain files
+ - Fix for bug 28071: Optionally ignore UID during iCal import
+
 * 2013-08-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 27849: Add an option to specify characters that are not allowed to be contained in a mailbox name
+ - Fix for bug 28070: Retry with "MS932" charset if "Shift-JIS" charset yields \ufffd
+ - Fix for bug 28087: Properly resolve "Unified Mail"-encoded message path
 
 * 2013-08-05 - thorben.betten@open-xchange.com
 
@@ -14,6 +36,7 @@
 * 2013-08-01 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 27975: Also try full login info as read from principal URL when resolving the user
+ - Fix for bug 27901: Check for null before accessing a supplied parameter
  - Fix for bug 27961: Catch & log hazelcast exceptions during OSGi event handling
 
 * 2013-08-01 - thorben.betten@open-xchange.com

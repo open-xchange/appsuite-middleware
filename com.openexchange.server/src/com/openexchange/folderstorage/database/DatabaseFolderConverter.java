@@ -76,7 +76,7 @@ import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceExceptionCode;
@@ -252,7 +252,7 @@ public final class DatabaseFolderConverter {
      * @return The converted {@link DatabaseFolder} instance
      * @throws OXException If conversion fails
      */
-    public static DatabaseFolder convert(final FolderObject fo, final User user, final UserConfiguration userConfiguration, final Context ctx, final Session session, final boolean altNames, final Connection con) throws OXException {
+    public static DatabaseFolder convert(final FolderObject fo, final User user, final UserPermissionBits userConfiguration, final Context ctx, final Session session, final boolean altNames, final Connection con) throws OXException {
         try {
             final int folderId = fo.getObjectID();
             if (folderId < FolderObject.MIN_FOLDER_ID) { // Possibly a system folder
@@ -372,7 +372,7 @@ public final class DatabaseFolderConverter {
         }
     }
 
-    private static DatabaseFolder handleDatabaseFolder(final DatabaseFolder databaseFolder, final int folderId, final FolderObject fo, final Session session, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException, SQLException {
+    private static DatabaseFolder handleDatabaseFolder(final DatabaseFolder databaseFolder, final int folderId, final FolderObject fo, final Session session, final User user, final UserPermissionBits userConfiguration, final Context ctx, final Connection con) throws OXException, SQLException {
         final int userId = user.getId();
         if (FolderObject.PRIVATE == fo.getType() && userId != databaseFolder.getCreatedBy()) { // Shared
             /*

@@ -4588,7 +4588,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             final IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
             boolean performRollback = false;
             try {
-                if (!session.getUserConfiguration().hasInfostore()) {
+                if (!session.getUserPermissionBits().hasInfostore()) {
                     throw MailExceptionCode.NO_MAIL_ACCESS.create();
                 }
                 if (mailInterface == null) {
@@ -5134,7 +5134,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
     @Override
     protected boolean hasModulePermission(final ServerSession session) {
-        return session.getUserConfiguration().hasWebMail();
+        return session.getUserPermissionBits().hasWebMail();
     }
 
     private static String getDefaultSendAddress(final ServerSession session) throws OXException {
@@ -5165,7 +5165,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
             if (accountId != -1) {
-                if (!session.getUserConfiguration().isMultipleMailAccounts() && accountId != MailAccount.DEFAULT_ID) {
+                if (!session.getUserPermissionBits().isMultipleMailAccounts() && accountId != MailAccount.DEFAULT_ID) {
                     throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(user), Integer.valueOf(cid));
                 }
                 if (checkTransportSupport) {

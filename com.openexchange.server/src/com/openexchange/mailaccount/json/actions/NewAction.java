@@ -103,7 +103,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
 
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
-        if (!session.getUserConfiguration().isMultipleMailAccounts()) {
+        if (!session.getUserPermissionBits().isMultipleMailAccounts()) {
             throw
                 MailAccountExceptionCodes.NOT_ENABLED.create(
                 Integer.valueOf(session.getUserId()),

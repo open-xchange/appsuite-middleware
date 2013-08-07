@@ -54,8 +54,6 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import java.util.Date;
 import org.apache.commons.logging.Log;
-import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -84,6 +82,8 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.java.Strings;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -138,7 +138,7 @@ public class TaskRequest extends CalendarRequest {
     }
 
     public JSONValue action(final String action, final JSONObject json) throws JSONException, OXException {
-        if (!session.getUserConfiguration().hasTask()) {
+        if (!session.getUserPermissionBits().hasTask()) {
             throw OXException.noPermissionForModule("task");
         }
         final String sTimeZone = DataParser.parseString(json, AJAXServlet.PARAMETER_TIMEZONE);

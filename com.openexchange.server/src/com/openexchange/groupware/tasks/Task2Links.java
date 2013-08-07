@@ -51,12 +51,12 @@ package com.openexchange.groupware.tasks;
 
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 
 /**
@@ -86,7 +86,7 @@ public final class Task2Links {
      * @return <code>true</code> if the task may be read, <code>false</code>
      * otherwise.
      */
-    public static boolean checkMayReadTask(final Session session, final Context ctx, final UserConfiguration userConfig, final int taskId) {
+    public static boolean checkMayReadTask(final Session session, final Context ctx, final UserPermissionBits userConfig, final int taskId) {
         final User user;
         final Task task;
         final Set<Folder> folders;
@@ -107,7 +107,7 @@ public final class Task2Links {
         return false;
     }
 
-    public static boolean checkMayReadTask(final Session session, final Context ctx, final UserConfiguration userConfig, final int taskId, final int folderId) {
+    public static boolean checkMayReadTask(final Session session, final Context ctx, final UserPermissionBits userConfig, final int taskId, final int folderId) {
         final User user;
         final Task task;
         final Folder folder;
@@ -123,7 +123,7 @@ public final class Task2Links {
         return null == folder ? false : mayRead(ctx, user, userConfig, task, folder);
     }
 
-    private static boolean mayRead(final Context ctx, final User user, final UserConfiguration userConfig, final Task task, final Folder folder) {
+    private static boolean mayRead(final Context ctx, final User user, final UserPermissionBits userConfig, final Task task, final Folder folder) {
         final FolderObject folder2;
         try {
             folder2 = Tools.getFolder(ctx, folder.getIdentifier());

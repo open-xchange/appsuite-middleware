@@ -72,7 +72,7 @@ import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -107,7 +107,7 @@ public final class SystemSharedFolder {
      * @return The database folder representing system shared folder for given user
      * @throws OXException
      */
-    public static DatabaseFolder getSystemSharedFolder(final FolderObject fo, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
+    public static DatabaseFolder getSystemSharedFolder(final FolderObject fo, final User user, final UserPermissionBits userConfiguration, final Context ctx, final Connection con) throws OXException {
         /*
          * The system shared folder
          */
@@ -173,7 +173,7 @@ public final class SystemSharedFolder {
      * @return The subfolder identifiers of database folder representing system shared folder for given user
      * @throws OXException If the database folder cannot be returned
      */
-    public static List<String[]> getSystemSharedFolderSubfolder(final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
+    public static List<String[]> getSystemSharedFolderSubfolder(final User user, final UserPermissionBits userConfiguration, final Context ctx, final Connection con) throws OXException {
         /*
          * The system shared folder
          */

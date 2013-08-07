@@ -389,7 +389,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 }
             }
             if (accountId != -1) {
-                if (!session.getUserConfiguration().isMultipleMailAccounts() && accountId != MailAccount.DEFAULT_ID) {
+                if (!session.getUserPermissionBits().isMultipleMailAccounts() && accountId != MailAccount.DEFAULT_ID) {
                     throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(user), Integer.valueOf(cid));
                 }
                 if (checkTransportSupport) {

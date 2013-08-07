@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.capabilities.Capability;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Quota;
 
@@ -63,6 +64,11 @@ import com.openexchange.file.storage.Quota;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface DriveService {
+
+    /**
+     * The "drive" capability constant.
+     */
+    static final Capability CAPABILITY_DRIVE = new Capability("drive");
 
     /**
      * Synchronizes the folder hierarchy.

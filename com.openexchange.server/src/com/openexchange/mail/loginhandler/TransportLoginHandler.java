@@ -63,7 +63,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -108,7 +108,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
              */
             final Context ctx = login.getContext();
             final ServerSession serverSession = getServerSessionFrom(login.getSession(), ctx);
-            final UserConfiguration userConfiguration = serverSession.getUserConfiguration();
+            final UserPermissionBits userConfiguration = serverSession.getUserPermissionBits();
             if (TransportProperties.getInstance().isPublishOnExceededQuota() && userConfiguration.hasInfostore() && new OXFolderAccess(ctx).getFolderObject(
                 FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID).getEffectiveUserPermission(serverSession.getUserId(), userConfiguration).canCreateSubfolders()) {
                 String name = TransportProperties.getInstance().getPublishingInfostoreFolder();

@@ -267,7 +267,7 @@ public class RdbContactStorage extends DefaultContactStorage {
              */
             FolderObject folder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(folderID, false);
             EffectivePermission permission = folder.getEffectiveUserPermission(
-                serverSession.getUserId(), serverSession.getUserConfiguration(), connection);
+                serverSession.getUserId(), serverSession.getUserPermissionBits(), connection);
             if (false == permission.canDeleteOwnObjects()) {
                 throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(folderId), session.getContextId(), serverSession.getUserId());
             }
@@ -305,7 +305,7 @@ public class RdbContactStorage extends DefaultContactStorage {
              */
             FolderObject folder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(folderID, false);
             EffectivePermission permission = folder.getEffectiveUserPermission(
-                serverSession.getUserId(), serverSession.getUserConfiguration(), connection);
+                serverSession.getUserId(), serverSession.getUserPermissionBits(), connection);
             if (false == permission.canDeleteOwnObjects()) {
                 throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(folderID, contextID, serverSession.getUserId());
             }
@@ -349,7 +349,7 @@ public class RdbContactStorage extends DefaultContactStorage {
              */
             FolderObject folder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(folderID, false);
             EffectivePermission permission = folder.getEffectiveUserPermission(
-                serverSession.getUserId(), serverSession.getUserConfiguration(), connection);
+                serverSession.getUserId(), serverSession.getUserPermissionBits(), connection);
             if (false == permission.canDeleteOwnObjects()) {
                 throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(folderID, session.getContextId(), serverSession.getUserId());
             }

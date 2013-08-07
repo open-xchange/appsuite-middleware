@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.util.Date;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -61,7 +60,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -92,7 +92,7 @@ public class TasksDowngrade extends DowngradeListener {
     @Override
     public void downgradePerformed(final DowngradeEvent event)
         throws OXException {
-        final UserConfiguration userConfig = event.getNewUserConfiguration();
+        final UserPermissionBits userConfig = event.getNewUserConfiguration().getUserPermissionBits();
         final Session session = event.getSession();
         final Context ctx = event.getContext();
         final Connection con = event.getWriteCon();
@@ -222,7 +222,7 @@ public class TasksDowngrade extends DowngradeListener {
     }
 
     private void removeDelegations(final Session session, final Context ctx,
-        final int userId, final UserConfiguration userConfig,
+        final int userId, final UserPermissionBits userConfig,
         final Connection con) throws OXException {
         final User user = Tools.getUser(ctx, userId);
         // Find all private folder.
@@ -282,7 +282,7 @@ public class TasksDowngrade extends DowngradeListener {
     }
 
     private void removeDelegationsInFolder(final Session session,
-        final Context ctx, final UserConfiguration userConfig,
+        final Context ctx, final UserPermissionBits userConfig,
         final Connection con, final User user, final FolderObject folder)
         throws OXException {
         for (final StorageType type : StorageType.TYPES_AD) {
