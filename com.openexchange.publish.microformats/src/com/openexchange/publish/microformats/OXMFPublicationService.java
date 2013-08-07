@@ -213,13 +213,22 @@ public class OXMFPublicationService extends AbstractPublicationService {
         final Map<String, Object> configuration = publication.getConfiguration();
 
         final StringBuilder urlBuilder = new StringBuilder(rootURL);
-        urlBuilder.append('/').append(publication.getContext().getContextId()).append('/').append(configuration.get(SITE));
+        urlBuilder.append('/').append(publication.getContext().getContextId()).append('/').append(saneSiteName((String) configuration.get(SITE)));
 
         if (configuration.containsKey(SECRET)) {
             urlBuilder.append("?secret=").append(configuration.get(SECRET));
         }
 
         publication.getConfiguration().put(URL, urlBuilder.toString());
+    }
+
+    private static final Pattern P_REPLACE_SPACES = Pattern.compile("\\s+");
+
+    private String saneSiteName(final String site) {
+        if (isEmpty(site)) {
+            return site;
+        }
+        return P_REPLACE_SPACES.matcher(site).replaceAll("_");
     }
 
     protected String normalizeSiteName(final String siteName) {
@@ -335,18 +344,18 @@ public class OXMFPublicationService extends AbstractPublicationService {
         String re4="(\\d+)";    // Integer Number 1
         String re5="(\\/)"; // Any Single Character 3
         String re6="((?:[a-z][a-z]+))"; // Word 3
-        
+
         Pattern p = Pattern.compile(re1+re2+re3+re4+re5+re6,Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         Matcher m = p.matcher(URL);
         if (m.find())
         {
             String contextId=m.group(3);
             String site=m.group(5);
-            
+
             final Context ctx = service.getContext(Integer.parseInt(contextId));
             return getPublication(ctx, site);
         }
-       
+
         return null;
     }
 
@@ -359,4 +368,16 @@ public class OXMFPublicationService extends AbstractPublicationService {
         return sb.toString();
     }
 
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
 }
