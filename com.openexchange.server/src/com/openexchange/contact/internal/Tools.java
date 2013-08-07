@@ -77,6 +77,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.l10n.SuperCollator;
 import com.openexchange.log.LogFactory;
@@ -93,7 +94,9 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link Tools} - Static utility functions for the contact service.
@@ -219,7 +222,25 @@ public final class Tools {
      * @throws OXException
      */
     public static UserConfiguration getUserConfig(Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUserConfiguration();
+        }
         return ContactServiceLookup.getService(UserConfigurationService.class, true).getUserConfiguration(
+            session.getUserId(), getContext(session));
+    }
+
+    /**
+     * Gets the user permission bits.
+     *
+     * @param session
+     * @return
+     * @throws OXException
+     */
+    public static UserPermissionBits getUserPermissionBits(Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUserPermissionBits();
+        }
+        return ContactServiceLookup.getService(UserPermissionService.class, true).getUserPermissionBits(
             session.getUserId(), getContext(session));
     }
 
@@ -231,6 +252,9 @@ public final class Tools {
      * @throws OXException
      */
     public static Context getContext(Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getContext();
+        }
         return getContext(session.getContextId());
     }
 
@@ -257,7 +281,7 @@ public final class Tools {
      */
     public static EffectivePermission getPermission(Session session, FolderObject folder) throws OXException {
         try {
-            return folder.getEffectiveUserPermission(session.getUserId(), getUserConfig(session));
+            return folder.getEffectiveUserPermission(session.getUserId(), getUserPermissionBits(session));
         } catch (RuntimeException e) {
             throw ContactExceptionCodes.UNEXPECTED_ERROR.create(e);
         }
