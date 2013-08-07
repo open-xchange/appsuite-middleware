@@ -1,13 +1,13 @@
-Source: open-xchange-contact-storage-ldap
+Source: open-xchange-contacts-ldap
 Section: web
 Priority: optional
-Maintainer: Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Maintainer: Dennis Sieben <dennis.sieben@open-xchange.com>
 Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@)
 Standards-Version: 3.8.4
 Homepage: http://www.open-xchange.com
 
-Package: open-xchange-contact-storage-ldap
+Package: open-xchange-contacts-ldap
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
-Description: Contact storage provider using a LDAP server as backend
+Description: This bundle provides a global LDAP address book
