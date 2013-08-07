@@ -48,7 +48,6 @@
 
 package com.openexchange.realtime.atmosphere.http;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -60,7 +59,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.impl.stanza.builder.IQBuilder;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
@@ -121,6 +120,8 @@ public class QueryAction extends RTAction {
     private final static Log LOG = com.openexchange.log.Log.loggerFor(QueryAction.class);
     private final ServiceLookup services;
     private final StanzaSequenceGate gate;
+    //how long to wait until: EITHER a stanza was answered synchronously OR a valid sequence was constructed from incoming Stanzas
+    private final long TIMEOUT = 50;
 
     /**
      * Initializes a new {@link QueryAction}.
@@ -153,17 +154,26 @@ public class QueryAction extends RTAction {
 
         final Lock sendLock = new ReentrantLock();
         try {
+            LOG.debug(Thread.currentThread()+ ": Trying to lock");
             sendLock.lock();
+            LOG.debug(Thread.currentThread()+ ": Got lock");
             final Condition handled = sendLock.newCondition();
-            gate.handle(stanza, stanza.getTo(), new CustomGateAction() {
+            if(gate.handle(stanza, stanza.getTo(), new CustomGateAction() {
 
                 @Override
                 public void handle(final Stanza stanza, ID recipient) {
-
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Handling stanza: " + stanza);
+                        LOG.debug("Called from:", new Throwable());
+                    }
                     try {
-                        values.put("answer", services.getService(MessageDispatcher.class).sendSynchronously(stanza, request.isSet("timeout") ? request.getIntParameter("timeout") : 50, TimeUnit.SECONDS));
+                        values.put("answer", services.getService(MessageDispatcher.class).sendSynchronously(stanza, request.isSet("timeout") ? request.getIntParameter("timeout") : TIMEOUT, TimeUnit.SECONDS));
                     } catch (OXException e) {
                         values.put("exception", e);
+                    } catch (Throwable t) {
+                        ExceptionUtils.handleThrowable(t);
+                        LOG.error(t.getMessage(), t);
+                        values.put("exception", new OXException(t));
                     }
                     values.put("done", Boolean.TRUE);
                     try {
@@ -172,22 +182,34 @@ public class QueryAction extends RTAction {
                     } finally {
                         sendLock.unlock();
                     }
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Done handling Stanza");
+                    }
                 }
 
-            });
-
-            if (!values.containsKey("done")) {
-                handled.await(request.isSet("timeout") ? request.getIntParameter("timeout") : 30, TimeUnit.SECONDS);
+            })) {
+                /*
+                 *  Stanza was handled by the gate. Return ack asynchronously via the MessageDispatcher so clients can synchronously receive
+                 *  the welcomemessage
+                 */
+                acknowledgeReceipt(stanza, id);
             }
+
+            // If the sequence number isn't correct, wait for a given time until a valid sequence was constructed from incoming Stanzas
+            if (!values.containsKey("done")) {
+                if(!handled.await(request.isSet("timeout") ? request.getIntParameter("timeout") : TIMEOUT, TimeUnit.SECONDS)) {
+                    LOG.debug("Timeout while waiting for correct sequence/handling Stanza:" + new StanzaWriter().write(stanza));
+                }
+            }
+
             OXException exception = (OXException) values.get("exception");
             if (exception != null) {
                 throw RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(exception, exception.getMessage());
             }
-        //gate.handle e.g. nextSequence
-        } catch (RealtimeException e) {
+        } catch (OXException e) {
             LOG.error(e.getMessage(), e);
-            throw e;
-            //Condition.await
+            RealtimeException re = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(e, e.getMessage());
+            throw re;
         } catch (InterruptedException e) {
             LOG.error(e.getMessage(), e);
             RealtimeException re = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(e, e.getMessage());
@@ -195,8 +217,10 @@ public class QueryAction extends RTAction {
         } finally {
             sendLock.unlock();
         }
+
         Object answer = values.get("answer");
-        if(answer == null || !Stanza.class.isInstance(answer)) {
+
+        if (answer == null || !Stanza.class.isInstance(answer)) {
             RealtimeException realtimeException = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create("Request didn't yield any response.");
             LOG.error(realtimeException.getMessage(), realtimeException);
             stanza.setError(realtimeException);
@@ -206,22 +230,34 @@ public class QueryAction extends RTAction {
         Stanza answerStanza = (Stanza)answer;
         //Set the recipient to the client that originally sent the request
         answerStanza.setTo(id);
+        return new AJAXRequestResult(new StanzaWriter().write(answerStanza), "json");
+    }
 
-        //send the ack asynchronously via the MessageDispatcher so office can synchronously receive the document
+    /**
+     * Asynchronously send an acknowledgement for the received Stanza
+     * @param stanza The received Stanza
+     * @param id The ID of the recipient
+     * @throws OXException
+     */
+    private void acknowledgeReceipt(Stanza stanza, ID id) throws OXException {
         long sequenceNumber = stanza.getSequenceNumber();
         if (sequenceNumber >= 0) {
         Stanza s = new Message();
-        s.setFrom(answerStanza.getFrom());
-        s.setTo(answerStanza.getTo());
+        s.setFrom(stanza.getTo());
+        s.setTo(id);
         s.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
             sequenceNumber,
             "json",
             "atmosphere",
             "received").build()));
-            services.getService(MessageDispatcher.class).send(s);
+        
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Acknowledging Stanza: " +new StanzaWriter().write(s));
         }
-
-        return new AJAXRequestResult(new StanzaWriter().write(answerStanza), "json");
+        
+        services.getService(MessageDispatcher.class).send(s);
+        }
+        
     }
 
 }
