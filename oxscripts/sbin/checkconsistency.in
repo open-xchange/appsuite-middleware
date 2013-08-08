@@ -71,7 +71,7 @@ JAVA_OPTS="${JAVA_OXCMD_OPTS} \
 -Dopenexchange.propdir=$PROPERTIESDIR \
 -Djava.util.logging.config.file=$LOGGINGPROPERTIES"
 
-CLASSPATH="-classpath $OXBUNDLES/com.openexchange.server/com.openexchange.server.jar:$OXBUNDLES/com.openexchange.global/com.openexchange.global.jar:$OXBUNDLES/com.openexchange.java/com.openexchange.java.jar:$OXBUNDLES/org.apache.commons.logging_1.1.1.v201101211721.jar"
+CLASSPATH="-classpath $OXBUNDLES/com.openexchange.java/com.openexchange.java.jar:$OXBUNDLES/com.openexchange.server/com.openexchange.server.jar:$OXBUNDLES/com.openexchange.global/com.openexchange.global.jar:$OXBUNDLES/com.openexchange.java/com.openexchange.java.jar:$OXBUNDLES/org.apache.commons.logging_1.1.1.v201101211721.jar"
 
 umask 066
 exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.consistency.ConsistencyCheck $@
