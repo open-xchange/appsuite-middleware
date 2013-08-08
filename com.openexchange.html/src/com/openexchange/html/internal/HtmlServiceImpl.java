@@ -229,7 +229,7 @@ public final class HtmlServiceImpl implements HtmlService {
                     sb.append("src=\"").append(uri.toString()).append('"');
                 }
             } catch (final MalformedURLException e) {
-                LOG.warn("Invalid URL found in \"img\" tag: " + imgTag, e);
+                LOG.debug("Invalid URL found in \"img\" tag: " + imgTag + ". Keeping original content.", e);
                 sb.append(srcMatcher.group());
             } catch (final OXException e) {
                 LOG.warn("Proxy registration failed for \"img\" tag: " + imgTag, e);
