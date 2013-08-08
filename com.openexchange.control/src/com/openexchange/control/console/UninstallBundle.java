@@ -92,6 +92,7 @@ public final class UninstallBundle extends AbstractConsoleHandler {
             } else {
                 exc.printStackTrace();
             }
+            exit();
         } finally {
             try {
                 close();

@@ -80,6 +80,7 @@ public final class ShutDown extends AbstractConsoleHandler {
             } else {
                 exc.printStackTrace();
             }
+            exit();
         } finally {
             try {
                 close();

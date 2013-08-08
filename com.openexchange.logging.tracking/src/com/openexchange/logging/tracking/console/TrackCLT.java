@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
@@ -64,20 +63,20 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXServiceURL;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-
 import com.openexchange.exception.OXException;
 
 public class TrackCLT {
+
 	 public static void main(final String[] args) {
 	        final CommandLineParser parser = new PosixParser();
 	        String bundleName = null;
+	        boolean error = true;
 	        try {
 	            final CommandLine cmd = parser.parse(toolkitOptions, args);
 	            if (cmd.hasOption('h')) {
@@ -93,13 +92,13 @@ public class TrackCLT {
 	                    } catch (final NumberFormatException e) {
 	                        System.err.println(new StringBuilder("Port parameter is not a number: ").append(val).toString());
 	                        printHelp();
-	                        System.exit(0);
+	                        System.exit(1);
 	                    }
 	                    if (port < 1 || port > 65535) {
 	                        System.err.println(new StringBuilder("Port parameter is out of range: ").append(val).append(
 	                            ". Valid range is from 1 to 65535.").toString());
 	                        printHelp();
-	                        System.exit(0);
+	                        System.exit(1);
 	                    }
 	                }
 	            }
@@ -147,6 +146,8 @@ public class TrackCLT {
 	            } finally {
 	                jmxConnector.close();
 	            }
+
+	            error = false;
 	        } catch (final MalformedObjectNameException e) {
 	            // Cannot occur
 	            System.err.println("Invalid MBean name: " + e.getMessage());
@@ -182,6 +183,10 @@ public class TrackCLT {
 	        } catch (final RuntimeException e) {
 	            System.err.println("Problem in runtime: " + e.getMessage());
 	            printHelp();
+	        } finally {
+	            if (error) {
+	                System.exit(1);
+                }
 	        }
 	    }
 
