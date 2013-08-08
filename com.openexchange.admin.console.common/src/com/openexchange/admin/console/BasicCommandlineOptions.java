@@ -431,17 +431,33 @@ public abstract class BasicCommandlineOptions {
         this.contextNameOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_NAME_SHORT, OPT_NAME_CONTEXT_NAME_LONG, OPT_NAME_CONTEXT_NAME_DESCRIPTION, true, needed);
     }
 
+    // ------------------------------------------------------------------------------------- //
+
     protected void setAdminPassOption(final AdminParser admp) {
-        this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, NeededQuadState.possibly);
+        setAdminPassOption(admp, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION);
     }
+
+    protected void setAdminPassOption(final AdminParser admp, final String nameAdminPassLong, final String description) {
+        this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, nameAdminPassLong, description, true, NeededQuadState.possibly);
+    }
+
+    // ------------------------------------------------------------------------------------- //
 
     protected final void setCSVOutputOption(final AdminParser admp) {
         this.csvOutputOption = setLongOpt(admp, OPT_NAME_CSVOUTPUT_LONG, OPT_NAME_CSVOUTPUT_DESCRIPTION, false, false);
     }
 
+    // ------------------------------------------------------------------------------------- //
+
     protected void setAdminUserOption(final AdminParser admp) {
-        this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, NeededQuadState.possibly);
+        setAdminUserOption(admp, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION);
     }
+
+    protected void setAdminUserOption(final AdminParser admp, final String nameAdminUserLong, final String description) {
+        this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, nameAdminUserLong, description, true, NeededQuadState.possibly);
+    }
+
+    // ------------------------------------------------------------------------------------- //
 
     protected final void setSearchPatternOption(final AdminParser admp){
         this.searchOption = setShortLongOpt(admp,OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing", true, NeededQuadState.notneeded);
@@ -490,7 +506,7 @@ public abstract class BasicCommandlineOptions {
         setAdminPassOption(admp);
     }
 
-    protected final void setDefaultCommandLineOptionsWithoutContextID(final AdminParser parser) {
+    protected void setDefaultCommandLineOptionsWithoutContextID(final AdminParser parser) {
         setAdminUserOption(parser);
         setAdminPassOption(parser);
     }

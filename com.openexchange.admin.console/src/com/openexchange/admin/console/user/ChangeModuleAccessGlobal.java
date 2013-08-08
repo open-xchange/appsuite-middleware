@@ -53,11 +53,11 @@ import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIIllegalOptionValueException;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.CLIParseException;
 import com.openexchange.admin.console.CLIUnknownOptionException;
-import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
@@ -126,6 +126,12 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
         setDefaultCommandLineOptionsWithoutContextID(parser);
         filterOption = setShortLongOpt(parser, FILTER_SHORT, FILTER_LONG, FILTER_DESCRIPTION, true, NeededQuadState.notneeded);
         setModuleAccessOptions(parser, false, false);
+    }
+
+    @Override
+    protected void setDefaultCommandLineOptionsWithoutContextID(AdminParser admp) {
+        setAdminUserOption(admp, "adminmaster", "The name of the admin master");
+        setAdminPassOption(admp, "adminmasterpass", "The password of the admin master");
     }
 
     private void prepare(AdminParser parser) throws MalformedURLException, RemoteException, NotBoundException, CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException, InvalidDataException {
