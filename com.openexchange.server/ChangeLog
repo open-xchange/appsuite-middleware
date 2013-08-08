@@ -9,6 +9,7 @@
  - Fix for bug 28145: Set proper class path for 'usercopy' CLI
  - Fix for bug 28147: Lowered log level to DEBUG
  - Fix for bug 28153: Obfuscate debug loggings if it contains sensitive content
+ - Fix for bug 28126: Aligned CLI's usage text to method's purpose
 
 * 2013-08-08 - tobias.friedrich@open-xchange.com
 
