@@ -51,7 +51,7 @@ package com.openexchange.publish.interfaces;
 
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 
 
 /**
@@ -60,5 +60,5 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface UserSpecificPublicationTarget {
-    public DynamicFormDescription getUserSpecificDescription(User user, UserConfiguration configuration);
+    public DynamicFormDescription getUserSpecificDescription(User user, UserPermissionBits permissionBits);
 }

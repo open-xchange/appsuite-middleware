@@ -57,7 +57,7 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.Translator;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.interfaces.UserSpecificPublicationTarget;
@@ -87,20 +87,20 @@ public class PublicationTargetWriter {
         this.translator = translator;
     }
 
-    public JSONObject write(PublicationTarget target, User user, UserConfiguration userConfig) throws JSONException {
+    public JSONObject write(PublicationTarget target, User user, UserPermissionBits permissionBits) throws JSONException {
         JSONObject object = new JSONObject();
         object.put(ID, target.getId());
         object.put(DISPLAY_NAME, target.getDisplayName());
         object.put(ICON, target.getIcon());
         object.put(MODULE,target.getModule());
-        object.put(FORM_DESCRIPTION, writeFormDescription(getFormDescription(target, user, userConfig)));
+        object.put(FORM_DESCRIPTION, writeFormDescription(getFormDescription(target, user, permissionBits)));
         return object;
     }
 
-    private DynamicFormDescription getFormDescription(PublicationTarget target, User user, UserConfiguration userConfig) {
+    private DynamicFormDescription getFormDescription(PublicationTarget target, User user, UserPermissionBits permissionBits) {
         if(UserSpecificPublicationTarget.class.isInstance(target)) {
             UserSpecificPublicationTarget userSpecific = (UserSpecificPublicationTarget) target;
-            return userSpecific.getUserSpecificDescription(user, userConfig);
+            return userSpecific.getUserSpecificDescription(user, permissionBits);
         }
         return target.getFormDescription();
     }
@@ -109,7 +109,7 @@ public class PublicationTargetWriter {
         return new FormDescriptionWriter(translator).write(form);
     }
 
-    public JSONArray writeArray(PublicationTarget target, String[] columns, User user, UserConfiguration userConfig) throws JSONException, OXException {
+    public JSONArray writeArray(PublicationTarget target, String[] columns, User user, UserPermissionBits permissionBits) throws JSONException, OXException {
         JSONArray array = new JSONArray();
         for (String column : columns) {
             if (column.equals(ID)) {
@@ -121,7 +121,7 @@ public class PublicationTargetWriter {
             } else if (column.equals(MODULE)) {
                 array.put(target.getModule());
             } else if (column.equals(FORM_DESCRIPTION)) {
-                array.put(writeFormDescription(getFormDescription(target, user, userConfig)));
+                array.put(writeFormDescription(getFormDescription(target, user, permissionBits)));
             } else {
                 throw PublicationJSONErrorMessage.UNKNOWN_COLUMN.create(column);
             }
@@ -129,10 +129,10 @@ public class PublicationTargetWriter {
         return array;
     }
 
-    public JSONArray writeJSONArray(Collection<PublicationTarget> targets, String[] columns, User user, UserConfiguration userConfig) throws JSONException, OXException {
+    public JSONArray writeJSONArray(Collection<PublicationTarget> targets, String[] columns, User user, UserPermissionBits permissionBits) throws JSONException, OXException {
         JSONArray array = new JSONArray();
         for (PublicationTarget publicationTarget : targets) {
-            array.put(writeArray(publicationTarget, columns, user, userConfig));
+            array.put(writeArray(publicationTarget, columns, user, permissionBits));
         }
         return array;
     }

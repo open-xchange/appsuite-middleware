@@ -129,7 +129,7 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
         if(target == null) {
             throw UNKNOWN_TARGET.create(identifier);
         }
-        final JSONObject data = new PublicationTargetWriter(createTranslator(session)).write(target, session.getUser(), session.getUserConfiguration());
+        final JSONObject data = new PublicationTargetWriter(createTranslator(session)).write(target, session.getUser(), session.getUserPermissionBits());
         return data;
     }
 
@@ -142,7 +142,7 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
     private JSONValue listTargets(final JSONObject request, final ServerSession session) throws JSONException, OXException, OXException {
         final Collection<PublicationTarget> targets = discoverer.listTargets();
         final String[] columns = getColumns(request);
-        final JSONArray json = new PublicationTargetWriter(createTranslator(session)).writeJSONArray(targets, columns, session.getUser(), session.getUserConfiguration());
+        final JSONArray json = new PublicationTargetWriter(createTranslator(session)).writeJSONArray(targets, columns, session.getUser(), session.getUserPermissionBits());
         return json;
     }
 
