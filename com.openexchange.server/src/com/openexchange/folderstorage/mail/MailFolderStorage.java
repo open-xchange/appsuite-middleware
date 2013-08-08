@@ -120,6 +120,7 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.event.EventPool;
 import com.openexchange.mail.event.PooledEvent;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -798,17 +799,30 @@ public final class MailFolderStorage implements FolderStorage {
     }
 
     private static MailFolder getMailFolder(final String treeId, final int accountId, final String fullname, final boolean createIfAbsent, final Session session, final MailAccess<?, ?> mailAccess) throws OXException {
-        try {
-            return mailAccess.getFolderStorage().getFolder(fullname);
-        } catch (final OXException e) {
-            if (!createIfAbsent) {
-                throw e;
+        OXException exc = null;
+        final int max = 2;
+        int count = 0;
+
+        while (count++ < max) {
+            try {
+                return mailAccess.getFolderStorage().getFolder(fullname);
+            } catch (final OXException e) {
+                if (count < max && MimeMailExceptionCode.STORE_CLOSED.equals(e)) {
+                    MailAccess.reconnect(mailAccess);
+                    exc = e;
+                } else {
+                    if (!createIfAbsent) {
+                        throw e;
+                    }
+                    if ((!e.isPrefix("MSG") || MailExceptionCode.FOLDER_NOT_FOUND.getNumber() != e.getCode()) || FolderStorage.REAL_TREE_ID.equals(treeId)) {
+                        throw e;
+                    }
+                    return recreateMailFolder(accountId, fullname, session, mailAccess);
+                }
             }
-            if ((!e.isPrefix("MSG") || MailExceptionCode.FOLDER_NOT_FOUND.getNumber() != e.getCode()) || FolderStorage.REAL_TREE_ID.equals(treeId)) {
-                throw e;
-            }
-            return recreateMailFolder(accountId, fullname, session, mailAccess);
         }
+
+        throw null == exc ? MailExceptionCode.UNEXPECTED_ERROR.create("Connection closed.") : exc;
     }
 
     private static MailFolder recreateMailFolder(final int accountId, final String fullname, final Session session, final MailAccess<?, ?> mailAccess) throws OXException {

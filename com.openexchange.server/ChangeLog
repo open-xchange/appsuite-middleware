@@ -4,6 +4,7 @@
  - Fix for bug 28119: Return a non-zero return code for 'checkconsistency' CLI if invocation fails
  - Fix for bug 28137: Proper help text for 'changeaccessglobal' CLI
  - Fix for bug 28141: Added needed 'com.openexchange.java' bundle to CLIs
+ - Fix for bug 28143: Re-connect MailAccess instance if read timed out
 
 * 2013-08-08 - tobias.friedrich@open-xchange.com
 
