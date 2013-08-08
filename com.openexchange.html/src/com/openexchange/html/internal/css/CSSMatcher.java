@@ -597,7 +597,8 @@ public final class CSSMatcher {
             return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
         }
         final String css = CRLF.matcher(cssBuilder).replaceAll(" ");
-        final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(css.length()));
+        final int cssLength = css.length();
+        final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(cssLength));
         final Matcher m = PATTERN_STYLE_STARTING_BLOCK.matcher(css);
         if (!m.find()) {
             return false;
@@ -624,8 +625,10 @@ public final class CSSMatcher {
             cssBuilder.append(prefix);
             cssBuilder.append(cssElemsBuffer);
             cssElemsBuffer.setLength(0);
-        } while (m.find(lastPos));
-        cssElemsBuffer.append(css.substring(lastPos, css.length()));
+        } while (lastPos < cssLength && m.find(lastPos));
+        if (lastPos < cssLength) {
+            cssElemsBuffer.append(css.substring(lastPos, cssLength));
+        }
         modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
         final String tail = cssElemsBuffer.toString();
         cssElemsBuffer.setLength(0);
