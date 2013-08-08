@@ -116,6 +116,7 @@ public final class LastLoginTimeStampTool {
         int userId = -1;
         int contextId = -1;
         String client = null;
+        boolean error = true;
         try {
             final CommandLine cmd = parser.parse(toolkitOptions, args);
             if (cmd.hasOption('h')) {
@@ -131,20 +132,20 @@ public final class LastLoginTimeStampTool {
                     } catch (final NumberFormatException e) {
                         System.err.println(new StringBuilder("Port parameter is not a number: ").append(val).toString());
                         printHelp();
-                        System.exit(0);
+                        System.exit(1);
                     }
                     if (port < 1 || port > 65535) {
                         System.err.println(new StringBuilder("Port parameter is out of range: ").append(val).append(
                             ". Valid range is from 1 to 65535.").toString());
                         printHelp();
-                        System.exit(0);
+                        System.exit(1);
                     }
                 }
             }
             if (!cmd.hasOption('t')) {
                 System.err.println("Missing client identifier.");
                 printHelp();
-                System.exit(0);
+                System.exit(1);
             }
             client = cmd.getOptionValue('t');
 
@@ -156,7 +157,7 @@ public final class LastLoginTimeStampTool {
             if (!cmd.hasOption('c')) {
                 System.err.println("Missing context identifier.");
                 printHelp();
-                System.exit(0);
+                System.exit(1);
             }
             String optionValue = cmd.getOptionValue('c');
             try {
@@ -164,13 +165,13 @@ public final class LastLoginTimeStampTool {
             } catch (final NumberFormatException e) {
                 System.err.println("Context identifier parameter is not a number: " + optionValue);
                 printHelp();
-                System.exit(0);
+                System.exit(1);
             }
 
             if (!cmd.hasOption('u')) {
                 System.err.println("Missing user identifier.");
                 printHelp();
-                System.exit(0);
+                System.exit(1);
             }
             optionValue = cmd.getOptionValue('u');
             try {
@@ -178,7 +179,7 @@ public final class LastLoginTimeStampTool {
             } catch (final NumberFormatException e) {
                 System.err.println("User identifier parameter is not a number: " + optionValue);
                 printHelp();
-                System.exit(0);
+                System.exit(1);
             }
 
             String jmxLogin = null;
@@ -228,6 +229,7 @@ public final class LastLoginTimeStampTool {
                     }
                 }
             }
+            error = false;
         } catch (final ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp();
@@ -246,6 +248,10 @@ public final class LastLoginTimeStampTool {
         } catch (final RuntimeException e) {
             System.err.println("Problem in runtime: " + e.getMessage());
             printHelp();
+        } finally {
+            if (error) {
+                System.exit(1);
+            }
         }
     }
 
