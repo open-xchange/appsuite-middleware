@@ -63,7 +63,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 /**
  * This class implements a caching for the context storage. It provides a proxy implementation for the Context interface to the outside
  * world to be able to keep the referenced context data up-to-date.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class CachingContextStorage extends ContextStorage {
@@ -117,7 +117,7 @@ public class CachingContextStorage extends ContextStorage {
         }
         final Cache cache = cacheService.getCache(REGION_NAME);
         final Integer key = I(contextId);
-        Object object = cache.get(key);
+        final Object object = cache.get(key);
         if (object instanceof ContextExtended) {
             return (ContextExtended) object;
         }
@@ -168,6 +168,17 @@ public class CachingContextStorage extends ContextStorage {
             return;
         }
         final Cache cache = cacheService.getCache(REGION_NAME);
+        try {
+            final Object object = cache.get(I(contextId));
+            if (object instanceof ContextExtended) {
+                for (final String loginInfo : ((ContextExtended) object).getLoginInfo()) {
+                    cache.remove(loginInfo);
+                }
+            }
+        } catch (final Exception e) {
+            // Ignore
+        }
+        // Finally remove context
         cache.remove(I(contextId));
     }
 

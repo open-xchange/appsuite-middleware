@@ -1,3 +1,7 @@
+* 2013-08-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28139: Invalidate login-info cache entries, too, when invalidating context cachings
+
 * 2013-08-08 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 28116: Removed duplicate configuration properties 
