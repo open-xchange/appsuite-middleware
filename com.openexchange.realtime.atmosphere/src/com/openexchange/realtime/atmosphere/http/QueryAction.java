@@ -164,7 +164,6 @@ public class QueryAction extends RTAction {
                 public void handle(final Stanza stanza, ID recipient) {
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("Handling stanza: " + stanza);
-                        LOG.debug("Called from:", new Throwable());
                     }
                     try {
                         values.put("answer", services.getService(MessageDispatcher.class).sendSynchronously(stanza, request.isSet("timeout") ? request.getIntParameter("timeout") : TIMEOUT, TimeUnit.SECONDS));
