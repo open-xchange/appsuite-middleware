@@ -168,11 +168,9 @@ public class GABRestorerCLT {
             try {
                 final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
 
-                mbsc.invoke(
-                    OXFolderProperties.getObjectName(GABRestorerMBeanImpl.class.getName(), GABRestorerMBean.GAB_DOMAIN),
-                    "restoreDefaultPermissions",
-                    new Object[] { Integer.valueOf(contextId) },
-                    null);
+                final String[] signature = new String[] { int.class.getName() };
+                final Object[] params = new Object[] { Integer.valueOf(contextId) };
+                mbsc.invoke(OXFolderProperties.getObjectName(GABRestorerMBeanImpl.class.getName(), GABRestorerMBean.GAB_DOMAIN), "restoreDefaultPermissions", params, signature);
 
             } catch (final MalformedObjectNameException e) {
                 // Cannot occur
