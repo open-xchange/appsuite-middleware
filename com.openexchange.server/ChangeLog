@@ -6,6 +6,7 @@
  - Fix for bug 28141: Added needed 'com.openexchange.java' bundle to CLIs
  - Fix for bug 28143: Re-connect MailAccess instance if read timed out
  - Fix for bug 28144: Fixed possible 'java.lang.IndexOutOfBoundsException' when parsing CSS content
+ - Fix for bug 28145: Set proper class path for 'usercopy' CLI
 
 * 2013-08-08 - tobias.friedrich@open-xchange.com
 
