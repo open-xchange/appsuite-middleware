@@ -128,16 +128,16 @@ public final class CalculatePermission {
                     final int userId = userIds[i];
                     if (toLoad.containsKey(userId)) {
                         final int index = toLoad.get(userId);
-                        UserPermissionBits userConfig = configurations[i];
-                        if (null == userConfig) {
-                            userConfig = userConfStorage.getUserPermissionBits(userId, context);
+                        UserPermissionBits userPermissionBits = configurations[i];
+                        if (null == userPermissionBits) {
+                            userPermissionBits = userConfStorage.getUserPermissionBits(userId, context);
                         }
                         userizedPermissions[index] = new EffectivePermission(
                             staticPermissions[index],
                             id,
                             type,
                             contentType,
-                            userConfig,
+                            userPermissionBits,
                             Collections.<ContentType> emptyList()).setEntityInfo(userId, context);
                     }
                 }
@@ -187,7 +187,7 @@ public final class CalculatePermission {
      * @throws OXException If calculating the effective permission fails
      */
     public static Permission calculate(final Folder folder, final User user, final Context context, final java.util.List<ContentType> allowedContentTypes) throws OXException {
-        final UserPermissionBits userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), context);
+        final UserPermissionBits userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), context);
         final Permission underlyingPermission;
         {
             final int bits = -1; // folder.getBits();
@@ -208,7 +208,7 @@ public final class CalculatePermission {
                 /*
                  * Compute permission from all folder permissions
                  */
-                underlyingPermission = getMaxPermission(folder.getPermissions(), userConfiguration);
+                underlyingPermission = getMaxPermission(folder.getPermissions(), userPermissionBits);
             }
         }
         return new EffectivePermission(
@@ -216,12 +216,12 @@ public final class CalculatePermission {
             folder.getID(),
             folder.getType(),
             folder.getContentType(),
-            userConfiguration,
+            userPermissionBits,
             allowedContentTypes).setEntityInfo(user.getId(), context);
     }
 
     public static boolean isVisible(final Folder folder, final User user, final Context context, final java.util.List<ContentType> allowedContentTypes) throws OXException {
-        final UserPermissionBits userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), context);
+        final UserPermissionBits userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), context);
         final Permission underlyingPermission;
         final Type type = folder.getType();
         final ContentType contentType = folder.getContentType();
@@ -247,21 +247,21 @@ public final class CalculatePermission {
                 if (PrivateType.getInstance().equals(type)) {
                     final int createdBy = folder.getCreatedBy();
                     if (createdBy <= 0 || createdBy == user.getId()) {
-                        return hasAccess(contentType, userConfiguration, allowedContentTypes);
+                        return hasAccess(contentType, userPermissionBits, allowedContentTypes);
                     }
                 }
                 /*
                  * Check visibility by effective permission
                  */
-                underlyingPermission = getMaxPermission(folder.getPermissions(), userConfiguration);
+                underlyingPermission = getMaxPermission(folder.getPermissions(), userPermissionBits);
             }
         }
-        return new EffectivePermission(underlyingPermission, folder.getID(), type, contentType, userConfiguration, allowedContentTypes).isVisible();
+        return new EffectivePermission(underlyingPermission, folder.getID(), type, contentType, userPermissionBits, allowedContentTypes).isVisible();
     }
 
-    private static boolean hasAccess(final ContentType contentType, final UserPermissionBits userConfig, final java.util.List<ContentType> allowedContentTypes) {
+    private static boolean hasAccess(final ContentType contentType, final UserPermissionBits permissionBits, final java.util.List<ContentType> allowedContentTypes) {
         final int module = contentType.getModule();
-        if (!userConfig.hasModuleAccess(module)) {
+        if (!permissionBits.hasModuleAccess(module)) {
             return false;
         }
         if (null == allowedContentTypes || allowedContentTypes.isEmpty()) {
@@ -311,7 +311,7 @@ public final class CalculatePermission {
      * @return The effective permission for given session's user in given folder
      */
     public static Permission calculate(final Folder folder, final ServerSession session, final java.util.List<ContentType> allowedContentTypes) {
-        final UserPermissionBits userConfiguration = session.getUserPermissionBits();
+        final UserPermissionBits userPermissionBits = session.getUserPermissionBits();
         final Permission underlyingPermission;
         {
             final int bits = -1;// folder.getBits();
@@ -332,7 +332,7 @@ public final class CalculatePermission {
                 /*
                  * Compute permission from all folder permissions
                  */
-                underlyingPermission = getMaxPermission(folder.getPermissions(), userConfiguration);
+                underlyingPermission = getMaxPermission(folder.getPermissions(), userPermissionBits);
             }
         }
         return new EffectivePermission(
@@ -340,20 +340,20 @@ public final class CalculatePermission {
             folder.getID(),
             folder.getType(),
             folder.getContentType(),
-            userConfiguration,
+            userPermissionBits,
             allowedContentTypes);
     }
 
-    private static Permission getMaxPermission(final Permission[] permissions, final UserPermissionBits userConfig) {
+    private static Permission getMaxPermission(final Permission[] permissions, final UserPermissionBits userPermissionBits) {
         final DummyPermission p = new DummyPermission();
         p.setNoPermissions();
-        p.setEntity(userConfig.getUserId());
+        p.setEntity(userPermissionBits.getUserId());
 
         final int[] idArr;
         {
-            final int[] groups = userConfig.getGroups();
+            final int[] groups = userPermissionBits.getGroups();
             idArr = new int[groups.length + 1];
-            idArr[0] = userConfig.getUserId();
+            idArr[0] = userPermissionBits.getUserId();
             System.arraycopy(groups, 0, idArr, 1, groups.length);
             Arrays.sort(idArr);
         }

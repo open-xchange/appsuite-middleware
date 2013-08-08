@@ -84,7 +84,7 @@ public final class GetTask {
 
     private User user;
 
-    private UserPermissionBits userConfig;
+    private UserPermissionBits permissionBits;
 
     private final int folderId;
 
@@ -118,19 +118,19 @@ public final class GetTask {
     /**
      * Use this constructor if you want permission checks.
      */
-    GetTask(final Context ctx, final User user, final UserPermissionBits userConfig, final int folderId, final int taskId, final StorageType type) {
-        this(ctx, null, user, userConfig, folderId, taskId, type);
+    GetTask(final Context ctx, final User user, final UserPermissionBits permissionBits, final int folderId, final int taskId, final StorageType type) {
+        this(ctx, null, user, permissionBits, folderId, taskId, type);
     }
 
     /**
      * Use this constructor if you want permission checks.
      */
-    GetTask(final Context ctx, final Connection con, final User user, final UserPermissionBits userConfig, final int folderId, final int taskId, final StorageType type) {
+    GetTask(final Context ctx, final Connection con, final User user, final UserPermissionBits permissionBits, final int folderId, final int taskId, final StorageType type) {
         super();
         this.ctx = ctx;
         this.con = con;
         this.user = user;
-        this.userConfig = userConfig;
+        this.permissionBits = permissionBits;
         this.folderId = folderId;
         this.taskId = taskId;
         this.type = type;
@@ -231,13 +231,13 @@ public final class GetTask {
     }
 
     void checkPermission() throws OXException {
-        if (null == user || null == userConfig) {
+        if (null == user || null == permissionBits) {
             throw TaskExceptionCode.UNIMPLEMENTED.create();
         }
         if (null == con) {
-            Permission.canReadInFolder(ctx, user, userConfig, getFolder(), getTask());
+            Permission.canReadInFolder(ctx, user, permissionBits, getFolder(), getTask());
         } else {
-            Permission.canReadInFolder(ctx, con, user, userConfig, getFolder(), getTask());
+            Permission.canReadInFolder(ctx, con, user, permissionBits, getFolder(), getTask());
         }
         final Folder check = FolderStorage.getFolder(getFolders(), folderId);
         if (null == check || (Tools.isFolderShared(getFolder(), user) && getTask().getPrivateFlag())) {

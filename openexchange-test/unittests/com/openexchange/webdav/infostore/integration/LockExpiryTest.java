@@ -106,7 +106,7 @@ public class LockExpiryTest extends AbstractInfostoreTest {
 
         Context ctx = factory.getSession().getContext();
         User user = factory.getSession().getUser();
-        UserPermissionBits userConfig = factory.getSession().getUserPermissionBits();
+        UserPermissionBits permissionBits = factory.getSession().getUserPermissionBits();
 
         DocumentMetadataResource resource = createResource();
         final WebdavLock lock = new WebdavLock();
@@ -121,7 +121,7 @@ public class LockExpiryTest extends AbstractInfostoreTest {
         resource.lock(lock);
         newRequest();
 
-        Date lastModified = infostoreFacade.getDocumentMetadata(resource.getId(), InfostoreFacade.CURRENT_VERSION, ctx, user, userConfig).getLastModified();
+        Date lastModified = infostoreFacade.getDocumentMetadata(resource.getId(), InfostoreFacade.CURRENT_VERSION, ctx, user, permissionBits).getLastModified();
 
 
         Thread.sleep(2001);
@@ -129,7 +129,7 @@ public class LockExpiryTest extends AbstractInfostoreTest {
         // The lock has expired by now, so an updates request on the testCollection folder must include the resource
         newRequest();
 
-        Delta delta = infostoreFacade.getDelta(folderCollection.getId(), lastModified.getTime()+10, new Metadata[]{Metadata.ID_LITERAL}, true, ctx, user, userConfig);
+        Delta delta = infostoreFacade.getDelta(folderCollection.getId(), lastModified.getTime()+10, new Metadata[]{Metadata.ID_LITERAL}, true, ctx, user, permissionBits);
 
         boolean found = false;
 

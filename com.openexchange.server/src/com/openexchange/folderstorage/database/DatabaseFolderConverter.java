@@ -244,7 +244,7 @@ public final class DatabaseFolderConverter {
      *
      * @param fo The {@link FolderObject} instance
      * @param user The user
-     * @param userConfiguration The user configuration
+     * @param userPermissionBits The user permission bits
      * @param ctx The context
      * @param session The user session
      * @param altNames <code>true</code> to use alternative names for former InfoStore folders; otherwise <code>false</code>
@@ -252,7 +252,7 @@ public final class DatabaseFolderConverter {
      * @return The converted {@link DatabaseFolder} instance
      * @throws OXException If conversion fails
      */
-    public static DatabaseFolder convert(final FolderObject fo, final User user, final UserPermissionBits userConfiguration, final Context ctx, final Session session, final boolean altNames, final Connection con) throws OXException {
+    public static DatabaseFolder convert(final FolderObject fo, final User user, final UserPermissionBits userPermissionBits, final Context ctx, final Session session, final boolean altNames, final Connection con) throws OXException {
         try {
             final int folderId = fo.getObjectID();
             if (folderId < FolderObject.MIN_FOLDER_ID) { // Possibly a system folder
@@ -260,7 +260,7 @@ public final class DatabaseFolderConverter {
                     /*
                      * The system shared folder
                      */
-                    return SystemSharedFolder.getSystemSharedFolder(fo, user, userConfiguration, ctx, con);
+                    return SystemSharedFolder.getSystemSharedFolder(fo, user, userPermissionBits, ctx, con);
                 }
                 /*
                  * Look-up a system converter
@@ -286,7 +286,7 @@ public final class DatabaseFolderConverter {
                 folderConverter = CONVERTERS.get(folderId);
                 if (null != folderConverter) {
                     final DatabaseFolder databaseFolder = folderConverter.convert(fo, altNames);
-                    return handleDatabaseFolder(databaseFolder, folderId, fo, session, user, userConfiguration, ctx, con);
+                    return handleDatabaseFolder(databaseFolder, folderId, fo, session, user, userPermissionBits, ctx, con);
                 }
             }
             /*
@@ -356,7 +356,7 @@ public final class DatabaseFolderConverter {
                     final int virtualParent = getPossibleVirtualParent(fo);
                     if (virtualParent > 0) {
                         final String sFolderId = Integer.toString(folderId);
-                        for (final String[] arr : VirtualListFolder.getVirtualListFolderSubfolders(virtualParent, user, userConfiguration, ctx, con)) {
+                        for (final String[] arr : VirtualListFolder.getVirtualListFolderSubfolders(virtualParent, user, userPermissionBits, ctx, con)) {
                             if (sFolderId.equals(arr[0])) {
                                 retval.setParentID(Integer.toString(virtualParent));
                                 break;
@@ -366,13 +366,13 @@ public final class DatabaseFolderConverter {
                 }
             }
             // Handle database folder
-            return handleDatabaseFolder(retval, folderId, fo, session, user, userConfiguration, ctx, con);
+            return handleDatabaseFolder(retval, folderId, fo, session, user, userPermissionBits, ctx, con);
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
-    private static DatabaseFolder handleDatabaseFolder(final DatabaseFolder databaseFolder, final int folderId, final FolderObject fo, final Session session, final User user, final UserPermissionBits userConfiguration, final Context ctx, final Connection con) throws OXException, SQLException {
+    private static DatabaseFolder handleDatabaseFolder(final DatabaseFolder databaseFolder, final int folderId, final FolderObject fo, final Session session, final User user, final UserPermissionBits userPerm, final Context ctx, final Connection con) throws OXException, SQLException {
         final int userId = user.getId();
         if (FolderObject.PRIVATE == fo.getType() && userId != databaseFolder.getCreatedBy()) { // Shared
             /*
@@ -385,7 +385,7 @@ public final class DatabaseFolderConverter {
             /*
              * Determine user-visible subfolders
              */
-            final TIntList visibleSubfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, user.getGroups(), userConfiguration.getAccessibleModules(), ctx, con);
+            final TIntList visibleSubfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, user.getGroups(), userPerm.getAccessibleModules(), ctx, con);
             if (visibleSubfolders.isEmpty()) {
                 databaseFolder.setSubfolderIDs(new String[0]);
                 databaseFolder.setSubscribedSubfolders(false);
@@ -401,7 +401,7 @@ public final class DatabaseFolderConverter {
              * Determine parent
              */
             final int parent = fo.getParentFolderID();
-            if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == parent || !OXFolderIteratorSQL.isVisibleFolder(parent, userId, user.getGroups(), userConfiguration.getAccessibleModules(), ctx, con)) {
+            if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == parent || !OXFolderIteratorSQL.isVisibleFolder(parent, userId, user.getGroups(), userPerm.getAccessibleModules(), ctx, con)) {
                 /*
                  * Either located below private folder or parent not visible
                  */
@@ -432,7 +432,7 @@ public final class DatabaseFolderConverter {
                     /*
                      * User-sensitive loading of user infostore folder
                      */
-                    final TIntList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, user.getGroups(), userConfiguration.getAccessibleModules(), ctx, null);
+                    final TIntList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, user.getGroups(), userPerm.getAccessibleModules(), ctx, null);
                     if (subfolders.isEmpty()) {
                         databaseFolder.setSubfolderIDs(new String[0]);
                         databaseFolder.setSubscribedSubfolders(false);

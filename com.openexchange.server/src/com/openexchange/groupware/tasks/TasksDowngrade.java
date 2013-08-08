@@ -92,24 +92,24 @@ public class TasksDowngrade extends DowngradeListener {
     @Override
     public void downgradePerformed(final DowngradeEvent event)
         throws OXException {
-        final UserPermissionBits userConfig = event.getNewUserConfiguration().getUserPermissionBits();
+        final UserPermissionBits permissionBits = event.getNewUserConfiguration().getUserPermissionBits();
         final Session session = event.getSession();
         final Context ctx = event.getContext();
         final Connection con = event.getWriteCon();
-        if (!userConfig.hasTask()) {
+        if (!permissionBits.hasTask()) {
             // If the user completely loses tasks the following should be deleted:
             // - All tasks in private folders if no other user sees them.
             // - The participation of the user in all tasks.
             // - All tasks in public folders that can be only edited by this user.
             try {
-                removeTasks(session, ctx, userConfig.getUserId(), con);
+                removeTasks(session, ctx, permissionBits.getUserId(), con);
             } catch (final OXException e) {
                 throw e;
             }
-        } else if (!userConfig.canDelegateTasks()) {
+        } else if (!permissionBits.canDelegateTasks()) {
             // Remove all delegations of tasks that the user created.
             try {
-                removeDelegations(session, ctx, userConfig.getUserId(), userConfig, con);
+                removeDelegations(session, ctx, permissionBits.getUserId(), permissionBits, con);
             } catch (final OXException e) {
                 throw e;
             }
@@ -222,7 +222,7 @@ public class TasksDowngrade extends DowngradeListener {
     }
 
     private void removeDelegations(final Session session, final Context ctx,
-        final int userId, final UserPermissionBits userConfig,
+        final int userId, final UserPermissionBits permissionBits,
         final Connection con) throws OXException {
         final User user = Tools.getUser(ctx, userId);
         // Find all private folder.
@@ -234,7 +234,7 @@ public class TasksDowngrade extends DowngradeListener {
             while (iter.hasNext()) {
                 final FolderObject folder = iter.next();
                 // Remove the delegations of tasks in that folders.
-                removeDelegationsInFolder(session, ctx, userConfig, con, user,
+                removeDelegationsInFolder(session, ctx, permissionBits, con, user,
                     folder);
             }
         } finally {
@@ -258,7 +258,7 @@ public class TasksDowngrade extends DowngradeListener {
                 if (!other) {
                     // If no other user than the current downgraded is able
                     // to edit the tasks, then remove the delegations.
-                    removeDelegationsInFolder(session, ctx, userConfig, con,
+                    removeDelegationsInFolder(session, ctx, permissionBits, con,
                         user, folder);
                 }
             }
@@ -282,7 +282,7 @@ public class TasksDowngrade extends DowngradeListener {
     }
 
     private void removeDelegationsInFolder(final Session session,
-        final Context ctx, final UserPermissionBits userConfig,
+        final Context ctx, final UserPermissionBits permissionBits,
         final Connection con, final User user, final FolderObject folder)
         throws OXException {
         for (final StorageType type : StorageType.TYPES_AD) {
@@ -293,7 +293,7 @@ public class TasksDowngrade extends DowngradeListener {
                 task.setObjectID(taskId);
                 task.setParentFolderID(folder.getObjectID());
                 task.setParticipants(new Participant[0]);
-                final UpdateData update = new UpdateData(ctx, user, userConfig,
+                final UpdateData update = new UpdateData(ctx, user, permissionBits,
                     folder, task, new Date(), type);
                 update.prepareWithoutChecks();
                 update.doUpdate();

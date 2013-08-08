@@ -96,18 +96,18 @@ public class TasksSQLImpl implements TasksSQLInterface {
         final Context ctx;
         final int userId = session.getUserId();
         final User user;
-        final UserPermissionBits configuration;
+        final UserPermissionBits permissionBits;
         final FolderObject folder;
         try {
             ctx = Tools.getContext(session.getContextId());
             user = Tools.getUser(ctx, userId);
-            configuration = Tools.getUserPermissionBits(ctx, userId);
+            permissionBits = Tools.getUserPermissionBits(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
         } catch (final OXException e) {
             throw e;
         }
         try {
-            onlyOwn = Permission.canReadInFolder(ctx, user, configuration, folder);
+            onlyOwn = Permission.canReadInFolder(ctx, user, permissionBits, folder);
         } catch (final OXException e) {
             throw e;
         }
@@ -125,12 +125,12 @@ public class TasksSQLImpl implements TasksSQLInterface {
         final Context ctx;
         final int userId = session.getUserId();
         final User user;
-        final UserPermissionBits userConfig;
+        final UserPermissionBits permissionBits;
         try {
             ctx = Tools.getContext(session.getContextId());
             user = Tools.getUser(ctx, userId);
-            userConfig = Tools.getUserPermissionBits(ctx, userId);
-            final GetTask get = new GetTask(ctx, user, userConfig, folderId, taskId, StorageType.ACTIVE);
+            permissionBits = Tools.getUserPermissionBits(ctx, userId);
+            final GetTask get = new GetTask(ctx, user, permissionBits, folderId, taskId, StorageType.ACTIVE);
             return get.loadAndCheck();
         } catch (final OXException e) {
             throw e;
@@ -141,19 +141,19 @@ public class TasksSQLImpl implements TasksSQLInterface {
         final Context ctx;
         final User user;
         final int userId = session.getUserId();
-        final UserPermissionBits userConfig;
+        final UserPermissionBits permissionBits;
         FolderObject folder;
         try {
             ctx = Tools.getContext(session.getContextId());
             user = Tools.getUser(ctx, userId);
-            userConfig = Tools.getUserPermissionBits(ctx, userId);
+            permissionBits = Tools.getUserPermissionBits(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
         } catch (final OXException e) {
             throw e;
         }
         boolean onlyOwn;
         try {
-            onlyOwn = Permission.canReadInFolder(ctx, user, userConfig, folder);
+            onlyOwn = Permission.canReadInFolder(ctx, user, permissionBits, folder);
         } catch (final OXException e) {
             throw e;
         }
@@ -180,10 +180,10 @@ public class TasksSQLImpl implements TasksSQLInterface {
         final Context ctx = Tools.getContext(session.getContextId());
         final int userId = session.getUserId();
         final User user = Tools.getUser(ctx, userId);
-        final UserPermissionBits userConfig = Tools.getUserPermissionBits(ctx, userId);
+        final UserPermissionBits permissionBits = Tools.getUserPermissionBits(ctx, userId);
         final int folderId = task.getParentFolderID();
         final FolderObject folder = Tools.getFolder(ctx, folderId);
-        InsertData insert = new InsertData(ctx, user, userConfig, folder, task);
+        InsertData insert = new InsertData(ctx, user, permissionBits, folder, task);
         insert.prepare(session);
         insert.doInsert();
         insert.createReminder();
@@ -195,17 +195,17 @@ public class TasksSQLImpl implements TasksSQLInterface {
         final Context ctx;
         final int userId = session.getUserId();
         final User user;
-        final UserPermissionBits userConfig;
+        final UserPermissionBits permissionBits;
         final FolderObject folder;
         try {
             ctx = Tools.getContext(session.getContextId());
             user = Tools.getUser(ctx, userId);
-            userConfig = Tools.getUserPermissionBits(ctx, userId);
+            permissionBits = Tools.getUserPermissionBits(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
         } catch (final OXException e) {
             throw e;
         }
-        final UpdateData update = new UpdateData(ctx, user, userConfig, folder, task, lastRead);
+        final UpdateData update = new UpdateData(ctx, user, permissionBits, folder, task, lastRead);
         try {
             update.prepare();
             // TODO join doUpdate(), updateReminder() and makeNextRecurrence() in one transaction.
@@ -224,16 +224,16 @@ public class TasksSQLImpl implements TasksSQLInterface {
         final Context ctx;
         final int userId = session.getUserId();
         final User user;
-        final UserPermissionBits userConfig;
+        final UserPermissionBits permissionBits;
         try {
             ctx = Tools.getContext(session.getContextId());
             user = Tools.getUser(ctx, userId);
-            userConfig = Tools.getUserPermissionBits(ctx, userId);
+            permissionBits = Tools.getUserPermissionBits(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
         } catch (final OXException e) {
             throw e;
         }
-        final DeleteData delete = new DeleteData(ctx, user, userConfig, folder, taskId, lastModified);
+        final DeleteData delete = new DeleteData(ctx, user, permissionBits, folder, taskId, lastModified);
         try {
             delete.prepare();
             delete.doDelete();
@@ -271,18 +271,18 @@ public class TasksSQLImpl implements TasksSQLInterface {
         final Context ctx;
         final int userId = session.getUserId();
         final User user;
-        final UserPermissionBits userConfig;
+        final UserPermissionBits permissionBits;
         try {
             ctx = Tools.getContext(session.getContextId());
             user = Tools.getUser(ctx, userId);
-            userConfig = Tools.getUserPermissionBits(ctx, userId);
+            permissionBits = Tools.getUserPermissionBits(ctx, userId);
         } catch (final OXException e) {
             throw e;
         }
         // TODO Improve performance
         final List<Task> tasks = new ArrayList<Task>();
         for (final int[] objectAndFolderId : ids) {
-            final GetTask get = new GetTask(ctx, user, userConfig,
+            final GetTask get = new GetTask(ctx, user, permissionBits,
                 objectAndFolderId[1], objectAndFolderId[0], StorageType.ACTIVE);
             try {
                 tasks.add(get.loadAndCheck());
@@ -297,13 +297,13 @@ public class TasksSQLImpl implements TasksSQLInterface {
     public SearchIterator<Task> getTasksByExtendedSearch(final TaskSearchObject searchData, final int orderBy, final Order order, final int[] columns) throws OXException {
         final Context ctx;
         final User user;
-        final UserPermissionBits config;
+        final UserPermissionBits permissionBits;
         final int userId = session.getUserId();
         try {
             ctx = Tools.getContext(session.getContextId());
             user = Tools.getUser(ctx, userId);
-            config = Tools.getUserPermissionBits(ctx, userId);
-            final Search search = new Search(ctx, user, config, searchData, orderBy, order, columns);
+            permissionBits = Tools.getUserPermissionBits(ctx, userId);
+            final Search search = new Search(ctx, user, permissionBits, searchData, orderBy, order, columns);
             return search.perform();
         } catch (final OXException e) {
             throw e;
@@ -315,8 +315,8 @@ public class TasksSQLImpl implements TasksSQLInterface {
         final Context ctx = Tools.getContext(session.getContextId());
         final int userId = session.getUserId();
         final User user = Tools.getUser(ctx, userId);
-        final UserPermissionBits userConfig = Tools.getUserPermissionBits(ctx, userId);
-        boolean onlyOwn = Permission.canReadInFolder(ctx, user, userConfig, folder);
+        final UserPermissionBits permissionBits = Tools.getUserPermissionBits(ctx, userId);
+        boolean onlyOwn = Permission.canReadInFolder(ctx, user, permissionBits, folder);
         boolean isShared = FolderObject.SHARED == folder.getType(userId);
         return TaskStorage.getInstance().countTasks(ctx, userId, folder.getObjectID(), onlyOwn, isShared);
     }

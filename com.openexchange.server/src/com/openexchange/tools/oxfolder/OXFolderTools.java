@@ -1496,12 +1496,12 @@ public class OXFolderTools {
     public static boolean canDeleteAllObjectsInFolder(final FolderObject fo, final Session session, final Connection readCon) throws OXException {
         final int userId = session.getUserId();
         final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-        final UserPermissionBits userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), ctx);
+        final UserPermissionBits permissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), ctx);
         try {
             /*
              * Check user permission on folder
              */
-            final OCLPermission oclPerm = fo.getEffectiveUserPermission(userId, userConfig, readCon);
+            final OCLPermission oclPerm = fo.getEffectiveUserPermission(userId, permissionBits, readCon);
             if (!oclPerm.isFolderVisible()) {
                 /*
                  * Folder is not visible to user
@@ -1535,7 +1535,7 @@ public class OXFolderTools {
                         fo.getObjectID(),
                         ctx,
                         UserStorage.getStorageUser(session.getUserId(), ctx),
-                        userConfig);
+                        permissionBits);
                 default:
                     throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(fo.getModule()),
                         Integer.valueOf(ctx.getContextId()));

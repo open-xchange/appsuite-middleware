@@ -830,13 +830,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userConfiguration;
+            final UserPermissionBits userPermissionBits;
             {
                 final Session s = storageParameters.getSession();
                 if (s instanceof ServerSession) {
-                    userConfiguration = ((ServerSession) s).getUserPermissionBits();
+                    userPermissionBits = ((ServerSession) s).getUserPermissionBits();
                 } else {
-                    userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
+                    userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                 }
             }
 
@@ -869,7 +869,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                          */
                         final FolderObject fo = getFolderObject(folderId, ctx, con);
                         final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
-                        retval = DatabaseFolderConverter.convert(fo, user, userConfiguration, ctx, storageParameters.getSession(), altNames, con);
+                        retval = DatabaseFolderConverter.convert(fo, user, userPermissionBits, ctx, storageParameters.getSession(), altNames, con);
                     }
                 }
             } else {
@@ -931,13 +931,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         try {
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userConfiguration;
+            final UserPermissionBits userPermissionBits;
             {
                 final Session s = storageParameters.getSession();
                 if (s instanceof ServerSession) {
-                    userConfiguration = ((ServerSession) s).getUserPermissionBits();
+                    userPermissionBits = ((ServerSession) s).getUserPermissionBits();
                 } else {
-                    userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
+                    userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                 }
             }
             final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
@@ -979,7 +979,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     for (final FolderObject folderObject : getFolderObjects(map.keys(), ctx, con)) {
                         if (null != folderObject) {
                             final int index = map.get(folderObject.getObjectID());
-                            ret[index] = DatabaseFolderConverter.convert(folderObject, user, userConfiguration, ctx, session, altNames, con);
+                            ret[index] = DatabaseFolderConverter.convert(folderObject, user, userPermissionBits, ctx, session, altNames, con);
                         }
                     }
                 }
@@ -1065,13 +1065,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             final User user = storageParameters.getUser();
             final int userId = user.getId();
             final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userConfiguration;
+            final UserPermissionBits userPermissionBits;
             {
                 final Session s = storageParameters.getSession();
                 if (s instanceof ServerSession) {
-                    userConfiguration = ((ServerSession) s).getUserPermissionBits();
+                    userPermissionBits = ((ServerSession) s).getUserPermissionBits();
                 } else {
-                    userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
+                    userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                 }
             }
             final int iType = getTypeByFolderTypeWithShared(type);
@@ -1080,7 +1080,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(
                     userId,
                     user.getGroups(),
-                    userConfiguration.getAccessibleModules(),
+                    userPermissionBits.getAccessibleModules(),
                     iType,
                     new int[] { iModule },
                     ctx,
@@ -1100,7 +1100,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                      * Add global address book manually
                      */
                     final FolderObject gab = getFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx, con);
-                    if (gab.isVisible(userId, userConfiguration)) {
+                    if (gab.isVisible(userId, userPermissionBits)) {
                         gab.setFolderName(StringHelper.valueOf(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
                         list.add(gab);
                     }
@@ -1179,17 +1179,17 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             if (DatabaseFolderStorageUtility.hasSharedPrefix(parentIdentifier)) {
                 final User user = storageParameters.getUser();
                 final Context ctx = storageParameters.getContext();
-                final UserPermissionBits userConfiguration;
+                final UserPermissionBits userPermissionBits;
                 {
                     final Session s = storageParameters.getSession();
                     if (s instanceof ServerSession) {
-                        userConfiguration = ((ServerSession) s).getUserPermissionBits();
+                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
                     } else {
-                        userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
+                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                     }
                 }
                 final List<FolderIdNamePair> subfolderIds =
-                    SharedPrefixFolder.getSharedPrefixFolderSubfolders(parentIdentifier, user, userConfiguration, ctx, con);
+                    SharedPrefixFolder.getSharedPrefixFolderSubfolders(parentIdentifier, user, userPermissionBits, ctx, con);
                 final List<SortableId> list = new ArrayList<SortableId>(subfolderIds.size());
                 int i = 0;
                 for (final FolderIdNamePair props : subfolderIds) {
@@ -1216,17 +1216,17 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                  */
                 final User user = storageParameters.getUser();
                 final Context ctx = storageParameters.getContext();
-                final UserPermissionBits userConfiguration;
+                final UserPermissionBits userPermissionBits;
                 {
                     final Session s = storageParameters.getSession();
                     if (s instanceof ServerSession) {
-                        userConfiguration = ((ServerSession) s).getUserPermissionBits();
+                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
                     } else {
-                        userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
+                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                     }
                 }
                 final List<String[]> subfolderIds =
-                    VirtualListFolder.getVirtualListFolderSubfolders(parentId, user, userConfiguration, ctx, con);
+                    VirtualListFolder.getVirtualListFolderSubfolders(parentId, user, userPermissionBits, ctx, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int i = 0; i < size; i++) {
@@ -1242,16 +1242,16 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                  */
                 final User user = storageParameters.getUser();
                 final Context ctx = storageParameters.getContext();
-                final UserPermissionBits userConfiguration;
+                final UserPermissionBits userPermissionBits;
                 {
                     final Session s = storageParameters.getSession();
                     if (s instanceof ServerSession) {
-                        userConfiguration = ((ServerSession) s).getUserPermissionBits();
+                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
                     } else {
-                        userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
+                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                     }
                 }
-                final List<String[]> subfolderIds = SystemPrivateFolder.getSystemPrivateFolderSubfolders(user, userConfiguration, ctx, con);
+                final List<String[]> subfolderIds = SystemPrivateFolder.getSystemPrivateFolderSubfolders(user, userPermissionBits, ctx, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int i = 0; i < size; i++) {
@@ -1267,16 +1267,16 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                  */
                 final User user = storageParameters.getUser();
                 final Context ctx = storageParameters.getContext();
-                final UserPermissionBits userConfiguration;
+                final UserPermissionBits userPermissionBits;
                 {
                     final Session s = storageParameters.getSession();
                     if (s instanceof ServerSession) {
-                        userConfiguration = ((ServerSession) s).getUserPermissionBits();
+                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
                     } else {
-                        userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
+                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                     }
                 }
-                final List<String[]> subfolderIds = SystemSharedFolder.getSystemSharedFolderSubfolder(user, userConfiguration, ctx, con);
+                final List<String[]> subfolderIds = SystemSharedFolder.getSystemSharedFolderSubfolder(user, userPermissionBits, ctx, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int i = 0; i < size; i++) {
@@ -1292,16 +1292,16 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                  */
                 final User user = storageParameters.getUser();
                 final Context ctx = storageParameters.getContext();
-                final UserPermissionBits userConfiguration;
+                final UserPermissionBits userPermissionBits;
                 {
                     final Session s = storageParameters.getSession();
                     if (s instanceof ServerSession) {
-                        userConfiguration = ((ServerSession) s).getUserPermissionBits();
+                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
                     } else {
-                        userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
+                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                     }
                 }
-                final List<String[]> subfolderIds = SystemPublicFolder.getSystemPublicFolderSubfolders(user, userConfiguration, ctx, con);
+                final List<String[]> subfolderIds = SystemPublicFolder.getSystemPublicFolderSubfolders(user, userPermissionBits, ctx, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int i = 0; i < size; i++) {
@@ -1317,17 +1317,17 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                  */
                 final User user = storageParameters.getUser();
                 final Context ctx = storageParameters.getContext();
-                final UserPermissionBits userConfiguration;
+                final UserPermissionBits userPermissionBits;
                 {
                     final Session s = storageParameters.getSession();
                     if (s instanceof ServerSession) {
-                        userConfiguration = ((ServerSession) s).getUserPermissionBits();
+                        userPermissionBits = ((ServerSession) s).getUserPermissionBits();
                     } else {
-                        userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
+                        userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                     }
                 }
                 final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
-                final List<String[]> subfolderIds = SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userConfiguration, ctx, altNames, con);
+                final List<String[]> subfolderIds = SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userPermissionBits, ctx, altNames, con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int i = 0; i < size; i++) {
@@ -1646,13 +1646,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userConfiguration;
+            final UserPermissionBits userPermissionBits;
             {
                 final Session s = storageParameters.getSession();
                 if (s instanceof ServerSession) {
-                    userConfiguration = ((ServerSession) s).getUserPermissionBits();
+                    userPermissionBits = ((ServerSession) s).getUserPermissionBits();
                 } else {
-                    userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
+                    userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                 }
             }
 
@@ -1661,7 +1661,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             if (StorageType.WORKING.equals(storageType)) {
                 if (DatabaseFolderStorageUtility.hasSharedPrefix(folderIdentifier)) {
 
-                    retval = SharedPrefixFolder.existsSharedPrefixFolder(folderIdentifier, user, userConfiguration, ctx, con);
+                    retval = SharedPrefixFolder.existsSharedPrefixFolder(folderIdentifier, user, userPermissionBits, ctx, con);
                 } else {
                     /*
                      * A numeric folder identifier
@@ -1677,7 +1677,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                             /*
                              * A virtual database folder
                              */
-                            retval = VirtualListFolder.existsVirtualListFolder(folderId, user, userConfiguration, ctx, con);
+                            retval = VirtualListFolder.existsVirtualListFolder(folderId, user, userPermissionBits, ctx, con);
                         } else {
                             /*
                              * A non-virtual database folder
@@ -1762,13 +1762,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userConfiguration;
+            final UserPermissionBits userPermissionBits;
             {
                 final Session s = storageParameters.getSession();
                 if (s instanceof ServerSession) {
-                    userConfiguration = ((ServerSession) s).getUserPermissionBits();
+                    userPermissionBits = ((ServerSession) s).getUserPermissionBits();
                 } else {
-                    userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
+                    userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), ctx);
                 }
             }
 
@@ -1777,7 +1777,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     timeStamp,
                     user.getId(),
                     user.getGroups(),
-                    userConfiguration.getAccessibleModules(),
+                    userPermissionBits.getAccessibleModules(),
                     ctx,
                     con)).asQueue();
             final int size = q.size();

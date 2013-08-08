@@ -104,7 +104,7 @@ public class InfostorePublicationServlet extends HttpServlet {
     private static volatile InfostoreDocumentPublicationService publisher;
     private static volatile ContextService contexts;
     private static volatile UserService users;
-    private static volatile UserPermissionService userConfigs;
+    private static volatile UserPermissionService userPermissions;
 
     private static volatile InfostoreFacade infostore;
 
@@ -112,8 +112,8 @@ public class InfostorePublicationServlet extends HttpServlet {
         users = service;
     }
 
-    public static void setUserConfigService(final UserPermissionService userConfigs2) {
-        userConfigs = userConfigs2;
+    public static void setUserConfigService(final UserPermissionService userPermissions2) {
+        userPermissions = userPermissions2;
     }
 
     public static void setInfostoreFacade(final InfostoreFacade service) {
@@ -240,16 +240,16 @@ public class InfostorePublicationServlet extends HttpServlet {
             final int version = InfostoreFacade.CURRENT_VERSION;
             final Context ctx = publication.getContext();
             final User user = loadUser(publication);
-            final UserPermissionBits userConfig = loadUserConfig(publication);
+            final UserPermissionBits userPerm = loadUserPermissionBits(publication);
 
-            return infostore.getDocumentMetadata(id, version, ctx, user, userConfig);
+            return infostore.getDocumentMetadata(id, version, ctx, user, userPerm);
         } catch (final RuntimeException e) {
             throw InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.create(e, new Object[0]);
         }
     }
 
-    private static UserPermissionBits loadUserConfig(final Publication publication) throws OXException {
-        return userConfigs.getUserPermissionBits(publication.getUserId(), publication.getContext());
+    private static UserPermissionBits loadUserPermissionBits(final Publication publication) throws OXException {
+        return userPermissions.getUserPermissionBits(publication.getUserId(), publication.getContext());
     }
 
     private static User loadUser(final Publication publication) throws OXException {

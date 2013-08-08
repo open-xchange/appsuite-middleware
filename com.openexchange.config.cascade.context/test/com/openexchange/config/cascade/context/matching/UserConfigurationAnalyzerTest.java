@@ -52,7 +52,6 @@ package com.openexchange.config.cascade.context.matching;
 import java.util.Arrays;
 import java.util.Set;
 import junit.framework.TestCase;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 
 
@@ -63,15 +62,15 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
  */
 public class UserConfigurationAnalyzerTest extends TestCase {
     public void testSample() {
-        UserPermissionBits config = new UserPermissionBits(0, 0, 0);
-        config.setActiveSync(true);
-        config.setEditPassword(true);
-        config.setInfostore(true);
-        config.setWebDAVXML(true);
+        UserPermissionBits permissionBits = new UserPermissionBits(0, 0, 0);
+        permissionBits.setActiveSync(true);
+        permissionBits.setEditPassword(true);
+        permissionBits.setInfostore(true);
+        permissionBits.setWebDAVXML(true);
 
         UserConfigurationAnalyzer analyzer = new UserConfigurationAnalyzer();
 
-        Set<String> tags = analyzer.getTags(config);
+        Set<String> tags = analyzer.getTags(permissionBits);
 
         for(String tag : Arrays.asList("ucActiveSync", "ucEditPassword", "ucInfostore", "ucWebDAVXML")) {
             assertTrue(tags.toString()+ " did not contain "+tag, tags.remove(tag));

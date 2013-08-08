@@ -82,8 +82,8 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DocumentMetadataHolderFolderUpdaterStrategy.class));
 
-    private final UserService users;
-    private final UserPermissionService userPermissions;
+    final UserService users;
+    final UserPermissionService userPermissions;
     private final InfostoreFacade infostore;
 
     public DocumentMetadataHolderFolderUpdaterStrategy(final UserService users, final UserPermissionService userPermissions, final InfostoreFacade infostore) {
@@ -124,7 +124,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
         final List<DocumentMetadataHolder> list = new ArrayList<DocumentMetadataHolder>();
         final InfostoreSession sess = (InfostoreSession) session;
 
-        final SearchIterator<DocumentMetadata> documents = infostore.getDocuments(target.getFolderIdAsInt(), target.getContext(), sess.user, sess.userConfig).results();
+        final SearchIterator<DocumentMetadata> documents = infostore.getDocuments(target.getFolderIdAsInt(), target.getContext(), sess.user, sess.permissionBits).results();
         try {
             while (documents.hasNext()) {
                 list.add(new DocumentMetadataHolder(null, documents.next()));
@@ -216,12 +216,12 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
 
         public int folderId;
         public User user;
-        public UserPermissionBits userConfig;
+        public UserPermissionBits permissionBits;
         public ServerSession serverSession;
 
         public InfostoreSession(final TargetFolderDefinition target) throws OXException, OXException, OXException {
             user = users.getUser(target.getUserId(), target.getContext());
-            userConfig = userPermissions.getUserPermissionBits(target.getUserId(), target.getContext());
+            permissionBits = userPermissions.getUserPermissionBits(target.getUserId(), target.getContext());
 
             serverSession = new ServerSessionAdapter(new TargetFolderSession(target), target.getContext(), user);
             folderId = target.getFolderIdAsInt();

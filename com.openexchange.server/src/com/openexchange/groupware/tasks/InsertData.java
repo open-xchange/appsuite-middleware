@@ -85,18 +85,18 @@ public final class InsertData {
 
     private final Context ctx;
     private final User user;
-    private final UserPermissionBits userConfig;
+    private final UserPermissionBits permissionBits;
     private final FolderObject folder;
     private final Task task;
 
     private Set<TaskParticipant> parts;
     private Set<Folder> folders;
 
-    InsertData(Context ctx, User user, UserPermissionBits userConfig, FolderObject folder, Task task) {
+    InsertData(Context ctx, User user, UserPermissionBits permissionBits, FolderObject folder, Task task) {
         super();
         this.ctx = ctx;
         this.user = user;
-        this.userConfig = userConfig;
+        this.permissionBits = permissionBits;
         this.folder = folder;
         this.task = task;
     }
@@ -112,10 +112,10 @@ public final class InsertData {
 
     void prepare(Session session) throws OXException {
         parts = TaskLogic.createParticipants(ctx, task.getParticipants());
-        TaskLogic.checkNewTask(task, user.getId(), userConfig, parts);
+        TaskLogic.checkNewTask(task, user.getId(), permissionBits, parts);
 
         // Check access rights
-        Permission.checkCreate(ctx, user, userConfig, folder);
+        Permission.checkCreate(ctx, user, permissionBits, folder);
         int folderId = folder.getObjectID();
         if (task.getPrivateFlag() && (Tools.isFolderPublic(folder) || Tools.isFolderShared(folder, user))) {
             throw TaskExceptionCode.PRIVATE_FLAG.create(I(folderId));

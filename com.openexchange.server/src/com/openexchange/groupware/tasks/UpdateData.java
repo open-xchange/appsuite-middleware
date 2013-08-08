@@ -97,9 +97,9 @@ class UpdateData {
     private final User user;
 
     /**
-     * User configuration.
+     * User permission bits.
      */
-    private final UserPermissionBits userConfig;
+    private final UserPermissionBits permissionBits;
 
     /**
      * Folder for permission checks.
@@ -211,13 +211,13 @@ class UpdateData {
      *
      * @param ctx Context.
      * @param user User.
-     * @param userConfig User configuration.
+     * @param permissionBits User permission bits.
      * @param folder folder throught that the task is changed.
      * @param changed the changed task.
      * @param lastRead timestamp when the to update task was read last.
      */
-    UpdateData(final Context ctx, final User user, final UserPermissionBits userConfig, final FolderObject folder, final Task changed, final Date lastRead) {
-        this(ctx, user, userConfig, folder, changed, lastRead, ACTIVE);
+    UpdateData(final Context ctx, final User user, final UserPermissionBits permissionBits, final FolderObject folder, final Task changed, final Date lastRead) {
+        this(ctx, user, permissionBits, folder, changed, lastRead, ACTIVE);
     }
 
     /**
@@ -225,17 +225,17 @@ class UpdateData {
      *
      * @param ctx Context.
      * @param user User.
-     * @param userConfig User configuration.
+     * @param permissionBits User permission bits.
      * @param folder folder throught that the task is changed.
      * @param changed the changed task.
      * @param lastRead timestamp when the to update task was read last.
      * @param type ACTIVE or DELETED.
      */
-    UpdateData(final Context ctx, final User user, final UserPermissionBits userConfig, final FolderObject folder, final Task changed, final Date lastRead, final StorageType type) {
+    UpdateData(final Context ctx, final User user, final UserPermissionBits permissionBits, final FolderObject folder, final Task changed, final Date lastRead, final StorageType type) {
         super();
         this.ctx = ctx;
         this.user = user;
-        this.userConfig = userConfig;
+        this.permissionBits = permissionBits;
         this.folder = folder;
         this.changed = changed;
         this.lastRead = lastRead;
@@ -330,7 +330,7 @@ class UpdateData {
         }
         checkPermission();
         // Do logic checks.
-        TaskLogic.checkUpdateTask(changed, getOrigTask(), user, userConfig, getChangedParticipants(), getOrigParticipants());
+        TaskLogic.checkUpdateTask(changed, getOrigTask(), user, permissionBits, getChangedParticipants(), getOrigParticipants());
         // Now we do the damn stuff.
         prepareWithoutChecks();
     }
@@ -424,8 +424,8 @@ class UpdateData {
         if (isMove()) {
             // task is deleted in source folder and created in destination
             // folder.
-            Permission.checkDelete(ctx, user, userConfig, folder, getOrigTask());
-            Permission.checkCreate(ctx, user, userConfig, getDestFolder());
+            Permission.checkDelete(ctx, user, permissionBits, folder, getOrigTask());
+            Permission.checkCreate(ctx, user, permissionBits, getDestFolder());
             // move out of a shared folder is not allowed.
             if (Tools.isFolderShared(folder, user)) {
                 throw TaskExceptionCode.NO_SHARED_MOVE.create(folder.getFolderName(), I(getFolderId()));
@@ -439,7 +439,7 @@ class UpdateData {
                 throw TaskExceptionCode.NO_PRIVATE_MOVE_TO_PUBLIC.create(getDestFolder().getFolderName(), I(getDestFolderId()));
             }
         } else {
-            Permission.checkWriteInFolder(ctx, user, userConfig, folder, getOrigTask());
+            Permission.checkWriteInFolder(ctx, user, permissionBits, folder, getOrigTask());
             // Check if task appears in folder.
             if (null == FolderStorage.getFolder(getOrigFolder(), getFolderId())) {
                 throw TaskExceptionCode.NOT_IN_FOLDER.create(I(getTaskId()), folder.getFolderName(), I(getFolderId()));
@@ -774,12 +774,12 @@ class UpdateData {
             search.setPriority(updated.getPriority());
 
             try {
-                Permission.checkReadInFolder(ctx, user, userConfig, folder);
+                Permission.checkReadInFolder(ctx, user, permissionBits, folder);
             } catch (final OXException e) {
                 throw e;
             }
 
-            final boolean own = Permission.canReadInFolder(ctx, user, userConfig, destFolder);
+            final boolean own = Permission.canReadInFolder(ctx, user, permissionBits, destFolder);
             final List<Integer> emptyList = new ArrayList<Integer>();
             final List<Integer> listWithFolder = new ArrayList<Integer>();
             listWithFolder.add(I(destFolder.getObjectID()));
@@ -826,7 +826,7 @@ class UpdateData {
             }
 
             if (!duplicateExists && next) {
-                insertNextRecurrence(session, ctx, getUserId(), userConfig, folder, getUpdated(), getUpdatedParticipants(), getUpdatedFolder());
+                insertNextRecurrence(session, ctx, getUserId(), permissionBits, folder, getUpdated(), getUpdatedParticipants(), getUpdatedFolder());
             }
         }
     }
@@ -840,9 +840,9 @@ class UpdateData {
      * @throws OXException if creating the new task fails.
      * @throws OXException if sending an event about new task fails.
      */
-    private static void insertNextRecurrence(final Session session, final Context ctx, final int userId, final UserPermissionBits userConfig, final FolderObject folder, final Task task, final Set<TaskParticipant> parts, final Set<Folder> folders) throws OXException, OXException {
+    private static void insertNextRecurrence(final Session session, final Context ctx, final int userId, final UserPermissionBits permissionBits, final FolderObject folder, final Task task, final Set<TaskParticipant> parts, final Set<Folder> folders) throws OXException, OXException {
         // TODO create insert class
-        TaskLogic.checkNewTask(task, userId, userConfig, parts);
+        TaskLogic.checkNewTask(task, userId, permissionBits, parts);
         InsertData.insertTask(ctx, task, parts, folders);
         try {
             new EventClient(session).create(task, folder);

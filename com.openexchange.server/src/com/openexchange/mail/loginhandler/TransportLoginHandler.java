@@ -108,9 +108,9 @@ public final class TransportLoginHandler implements LoginHandlerService {
              */
             final Context ctx = login.getContext();
             final ServerSession serverSession = getServerSessionFrom(login.getSession(), ctx);
-            final UserPermissionBits userConfiguration = serverSession.getUserPermissionBits();
-            if (TransportProperties.getInstance().isPublishOnExceededQuota() && userConfiguration.hasInfostore() && new OXFolderAccess(ctx).getFolderObject(
-                FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID).getEffectiveUserPermission(serverSession.getUserId(), userConfiguration).canCreateSubfolders()) {
+            final UserPermissionBits permissionBits = serverSession.getUserPermissionBits();
+            if (TransportProperties.getInstance().isPublishOnExceededQuota() && permissionBits.hasInfostore() && new OXFolderAccess(ctx).getFolderObject(
+                FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID).getEffectiveUserPermission(serverSession.getUserId(), permissionBits).canCreateSubfolders()) {
                 String name = TransportProperties.getInstance().getPublishingInfostoreFolder();
                 if ("i18n-defined".equals(name)) {
                     name = FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME;

@@ -637,10 +637,10 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			}
 			final ServerSession session = getSession();
 			final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
-			final UserPermissionBits userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), session.getContext());
+			final UserPermissionBits userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), session.getContext());
 			final Context ctx = session.getContext();
 
-			final SearchIterator<FolderObject> iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(id, user.getId(),user.getGroups(), ctx, userConfig, new Timestamp(0));
+			final SearchIterator<FolderObject> iter = OXFolderIteratorSQL.getVisibleSubfoldersIterator(id, user.getId(),user.getGroups(), ctx, userPermissionBits, new Timestamp(0));
 			//final SearchIterator iter = OXFolderTools.getVisibleSubfoldersIterator(id, user.getId(),user.getGroups(), ctx, userConfig, new Timestamp(0));
 
 

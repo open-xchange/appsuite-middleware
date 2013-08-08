@@ -85,7 +85,7 @@ public class InfostoreDowngradeTest extends TestCase {
     private int userId;
     private InfostoreFacade database;
     private ServerSession session;
-    private UserPermissionBits userConfig;
+    private UserPermissionBits permissionBits;
     private User user;
 
     private final List<DocumentMetadata> clean = new ArrayList<DocumentMetadata>();
@@ -98,7 +98,7 @@ public class InfostoreDowngradeTest extends TestCase {
         ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
         userId = UserStorage.getInstance().getUserId(AJAXConfig.getProperty(AJAXConfig.Property.LOGIN), ctx);
         user = UserStorage.getInstance().getUser(userId, ctx);
-        userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
+        permissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
 
         final OXFolderAccess access = new OXFolderAccess(ctx);
         final FolderObject fo = access.getDefaultFolder(userId, FolderObject.INFOSTORE);
@@ -120,7 +120,7 @@ public class InfostoreDowngradeTest extends TestCase {
     }
 
     private void runDelete() {
-        final UserConfiguration config = new UserConfiguration(new HashSet<String>(), userId,userConfig.getGroups() , ctx);
+        final UserConfiguration config = new UserConfiguration(new HashSet<String>(), userId,permissionBits.getGroups() , ctx);
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(ctx);
@@ -163,7 +163,7 @@ public class InfostoreDowngradeTest extends TestCase {
 
     private void assertNotFound(final int id) {
         try {
-            database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx, user, userConfig);
+            database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, ctx, user, permissionBits);
             fail("The document still exists!");
         } catch (final OXException e) {
             assertEquals(e.getMessage(), 300, e.getCode());

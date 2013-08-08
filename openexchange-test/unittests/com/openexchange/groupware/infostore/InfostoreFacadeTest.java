@@ -68,11 +68,11 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
 
         infostore.saveDocumentMetadata(dm, System.currentTimeMillis(), session);
         clean.add(dm);
-        assertTrue("Should Exist", infostore.exists(dm.getId(), InfostoreFacade.CURRENT_VERSION, ctx, user, userConfig));
+        assertTrue("Should Exist", infostore.exists(dm.getId(), InfostoreFacade.CURRENT_VERSION, ctx, user, permissionBits));
 
         infostore.removeDocument(new int[]{dm.getId()}, System.currentTimeMillis(), session);
         clean.remove(dm);
-        assertFalse("Should not exist", infostore.exists(dm.getId(), InfostoreFacade.CURRENT_VERSION, ctx, user, userConfig));
+        assertFalse("Should not exist", infostore.exists(dm.getId(), InfostoreFacade.CURRENT_VERSION, ctx, user, permissionBits));
 
     }
 
@@ -85,7 +85,7 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
         infostore.saveDocumentMetadata(dm, System.currentTimeMillis(), session);
         clean.add(dm);
 
-        assertFalse("No read permission so should not exist", infostore.exists(dm.getId(), InfostoreFacade.CURRENT_VERSION, ctx, user2, userConfig2));
+        assertFalse("No read permission so should not exist", infostore.exists(dm.getId(), InfostoreFacade.CURRENT_VERSION, ctx, user2, permissionBits2));
     }
 
 //     Bug 9555
@@ -164,7 +164,7 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
 
         }
 
-        dm = infostore.getDocumentMetadata(dm.getId(), InfostoreFacade.CURRENT_VERSION, ctx, user, userConfig);
+        dm = infostore.getDocumentMetadata(dm.getId(), InfostoreFacade.CURRENT_VERSION, ctx, user, permissionBits);
 
         assertEquals("", dm.getFileMIMEType());
         assertNull(dm.getFileName());

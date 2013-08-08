@@ -105,13 +105,13 @@ public final class SystemPrivateFolder {
      * Gets the subfolder identifiers of database folder representing system private folder.
      *
      * @param user The user
-     * @param userConfiguration The user configuration
+     * @param userPerm The user permission bits
      * @param ctx The context
      * @param con The connection
      * @return The database folder representing system private folder
      * @throws OXException If the database folder cannot be returned
      */
-    public static int[] getSystemPrivateFolderSubfoldersAsInt(final User user, final UserPermissionBits userConfiguration, final Context ctx, final Connection con) throws OXException {
+    public static int[] getSystemPrivateFolderSubfoldersAsInt(final User user, final UserPermissionBits userPerm, final Context ctx, final Connection con) throws OXException {
         try {
             /*
              * The system private folder
@@ -122,7 +122,7 @@ public final class SystemPrivateFolder {
                     user.getId(),
                     user.getGroups(),
                     ctx,
-                    userConfiguration,
+                    userPerm,
                     null,
                     con)).asList();
             StringHelper stringHelper = null;
@@ -174,13 +174,13 @@ public final class SystemPrivateFolder {
      * Gets the subfolder identifiers of database folder representing system private folder.
      *
      * @param user The user
-     * @param userConfiguration The user configuration
+     * @param userPerm The user permission bits
      * @param ctx The context
      * @param con The connection
      * @return The database folder representing system private folder
      * @throws OXException If the database folder cannot be returned
      */
-    public static List<String[]> getSystemPrivateFolderSubfolders(final User user, final UserPermissionBits userConfiguration, final Context ctx, final Connection con) throws OXException {
+    public static List<String[]> getSystemPrivateFolderSubfolders(final User user, final UserPermissionBits userPerm, final Context ctx, final Connection con) throws OXException {
         try {
             /*
              * The system private folder
@@ -191,7 +191,7 @@ public final class SystemPrivateFolder {
                     user.getId(),
                     user.getGroups(),
                     ctx,
-                    userConfiguration,
+                    userPerm,
                     null,
                     con)).asList();
             StringHelper stringHelper = null;

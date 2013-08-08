@@ -108,15 +108,15 @@ public final class TaskLogic {
      *
      * @param task Task to create.
      * @param userId unique identifier of the user that wants to create the task.
-     * @param userConfig groupware configuration of the user that wants to create the task.
+     * @param permissionBits groupware permission bits of the user that wants to create the task.
      * @throws OXException if the task can't be created.
      */
-    static void checkNewTask(final Task task, final int userId, final UserPermissionBits userConfig, final Set<TaskParticipant> participants) throws OXException {
+    static void checkNewTask(final Task task, final int userId, final UserPermissionBits permissionBits, final Set<TaskParticipant> participants) throws OXException {
         checkMissingAttributes(task, userId);
         checkData(task);
         checkDates(task);
         checkStateAndProgress(task);
-        Permission.checkDelegation(userConfig, task.getParticipants());
+        Permission.checkDelegation(permissionBits, task.getParticipants());
         // TODO Check if creator is participant in private or shared folder
         // Maybe the owner of the shared folder is the delegator of the task.
         checkPrivateFlag(task.getPrivateFlag(), false, participants, null);
@@ -130,12 +130,12 @@ public final class TaskLogic {
      * @param task Task object with the updated attributes.
      * @param oldTask Task object that should be updated.
      * @param user user that wants to change the task.
-     * @param userConfig groupware configuration of the user that wants to change the task.
+     * @param permissionBits groupware permission bits of the user that wants to change the task.
      * @param newParts changed participants.
      * @param oldParts participants of the original task.
      * @throws OXException if the check fails.
      */
-    static void checkUpdateTask(final Task task, final Task oldTask, final User user, final UserPermissionBits userConfig, final Set<TaskParticipant> newParts, final Set<TaskParticipant> oldParts) throws OXException {
+    static void checkUpdateTask(final Task task, final Task oldTask, final User user, final UserPermissionBits permissionBits, final Set<TaskParticipant> newParts, final Set<TaskParticipant> oldParts) throws OXException {
         if (task.containsUid()) {
             if (!oldTask.getUid().equals(task.getUid())) {
                 throw TaskExceptionCode.NO_UID_CHANGE.create();
@@ -151,7 +151,7 @@ public final class TaskLogic {
         checkData(task);
         checkDates(task, oldTask);
         checkStateAndProgress(task);
-        Permission.checkDelegation(userConfig, task.getParticipants());
+        Permission.checkDelegation(permissionBits, task.getParticipants());
         final boolean changedParts = task.containsParticipants();
         // Only creator is allowed to set private flag.
         if (task.containsPrivateFlag() && task.getPrivateFlag() && oldTask.getCreatedBy() != user.getId()) {

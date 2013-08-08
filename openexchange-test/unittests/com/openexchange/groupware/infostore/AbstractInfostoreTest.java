@@ -85,8 +85,8 @@ public class AbstractInfostoreTest extends TestCase{
     protected User user = null;
     protected User user2 = null;
 
-    protected UserPermissionBits userConfig = null;
-    protected UserPermissionBits userConfig2 = null;
+    protected UserPermissionBits permissionBits = null;
+    protected UserPermissionBits permissionBits2 = null;
 
     protected int folderId;
     protected int folderId2;
@@ -122,8 +122,8 @@ public class AbstractInfostoreTest extends TestCase{
         session = ServerSessionFactory.createServerSession(user.getId(), ctx, "blupp");
         session2 = ServerSessionFactory.createServerSession(user2.getId(), ctx, "blupp2");
 
-        userConfig = session.getUserPermissionBits();
-        userConfig2 = session2.getUserPermissionBits();
+        permissionBits = session.getUserPermissionBits();
+        permissionBits2 = session2.getUserPermissionBits();
 
         folderId = getPrivateInfostoreFolder(ctx,user,session);
         folderId2 = getPrivateInfostoreFolder(ctx, user2, session2);
@@ -181,11 +181,11 @@ public class AbstractInfostoreTest extends TestCase{
     }
 
     public UserPermissionBits getUserPermissionBits() {
-        return userConfig;
+        return permissionBits;
     }
 
     public UserPermissionBits getUserPermissionBits2() {
-        return userConfig2;
+        return permissionBits2;
     }
 
     public int getFolderId2() {

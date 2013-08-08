@@ -158,13 +158,13 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
         }
         final long start = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         try {
-            final UserPermissionBits userConfiguration;
+            final UserPermissionBits userPermissionBits;
             {
                 final Session s = storageParameters.getSession();
                 if (s instanceof ServerSession) {
-                    userConfiguration = ((ServerSession) s).getUserPermissionBits();
+                    userPermissionBits = ((ServerSession) s).getUserPermissionBits();
                 } else {
-                    userConfiguration =
+                    userPermissionBits =
                         UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), storageParameters.getContext());
                 }
             }
@@ -276,7 +276,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                 }
                 addSystemSharedFolder = false;
                 checkVirtualListFolders = false;
-                final boolean sharedFolderAccess = userConfiguration.hasFullSharedFolderAccess();
+                final boolean sharedFolderAccess = userPermissionBits.hasFullSharedFolderAccess();
                 final int size = modifiedFolders.size();
                 final Iterator<Folder> iter = modifiedFolders.iterator();
                 for (int i = 0; i < size; i++) {
@@ -352,7 +352,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                 final Set<String> set = getPublicSubfolderIDs(FolderStorage.REAL_TREE_ID, realFolderStorages);
                 {
                     final String vid = String.valueOf(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
-                    if (userConfiguration.hasTask() && !set.contains(vid)) {
+                    if (userPermissionBits.hasTask() && !set.contains(vid)) {
                         if (treeChecker.containsVirtualFolder(vid, treeId, StorageType.WORKING)) {
                             deletedList.add(getFolder(FolderStorage.REAL_TREE_ID, vid, realFolderStorages));
                         }
@@ -360,7 +360,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                 }
                 {
                     final String vid = String.valueOf(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID);
-                    if (userConfiguration.hasCalendar() && !set.contains(vid)) {
+                    if (userPermissionBits.hasCalendar() && !set.contains(vid)) {
                         if (treeChecker.containsVirtualFolder(vid, treeId, StorageType.WORKING)) {
                             deletedList.add(getFolder(FolderStorage.REAL_TREE_ID, vid, realFolderStorages));
                         }
@@ -368,7 +368,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                 }
                 {
                     final String vid = String.valueOf(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID);
-                    if (userConfiguration.hasContact() && !set.contains(vid)) {
+                    if (userPermissionBits.hasContact() && !set.contains(vid)) {
                         if (treeChecker.containsVirtualFolder(vid, treeId, StorageType.WORKING)) {
                             deletedList.add(getFolder(FolderStorage.REAL_TREE_ID, vid, realFolderStorages));
                         }
@@ -376,7 +376,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                 }
                 {
                     final String vid = String.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID);
-                    if (userConfiguration.hasInfostore() && !set.contains(vid)) {
+                    if (userPermissionBits.hasInfostore() && !set.contains(vid)) {
                         if (treeChecker.containsVirtualFolder(vid, treeId, StorageType.WORKING)) {
                             deletedList.add(getFolder(FolderStorage.REAL_TREE_ID, vid, realFolderStorages));
                         }

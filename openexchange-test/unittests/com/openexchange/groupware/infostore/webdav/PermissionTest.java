@@ -54,9 +54,9 @@ public class PermissionTest extends TestCase implements SessionHolder {
     private User user1;
     private User user2;
 
-    private UserPermissionBits userConfig;
-    private UserPermissionBits userConfig1;
-    private UserPermissionBits userConfig2;
+    private UserPermissionBits permissionBits;
+    private UserPermissionBits permissionBits1;
+    private UserPermissionBits permissionBits2;
 
     private User cleanupUser;
 
@@ -89,11 +89,11 @@ public class PermissionTest extends TestCase implements SessionHolder {
 
         session1 = SessionObjectWrapper.createSessionObject(userStorage.getUserId(getUsername(AJAXConfig.getProperty(AJAXConfig.Property.LOGIN)), ctx), ctx, getClass().getName());
 		user1 = userStorage.getUser(session1.getUserId(), ctx);
-        userConfig1 = userConfigStorage.getUserPermissionBits(user1.getId(),ctx);
+        permissionBits1 = userConfigStorage.getUserPermissionBits(user1.getId(),ctx);
 
         session2 = SessionObjectWrapper.createSessionObject(userStorage.getUserId(getUsername(AJAXConfig.getProperty(AJAXConfig.Property.SECONDUSER)), ctx), ctx, getClass().getName());
 		user2 = userStorage.getUser(session2.getUserId(), ctx);
-        userConfig2 = userConfigStorage.getUserPermissionBits(user2.getId(), ctx);
+        permissionBits2 = userConfigStorage.getUserPermissionBits(user2.getId(), ctx);
 
         final OXFolderAccess oxfa = new OXFolderAccess(ctx);
 		root = oxfa.getFolderObject(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
@@ -256,7 +256,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
         // Verify that it has not doubled, but was overwritten (correctly)
         switchUser(user1);
 
-        final TimedResult documents = factory.getDatabase().getDocuments(testFolder.getObjectID(), getContext(), user, userConfig);
+        final TimedResult documents = factory.getDatabase().getDocuments(testFolder.getObjectID(), getContext(), user, permissionBits);
 
         final Map<String, Integer> counter =  new HashMap<String,Integer>();
         for(final DocumentMetadata metadata : SearchIteratorAdapter.toIterable((SearchIterator<DocumentMetadata>)documents.results())) {
@@ -381,11 +381,11 @@ public class PermissionTest extends TestCase implements SessionHolder {
         if(user.getId() == user1.getId()) {
           session = session1;
           this.user = user1;
-          userConfig = userConfig1;
+          permissionBits = permissionBits1;
         } else if (user.getId() == user2.getId()) {
           session = session2;
           this.user = user2;
-          userConfig = userConfig2;
+          permissionBits = permissionBits2;
         } else {
             throw new IllegalArgumentException("I don't know user "+user.getId());
         }

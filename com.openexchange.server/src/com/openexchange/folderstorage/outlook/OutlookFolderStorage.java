@@ -2114,13 +2114,13 @@ public final class OutlookFolderStorage implements FolderStorage {
         /*
          * User configuration
          */
-        final UserPermissionBits userConfiguration;
+        final UserPermissionBits userPermissionBits;
         {
             final Session s = parameters.getSession();
             if (s instanceof ServerSession) {
-                userConfiguration = ((ServerSession) s).getUserPermissionBits();
+                userPermissionBits = ((ServerSession) s).getUserPermissionBits();
             } else {
-                userConfiguration = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), parameters.getContext());
+                userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(user.getId(), parameters.getContext());
             }
         }
         /*
@@ -2128,7 +2128,7 @@ public final class OutlookFolderStorage implements FolderStorage {
          */
         final List<String> accountSubfolderIDs;
         int unifiedMailIndex = -1;
-        if (userConfiguration.isMultipleMailAccounts()) {
+        if (userPermissionBits.isMultipleMailAccounts()) {
             final MailAccountStorageService mass = OutlookServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class);
             if (null == mass) {
                 accountSubfolderIDs = Collections.emptyList();

@@ -217,11 +217,11 @@ public class Links {
             public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so)
                     throws OXException {
                 final Context ctx = ContextStorage.getStorageContext(so.getContextId());
-                final UserPermissionBits userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(so.getUserId(), ctx);
-                if (!userConfig.hasTask()) {
+                final UserPermissionBits userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(so.getUserId(), ctx);
+                if (!userPermissionBits.hasTask()) {
                     return false;
                 }
-                return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, ctx, userConfig, oid, fid);
+                return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, ctx, userPermissionBits, oid, fid);
             }
 
             @Override
@@ -236,11 +236,11 @@ public class Links {
             @Override
             public boolean isReadableByID(final int oid, final int user, final int[] group, final Session so) throws OXException {
                 final Context ctx = ContextStorage.getStorageContext(so.getContextId());
-                final UserPermissionBits userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(so.getUserId(), ctx);
-                if (!userConfig.hasTask()) {
+                final UserPermissionBits userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(so.getUserId(), ctx);
+                if (!userPermissionBits.hasTask()) {
                     return false;
                 }
-                return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, ctx, userConfig, oid);
+                return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, ctx, userPermissionBits, oid);
             }
         });
         modules.put(Integer.valueOf(Types.CONTACT), new ModuleAccess() {

@@ -124,7 +124,7 @@ public class InfostoreFolderJob implements IndexingJob {
             UserPermissionService userConfigurationService = Services.getService(UserPermissionService.class);
             Context context = contextService.getContext(info.contextId);
             User user = userService.getUser(info.userId, context);
-            UserPermissionBits userConfig = userConfigurationService.getUserPermissionBits(info.userId, context);
+            UserPermissionBits permissionBits = userConfigurationService.getUserPermissionBits(info.userId, context);
             IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
             final IndexAccess<DocumentMetadata> infostoreIndex = indexFacade.acquireIndexAccess(
                 Types.INFOSTORE,
@@ -135,7 +135,7 @@ public class InfostoreFolderJob implements IndexingJob {
                 if (info.deleteFolder) {
                     deleteFromIndex(info, infostoreIndex, attachmentIndex);
                 } else {
-                    indexFolder(info, context, user, userConfig, infostoreIndex, attachmentIndex);
+                    indexFolder(info, context, user, permissionBits, infostoreIndex, attachmentIndex);
                 }
             } finally {
                 closeIndexAccess(infostoreIndex);
@@ -166,9 +166,9 @@ public class InfostoreFolderJob implements IndexingJob {
         attachmentIndex.deleteByQuery(attachmentAllQuery);
     }
 
-    private void indexFolder(InfostoreJobInfo info, Context context, User user, UserPermissionBits userConfig, final IndexAccess<DocumentMetadata> infostoreIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
+    private void indexFolder(InfostoreJobInfo info, Context context, User user, UserPermissionBits permissionBits, final IndexAccess<DocumentMetadata> infostoreIndex, final IndexAccess<Attachment> attachmentIndex) throws OXException {
         InfostoreFacade infostoreFacade = Services.getService(InfostoreFacade.class);
-        TimedResult<DocumentMetadata> documents = infostoreFacade.getDocuments(info.folder, context, user, userConfig);
+        TimedResult<DocumentMetadata> documents = infostoreFacade.getDocuments(info.folder, context, user, permissionBits);
         final List<IndexDocument<DocumentMetadata>> indexDocuments = new ArrayList<IndexDocument<DocumentMetadata>>();
         final List<IndexDocument<Attachment>> attachments = new ArrayList<IndexDocument<Attachment>>();
         SearchIterator<DocumentMetadata> it = documents.results();
@@ -183,7 +183,7 @@ public class InfostoreFolderJob implements IndexingJob {
                         InfostoreFacade.CURRENT_VERSION,
                         context,
                         user,
-                        userConfig);
+                        permissionBits);
 
                     if (document != null) {
                         Attachment attachment = new Attachment();

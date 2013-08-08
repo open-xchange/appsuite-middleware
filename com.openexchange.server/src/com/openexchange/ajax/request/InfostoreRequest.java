@@ -122,8 +122,8 @@ public class InfostoreRequest extends CommonRequest {
         user = session.getUser();
     }
 
-    public static boolean hasPermission(final UserPermissionBits userConfig) {
-        return userConfig.hasInfostore();
+    public static boolean hasPermission(final UserPermissionBits userPerm) {
+        return userPerm.hasInfostore();
     }
 
     public boolean action(final String action, final SimpleRequest req) throws OXException {
