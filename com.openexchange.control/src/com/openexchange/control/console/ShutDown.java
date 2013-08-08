@@ -107,7 +107,8 @@ public final class ShutDown extends AbstractConsoleHandler {
 
     @Override
     protected void showHelp() {
-        System.out.println("shutdown (-h <jmx host> -p <jmx port> -l (optional) <jmx login> -pw (optional) <jmx password>) bundle name");
+        System.out.println("Shuts down the OSGi framework through invoking closure of top-level system bundle.");
+        System.out.println("Usage: shutdown (-h <jmx host> -p <jmx port> -l (optional) <jmx login> -pw (optional) <jmx password>)");
     }
 
     @Override
