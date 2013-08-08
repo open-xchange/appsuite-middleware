@@ -66,6 +66,7 @@ import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.storage.filter.FileNameFilter;
 import com.openexchange.drive.storage.filter.Filter;
+import com.openexchange.drive.storage.filter.SynchronizedFileFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
@@ -460,18 +461,44 @@ public class DriveStorage {
         return getFileAccess().getFileMetadata(id, version);
     }
 
-    public List<File> getFiles(String path) throws OXException {
-        return getFilesInFolder(getFolderID(path));
+//    public List<File> getFiles(String path) throws OXException {
+//        return getFilesInFolder(getFolderID(path));
+//    }
+
+    /**
+     * Gets all synchronized files present in the folder identified by the supplied ID.
+     *
+     * @param folderID The folder ID
+     * @return All synchronizable files in the folder
+     * @throws OXException
+     */
+    public List<File> getFilesInFolder(String folderID) throws OXException {
+        return getFilesInFolder(folderID, false, null, null);
     }
 
-    public List<File> getFilesInFolder(String folderID) throws OXException {
-        return Filter.apply(getFilesIterator(folderID, null), new FileNameFilter() {
+    /**
+     * Gets a list of files in the folder identified by the supplied ID.
+     *
+     * @param folderID The folder ID
+     * @param all <code>true</code> to include also files excluded from synchronization, <code>false</code>, otherwise
+     * @param pattern The file search pattern to apply, or <code>null</code> if not used
+     * @param fields The file-fields to get, or <code>null</code> to retrieve the default fields
+     * @return The files
+     * @throws OXException
+     */
+    public List<File> getFilesInFolder(String folderID, boolean all, String pattern, List<Field> fields) throws OXException {
+        SearchIterator<File> filesIterator = getFilesIterator(folderID, pattern, null != fields ? fields : DriveConstants.FILE_FIELDS);
+        if (all) {
+            return Filter.apply(filesIterator, new FileNameFilter() {
 
-            @Override
-            protected boolean accept(String fileName) throws OXException {
-                return null != fileName && false == Strings.isEmpty(fileName);
-            }
-        });
+                @Override
+                protected boolean accept(String fileName) throws OXException {
+                    return null != fileName && false == Strings.isEmpty(fileName);
+                }
+            });
+        } else {
+            return Filter.apply(filesIterator, SynchronizedFileFilter.getInstance());
+        }
     }
 
     public File findFileByName(String path, final String name) throws OXException {
@@ -511,7 +538,15 @@ public class DriveStorage {
     public FileStorageFolder getFolder(String path, boolean createIfNeeded) throws OXException {
         FileStorageFolder folder = knownFolders.getFolder(path);
         if (null == folder) {
-            folder = resolveToLeaf(path, createIfNeeded);
+            folder = resolveToLeaf(path, createIfNeeded, true);
+        }
+        return folder;
+    }
+
+    public FileStorageFolder optFolder(String path, boolean createIfNeeded) throws OXException {
+        FileStorageFolder folder = knownFolders.getFolder(path);
+        if (null == folder) {
+            folder = resolveToLeaf(path, createIfNeeded, false);
         }
         return folder;
     }
@@ -530,20 +565,19 @@ public class DriveStorage {
         return "Uploaded with OX Drive (" + device + ")";
     }
 
-    private SearchIterator<File> getFilesIterator(String folderID, String pattern) throws OXException {
-        return getFilesIterator(folderID, pattern, DriveConstants.FILE_FIELDS);
-    }
-
     private SearchIterator<File> getFilesIterator(String folderID, String pattern, List<Field> fields) throws OXException {
         if (null != pattern) {
-            return getFileAccess().search(pattern, fields, folderID, null, SortDirection.DEFAULT,
-                FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+            // search
+            return getFileAccess().search(pattern, null != fields ? fields : DriveConstants.FILE_FIELDS, folderID, null,
+                SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
         } else {
-            return getFileAccess().getDocuments(folderID, fields, null, SortDirection.DEFAULT).results();
+            // get
+            return getFileAccess().getDocuments(
+                folderID, null != fields ? fields : DriveConstants.FILE_FIELDS, null, SortDirection.DEFAULT).results();
         }
     }
 
-    private FileStorageFolder resolveToLeaf(String path, boolean createIfNeeded) throws OXException {
+    private FileStorageFolder resolveToLeaf(String path, boolean createIfNeeded, boolean throwOnAbsence) throws OXException {
         FileStorageFolder currentFolder = getRootFolder();
         String currentPath = ROOT_PATH;
         for (String name : split(path)) {
@@ -561,7 +595,11 @@ public class DriveStorage {
             }
             if (null == existingFolder) {
                 if (false == createIfNeeded) {
-                    throw DriveExceptionCodes.PATH_NOT_FOUND.create(path);
+                    if (throwOnAbsence) {
+                        throw DriveExceptionCodes.PATH_NOT_FOUND.create(path);
+                    } else {
+                        return null;
+                    }
                 }
                 existingFolder = createFolder(currentFolder, name);
                 knownFolders.remember(currentPath + name, existingFolder);

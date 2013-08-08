@@ -49,14 +49,18 @@
 
 package com.openexchange.drive.internal;
 
+import static com.openexchange.drive.storage.DriveConstants.TEMP_PATH;
 import java.security.NoSuchAlgorithmException;
 import jonelo.jacksum.algorithm.MD;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.checksum.ChecksumStore;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -71,6 +75,7 @@ public class SyncSession {
     private ChecksumStore checksumStore;
     private DriveStorage storage;
     private DirectLinkGenerator linkGenerator;
+    private Boolean hasTempFolder;
 
     /**
      * Initializes a new {@link SyncSession}.
@@ -176,6 +181,51 @@ public class SyncSession {
      */
     public boolean isTraceEnabled() {
         return tracer.isTraceEnabled();
+    }
+
+    /**
+     * Gets a value indicating whether the TEMP folder is available for uploads or not. If possible and not yet exists, the folder is
+     * created dynamically.
+     *
+     * @return <code>true</code> if the folder is available, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    public boolean hasTempFolder() throws OXException {
+        if (null == hasTempFolder) {
+            /*
+             * check configuration first
+             */
+            ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
+            if (null != configService && false ==
+                Boolean.valueOf(configService.getBoolProperty("com.openexchange.drive.useTempFolder", false))) {
+                trace("Temporary folder for upload is disabled by configuration.");
+                hasTempFolder = Boolean.FALSE;
+            } else {
+                /*
+                 * check temp folder and permissions
+                 */
+                FileStorageFolder tempFolder = getStorage().optFolder(TEMP_PATH, false);
+                if (null == tempFolder) {
+                    try {
+                        tempFolder = getStorage().optFolder(TEMP_PATH, true);
+                    } catch (OXException e) {
+                        trace("Error creating temporary folder for uploads: " + e.getMessage());
+                    }
+                }
+                if (null == tempFolder) {
+                    trace("No temporary folder available for uploads.");
+                    hasTempFolder = Boolean.FALSE;
+                } else if (null != tempFolder.getOwnPermission() &&
+                    FileStoragePermission.CREATE_OBJECTS_IN_FOLDER <= tempFolder.getOwnPermission().getFolderPermission()) {
+                    trace("Using folder '" + tempFolder + "' for temporary uploads.");
+                    hasTempFolder = Boolean.TRUE;
+                } else {
+                    trace("Temporary folder for uploads found, but not enough permissions for current user.");
+                    hasTempFolder = Boolean.FALSE;
+                }
+            }
+        }
+        return hasTempFolder.booleanValue();
     }
 
 }

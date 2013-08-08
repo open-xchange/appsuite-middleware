@@ -108,7 +108,7 @@ public class UploadHelper {
 
             @Override
             public Entry<File, String> call() throws OXException {
-                return upload(newVersion, uploadStream, contentType, offset, totalLength);
+                return upload(path, newVersion, uploadStream, contentType, offset, totalLength);
             }
         });
         String checksum = uploadEntry.getValue();
@@ -221,11 +221,11 @@ public class UploadHelper {
         }
     }
 
-    private Entry<File, String> upload(FileVersion newVersion, InputStream uploadStream, String contentType, long offset, long totalLength) throws OXException {
+    private Entry<File, String> upload(String path, FileVersion newVersion, InputStream uploadStream, String contentType, long offset, long totalLength) throws OXException {
         /*
          * get/create upload file
          */
-        File uploadFile = getUploadFile(newVersion.getChecksum(), true);
+        File uploadFile = getUploadFile(path, newVersion.getChecksum(), true);
         /*
          * check current offset
          */
@@ -301,31 +301,31 @@ public class UploadHelper {
         }
     }
 
-    public long getUploadOffset(FileVersion file) throws OXException {
-        File uploadFile = getUploadFile(file.getChecksum(), false);
+    public long getUploadOffset(String path, FileVersion file) throws OXException {
+        File uploadFile = getUploadFile(path, file.getChecksum(), false);
         return null == uploadFile ? 0 : uploadFile.getFileSize();
     }
 
-    private File getUploadFile(String checksum, boolean createIfAbsent) throws OXException {
+    private File getUploadFile(String path, String checksum, boolean createIfAbsent) throws OXException {
         /*
          * check for existing partial upload
          */
         String uploadFileName = getUploadFilename(checksum);
-        session.getStorage().getFolder(TEMP_PATH, true); // to ensure the temp folder exists
-        File uploadFile = session.getStorage().findFileByName(TEMP_PATH, uploadFileName);
+        String uploadPath = session.hasTempFolder() ? TEMP_PATH : path;
+        File uploadFile = session.getStorage().findFileByName(uploadPath, uploadFileName);;
         if (null == uploadFile && createIfAbsent) {
             /*
              * create new upload file
              */
             if (session.isTraceEnabled()) {
-                session.trace("Creating new upload file at: " + DriveStorage.combine(TEMP_PATH, uploadFileName));
+                session.trace("Creating new upload file at: " + DriveStorage.combine(uploadPath, uploadFileName));
             }
-            uploadFile = session.getStorage().createFile(TEMP_PATH, uploadFileName);
+            uploadFile = session.getStorage().createFile(uploadPath, uploadFileName);
             if (null != uploadFile && session.isTraceEnabled()) {
                 session.trace("Upload file created: [" + uploadFile.getFolderId() + '/' + uploadFile.getId() + ']');
             }
         } else if (null != uploadFile && session.isTraceEnabled()) {
-            session.trace("Using existing upload file at " + DriveStorage.combine(TEMP_PATH, uploadFileName) +
+            session.trace("Using existing upload file at " + DriveStorage.combine(uploadPath, uploadFileName) +
                 " [" + uploadFile.getFolderId() + '/' + uploadFile.getId() + "], current size: " + uploadFile.getFileSize() +
                 ", last modified: " + (null != uploadFile.getLastModified() ?
                     DriveConstants.LOG_DATE_FORMAT.get().format(uploadFile.getLastModified()) : "(unknown)"));
