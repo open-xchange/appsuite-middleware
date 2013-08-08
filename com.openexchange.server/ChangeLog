@@ -1,6 +1,7 @@
 * 2013-08-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 28139: Invalidate login-info cache entries, too, when invalidating context cachings
+ - Fix for bug 28119: Return a non-zero return code for 'checkconsistency' CLI if invocation fails
 
 * 2013-08-08 - tobias.friedrich@open-xchange.com
 
