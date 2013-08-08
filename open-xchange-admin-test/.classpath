@@ -1,25 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="lib/junit-4.6.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.rmi"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.console"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.plugin.hosting"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.common"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.reseller"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.reseller.rmi"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/open-xchange-test"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.server"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.datatypes.genericonf"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.global"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.user.copy"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.user.copy.rmi"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.user.copy"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.json"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.java"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.console.common"/>
-	<classpathentry kind="output" path="bin"/>
+        <classpathentry kind="src" path="src"/>
+        <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+        <classpathentry kind="lib" path="lib/junit-4.6.jar"/>
+        <classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.console"/>
+        <classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.console.common"/>
+        <classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.rmi"/>
+        <classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.user.copy"/>
+        <classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.global"/>
+        <classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin"/>
+        <classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.common"/>
+        <classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.reseller.rmi"/>
+        <classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.java"/>
+        <classpathentry combineaccessrules="false" kind="src" path="/org.json"/>
+        <classpathentry combineaccessrules="false" kind="src" path="/open-xchange-test"/>
+        <classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.datatypes.genericonf"/>
+        <classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.server"/>
+        <classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe"/>
+        <classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.user.copy.rmi"/>
+        <classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.plugin.hosting"/>
+        <classpathentry kind="output" path="bin"/>
 </classpath>
