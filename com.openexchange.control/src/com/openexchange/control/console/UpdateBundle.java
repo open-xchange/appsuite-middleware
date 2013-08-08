@@ -97,6 +97,7 @@ public final class UpdateBundle extends AbstractConsoleHandler {
             } else {
                 exc.printStackTrace();
             }
+            exit();
         } finally {
             try {
                 close();

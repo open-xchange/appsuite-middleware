@@ -68,7 +68,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.groupware.update.tools.Constants;
-import com.openexchange.java.Streams;
 import com.openexchange.management.console.JMXAuthenticatorImpl;
 
 /**
@@ -102,6 +101,7 @@ public final class UpdateTaskSchemasAndVersionsCLT {
 
     public static void main(final String[] args) {
         final CommandLineParser parser = new PosixParser();
+        boolean error = true;
         try {
             final CommandLine cmd = parser.parse(toolkitOptions, args);
             if (cmd.hasOption('h')) {
@@ -117,12 +117,12 @@ public final class UpdateTaskSchemasAndVersionsCLT {
                     } catch (final NumberFormatException e) {
                         System.err.println("Port parameter is not a number: " + val);
                         printHelp();
-                        System.exit(0);
+                        System.exit(1);
                     }
                     if (port < 1 || port > 65535) {
                         System.err.println("Port parameter is out of range: " + val + ". Valid range is from 1 to 65535.");
                         printHelp();
-                        System.exit(0);
+                        System.exit(1);
                     }
                 }
             }
@@ -153,9 +153,15 @@ public final class UpdateTaskSchemasAndVersionsCLT {
 
                 System.out.println(output);
             } finally {
-                Streams.close(jmxConnector);
+                if (null != jmxConnector) {
+                    try {
+                        jmxConnector.close();
+                    } catch (final Exception e) {
+                        // Ignore
+                    }
+                }
             }
-
+            error = false;
         } catch (final ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp();
@@ -179,6 +185,10 @@ public final class UpdateTaskSchemasAndVersionsCLT {
         } catch (final RuntimeException e) {
             System.err.println("Problem in runtime: " + e.getMessage());
             printHelp();
+        } finally {
+            if (error) {
+                System.exit(1);
+            }
         }
     }
 

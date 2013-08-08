@@ -108,6 +108,7 @@ public final class CloseSessionsCLT {
     public static void main(final String[] args) {
         final CommandLineParser parser = new PosixParser();
         int contextId = -1;
+        boolean error = true;
         try {
             final CommandLine cmd = parser.parse(toolkitOptions, args);
             if (cmd.hasOption('h')) {
@@ -123,13 +124,13 @@ public final class CloseSessionsCLT {
                     } catch (final NumberFormatException e) {
                         System.err.println(new StringBuilder("Port parameter is not a number: ").append(val).toString());
                         printHelp();
-                        System.exit(0);
+                        System.exit(1);
                     }
                     if (port < 1 || port > 65535) {
                         System.err.println(new StringBuilder("Port parameter is out of range: ").append(val).append(
                             ". Valid range is from 1 to 65535.").toString());
                         printHelp();
-                        System.exit(0);
+                        System.exit(1);
                     }
                 }
             }
@@ -141,12 +142,12 @@ public final class CloseSessionsCLT {
                 } catch (final NumberFormatException e) {
                     System.err.println("Context identifier parameter is not a number: " + optionValue);
                     printHelp();
-                    System.exit(0);
+                    System.exit(1);
                 }
             } else {
                 System.err.println("Missing context identifier.");
                 printHelp();
-                System.exit(0);
+                System.exit(1);
             }
 
             String jmxLogin = null;
@@ -166,8 +167,7 @@ public final class CloseSessionsCLT {
                 environment.put(JMXConnectorServer.AUTHENTICATOR, new JMXAuthenticatorImpl(jmxLogin, jmxPassword));
             }
 
-            final JMXServiceURL url =
-                new JMXServiceURL(new StringBuilder("service:jmx:rmi:///jndi/rmi://localhost:").append(port).append("/server").toString());
+            final JMXServiceURL url = new JMXServiceURL(new StringBuilder("service:jmx:rmi:///jndi/rmi://localhost:").append(port).append("/server").toString());
             final JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
             try {
                 final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
@@ -178,6 +178,7 @@ public final class CloseSessionsCLT {
             } finally {
                 jmxConnector.close();
             }
+            error = false;
         } catch (final MalformedObjectNameException e) {
             // Cannot occur
             System.err.println("Invalid MBean name: " + e.getMessage());
@@ -213,6 +214,10 @@ public final class CloseSessionsCLT {
         } catch (final RuntimeException e) {
             System.err.println("Problem in runtime: " + e.getMessage());
             printHelp();
+        } finally {
+            if (error) {
+                System.exit(1);
+            }
         }
     }
 
