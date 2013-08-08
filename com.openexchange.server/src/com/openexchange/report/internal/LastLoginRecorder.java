@@ -54,110 +54,116 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.login.Interface;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.UserService;
 
 /**
- * {@link LastLoginRecorder} records the last login of a user in its user attributes.
+ * {@link LastLoginRecorder} records the last login of a user in their attributes.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class LastLoginRecorder implements LoginHandlerService {
 
-    private static volatile Integer maxClientCount;
-    private static int maxClientCount() {
-        Integer tmp = maxClientCount;
-        if (null == tmp) {
-            synchronized (LastLoginRecorder.class) {
-                tmp = maxClientCount;
-                if (null == tmp) {
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    tmp = Integer.valueOf(null == service ? -1 : service.getIntProperty("com.openexchange.user.maxClientCount", -1));
-                    maxClientCount = tmp;
-                }
-            }
-        }
-        return tmp.intValue();
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(LastLoginRecorder.class);
+
+    private int maxClientCount = -1;
+    private UserService userService;
+
+    public LastLoginRecorder(ConfigurationService confService, UserService userService) {
+        super();
+        this.userService = userService;
+        readConfiguration(confService);
     }
 
-    /**
-     * Initializes a new {@link LastLoginRecorder}.
-     */
-    public LastLoginRecorder() {
-        super();
+    private void readConfiguration(ConfigurationService confService) {
+        maxClientCount = confService.getIntProperty("com.openexchange.user.maxClientCount", -1);
     }
 
     @Override
     public void handleLogin(final LoginResult login) throws OXException {
         final LoginRequest request = login.getRequest();
         // Determine client
-        String client;
-        if (null != request.getClient()) {
-            client = request.getClient();
-        } else if (null != request.getInterface()) {
+        String client = request.getClient();
+        if (null == client) {
             client = request.getInterface().toString();
-        } else {
+        }
+        if (null == client) {
             return;
         }
-        updateLastLogin(client, login.getUser(), login.getContext());
+        Context context = login.getContext();
+        User user = login.getUser();
+        if (!isWhitelistedClient(client) && maxClientCount > 0) {
+            int count = 0;
+            for (String origKey : user.getAttributes().keySet()) {
+                if (origKey.startsWith("client:") && ++count > maxClientCount) {
+                    LOG.warn("Login of client " + client + " for login " + login + " (Context: " + context.getContextId() + ", User: " + user.getId() + ") will not be recorded in the database.");
+                }
+            }
+        }
+        updateLastLogin(userService, client, user, context);
     }
 
     /**
      * Updates the last-accessed time stamp for given user's client.
-     *
+     * @param userService UserService to update the user attributes.
      * @param client The client identifier
      * @param origUser The associated user
      * @param context The context
      * @throws OXException If update fails for any reason
      */
-    static void updateLastLogin(final String client, final User origUser, final Context context) throws OXException {
-        // Set attribute
-        final String key = "client:" + client;
+    static void updateLastLogin(UserService userService, String client, User origUser, Context context) throws OXException {
         if (context.isReadOnly()) {
             return;
         }
-        // Retrieve existing ones
-        final Map<String, Set<String>> attributes;
-        {
-            final int maxClientCount = maxClientCount();
-            if (maxClientCount > 0) {
-                final Map<String, Set<String>> origAttributes = origUser.getAttributes();
-                int count = 0;
-                for (final String origKey : origAttributes.keySet()) {
-                    if (origKey.startsWith("client:") && ++count > maxClientCount) {
-                        throw UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(Integer.valueOf(context.getContextId()), Integer.valueOf(origUser.getId()));
-                    }
-                }
-                attributes = new HashMap<String, Set<String>>(origAttributes);
-            } else {
-                attributes = new HashMap<String, Set<String>>(origUser.getAttributes());
-            }
-        }
+        // Set attribute
+        final Map<String, Set<String>> attributes = new HashMap<String, Set<String>>(origUser.getAttributes());
         // Add current time stamp
-        attributes.put(key, new HashSet<String>(Arrays.asList(Long.toString(System.currentTimeMillis()))));
+        attributes.put("client:" + client, new HashSet<String>(Arrays.asList(Long.toString(System.currentTimeMillis()))));
         final UserImpl newUser = new UserImpl();
         newUser.setId(origUser.getId());
         newUser.setAttributes(attributes);
-        UserService service;
         try {
-            service = ServerServiceRegistry.getInstance().getService(UserService.class, true);
-            service.updateUser(newUser, context);
+            userService.updateUser(newUser, context);
         } catch (final OXException e) {
             throw e;
         }
+    }
+
+    private static boolean isWhitelistedClient(String client) {
+        for (Interface iface : Interface.values()) {
+            if (iface.toString().equals(client)) {
+                return true;
+            }
+        }
+        for (String known : KNOWN_CLIENTS) {
+            if (known.equals(client)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public void handleLogout(final LoginResult logout) {
         // Nothing to to.
     }
+
+    private static final String[] KNOWN_CLIENTS = {
+        "com.openexchange.ox.gui.dhtml",     // OX6 frontend
+        "open-xchange-appsuite",             // AppSuite frontend
+        "com.openexchange.mobileapp",        // Mobile Web Interface
+        "OpenXchange.HTTPClient.OXAddIn",    // Outlook OXtender2 AddIn
+        "OpenXchange.HTTPClient.OXNotifier", // OXNotifier
+        "com.open-xchange.updater.olox1",    // Outlook Updater 1
+        "com.open-xchange.updater.olox2"     // Outlook Updater 2
+    };
 }

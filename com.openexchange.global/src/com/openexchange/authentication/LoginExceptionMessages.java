@@ -124,6 +124,11 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // tests. Therefore this message does not need to be translated.
     public static final String SERVER_TOKEN_NOT_CREATED_MSG = "Server side token for token login was not created.";
 
+    // If some integration passes the User-Agent of the HTTP client as value for the client parameter of some login request, this is denied
+    // with this exception message. Instead the client parameter should identify the client using the backend. This can be something like
+    // com.openexchange.mobileapp identifying the Mobile Web Interface.
+    public static final String DONT_USER_AGENT_MSG = "Value of User-Agent header must not be used as value for the client parameter. Please use a string identifying the client software.";
+
     private LoginExceptionMessages() {
         super();
     }

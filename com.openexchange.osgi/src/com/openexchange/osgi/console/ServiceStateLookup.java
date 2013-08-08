@@ -72,4 +72,6 @@ public interface ServiceStateLookup {
      * @return
      */
     public List<String> getNames();
+
+    void setState(String name, List<String> missing, List<String> present);
 }

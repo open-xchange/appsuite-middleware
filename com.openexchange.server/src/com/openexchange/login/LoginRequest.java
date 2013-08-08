@@ -71,6 +71,13 @@ public interface LoginRequest {
 
     String getAuthId();
 
+    /**
+     * The client is used for reporting issues to known which client used the backend. This can be OX6 frontend, AppSuite frontend, some
+     * OXtender identification, somebody's own client identification and so on. Additionally the client is used to separate cookies in the
+     * same cookie store for different client specific sessions.
+     * Especially with basic authentication methods like for some WebDAV interface this string can be <code>null</code>.
+     * @return the client identification or <code>null</code>.
+     */
     String getClient();
 
     String getVersion();

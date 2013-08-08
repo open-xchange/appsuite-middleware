@@ -1,3 +1,8 @@
+* 2013-08-09 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24624: White listed our known clients to have their logins recorded always. Testing the client login parameter for
+   self-defeating values.
+
 * 2013-08-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 28110: Show an appropriate hint to perform a logout&login cycle after successful password-change
