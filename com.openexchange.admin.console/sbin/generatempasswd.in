@@ -58,7 +58,7 @@ GetOptions( "adminuser|A=s"   => \$OXMASTER,
             "adminpass|P=s"   => \$OXPASSWORD,
             "mpasswdfile|f=s" => \$OXMPWFILE,
             "help|h|?"        => \$USAGE
-) || exit;
+) || die;
 
 if( $< != 0 ) {
 	die "You must be root to run this command";
