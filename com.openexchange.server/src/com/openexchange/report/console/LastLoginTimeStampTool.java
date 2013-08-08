@@ -220,7 +220,13 @@ public final class LastLoginTimeStampTool {
                     }
                 }
             } finally {
-                Streams.close(jmxConnector);
+                if (null != jmxConnector) {
+                    try {
+                        jmxConnector.close();
+                    } catch (final Exception e) {
+                        // Ignore
+                    }
+                }
             }
         } catch (final ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
