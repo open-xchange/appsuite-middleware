@@ -51,25 +51,29 @@ package com.openexchange.report.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
+import com.openexchange.login.LoginHandlerService;
+import com.openexchange.osgi.DependantServiceRegisterer;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.report.LoginCounterService;
+import com.openexchange.report.internal.LastLoginRecorder;
 import com.openexchange.report.internal.LastLoginUpdater;
 import com.openexchange.report.internal.LoginCounterImpl;
 import com.openexchange.sessiond.SessiondEventConstants;
-
+import com.openexchange.user.UserService;
 
 /**
- * {@link ReportActivator} - The activator for reporting.
+ * {@link ReportActivator} - The activator for reporting. Registers the services writing reporting information to the database and the
+ * services providing interfaces for fetching report data.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ReportActivator extends HousekeepingActivator {
 
-    /**
-     * Initializes a new {@link ReportActivator}.
-     */
     public ReportActivator() {
         super();
     }
@@ -81,10 +85,26 @@ public final class ReportActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        track(new DependantServiceRegisterer<LoginHandlerService>(
+            context,
+            LoginHandlerService.class,
+            LastLoginRecorder.class,
+            null,
+            ConfigurationService.class,
+            UserService.class));
         final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
         dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_TOUCH_SESSION);
-        registerService(EventHandler.class, new LastLoginUpdater(), dict);
+        track(new DependantServiceRegisterer<EventHandler>(
+            context,
+            EventHandler.class,
+            LastLoginUpdater.class,
+            dict,
+            ContextService.class,
+            UserService.class));
         registerService(LoginCounterService.class, new LoginCounterImpl());
     }
 
+    private final void track(DependantServiceRegisterer<?> registerer) throws InvalidSyntaxException {
+        track(registerer.getFilter(), registerer);
+    }
 }

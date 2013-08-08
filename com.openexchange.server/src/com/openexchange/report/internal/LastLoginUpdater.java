@@ -58,14 +58,14 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.user.UserService;
 
 /**
- * {@link LastLoginUpdater}
- * 
+ * Increases every day the login timestamp for clients able to use a session longer than several days. This is currently especially the
+ * USM client maintaining a long lasting connection to some EAS client.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LastLoginUpdater implements EventHandler {
@@ -78,11 +78,13 @@ public final class LastLoginUpdater implements EventHandler {
     /** The accepted clients */
     private final Set<String> acceptedClients;
 
-    /**
-     * Initializes a new {@link LastLoginUpdater}.
-     */
-    public LastLoginUpdater() {
+    private ContextService contextService;
+    private UserService userService;
+
+    public LastLoginUpdater(ContextService contextService, UserService userService) {
         super();
+        this.contextService = contextService;
+        this.userService = userService;
         final Set<String> set = new HashSet<String>(1);
         set.add("USM-EAS");
         acceptedClients = set;
@@ -105,32 +107,26 @@ public final class LastLoginUpdater implements EventHandler {
         // Determine client
         String client = session.getClient();
         if (!isEmpty(client) && acceptedClients.contains(client)) {
-            final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
-            final ContextService contextService = registry.getService(ContextService.class);
-            final UserService userService = registry.getService(UserService.class);
-            if (null != contextService && null != userService) {
-                final Context context = contextService.getContext(session.getContextId());
-                final User user = userService.getUser(session.getUserId(), context);
-                // Check last-accessed time stamp for client
-                final Set<String> values = user.getAttributes().get("client:" + client);
-                if (!values.isEmpty()) {
-                    try {
-                        final long lastAccessed = Long.parseLong(values.iterator().next());
-                        final long now = System.currentTimeMillis();
-                        if ((now - lastAccessed) >= MILLIS_DAY) {
-                            // Need to update
-                            LastLoginRecorder.updateLastLogin(client, user, context);
-                        }
-                    } catch (final NumberFormatException e) {
-                        // Continue...
+            final Context context = contextService.getContext(session.getContextId());
+            final User user = userService.getUser(session.getUserId(), context);
+            // Check last-accessed time stamp for client
+            final Set<String> values = user.getAttributes().get("client:" + client);
+            if (!values.isEmpty()) {
+                try {
+                    final long lastAccessed = Long.parseLong(values.iterator().next());
+                    final long now = System.currentTimeMillis();
+                    if ((now - lastAccessed) >= MILLIS_DAY) {
+                        // Need to update
+                        LastLoginRecorder.updateLastLogin(userService, client, user, context);
                     }
+                } catch (final NumberFormatException e) {
+                    // Continue...
                 }
             }
         }
     }
 
-    /** Checks for an empty string */
-    private boolean isEmpty(final String string) {
+    private static boolean isEmpty(final String string) {
         if (null == string) {
             return true;
         }
@@ -141,5 +137,4 @@ public final class LastLoginUpdater implements EventHandler {
         }
         return isWhitespace;
     }
-
 }

@@ -567,7 +567,6 @@ public final class ServerActivator extends HousekeepingActivator {
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registerService(LoginHandlerService.class, new MailLoginHandler());
         registerService(LoginHandlerService.class, new TransportLoginHandler());
-        registerService(LoginHandlerService.class, new LastLoginRecorder());
         // registrationList.add(context.registerService(LoginHandlerService.class.getName(), new PasswordCrypter(), null));
         // Register table creation for mail account storage.
         registerService(CreateTableService.class, new CreateMailAccountTables());

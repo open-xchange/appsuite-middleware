@@ -100,7 +100,9 @@ public enum LoginExceptionCodes implements OXExceptionCode {
      */
     NOT_SUPPORTED(NOT_SUPPORTED_MSG, Category.CATEGORY_SERVICE_DOWN, 19),
     /** Server side token for token login was not created. */
-    SERVER_TOKEN_NOT_CREATED(SERVER_TOKEN_NOT_CREATED_MSG, Category.CATEGORY_ERROR, 20);
+    SERVER_TOKEN_NOT_CREATED(SERVER_TOKEN_NOT_CREATED_MSG, Category.CATEGORY_ERROR, 20),
+    /** Value of User-Agent header must not be used as value for the client parameter. Please use a string identifying the client software. */
+    DONT_USER_AGENT(DONT_USER_AGENT_MSG, Category.CATEGORY_USER_INPUT, 21);
 
     private final String message;
 
