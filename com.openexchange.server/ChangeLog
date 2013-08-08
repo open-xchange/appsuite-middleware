@@ -1,3 +1,7 @@
+* 2013-08-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28116: Removed duplicate configuration properties 
+
 * 2013-08-07 - martin.herfurth@open-xchange.com
 
  - Fix for bug 26475: Bad calculation of recurrence date position of a change exception on delete.
