@@ -8,6 +8,7 @@
  - Fix for bug 28144: Fixed possible 'java.lang.IndexOutOfBoundsException' when parsing CSS content
  - Fix for bug 28145: Set proper class path for 'usercopy' CLI
  - Fix for bug 28147: Lowered log level to DEBUG
+ - Fix for bug 28153: Obfuscate debug loggings if it contains sensitive content
 
 * 2013-08-08 - tobias.friedrich@open-xchange.com
 
