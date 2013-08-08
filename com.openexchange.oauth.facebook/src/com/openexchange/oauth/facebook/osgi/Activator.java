@@ -90,29 +90,6 @@ public final class Activator extends HousekeepingActivator {
         FacebookRegisterer fbRegisterer = new FacebookRegisterer(context);
         track(filter, fbRegisterer);
         openTrackers();
-
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-        final String sCapability = "facebook";
-        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
-        registerService(CapabilityChecker.class, new CapabilityChecker() {
-
-            @Override
-            public boolean isEnabled(String capability, Session ses) throws OXException {
-                if (sCapability.equals(capability)) {
-                    final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                    if (session.isAnonymous()) {
-                        return false;
-                    }
-                    final ConfigViewFactory factory = getService(ConfigViewFactory.class);
-                    final ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-                    return view.opt("com.openexchange.oauth.facebook", boolean.class, Boolean.TRUE).booleanValue();
-                }
-                return true;
-
-            }
-        }, properties);
-
-        getService(CapabilityService.class).declareCapability(sCapability);
     }
 
     @Override

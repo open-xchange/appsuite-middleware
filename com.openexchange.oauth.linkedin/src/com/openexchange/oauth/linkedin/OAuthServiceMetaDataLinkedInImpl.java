@@ -80,6 +80,11 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
     }
 
     @Override
+    protected String getEnabledProperty() {
+        return "com.openexchange.oauth.linkedin";
+    }
+
+    @Override
     public boolean needsRequestToken() {
         return true;
     }
