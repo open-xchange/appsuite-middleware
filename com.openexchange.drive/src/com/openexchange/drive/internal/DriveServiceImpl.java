@@ -553,7 +553,8 @@ public class DriveServiceImpl implements DriveService {
              */
             ServerFileVersion sourceVersion = (ServerFileVersion)action.getParameters().get("sourceVersion");
             File sourceFile = sourceVersion.getFile();
-            boolean isFromTemp = sourceFile.getFolderId().equals(session.getStorage().getFolderID(DriveConstants.TEMP_PATH));
+            boolean isFromTemp = session.hasTempFolder() &&
+                sourceFile.getFolderId().equals(session.getStorage().getFolderID(DriveConstants.TEMP_PATH));
             File targetFile = null;
             if (null != action.getVersion()) {
                 File file = session.getStorage().findFileByName(path, action.getVersion().getName());

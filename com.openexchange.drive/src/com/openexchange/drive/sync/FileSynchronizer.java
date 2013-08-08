@@ -350,7 +350,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     }
 
     private long getUploadOffset(String path, FileVersion fileVersion) throws OXException {
-        return new UploadHelper(session).getUploadOffset(fileVersion);
+        return new UploadHelper(session).getUploadOffset(path, fileVersion);
     }
 
 }

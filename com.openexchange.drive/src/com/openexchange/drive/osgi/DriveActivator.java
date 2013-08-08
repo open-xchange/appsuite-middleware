@@ -55,6 +55,7 @@ import org.apache.commons.logging.Log;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.drive.DriveService;
@@ -91,7 +92,7 @@ public class DriveActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { IDBasedFileAccessFactory.class, ManagedFileManagement.class, DatabaseService.class,
-            IDBasedFolderAccessFactory.class, EventAdmin.class };
+            IDBasedFolderAccessFactory.class, EventAdmin.class, ConfigurationService.class };
     }
 
     @Override
