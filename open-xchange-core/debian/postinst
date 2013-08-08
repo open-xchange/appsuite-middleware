@@ -584,6 +584,12 @@ if ! grep "com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask" 
     echo "!com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask" >> $pfile
 fi
 
+# SoftwareChange_Request-1529
+pfile=/opt/open-xchange/etc/server.properties
+if ! ox_exists_property com.openexchange.server.fullPrimaryKeySupport $pfile; then
+    ox_set_property com.openexchange.server.fullPrimaryKeySupport false $pfile
+fi
+
 setConfigFilePermissions() {
     PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
     for FILE in $PROTECT
