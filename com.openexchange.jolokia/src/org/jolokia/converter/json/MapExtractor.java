@@ -75,8 +75,14 @@ public class MapExtractor implements Extractor {
                 JSONObject ret = new JSONObject();
                 int i = 0;
                 for(Map.Entry entry : map.entrySet()) {
-                    ret.put(entry.getKey(),
+                    if (entry.getValue() instanceof java.lang.Class){
+                        ret.put(entry.getKey(),
+                            pConverter.extractObject(entry.getValue().toString(), pExtraArgs, jsonify));
+                    } else {
+                        ret.put(entry.getKey(),
                             pConverter.extractObject(entry.getValue(), pExtraArgs, jsonify));
+                    }
+                    
                     i++;
                     if (i > length) {
                         break;
