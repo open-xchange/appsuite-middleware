@@ -273,6 +273,33 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
         }
     }
 
+    /**
+     * Initializes a new {@link ServerSessionAdapter}.
+     *
+     * @param session The delegate session
+     * @param ctx The session's context object
+     * @param user The session's user object
+     * @throws IllegalArgumentException If session argument is <code>null</code>
+     */
+    public ServerSessionAdapter(final Session session, final Context ctx, final User user, final UserConfiguration userConfiguration, final UserPermissionBits permissionBits) {
+        super();
+        if (null == session) {
+            throw new IllegalArgumentException("Session is null.");
+        }
+        if (ServerSession.class.isInstance(session)) {
+            this.serverSession = (ServerSession) session;
+            this.session = null;
+            this.ctx = null;
+        } else {
+            this.serverSession = null;
+            this.session = session;
+            this.ctx = ctx;
+            this.user = user;
+            this.userConfiguration = userConfiguration;
+            this.userPermissionBits = permissionBits;
+        }
+    }
+
     @Override
     public int getContextId() {
         return session().getContextId();
