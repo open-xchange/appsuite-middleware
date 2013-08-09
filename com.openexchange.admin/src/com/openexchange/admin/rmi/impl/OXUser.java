@@ -145,7 +145,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw new InvalidDataException("No capabilities specified.");
         }
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
-        
+
         if (log.isDebugEnabled()) {
             log.debug(ctx + " - " + user + " - "+ (null == capsToAdd ? "" : capsToAdd.toString())+" | "+(null == capsToRemove ? "" : capsToRemove.toString()) + " - " + auth);
         }
@@ -1028,6 +1028,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         log.debug(Arrays.toString(retusers));
         return retusers;
+    }
+
+    @Override
+    public UserModuleAccess moduleAccessForName(final String accessCombinationName) {
+        return null == accessCombinationName ? null : cache.getAccessCombinationNames().get(accessCombinationName);
     }
 
     @Override

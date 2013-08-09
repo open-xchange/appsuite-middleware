@@ -125,6 +125,7 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
     private void setOptions(AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
         filterOption = setShortLongOpt(parser, FILTER_SHORT, FILTER_LONG, FILTER_DESCRIPTION, true, NeededQuadState.notneeded);
+        accessRightsCombinationName = setShortLongOpt(parser,'a', OPT_ACCESSRIGHTS_COMBINATION_NAME, "The optional access combination name as replacement for specifying single permissions to enable/disable.", true, NeededQuadState.notneeded);
         setModuleAccessOptions(parser, false, false);
     }
 
@@ -142,12 +143,33 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
         oxusr.changeModuleAccessGlobal(filterString, addAccess, removeAccess, auth);
     }
 
-    private void parse(AdminParser parser, String[] args) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException, InvalidDataException {
+    private void parse(AdminParser parser, String[] args) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException, InvalidDataException, RemoteException {
         parser.ownparse(args);
         auth = credentialsparsing(parser);
+
+        final String accessCombinationName = parseAndSetAccessCombinationName(parser);
+        if (null != accessCombinationName) {
+            final UserModuleAccess moduleAccess = oxusr.moduleAccessForName(accessCombinationName.trim());
+
+            if (null == moduleAccess) {
+                throw new InvalidDataException("No such access combination name \""+accessCombinationName.trim()+"\"");
+            }
+
+            if (moduleAccess.isGlobalAddressBookDisabled()) {
+                throw new InvalidDataException("Unable to set Global Address Book Permission.");
+            }
+
+            moduleAccess.transferTo(addAccess, removeAccess);
+            addAccess.setGlobalAddressBookDisabled(false);
+            removeAccess.setGlobalAddressBookDisabled(false);
+
+
+        }
+
         if (parser.getOptionValue(accessGAB) != null) {
             throw new InvalidDataException("Unable to set Global Address Book Permission.");
         }
+
         if (parser.getOptionValue(accessCalendarOption) != null) {
             if (accessOption2Boolean(parser, accessCalendarOption)) {
                 addAccess.setCalendar(true);
