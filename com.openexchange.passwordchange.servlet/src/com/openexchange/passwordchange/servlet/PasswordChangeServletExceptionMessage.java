@@ -65,24 +65,19 @@ public class PasswordChangeServletExceptionMessage implements LocalizableStrings
         super();
     }
 
-    /**
-     * A JSON error occurred: %1$s
-     */
+    // A JSON error occurred: %1$s
     public final static String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
 
-    /**
-     * Invalid locale string: %1$s
-     */
+    // Invalid locale string: %1$s
     public final static String INVALID_LOCALE_STR_MSG = "Invalid locale string: %1$s";
 
-    /**
-     * Unsupported action %1$s via %2$s request
-     */
+    // Unsupported action %1$s via %2$s request
     public final static String UNSUPPORTED_ACTION_MSG = "Unsupported action %1$s via %2$s request";
 
-    /**
-     * Missing parameter %1$s
-     */
+    // Missing parameter %1$s
     public final static String MISSING_PARAM_MSG = "Missing parameter %1$s";
+
+    // Password changed successfully. Please logout and login back again.
+    public static final String PW_CHANGE_SUCCEEDED_MSG = "Password changed successfully. Please logout and login back again.";
 
 }
