@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.groupware.userconfiguration.MutableUserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.session.SimSession;
 import com.openexchange.sim.SimBuilder;
 import com.openexchange.templating.OXTemplate.TemplateLevel;
@@ -114,8 +114,8 @@ public class TestTemplateService extends TestCase {
         noInfostore.setInfostore(false);
 
         SimSession simSession = new SimSession(1, 1);
-        session = new ServerSessionAdapter(simSession, null, new SimUser(1), userConfig);
-        sessionWithoutInfostore = new ServerSessionAdapter(simSession, null, null, noInfostore);
+        session = new ServerSessionAdapter(simSession, null, new SimUser(1), userConfig, new UserPermissionBits(UserPermissionBits.INFOSTORE, 1, 1));
+        sessionWithoutInfostore = new ServerSessionAdapter(simSession, null, null, noInfostore, new UserPermissionBits(0, 1, 1));
     }
 
     @Override
