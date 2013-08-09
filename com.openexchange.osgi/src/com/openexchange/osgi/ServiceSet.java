@@ -67,29 +67,49 @@ import org.osgi.framework.ServiceReference;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public @ThreadSafe class ServiceSet<E> implements NavigableSet<E>, SimpleRegistryListener<E> {
-    
-    private ConcurrentHashMap<E, Integer> serviceRankings = new ConcurrentHashMap<E, Integer>();
-    private ConcurrentHashMap<E, Long> serviceIds = new ConcurrentHashMap<E, Long>();
-    private ConcurrentSkipListSet<E> entries = new ConcurrentSkipListSet<E>(new Comparator<E>() {
 
-        @Override
-        public int compare(E o1, E o2) {
-            Long r1 = serviceRankings.containsKey(o1) ? (long) serviceRankings.get(o1) : 0;
-            Long r2 = serviceRankings.containsKey(o2) ? (long) serviceRankings.get(o2) : 0;
+    private final ConcurrentHashMap<E, Integer> serviceRankings;
+    private final ConcurrentHashMap<E, Long> serviceIds;
+    private final ConcurrentSkipListSet<E> entries;
 
-            if (r1 == r2) {
-                r1 = serviceIds.get(o1);
-                r2 = serviceIds.get(o2);
+    /**
+     * Initializes a new {@link ServiceSet}.
+     */
+    public ServiceSet() {
+        super();
+        final ConcurrentHashMap<E, Integer> serviceRankings = new ConcurrentHashMap<E, Integer>();
+        this.serviceRankings = serviceRankings;
+        final ConcurrentHashMap<E, Long> serviceIds = new ConcurrentHashMap<E, Long>();
+        this.serviceIds = serviceIds;
+        entries = new ConcurrentSkipListSet<E>(new Comparator<E>() {
+
+            @Override
+            public int compare(E o1, E o2) {
+                Long r1;
+                {
+                    final Integer i1 = serviceRankings.get(o1);
+                    r1 = Long.valueOf(null == i1 ? 0L : i1.longValue());
+                }
+                Long r2;
+                {
+                    final Integer i2 = serviceRankings.get(o2);
+                    r2 = Long.valueOf(null == i2 ? 0L : i2.longValue());
+                }
+
+                if (r1 == r2) {
+                    r1 = serviceIds.get(o1);
+                    r2 = serviceIds.get(o2);
+                }
+                if (r1 == null) {
+                    r1 = Long.valueOf(0L);
+                }
+                if (r2 == null) {
+                    r2 = Long.valueOf(0L);
+                }
+                return (int) (r1.longValue() - r2.longValue());
             }
-            if (r1 == null) {
-                r1 = 0l;
-            }
-            if (r2 == null) {
-                r2 = 0l;
-            }
-            return (int) (r1 - r2);
-        }
-    });
+        });
+    }
 
     @Override
     public Comparator<? super E> comparator() {
@@ -174,7 +194,7 @@ public @ThreadSafe class ServiceSet<E> implements NavigableSet<E>, SimpleRegistr
         }
         Long id = (Long) ref.getProperty(Constants.SERVICE_ID);
         serviceIds.put(service, id);
-    
+
         entries.add(service);
     }
 
@@ -259,7 +279,5 @@ public @ThreadSafe class ServiceSet<E> implements NavigableSet<E>, SimpleRegistr
     public NavigableSet<E> tailSet(E arg0, boolean arg1) {
         return entries.tailSet(arg0, arg1);
     }
-    
-    
 
 }
