@@ -59,29 +59,33 @@ public enum PasswordChangeServletExceptionCode implements OXExceptionCode {
     /**
      * A JSON error occurred: %1$s
      */
-    JSON_ERROR(PasswordChangeServletExceptionMessage.JSON_ERROR_MSG, CATEGORY_ERROR, 1),
+    JSON_ERROR(PasswordChangeServletExceptionMessage.JSON_ERROR_MSG, CATEGORY_ERROR),
     /**
      * Invalid locale string: %1$s
      */
-    INVALID_LOCALE_STR(PasswordChangeServletExceptionMessage.INVALID_LOCALE_STR_MSG, CATEGORY_ERROR, 2),
+    INVALID_LOCALE_STR(PasswordChangeServletExceptionMessage.INVALID_LOCALE_STR_MSG, CATEGORY_ERROR),
     /**
      * Unsupported action %1$s via %2$s request
      */
-    UNSUPPORTED_ACTION(PasswordChangeServletExceptionMessage.UNSUPPORTED_ACTION_MSG, CATEGORY_ERROR, 3),
+    UNSUPPORTED_ACTION(PasswordChangeServletExceptionMessage.UNSUPPORTED_ACTION_MSG, CATEGORY_ERROR),
     /**
      * Missing parameter %1$s
      */
-    MISSING_PARAM(PasswordChangeServletExceptionMessage.MISSING_PARAM_MSG, CATEGORY_ERROR, 4);
+    MISSING_PARAM(PasswordChangeServletExceptionMessage.MISSING_PARAM_MSG, CATEGORY_ERROR),
+    /**
+     * Password changed successfully. Please logout and login back again.
+     */
+    PW_CHANGE_SUCCEEDED(PasswordChangeServletExceptionMessage.PW_CHANGE_SUCCEEDED_MSG, CATEGORY_WARNING),
+
+    ;
 
     private final String message;
-
     private final int detailNumber;
-
     private final Category category;
 
-    private PasswordChangeServletExceptionCode(final String message, final Category category, final int detailNumber) {
+    private PasswordChangeServletExceptionCode(final String message, final Category category) {
         this.message = message;
-        this.detailNumber = detailNumber;
+        this.detailNumber = ordinal() + 1;
         this.category = category;
     }
 
