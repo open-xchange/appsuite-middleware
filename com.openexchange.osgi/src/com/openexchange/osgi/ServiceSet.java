@@ -126,16 +126,33 @@ public @ThreadSafe class ServiceSet<E> implements NavigableSet<E>, SimpleRegistr
         return entries.last();
     }
 
+    /**
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * Not supported and therefore throws an {@code UnsupportedOperationException}.
+     * </div>
+     * <p>
+     */
     @Override
     public boolean add(E arg0) {
         throw new UnsupportedOperationException("This set can only be modified by the backing service registry");
     }
 
+    /**
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * Not supported and therefore throws an {@code UnsupportedOperationException}.
+     * </div>
+     * <p>
+     */
     @Override
     public boolean addAll(Collection<? extends E> arg0) {
         throw new UnsupportedOperationException("This set can only be modified by the backing service registry");
     }
 
+    /**
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * Not supported and therefore throws an {@code UnsupportedOperationException}.
+     * </div>
+     */
     @Override
     public void clear() {
         throw new UnsupportedOperationException("This set can only be modified by the backing service registry");
@@ -156,16 +173,34 @@ public @ThreadSafe class ServiceSet<E> implements NavigableSet<E>, SimpleRegistr
         return entries.isEmpty();
     }
 
+    /**
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * Not supported and therefore throws an {@code UnsupportedOperationException}.
+     * </div>
+     * <p>
+     */
     @Override
     public boolean remove(Object arg0) {
         throw new UnsupportedOperationException("This set can only be modified by the backing service registry");
     }
 
+    /**
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * Not supported and therefore throws an {@code UnsupportedOperationException}.
+     * </div>
+     * <p>
+     */
     @Override
     public boolean removeAll(Collection<?> arg0) {
         throw new UnsupportedOperationException("This set can only be modified by the backing service registry");
     }
 
+    /**
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * Not supported and therefore throws an {@code UnsupportedOperationException}.
+     * </div>
+     * <p>
+     */
     @Override
     public boolean retainAll(Collection<?> arg0) {
         throw new UnsupportedOperationException("This set can only be modified by the backing service registry");
@@ -250,11 +285,23 @@ public @ThreadSafe class ServiceSet<E> implements NavigableSet<E>, SimpleRegistr
         return entries.lower(arg0);
     }
 
+    /**
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * Not supported and therefore throws an {@code UnsupportedOperationException}.
+     * </div>
+     * <p>
+     */
     @Override
     public E pollFirst() {
         throw new UnsupportedOperationException("This set can only be modified by the backing service registry");
     }
 
+    /**
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * Not supported and therefore throws an {@code UnsupportedOperationException}.
+     * </div>
+     * <p>
+     */
     @Override
     public E pollLast() {
         throw new UnsupportedOperationException("This set can only be modified by the backing service registry");
