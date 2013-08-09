@@ -103,11 +103,14 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.ajax.redirect.osgi.RedirectActivator(),
         new com.openexchange.groupware.tasks.osgi.TaskActivator(),
         new FolderUpdaterRegistryDependencyActivator(),
-        new ImageActivator(), 
+        new ImageActivator(),
         new PreviewCacheActivator(),
         new ReportActivator(),
         new QuotaGWActivator(),
-        new PingActivator()
+        new PingActivator(),
+
+        // Very last one:
+        new FileCleaningActivator()
     };
 
     public ServerCompositeActivator() {
