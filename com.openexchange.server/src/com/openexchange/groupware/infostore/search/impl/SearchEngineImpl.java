@@ -188,7 +188,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 	        }
 	        if (query.length() > 0 && !"*".equals(query)) {
 	            checkPatternLength(query);
-	            final boolean containsWildcard = query.indexOf('*') >= 0;
+	            final boolean containsWildcard = query.indexOf('*') >= 0 || 0 <= query.indexOf('?');
 	            addQuery = true;
 
 	            query = query.replaceAll("\\\\", "\\\\\\\\");
