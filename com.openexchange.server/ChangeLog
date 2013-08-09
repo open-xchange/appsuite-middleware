@@ -1,3 +1,7 @@
+* 2013-08-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28110: Show an appropriate hint to perform a logout&login cycle after successful password-change
+
 * 2013-08-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 28139: Invalidate login-info cache entries, too, when invalidating context cachings
