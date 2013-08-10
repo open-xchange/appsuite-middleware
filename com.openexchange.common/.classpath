@@ -28,7 +28,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-core-0.7.2.jar" sourcepath="source/apache-mime4j-core-0.7.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-dom-0.7.2.jar" sourcepath="source/apache-mime4j-dom-0.7.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-storage-0.7.2.jar" sourcepath="source/apache-mime4j-storage-0.7.2-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-io-2.3.jar" sourcepath="source/commons-io-2.3-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-codec-1.6.jar" sourcepath="source/commons-codec-1.6-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/automaton-1.11-8.jar" sourcepath="source/automaton-1.11-8-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/gnu-rex.jar" sourcepath="lib/gnu-rex.jar"/>
