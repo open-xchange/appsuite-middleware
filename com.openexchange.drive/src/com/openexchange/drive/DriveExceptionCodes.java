@@ -109,6 +109,8 @@ public enum DriveExceptionCodes implements OXExceptionCode {
     /** The allowed Quota is reached */
     QUOTA_REACHED(DriveExceptionMessages.QUOTA_REACHED_MSG, Category.CATEGORY_PERMISSION_DENIED, 16),
 
+    /** The file name \"%1$s\" is invalid */
+    INVALID_FILENAME(DriveExceptionMessages.INVALID_FILENAME_MSG, Category.CATEGORY_USER_INPUT, 17),
     ;
 
     private static final String PREFIX = "DRV";

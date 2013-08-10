@@ -49,6 +49,9 @@
 
 package com.openexchange.drive.storage.filter;
 
+import java.util.regex.Pattern;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -69,17 +72,31 @@ public class SynchronizedFileFilter extends FileNameFilter {
 
     private static final SynchronizedFileFilter INSTANCE = new SynchronizedFileFilter();
 
+    private final Pattern excudedFilesPattern;
+
     private SynchronizedFileFilter() {
         super();
+        ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
+        String excludedFilesPattern = "thumbs\\.db|desktop\\.ini|\\.ds_store|icon\\\r";
+        if (null != configService) {
+            excludedFilesPattern = configService.getProperty("com.openexchange.drive.excludedFilesPattern", excludedFilesPattern);
+        }
+        this.excudedFilesPattern = Pattern.compile(excludedFilesPattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
     }
 
     @Override
-    protected boolean accept(String fileName) throws OXException {
+    public boolean accept(String fileName) throws OXException {
         if (Strings.isEmpty(fileName)) {
             return false; // no empty filenames
         }
         if (fileName.endsWith(DriveConstants.FILEPART_EXTENSION)) {
             return false; // no temporary upload files
+        }
+        if (DriveConstants.FILENAME_VALIDATION_PATTERN.matcher(fileName).matches()) {
+            return false; // no invalid filenames
+        }
+        if (excudedFilesPattern.matcher(fileName).matches()) {
+            return false; // no excluded files
         }
         return true;
     }

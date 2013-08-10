@@ -49,8 +49,12 @@
 
 package com.openexchange.drive.sync;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
@@ -65,6 +69,8 @@ import com.openexchange.drive.comparison.ThreeWayComparison;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.internal.UploadHelper;
+import com.openexchange.drive.storage.DriveConstants;
+import com.openexchange.drive.storage.filter.SynchronizedFileFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStoragePermission;
@@ -78,6 +84,7 @@ import com.openexchange.file.storage.FileStoragePermission;
 public class FileSynchronizer extends Synchronizer<FileVersion> {
 
     private Set<String> usedFilenames;
+    private List<UploadFileAction> uploadActions;
     private final String path;
     private FileStoragePermission folderPermission;
 
@@ -89,7 +96,22 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     @Override
     public IntermediateSyncResult<FileVersion> sync() throws OXException {
         usedFilenames = new HashSet<String>(mapper.getKeys());
-        return super.sync();
+        uploadActions = new ArrayList<UploadFileAction>();
+        IntermediateSyncResult<FileVersion> syncResult = super.sync();
+        /*
+         * inject upload offsets if needed
+         */
+        if (0 < uploadActions.size()) {
+            List<FileVersion> versionsToUpload = new ArrayList<FileVersion>(uploadActions.size());
+            for (UploadFileAction uploadAction : uploadActions) {
+                versionsToUpload.add(uploadAction.getNewVersion());
+            }
+            List<Long> uploadOffsets = new UploadHelper(session).getUploadOffsets(path, versionsToUpload);
+            for (int i = 0; i < uploadOffsets.size(); i++) {
+                uploadActions.get(i).getParameters().put(DriveAction.PARAMETER_OFFSET, uploadOffsets.get(i));
+            }
+        }
+        return syncResult;
     }
 
     @Override
@@ -169,8 +191,10 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                     /*
                      * modified on client, let client upload the modified file
                      */
-                    result.addActionForClient(new UploadFileAction(comparison.getServerVersion(), comparison.getClientVersion(), comparison,
-                        path, getUploadOffset(path, comparison.getClientVersion())));
+                    UploadFileAction uploadAction = new UploadFileAction(
+                        comparison.getServerVersion(), comparison.getClientVersion(), comparison, path, 0);
+                    uploadActions.add(uploadAction);
+                    result.addActionForClient(uploadAction);
                 }
             } else if (mayCreate()) {
                 /*
@@ -186,7 +210,9 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 /*
                  * ... then upload it, and download the server version afterwards
                  */
-                result.addActionForClient(new UploadFileAction(null, renamedVersion, comparison, path, getUploadOffset(path, renamedVersion)));
+                UploadFileAction uploadAction = new UploadFileAction(null, renamedVersion, comparison, path, 0);
+                uploadActions.add(uploadAction);
+                result.addActionForClient(uploadAction);
                 File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
                 result.addActionForClient(new DownloadFileAction(null, comparison.getServerVersion(), comparison, path, serverFile));
             } else {
@@ -209,11 +235,21 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
              * new on client
              */
             if (mayCreate()) {
-                /*
-                 * let client upload the file
-                 */
-                result.addActionForClient(new UploadFileAction(comparison.getServerVersion(), comparison.getClientVersion(), comparison,
-                    path, getUploadOffset(path, comparison.getClientVersion())));
+                if (isInvalidName(comparison.getClientVersion().getName())) {
+                    /*
+                     * invalid name, indicate as error with quarantine flag
+                     */
+                    result.addActionForClient(new ErrorFileAction(null, comparison.getClientVersion(), comparison, path,
+                        DriveExceptionCodes.INVALID_FILENAME.create(comparison.getClientVersion().getName()), true));
+                } else {
+                    /*
+                     * let client upload the file
+                     */
+                    UploadFileAction uploadAction = new UploadFileAction(
+                        comparison.getServerVersion(), comparison.getClientVersion(), comparison, path, 0);
+                    uploadActions.add(uploadAction);
+                    result.addActionForClient(uploadAction);
+                }
             } else {
                 /*
                  * not allowed, indicate as error with quarantine flag
@@ -264,7 +300,9 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  * ... then upload it if possible...
                  */
                 if (mayCreate()) {
-                    result.addActionForClient(new UploadFileAction(null, renamedVersion, comparison, path, getUploadOffset(path, renamedVersion)));
+                    UploadFileAction uploadAction = new UploadFileAction(null, renamedVersion, comparison, path, 0);
+                    uploadActions.add(uploadAction);
+                    result.addActionForClient(uploadAction);
                 } else {
                     result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), renamedVersion, comparison, path,
                         DriveExceptionCodes.NO_CREATE_FILE_PERMISSION.create(path), true));
@@ -286,8 +324,9 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
              * edit-delete conflict, let client upload it's file
              */
             if (mayCreate()) {
-                result.addActionForClient(new UploadFileAction(
-                    null, comparison.getClientVersion(), comparison, path, getUploadOffset(path, comparison.getClientVersion())));
+                UploadFileAction uploadAction = new UploadFileAction(null, comparison.getClientVersion(), comparison, path, 0);
+                result.addActionForClient(uploadAction);
+                uploadActions.add(uploadAction);
             } else {
                 /*
                  * not allowed, indicate as error with quarantine flag
@@ -349,8 +388,23 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
         return folderPermission;
     }
 
-    private long getUploadOffset(String path, FileVersion fileVersion) throws OXException {
-        return new UploadHelper(session).getUploadOffset(path, fileVersion);
+    /**
+     * Gets a value indicating whether the supplied filename is invalid, i.e. it contains illegal characters, is not supported for
+     * other reasons, or is excluded from synchronization by definition.
+     *
+     * @param fileName The filename to check
+     * @return <code>true</code> if the filename is considered invalid, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    private static boolean isInvalidName(String fileName) throws OXException {
+        Matcher matcher = DriveConstants.FILENAME_VALIDATION_PATTERN.matcher(fileName);
+        if (matcher.matches()) {
+            return true; // invalid
+        }
+        if (false == SynchronizedFileFilter.getInstance().accept(fileName)) {
+            return true; // excluded
+        }
+        return false; // allowed
     }
 
 }
