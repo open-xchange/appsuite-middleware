@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
@@ -69,7 +68,6 @@ import com.openexchange.drive.comparison.ThreeWayComparison;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.internal.UploadHelper;
-import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.drive.storage.filter.SynchronizedFileFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -397,14 +395,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
      * @throws OXException
      */
     private static boolean isInvalidName(String fileName) throws OXException {
-        Matcher matcher = DriveConstants.FILENAME_VALIDATION_PATTERN.matcher(fileName);
-        if (matcher.matches()) {
-            return true; // invalid
-        }
-        if (false == SynchronizedFileFilter.getInstance().accept(fileName)) {
-            return true; // excluded
-        }
-        return false; // allowed
+        return false == SynchronizedFileFilter.getInstance().accept(fileName);
     }
 
 }
