@@ -59,6 +59,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
@@ -331,6 +332,41 @@ public class UploadHelper {
                     DriveConstants.LOG_DATE_FORMAT.get().format(uploadFile.getLastModified()) : "(unknown)"));
         }
         return null == uploadFile ? null : new DefaultFile(uploadFile);
+    }
+
+    /**
+     * Gets the expected upload offset for the supplied file versions based on their checksums. If no upload file yet exists, an offset
+     * of <code>0</code> is assumed implicitly.
+     *
+     * @param path The path where the file versions should be uploaded to
+     * @param fileVersions The file versions
+     * @return A list holding the upload offsets for each file version, in the same order as the passed list of file versions
+     * @throws OXException
+     */
+    public List<Long> getUploadOffsets(String path, List<FileVersion> fileVersions) throws OXException {
+        if (null == fileVersions || 0 == fileVersions.size()) {
+            return Collections.emptyList();
+        } else if (1 == fileVersions.size()) {
+            return Collections.singletonList(Long.valueOf(getUploadOffset(path, fileVersions.get(0))));
+        }
+        List<Long> uploadOffsets = new ArrayList<Long>(fileVersions.size());
+        String uploadPath = session.hasTempFolder() ? TEMP_PATH : path;
+        String folderID = session.getStorage().getFolderID(uploadPath, false);
+        List<Field> fields = Arrays.asList(Field.FILENAME, Field.FILE_SIZE);
+        String pattern = ".????????????????????????????????" + DriveConstants.FILEPART_EXTENSION;
+        List<File> files = session.getStorage().getFilesInFolder(folderID, true, pattern, fields);
+        for (FileVersion fileVersion : fileVersions) {
+            String fileName = getUploadFilename(fileVersion.getChecksum());
+            long offset = 0;
+            for (File file : files) {
+                if (fileName.equals(file.getFileName())) {
+                    offset = file.getFileSize();
+                    break;
+                }
+            }
+            uploadOffsets.add(Long.valueOf(offset));
+        }
+        return uploadOffsets;
     }
 
     private static String getUploadFilename(String checksum) {
