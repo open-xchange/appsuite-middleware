@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.storage.filter;
 
+import java.util.Arrays;
 import java.util.regex.Pattern;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.internal.DriveServiceLookup;
@@ -92,9 +93,15 @@ public class SynchronizedFileFilter extends FileNameFilter {
         if (fileName.endsWith(DriveConstants.FILEPART_EXTENSION)) {
             return false; // no temporary upload files
         }
-        if (DriveConstants.FILENAME_VALIDATION_PATTERN.matcher(fileName).matches()) {
-            return false; // no invalid filenames
+        for (int i = 0; i < fileName.length(); i++) {
+            char c = fileName.charAt(i);
+            if (0 <= Arrays.binarySearch(DriveConstants.ILLEGAL_FILENAME_CHARS, c)) {
+                return false; // no invalid characters
+            }
         }
+//        if (DriveConstants.FILENAME_VALIDATION_PATTERN.matcher(fileName).matches()) {
+//            return false; // no invalid filenames
+//        }
         if (excudedFilesPattern.matcher(fileName).matches()) {
             return false; // no excluded files
         }
