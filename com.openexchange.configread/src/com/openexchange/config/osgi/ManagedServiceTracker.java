@@ -58,21 +58,25 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
 
 
 /**
- * {@link ManagedServiceTracker}
+ * {@link ManagedServiceTracker} - Tracks {@link ManagedService} instances and applies certain configuration to them.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.0
  */
 public final class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedService> {
 
+    private final ConfigurationService configService;
+
     /**
      * Initializes a new {@link ManagedServiceTracker}.
      */
-    public ManagedServiceTracker(final BundleContext context) {
+    public ManagedServiceTracker(final BundleContext context, ConfigurationService configService) {
         super(context, ManagedService.class, null);
+        this.configService = configService;
     }
 
     @Override
@@ -82,15 +86,20 @@ public final class ManagedServiceTracker extends ServiceTracker<ManagedService, 
             if ("org.apache.felix.webconsole.internal.servlet.OsgiManager".equals(reference.getProperty(Constants.SERVICE_PID))) {
                 final ManagedService service = super.addingService(reference);
                 serviceObtained = true;
+
                 final Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
-                properties.put("manager.root", "/servlet/console");
-                properties.put("username", "open-xchange");
-                properties.put("password", "secret");
-                properties.put("realm", "Open-Xchange Management Console");
+                properties.put("manager.root", configService.getProperty("com.openexchange.webconsole.servletPath", "/servlet/console"));
+                properties.put("username", configService.getProperty("com.openexchange.webconsole.username", "open-xchange"));
+                properties.put("password", configService.getProperty("com.openexchange.webconsole.password", "secret"));
+                properties.put("realm", configService.getProperty("com.openexchange.webconsole.realm", "Open-Xchange Management Console"));
                 service.updated(properties);
+
                 return service;
             }
         } catch (final ConfigurationException e) {
+            final Log log = com.openexchange.log.Log.loggerFor(ManagedServiceTracker.class);
+            log.warn("Cannot configure Apache Felix Web Console", e);
+        } catch (final RuntimeException e) {
             final Log log = com.openexchange.log.Log.loggerFor(ManagedServiceTracker.class);
             log.warn("Cannot configure Apache Felix Web Console", e);
         }

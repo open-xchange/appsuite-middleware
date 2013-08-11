@@ -85,10 +85,12 @@ public final class ConfigActivator extends HousekeepingActivator {
         try {
             final ConfigurationService configService = new ConfigurationImpl();
             registerService(ConfigurationService.class, configService, null);
+
             final Hashtable<String, Object> properties = new Hashtable<String, Object>();
             properties.put("scope", "server");
             registerService(ConfigProviderService.class, new ConfigProviderServiceImpl(configService), properties);
-            rememberTracker(new ManagedServiceTracker(context));
+
+            rememberTracker(new ManagedServiceTracker(context, configService));
             openTrackers();
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
