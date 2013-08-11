@@ -50,10 +50,13 @@
 package com.openexchange.tokenlogin.impl;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -78,7 +81,7 @@ import com.openexchange.tokenlogin.TokenLoginSecret;
 
 /**
  * Unit tests for {@link TokenLoginServiceImpl}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
@@ -93,12 +96,12 @@ public class TokenLoginServiceImplTest extends AbstractMockTest {
     /**
      * Idle time required for the constructor
      */
-    private int maxIdleTime = 1000;
+    private final int maxIdleTime = 1000;
 
     /**
      * Fake token for the tests
      */
-    private String token = "067e61623b6f4ae2a1712470b63dff00";
+    private final String token = "067e61623b6f4ae2a1712470b63dff00";
 
     /**
      * Mock of the {@link ConfigurationService}
@@ -134,7 +137,7 @@ public class TokenLoginServiceImplTest extends AbstractMockTest {
     /**
      * Content of the secret file
      */
-    private String secretFileContent = "#\n# Listing of known Web Application secrets followed by an optional semicolon-separated parameter list\n# e.g. 1254654698621354; accessPasword=true\n# Dummy entry\n" + SECRET_TOKEN + "; accessPassword=true\n";
+    private final String secretFileContent = "#\n# Listing of known Web Application secrets followed by an optional semicolon-separated parameter list\n# e.g. 1254654698621354; accessPasword=true\n# Dummy entry\n" + SECRET_TOKEN + "; accessPassword=true\n";
 
     @Override
     public void setUp() throws Exception {
@@ -301,7 +304,7 @@ public class TokenLoginServiceImplTest extends AbstractMockTest {
         this.tokenLoginServiceImpl = new TokenLoginServiceImpl(this.maxIdleTime, this.configService);
 
         File file = folder.newFile("tokenlogin-secrets");
-        FileUtils.writeStringToFile(file, secretFileContent, true);
+        writeStringToFile(file, secretFileContent, Charset.defaultCharset(), true);
 
         Map<String, TokenLoginSecret> initSecrets = this.tokenLoginServiceImpl.initSecrets(file);
 
@@ -313,7 +316,7 @@ public class TokenLoginServiceImplTest extends AbstractMockTest {
         this.tokenLoginServiceImpl = new TokenLoginServiceImpl(this.maxIdleTime, this.configService);
 
         File file = folder.newFile("tokenlogin-secrets");
-        FileUtils.writeStringToFile(file, secretFileContent, true);
+        writeStringToFile(file, secretFileContent, Charset.defaultCharset(), true);
 
         Map<String, TokenLoginSecret> initSecrets = this.tokenLoginServiceImpl.initSecrets(file);
 
@@ -326,7 +329,7 @@ public class TokenLoginServiceImplTest extends AbstractMockTest {
         this.tokenLoginServiceImpl = new TokenLoginServiceImpl(this.maxIdleTime, this.configService);
 
         File file = folder.newFile("tokenlogin-secrets");
-        FileUtils.writeStringToFile(file, secretFileContent, true);
+        writeStringToFile(file, secretFileContent, Charset.defaultCharset(), true);
 
         Map<String, TokenLoginSecret> initSecrets = this.tokenLoginServiceImpl.initSecrets(file);
 
@@ -339,7 +342,7 @@ public class TokenLoginServiceImplTest extends AbstractMockTest {
 
         String secret = "this should not be returned as correct";
         File file = folder.newFile("tokenlogin-secrets");
-        FileUtils.writeStringToFile(file, secret, true);
+        writeStringToFile(file, secret, Charset.defaultCharset(), true);
 
         Map<String, TokenLoginSecret> initSecrets = this.tokenLoginServiceImpl.initSecrets(file);
 
@@ -354,7 +357,7 @@ public class TokenLoginServiceImplTest extends AbstractMockTest {
         String secret = "this should not be returned as correct";
         String password = "; accessPassword=true";
         File file = folder.newFile("tokenlogin-secrets");
-        FileUtils.writeStringToFile(file, secret + password, true);
+        writeStringToFile(file, secret + password, Charset.defaultCharset(), true);
 
         Map<String, TokenLoginSecret> initSecrets = this.tokenLoginServiceImpl.initSecrets(file);
 
@@ -400,7 +403,7 @@ public class TokenLoginServiceImplTest extends AbstractMockTest {
 
     /**
      * Creates the token-session id map
-     * 
+     *
      * @return {@link ConcurrentMap<String, String>} with the desired mapping
      */
     private ConcurrentMap<String, String> createToken2SessionId() {
@@ -417,7 +420,7 @@ public class TokenLoginServiceImplTest extends AbstractMockTest {
 
     /**
      * Creates the session id-token map
-     * 
+     *
      * @return {@link ConcurrentMap<String, String>} with the desired mapping
      */
     private ConcurrentMap<String, String> createSessionId2Token() {
@@ -431,4 +434,66 @@ public class TokenLoginServiceImplTest extends AbstractMockTest {
 
         return sessionId2Token;
     }
+
+    /**
+     * Writes a String to a file creating the file if it does not exist.
+     */
+    private static void writeStringToFile(File file, String data, Charset encoding, boolean append) throws IOException {
+        OutputStream out = null;
+        try {
+            out = openOutputStream(file, append);
+            write(data, out, encoding);
+            out.close(); // don't swallow close Exception if copy completes normally
+        } finally {
+            IOUtils.closeQuietly(out);
+        }
+    }
+
+    /**
+     * Writes chars from a <code>String</code> to bytes on an
+     * <code>OutputStream</code> using the specified character encoding.
+     */
+    private static void write(String data, OutputStream output, Charset encoding) throws IOException {
+        if (data != null) {
+            if (encoding == null) {
+                IOUtils.write(data, output);
+            } else {
+                output.write(data.getBytes(encoding));
+            }
+        }
+    }
+
+    /**
+     * Opens a {@link FileOutputStream} for the specified file, checking and
+     * creating the parent directory if it does not exist.
+     * <p>
+     * At the end of the method either the stream will be successfully opened,
+     * or an exception will have been thrown.
+     * <p>
+     * The parent directory will be created if it does not exist.
+     * The file will be created if it does not exist.
+     * An exception is thrown if the file object exists but is a directory.
+     * An exception is thrown if the file exists but cannot be written to.
+     * An exception is thrown if the parent directory cannot be created.
+     * @param append
+     */
+    private static FileOutputStream openOutputStream(File file, boolean append) throws IOException {
+        if (file.exists()) {
+            if (file.isDirectory()) {
+                throw new IOException("File '" + file + "' exists but is a directory");
+            }
+            if (file.canWrite() == false) {
+                throw new IOException("File '" + file + "' cannot be written to");
+            }
+        } else {
+            File parent = file.getParentFile();
+            if (parent != null && parent.exists() == false) {
+                if (parent.mkdirs() == false) {
+                    throw new IOException("File '" + file + "' could not be created");
+                }
+            }
+        }
+        return new FileOutputStream(file, append);
+    }
+
 }
