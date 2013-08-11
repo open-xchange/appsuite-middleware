@@ -14,7 +14,9 @@ Import-Package: com.openexchange.config.cascade,
  com.openexchange.tools.strings,
  org.apache.commons.logging,
  org.ho.yaml,
- org.osgi.framework
+ org.osgi.framework,
+ org.osgi.service.cm,
+ org.osgi.util.tracker
 Export-Package: com.openexchange.config
 Bundle-Activator: com.openexchange.config.osgi.ConfigActivator
 Bundle-ClassPath: .

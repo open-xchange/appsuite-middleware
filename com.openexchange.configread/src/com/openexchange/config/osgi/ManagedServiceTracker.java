@@ -49,62 +49,55 @@
 
 package com.openexchange.config.osgi;
 
+import java.util.Dictionary;
 import java.util.Hashtable;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigProviderService;
-import com.openexchange.config.internal.ConfigProviderServiceImpl;
-import com.openexchange.config.internal.ConfigurationImpl;
-import com.openexchange.config.internal.filewatcher.FileWatcher;
-import com.openexchange.osgi.HousekeepingActivator;
+import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
+import org.osgi.util.tracker.ServiceTracker;
+
 
 /**
- * {@link ConfigActivator} - Activator for <code>com.openexchange.config</code> bundle
+ * {@link ManagedServiceTracker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.0
  */
-public final class ConfigActivator extends HousekeepingActivator {
-
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ConfigActivator.class));
+public final class ManagedServiceTracker extends ServiceTracker<ManagedService, ManagedService> {
 
     /**
-     * Default constructor
+     * Initializes a new {@link ManagedServiceTracker}.
      */
-    public ConfigActivator() {
-        super();
+    public ManagedServiceTracker(final BundleContext context) {
+        super(context, ManagedService.class, null);
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        // Nothing to do
+    public ManagedService addingService(final ServiceReference<ManagedService> reference) {
+        boolean serviceObtained = false;
+        try {
+            if ("org.apache.felix.webconsole.internal.servlet.OsgiManager".equals(reference.getProperty(Constants.SERVICE_PID))) {
+                final ManagedService service = super.addingService(reference);
+                serviceObtained = true;
+                final Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
+                properties.put("manager.root", "/servlet/console");
+                properties.put("username", "open-xchange");
+                properties.put("password", "secret");
+                properties.put("realm", "Open-Xchange Management Console");
+                service.updated(properties);
+                return service;
+            }
+        } catch (final ConfigurationException e) {
+            final Log log = com.openexchange.log.Log.loggerFor(ManagedServiceTracker.class);
+            log.warn("Cannot configure Apache Felix Web Console", e);
+        }
+        if (serviceObtained) {
+            context.ungetService(reference);
+        }
         return null;
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: com.openexchange.configread");
-        try {
-            final ConfigurationService configService = new ConfigurationImpl();
-            registerService(ConfigurationService.class, configService, null);
-            final Hashtable<String, Object> properties = new Hashtable<String, Object>();
-            properties.put("scope", "server");
-            registerService(ConfigProviderService.class, new ConfigProviderServiceImpl(configService), properties);
-            rememberTracker(new ManagedServiceTracker(context));
-            openTrackers();
-        } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
-        }
-    }
-
-    @Override
-    public void stopBundle() {
-        LOG.info("stopping bundle: com.openexchange.configread");
-        try {
-            cleanUp();
-            FileWatcher.dropTimer();
-        } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
-        }
     }
 
 }
