@@ -138,6 +138,11 @@ public class OXContextRestoreException extends Exception {
          */
         NO_ENTRIES_IN_UPDATE_TASK_TABLE("No entries in updateTask table"),
 
+        /**
+         * An unexpected error occurred: %s
+         */
+        UNEXPECTED_ERROR("An unexpected error occurred: %s"),
+
         ;
 
         private final String text;
