@@ -2,6 +2,12 @@
 # translation of server.nl_NL.po to deutsch
 # #-#-#-#-#  errors.nl_NL.po (errors.nl_NL)  #-#-#-#-#
 # translation of errors.nl_NL.po to deutsch
+# Antje Faber <antje.faber@open-xchange.com>, 2010, 2012.
+# Ivar Snaaijer <Ivar@bureau-cornavin.com >, 2010.
+# Ivar Snaaijer <Ivar@bureau-cornavin.com >, 2010, 2011.
+# Ivar Snaaijer <Ivar@bureau-cornavin.com >, 2011, 2012, 2013.
+# Antje Faber <antje.faber@open-xchange.com>, 2010.
+# Reinout van Schouwen <reinouts@gnome.org>, 2012, 2013.
 #. *
 #. * Mail(s) could not be found in folder
 #. * <p>
@@ -37,28 +43,18 @@
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:88
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:90
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:92
-# Antje Faber <antje.faber@open-xchange.com>, 2010, 2012.
-# Ivar Snaaijer <Ivar@bureau-cornavin.com >, 2010.
-# Ivar Snaaijer <Ivar@bureau-cornavin.com >, 2010, 2011.
-# Ivar Snaaijer <Ivar@bureau-cornavin.com >, 2011, 2012, 2013.
-# Antje Faber <antje.faber@open-xchange.com>, 2010.
-# Reinout van Schouwen <reinouts@gnome.org>, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: errors.nl_NL\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-08-04 14:10+0100\n"
-"PO-Revision-Date: 2013-07-28 21:17+0200\n"
-"Last-Translator: Ivar Snaaijer <Ivar@bureau-cornavin.com >\n"
-"Language-Team: Dutch <kde-i18n-doc@kde.org>\n"
+"PO-Revision-Date: 2013-08-08 21:48+0200\n"
+"Last-Translator: Reinout van Schouwen <reinouts@gnome.org>\n"
+"Language-Team: Dutch <vertaling@vrijschrift.org>\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"#-#-#-#-#  server.nl_NL.po (server.nl_NL)  #-#-#-#-#\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 1.5\n"
-"#-#-#-#-#  errors.nl_NL.po (errors.nl_NL)  #-#-#-#-#\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Virtaal 0.7.1\n"
 
@@ -1203,6 +1199,7 @@ msgstr "Er is een JSON-fout opgetreden: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:68
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:224
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:67
@@ -2035,8 +2032,8 @@ msgstr "Onverwachte database fout: \"%1$s\""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:69
 msgid "The file \"%1$s\" with checksum \"%2$s\" was not found at \"%3$s\""
 msgstr ""
-"Het bestand \"%1$s\" met controlegetal \"%2$s\" is niet aangetroffen in \"%"
-"3$s\""
+"Het bestand \"%1$s\" met controlegetal \"%2$s\" is niet aangetroffen in "
+"\"%3$s\""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:70
 msgid "No checksum for file \"%1$s\" available"
@@ -3073,8 +3070,8 @@ msgid ""
 "An error occurred inside the Open-Xchange server which prevented it from "
 "fulfilling the request."
 msgstr ""
-"Er is een fout opgetreden in de Open-Xchange server waardoor deze het verzoek "
-"niet kan uitvoeren."
+"Er is een fout opgetreden in de Open-Xchange server waardoor deze het "
+"verzoek niet kan uitvoeren."
 
 #. The default message displayed to user when a re-try is recommended
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:69
@@ -3426,8 +3423,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.i18n/src/com/openexchange/i18n/parsing/I18NErrorStrings.java:74
 msgid "An I/O error ocurred reading .po file %s."
 msgstr ""
-"Een Invoer-/Uitvoeruitzondering is opgetreden tijdens het lezen van "
-".po-bestand %s."
+"Een Invoer-/Uitvoeruitzondering is opgetreden tijdens het lezen van .po-"
+"bestand %s."
 
 #. Help //
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.i18n/src/com/openexchange/i18n/parsing/I18NErrorStrings.java:77
@@ -3437,6 +3434,692 @@ msgstr "Ga na dat het bestand juist is ingedeeld."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.i18n/src/com/openexchange/i18n/parsing/I18NErrorStrings.java:79
 msgid "Please make sure the file is readable by the groupware."
 msgstr "Ga na dat het bestand leesbaar is door de groupware."
+
+#. *
+#. * No connection available to access mailbox
+#.
+#. No connection available to access mailbox
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:466
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:100
+msgid "No connection available to access mailbox"
+msgstr "Geen verbinding beschikbaar voor toegang tot postbus"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:68
+msgid ""
+"No connection available to access mailbox on server %1$s with login %2$s "
+"(user=%3$s, context=%4$s)"
+msgstr ""
+"Geen verbinding beschikbaar om de mailbox te benaderen op server %1$s met "
+"aanmeldingsnaam %3$s (gebruiker=%3$s, context=%4$s): %5$s"
+
+#. *
+#. * User %1$s has no mail module access due to user configuration
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:76
+msgid "User %1$s has no mail module access due to user configuration"
+msgstr ""
+"Gebruiker %1$s heeft geen toegang tot de e-mail module als gevolg van de "
+"gebruikersconfiguratie"
+
+#. *
+#. * No access to mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:80
+msgid "No access to mail folder %1$s"
+msgstr "Geen toegangsrechten op e-mailmap %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:74
+msgid ""
+"No access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Geen toegangsrechten op e-mailmap %1$s op server %2$s met aanmeldingsnaam "
+"%3$s (gebruiker=%4$s, context=%5$s)."
+
+#. *
+#. * No lookup access to mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:84
+msgid "No lookup access to mail folder %1$s"
+msgstr "Geen rechten voor inzien op e-mailmap %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:78
+msgid ""
+"No lookup access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Geen rechten voor inzien op e-mailmap %1$s op server %2$s met "
+"aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
+
+#. *
+#. * No read access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:88
+msgid "No read access to mail folder %1$s"
+msgstr "Geen leesrechten op e-mailmap %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:82
+msgid ""
+"No read access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Geen leesrechten op e-mailmap %1$s op server %2$s met aanmeldingsnaam %3$s "
+"(gebruiker=%4$s, context=%5$s)."
+
+#. *
+#. * No delete access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:92
+msgid "No delete access to mail folder %1$s"
+msgstr "Geen verwijderrechten op e-mailmap %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:86
+msgid ""
+"No delete access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Geen verwijderrechten op e-mailmap %1$s op server %2$s met aanmeldingsnaam "
+"%3$s (gebruiker=%4$s, context=%5$s)"
+
+#. *
+#. * No insert access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:96
+msgid "No insert access to mail folder %1$s"
+msgstr "Geen invoeg rechten op e-mailmap %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:90
+msgid ""
+"No insert access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Geen invoeg rechten op e-mailmap %1$s op server %2$s met aanmeldingsnaam "
+"%3$s (gebruiker=%4$s, context=%5$s)"
+
+#. *
+#. * No administer access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:100
+msgid "No administer access to mail folder %1$s"
+msgstr "Geen beheerdersrechten op e-mailmap %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:94
+msgid ""
+"No administer access to mail folder %1$s on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Geen beheerdersrechten op e-mailmap %1$s op server %2$s met aanmeldingsnaam "
+"%3$s (gebruiker=%4$s, context=%5$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:96
+msgid "No write access to IMAP folder %1$s"
+msgstr "Geen schrijfrechten naar IMAP map %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:98
+msgid ""
+"No write access to IMAP folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Geen schrijfrechten naar IMAP map %1$s op server %2$s met aanmeldingsnaam "
+"%3$s (gebruiker=%4$s, context=%5$s)."
+
+#. *
+#. * No keep-seen access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:108
+msgid "No keep-seen access to mail folder %1$s"
+msgstr "Geen behoud-gelezen toegang op e-mailmap %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:102
+msgid ""
+"No keep-seen access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Geen behoud-gelezen toegang op e-mailmap %1$s op server %2$s met "
+"aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
+
+#. *
+#. * Folder %1$s does not allow subfolders.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:112
+msgid "Folder %1$s does not allow subfolders."
+msgstr "Map %1$s mag geen submappen bevatten."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:106
+msgid ""
+"Folder %1$s does not allow subfolders on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)."
+msgstr ""
+"Map %1$s kan geen submappen bevatten op mailserver %2$s met aanmeldingsnaam "
+"%3$s (gebruiker=%4$s, context=%5$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:108
+msgid ""
+"Mail folder \"%1$s\" could not be created (maybe due to insufficient "
+"permission on parent folder %2$s or due to an invalid folder name)"
+msgstr ""
+"E-mail map \"%1$s\" kon niet worden aangemaakt (mogelijk doordat er niet "
+"voldoende rechten zijn op de hoofdmap %2$s of omdat de mapnaam ongeldig is)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:110
+msgid ""
+"Mail folder \"%1$s\" could not be created (maybe due to insufficient "
+"permission on parent folder %2$s or due to an invalid folder name) on server "
+"%3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"E-mail map \"%1$s\" kon niet worden aangemaakt (mogelijk doordat er niet "
+"voldoende rechten zijn op de hoofdmap %2$s of omdat de mapnaam ongeldig is) "
+"op mailserver %3$s met aanmeldingsnaam %4$s (gebruiker=%5$s, context=%6$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:112
+msgid ""
+"The composed rights could not be applied to new folder %1$s due to missing "
+"administer right in its initial rights specified by IMAP server. However, "
+"the folder has been created."
+msgstr ""
+"De samengestelde rechten zijn niet toe te passen op de nieuwe map %1$s door "
+"de afwezigheid van beheerdersrechten in de basis rechten zoals gedefinieerd "
+"op de IMAP server. De map is toch aangemaakt."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:114
+msgid ""
+"The composed rights could not be applied to new folder %1$s due to missing "
+"administer right in its initial rights specified by IMAP server. However, "
+"the folder has been created on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)."
+msgstr ""
+"De samengestelde rechten zijn niet toe te passen op de nieuwe map %1$s door "
+"de afwezigheid van beheerdersrechten in de basis rechten zoals gedefinieerd "
+"op de IMAP server. De map is toch aangemaakt op server %2$s met "
+"aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
+
+#. *
+#. * No admin permission specified for folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:125
+msgid "No administer permission specified for folder %1$s"
+msgstr "Geen beheerdersrechten toegewezen voor map %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:118
+msgid ""
+"No administer permission specified for folder %1$s on server %2$s with login "
+"%3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Geen beheerdersrechten toegewezen voor map %1$s op server %2$s met "
+"aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:120
+msgid "Default folder %1$s must not be updated"
+msgstr "Standaardmap %1$s mag niet ververst worden"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:122
+msgid ""
+"Default folder %1$s must not be updated on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Standaardmap %1$s mag niet worden ververst op de server %2$s terwijl u "
+"aangemeld bent met %3$s (gebruiker=%4$s, context=%5$s)"
+
+#. *
+#. * Deletion of folder %1$s failed
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:124
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:133
+msgid "Deletion of folder %1$s failed"
+msgstr "Het verwijderen van de map %1$s is mislukt"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:126
+msgid ""
+"Deletion of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"De map %1$s kan niet worden verwijderd van de server %2$s terwijl u "
+"aangemeld bent met %3$s (gebruiker=%4$s, context=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:128
+msgid "IMAP default folder %1$s could not be created"
+msgstr "IMAP standaard map %1$s kon niet worden aangemaakt."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:130
+msgid ""
+"IMAP default folder %1$s could not be created on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"IMAP standaard map %1$s kon niet worden aangemaakt worden op mailserver %2$s "
+"met aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:132
+msgid "Missing default %1$s folder"
+msgstr "Standaardmap %1$s ontbreekt"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:134
+msgid ""
+"Missing default %1$s folder on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Standaardmap %1$s ontbreekt op server %2$s met aanmeldingsnaam %3$s "
+"(gebruiker=%4$s, context=%5$s)"
+
+#. *
+#. * Update of folder %1$s failed
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:136
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:145
+msgid "Update of folder %1$s failed"
+msgstr "Het bijwerken van de map %1$s is mislukt"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:138
+msgid ""
+"Update of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Het bijwerken van de map %1$s is mislukt op server %2$s met aanmeldingsnaam "
+"%3$s (gebruiker=%4$s, context=%5$s)."
+
+#. *
+#. * Folder %1$s must not be deleted
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:140
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:149
+msgid "Folder %1$s cannot be deleted"
+msgstr "Map %1$s kan niet verwijderd worden"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:142
+msgid ""
+"Folder %1$s cannot be deleted on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Map %1$s kan niet worden verwijderd van server %2$s met aanmeldingsnaam %3$s "
+"(gebruiker=%4$s, context=%5$s)"
+
+#. *
+#. * Default folder %1$s must not be deleted
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:144
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:153
+msgid "Default folder %1$s cannot be deleted"
+msgstr "Standaardmap %1$s kan niet verwijderd worden"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:146
+msgid ""
+"Default folder %1$s cannot be deleted on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Standaardmap %1$s kan niet worden verwijderd van de server %2$s terwijl u "
+"aangemeld bent met %3$s (gebruiker=%4$s, context=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:148
+msgid "Flag %1$s could not be changed due to following reason \"%2$s\""
+msgstr "Vlag %1$s kan niet worden gezet met als reden \"%2$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:150
+msgid ""
+"Flag %1$s could not be changed due to following reason \"%2$s\" on server "
+"%3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Vlag %1$s kan niet worden veranderd door de reden \"%2$s\" op de server %3$s "
+"met aanmeldingsnaam %4$s (gebruiker=%5$s, context=%6$s)."
+
+#. *
+#. * Number of search fields (%d) do not match number of search patterns (%d)
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:152
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:161
+msgid ""
+"Number of search fields (%d) do not match number of search patterns (%d)"
+msgstr ""
+"Het aantal zoekvelden (%d) is niet gelijk aan het aantal zoekpatronen (%d)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:154
+msgid ""
+"IMAP search failed due to reason \"%1$s\". Switching to application-based "
+"search"
+msgstr ""
+"Zoeken in IMAP is mislukt met de reden \"%1$s\". De applicatie gaat zelf "
+"zoeken"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:156
+msgid ""
+"IMAP search failed due to reason \"%1$s\" on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s). Switching to application-based search."
+msgstr ""
+"Zoeken in IMAP is mislukt met de reden \"%1$s\" op server %2$s met "
+"aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:158
+msgid ""
+"IMAP sort failed due to reason \"%1$s\". Switching to application-based "
+"sorting."
+msgstr ""
+"Sorteren in IMAP is mislukt met de reden \"%1$s\". De applicatie gaat zelf "
+"sorteren."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:160
+msgid ""
+"IMAP sort failed due to reason \"%1$s\" on server %2$s with login %3$s (user="
+"%4$s, context=%5$s). Switching to application-based sorting."
+msgstr ""
+"Sorteren in IMAP is mislukt met de reden \"%1$s\" server %2$s met "
+"aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
+
+#. *
+#. * Unknown search field: %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:173
+msgid "Unknown search field: %1$s"
+msgstr "Onbekend zoekveld: %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:164
+msgid ""
+"Unknown search field: %1$s on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Onbekend zoekveld: %1$s op server %2$s met aanmeldingsnaam %3$s (gebruiker="
+"%4$s, context=%5$s)."
+
+#. *
+#. * Mail folder %1$s must not be moved to subsequent folder %2$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:166
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:177
+msgid "Mail folder %1$s must not be moved to subsequent folder %2$s"
+msgstr "E-mail map %1$s mag niet verplaatst worden de volgende map %2$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:168
+msgid ""
+"Mail folder %1$s must not be moved to subsequent folder %2$s on server %3$s "
+"with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"E-mail map %1$s mag niet verplaatst worden naar de volgende map %2$s op "
+"mailserver %3$s met aanmeldingsnaam %4$s (gebruiker=%5$s, context=%6$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:170
+msgid ""
+"This message could not be moved to trash folder, possibly because your "
+"mailbox is nearly full.\n"
+"In that case, please try to empty your deleted items first, or delete "
+"smaller messages first."
+msgstr ""
+"Dit bericht kon niet naar de prullenbakmap verplaatst worden, mogelijk omdat "
+"uw postvak bijna vol is.\n"
+"In dat geval kunt u proberen om eerst uw prullenbak te legen, of eerst "
+"kleinere berichten te verwijderen."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:172
+msgid ""
+"This message could not be moved to trash folder on server %1$s with login "
+"%2$s (user=%3$s, context=%4$s), possibly because your mailbox is nearly "
+"full.\n"
+"In that case, please try to empty your deleted items first, or delete "
+"smaller messages first."
+msgstr ""
+"Dit bericht kon niet naar de prullenbakmap op server %1$s met aanmeldnaam %"
+"2$s (gebruiker=%3$s, context=%4$s) verplaatst worden, mogelijk omdat uw "
+"postvak bijna vol is.\n"
+"In dat geval kunt u proberen om eerst uw prullenbak te legen, of eerst "
+"kleinere berichten te verwijderen."
+
+#. *
+#. * Missing %1$s folder in mail move operation
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:174
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:186
+msgid "Missing %1$s folder in mail move operation"
+msgstr "De map %1$s ontbreekt tijdens het verplaatsen van de mail"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:176
+msgid ""
+"Missing %1$s folder in mail move operation on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"De map %1$s ontbreekt tijdens het verplaatsen van de mail op server %2$s met "
+"aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:178
+msgid ""
+"Message move aborted for user %1$s. Source and destination folder are equal "
+"to \"%2$s\""
+msgstr ""
+"Bericht verplaatsing voor aanmelingsnaam %1$s. De bron en doel map zijn "
+"gelijk aan \"%2$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:180
+msgid ""
+"Message move aborted for user %1$s. Source and destination folder are equal "
+"to \"%2$s\" on server %3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Het verplaatsen van het bericht voor gebruiker %1$s is afgebroken. De bron- "
+"en doelmap zijn gelijk aan \"%2$s\" op server %3$s met aanmeldingsnaam %4$s "
+"(gebruiker=%5$s, context=%6$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:182
+msgid "IMAP folder read-only check failed"
+msgstr "IMAP map alleen-lezen controle mislukt "
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:184
+msgid ""
+"Folder read-only check failed on server %1$s with login %2$s (user=%3$s, "
+"context=%4$s)"
+msgstr ""
+"Alleen-lezen controle is mislukt op server %1$s met aanmeldingsnaam %2$s "
+"(gebruiker=%3$s, context=%4$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:186
+msgid "Unknown folder open mode %1$s"
+msgstr "Onbekende methode  %1$s voor het openen van een map"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:188
+msgid ""
+"Unknown folder open mode %1$s on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Onbekende methode  %1$s voor het openen van een map op server %2$s met "
+"aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:190
+msgid ""
+"Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
+msgstr ""
+"Bericht(en) %1$s in map %2$s kunnen niet verwijderd worden door fout \"%3$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:192
+msgid ""
+"Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\" on "
+"server %4$s with login %5$s (user=%6$s, context=%7$s)"
+msgstr ""
+"Bericht(en) %1$s in map %2$s kunnen niet verwijderd worden door fout \"%3$s"
+"\" op server %4$s met aanmeldingsnaam %5$s (gebruiker=%6$s, context=%7$s)."
+
+#. *
+#. * Not allowed to open folder %1$s due to missing read access
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:194
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:206
+msgid "Not allowed to open folder %1$s due to missing read access"
+msgstr "niet toegestaan map %1$s te openen omdat u geen leesrechten heeft"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:196
+msgid ""
+"Not allowed to open folder %1$s due to missing read access on server %2$s "
+"with login %3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"niet toegestaan map %1$s te openen omdat u geen leesrechten heeft op server "
+"%2$s met aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)"
+
+#. *
+#. * The raw content's input stream of message %1$s in folder %2$s cannot be read
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:198
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:210
+msgid ""
+"The raw content's input stream of message %1$s in folder %2$s cannot be read"
+msgstr ""
+"De ruwe inhoud van de inkomende gegevensstroom van bericht %1$s in map %2$s "
+"kon niet worden gelezen"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:200
+msgid ""
+"The raw content's input stream of message %1$s in folder %2$s cannot be read "
+"on server %3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"De ruwe inhoud van de inkomende gegevensstroom van bericht %1$s in map %2$s "
+"kon niet worden gelezen op server %2$s met aanmeldingsnaam %3$s (gebruiker="
+"%4$s, context=%5$s)."
+
+#. *
+#. * No attachment was found with id %1$s in message
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:202
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:214
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:203
+msgid "No attachment was found with id %1$s in message"
+msgstr "Geen aanhangsel gevonden met id %1$s in het bericht"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:204
+msgid ""
+"No attachment was found with id %1$s in message on server %2$s with login "
+"%3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Geen aanhangsel gevonden met id %1$s in het bericht op server %2$s met "
+"aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
+
+#. *
+#. * Versit object %1$s could not be saved
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:206
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:218
+msgid "Versit object could not be saved"
+msgstr "Versit-object kon niet worden opgeslagen"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:208
+msgid "No support of capability \"THREAD=REFERENCES\""
+msgstr "Geen ondersteuning voor optie \"THREAD=REFERENCES\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:210
+msgid ""
+"No support of capability \"THREAD=REFERENCES\" on server %2$s with login "
+"%3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Geen ondersteuning voor optie \"THREAD=REFERENCES\" op server %2$s met "
+"aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:212
+msgid ""
+"A protocol exception occurred during execution of IMAP request \"%1$s\".\n"
+"Error message: %2$s"
+msgstr ""
+"Er is een protocol uitzondering opgetreden bij het uitvoeren van een IMAP "
+"aanvraag \"%1$s\".\n"
+"Foutmelding: %2$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:214
+msgid ""
+"Mailbox' root folder must not be source or the destination full name of a "
+"move operation."
+msgstr ""
+"E-mail hoofdmap mag niet de bron- of doelmap zijn van een verplaatsing."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:216
+msgid "Sort field %1$s is not supported via IMAP SORT command"
+msgstr "Sorteerveld %1$s wordt niet ondersteund door het IMAP SORT commando"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:218
+msgid ""
+"Sort field %1$s is not supported via IMAP SORT command on server %2$s with "
+"login %3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Sorteerveld %1$s wordt niet ondersteund door het IMAP SORT commando op "
+"server %2$s met aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
+
+#. *
+#. * Missing personal namespace
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:220
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:238
+msgid "Missing personal namespace"
+msgstr "De persoonlijke namespace ontbreekt"
+
+#. *
+#. * Parsing thread-sort string failed: %1$s.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:222
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:242
+msgid "Parsing thread-sort string failed: %1$s."
+msgstr "Verwerken van draad-sorteer tekens mislukt: %1$s."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:226
+msgid "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\"."
+msgstr ""
+"Hernoemen van map \"%1$s\" naar \"%2$s\" is mislukt met de melding \"%3$s\"."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:228
+msgid ""
+"Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\" on server %4$s "
+"with login %5$s (user=%6$s, context=%7$s)."
+msgstr ""
+"Hernoemen van map \"%1$s\" naar \"%2$s\" is mislukt met de melding \"%3$s\" "
+"op server %4$s met aanmeldingsnaam %5$s (gebruiker=%6$s, context=%7$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:230
+msgid "No rename access to mail folder %1$s"
+msgstr "Geen hernoemrechten op e-mailmap %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:232
+msgid ""
+"No rename access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Geen hernoemrechten op e-mailmap %1$s op server %2$s met aanmeldingsnaam "
+"%3$s (gebruiker=%4$s, context=%5$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:234
+msgid "Unable to parse IMAP server URI \"%1$s\"."
+msgstr "Het is niet mogelijk de IMAP server URI \"%1$s\" te verwerken."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:236
+msgid "Default folder %1$s must not be unsubscribed."
+msgstr "Het abonnement op standaardmap %1$s kan niet worden gestopt."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:238
+msgid ""
+"Default folder %1$s must not be unsubscribed on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Het is niet mogelijk het abonnement te stoppen van standaardmap %1$s op de "
+"server %2$s terwijl u aangemeld bent met %3$s (gebruiker=%4$s, context=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:240
+msgid "IMAP server refuses to import one or more E-Mails."
+msgstr "IMAP server weigerd één of meerdere e-mailbreichten te importeren."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:242
+msgid ""
+"IMAP server %1$s refuses to import one or more E-Mails with login %2$s (user="
+"%3$s, context=%4$s)"
+msgstr ""
+"IMAP server %1$s heeft het importeren van één of meerdere e-mailbreichten "
+"geweigerd met aanmeldingsnaam %2$s (gebruiker=%3$s, context=%4$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:244
+msgid ""
+"Currently not possible to establish a new connection to server %1$s with "
+"login %2$s. Please try again."
+msgstr ""
+"Het is momenteel niet mogelijk een verbinding te maken met server %1$s met "
+"login %2$s. Probeer het opnieuw."
 
 #. Implementing class could not be found
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:70
@@ -4069,7 +4752,7 @@ msgstr "Album"
 
 #. The internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:105
 msgid "Confirmed ham"
 msgstr "Bevestigde ham"
 
@@ -4079,7 +4762,7 @@ msgstr "Bevestigde hammap"
 
 #. The internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:97
 msgid "Confirmed spam"
 msgstr "Bevestigde spam"
 
@@ -4092,7 +4775,7 @@ msgstr "Bevestigde spam map"
 #. The name for the drafts folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:65
 msgid "Drafts"
 msgstr "Concepten"
@@ -4114,7 +4797,7 @@ msgstr "Verzonden map"
 #. The name for the spam folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:89
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:166
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:71
 msgid "Spam"
 msgstr "Spam"
@@ -4128,7 +4811,7 @@ msgstr "Spam map"
 #. The name for the trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:85
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:150
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:74
 msgid "Trash"
 msgstr "Prullenbak"
@@ -4606,86 +5289,11 @@ msgid "Unsupported action %1$s via %2$s request"
 msgstr "Niet-ondersteunde actie %1$s via %2$s aanvraag"
 
 #. *
-#. * No connection available to access mailbox
-#.
-#. No connection available to access mailbox
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:466
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:100
-msgid "No connection available to access mailbox"
-msgstr "Geen verbinding beschikbaar voor toegang tot postbus"
-
-#. *
-#. * User %1$s has no mail module access due to user configuration
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:76
-msgid "User %1$s has no mail module access due to user configuration"
-msgstr ""
-"Gebruiker %1$s heeft geen toegang tot de e-mail module als gevolg van de "
-"gebruikersconfiguratie"
-
-#. *
-#. * No access to mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:80
-msgid "No access to mail folder %1$s"
-msgstr "Geen toegangsrechten op e-mailmap %1$s"
-
-#. *
-#. * No lookup access to mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:84
-msgid "No lookup access to mail folder %1$s"
-msgstr "Geen rechten voor inzien op e-mailmap %1$s"
-
-#. *
-#. * No read access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:88
-msgid "No read access to mail folder %1$s"
-msgstr "Geen leesrechten op e-mailmap %1$s"
-
-#. *
-#. * No delete access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:92
-msgid "No delete access to mail folder %1$s"
-msgstr "Geen verwijderrechten op e-mailmap %1$s"
-
-#. *
-#. * No insert access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:96
-msgid "No insert access to mail folder %1$s"
-msgstr "Geen invoeg rechten op e-mailmap %1$s"
-
-#. *
-#. * No administer access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:100
-msgid "No administer access to mail folder %1$s"
-msgstr "Geen beheerdersrechten op e-mailmap %1$s"
-
-#. *
 #. * No write access to POP3 folder %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:104
 msgid "No write access to POP3 folder %1$s"
 msgstr "Geen schrijfrechten naar POP3 map %1$s"
-
-#. *
-#. * No keep-seen access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:108
-msgid "No keep-seen access to mail folder %1$s"
-msgstr "Geen behoud-gelezen toegang op e-mailmap %1$s"
-
-#. *
-#. * Folder %1$s does not allow subfolders.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:112
-msgid "Folder %1$s does not allow subfolders."
-msgstr "Map %1$s mag geen submappen bevatten."
 
 #. *
 #. * POP3 does not support mail folder creation
@@ -4709,25 +5317,11 @@ msgstr ""
 "toe. Desalniettemin is de map aangemaakt."
 
 #. *
-#. * No admin permission specified for folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:125
-msgid "No administer permission specified for folder %1$s"
-msgstr "Geen beheerdersrechten toegewezen voor map %1$s"
-
-#. *
 #. * Default folder %1$s must not be updated
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:129
 msgid "Default folder %1$s cannot be updated"
 msgstr "Standaardmap %1$s kan niet bijgewerkt worden"
-
-#. *
-#. * Deletion of folder %1$s failed
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:133
-msgid "Deletion of folder %1$s failed"
-msgstr "Het verwijderen van de map %1$s is mislukt"
 
 #. *
 #. * POP3 default folder %1$s could not be created
@@ -4745,41 +5339,11 @@ msgid "Missing default %1$s folder in user mail settings"
 msgstr "Standaardmap %1$s ontbreekt in gebruikersinstellingen voor e-mail"
 
 #. *
-#. * Update of folder %1$s failed
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:145
-msgid "Update of folder %1$s failed"
-msgstr "Het bijwerken van de map %1$s is mislukt"
-
-#. *
-#. * Folder %1$s must not be deleted
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:149
-msgid "Folder %1$s cannot be deleted"
-msgstr "Map %1$s kan niet verwijderd worden"
-
-#. *
-#. * Default folder %1$s must not be deleted
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:153
-msgid "Default folder %1$s cannot be deleted"
-msgstr "Standaardmap %1$s kan niet verwijderd worden"
-
-#. *
 #. * Flag %1$s could not be changed due to following reason: %2$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:157
 msgid "Flag %1$s could not be changed due to the following reason: %2$s"
 msgstr "Vlag %1$s kan niet worden veranderd met als reden: %2$s"
-
-#. *
-#. * Number of search fields (%d) do not match number of search patterns (%d)
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:161
-msgid ""
-"Number of search fields (%d) do not match number of search patterns (%d)"
-msgstr ""
-"Het aantal zoekvelden (%d) is niet gelijk aan het aantal zoekpatronen (%d)"
 
 #. *
 #. * POP3 search failed due to following reason: %1$s. Switching to application-based search
@@ -4803,20 +5367,6 @@ msgstr ""
 "sorteren"
 
 #. *
-#. * Unknown search field: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:173
-msgid "Unknown search field: %1$s"
-msgstr "Onbekend zoekveld: %1$s"
-
-#. *
-#. * Mail folder %1$s must not be moved to subsequent folder %2$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:177
-msgid "Mail folder %1$s must not be moved to subsequent folder %2$s"
-msgstr "E-mail map %1$s mag niet verplaatst worden de volgende map %2$s"
-
-#. *
 #. * This message could not be moved to trash folder, possibly because your mailbox is nearly full.<br>
 #. * In that case, please try to empty your deleted items first, or delete smaller messages first.
 #.
@@ -4835,13 +5385,6 @@ msgid ""
 msgstr ""
 "Als dit correct is, probeer dan eerst de verwijderde items te verwijderen, "
 "of verwijder eerst kleine berichten."
-
-#. *
-#. * Missing %1$s folder in mail move operation
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:186
-msgid "Missing %1$s folder in mail move operation"
-msgstr "De map %1$s ontbreekt tijdens het verplaatsen van de mail"
 
 #. *
 #. * Message move aborted for user %1$s. Source and destination folder are equal: %2$s
@@ -4879,38 +5422,6 @@ msgstr ""
 "Bericht(en) %1$s in map %2$s kunnen niet verwijderd worden door fout : %3$s"
 
 #. *
-#. * Not allowed to open folder %1$s due to missing read access
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:206
-msgid "Not allowed to open folder %1$s due to missing read access"
-msgstr "niet toegestaan map %1$s te openen omdat u geen leesrechten heeft"
-
-#. *
-#. * The raw content's input stream of message %1$s in folder %2$s cannot be read
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:210
-msgid ""
-"The raw content's input stream of message %1$s in folder %2$s cannot be read"
-msgstr ""
-"De ruwe inhoud van de inkomende gegevensstroom van bericht %1$s in map %2$s "
-"kon niet worden gelezen"
-
-#. *
-#. * No attachment was found with id %1$s in message
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:214
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:203
-msgid "No attachment was found with id %1$s in message"
-msgstr "Geen aanhangsel gevonden met id %1$s in het bericht"
-
-#. *
-#. * Versit object %1$s could not be saved
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:218
-msgid "Versit object could not be saved"
-msgstr "Versit-object kon niet worden opgeslagen"
-
-#. *
 #. * POP3 server does not support capability "THREAD=REFERENCES"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:222
@@ -4939,20 +5450,6 @@ msgstr "POP3 ondersteund het verplaatsen van mappen niet."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:234
 msgid "Sort field %1$s is not supported via POP3 SORT command"
 msgstr "Sorteerveld %1$s wordt niet ondersteund door het POP3 SORT commando"
-
-#. *
-#. * Missing personal namespace
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:238
-msgid "Missing personal namespace"
-msgstr "De persoonlijke namespace ontbreekt"
-
-#. *
-#. * Parsing thread-sort string failed: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:242
-msgid "Parsing thread-sort string failed: %1$s."
-msgstr "Verwerken van draad-sorteer tekens mislukt: %1$s."
 
 #. *
 #. * POP3 does not support to create folders.
@@ -5604,8 +6101,8 @@ msgstr "Ongeldige ID. Bronkenmerk is afwezig."
 msgid ""
 "The client has sent a message that is malformed or cannot be processed: %1$s"
 msgstr ""
-"De client heeft een misvormd bericht gestuurd of kan niet worden verwerkt: %"
-"1$s"
+"De client heeft een misvormd bericht gestuurd of kan niet worden verwerkt: "
+"%1$s"
 
 #. * The server could not process the stanza because of a misconfiguration or an otherwise-undefined internal server error: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:71
@@ -5613,8 +6110,8 @@ msgid ""
 "The server could not process the stanza because of a misconfiguration or an "
 "otherwise-undefined internal server error: %1$s"
 msgstr ""
-"De server kan de stanza niet verwerken door een verkeerde configuratie of een "
-"onbekende server fout: %1$s"
+"De server kan de stanza niet verwerken door een verkeerde configuratie of "
+"een onbekende server fout: %1$s"
 
 #. * Resource not available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:106
@@ -7226,7 +7723,7 @@ msgstr "Inbox"
 #. The internationalized name for the sent mail folder
 #. The name for trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
 msgid "Sent objects"
 msgstr "Verzonden objecten"
 
@@ -7237,18 +7734,25 @@ msgstr "Verzonden objecten"
 msgid "Sent items"
 msgstr "Sent items"
 
+#. The internationalized name for the archive mail folder
+#. The name for trash folder
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:170
+msgid "Archive"
+msgstr "Archief"
+
 #. The alternative internationalized name for the confirmed-spam mail folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:101
 msgid "confirmed-spam"
 msgstr "Bevestigde spam"
 
 #. The alternative internationalized name for the confirmed-spam mail folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:105
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:109
 msgid "confirmed-ham"
 msgstr "Bevestigde ham"
 
 #. The internationalized subject for a read acknowledgement
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:114
 msgid "Read acknowledgement"
 msgstr "Leesbevestiging"
 
@@ -7256,7 +7760,7 @@ msgstr "Leesbevestiging"
 #. #DATE# is replaced with the sent date of referenced email
 #. #RECIPIENT# is replaced with personal and/or email address of recipient(s)
 #. #SUBJECT# is replaced with referenced email's subject
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:120
 msgid ""
 "This is a delivery receipt for the mail that you sent on #DATE# to "
 "#RECIPIENT# with subject \"#SUBJECT#\".\n"
@@ -7276,7 +7780,7 @@ msgstr ""
 #. #DATE# is replaced with the sent date of referenced email
 #. #TIME# is replaced with time of referenced email
 #. #SENDER# is replaced with personal and/or email address of the sender
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:122
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:126
 msgid "On #DATE# at #TIME# #SENDER# wrote:"
 msgstr "Op #DATE# om #TIME# schreef #SENDER#:"
 
@@ -7288,7 +7792,7 @@ msgstr "Op #DATE# om #TIME# schreef #SENDER#:"
 #. #DATE# is replaced with the sent date of referenced email
 #. #TIME# is replaced with time of referenced email
 #. #SUBJECT# is replaced with referenced email's subject
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:132
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:136
 msgid ""
 "---------- Original Message ----------\n"
 "From: #FROM#\n"
@@ -7303,26 +7807,26 @@ msgstr ""
 "Onderwerp: #SUBJECT#"
 
 #. The internationalized default subject.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:135
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:139
 msgid "[No Subject]"
 msgstr "[Geen onderwerp]"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Hints to the available attachments for affected message
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:139
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:143
 msgid ""
 "The available attachments for this E-Mail can be accessed via the links:"
 msgstr "De bijlagen van deze e-mail zijn beschikbaar via deze links:"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the elapsed date for affected message's attachments
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:143
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:147
 msgid "The links will be deleted on #DATE#"
 msgstr "De linkjes worden op #DATE# verwijderd."
 
 #. The greeting used for form mails. E.g.
 #. "Dear Sir or Madam Jane Doe"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:147
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:151
 msgid "Dear Sir or Madam"
 msgstr "Beste Mijnheer of Mevrouw"
 
@@ -11184,8 +11688,8 @@ msgid ""
 "The requested range (offset: %1$d, length: %2$d) for the file \"%3$s"
 "\" (current size: %4$d) is invalid."
 msgstr ""
-"De gevraagde reeks (offset: %1$d, lengte: %2$d) voor het bestand \"%3$s\" "
-"(huidige grote: %4$d) is ongeldig."
+"De gevraagde reeks (offset: %1$d, lengte: %2$d) voor het bestand \"%3$s"
+"\" (huidige grote: %4$d) is ongeldig."
 
 #. The specified offset %1$d for the file \"%2$s\" (current size: %3$d) is invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:106
@@ -12807,8 +13311,7 @@ msgstr "Gebruik correct HTML."
 msgid "An I/O error occurred: %1$s. Was trying to get the service at %2$s."
 msgstr ""
 "Een Invoer-/Uitvoeruitzondering is ontstaan: %1$s. Dit was tijdens het "
-"aanroepen van de dienst op "
-"%2$s."
+"aanroepen van de dienst op %2$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:71
@@ -12822,8 +13325,7 @@ msgstr "Probeer het later nog eens."
 msgid "A HTTP Error occurred: %1$s. Was trying to get the service at %2$s."
 msgstr ""
 "Een HTTP uitzondering is opgetreden: %1$s. Dit was tijdens het aanroepen van "
-"de "
-"dienst op %2$s."
+"de dienst op %2$s."
 
 #. Can only post to external subscription sources.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:74
@@ -15510,14 +16012,6 @@ msgstr "Zoeloe"
 #~ msgid "%s"
 #~ msgstr "%s"
 
-#~ msgid ""
-#~ "A protocol exception occurred during execution of IMAP request \"%1$s\".\n"
-#~ "Error message: %2$s"
-#~ msgstr ""
-#~ "Er is een protocol uitzondering opgetreden bij het uitvoeren van een IMAP "
-#~ "aanvraag \"%1$s\".\n"
-#~ "Foutmelding: %2$s"
-
 #~ msgid "A server name cannot be found in the server URL \"%1$s\"."
 #~ msgstr "Er is geen servernaam gevonden in de server URL \"%1$s\"."
 
@@ -15563,48 +16057,6 @@ msgstr "Zoeloe"
 #~ msgid "Couldn't reach the filestore"
 #~ msgstr "Kan bestandsdepot niet bereiken"
 
-#~ msgid ""
-#~ "Currently not possible to establish a new connection to server %1$s with "
-#~ "login %2$s. Please try again."
-#~ msgstr ""
-#~ "Het is momenteel niet mogelijk een verbinding te maken met server %1$s "
-#~ "met login %2$s. Probeer het opnieuw."
-
-#~ msgid ""
-#~ "Default folder %1$s cannot be deleted on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Standaardmap %1$s kan niet worden verwijderd van de server %2$s terwijl u "
-#~ "aangemeld bent met %3$s (gebruiker=%4$s, context=%5$s)"
-
-#~ msgid ""
-#~ "Default folder %1$s must not be unsubscribed on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Het is niet mogelijk het abonnement te stoppen van standaardmap %1$s op "
-#~ "de server %2$s terwijl u aangemeld bent met %3$s (gebruiker=%4$s, context="
-#~ "%5$s)"
-
-#~ msgid "Default folder %1$s must not be unsubscribed."
-#~ msgstr "Het abonnement op standaardmap %1$s kan niet worden gestopt."
-
-#~ msgid "Default folder %1$s must not be updated"
-#~ msgstr "Standaardmap %1$s mag niet ververst worden"
-
-#~ msgid ""
-#~ "Default folder %1$s must not be updated on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Standaardmap %1$s mag niet worden ververst op de server %2$s terwijl u "
-#~ "aangemeld bent met %3$s (gebruiker=%4$s, context=%5$s)"
-
-#~ msgid ""
-#~ "Deletion of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "De map %1$s kan niet worden verwijderd van de server %2$s terwijl u "
-#~ "aangemeld bent met %3$s (gebruiker=%4$s, context=%5$s)"
-
 #~ msgid "Empty SEND_BODY_CHUNK package MUST NOT be sent"
 #~ msgstr "Leeg SEND_BODY_CHUNK-pakket MAG NIET verstuurd worden"
 
@@ -15623,83 +16075,8 @@ msgstr "Zoeloe"
 #~ msgid "File is not a directory: %s"
 #~ msgstr "Het bestand is geen map: %s"
 
-#~ msgid "Flag %1$s could not be changed due to following reason \"%2$s\""
-#~ msgstr "Vlag %1$s kan niet worden gezet met als reden \"%2$s\""
-
-#~ msgid ""
-#~ "Flag %1$s could not be changed due to following reason \"%2$s\" on server "
-#~ "%3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Vlag %1$s kan niet worden veranderd door de reden \"%2$s\" op de server "
-#~ "%3$s met aanmeldingsnaam %4$s (gebruiker=%5$s, context=%6$s)."
-
-#~ msgid ""
-#~ "Folder %1$s does not allow subfolders on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)."
-#~ msgstr ""
-#~ "Map %1$s kan geen submappen bevatten op mailserver %2$s met "
-#~ "aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
-
 #~ msgid "Folder of the object is missing."
 #~ msgstr "De map van het object ontbreekt."
-
-#~ msgid ""
-#~ "Folder read-only check failed on server %1$s with login %2$s (user=%3$s, "
-#~ "context=%4$s)"
-#~ msgstr ""
-#~ "Alleen-lezen controle is mislukt op server %1$s met aanmeldingsnaam %2$s "
-#~ "(gebruiker=%3$s, context=%4$s)"
-
-#~ msgid "IMAP default folder %1$s could not be created"
-#~ msgstr "IMAP standaard map %1$s kon niet worden aangemaakt."
-
-#~ msgid ""
-#~ "IMAP default folder %1$s could not be created on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "IMAP standaard map %1$s kon niet worden aangemaakt worden op mailserver "
-#~ "%2$s met aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
-
-#~ msgid "IMAP folder read-only check failed"
-#~ msgstr "IMAP map alleen-lezen controle mislukt "
-
-#~ msgid ""
-#~ "IMAP search failed due to reason \"%1$s\" on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s). Switching to application-based search."
-#~ msgstr ""
-#~ "Zoeken in IMAP is mislukt met de reden \"%1$s\" op server %2$s met "
-#~ "aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
-
-#~ msgid ""
-#~ "IMAP search failed due to reason \"%1$s\". Switching to application-based "
-#~ "search"
-#~ msgstr ""
-#~ "Zoeken in IMAP is mislukt met de reden \"%1$s\". De applicatie gaat zelf "
-#~ "zoeken"
-
-#~ msgid ""
-#~ "IMAP server %1$s refuses to import one or more E-Mails with login %2$s "
-#~ "(user=%3$s, context=%4$s)"
-#~ msgstr ""
-#~ "IMAP server %1$s heeft het importeren van één of meerdere e-mailbreichten "
-#~ "geweigerd met aanmeldingsnaam %2$s (gebruiker=%3$s, context=%4$s)"
-
-#~ msgid "IMAP server refuses to import one or more E-Mails."
-#~ msgstr "IMAP server weigerd één of meerdere e-mailbreichten te importeren."
-
-#~ msgid ""
-#~ "IMAP sort failed due to reason \"%1$s\" on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s). Switching to application-based sorting."
-#~ msgstr ""
-#~ "Sorteren in IMAP is mislukt met de reden \"%1$s\" server %2$s met "
-#~ "aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
-
-#~ msgid ""
-#~ "IMAP sort failed due to reason \"%1$s\". Switching to application-based "
-#~ "sorting."
-#~ msgstr ""
-#~ "Sorteren in IMAP is mislukt met de reden \"%1$s\". De applicatie gaat "
-#~ "zelf sorteren."
 
 #~ msgid "Identifier of the object is missing."
 #~ msgstr "Kenmerk van het object ontbreekt."
@@ -15723,39 +16100,8 @@ msgstr "Zoeloe"
 #~ msgid "Lexical error: %1$s"
 #~ msgstr "Lexicale fout: %1$s"
 
-#~ msgid ""
-#~ "Mail folder \"%1$s\" could not be created (maybe due to insufficient "
-#~ "permission on parent folder %2$s or due to an invalid folder name)"
-#~ msgstr ""
-#~ "E-mail map \"%1$s\" kon niet worden aangemaakt (mogelijk doordat er niet "
-#~ "voldoende rechten zijn op de hoofdmap %2$s of omdat de mapnaam ongeldig "
-#~ "is)"
-
-#~ msgid ""
-#~ "Mail folder \"%1$s\" could not be created (maybe due to insufficient "
-#~ "permission on parent folder %2$s or due to an invalid folder name) on "
-#~ "server %3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "E-mail map \"%1$s\" kon niet worden aangemaakt (mogelijk doordat er niet "
-#~ "voldoende rechten zijn op de hoofdmap %2$s of omdat de mapnaam ongeldig "
-#~ "is) op mailserver %3$s met aanmeldingsnaam %4$s (gebruiker=%5$s, context="
-#~ "%6$s)."
-
-#~ msgid ""
-#~ "Mail folder %1$s must not be moved to subsequent folder %2$s on server "
-#~ "%3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "E-mail map %1$s mag niet verplaatst worden naar de volgende map %2$s op "
-#~ "mailserver %3$s met aanmeldingsnaam %4$s (gebruiker=%5$s, context=%6$s)."
-
 #~ msgid "Mail(s)  could not be found in folder "
 #~ msgstr "E-mail(s) zijn onvindbaar in map"
-
-#~ msgid ""
-#~ "Mailbox' root folder must not be source or the destination full name of a "
-#~ "move operation."
-#~ msgstr ""
-#~ "E-mail hoofdmap mag niet de bron- of doelmap zijn van een verplaatsing."
 
 #~ msgid "Mapping file \"%s\" not valid"
 #~ msgstr "Vertaalbestand \"%s\" is niet geldig"
@@ -15773,52 +16119,6 @@ msgstr "Zoeloe"
 #~ msgstr ""
 #~ "Bericht is met succes verstuurd, maar een kopie kon niet in uw verzonden-"
 #~ "map worden geplaatst als gevolg van overschreden quota."
-
-#~ msgid ""
-#~ "Message move aborted for user %1$s. Source and destination folder are "
-#~ "equal to \"%2$s\""
-#~ msgstr ""
-#~ "Bericht verplaatsing voor aanmelingsnaam %1$s. De bron en doel map zijn "
-#~ "gelijk aan \"%2$s\""
-
-#~ msgid ""
-#~ "Message move aborted for user %1$s. Source and destination folder are "
-#~ "equal to \"%2$s\" on server %3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Het verplaatsen van het bericht voor gebruiker %1$s is afgebroken. De "
-#~ "bron- en doelmap zijn gelijk aan \"%2$s\" op server %3$s met "
-#~ "aanmeldingsnaam %4$s (gebruiker=%5$s, context=%6$s)"
-
-#~ msgid ""
-#~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
-#~ msgstr ""
-#~ "Bericht(en) %1$s in map %2$s kunnen niet verwijderd worden door fout "
-#~ "\"%3$s\""
-
-#~ msgid ""
-#~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\" "
-#~ "on server %4$s with login %5$s (user=%6$s, context=%7$s)"
-#~ msgstr ""
-#~ "Bericht(en) %1$s in map %2$s kunnen niet verwijderd worden door fout "
-#~ "\"%3$s\" op server %4$s met aanmeldingsnaam %5$s (gebruiker=%6$s, context="
-#~ "%7$s)."
-
-#~ msgid ""
-#~ "Missing %1$s folder in mail move operation on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "De map %1$s ontbreekt tijdens het verplaatsen van de mail op server %2$s "
-#~ "met aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)"
-
-#~ msgid "Missing default %1$s folder"
-#~ msgstr "Standaardmap %1$s ontbreekt"
-
-#~ msgid ""
-#~ "Missing default %1$s folder on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Standaardmap %1$s ontbreekt op server %2$s met aanmeldingsnaam %3$s "
-#~ "(gebruiker=%4$s, context=%5$s)"
 
 #~ msgid "Missing or wrong Interval value: %d"
 #~ msgstr "Ontbrekende of foute intervalwaarde : %d"
@@ -15851,43 +16151,8 @@ msgstr "Zoeloe"
 #~ "Er is geen UDP kanaal geconfigureerd. Controleer op mislukte kanaal "
 #~ "openingen tijdens het starten van de server."
 
-#~ msgid ""
-#~ "No access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Geen toegangsrechten op e-mailmap %1$s op server %2$s met aanmeldingsnaam "
-#~ "%3$s (gebruiker=%4$s, context=%5$s)."
-
-#~ msgid ""
-#~ "No administer access to mail folder %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Geen beheerdersrechten op e-mailmap %1$s op server %2$s met "
-#~ "aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
-
-#~ msgid ""
-#~ "No administer permission specified for folder %1$s on server %2$s with "
-#~ "login %3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Geen beheerdersrechten toegewezen voor map %1$s op server %2$s met "
-#~ "aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
-
-#~ msgid ""
-#~ "No attachment was found with id %1$s in message on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Geen aanhangsel gevonden met id %1$s in het bericht op server %2$s met "
-#~ "aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
-
 #~ msgid "No attribute name could be found for code: %1$d"
 #~ msgstr "Geen attribuutnaam gevonden voor code: %1$d"
-
-#~ msgid ""
-#~ "No connection available to access mailbox on server %1$s with login %2$s "
-#~ "(user=%3$s, context=%4$s)"
-#~ msgstr ""
-#~ "Geen verbinding beschikbaar om de mailbox te benaderen op server %1$s met "
-#~ "aanmeldingsnaam %3$s (gebruiker=%3$s, context=%4$s): %5$s"
 
 #~ msgid ""
 #~ "No data provided from web server: input stream returned \"-1\" while "
@@ -15901,55 +16166,10 @@ msgstr "Zoeloe"
 #~ msgid "No default constructor specified in servlet class \"%s\""
 #~ msgstr "Geen standaardconstructor gespecificeerd in servletklasse ‘%s’"
 
-#~ msgid ""
-#~ "No delete access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Geen verwijderrechten op e-mailmap %1$s op server %2$s met "
-#~ "aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)"
-
-#~ msgid ""
-#~ "No insert access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Geen invoeg rechten op e-mailmap %1$s op server %2$s met aanmeldingsnaam "
-#~ "%3$s (gebruiker=%4$s, context=%5$s)"
-
-#~ msgid ""
-#~ "No keep-seen access to mail folder %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Geen behoud-gelezen toegang op e-mailmap %1$s op server %2$s met "
-#~ "aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
-
-#~ msgid ""
-#~ "No lookup access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Geen rechten voor inzien op e-mailmap %1$s op server %2$s met "
-#~ "aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
-
 #~ msgid "No parent recurring appointment found for series exception: %s"
 #~ msgstr ""
 #~ "Er is geen ouder gevonden voor deze terugkerende afspraak om een "
 #~ "uitzondering te maken: %s"
-
-#~ msgid ""
-#~ "No read access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Geen leesrechten op e-mailmap %1$s op server %2$s met aanmeldingsnaam "
-#~ "%3$s (gebruiker=%4$s, context=%5$s)."
-
-#~ msgid "No rename access to mail folder %1$s"
-#~ msgstr "Geen hernoemrechten op e-mailmap %1$s"
-
-#~ msgid ""
-#~ "No rename access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Geen hernoemrechten op e-mailmap %1$s op server %2$s met aanmeldingsnaam "
-#~ "%3$s (gebruiker=%4$s, context=%5$s)."
 
 #~ msgid ""
 #~ "No servlet class name found for key \"%s\". Please check servlet mappings."
@@ -15957,50 +16177,11 @@ msgstr "Zoeloe"
 #~ "Geen servletklassenaam gevonden voor sleutel ‘%s’. Controleer de "
 #~ "servletmappings."
 
-#~ msgid "No support of capability \"THREAD=REFERENCES\""
-#~ msgstr "Geen ondersteuning voor optie \"THREAD=REFERENCES\""
-
-#~ msgid ""
-#~ "No support of capability \"THREAD=REFERENCES\" on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Geen ondersteuning voor optie \"THREAD=REFERENCES\" op server %2$s met "
-#~ "aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
-
-#~ msgid "No write access to IMAP folder %1$s"
-#~ msgstr "Geen schrijfrechten naar IMAP map %1$s"
-
-#~ msgid ""
-#~ "No write access to IMAP folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Geen schrijfrechten naar IMAP map %1$s op server %2$s met aanmeldingsnaam "
-#~ "%3$s (gebruiker=%4$s, context=%5$s)."
-
-#~ msgid ""
-#~ "Not allowed to open folder %1$s due to missing read access on server %2$s "
-#~ "with login %3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "niet toegestaan map %1$s te openen omdat u geen leesrechten heeft op "
-#~ "server %2$s met aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)"
-
 #~ msgid "Problem with a thread."
 #~ msgstr "Probleem met een thread."
 
 #~ msgid "Property error: %s"
 #~ msgstr "Eigenschap fout: %1$s"
-
-#~ msgid ""
-#~ "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\" on server %4$s "
-#~ "with login %5$s (user=%6$s, context=%7$s)."
-#~ msgstr ""
-#~ "Hernoemen van map \"%1$s\" naar \"%2$s\" is mislukt met de melding \"%3$s"
-#~ "\" op server %4$s met aanmeldingsnaam %5$s (gebruiker=%6$s, context=%7$s)."
-
-#~ msgid "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\"."
-#~ msgstr ""
-#~ "Hernoemen van map \"%1$s\" naar \"%2$s\" is mislukt met de melding \"%3$s"
-#~ "\"."
 
 #~ msgid "Response package exceeds max package size value of 8192k: %1$s"
 #~ msgstr "Antwoordpakket overschrijdt max. pakketgrootte van 8192k: %1$s"
@@ -16022,38 +16203,8 @@ msgstr "Zoeloe"
 #~ "Socket gesloten door webserver. Wachten op invoergegevens van pakket #"
 #~ "%1$d duurde %2$d msec."
 
-#~ msgid "Sort field %1$s is not supported via IMAP SORT command"
-#~ msgstr "Sorteerveld %1$s wordt niet ondersteund door het IMAP SORT commando"
-
-#~ msgid ""
-#~ "Sort field %1$s is not supported via IMAP SORT command on server %2$s "
-#~ "with login %3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Sorteerveld %1$s wordt niet ondersteund door het IMAP SORT commando op "
-#~ "server %2$s met aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
-
 #~ msgid "String parse exception: No ending 0x00 found"
 #~ msgstr "Fout bij analyseren tekenreeks: geen 0x00-eindmarkering gevonden"
-
-#~ msgid ""
-#~ "The composed rights could not be applied to new folder %1$s due to "
-#~ "missing administer right in its initial rights specified by IMAP server. "
-#~ "However, the folder has been created on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)."
-#~ msgstr ""
-#~ "De samengestelde rechten zijn niet toe te passen op de nieuwe map %1$s "
-#~ "door de afwezigheid van beheerdersrechten in de basis rechten zoals "
-#~ "gedefinieerd op de IMAP server. De map is toch aangemaakt op server %2$s "
-#~ "met aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
-
-#~ msgid ""
-#~ "The composed rights could not be applied to new folder %1$s due to "
-#~ "missing administer right in its initial rights specified by IMAP server. "
-#~ "However, the folder has been created."
-#~ msgstr ""
-#~ "De samengestelde rechten zijn niet toe te passen op de nieuwe map %1$s "
-#~ "door de afwezigheid van beheerdersrechten in de basis rechten zoals "
-#~ "gedefinieerd op de IMAP server. De map is toch aangemaakt."
 
 #~ msgid ""
 #~ "The configuration requests a master password but none is given in the "
@@ -16091,17 +16242,6 @@ msgstr "Zoeloe"
 #~ msgstr "De positie waar de filter moet worden toegevoegd is te groot"
 
 #~ msgid ""
-#~ "The raw content's input stream of message %1$s in folder %2$s cannot be "
-#~ "read on server %3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "De ruwe inhoud van de inkomende gegevensstroom van bericht %1$s in map "
-#~ "%2$s kon niet worden gelezen op server %2$s met aanmeldingsnaam %3$s "
-#~ "(gebruiker=%4$s, context=%5$s)."
-
-#~ msgid "Unable to parse IMAP server URI \"%1$s\"."
-#~ msgstr "Het is niet mogelijk de IMAP server URI \"%1$s\" te verwerken."
-
-#~ msgid ""
 #~ "Unexpected empty body package received from web server. Total-Received: "
 #~ "%1$d | Content-Length: %2$d.\n"
 #~ "Corresponding AJP forward package:\n"
@@ -16115,32 +16255,8 @@ msgstr "Zoeloe"
 #~ msgid "Unknown Request Prefix Code: %1$s"
 #~ msgstr "Onbekende Request Prefix Code: %1$s"
 
-#~ msgid "Unknown folder open mode %1$s"
-#~ msgstr "Onbekende methode  %1$s voor het openen van een map"
-
-#~ msgid ""
-#~ "Unknown folder open mode %1$s on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Onbekende methode  %1$s voor het openen van een map op server %2$s met "
-#~ "aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)"
-
-#~ msgid ""
-#~ "Unknown search field: %1$s on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Onbekend zoekveld: %1$s op server %2$s met aanmeldingsnaam %3$s "
-#~ "(gebruiker=%4$s, context=%5$s)."
-
 #~ msgid "Unparseable header field %1$s in forward request package"
 #~ msgstr "Niet-analyseerbaar kopveld %1$s in doorstuur-aanvraagpakket"
-
-#~ msgid ""
-#~ "Update of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Het bijwerken van de map %1$s is mislukt op server %2$s met "
-#~ "aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
 
 #~ msgid "mail filter servlet cannot be registered: %s"
 #~ msgstr "mail filter servlet kan niet worden geregistreerd: %s."

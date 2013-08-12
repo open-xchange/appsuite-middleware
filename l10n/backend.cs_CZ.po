@@ -45,7 +45,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.cs_CZ.po\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2013-07-28 13:28+0200\n"
+"PO-Revision-Date: 2013-08-04 14:05+0200\n"
 "Last-Translator: Robert Kratky <rkratky@gmail.com>\n"
 "Language-Team: Czech <>\n"
 "Language: cs\n"
@@ -1191,6 +1191,7 @@ msgstr "Došlo k chybě JSON: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:68
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:224
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:67
@@ -3040,8 +3041,8 @@ msgid ""
 "A temporary error occurred inside the Open-Xchange server which prevented it "
 "from fulfilling the request.. Please try again later."
 msgstr ""
-"V rámci serveru Open-Xchange došlo k dočasné chybě, která zabránila tomu, aby "
-"byl požadavek proveden. Zkuste to, prosím, znovu později."
+"V rámci serveru Open-Xchange došlo k dočasné chybě, která zabránila tomu, "
+"aby byl požadavek proveden. Zkuste to, prosím, znovu později."
 
 #. The general message for a conflicting update operation.
 #. The object has been changed in the meantime.
@@ -3389,6 +3390,686 @@ msgstr "Zkontrolujte, prosím, jestli má soubor správné formátovaní."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.i18n/src/com/openexchange/i18n/parsing/I18NErrorStrings.java:79
 msgid "Please make sure the file is readable by the groupware."
 msgstr "Zkontrolujte, prosím, jestli groupware může daný soubor číst."
+
+#. *
+#. * No connection available to access mailbox
+#.
+#. No connection available to access mailbox
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:466
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:100
+msgid "No connection available to access mailbox"
+msgstr "Není k dispozici žádné spojení pro přístup k poštovní schránce"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:68
+msgid ""
+"No connection available to access mailbox on server %1$s with login %2$s "
+"(user=%3$s, context=%4$s)"
+msgstr ""
+"Není k dispozici žádné spojení s poštovní schránkou na serveru %1$s s "
+"přihlašovacím jménem %2$s (uživatel=%3$s, kontext=%4$s)"
+
+#. *
+#. * User %1$s has no mail module access due to user configuration
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:76
+msgid "User %1$s has no mail module access due to user configuration"
+msgstr ""
+"Uživatel %1$s nemá přístup k poštovnímu modulu kvůli uživatelské konfiguraci"
+
+#. *
+#. * No access to mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:80
+msgid "No access to mail folder %1$s"
+msgstr "K poštovní složce %1$s nemám přístup"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:74
+msgid ""
+"No access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
+"%4$s, kontext=%5$s) nemám přístup"
+
+#. *
+#. * No lookup access to mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:84
+msgid "No lookup access to mail folder %1$s"
+msgstr "K poštovní složce: %1$s nemám přístup povolující hledání"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:78
+msgid ""
+"No lookup access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
+"%4$s, kontext=%5$s) nemám přístup povolující hledání"
+
+#. *
+#. * No read access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:88
+msgid "No read access to mail folder %1$s"
+msgstr "K poštovní složce %1$s nemám přístup povolující čtení"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:82
+msgid ""
+"No read access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
+"%4$s, kontext=%5$s) nemám přístup povolující čtení"
+
+#. *
+#. * No delete access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:92
+msgid "No delete access to mail folder %1$s"
+msgstr "K poštovní složce %1$s nemám přístup povolující mazání"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:86
+msgid ""
+"No delete access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
+"%4$s, kontext=%5$s) nemám přístup povolující mazání"
+
+#. *
+#. * No insert access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:96
+msgid "No insert access to mail folder %1$s"
+msgstr "K poštovní složce %1$s nemám přístup povolující vkládání"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:90
+msgid ""
+"No insert access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
+"%4$s, kontext=%5$s) nemám přístup povolující vkládání."
+
+#. *
+#. * No administer access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:100
+msgid "No administer access to mail folder %1$s"
+msgstr "K poštovní složce %1$s nemám administrátorský přístup"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:94
+msgid ""
+"No administer access to mail folder %1$s on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
+"%4$s, kontext=%5$s) nemám administrátorský přístup"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:96
+msgid "No write access to IMAP folder %1$s"
+msgstr "K IMAP složce %1$s nemám přístup povolující zápis"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:98
+msgid ""
+"No write access to IMAP folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"K IMAP složce %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
+"%4$s, kontext=%5$s) nemám přístup povolující zápis."
+
+#. *
+#. * No keep-seen access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:108
+msgid "No keep-seen access to mail folder %1$s"
+msgstr "K poštovní složce %1$s nemám přístup povolující ponechat přečtené."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:102
+msgid ""
+"No keep-seen access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
+"%4$s, kontext=%5$s) nemám přístup povolující ponechat přečtené."
+
+#. *
+#. * Folder %1$s does not allow subfolders.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:112
+msgid "Folder %1$s does not allow subfolders."
+msgstr "Složka %1$s neumožňuje podsložky."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:106
+msgid ""
+"Folder %1$s does not allow subfolders on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)."
+msgstr ""
+"Složku „%1$s“ na serveru %2$s s přihlašovacím jménem %3$s (uživatel=%4$s, "
+"kontext=%5$s) neumožňuje podsložky."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:108
+msgid ""
+"Mail folder \"%1$s\" could not be created (maybe due to insufficient "
+"permission on parent folder %2$s or due to an invalid folder name)"
+msgstr ""
+"Poštovní složku „%1$s“ se nepodařilo vytvořit (možná kvůli nedostatečným "
+"oprávněním k nadřazené složce %2$s nebo kvůli neplatnému názvu složky"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:110
+msgid ""
+"Mail folder \"%1$s\" could not be created (maybe due to insufficient "
+"permission on parent folder %2$s or due to an invalid folder name) on server "
+"%3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Poštovní složku „%1$s“ se na serveru %3$s s přihlašovacím jménem %4$s "
+"(uživatel=%5$s, kontext=%6$s) nepodařilo vytvořit (možná kvůli nedostatečným "
+"oprávněním k nadřazené složce %2$s nebo kvůli neplatnému názvu složky)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:112
+msgid ""
+"The composed rights could not be applied to new folder %1$s due to missing "
+"administer right in its initial rights specified by IMAP server. However, "
+"the folder has been created."
+msgstr ""
+"Poskládaná oprávnění se nepodařilo na novou složku %1$s aplikovat, protože "
+"ve výchozích oprávněních určených IMAP serverem chybí administrátorské "
+"oprávnění. Nicméně, složka byla vytvořena."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:114
+msgid ""
+"The composed rights could not be applied to new folder %1$s due to missing "
+"administer right in its initial rights specified by IMAP server. However, "
+"the folder has been created on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)."
+msgstr ""
+"Poskládaná oprávnění se nepodařilo na novou složku %1$s aplikovat, protože "
+"ve výchozích oprávněních určených IMAP serverem chybí administrátorské "
+"oprávnění. Nicméně, složka byla na serveru %2$s s přihlašovacím jménem %3$s "
+"(uživatel=%4$s, kontext=%5$s) vytvořena."
+
+#. *
+#. * No admin permission specified for folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:125
+msgid "No administer permission specified for folder %1$s"
+msgstr "Pro složku %1$s nejsou určena žádná administrátorská práva"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:118
+msgid ""
+"No administer permission specified for folder %1$s on server %2$s with login "
+"%3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Pro složku %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel=%4$s, "
+"kontext=%5$s) nejsou určena žádná administrátorská práva"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:120
+msgid "Default folder %1$s must not be updated"
+msgstr "Výchozí složka %1$s nesmí být aktualizována."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:122
+msgid ""
+"Default folder %1$s must not be updated on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Výchozí složka %1$s nesmí být na serveru %2$s s přihlašovacím jménem %3$s "
+"(uživatel=%4$s, kontext=%5$s) aktualizována"
+
+#. *
+#. * Deletion of folder %1$s failed
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:124
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:133
+msgid "Deletion of folder %1$s failed"
+msgstr "Mazání složky %1$s selhalo"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:126
+msgid ""
+"Deletion of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Mazání složky %1$s na serveru %2$s s přihlašovacím jménem %3$s existuje "
+"(uživatel=%4 $s, kontext=%5$s) selhalo."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:128
+msgid "IMAP default folder %1$s could not be created"
+msgstr "IMAP složku %1$s se nepodařilo vytvořit"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:130
+msgid ""
+"IMAP default folder %1$s could not be created on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Výchozí složku IMAP %1$s se nepodařilo na serveru %2$s s přihlašovacím "
+"jménem %3$s (uživatel=%4$s, kontext=%5$s) vytvořit."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:132
+msgid "Missing default %1$s folder"
+msgstr "Chybí výchozí složka %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:134
+msgid ""
+"Missing default %1$s folder on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Chybí výchozí složka %1$s na serveru %2$s s přihlašovacím jménem %3$s "
+"(uživatel=%4$s, kontext=%5$s)"
+
+#. *
+#. * Update of folder %1$s failed
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:136
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:145
+msgid "Update of folder %1$s failed"
+msgstr "Aktualizace složky %1$s selhala"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:138
+msgid ""
+"Update of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Aktualizace složky %1$s na serveru %2$s s přihlašovacím jménem %3$s "
+"(uživatel=%4 $s, kontext=%5$s) selhala"
+
+#. *
+#. * Folder %1$s must not be deleted
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:140
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:149
+msgid "Folder %1$s cannot be deleted"
+msgstr "Složku %1$s nelze smazat"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:142
+msgid ""
+"Folder %1$s cannot be deleted on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Složku %1$s nelze na serveru %2$s s přihlašovacím jménem %3$s (uživatel=%4$s, "
+"kontext=%5$s) smazat"
+
+#. *
+#. * Default folder %1$s must not be deleted
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:144
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:153
+msgid "Default folder %1$s cannot be deleted"
+msgstr "Výchozí složku %1$s nelze %2$s smazat"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:146
+msgid ""
+"Default folder %1$s cannot be deleted on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Výchozí složku %1$s nelze na serveru %2$s s přihlašovacím jménem %3$s "
+"(uživatel=%4$s, kontext=%5$s) smazat"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:148
+msgid "Flag %1$s could not be changed due to following reason \"%2$s\""
+msgstr "Příznak %1$s nemohl být změněn z tohoto důvodu: „%2$s“"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:150
+msgid ""
+"Flag %1$s could not be changed due to following reason \"%2$s\" on server "
+"%3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Příznak %1$s na serveru %3$s s přihlašovacím jménem %4$s (uživatel=%5$s, "
+"kontext=%6$s) nemohl být změněn z tohoto důvodu: „%2$“"
+
+#. *
+#. * Number of search fields (%d) do not match number of search patterns (%d)
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:152
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:161
+msgid ""
+"Number of search fields (%d) do not match number of search patterns (%d)"
+msgstr ""
+"Počet vyhledávacích polí (%d) neodpovídá počtu vzorů pro vyhledávání (%d)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:154
+msgid ""
+"IMAP search failed due to reason \"%1$s\". Switching to application-based "
+"search"
+msgstr ""
+"IMAP vyhledávání selhalo z tohoto důvodu: „%1$s“. Přepínám na vyhledávání v "
+"aplikaci."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:156
+msgid ""
+"IMAP search failed due to reason \"%1$s\" on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s). Switching to application-based search."
+msgstr ""
+"IMAP vyhledávání na serveru %2$s s přihlašovacím jménem %3$s (uživatel=%4$s, "
+"kontext=%5$s) selhalo z tohoto důvodu: „%1$s“. Přepínám na vyhledávání v "
+"aplikaci."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:158
+msgid ""
+"IMAP sort failed due to reason \"%1$s\". Switching to application-based "
+"sorting."
+msgstr ""
+"IMAP třídění selhalo z tohoto důvodu: „%1$s“. Přepínám na třídění v aplikaci."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:160
+msgid ""
+"IMAP sort failed due to reason \"%1$s\" on server %2$s with login %3$s (user="
+"%4$s, context=%5$s). Switching to application-based sorting."
+msgstr ""
+"IMAP třídění na serveru %2$s s přihlašovacím jménem %3$s (uživatel=%4$s, "
+"kontext=%5$s) selhalo z tohoto důvodu: „%1$s“. Přepínám na třídění v "
+"aplikaci."
+
+#. *
+#. * Unknown search field: %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:173
+msgid "Unknown search field: %1$s"
+msgstr "Neznámé vyhledávací pole: %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:164
+msgid ""
+"Unknown search field: %1$s on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Neznámé vyhledávací pole %1$s na serveru %2$s s přihlašovacím jménem %3$s "
+"(uživatel=%4$s, kontext=%5$s)"
+
+#. *
+#. * Mail folder %1$s must not be moved to subsequent folder %2$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:166
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:177
+msgid "Mail folder %1$s must not be moved to subsequent folder %2$s"
+msgstr "Poštovní složku %1$s nelze přesunout do složky %2$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:168
+msgid ""
+"Mail folder %1$s must not be moved to subsequent folder %2$s on server %3$s "
+"with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Poštovní složku %1$s nelze na poštovním serveru %3$s s přihlašovacím jménem "
+"%4$s (uživatel=%5$s, kontext=%6$s) přesunout do složky %2$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:170
+msgid ""
+"This message could not be moved to trash folder, possibly because your "
+"mailbox is nearly full.\n"
+"In that case, please try to empty your deleted items first, or delete "
+"smaller messages first."
+msgstr ""
+"Zprávu se nepodařilo přesunout do koše - nejspíš proto, že je vaše poštovní "
+"schránka téměř plná.\n"
+"Je-li tomu tak, zkuste prosím odstranit vymazané položky nebo nejdříve smazat "
+"menší zprávy."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:172
+msgid ""
+"This message could not be moved to trash folder on server %1$s with login "
+"%2$s (user=%3$s, context=%4$s), possibly because your mailbox is nearly "
+"full.\n"
+"In that case, please try to empty your deleted items first, or delete "
+"smaller messages first."
+msgstr ""
+"Zprávu se nepodařilo přesunout do koše na serveru %1$s s přihlašovacím jménem "
+"%2$s (uživatel=%3$s, kontext=%4$s) - nejspíš proto, že je vaše poštovní "
+"schránka téměř plná.\n"
+"Je-li tomu tak, zkuste prosím odstranit vymazané položky nebo nejdříve smazat "
+"menší zprávy."
+
+#. *
+#. * Missing %1$s folder in mail move operation
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:174
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:186
+msgid "Missing %1$s folder in mail move operation"
+msgstr "Chybí složka %1$s při přesunu pošty"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:176
+msgid ""
+"Missing %1$s folder in mail move operation on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Chybí složka %1$s při přesunu pošty na serveru %2$s s přihlašovacím jménem "
+"%3$s (uživatel=%4$s, kontext=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:178
+msgid ""
+"Message move aborted for user %1$s. Source and destination folder are equal "
+"to \"%2$s\""
+msgstr ""
+"Přesun zrušen pro uživatele %1$s. Zdrojová a cílová složka je stejná: „%2$s“"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:180
+msgid ""
+"Message move aborted for user %1$s. Source and destination folder are equal "
+"to \"%2$s\" on server %3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Přesun na serveru %3$s s přihlašovacím jménem %4$s (uživatel=%5$s, kontext="
+"%6$s) zrušen pro uživatele %1$s. Zdrojová a cílová složka je stejná: „%2$s“"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:182
+msgid "IMAP folder read-only check failed"
+msgstr "Selhala kontrola nastavení IMAP složky pouze pro čtení"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:184
+msgid ""
+"Folder read-only check failed on server %1$s with login %2$s (user=%3$s, "
+"context=%4$s)"
+msgstr ""
+"Kontrola nastavení složky pouze pro čtení na serveru %1$s s přihlašovacím "
+"jménem %2$s (uživatel=%3$s, kontext=%4$s) selhala"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:186
+msgid "Unknown folder open mode %1$s"
+msgstr "Neznámý režim otevírání složky %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:188
+msgid ""
+"Unknown folder open mode %1$s on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Neznámý režim otevírání složky %1$s na serveru %2$s s přihlašovacím jménem "
+"%3$s (uživatel=%4$s, kontext=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:190
+msgid ""
+"Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
+msgstr "Zprávu(y) %1$s ve složce %2$s se nepodařilo smazat kvůli chybě „%3$s“"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:192
+msgid ""
+"Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\" on "
+"server %4$s with login %5$s (user=%6$s, context=%7$s)"
+msgstr ""
+"Zprávu(y) %1$s ve složce %2$s se na serveru %4$s s přihlašovacím jménem %5$s "
+"(uživatel=%6$s, kontext=%7$s) nepodařilo smazat kvůli chybě „%3$s“"
+
+#. *
+#. * Not allowed to open folder %1$s due to missing read access
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:194
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:206
+msgid "Not allowed to open folder %1$s due to missing read access"
+msgstr "Není povoleno otevřít složku %1$s, protože nemám přístup ke čtení"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:196
+msgid ""
+"Not allowed to open folder %1$s due to missing read access on server %2$s "
+"with login %3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Není povoleno otevřít složku %1$s na serveru %2$s s přihlašovacím jménem "
+"%3$s (uživatel=%4$s, kontext=%5$s), protože nemám přístup ke čtení"
+
+#. *
+#. * The raw content's input stream of message %1$s in folder %2$s cannot be read
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:198
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:210
+msgid ""
+"The raw content's input stream of message %1$s in folder %2$s cannot be read"
+msgstr "Vstupní proud surového obsahu zprávy %1$s ve složce %2$s nelze přečíst"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:200
+msgid ""
+"The raw content's input stream of message %1$s in folder %2$s cannot be read "
+"on server %3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Vstupní proud surového obsahu zprávy %1$s ve složce %2$s nelze přečíst na "
+"serveru %3$s s přihlašovacím jménem %4$s (uživatel=%5$s, kontext=%6$s) "
+"přečíst"
+
+#. *
+#. * No attachment was found with id %1$s in message
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:202
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:214
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:203
+msgid "No attachment was found with id %1$s in message"
+msgstr "Ve zprávě nebyla nalezena žádná příloha s id %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:204
+msgid ""
+"No attachment was found with id %1$s in message on server %2$s with login "
+"%3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Ve zprávě na serveru %2$s s přihlašovacím jménem %3$s (uživatel=%4$s, "
+"kontext=%5$s) nebyla nalezena žádná příloha s id %1$s"
+
+#. *
+#. * Versit object %1$s could not be saved
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:206
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:218
+msgid "Versit object could not be saved"
+msgstr "Objekt Versit se nepodařilo uložit"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:208
+msgid "No support of capability \"THREAD=REFERENCES\""
+msgstr "Funkce „THREAD=REFERENCES“ není podporována"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:210
+msgid ""
+"No support of capability \"THREAD=REFERENCES\" on server %2$s with login "
+"%3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Funkce „THREAD=REFERENCES“ není na serveru %2$s s přihlašovacím jménem %3$s "
+"(uživatel=%4$s, kontext=%5$s) podporována"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:212
+msgid ""
+"A protocol exception occurred during execution of IMAP request \"%1$s\".\n"
+"Error message: %2$s"
+msgstr ""
+"Došlo k výjimce protokolu při provádění IMAP požadavku „%1$s“.\n"
+"Chybová zpráva: %2$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:214
+msgid ""
+"Mailbox' root folder must not be source or the destination full name of a "
+"move operation."
+msgstr ""
+"Kořenová složka poštovní schránky nesmí být zdrojovým nebo cílovým názvem "
+"pro přesun."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:216
+msgid "Sort field %1$s is not supported via IMAP SORT command"
+msgstr "Třídící pole %1$s není příkazem IMAP SORT podporováno"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:218
+msgid ""
+"Sort field %1$s is not supported via IMAP SORT command on server %2$s with "
+"login %3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Třídící pole %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
+"%4$s, kontext=%5$s) nepodporuje příkaz IMAP SORT"
+
+#. *
+#. * Missing personal namespace
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:220
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:238
+msgid "Missing personal namespace"
+msgstr "Chybí osobní jmenný prostor"
+
+#. *
+#. * Parsing thread-sort string failed: %1$s.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:222
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:242
+msgid "Parsing thread-sort string failed: %1$s."
+msgstr "Parsování řetězce thread-sort selhalo: %1$s."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:226
+msgid "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\"."
+msgstr "Přejmenování složky „%1$s“ na „%2$s“ selhalo s chybou „%3$s“."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:228
+msgid ""
+"Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\" on server %4$s "
+"with login %5$s (user=%6$s, context=%7$s)."
+msgstr ""
+"Přejmenování složky „%1$s“ na „%2$s“ na serveru %4$s s přihlašovacím jménem "
+"%5$s (uživatel=%6$s, kontext=%7$s) selhalo s chybou „%3$s“."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:230
+msgid "No rename access to mail folder %1$s"
+msgstr "K poštovní složce %1$s nemám přístup povolující přejmenovávat"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:232
+msgid ""
+"No rename access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
+"%4$s, kontext=%5$s) nemám přístup povolující přejmenovávat"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:234
+msgid "Unable to parse IMAP server URI \"%1$s\"."
+msgstr "Nemohu parsovat URI IMAP serveru „%1$s“."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:236
+msgid "Default folder %1$s must not be unsubscribed."
+msgstr "Výchozí složka %1$s nesmí být odhlášena."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:238
+msgid ""
+"Default folder %1$s must not be unsubscribed on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Výchozí složka %1$s nesmí být na serveru %2$s s přihlašovacím jménem %3$s "
+"(uživatel=%4$s, kontext=%5$s) odhlášena."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:240
+msgid "IMAP server refuses to import one or more E-Mails."
+msgstr "IMAP server odmítá importovat jeden nebo více e-mailů."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:242
+msgid ""
+"IMAP server %1$s refuses to import one or more E-Mails with login %2$s (user="
+"%3$s, context=%4$s)"
+msgstr ""
+"IMAP server %1$s odmítá importovat jeden nebo více e-mailů s přihlašovacím "
+"jménem %2$s (uživatel=%3$s, kontext=%4$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:244
+msgid ""
+"Currently not possible to establish a new connection to server %1$s with "
+"login %2$s. Please try again."
+msgstr ""
+"V tuto chvíli není možné nové navázat spojení se serverem %1$s při použití "
+"přihlašovacího jména %2$s. Zkuste to, prosím, znovu."
 
 #. Implementing class could not be found
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:70
@@ -4005,7 +4686,7 @@ msgstr "Album"
 
 #. The internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:105
 msgid "Confirmed ham"
 msgstr "Potvrzená normální pošta"
 
@@ -4015,7 +4696,7 @@ msgstr "Složka potvrzené normální pošty"
 
 #. The internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:97
 msgid "Confirmed spam"
 msgstr "Potvrzený spam"
 
@@ -4028,7 +4709,7 @@ msgstr "Složka potvrzeného spamu"
 #. The name for the drafts folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:65
 msgid "Drafts"
 msgstr "Koncepty"
@@ -4050,7 +4731,7 @@ msgstr "Odeslaná pošta"
 #. The name for the spam folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:89
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:166
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:71
 msgid "Spam"
 msgstr "Spam"
@@ -4064,7 +4745,7 @@ msgstr "Složka Spam"
 #. The name for the trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:85
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:150
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:74
 msgid "Trash"
 msgstr "Koš"
@@ -4534,85 +5215,11 @@ msgid "Unsupported action %1$s via %2$s request"
 msgstr "Nepodporovaná operace %1$s prostřednictvím požadavku %2$s"
 
 #. *
-#. * No connection available to access mailbox
-#.
-#. No connection available to access mailbox
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:466
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:100
-msgid "No connection available to access mailbox"
-msgstr "Není k dispozici žádné spojení pro přístup k poštovní schránce"
-
-#. *
-#. * User %1$s has no mail module access due to user configuration
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:76
-msgid "User %1$s has no mail module access due to user configuration"
-msgstr ""
-"Uživatel %1$s nemá přístup k poštovnímu modulu kvůli uživatelské konfiguraci"
-
-#. *
-#. * No access to mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:80
-msgid "No access to mail folder %1$s"
-msgstr "K poštovní složce %1$s nemám přístup"
-
-#. *
-#. * No lookup access to mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:84
-msgid "No lookup access to mail folder %1$s"
-msgstr "K poštovní složce: %1$s nemám přístup povolující hledání"
-
-#. *
-#. * No read access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:88
-msgid "No read access to mail folder %1$s"
-msgstr "K poštovní složce %1$s nemám přístup povolující čtení"
-
-#. *
-#. * No delete access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:92
-msgid "No delete access to mail folder %1$s"
-msgstr "K poštovní složce %1$s nemám přístup povolující mazání"
-
-#. *
-#. * No insert access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:96
-msgid "No insert access to mail folder %1$s"
-msgstr "K poštovní složce %1$s nemám přístup povolující vkládání"
-
-#. *
-#. * No administer access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:100
-msgid "No administer access to mail folder %1$s"
-msgstr "K poštovní složce %1$s nemám administrátorský přístup"
-
-#. *
 #. * No write access to POP3 folder %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:104
 msgid "No write access to POP3 folder %1$s"
 msgstr "K POP3 složce %1$s nemám přístup povolující zápis"
-
-#. *
-#. * No keep-seen access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:108
-msgid "No keep-seen access to mail folder %1$s"
-msgstr "K poštovní složce %1$s nemám přístup povolující ponechat přečtené."
-
-#. *
-#. * Folder %1$s does not allow subfolders.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:112
-msgid "Folder %1$s does not allow subfolders."
-msgstr "Složka %1$s neumožňuje podsložky."
 
 #. *
 #. * POP3 does not support mail folder creation
@@ -4636,25 +5243,11 @@ msgstr ""
 "oprávnění. Složka však byla vytvořena."
 
 #. *
-#. * No admin permission specified for folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:125
-msgid "No administer permission specified for folder %1$s"
-msgstr "Pro složku %1$s nejsou určena žádná administrátorská práva"
-
-#. *
 #. * Default folder %1$s must not be updated
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:129
 msgid "Default folder %1$s cannot be updated"
 msgstr "Výchozí složku %1$s nelze aktualizovat"
-
-#. *
-#. * Deletion of folder %1$s failed
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:133
-msgid "Deletion of folder %1$s failed"
-msgstr "Mazání složky %1$s selhalo"
 
 #. *
 #. * POP3 default folder %1$s could not be created
@@ -4672,41 +5265,11 @@ msgid "Missing default %1$s folder in user mail settings"
 msgstr "Chybí výchozí složka %1$s v uživatelském nastavení pošty"
 
 #. *
-#. * Update of folder %1$s failed
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:145
-msgid "Update of folder %1$s failed"
-msgstr "Aktualizace složky %1$s selhala"
-
-#. *
-#. * Folder %1$s must not be deleted
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:149
-msgid "Folder %1$s cannot be deleted"
-msgstr "Složku %1$s nelze smazat"
-
-#. *
-#. * Default folder %1$s must not be deleted
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:153
-msgid "Default folder %1$s cannot be deleted"
-msgstr "Výchozí složku %1$s nelze %2$s smazat"
-
-#. *
 #. * Flag %1$s could not be changed due to following reason: %2$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:157
 msgid "Flag %1$s could not be changed due to the following reason: %2$s"
 msgstr "Příznak %1$s nemohl být změněn z tohoto důvodu: %2$s"
-
-#. *
-#. * Number of search fields (%d) do not match number of search patterns (%d)
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:161
-msgid ""
-"Number of search fields (%d) do not match number of search patterns (%d)"
-msgstr ""
-"Počet vyhledávacích polí (%d) neodpovídá počtu vzorů pro vyhledávání (%d)"
 
 #. *
 #. * POP3 search failed due to following reason: %1$s. Switching to application-based search
@@ -4730,20 +5293,6 @@ msgstr ""
 "POP3 třídění selhalo z tohoto důvodu: %1$s. Přepínám na třídění v aplikaci"
 
 #. *
-#. * Unknown search field: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:173
-msgid "Unknown search field: %1$s"
-msgstr "Neznámé vyhledávací pole: %1$s"
-
-#. *
-#. * Mail folder %1$s must not be moved to subsequent folder %2$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:177
-msgid "Mail folder %1$s must not be moved to subsequent folder %2$s"
-msgstr "Poštovní složku %1$s nelze přesunout do složky %2$s"
-
-#. *
 #. * This message could not be moved to trash folder, possibly because your mailbox is nearly full.<br>
 #. * In that case, please try to empty your deleted items first, or delete smaller messages first.
 #.
@@ -4761,13 +5310,6 @@ msgid ""
 "smaller messages first."
 msgstr ""
 "Je-li to tak, odstraňte, prosím, nejprve vymazané položky nebo menší zprávy."
-
-#. *
-#. * Missing %1$s folder in mail move operation
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:186
-msgid "Missing %1$s folder in mail move operation"
-msgstr "Chybí složka %1$s při přesunu pošty"
 
 #. *
 #. * Message move aborted for user %1$s. Source and destination folder are equal: %2$s
@@ -4806,36 +5348,6 @@ msgstr ""
 "%3$s"
 
 #. *
-#. * Not allowed to open folder %1$s due to missing read access
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:206
-msgid "Not allowed to open folder %1$s due to missing read access"
-msgstr "Není povoleno otevřít složku %1$s, protože nemám přístup ke čtení"
-
-#. *
-#. * The raw content's input stream of message %1$s in folder %2$s cannot be read
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:210
-msgid ""
-"The raw content's input stream of message %1$s in folder %2$s cannot be read"
-msgstr "Vstupní proud surového obsahu zprávy %1$s ve složce %2$s nelze přečíst"
-
-#. *
-#. * No attachment was found with id %1$s in message
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:214
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:203
-msgid "No attachment was found with id %1$s in message"
-msgstr "Ve zprávě nebyla nalezena žádná příloha s id %1$s"
-
-#. *
-#. * Versit object %1$s could not be saved
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:218
-msgid "Versit object could not be saved"
-msgstr "Objekt Versit se nepodařilo uložit"
-
-#. *
 #. * POP3 server does not support capability "THREAD=REFERENCES"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:222
@@ -4862,20 +5374,6 @@ msgstr "POP3 nepodporuje přesouvání složek."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:234
 msgid "Sort field %1$s is not supported via POP3 SORT command"
 msgstr "Třídící pole %1$s není příkazem POP3 SORT podporováno"
-
-#. *
-#. * Missing personal namespace
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:238
-msgid "Missing personal namespace"
-msgstr "Chybí osobní jmenný prostor"
-
-#. *
-#. * Parsing thread-sort string failed: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:242
-msgid "Parsing thread-sort string failed: %1$s."
-msgstr "Parsování řetězce thread-sort selhalo: %1$s."
 
 #. *
 #. * POP3 does not support to create folders.
@@ -7101,7 +7599,7 @@ msgstr "Doručená pošta"
 #. The internationalized name for the sent mail folder
 #. The name for trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
 msgid "Sent objects"
 msgstr "Odeslané položky"
 
@@ -7112,18 +7610,25 @@ msgstr "Odeslané položky"
 msgid "Sent items"
 msgstr "Odeslané položky"
 
+#. The internationalized name for the archive mail folder
+#. The name for trash folder
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:170
+msgid "Archive"
+msgstr "Archiv"
+
 #. The alternative internationalized name for the confirmed-spam mail folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:101
 msgid "confirmed-spam"
 msgstr "Potvrzený spam"
 
 #. The alternative internationalized name for the confirmed-spam mail folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:105
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:109
 msgid "confirmed-ham"
 msgstr "Potvrzená normální pošta"
 
 #. The internationalized subject for a read acknowledgement
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:114
 msgid "Read acknowledgement"
 msgstr "Přečíst potvrzení"
 
@@ -7131,7 +7636,7 @@ msgstr "Přečíst potvrzení"
 #. #DATE# is replaced with the sent date of referenced email
 #. #RECIPIENT# is replaced with personal and/or email address of recipient(s)
 #. #SUBJECT# is replaced with referenced email's subject
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:120
 msgid ""
 "This is a delivery receipt for the mail that you sent on #DATE# to "
 "#RECIPIENT# with subject \"#SUBJECT#\".\n"
@@ -7151,7 +7656,7 @@ msgstr ""
 #. #DATE# is replaced with the sent date of referenced email
 #. #TIME# is replaced with time of referenced email
 #. #SENDER# is replaced with personal and/or email address of the sender
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:122
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:126
 msgid "On #DATE# at #TIME# #SENDER# wrote:"
 msgstr "#DATE# v #TIME# #SENDER# napsal(a):"
 
@@ -7163,7 +7668,7 @@ msgstr "#DATE# v #TIME# #SENDER# napsal(a):"
 #. #DATE# is replaced with the sent date of referenced email
 #. #TIME# is replaced with time of referenced email
 #. #SUBJECT# is replaced with referenced email's subject
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:132
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:136
 msgid ""
 "---------- Original Message ----------\n"
 "From: #FROM#\n"
@@ -7178,26 +7683,26 @@ msgstr ""
 "Předmět: #SUBJECT#"
 
 #. The internationalized default subject.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:135
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:139
 msgid "[No Subject]"
 msgstr "[Žádný předmět]"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Hints to the available attachments for affected message
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:139
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:143
 msgid ""
 "The available attachments for this E-Mail can be accessed via the links:"
 msgstr "K přílohám této zprávy můžete přistupovat pomocí odkazů:"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the elapsed date for affected message's attachments
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:143
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:147
 msgid "The links will be deleted on #DATE#"
 msgstr "Odkazy budou smazány #DATE#"
 
 #. The greeting used for form mails. E.g.
 #. "Dear Sir or Madam Jane Doe"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:147
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:151
 msgid "Dear Sir or Madam"
 msgstr "Vážená paní nebo pane"
 
@@ -10495,8 +11000,7 @@ msgid ""
 "%3$s, context=%4$s). Error message: %5$s"
 msgstr ""
 "Chyba protokolu v údajích poslaných poštovnímu serveru %1$s s přihlašovacím "
-"jménem %2$s "
-"(uživatel=%3$s, kontext=%4). Chybová zpráva: %5$s"
+"jménem %2$s (uživatel=%3$s, kontext=%4). Chybová zpráva: %5$s"
 
 #. *
 #. * Message could not be sent: %1$s
@@ -15257,13 +15761,6 @@ msgstr "Zulu"
 #~ msgid "%s"
 #~ msgstr "%s"
 
-#~ msgid ""
-#~ "A protocol exception occurred during execution of IMAP request \"%1$s\".\n"
-#~ "Error message: %2$s"
-#~ msgstr ""
-#~ "Došlo k výjimce protokolu při provádění IMAP požadavku „%1$s“.\n"
-#~ "Chybová zpráva: %2$s"
-
 #~ msgid "A server name cannot be found in the server URL \"%1$s\"."
 #~ msgstr "V URL serveru „%1$s“ se nepodařilo nalézt název serveru."
 
@@ -15308,47 +15805,6 @@ msgstr "Zulu"
 #~ msgid "Couldn't reach the filestore"
 #~ msgstr "Nepodařilo se spojit se souborovým úložištěm"
 
-#~ msgid ""
-#~ "Currently not possible to establish a new connection to server %1$s with "
-#~ "login %2$s. Please try again."
-#~ msgstr ""
-#~ "V tuto chvíli není možné nové navázat spojení se serverem %1$s při "
-#~ "použití přihlašovacího jména %2$s. Zkuste to, prosím, znovu."
-
-#~ msgid ""
-#~ "Default folder %1$s cannot be deleted on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Výchozí složku %1$s nelze na serveru %2$s s přihlašovacím jménem %3$s "
-#~ "(uživatel=%4$s, kontext=%5$s) smazat"
-
-#~ msgid ""
-#~ "Default folder %1$s must not be unsubscribed on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Výchozí složka %1$s nesmí být na serveru %2$s s přihlašovacím jménem %3$s "
-#~ "(uživatel=%4$s, kontext=%5$s) odhlášena."
-
-#~ msgid "Default folder %1$s must not be unsubscribed."
-#~ msgstr "Výchozí složka %1$s nesmí být odhlášena."
-
-#~ msgid "Default folder %1$s must not be updated"
-#~ msgstr "Výchozí složka %1$s nesmí být aktualizována."
-
-#~ msgid ""
-#~ "Default folder %1$s must not be updated on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Výchozí složka %1$s nesmí být na serveru %2$s s přihlašovacím jménem %3$s "
-#~ "(uživatel=%4$s, kontext=%5$s) aktualizována"
-
-#~ msgid ""
-#~ "Deletion of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Mazání složky %1$s na serveru %2$s s přihlašovacím jménem %3$s existuje "
-#~ "(uživatel=%4 $s, kontext=%5$s) selhalo."
-
 #~ msgid "Empty SEND_BODY_CHUNK package MUST NOT be sent"
 #~ msgstr "Prázdný balík SEND_BODY_CHUNK nesmí být odeslán"
 
@@ -15367,85 +15823,8 @@ msgstr "Zulu"
 #~ msgid "File is not a directory: %s"
 #~ msgstr "Soubor není adresář: %s"
 
-#~ msgid "Flag %1$s could not be changed due to following reason \"%2$s\""
-#~ msgstr "Příznak %1$s nemohl být změněn z tohoto důvodu: „%2$s“"
-
-#~ msgid ""
-#~ "Flag %1$s could not be changed due to following reason \"%2$s\" on server "
-#~ "%3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Příznak %1$s na serveru %3$s s přihlašovacím jménem %4$s (uživatel=%5$s, "
-#~ "kontext=%6$s) nemohl být změněn z tohoto důvodu: „%2$“"
-
-#~ msgid ""
-#~ "Folder %1$s does not allow subfolders on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)."
-#~ msgstr ""
-#~ "Složku „%1$s“ na serveru %2$s s přihlašovacím jménem %3$s (uživatel=%4$s, "
-#~ "kontext=%5$s) neumožňuje podsložky."
-
 #~ msgid "Folder of the object is missing."
 #~ msgstr "Složka objektu chybí."
-
-#~ msgid ""
-#~ "Folder read-only check failed on server %1$s with login %2$s (user=%3$s, "
-#~ "context=%4$s)"
-#~ msgstr ""
-#~ "Kontrola nastavení složky pouze pro čtení na serveru %1$s s přihlašovacím "
-#~ "jménem %2$s (uživatel=%3$s, kontext=%4$s) selhala"
-
-#~ msgid "IMAP default folder %1$s could not be created"
-#~ msgstr "IMAP složku %1$s se nepodařilo vytvořit"
-
-#~ msgid ""
-#~ "IMAP default folder %1$s could not be created on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Výchozí složku IMAP %1$s se nepodařilo na serveru %2$s s přihlašovacím "
-#~ "jménem %3$s (uživatel=%4$s, kontext=%5$s) vytvořit."
-
-#~ msgid "IMAP folder read-only check failed"
-#~ msgstr "Selhala kontrola nastavení IMAP složky pouze pro čtení"
-
-#~ msgid ""
-#~ "IMAP search failed due to reason \"%1$s\" on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s). Switching to application-based search."
-#~ msgstr ""
-#~ "IMAP vyhledávání na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
-#~ "%4$s, kontext=%5$s) selhalo z tohoto důvodu: „%1$s“. Přepínám na "
-#~ "vyhledávání v aplikaci."
-
-#~ msgid ""
-#~ "IMAP search failed due to reason \"%1$s\". Switching to application-based "
-#~ "search"
-#~ msgstr ""
-#~ "IMAP vyhledávání selhalo z tohoto důvodu: „%1$s“. Přepínám na vyhledávání "
-#~ "v aplikaci."
-
-#~ msgid ""
-#~ "IMAP server %1$s refuses to import one or more E-Mails with login %2$s "
-#~ "(user=%3$s, context=%4$s)"
-#~ msgstr ""
-#~ "IMAP server %1$s odmítá importovat jeden nebo více e-mailů s "
-#~ "přihlašovacím jménem %2$s (uživatel=%3$s, kontext=%4$s)"
-
-#~ msgid "IMAP server refuses to import one or more E-Mails."
-#~ msgstr "IMAP server odmítá importovat jeden nebo více e-mailů."
-
-#~ msgid ""
-#~ "IMAP sort failed due to reason \"%1$s\" on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s). Switching to application-based sorting."
-#~ msgstr ""
-#~ "IMAP třídění na serveru %2$s s přihlašovacím jménem %3$s (uživatel=%4$s, "
-#~ "kontext=%5$s) selhalo z tohoto důvodu: „%1$s“. Přepínám na třídění v "
-#~ "aplikaci."
-
-#~ msgid ""
-#~ "IMAP sort failed due to reason \"%1$s\". Switching to application-based "
-#~ "sorting."
-#~ msgstr ""
-#~ "IMAP třídění selhalo z tohoto důvodu: „%1$s“. Přepínám na třídění v "
-#~ "aplikaci."
 
 #~ msgid "Identifier of the object is missing."
 #~ msgstr "Chybí identifikátor objektu."
@@ -15469,39 +15848,8 @@ msgstr "Zulu"
 #~ msgid "Lexical error: %1$s"
 #~ msgstr "Lexikální chyba: %1$s"
 
-#~ msgid ""
-#~ "Mail folder \"%1$s\" could not be created (maybe due to insufficient "
-#~ "permission on parent folder %2$s or due to an invalid folder name)"
-#~ msgstr ""
-#~ "Poštovní složku „%1$s“ se nepodařilo vytvořit (možná kvůli nedostatečným "
-#~ "oprávněním k nadřazené složce %2$s nebo kvůli neplatnému názvu složky"
-
-#~ msgid ""
-#~ "Mail folder \"%1$s\" could not be created (maybe due to insufficient "
-#~ "permission on parent folder %2$s or due to an invalid folder name) on "
-#~ "server %3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Poštovní složku „%1$s“ se na serveru %3$s s přihlašovacím jménem %4$s "
-#~ "(uživatel=%5$s, kontext=%6$s) nepodařilo vytvořit (možná kvůli "
-#~ "nedostatečným oprávněním k nadřazené složce %2$s nebo kvůli neplatnému "
-#~ "názvu složky)"
-
-#~ msgid ""
-#~ "Mail folder %1$s must not be moved to subsequent folder %2$s on server "
-#~ "%3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Poštovní složku %1$s nelze na poštovním serveru %3$s s přihlašovacím "
-#~ "jménem %4$s (uživatel=%5$s, kontext=%6$s) přesunout do složky %2$s"
-
 #~ msgid "Mail(s)  could not be found in folder "
 #~ msgstr "Ve složce se nepodařilo nalézt zprávu/y"
-
-#~ msgid ""
-#~ "Mailbox' root folder must not be source or the destination full name of a "
-#~ "move operation."
-#~ msgstr ""
-#~ "Kořenová složka poštovní schránky nesmí být zdrojovým nebo cílovým názvem "
-#~ "pro přesun."
 
 #~ msgid "Mapping file \"%s\" not valid"
 #~ msgstr "Mapovací soubor „%s“ není platný"
@@ -15519,50 +15867,6 @@ msgstr "Zulu"
 #~ msgstr ""
 #~ "Zpráva byla úspěšně odeslána, ale do vaší složky s odeslanou poštou se "
 #~ "nepodařilo umístit kopii, protože byla překročena kvóta."
-
-#~ msgid ""
-#~ "Message move aborted for user %1$s. Source and destination folder are "
-#~ "equal to \"%2$s\""
-#~ msgstr ""
-#~ "Přesun zrušen pro uživatele %1$s. Zdrojová a cílová složka je stejná: "
-#~ "„%2$s“"
-
-#~ msgid ""
-#~ "Message move aborted for user %1$s. Source and destination folder are "
-#~ "equal to \"%2$s\" on server %3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Přesun na serveru %3$s s přihlašovacím jménem %4$s (uživatel=%5$s, "
-#~ "kontext=%6$s) zrušen pro uživatele %1$s. Zdrojová a cílová složka je "
-#~ "stejná: „%2$s“"
-
-#~ msgid ""
-#~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
-#~ msgstr ""
-#~ "Zprávu(y) %1$s ve složce %2$s se nepodařilo smazat kvůli chybě „%3$s“"
-
-#~ msgid ""
-#~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\" "
-#~ "on server %4$s with login %5$s (user=%6$s, context=%7$s)"
-#~ msgstr ""
-#~ "Zprávu(y) %1$s ve složce %2$s se na serveru %4$s s přihlašovacím jménem "
-#~ "%5$s (uživatel=%6$s, kontext=%7$s) nepodařilo smazat kvůli chybě „%3$s“"
-
-#~ msgid ""
-#~ "Missing %1$s folder in mail move operation on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Chybí složka %1$s při přesunu pošty na serveru %2$s s přihlašovacím "
-#~ "jménem %3$s (uživatel=%4$s, kontext=%5$s)"
-
-#~ msgid "Missing default %1$s folder"
-#~ msgstr "Chybí výchozí složka %1$s"
-
-#~ msgid ""
-#~ "Missing default %1$s folder on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Chybí výchozí složka %1$s na serveru %2$s s přihlašovacím jménem %3$s "
-#~ "(uživatel=%4$s, kontext=%5$s)"
 
 #~ msgid "Missing or wrong Interval value: %d"
 #~ msgstr "Chybějící nebo špatná hodnota ‚Interval‘: %d"
@@ -15595,43 +15899,8 @@ msgstr "Zulu"
 #~ "Není nastaven žádný UDP kanál. Zkontrolujte pokusy o otevření kanálu, "
 #~ "které selhávají při startu serveru."
 
-#~ msgid ""
-#~ "No access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
-#~ "(uživatel=%4$s, kontext=%5$s) nemám přístup"
-
-#~ msgid ""
-#~ "No administer access to mail folder %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
-#~ "(uživatel=%4$s, kontext=%5$s) nemám administrátorský přístup"
-
-#~ msgid ""
-#~ "No administer permission specified for folder %1$s on server %2$s with "
-#~ "login %3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Pro složku %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
-#~ "%4$s, kontext=%5$s) nejsou určena žádná administrátorská práva"
-
-#~ msgid ""
-#~ "No attachment was found with id %1$s in message on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Ve zprávě na serveru %2$s s přihlašovacím jménem %3$s (uživatel=%4$s, "
-#~ "kontext=%5$s) nebyla nalezena žádná příloha s id %1$s"
-
 #~ msgid "No attribute name could be found for code: %1$d"
 #~ msgstr "Nepodařilo se nalézt žádný název atributu odpovídající kódu: %1$d"
-
-#~ msgid ""
-#~ "No connection available to access mailbox on server %1$s with login %2$s "
-#~ "(user=%3$s, context=%4$s)"
-#~ msgstr ""
-#~ "Není k dispozici žádné spojení s poštovní schránkou na serveru %1$s s "
-#~ "přihlašovacím jménem %2$s (uživatel=%3$s, kontext=%4$s)"
 
 #~ msgid ""
 #~ "No data provided from web server: input stream returned \"-1\" while "
@@ -15644,54 +15913,9 @@ msgstr "Zulu"
 #~ msgid "No default constructor specified in servlet class \"%s\""
 #~ msgstr "V servletové třídě „%s“ není určen výchozí konstruktor"
 
-#~ msgid ""
-#~ "No delete access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
-#~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující mazání"
-
-#~ msgid ""
-#~ "No insert access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
-#~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující vkládání."
-
-#~ msgid ""
-#~ "No keep-seen access to mail folder %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
-#~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující ponechat přečtené."
-
-#~ msgid ""
-#~ "No lookup access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
-#~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující hledání"
-
 #~ msgid "No parent recurring appointment found for series exception: %s"
 #~ msgstr ""
 #~ "Pro výjimku série %s nebyla nalezena žádná nadřazená opakující se schůzka"
-
-#~ msgid ""
-#~ "No read access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
-#~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující čtení"
-
-#~ msgid "No rename access to mail folder %1$s"
-#~ msgstr "K poštovní složce %1$s nemám přístup povolující přejmenovávat"
-
-#~ msgid ""
-#~ "No rename access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
-#~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující přejmenovávat"
 
 #~ msgid ""
 #~ "No servlet class name found for key \"%s\". Please check servlet mappings."
@@ -15699,48 +15923,11 @@ msgstr "Zulu"
 #~ "Nebyl nalezen žádný název servletové třídy odpovídající klíči „%s“. "
 #~ "Zkontrolujte, prosím, mapování servletů."
 
-#~ msgid "No support of capability \"THREAD=REFERENCES\""
-#~ msgstr "Funkce „THREAD=REFERENCES“ není podporována"
-
-#~ msgid ""
-#~ "No support of capability \"THREAD=REFERENCES\" on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Funkce „THREAD=REFERENCES“ není na serveru %2$s s přihlašovacím jménem "
-#~ "%3$s (uživatel=%4$s, kontext=%5$s) podporována"
-
-#~ msgid "No write access to IMAP folder %1$s"
-#~ msgstr "K IMAP složce %1$s nemám přístup povolující zápis"
-
-#~ msgid ""
-#~ "No write access to IMAP folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "K IMAP složce %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
-#~ "%4$s, kontext=%5$s) nemám přístup povolující zápis."
-
-#~ msgid ""
-#~ "Not allowed to open folder %1$s due to missing read access on server %2$s "
-#~ "with login %3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Není povoleno otevřít složku %1$s na serveru %2$s s přihlašovacím jménem "
-#~ "%3$s (uživatel=%4$s, kontext=%5$s), protože nemám přístup ke čtení"
-
 #~ msgid "Problem with a thread."
 #~ msgstr "Problém s vláknem."
 
 #~ msgid "Property error: %s"
 #~ msgstr "Chyba vlastností: %s"
-
-#~ msgid ""
-#~ "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\" on server %4$s "
-#~ "with login %5$s (user=%6$s, context=%7$s)."
-#~ msgstr ""
-#~ "Přejmenování složky „%1$s“ na „%2$s“ na serveru %4$s s přihlašovacím "
-#~ "jménem %5$s (uživatel=%6$s, kontext=%7$s) selhalo s chybou „%3$s“."
-
-#~ msgid "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\"."
-#~ msgstr "Přejmenování složky „%1$s“ na „%2$s“ selhalo s chybou „%3$s“."
 
 #~ msgid "Response package exceeds max package size value of 8192k: %1$s"
 #~ msgstr "Odpovědní balík přesahuje maximální velikost balíku 8192k: %1$s"
@@ -15761,38 +15948,8 @@ msgstr "Zulu"
 #~ "Soket uzavřen webserverem. Čekání na vstupní data balíku #%1$d trvalo "
 #~ "%2$dmsec."
 
-#~ msgid "Sort field %1$s is not supported via IMAP SORT command"
-#~ msgstr "Třídící pole %1$s není příkazem IMAP SORT podporováno"
-
-#~ msgid ""
-#~ "Sort field %1$s is not supported via IMAP SORT command on server %2$s "
-#~ "with login %3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Třídící pole %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
-#~ "%4$s, kontext=%5$s) nepodporuje příkaz IMAP SORT"
-
 #~ msgid "String parse exception: No ending 0x00 found"
 #~ msgstr "Výjimka při parsování řetězce: Nebylo nalezeno zakončení 0x00"
-
-#~ msgid ""
-#~ "The composed rights could not be applied to new folder %1$s due to "
-#~ "missing administer right in its initial rights specified by IMAP server. "
-#~ "However, the folder has been created on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)."
-#~ msgstr ""
-#~ "Poskládaná oprávnění se nepodařilo na novou složku %1$s aplikovat, "
-#~ "protože ve výchozích oprávněních určených IMAP serverem chybí "
-#~ "administrátorské oprávnění. Nicméně, složka byla na serveru %2$s s "
-#~ "přihlašovacím jménem %3$s (uživatel=%4$s, kontext=%5$s) vytvořena."
-
-#~ msgid ""
-#~ "The composed rights could not be applied to new folder %1$s due to "
-#~ "missing administer right in its initial rights specified by IMAP server. "
-#~ "However, the folder has been created."
-#~ msgstr ""
-#~ "Poskládaná oprávnění se nepodařilo na novou složku %1$s aplikovat, "
-#~ "protože ve výchozích oprávněních určených IMAP serverem chybí "
-#~ "administrátorské oprávnění. Nicméně, složka byla vytvořena."
 
 #~ msgid ""
 #~ "The configuration requests a master password but none is given in the "
@@ -15829,17 +15986,6 @@ msgstr "Zulu"
 #~ msgstr "Místo, na které má být přidáno pravidlo, je příliš velké."
 
 #~ msgid ""
-#~ "The raw content's input stream of message %1$s in folder %2$s cannot be "
-#~ "read on server %3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Vstupní proud surového obsahu zprávy %1$s ve složce %2$s nelze přečíst na "
-#~ "serveru %3$s s přihlašovacím jménem %4$s (uživatel=%5$s, kontext=%6$s) "
-#~ "přečíst"
-
-#~ msgid "Unable to parse IMAP server URI \"%1$s\"."
-#~ msgstr "Nemohu parsovat URI IMAP serveru „%1$s“."
-
-#~ msgid ""
 #~ "Unexpected empty body package received from web server. Total-Received: "
 #~ "%1$d | Content-Length: %2$d.\n"
 #~ "Corresponding AJP forward package:\n"
@@ -15853,32 +15999,8 @@ msgstr "Zulu"
 #~ msgid "Unknown Request Prefix Code: %1$s"
 #~ msgstr "Neznámý prefix kódu požadavku: %1$s"
 
-#~ msgid "Unknown folder open mode %1$s"
-#~ msgstr "Neznámý režim otevírání složky %1$s"
-
-#~ msgid ""
-#~ "Unknown folder open mode %1$s on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Neznámý režim otevírání složky %1$s na serveru %2$s s přihlašovacím "
-#~ "jménem %3$s (uživatel=%4$s, kontext=%5$s)"
-
-#~ msgid ""
-#~ "Unknown search field: %1$s on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Neznámé vyhledávací pole %1$s na serveru %2$s s přihlašovacím jménem %3$s "
-#~ "(uživatel=%4$s, kontext=%5$s)"
-
 #~ msgid "Unparseable header field %1$s in forward request package"
 #~ msgstr "Neparsovatelné pole hlavičky %1$s v balíku požadavku na přeposlání"
-
-#~ msgid ""
-#~ "Update of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Aktualizace složky %1$s na serveru %2$s s přihlašovacím jménem %3$s "
-#~ "(uživatel=%4 $s, kontext=%5$s) selhala"
 
 #~ msgid "mail filter servlet cannot be registered: %s"
 #~ msgstr "Servlet poštovního filtru nelze zaregistrovat: %s."

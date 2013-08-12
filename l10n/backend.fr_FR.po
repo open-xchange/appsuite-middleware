@@ -1,39 +1,4 @@
 # translation of backend.po to Français
-#. *
-#. * Mail(s) could not be found in folder
-#. * <p>
-#. * The exception thrown when an invalid method is invoked on an expunged Message. The only valid methods on an expunged Message are
-#. * <code>isExpunged()</code> and <code>getMessageNumber()</code>.
-#. * </p>
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:67
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:68
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:74
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:75
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:76
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:78
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:79
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:80
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:81
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:82
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:83
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:84
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:85
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:86
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:87
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:88
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:129
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:82
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:84
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:86
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:88
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:90
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:92
 # Joëlle Cornavin <joelle@bureau-cornavin.com>, 2010, 2011, 2012.
 # Éric Bischoff <eric@bureau-cornavin.com>, 2012, 2013.
 # Antje Faber, 2011.
@@ -42,7 +7,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-07-27 15:02+0200\n"
+"PO-Revision-Date: 2013-08-02 18:33+0200\n"
 "Last-Translator: Eric Bischoff\n"
 "Language-Team: French <kde-i18n-doc@kde.org>\n"
 "Language: fr\n"
@@ -1214,6 +1179,7 @@ msgstr "Une erreur JSON s'est produite : %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:68
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:224
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:67
@@ -2072,8 +2038,8 @@ msgstr "Aucune somme de contrôle n'est disponible pour le fichier « %1$s »"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:71
 msgid "Checksum \"%1$s\" for uploaded file \"%2$s\" different from \"%3$s\""
 msgstr ""
-"La somme de contrôle « %1$s » du fichier téléchargé « %2$s » diffère de « %"
-"3$s »"
+"La somme de contrôle « %1$s » du fichier téléchargé « %2$s » diffère de "
+"« %3$s »"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:72
 msgid "The directory \"%1$s\" with checksum \"%2$s\""
@@ -2082,8 +2048,8 @@ msgstr "Le répertoire « %1$s » de somme de contrôle « %2$s »"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:73
 msgid "You are not allowed to delete the file \"%1$s\" at \"%2$s\""
 msgstr ""
-"Vous n'avez pas le droit de supprimer le fichier « %1$s » à l'emplacement  « %"
-"2$s »"
+"Vous n'avez pas le droit de supprimer le fichier « %1$s » à l'emplacement  « "
+"%2$s »"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:74
 msgid "You are not allowed to create files at \"%1$s\""
@@ -2093,8 +2059,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:75
 msgid "You are not allowed to modify the file \"%1$s\" at \"%2$s\""
 msgstr ""
-"Vous n'avez pas le droit de modifier le fichier « %1$s » à l'emplacement  « %"
-"2$s »"
+"Vous n'avez pas le droit de modifier le fichier « %1$s » à l'emplacement  « "
+"%2$s »"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:76
 msgid "You are not allowed to delete the directory \"%1$s\""
@@ -2176,7 +2142,7 @@ msgstr "URL CIFS / SMB invalide : %1$s"
 #. CIFS/SMB URL does not denote a directory: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:75
 msgid "CIFS/SMB URL does not denote a directory: %1$s"
-msgstr "L'URL CIFS / SMB n'indique pas un répertoire : %s"
+msgstr "L'URL CIFS / SMB ne désigne pas un répertoire : %s"
 
 #. The CIFS/SMB resource does not exist: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:78
@@ -2196,7 +2162,7 @@ msgstr "Suppression refusée pour la ressource CIFS/SMB : %1$s"
 #. CIFS/SMB URL does not denote a file: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:87
 msgid "CIFS/SMB URL does not denote a file: %1$s"
-msgstr "L'URL CIFS/SMB n'indique pas un fichier : %1$s"
+msgstr "L'URL CIFS/SMB ne désigne pas un fichier : %1$s"
 
 #. Missing file name.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:90
@@ -2565,7 +2531,7 @@ msgstr "URL CMIS invalide : %1$s"
 #. CMIS URL does not denote a directory: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/CMISExceptionMessages.java:72
 msgid "CMIS URL does not denote a directory: %1$s"
-msgstr "L'URL CMIS ne pointe pas vers un répertoire : %1$s"
+msgstr "L'URL CMIS ne désigne pas un répertoire : %1$s"
 
 #. The CMIS resource does not exist: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/CMISExceptionMessages.java:75
@@ -2585,7 +2551,7 @@ msgstr "Suppression refusée pour la ressource CMIS : %1$s"
 #. CMIS URL does not denote a file: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/CMISExceptionMessages.java:84
 msgid "CMIS URL does not denote a file: %1$s"
-msgstr "L'URL CMIS n'indique pas un fichier : %1$s"
+msgstr "L'URL CMIS ne désigne pas un fichier : %1$s"
 
 #. Versioning not supported by CMIS file storage.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/CMISExceptionMessages.java:90
@@ -2607,7 +2573,7 @@ msgstr "URL de boîte de dépôt invalide : %1$s"
 #. Dropbox URL does not denote a directory: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:71
 msgid "Dropbox URL does not denote a directory: %1$s"
-msgstr "L'URL de boîte de dépôt ne pointe pas vers un répertoire : %1$s"
+msgstr "L'URL de boîte de dépôt ne désigne pas un répertoire : %1$s"
 
 #. The Dropbox resource does not exist: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:74
@@ -2627,7 +2593,7 @@ msgstr "Suppression refusée pour la ressource de boîte de dépôt : %1$s"
 #. Dropbox URL does not denote a file: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:83
 msgid "Dropbox URL does not denote a file: %1$s"
-msgstr "L'URL de boîte de dépôt ne pointe pas vers un fichier : %1$s"
+msgstr "L'URL de boîte de dépôt ne désigne pas un fichier : %1$s"
 
 #. Versioning not supported by Dropbox file storage.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:89
@@ -3508,6 +3474,717 @@ msgstr ""
 "Veuillez vous assurer que le fichier peut être lu par le logiciel de travail "
 "de collaboratif."
 
+#. *
+#. * No connection available to access mailbox
+#.
+#. No connection available to access mailbox
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:466
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:100
+msgid "No connection available to access mailbox"
+msgstr "Pas de connexion disponible pour accéder à la boîte aux lettres"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:68
+msgid ""
+"No connection available to access mailbox on server %1$s with login %2$s "
+"(user=%3$s, context=%4$s)"
+msgstr ""
+"Pas de connexion disponible pour accéder à la Boîte aux lettres sur le "
+"serveur %1$s avec l'identifiant de connexion %2$s (utilisateur=%3$s, "
+"contexte=%4$s)"
+
+#. *
+#. * User %1$s has no mail module access due to user configuration
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:76
+msgid "User %1$s has no mail module access due to user configuration"
+msgstr ""
+"L'utilisateur %1$s n'a aucun accès au module de courrier à cause de la "
+"configuration utilisateur"
+
+#. *
+#. * No access to mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:80
+msgid "No access to mail folder %1$s"
+msgstr "Pas d'accès au dossier de courrier %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:74
+msgid ""
+"No access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Pas d'accès au dossier de courrier %1$s sur le serveur %2$s avec "
+"l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#. *
+#. * No lookup access to mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:84
+msgid "No lookup access to mail folder %1$s"
+msgstr "Pas d'accès de recherche au dossier de courrier %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:78
+msgid ""
+"No lookup access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Pas d'accès de recherche au dossier de courrier %1$s sur le serveur %2$s "
+"avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#. *
+#. * No read access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:88
+msgid "No read access to mail folder %1$s"
+msgstr "Pas d'accès en lecture au dossier de courrier %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:82
+msgid ""
+"No read access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Pas d'accès en lecture au dossier de courrier %1$s sur le serveur %2$s avec "
+"l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#. *
+#. * No delete access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:92
+msgid "No delete access to mail folder %1$s"
+msgstr "Pas d'accès en suppression au dossier de courrier %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:86
+msgid ""
+"No delete access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Pas d'accès en suppression au dossier de courrier %1$s sur le serveur %2$s "
+"avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#. *
+#. * No insert access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:96
+msgid "No insert access to mail folder %1$s"
+msgstr "Pas d'accès en insertion au dossier de courrier %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:90
+msgid ""
+"No insert access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Pas d'accès en insertion au dossier de courrier %1$s sur le serveur %2$s "
+"avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#. *
+#. * No administer access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:100
+msgid "No administer access to mail folder %1$s"
+msgstr "Pas d'accès administrateur au dossier de courrier %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:94
+msgid ""
+"No administer access to mail folder %1$s on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Pas d'accès administrateur au dossier de courrier %1$s sur le serveur %2$s "
+"avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:96
+msgid "No write access to IMAP folder %1$s"
+msgstr "Pas d'accès en écriture au dossier IMAP %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:98
+msgid ""
+"No write access to IMAP folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Pas d'accès en écriture au dossier IMAP %1$s sur le serveur %2$s avec "
+"l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#. *
+#. * No keep-seen access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:108
+msgid "No keep-seen access to mail folder %1$s"
+msgstr "Pas d'accès de marquage « Vu » au dossier de courrier %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:102
+msgid ""
+"No keep-seen access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Pas d'accès de marquage « Vu » au dossier de courrier %1$s sur le serveur "
+"%2$s avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#. *
+#. * Folder %1$s does not allow subfolders.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:112
+msgid "Folder %1$s does not allow subfolders."
+msgstr "Le dossier %1$s (%2$d) n'autorise pas la création de sous-dossiers."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:106
+msgid ""
+"Folder %1$s does not allow subfolders on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)."
+msgstr ""
+"Le dossier %1$s n'autorise pas la création de sous-dossiers sur le serveur "
+"%2$s avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:108
+msgid ""
+"Mail folder \"%1$s\" could not be created (maybe due to insufficient "
+"permission on parent folder %2$s or due to an invalid folder name)"
+msgstr ""
+"Le dossier de courrier « %1$s » n'a pas pu être créé (peut être en raison de "
+"droits insuffisants sur le dossier parent %2$s ou à cause d'un nom de "
+"dossier invalide)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:110
+msgid ""
+"Mail folder \"%1$s\" could not be created (maybe due to insufficient "
+"permission on parent folder %2$s or due to an invalid folder name) on server "
+"%3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Le dossier de courrier « %1$s » n'a pas pu être créé (peut-être en raison de "
+"droits insuffisants sur le dossier parent %2$s ou à cause d'un nom de "
+"dossier invalide) sur le serveur %3$s avec l'identifiant de connexion %4$s "
+"(utilisateur=%5$s, contexte=%6$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:112
+msgid ""
+"The composed rights could not be applied to new folder %1$s due to missing "
+"administer right in its initial rights specified by IMAP server. However, "
+"the folder has been created."
+msgstr ""
+"Les droits combinés n'ont pas pu être appliqués au nouveau dossier %1$s en "
+"raison de l'absence du droit d'administrateur dans ses droits initiaux "
+"spécifiés par le serveur IMAP. Cependant, le dossier a été créé."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:114
+msgid ""
+"The composed rights could not be applied to new folder %1$s due to missing "
+"administer right in its initial rights specified by IMAP server. However, "
+"the folder has been created on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)."
+msgstr ""
+"Les droits combinés n'ont pas pu être appliqués au nouveau dossier %1$s en "
+"raison de l'absence du droit d'administrateur dans ses droits initiaux "
+"spécifiés par le serveur IMAP. Cependant, le dossier a été créé sur le "
+"serveur %2$s avec l'identifiant %3$s (utilisateur =%4$s, contexte =%5$s)."
+
+#. *
+#. * No admin permission specified for folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:125
+msgid "No administer permission specified for folder %1$s"
+msgstr "Pas de droits administrateur spécifiés sur le dossier %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:118
+msgid ""
+"No administer permission specified for folder %1$s on server %2$s with login "
+"%3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Pas d'accès administrateur spécifié au dossier %1$s sur le serveur %2$s avec "
+"l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:120
+msgid "Default folder %1$s must not be updated"
+msgstr "Le dossier par défaut %1$s ne doit pas être mis à jour"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:122
+msgid ""
+"Default folder %1$s must not be updated on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Le dossier par défaut %1$s ne doit pas être mis à jour sur le serveur %2$s "
+"avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#. *
+#. * Deletion of folder %1$s failed
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:124
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:133
+msgid "Deletion of folder %1$s failed"
+msgstr "La suppression du dossier %1$s a échoué"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:126
+msgid ""
+"Deletion of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"La suppression du dossier %1$s a échoué sur le serveur %2$s avec "
+"l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:128
+msgid "IMAP default folder %1$s could not be created"
+msgstr "Le dossier IMAP par défaut %1$s n'a pas pu être créé"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:130
+msgid ""
+"IMAP default folder %1$s could not be created on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Le dossier IMAP par défaut %1$s n'a pas pu être créé sur le serveur %2$s "
+"avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:132
+msgid "Missing default %1$s folder"
+msgstr "Dossier par défaut %1$s manquant"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:134
+msgid ""
+"Missing default %1$s folder on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Dossier par défaut %1$s manquant sur le serveur %2$s avec l'identifiant de "
+"connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#. *
+#. * Update of folder %1$s failed
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:136
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:145
+msgid "Update of folder %1$s failed"
+msgstr "La mise à jour du dossier %1$d a échoué"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:138
+msgid ""
+"Update of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"La mise à jour du dossier %1$s a échoué sur le serveur %2$s avec "
+"l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#. *
+#. * Folder %1$s must not be deleted
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:140
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:149
+msgid "Folder %1$s cannot be deleted"
+msgstr "Le dossier %1$s ne peut pas être supprimé"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:142
+msgid ""
+"Folder %1$s cannot be deleted on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Le dossier %1$s ne peut pas être supprimé sur le serveur %2$s avec "
+"l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#. *
+#. * Default folder %1$s must not be deleted
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:144
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:153
+msgid "Default folder %1$s cannot be deleted"
+msgstr "Le dossier par défaut %1$s ne peut pas être supprimé"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:146
+msgid ""
+"Default folder %1$s cannot be deleted on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Le dossier par défaut %1$s ne peut pas être supprimé sur le serveur %2$s "
+"avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:148
+msgid "Flag %1$s could not be changed due to following reason \"%2$s\""
+msgstr ""
+"Le drapeau %1$s n'a pas pu être modifié pour la raison suivante : « %2$s »"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:150
+msgid ""
+"Flag %1$s could not be changed due to following reason \"%2$s\" on server "
+"%3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Le drapeau %1$s n'a pas pu être modifié pour la raison suivante : « %2$s » "
+"sur le serveur %3$s avec l'identifiant de connexion %4$s (utilisateur=%5$s, "
+"contexte=%6$s)"
+
+#. *
+#. * Number of search fields (%d) do not match number of search patterns (%d)
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:152
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:161
+msgid ""
+"Number of search fields (%d) do not match number of search patterns (%d)"
+msgstr ""
+"Le nombre de champs de recherche (%d) ne correspond pas au nombre de motifs "
+"de recherche (%d)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:154
+msgid ""
+"IMAP search failed due to reason \"%1$s\". Switching to application-based "
+"search"
+msgstr ""
+"La recherche IMAP a échoué pour la raison « %1$s ». Passage à la recherche "
+"applicative"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:156
+msgid ""
+"IMAP search failed due to reason \"%1$s\" on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s). Switching to application-based search."
+msgstr ""
+"La recherche IMAP a échoué pour la raison « %1$s » sur le serveur %2$s avec "
+"l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s). Passage à "
+"la recherche applicative."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:158
+msgid ""
+"IMAP sort failed due to reason \"%1$s\". Switching to application-based "
+"sorting."
+msgstr ""
+"Le tri IMAP a échoué pour la raison « %1$s ». Passage au tri applicatif."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:160
+msgid ""
+"IMAP sort failed due to reason \"%1$s\" on server %2$s with login %3$s (user="
+"%4$s, context=%5$s). Switching to application-based sorting."
+msgstr ""
+"Le tri IMAP a échoué pour la raison « %1$s » sur le serveur %2$s avec "
+"l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s). Passage "
+"au tri applicatif."
+
+#. *
+#. * Unknown search field: %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:173
+msgid "Unknown search field: %1$s"
+msgstr "Champ de recherche inconnu : %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:164
+msgid ""
+"Unknown search field: %1$s on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Champ de recherche inconnu : %1$s sur le serveur %2$s avec l'identifiant de "
+"connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#. *
+#. * Mail folder %1$s must not be moved to subsequent folder %2$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:166
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:177
+msgid "Mail folder %1$s must not be moved to subsequent folder %2$s"
+msgstr ""
+"Le dossier de courrier %1$s ne doit pas être déplacé vers le sous-dossier "
+"%2$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:168
+msgid ""
+"Mail folder %1$s must not be moved to subsequent folder %2$s on server %3$s "
+"with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Le dossier de courrier %1$s ne doit pas être déplacé dans le sous-dossier "
+"%2$s sur le serveur %3$s avec l'identifiant de connexion %4$s (utilisateur="
+"%5$s, contexte=%6$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:170
+msgid ""
+"This message could not be moved to trash folder, possibly because your "
+"mailbox is nearly full.\n"
+"In that case, please try to empty your deleted items first, or delete "
+"smaller messages first."
+msgstr ""
+"Ce message n'a pas pu être déplacé dans la corbeille, peut-être parce que "
+"votre boîte aux lettres est presque pleine.\n"
+"Si c'est le cas, veuillez essayer dans un premier temps de supprimer "
+"définitivement vos éléments effacés, ou de de supprimer en premier les "
+"petits messages."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:172
+msgid ""
+"This message could not be moved to trash folder on server %1$s with login "
+"%2$s (user=%3$s, context=%4$s), possibly because your mailbox is nearly "
+"full.\n"
+"In that case, please try to empty your deleted items first, or delete "
+"smaller messages first."
+msgstr ""
+"Ce message n'a pas pu être déplacé dans la corbeille sur le serveur %1$s avec "
+"l'identifiant de connexion %2$s (utilisateur=%3$s, contexte=%4$s), peut-être "
+"parce que votre boîte aux lettres est presque pleine.\n"
+"Si c'est le cas, veuillez essayer dans un premier temps de supprimer "
+"définitivement vos éléments effacés, ou de de supprimer en premier les "
+"petits messages."
+
+#. *
+#. * Missing %1$s folder in mail move operation
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:174
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:186
+msgid "Missing %1$s folder in mail move operation"
+msgstr "Dossier %1$s manquant dans l'opération de déplacement du courrier"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:176
+msgid ""
+"Missing %1$s folder in mail move operation on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Dossier %1$s manquant dans l'opération de déplacement de courrier sur le "
+"serveur %2$s avec l'identifiant de connexion %3$s (utilisateur=%4$s, "
+"contexte=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:178
+msgid ""
+"Message move aborted for user %1$s. Source and destination folder are equal "
+"to \"%2$s\""
+msgstr ""
+"Déplacement du message interrompu pour l'utilisateur %1$s. Les dossiers "
+"source et destination sont équivalents à « %2$s »"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:180
+msgid ""
+"Message move aborted for user %1$s. Source and destination folder are equal "
+"to \"%2$s\" on server %3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Déplacement du message interrompu pour l'utilisateur %1$s. Les dossiers "
+"source et destination sont équivalents à « %2$s » sur le serveur %3$s avec "
+"l'identifiant de connexion %4$s (utilisateur=%5$s, contexte=%6$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:182
+msgid "IMAP folder read-only check failed"
+msgstr "La vérification des droits en lecture seule du dossier IMAP a échoué"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:184
+msgid ""
+"Folder read-only check failed on server %1$s with login %2$s (user=%3$s, "
+"context=%4$s)"
+msgstr ""
+"La vérification des droits en lecture seule du dossier a échoué sur le "
+"serveur %1$s avec l'identifiant de connexion %2$s (utilisateur=%3$s, "
+"contexte=%4$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:186
+msgid "Unknown folder open mode %1$s"
+msgstr "Mode %1$s d'ouverture de dossier inconnu"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:188
+msgid ""
+"Unknown folder open mode %1$s on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Mode %1$s d'ouverture de dossier inconnue sur le serveur %2$s avec "
+"l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:190
+msgid ""
+"Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
+msgstr ""
+"Le ou les messages %1$s du dossier %2$s n'ont pas pu être supprimés en "
+"raison de l'erreur « %3$s »"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:192
+msgid ""
+"Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\" on "
+"server %4$s with login %5$s (user=%6$s, context=%7$s)"
+msgstr ""
+"Le ou les messages %1$s du dossier %2$s n'ont pas pu être supprimés en "
+"raison de l'erreur « %3$s » sur le serveur %4$s avec l'identifiant de "
+"connexion %5$s (utilisateur=%6$s, contexte=%7$s)"
+
+#. *
+#. * Not allowed to open folder %1$s due to missing read access
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:194
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:206
+msgid "Not allowed to open folder %1$s due to missing read access"
+msgstr ""
+"Il n'est pas permis d'ouvrir le dossier %1$s en raison d'une absence d'accès "
+"en lecture"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:196
+msgid ""
+"Not allowed to open folder %1$s due to missing read access on server %2$s "
+"with login %3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Il n'est pas permis d'ouvrir le dossier %1$s car on n'a pas accès en lecture "
+"sur le serveur %2$s avec l'identifiant de connexion %3$s (utilisateur=%4$s, "
+"contexte=%5$s)"
+
+#. *
+#. * The raw content's input stream of message %1$s in folder %2$s cannot be read
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:198
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:210
+msgid ""
+"The raw content's input stream of message %1$s in folder %2$s cannot be read"
+msgstr ""
+"Le flux d'entrée du contenu brut du message %1$s du dossier de courrier %2$s "
+"ne peut pas être lu"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:200
+msgid ""
+"The raw content's input stream of message %1$s in folder %2$s cannot be read "
+"on server %3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Le flux d'entrée du contenu brut du message %1$s dans le dossier %2$s ne "
+"peut pas être lu sur le serveur %3$s avec l'identifiant de connexion %4$s "
+"(utilisateur=%5$s, contexte=%6$s)"
+
+#. *
+#. * No attachment was found with id %1$s in message
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:202
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:214
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:203
+msgid "No attachment was found with id %1$s in message"
+msgstr "La pièce jointe d'identifiant %1$s n'a pas été trouvée dans le message"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:204
+msgid ""
+"No attachment was found with id %1$s in message on server %2$s with login "
+"%3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Aucune pièce jointe n'a été trouvée comportant l'identifiant %1$s dans le "
+"message sur le serveur %2$s avec l'identifiant de connexion %3$s "
+"(utilisateur=%4$s, contexte=%5$s)"
+
+#. *
+#. * Versit object %1$s could not be saved
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:206
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:218
+msgid "Versit object could not be saved"
+msgstr "L'objet Versit n'a pas pu être enregistré"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:208
+msgid "No support of capability \"THREAD=REFERENCES\""
+msgstr "Pas de prise en charge de la fonction « THREAD=REFERENCES »"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:210
+msgid ""
+"No support of capability \"THREAD=REFERENCES\" on server %2$s with login "
+"%3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Pas de prise en charge de la fonction « THREAD=REFERENCES » sur le serveur "
+"%2$s avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:212
+msgid ""
+"A protocol exception occurred during execution of IMAP request \"%1$s\".\n"
+"Error message: %2$s"
+msgstr ""
+"Une exception de protocole s'est produite pendant l'exécution de la requête "
+"IMAP « %1$s ».\n"
+"Message d'erreur : %2$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:214
+msgid ""
+"Mailbox' root folder must not be source or the destination full name of a "
+"move operation."
+msgstr ""
+"Le dossier racine de la Boîte aux lettres ne doit pas être le nom complet de "
+"la source ou de la destination d'une opération de déplacement."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:216
+msgid "Sort field %1$s is not supported via IMAP SORT command"
+msgstr ""
+"Le champ de tri %1$s n'est pas pris en charge par le biais de la commande "
+"IMAP SORT"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:218
+msgid ""
+"Sort field %1$s is not supported via IMAP SORT command on server %2$s with "
+"login %3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Le champ de tri %1$s n'est pas pris en charge par le biais de la commande "
+"IMAP SORT sur le serveur %2$s avec l'identifiant de connexion %3$s "
+"(utilisateur=%4$s, contexte=%5$s)"
+
+#. *
+#. * Missing personal namespace
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:220
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:238
+msgid "Missing personal namespace"
+msgstr "Espace de noms personnel manquant"
+
+#. *
+#. * Parsing thread-sort string failed: %1$s.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:222
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:242
+msgid "Parsing thread-sort string failed: %1$s."
+msgstr ""
+"L'analyse syntaxique de la chaîne triée par fil de discussion a échoué : %s."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:226
+msgid "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\"."
+msgstr "Le renommage du dossier « %1$s » en « %2$s » a échoué avec « %3$s »."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:228
+msgid ""
+"Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\" on server %4$s "
+"with login %5$s (user=%6$s, context=%7$s)."
+msgstr ""
+"Le renommage du dossier « %1$s » en « %2$s » a échoué avec « %3$s » sur le "
+"serveur %4$s avec l'identifiant de connexion %5$s (utilisateur=%6$s, "
+"contexte=%7$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:230
+msgid "No rename access to mail folder %1$s"
+msgstr "Pas d'accès en renommage au dossier de courrier %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:232
+msgid ""
+"No rename access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Pas d'accès en renommage au dossier de courrier %1$s sur le serveur %2$s "
+"avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:234
+msgid "Unable to parse IMAP server URI \"%1$s\"."
+msgstr "Impossible d'analyser syntaxiquement l'URI du serveur IMAP « %1$s »."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:236
+msgid "Default folder %1$s must not be unsubscribed."
+msgstr "Il est impossible de se désabonner du dossier par défaut %1$s."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:238
+msgid ""
+"Default folder %1$s must not be unsubscribed on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Il est impossible de se désabonner du dossier par défaut %1$s sur le serveur "
+"%2$s avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:240
+msgid "IMAP server refuses to import one or more E-Mails."
+msgstr "Le serveur IMAP refuse d'importer un ou plusieurs courriels."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:242
+msgid ""
+"IMAP server %1$s refuses to import one or more E-Mails with login %2$s (user="
+"%3$s, context=%4$s)"
+msgstr ""
+"Le serveur IMAP par défaut %1$s refuse d'importer un ou plusieurs courriels "
+"avec l'identifiant de connexion %2$s (utilisateur=%3$s, contexte=%$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:244
+msgid ""
+"Currently not possible to establish a new connection to server %1$s with "
+"login %2$s. Please try again."
+msgstr ""
+"Il n'est pas possible pour le moment d'établir une connexion vers le serveur "
+"%1$s avec le compte %2$s. Veuillez essayer à nouveau."
+
 #. Implementing class could not be found
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:70
 msgid "Implementing class could not be found"
@@ -3687,7 +4364,7 @@ msgid ""
 "name, company or E-Mail."
 msgstr ""
 "Aucun champ pouvant donner un nom d'affichage au contact de la ligne %s n'a "
-"été défini : ni nom, ni société ni adresse électronique."
+"été défini : ni nom, ni société, ni adresse électronique."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:115
 msgid "Could not read InputStream as string"
@@ -4156,7 +4833,7 @@ msgstr "Album"
 
 #. The internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:105
 msgid "Confirmed ham"
 msgstr "Message légitime confirmé"
 
@@ -4166,7 +4843,7 @@ msgstr "Dossier de messages légitimes confirmés"
 
 #. The internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:97
 msgid "Confirmed spam"
 msgstr "Pourriel confirmé"
 
@@ -4179,7 +4856,7 @@ msgstr "Dossier de pourriels confirmés"
 #. The name for the drafts folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:65
 msgid "Drafts"
 msgstr "Brouillons"
@@ -4201,7 +4878,7 @@ msgstr "Dossier des objets envoyés"
 #. The name for the spam folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:89
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:166
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:71
 msgid "Spam"
 msgstr "Pourriel"
@@ -4215,7 +4892,7 @@ msgstr "Dossier de pourriel"
 #. The name for the trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:85
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:150
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:74
 msgid "Trash"
 msgstr "Corbeille"
@@ -4520,8 +5197,8 @@ msgid ""
 "Conflict. The resource cannot be created until one or more parental "
 "directories have been created: %1$s."
 msgstr ""
-"Conflit. Il est impossible de créer la ressource jusqu'à ce qu'un répertoire "
-"parental ou plus aient été créés : %1$s."
+"Conflit. Il est impossible de créer la ressource jusqu'à ce qu'au "
+"moins un répertoire parental ait été créé : %1$s."
 
 #. Such a resource already exists: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:90
@@ -4695,86 +5372,11 @@ msgid "Unsupported action %1$s via %2$s request"
 msgstr "Action  %1$s non prise en charge par la requête %2$s"
 
 #. *
-#. * No connection available to access mailbox
-#.
-#. No connection available to access mailbox
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:466
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:100
-msgid "No connection available to access mailbox"
-msgstr "Pas de connexion disponible pour accéder à la boîte aux lettres"
-
-#. *
-#. * User %1$s has no mail module access due to user configuration
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:76
-msgid "User %1$s has no mail module access due to user configuration"
-msgstr ""
-"L'utilisateur %1$s n'a aucun accès au module de courrier à cause de la "
-"configuration utilisateur"
-
-#. *
-#. * No access to mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:80
-msgid "No access to mail folder %1$s"
-msgstr "Pas d'accès au dossier de courrier %1$s"
-
-#. *
-#. * No lookup access to mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:84
-msgid "No lookup access to mail folder %1$s"
-msgstr "Pas d'accès de recherche au dossier de courrier %1$s"
-
-#. *
-#. * No read access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:88
-msgid "No read access to mail folder %1$s"
-msgstr "Pas d'accès en lecture au dossier de courrier %1$s"
-
-#. *
-#. * No delete access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:92
-msgid "No delete access to mail folder %1$s"
-msgstr "Pas d'accès en suppression au dossier de courrier %1$s"
-
-#. *
-#. * No insert access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:96
-msgid "No insert access to mail folder %1$s"
-msgstr "Pas d'accès en insertion au dossier de courrier %1$s"
-
-#. *
-#. * No administer access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:100
-msgid "No administer access to mail folder %1$s"
-msgstr "Pas d'accès administrateur au dossier de courrier %1$s"
-
-#. *
 #. * No write access to POP3 folder %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:104
 msgid "No write access to POP3 folder %1$s"
 msgstr "Pas d'accès en écriture au dossier POP3 %1$s"
-
-#. *
-#. * No keep-seen access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:108
-msgid "No keep-seen access to mail folder %1$s"
-msgstr "Pas d'accès de marquage « Vu » au dossier de courrier %1$s"
-
-#. *
-#. * Folder %1$s does not allow subfolders.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:112
-msgid "Folder %1$s does not allow subfolders."
-msgstr "Le dossier %1$s (%2$d) n'autorise pas la création de sous-dossiers."
 
 #. *
 #. * POP3 does not support mail folder creation
@@ -4798,25 +5400,11 @@ msgstr ""
 "droit d'administrateur. Cependant, le dossier a été créé."
 
 #. *
-#. * No admin permission specified for folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:125
-msgid "No administer permission specified for folder %1$s"
-msgstr "Pas de droits administrateur spécifiés sur le dossier %1$s"
-
-#. *
 #. * Default folder %1$s must not be updated
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:129
 msgid "Default folder %1$s cannot be updated"
 msgstr "Le dossier par défaut %1$s ne peut pas être mis à jour"
-
-#. *
-#. * Deletion of folder %1$s failed
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:133
-msgid "Deletion of folder %1$s failed"
-msgstr "La suppression du dossier %1$s a échoué"
 
 #. *
 #. * POP3 default folder %1$s could not be created
@@ -4836,42 +5424,11 @@ msgstr ""
 "l'utilisateur"
 
 #. *
-#. * Update of folder %1$s failed
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:145
-msgid "Update of folder %1$s failed"
-msgstr "La mise à jour du dossier %1$d a échoué"
-
-#. *
-#. * Folder %1$s must not be deleted
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:149
-msgid "Folder %1$s cannot be deleted"
-msgstr "Le dossier %1$s ne peut pas être supprimé"
-
-#. *
-#. * Default folder %1$s must not be deleted
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:153
-msgid "Default folder %1$s cannot be deleted"
-msgstr "Le dossier par défaut %1$s ne peut pas être supprimé"
-
-#. *
 #. * Flag %1$s could not be changed due to following reason: %2$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:157
 msgid "Flag %1$s could not be changed due to the following reason: %2$s"
 msgstr "Le drapeau %1$s n'a pas pu être modifié pour la raison suivante : %2$s"
-
-#. *
-#. * Number of search fields (%d) do not match number of search patterns (%d)
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:161
-msgid ""
-"Number of search fields (%d) do not match number of search patterns (%d)"
-msgstr ""
-"Le nombre de champs de recherche (%d) ne correspond pas au nombre de motifs "
-"de recherche (%d)"
 
 #. *
 #. * POP3 search failed due to following reason: %1$s. Switching to application-based search
@@ -4896,22 +5453,6 @@ msgstr ""
 "applicatif"
 
 #. *
-#. * Unknown search field: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:173
-msgid "Unknown search field: %1$s"
-msgstr "Champ de recherche inconnu : %1$s"
-
-#. *
-#. * Mail folder %1$s must not be moved to subsequent folder %2$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:177
-msgid "Mail folder %1$s must not be moved to subsequent folder %2$s"
-msgstr ""
-"Le dossier de courrier %1$s ne doit pas être déplacé vers le sous-dossier "
-"%2$s"
-
-#. *
 #. * This message could not be moved to trash folder, possibly because your mailbox is nearly full.<br>
 #. * In that case, please try to empty your deleted items first, or delete smaller messages first.
 #.
@@ -4930,13 +5471,6 @@ msgid ""
 msgstr ""
 "Si c'est le cas, veuillez essayer de vider d'abord vos éléments supprimés, "
 "ou de supprimer de plus petits messages en premier."
-
-#. *
-#. * Missing %1$s folder in mail move operation
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:186
-msgid "Missing %1$s folder in mail move operation"
-msgstr "Dossier %1$s manquant dans l'opération de déplacement du courrier"
 
 #. *
 #. * Message move aborted for user %1$s. Source and destination folder are equal: %2$s
@@ -4975,40 +5509,6 @@ msgstr ""
 "raison de l'erreur suivante : %3$s"
 
 #. *
-#. * Not allowed to open folder %1$s due to missing read access
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:206
-msgid "Not allowed to open folder %1$s due to missing read access"
-msgstr ""
-"Il n'est pas permis d'ouvrir le dossier %1$s en raison d'une absence d'accès "
-"en lecture"
-
-#. *
-#. * The raw content's input stream of message %1$s in folder %2$s cannot be read
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:210
-msgid ""
-"The raw content's input stream of message %1$s in folder %2$s cannot be read"
-msgstr ""
-"Le flux d'entrée du contenu brut du message %1$s du dossier de courrier %2$s "
-"ne peut pas être lu"
-
-#. *
-#. * No attachment was found with id %1$s in message
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:214
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:203
-msgid "No attachment was found with id %1$s in message"
-msgstr "La pièce jointe d'identifiant %1$s n'a pas été trouvée dans le message"
-
-#. *
-#. * Versit object %1$s could not be saved
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:218
-msgid "Versit object could not be saved"
-msgstr "L'objet Versit n'a pas pu être enregistré"
-
-#. *
 #. * POP3 server does not support capability "THREAD=REFERENCES"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:222
@@ -5040,21 +5540,6 @@ msgid "Sort field %1$s is not supported via POP3 SORT command"
 msgstr ""
 "Le champ de tri %1$s n'est pas pris en charge par le biais de la commande "
 "POP3 SORT"
-
-#. *
-#. * Missing personal namespace
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:238
-msgid "Missing personal namespace"
-msgstr "Espace de noms personnel manquant"
-
-#. *
-#. * Parsing thread-sort string failed: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:242
-msgid "Parsing thread-sort string failed: %1$s."
-msgstr ""
-"L'analyse syntaxique de la chaîne triée par fil de discussion a échoué : %s."
 
 #. *
 #. * POP3 does not support to create folders.
@@ -6844,7 +7329,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:436
 msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
-msgstr "Pour effectuer la recherche, %1$d caractères ou plus sont requis."
+msgstr "Pour effectuer la recherche, au moins %1$d caractères sont nécessaires."
 
 #. *
 #. * Redundant information.
@@ -7380,7 +7865,7 @@ msgstr "Boîte de réception"
 #. The internationalized name for the sent mail folder
 #. The name for trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
 msgid "Sent objects"
 msgstr "Objets envoyés"
 
@@ -7391,18 +7876,25 @@ msgstr "Objets envoyés"
 msgid "Sent items"
 msgstr "Éléments envoyés"
 
+#. The internationalized name for the archive mail folder
+#. The name for trash folder
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:170
+msgid "Archive"
+msgstr "Archives"
+
 #. The alternative internationalized name for the confirmed-spam mail folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:101
 msgid "confirmed-spam"
 msgstr "pourriel confirmé"
 
 #. The alternative internationalized name for the confirmed-spam mail folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:105
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:109
 msgid "confirmed-ham"
 msgstr "courrier légitime confirmé"
 
 #. The internationalized subject for a read acknowledgement
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:114
 msgid "Read acknowledgement"
 msgstr "Accusé de lecture"
 
@@ -7410,7 +7902,7 @@ msgstr "Accusé de lecture"
 #. #DATE# is replaced with the sent date of referenced email
 #. #RECIPIENT# is replaced with personal and/or email address of recipient(s)
 #. #SUBJECT# is replaced with referenced email's subject
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:120
 msgid ""
 "This is a delivery receipt for the mail that you sent on #DATE# to "
 "#RECIPIENT# with subject \"#SUBJECT#\".\n"
@@ -7430,7 +7922,7 @@ msgstr ""
 #. #DATE# is replaced with the sent date of referenced email
 #. #TIME# is replaced with time of referenced email
 #. #SENDER# is replaced with personal and/or email address of the sender
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:122
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:126
 msgid "On #DATE# at #TIME# #SENDER# wrote:"
 msgstr "Le #DATE# à #TIME#, #SENDER# a écrit :"
 
@@ -7442,7 +7934,7 @@ msgstr "Le #DATE# à #TIME#, #SENDER# a écrit :"
 #. #DATE# is replaced with the sent date of referenced email
 #. #TIME# is replaced with time of referenced email
 #. #SUBJECT# is replaced with referenced email's subject
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:132
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:136
 msgid ""
 "---------- Original Message ----------\n"
 "From: #FROM#\n"
@@ -7457,13 +7949,13 @@ msgstr ""
 "Sujet : #SUBJECT#"
 
 #. The internationalized default subject.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:135
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:139
 msgid "[No Subject]"
 msgstr "[Pas de sujet]"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Hints to the available attachments for affected message
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:139
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:143
 msgid ""
 "The available attachments for this E-Mail can be accessed via the links:"
 msgstr ""
@@ -7472,13 +7964,13 @@ msgstr ""
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the elapsed date for affected message's attachments
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:143
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:147
 msgid "The links will be deleted on #DATE#"
 msgstr "Les liens seront supprimés le #DATE#"
 
 #. The greeting used for form mails. E.g.
 #. "Dear Sir or Madam Jane Doe"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:147
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:151
 msgid "Dear Sir or Madam"
 msgstr "Cher Monsieur ou Chère Madame"
 
@@ -8797,7 +9289,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:107
 msgid "Illegal argument: document %1$s contains no file"
-msgstr "argument illégal : le document %1$s ne contient pas de fichier"
+msgstr "Argument illégal : le document %1$s ne contient pas de fichier"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:109
 msgid ""
@@ -8810,7 +9302,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:111
 msgid ""
 "In order to accomplish the search, %1$s or more characters are required."
-msgstr "Pour effectuer la recherche, %1$s caractères ou plus sont nécessaires."
+msgstr "Pour effectuer la recherche, au moins %1$s caractères sont nécessaires."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:113
 msgid "DocumentMetadata %1$s could not be deleted. Please try again."
@@ -10827,14 +11319,14 @@ msgid ""
 "context=%4$s). Error message: %5$s"
 msgstr ""
 "Le quota sur le serveur de courrier « %1$s » avec l'identifiant de connexion "
-"%2$s (utilisateur=%3$s, contexte=%4$s) est dépassé. Message d'erreur : %5$s"
+"%2$s (utilisateur=%3$s, contexte=%4$s) est dépassé. Message d'erreur : %5$s"
 
 #. A command sent to mail server failed. Server response: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:269
 msgid "A command sent to mail server failed. Server response: %1$s"
 msgstr ""
-"Une commande envoyée au serveur de courrier a échoué. Réponse du serveur : %"
-"1$s."
+"Une commande envoyée au serveur de courrier a échoué. Réponse du serveur : "
+"%1$s."
 
 #. *
 #. * A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s
@@ -10882,9 +11374,9 @@ msgid ""
 "Protocol error in data sent to to mail server %1$s with login %2$s (user="
 "%3$s, context=%4$s). Error message: %5$s"
 msgstr ""
-"Une erreur de protocole dans les données envoyées au serveur de courrier %1$s "
-"avec le nom de connexion %2$s est survenue (utilisateur=%3$s, contexte=%4$s). "
-"Message d'erreur : %5$s"
+"Une erreur de protocole dans les données envoyées au serveur de courrier "
+"%1$s avec le nom de connexion %2$s est survenue (utilisateur=%3$s, contexte="
+"%4$s). Message d'erreur : %5$s"
 
 #. *
 #. * Message could not be sent: %1$s
@@ -11014,7 +11506,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:353
 msgid "Error message: %5$s"
-msgstr "Message d'erreur : %1$s"
+msgstr "Message d'erreur : %5$s"
 
 #. Unexpected error: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
@@ -11377,8 +11869,8 @@ msgid ""
 "The specified offset %1$d for the file \"%2$s\" (current size: %3$d) is "
 "invalid."
 msgstr ""
-"La position indiquée %1$d pour le fichier « %2$s » "
-"(taille actuelle : %3$d) est invalide."
+"La position indiquée %1$d pour le fichier « %2$s » (taille actuelle : %3$d) "
+"est invalide."
 
 #. The specified length %1$d for the file \"%2$s\" (current size: %3$d) is invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/FileStorageExceptionMessage.java:109
@@ -12069,10 +12561,9 @@ msgid ""
 "User %1$s granted invalid permissions on shared folder %2$s in context %3$s. "
 "Only the owner of the parent shared folder %4$s can administrate the folder."
 msgstr ""
-"L'utilisateur %1$s a accordé des droits invalides sur le dossier partagé %2$s "
-"dans le contexte %3$s. Seul le propriétaire du dossier partagé parent %4$s "
-"peut "
-"administrer le dossier."
+"L'utilisateur %1$s a accordé des droits invalides sur le dossier partagé "
+"%2$s dans le contexte %3$s. Seul le propriétaire du dossier partagé parent "
+"%4$s peut administrer le dossier."
 
 #. *
 #. * Owner %1$s of default folder %2$s must keep the folder admin permission
@@ -13045,8 +13536,8 @@ msgstr "Fournissez du HTML bien formé."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:66
 msgid "An I/O error occurred: %1$s. Was trying to get the service at %2$s."
 msgstr ""
-"Une erreur d'E/S s'est produite : %1$s, en essayant d'obtenir le service "
-"à %2$s."
+"Une erreur d'E/S s'est produite : %1$s, en essayant d'obtenir le service à "
+"%2$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:71
@@ -13097,7 +13588,7 @@ msgstr "URL XING invalide : %1$s"
 #. XING URL does not denote a directory: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:71
 msgid "XING URL does not denote a directory: %1$s"
-msgstr "L'URL XING ne pointe pas vers un répertoire : %1$s"
+msgstr "L'URL XING ne désigne pas un répertoire : %1$s"
 
 #. The XING resource does not exist: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:74
@@ -13117,7 +13608,7 @@ msgstr "Suppression refusée pour la ressource XING : %1$s"
 #. XING URL does not denote a file: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:83
 msgid "XING URL does not denote a file: %1$s"
-msgstr "L'URL XING ne pointe pas sur un fichier : %1$s"
+msgstr "L'URL XING ne désigne pas un fichier : %1$s"
 
 #. Versioning not supported by XING file storage.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:89
@@ -15790,14 +16281,6 @@ msgstr "Zoulou"
 #~ msgid "%s"
 #~ msgstr "%s"
 
-#~ msgid ""
-#~ "A protocol exception occurred during execution of IMAP request \"%1$s\".\n"
-#~ "Error message: %2$s"
-#~ msgstr ""
-#~ "Une exception de protocole s'est produite pendant l'exécution de la "
-#~ "requête IMAP « %1$s ».\n"
-#~ "Message d'erreur : %2$s"
-
 #~ msgid "A server name cannot be found in the server URL \"%1$s\"."
 #~ msgstr ""
 #~ "Impossible de trouver le nom d'un serveur dans l'URL de serveur « %1$s »."
@@ -15844,49 +16327,6 @@ msgstr "Zoulou"
 #~ msgid "Couldn't reach the filestore"
 #~ msgstr "Impossible d'accéder au dépôt de fichiers"
 
-#~ msgid ""
-#~ "Currently not possible to establish a new connection to server %1$s with "
-#~ "login %2$s. Please try again."
-#~ msgstr ""
-#~ "Il n'est pas possible pour le moment d'établir une connexion vers le "
-#~ "serveur %1$s avec le compte %2$s. Veuillez essayer à nouveau."
-
-#~ msgid ""
-#~ "Default folder %1$s cannot be deleted on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Le dossier par défaut %1$s ne peut pas être supprimé sur le serveur %2$s "
-#~ "avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
-
-#~ msgid ""
-#~ "Default folder %1$s must not be unsubscribed on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Il est impossible de se désabonner du dossier par défaut %1$s sur le "
-#~ "serveur %2$s avec l'identifiant de connexion %3$s (utilisateur=%4$s, "
-#~ "contexte=%5$s)"
-
-#~ msgid "Default folder %1$s must not be unsubscribed."
-#~ msgstr "Il est impossible de se désabonner du dossier par défaut %1$s."
-
-#~ msgid "Default folder %1$s must not be updated"
-#~ msgstr "Le dossier par défaut %1$s ne doit pas être mis à jour"
-
-#~ msgid ""
-#~ "Default folder %1$s must not be updated on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Le dossier par défaut %1$s ne doit pas être mis à jour sur le serveur "
-#~ "%2$s avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte="
-#~ "%5$s)"
-
-#~ msgid ""
-#~ "Deletion of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "La suppression du dossier %1$s a échoué sur le serveur %2$s avec "
-#~ "l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
-
 #~ msgid "Empty SEND_BODY_CHUNK package MUST NOT be sent"
 #~ msgstr "Un paquetage SEND_BODY_CHUNK vide ne DOIT PAS être envoyé"
 
@@ -15905,90 +16345,8 @@ msgstr "Zoulou"
 #~ msgid "File is not a directory: %s"
 #~ msgstr "Le fichier n'est pas un répertoire : %s"
 
-#~ msgid "Flag %1$s could not be changed due to following reason \"%2$s\""
-#~ msgstr ""
-#~ "Le drapeau %1$s n'a pas pu être modifié pour la raison suivante : « %2$s »"
-
-#~ msgid ""
-#~ "Flag %1$s could not be changed due to following reason \"%2$s\" on server "
-#~ "%3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Le drapeau %1$s n'a pas pu être modifié pour la raison suivante : "
-#~ "« %2$s » sur le serveur %3$s avec l'identifiant de connexion %4$s "
-#~ "(utilisateur=%5$s, contexte=%6$s)"
-
-#~ msgid ""
-#~ "Folder %1$s does not allow subfolders on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)."
-#~ msgstr ""
-#~ "Le dossier %1$s n'autorise pas la création de sous-dossiers sur le "
-#~ "serveur %2$s avec l'identifiant de connexion %3$s (utilisateur=%4$s, "
-#~ "contexte=%5$s)."
-
 #~ msgid "Folder of the object is missing."
 #~ msgstr "Le dossier de l'objet manque."
-
-#~ msgid ""
-#~ "Folder read-only check failed on server %1$s with login %2$s (user=%3$s, "
-#~ "context=%4$s)"
-#~ msgstr ""
-#~ "La vérification des droits en lecture seule du dossier a échoué sur le "
-#~ "serveur %1$s avec l'identifiant de connexion %2$s (utilisateur=%3$s, "
-#~ "contexte=%4$s)"
-
-#~ msgid "IMAP default folder %1$s could not be created"
-#~ msgstr "Le dossier IMAP par défaut %1$s n'a pas pu être créé"
-
-#~ msgid ""
-#~ "IMAP default folder %1$s could not be created on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Le dossier IMAP par défaut %1$s n'a pas pu être créé sur le serveur %2$s "
-#~ "avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
-
-#~ msgid "IMAP folder read-only check failed"
-#~ msgstr ""
-#~ "La vérification des droits en lecture seule du dossier IMAP a échoué"
-
-#~ msgid ""
-#~ "IMAP search failed due to reason \"%1$s\" on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s). Switching to application-based search."
-#~ msgstr ""
-#~ "La recherche IMAP a échoué pour la raison « %1$s » sur le serveur %2$s "
-#~ "avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s). "
-#~ "Passage à la recherche applicative."
-
-#~ msgid ""
-#~ "IMAP search failed due to reason \"%1$s\". Switching to application-based "
-#~ "search"
-#~ msgstr ""
-#~ "La recherche IMAP a échoué pour la raison « %1$s ». Passage à la "
-#~ "recherche applicative"
-
-#~ msgid ""
-#~ "IMAP server %1$s refuses to import one or more E-Mails with login %2$s "
-#~ "(user=%3$s, context=%4$s)"
-#~ msgstr ""
-#~ "Le serveur IMAP par défaut %1$s refuse d'importer un ou plusieurs "
-#~ "courriels avec l'identifiant de connexion %2$s (utilisateur=%3$s, "
-#~ "contexte=%$s)"
-
-#~ msgid "IMAP server refuses to import one or more E-Mails."
-#~ msgstr "Le serveur IMAP refuse d'importer un ou plusieurs courriels."
-
-#~ msgid ""
-#~ "IMAP sort failed due to reason \"%1$s\" on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s). Switching to application-based sorting."
-#~ msgstr ""
-#~ "Le tri IMAP a échoué pour la raison « %1$s » sur le serveur %2$s avec "
-#~ "l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s). "
-#~ "Passage au tri applicatif."
-
-#~ msgid ""
-#~ "IMAP sort failed due to reason \"%1$s\". Switching to application-based "
-#~ "sorting."
-#~ msgstr ""
-#~ "Le tri IMAP a échoué pour la raison « %1$s ». Passage au tri applicatif."
 
 #~ msgid "Identifier of the object is missing."
 #~ msgstr "L'identifiant de l'objet manque."
@@ -16012,41 +16370,8 @@ msgstr "Zoulou"
 #~ msgid "Lexical error: %1$s"
 #~ msgstr "Erreur lexicale : %1$s"
 
-#~ msgid ""
-#~ "Mail folder \"%1$s\" could not be created (maybe due to insufficient "
-#~ "permission on parent folder %2$s or due to an invalid folder name)"
-#~ msgstr ""
-#~ "Le dossier de courrier « %1$s » n'a pas pu être créé (peut être en raison "
-#~ "de droits insuffisants sur le dossier parent %2$s ou à cause d'un nom de "
-#~ "dossier invalide)"
-
-#~ msgid ""
-#~ "Mail folder \"%1$s\" could not be created (maybe due to insufficient "
-#~ "permission on parent folder %2$s or due to an invalid folder name) on "
-#~ "server %3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Le dossier de courrier « %1$s » n'a pas pu être créé (peut-être en raison "
-#~ "de droits insuffisants sur le dossier parent %2$s ou à cause d'un nom de "
-#~ "dossier invalide) sur le serveur %3$s avec l'identifiant de connexion "
-#~ "%4$s (utilisateur=%5$s, contexte=%6$s)"
-
-#~ msgid ""
-#~ "Mail folder %1$s must not be moved to subsequent folder %2$s on server "
-#~ "%3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Le dossier de courrier %1$s ne doit pas être déplacé dans le sous-dossier "
-#~ "%2$s sur le serveur %3$s avec l'identifiant de connexion %4$s "
-#~ "(utilisateur=%5$s, contexte=%6$s)"
-
 #~ msgid "Mail(s)  could not be found in folder "
 #~ msgstr "Le ou les messages sont introuvables dans le dossier "
-
-#~ msgid ""
-#~ "Mailbox' root folder must not be source or the destination full name of a "
-#~ "move operation."
-#~ msgstr ""
-#~ "Le dossier racine de la Boîte aux lettres ne doit pas être le nom complet "
-#~ "de la source ou de la destination d'une opération de déplacement."
 
 #~ msgid "Mapping file \"%s\" not valid"
 #~ msgstr "Le fichier d'associations « %s » est invalide"
@@ -16066,53 +16391,6 @@ msgstr "Zoulou"
 #~ "Le message a été envoyé avec succès, mais il n'a pas été possible d'en "
 #~ "mettre une copie dans votre dossier des messages envoyés, car le quota a "
 #~ "été dépassé."
-
-#~ msgid ""
-#~ "Message move aborted for user %1$s. Source and destination folder are "
-#~ "equal to \"%2$s\""
-#~ msgstr ""
-#~ "Déplacement du message interrompu pour l'utilisateur %1$s. Les dossiers "
-#~ "source et destination sont équivalents à « %2$s »"
-
-#~ msgid ""
-#~ "Message move aborted for user %1$s. Source and destination folder are "
-#~ "equal to \"%2$s\" on server %3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Déplacement du message interrompu pour l'utilisateur %1$s. Les dossiers "
-#~ "source et destination sont équivalents à « %2$s » sur le serveur %3$s "
-#~ "avec l'identifiant de connexion %4$s (utilisateur=%5$s, contexte=%6$s)"
-
-#~ msgid ""
-#~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
-#~ msgstr ""
-#~ "Le ou les messages %1$s du dossier %2$s n'ont pas pu être supprimés en "
-#~ "raison de l'erreur « %3$s »"
-
-#~ msgid ""
-#~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\" "
-#~ "on server %4$s with login %5$s (user=%6$s, context=%7$s)"
-#~ msgstr ""
-#~ "Le ou les messages %1$s du dossier %2$s n'ont pas pu être supprimés en "
-#~ "raison de l'erreur « %3$s » sur le serveur %4$s avec l'identifiant de "
-#~ "connexion %5$s (utilisateur=%6$s, contexte=%7$s)"
-
-#~ msgid ""
-#~ "Missing %1$s folder in mail move operation on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Dossier %1$s manquant dans l'opération de déplacement de courrier sur le "
-#~ "serveur %2$s avec l'identifiant de connexion %3$s (utilisateur=%4$s, "
-#~ "contexte=%5$s)"
-
-#~ msgid "Missing default %1$s folder"
-#~ msgstr "Dossier par défaut %1$s manquant"
-
-#~ msgid ""
-#~ "Missing default %1$s folder on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Dossier par défaut %1$s manquant sur le serveur %2$s avec l'identifiant "
-#~ "de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
 
 #~ msgid "Missing or wrong Interval value: %d"
 #~ msgstr "Valeur « Interval » manquante ou incorrecte : %d"
@@ -16149,46 +16427,8 @@ msgstr "Zoulou"
 #~ "Aucun canal UDP n'est configuré. Vérifiez que le canal défectueux s'ouvre "
 #~ "lors du démarrage du serveur."
 
-#~ msgid ""
-#~ "No access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Pas d'accès au dossier de courrier %1$s sur le serveur %2$s avec "
-#~ "l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
-
-#~ msgid ""
-#~ "No administer access to mail folder %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Pas d'accès administrateur au dossier de courrier %1$s sur le serveur "
-#~ "%2$s avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte="
-#~ "%5$s)"
-
-#~ msgid ""
-#~ "No administer permission specified for folder %1$s on server %2$s with "
-#~ "login %3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Pas d'accès administrateur spécifié au dossier %1$s sur le serveur %2$s "
-#~ "avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
-
-#~ msgid ""
-#~ "No attachment was found with id %1$s in message on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Aucune pièce jointe n'a été trouvée comportant l'identifiant %1$s dans le "
-#~ "message sur le serveur %2$s avec l'identifiant de connexion %3$s "
-#~ "(utilisateur=%4$s, contexte=%5$s)"
-
 #~ msgid "No attribute name could be found for code: %1$d"
 #~ msgstr "Le nom d'attribut correspondant au code %1$d est introuvable"
-
-#~ msgid ""
-#~ "No connection available to access mailbox on server %1$s with login %2$s "
-#~ "(user=%3$s, context=%4$s)"
-#~ msgstr ""
-#~ "Pas de connexion disponible pour accéder à la Boîte aux lettres sur le "
-#~ "serveur %1$s avec l'identifiant de connexion %2$s (utilisateur=%3$s, "
-#~ "contexte=%4$s)"
 
 #~ msgid ""
 #~ "No data provided from web server: input stream returned \"-1\" while "
@@ -16203,57 +16443,10 @@ msgstr "Zoulou"
 #~ msgstr ""
 #~ "Pas de constructeur par défaut précisé dans la classe de servlet « %s »"
 
-#~ msgid ""
-#~ "No delete access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Pas d'accès en suppression au dossier de courrier %1$s sur le serveur "
-#~ "%2$s avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte="
-#~ "%5$s)"
-
-#~ msgid ""
-#~ "No insert access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Pas d'accès en insertion au dossier de courrier %1$s sur le serveur %2$s "
-#~ "avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
-
-#~ msgid ""
-#~ "No keep-seen access to mail folder %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Pas d'accès de marquage « Vu » au dossier de courrier %1$s sur le serveur "
-#~ "%2$s avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte="
-#~ "%5$s)"
-
-#~ msgid ""
-#~ "No lookup access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Pas d'accès de recherche au dossier de courrier %1$s sur le serveur %2$s "
-#~ "avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
-
 #~ msgid "No parent recurring appointment found for series exception: %s"
 #~ msgstr ""
 #~ "Aucun rendez-vous répétitif parent n'a été trouvé pour l'exception à la "
 #~ "série : %s"
-
-#~ msgid ""
-#~ "No read access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Pas d'accès en lecture au dossier de courrier %1$s sur le serveur %2$s "
-#~ "avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
-
-#~ msgid "No rename access to mail folder %1$s"
-#~ msgstr "Pas d'accès en renommage au dossier de courrier %1$s"
-
-#~ msgid ""
-#~ "No rename access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Pas d'accès en renommage au dossier de courrier %1$s sur le serveur %2$s "
-#~ "avec l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
 
 #~ msgid ""
 #~ "No servlet class name found for key \"%s\". Please check servlet mappings."
@@ -16261,52 +16454,11 @@ msgstr "Zoulou"
 #~ "Pas de nom de classe de servlet pour la clé « %s ». Veuillez vérifier les "
 #~ "associations de servlets."
 
-#~ msgid "No support of capability \"THREAD=REFERENCES\""
-#~ msgstr "Pas de prise en charge de la fonction « THREAD=REFERENCES »"
-
-#~ msgid ""
-#~ "No support of capability \"THREAD=REFERENCES\" on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Pas de prise en charge de la fonction « THREAD=REFERENCES » sur le "
-#~ "serveur %2$s avec l'identifiant de connexion %3$s (utilisateur=%4$s, "
-#~ "contexte=%5$s)"
-
-#~ msgid "No write access to IMAP folder %1$s"
-#~ msgstr "Pas d'accès en écriture au dossier IMAP %1$s"
-
-#~ msgid ""
-#~ "No write access to IMAP folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Pas d'accès en écriture au dossier IMAP %1$s sur le serveur %2$s avec "
-#~ "l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
-
-#~ msgid ""
-#~ "Not allowed to open folder %1$s due to missing read access on server %2$s "
-#~ "with login %3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Il n'est pas permis d'ouvrir le dossier %1$s car on n'a pas accès en "
-#~ "lecture sur le serveur %2$s avec l'identifiant de connexion %3$s "
-#~ "(utilisateur=%4$s, contexte=%5$s)"
-
 #~ msgid "Problem with a thread."
 #~ msgstr "Problème avec un fil de discussion."
 
 #~ msgid "Property error: %s"
 #~ msgstr "Erreur de propriété : %s"
-
-#~ msgid ""
-#~ "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\" on server %4$s "
-#~ "with login %5$s (user=%6$s, context=%7$s)."
-#~ msgstr ""
-#~ "Le renommage du dossier « %1$s » en « %2$s » a échoué avec « %3$s » sur "
-#~ "le serveur %4$s avec l'identifiant de connexion %5$s (utilisateur=%6$s, "
-#~ "contexte=%7$s)."
-
-#~ msgid "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\"."
-#~ msgstr ""
-#~ "Le renommage du dossier « %1$s » en « %2$s » a échoué avec « %3$s »."
 
 #~ msgid "Response package exceeds max package size value of 8192k: %1$s"
 #~ msgstr ""
@@ -16331,43 +16483,10 @@ msgstr "Zoulou"
 #~ "L'interface de connexion a été fermée par le serveur web. L'attente des "
 #~ "données d'entrée des paquetages numéro %1$d a pris %2$d ms."
 
-#~ msgid "Sort field %1$s is not supported via IMAP SORT command"
-#~ msgstr ""
-#~ "Le champ de tri %1$s n'est pas pris en charge par le biais de la commande "
-#~ "IMAP SORT"
-
-#~ msgid ""
-#~ "Sort field %1$s is not supported via IMAP SORT command on server %2$s "
-#~ "with login %3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Le champ de tri %1$s n'est pas pris en charge par le biais de la commande "
-#~ "IMAP SORT sur le serveur %2$s avec l'identifiant de connexion %3$s "
-#~ "(utilisateur=%4$s, contexte=%5$s)"
-
 #~ msgid "String parse exception: No ending 0x00 found"
 #~ msgstr ""
 #~ "Exception d'analyse de chaîne de caractères : caractère nul final non "
 #~ "trouvé"
-
-#~ msgid ""
-#~ "The composed rights could not be applied to new folder %1$s due to "
-#~ "missing administer right in its initial rights specified by IMAP server. "
-#~ "However, the folder has been created on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)."
-#~ msgstr ""
-#~ "Les droits combinés n'ont pas pu être appliqués au nouveau dossier %1$s "
-#~ "en raison de l'absence du droit d'administrateur dans ses droits initiaux "
-#~ "spécifiés par le serveur IMAP. Cependant, le dossier a été créé sur le "
-#~ "serveur %2$s avec l'identifiant %3$s (utilisateur =%4$s, contexte =%5$s)."
-
-#~ msgid ""
-#~ "The composed rights could not be applied to new folder %1$s due to "
-#~ "missing administer right in its initial rights specified by IMAP server. "
-#~ "However, the folder has been created."
-#~ msgstr ""
-#~ "Les droits combinés n'ont pas pu être appliqués au nouveau dossier %1$s "
-#~ "en raison de l'absence du droit d'administrateur dans ses droits initiaux "
-#~ "spécifiés par le serveur IMAP. Cependant, le dossier a été créé."
 
 #~ msgid ""
 #~ "The configuration requests a master password but none is given in the "
@@ -16414,18 +16533,6 @@ msgstr "Zoulou"
 #~ "La règle ne peut pas être ajoutée à cette position, elle est trop grande"
 
 #~ msgid ""
-#~ "The raw content's input stream of message %1$s in folder %2$s cannot be "
-#~ "read on server %3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Le flux d'entrée du contenu brut du message %1$s dans le dossier %2$s ne "
-#~ "peut pas être lu sur le serveur %3$s avec l'identifiant de connexion %4$s "
-#~ "(utilisateur=%5$s, contexte=%6$s)"
-
-#~ msgid "Unable to parse IMAP server URI \"%1$s\"."
-#~ msgstr ""
-#~ "Impossible d'analyser syntaxiquement l'URI du serveur IMAP « %1$s »."
-
-#~ msgid ""
 #~ "Unexpected empty body package received from web server. Total-Received: "
 #~ "%1$d | Content-Length: %2$d.\n"
 #~ "Corresponding AJP forward package:\n"
@@ -16439,34 +16546,10 @@ msgstr "Zoulou"
 #~ msgid "Unknown Request Prefix Code: %1$s"
 #~ msgstr "Code préfixe de requête inconnu : %1$s"
 
-#~ msgid "Unknown folder open mode %1$s"
-#~ msgstr "Mode %1$s d'ouverture de dossier inconnu"
-
-#~ msgid ""
-#~ "Unknown folder open mode %1$s on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Mode %1$s d'ouverture de dossier inconnue sur le serveur %2$s avec "
-#~ "l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
-
-#~ msgid ""
-#~ "Unknown search field: %1$s on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Champ de recherche inconnu : %1$s sur le serveur %2$s avec l'identifiant "
-#~ "de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
-
 #~ msgid "Unparseable header field %1$s in forward request package"
 #~ msgstr ""
 #~ "Le champ %1$s de l'en-tête ne peut pas être analysé dans le paquetage de "
 #~ "demande de transfert"
-
-#~ msgid ""
-#~ "Update of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "La mise à jour du dossier %1$s a échoué sur le serveur %2$s avec "
-#~ "l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
 
 #~ msgid "mail filter servlet cannot be registered: %s"
 #~ msgstr "le servlet de filtrage du courrier ne peut pas être enregistré : %s"
@@ -16563,7 +16646,7 @@ msgstr "Zoulou"
 #~ "no name, no company nor e-mail."
 #~ msgstr ""
 #~ "Aucun champ pouvant être utilisé pour nommer des contacts n'a été trouvé "
-#~ "dans ce fichier  : ni nom, ni société ni adresse électronique."
+#~ "dans ce fichier  : ni nom, ni société, ni adresse électronique."
 
 #~ msgid "Invalid date format detected: \"%1$s\". Ignoring value."
 #~ msgstr "Format de date invalide détecté : « %1$s ». Ignorer la valeur."

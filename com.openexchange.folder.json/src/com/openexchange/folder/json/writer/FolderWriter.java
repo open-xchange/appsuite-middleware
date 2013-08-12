@@ -75,7 +75,6 @@ import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.FolderFieldRegistry;
-import com.openexchange.folder.json.actions.AbstractFolderAction;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderProperty;
@@ -95,8 +94,6 @@ public final class FolderWriter {
 
     static final Log LOG = com.openexchange.log.Log.loggerFor(FolderWriter.class);
     static final boolean WARN = LOG.isWarnEnabled();
-
-    static final String PARAM_IGNORE_TRANSLATION = AbstractFolderAction.PARAM_IGNORE_TRANSLATION;
 
     /**
      * The default locale: en_US.
@@ -354,15 +351,8 @@ public final class FolderWriter {
 
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-                final String name;
-                final Boolean b = jsonPutter.getParameter(PARAM_IGNORE_TRANSLATION);
-                if (null != b && b.booleanValue()) {
-                    name = folder.getName();
-                } else {
-                    final Locale locale = folder.getLocale();
-                    name = folder.getLocalizedName(locale == null ? DEFAULT_LOCALE : locale);
-                }
-                jsonPutter.put(FolderField.FOLDER_NAME.getName(), name);
+                final Locale locale = folder.getLocale();
+                jsonPutter.put(FolderField.FOLDER_NAME.getName(), folder.getLocalizedName(locale == null ? DEFAULT_LOCALE : locale));
             }
         });
         m.put(FolderField.MODULE.getColumn(), new FolderFieldWriter() {

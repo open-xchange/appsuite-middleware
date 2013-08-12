@@ -66,6 +66,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -797,6 +798,10 @@ public class RdbUserStorage extends UserStorage {
                 closeSQLStuff(stmt);
             }
         }
+
+        // Check if table 'user_attribute' has a primary key
+        final boolean hasPrimaryKey = hasPrimaryKey("user_attribute", con);
+
         // Remove attributes
         if (!removed.isEmpty()) {
             try {
@@ -809,13 +814,13 @@ public class RdbUserStorage extends UserStorage {
                 for (UserAttribute attribute : removed.values()) {
                     for (AttributeValue value : attribute.getValues()) {
                         final UUID uuid = value.getUuid();
-                        if (null == uuid) {
+                        if (hasPrimaryKey && null != uuid) {
+                            stmt2.setBytes(2, UUIDs.toByteArray(uuid));
+                            stmt2.addBatch();
+                        } else {
                             stmt.setString(3, attribute.getName());
                             stmt.setString(4, value.getValue());
                             stmt.addBatch();
-                        } else {
-                            stmt2.setBytes(2, UUIDs.toByteArray(uuid));
-                            stmt2.addBatch();
                         }
                         size++;
                     }
@@ -849,17 +854,18 @@ public class RdbUserStorage extends UserStorage {
                 int size2 = 0;
                 for (UserAttribute attribute : changed.values()) {
                     for (AttributeValue value : attribute.getValues()) {
-                        stmt2.setString(1, value.getNewValue());
                         UUID uuid = value.getUuid();
-                        if (null == uuid) {
+                        if (hasPrimaryKey && null != uuid) {
+                            stmt2.setString(1, value.getNewValue());
+                            stmt2.setBytes(3, UUIDs.toByteArray(uuid));
+                            stmt2.addBatch();
+                            size2++;
+                        } else {
+                            stmt.setString(1, value.getNewValue());
                             stmt.setString(4, attribute.getName());
                             stmt.setString(5, value.getValue());
                             stmt.addBatch();
                             size1++;
-                        } else {
-                            stmt2.setBytes(3, UUIDs.toByteArray(uuid));
-                            stmt2.addBatch();
-                            size2++;
                         }
                     }
                 }
@@ -923,6 +929,17 @@ public class RdbUserStorage extends UserStorage {
                 closeSQLStuff(stmt);
                 closeSQLStuff(stmt2);
             }
+        }
+    }
+
+    private static boolean hasPrimaryKey(final String table, final Connection con) throws SQLException {
+        final DatabaseMetaData metaData = con.getMetaData();
+        // Get primary keys
+        final ResultSet primaryKeys = metaData.getPrimaryKeys(null, null, table);
+        try {
+            return primaryKeys.next();
+        } finally {
+            closeSQLStuff(primaryKeys);
         }
     }
 
