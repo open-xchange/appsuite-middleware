@@ -118,12 +118,11 @@ public final class GetAction extends AbstractFolderAction {
                 treeId,
                 folderId,
                 session,
-                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put(PARAM_IGNORE_TRANSLATION, request.getParameter(PARAM_IGNORE_TRANSLATION)));
+                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")));
         /*
          * Write subfolders as JSON arrays to JSON array
          */
-        final boolean ignoreTranslation = parseBoolean(request.getParameter(PARAM_IGNORE_TRANSLATION), false);
-        final JSONObject jsonObject = FolderWriter.writeSingle2Object(null, folder, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST, ignoreTranslation ? parametersFor(PARAM_IGNORE_TRANSLATION, Boolean.TRUE) : null);
+        final JSONObject jsonObject = FolderWriter.writeSingle2Object(null, folder, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST, null);
         /*
          * Return appropriate result
          */
