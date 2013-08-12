@@ -523,4 +523,68 @@ public class Strings {
         return s;
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * Generates a string of code points for given string
+     *
+     * @param str The string
+     * @return The code points
+     */
+    public static String toCodePoints(final String str) {
+        if (null == str) {
+            return null;
+        }
+        final int length = str.length();
+        final StringAllocator sb = new StringAllocator(length << 1);
+        for (int i = 0; i < length; i++) {
+            sb.append(' ').append(str.codePointAt(i));
+        }
+        return sb.deleteCharAt(0).toString();
+    }
+
+    /**
+     * Generates a string of code points for given string
+     *
+     * @param str The string
+     * @param out The print stream to print to
+     * @return The code points
+     */
+    public static void outCodePoints(final String str, final PrintStream out) {
+        if (null == out) {
+            System.out.println(toCodePoints(str));
+        } else {
+            out.println(toCodePoints(str));
+        }
+    }
+
+    /** ASCII-wise to upper-case */
+    public static String toUpperCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+        }
+        return builder.toString();
+    }
+
+    /** ASCII-wise to lower-case */
+    public static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
+    }
+
+>>>>>>> c31e9b4... Helper methods
 }
