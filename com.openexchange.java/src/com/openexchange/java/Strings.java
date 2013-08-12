@@ -51,6 +51,7 @@ package com.openexchange.java;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
@@ -523,8 +524,6 @@ public class Strings {
         return s;
     }
 
-<<<<<<< HEAD
-=======
     /**
      * Generates a string of code points for given string
      *
@@ -586,5 +585,4 @@ public class Strings {
         return builder.toString();
     }
 
->>>>>>> c31e9b4... Helper methods
 }
