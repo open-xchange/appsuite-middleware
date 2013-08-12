@@ -112,6 +112,6 @@ public class CapabilitiesActivatorTest extends AbstractMockTest {
     public void testStopBundle_EverythingFine_AllServicesClosed() throws Exception {
         this.capabilitiesActivator.stopBundle();
 
-        ServiceMockActivatorAsserter.verifyAllServicesDeregistered(this.capabilitiesActivator);
+        ServiceMockActivatorAsserter.verifyAllServicesUnregistered(this.capabilitiesActivator);
     }
 }

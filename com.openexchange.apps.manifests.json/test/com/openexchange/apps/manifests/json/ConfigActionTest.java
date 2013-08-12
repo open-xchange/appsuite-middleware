@@ -139,7 +139,7 @@ public class ConfigActionTest extends AbstractMockTest {
     @Test
     public void testGetFromConfiguration_ConfigurationFound_ReturnJSON() throws JSONException, OXException {
         this.configAction = new ConfigAction(serviceLookup, manifests, serverConfigServicesLookup);
-        ContextAndServicesActivator.activateServiceLookupMocks(this.configAction, ConfigurationService.class);
+        ContextAndServicesActivator.activateServiceLookupMocks(this.configAction);
 
         JSONObject jsonObject = this.configAction.getFromConfiguration(this.ajaxRequestData, this.serverSession);
 
@@ -149,7 +149,7 @@ public class ConfigActionTest extends AbstractMockTest {
     @Test
     public void testGetFromConfiguration_NoConfigurationFound_ReturnEmptyJSON() throws JSONException, OXException {
         this.configAction = new ConfigAction(serviceLookup, manifests, serverConfigServicesLookup);
-        ServiceLookup lServiceLookup = ContextAndServicesActivator.activateServiceLookupMocks(this.configAction, ConfigurationService.class);
+        ServiceLookup lServiceLookup = ContextAndServicesActivator.activateServiceLookupMocks(this.configAction);
         Mockito.when(lServiceLookup.getService(ConfigurationService.class).getYaml(Matchers.anyString())).thenReturn(null);
 
         JSONObject jsonObject = this.configAction.getFromConfiguration(this.ajaxRequestData, this.serverSession);

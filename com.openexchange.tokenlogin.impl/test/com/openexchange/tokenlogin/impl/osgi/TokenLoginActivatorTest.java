@@ -55,7 +55,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.ServiceProvider;
 import com.openexchange.test.mock.main.ContextAndServicesActivator;
@@ -94,8 +93,7 @@ public class TokenLoginActivatorTest extends AbstractMockTest {
 
         this.activatedServiceMocks = ContextAndServicesActivator.activateContextAndServiceMocks(
             this.tokenLoginActivator,
-            HazelcastConfigurationService.class,
-            ConfigurationService.class);
+            this.tokenLoginActivator.getNeededServices());
     }
 
     @Test

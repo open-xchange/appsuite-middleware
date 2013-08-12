@@ -90,11 +90,11 @@ public class ServiceMockActivatorAsserter {
     }
 
     /**
-     * Verifies if all services associated with the bundle are deregistered
+     * Verifies if all services associated with the bundle are unregistered
      * 
      * @param activator - the activator the services should be checked for
      */
-    public static void verifyAllServicesDeregistered(HousekeepingActivator activator) {
+    public static void verifyAllServicesUnregistered(HousekeepingActivator activator) {
         Map<Object, ServiceRegistration<?>> serviceRegistrations = (Map<Object, ServiceRegistration<?>>) MockUtils.getValueFromField(
             activator,
             InjectionFieldConstants.SERVICE_REGISTRATIONS);

@@ -121,14 +121,14 @@ public class ContextAndServicesActivator {
     }
 
     /**
-     * Creates the bundle context and activates the service mocks for the given class.
+     * Creates the bundle context and activates the service mocks for the given class. The used ServiceLookupMock will create a mock from
+     * the MockFactory if the com.openexchange.test.mock.main.ContextAndServicesActivator.ServiceLookupMock.getService(Class<? extends S>)
+     * is called.
      * 
      * @param instance - the instance the services should be activated for
-     * @param clazz - the (service) classes which should be activated for the activator
      * @return Map with the activated class - service mapping
      */
-    public static ServiceLookup activateServiceLookupMocks(Object instance, Class<?>... clazz) {
-
+    public static ServiceLookup activateServiceLookupMocks(Object instance) {
         ServiceLookup serviceLookup = new ServiceLookupMock();
 
         MockUtils.injectValueIntoPrivateField(instance, InjectionFieldConstants.SERVICES, serviceLookup);
