@@ -123,6 +123,7 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
      * @param parser
      */
     private void setOptions(AdminParser parser) {
+        parser.setExtendedOptions();
         setDefaultCommandLineOptionsWithoutContextID(parser);
         filterOption = setShortLongOpt(parser, FILTER_SHORT, FILTER_LONG, FILTER_DESCRIPTION, true, NeededQuadState.notneeded);
         accessRightsCombinationName = setShortLongOpt(parser,'a', OPT_ACCESSRIGHTS_COMBINATION_NAME, "The optional access combination name as replacement for specifying single permissions to enable/disable.", true, NeededQuadState.notneeded);
