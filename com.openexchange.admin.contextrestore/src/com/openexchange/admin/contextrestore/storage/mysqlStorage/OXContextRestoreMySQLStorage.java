@@ -106,9 +106,14 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
                 doRollback = true;
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    prepareStatement = connection.prepareStatement(line);
-                    prepareStatement.execute();
-                    prepareStatement.close();
+                    try {
+                        prepareStatement = connection.prepareStatement(line);
+                        prepareStatement.execute();
+                        prepareStatement.close();
+                    } catch (SQLException e) {
+                        LOG.error("Executing the following SQL statement failed: " + line, e);
+                        throw e;
+                    }
                 }
             } finally {
                 close(reader);
@@ -121,9 +126,14 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
                 doRollback = true;
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    prepareStatement2 = connection2.prepareStatement(line);
-                    prepareStatement2.execute();
-                    prepareStatement2.close();
+                    try {
+                        prepareStatement2 = connection2.prepareStatement(line);
+                        prepareStatement2.execute();
+                        prepareStatement2.close();
+                    } catch (SQLException e) {
+                        LOG.error("Executing the following SQL statement failed: " + line, e);
+                        throw e;
+                    }
                 }
             } finally {
                 close(reader);

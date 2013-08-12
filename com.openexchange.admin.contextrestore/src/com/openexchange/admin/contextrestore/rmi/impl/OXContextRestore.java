@@ -759,12 +759,12 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         } catch (final OXContextRestoreException e) {
             LOG.error(e.getMessage(), e);
             throw e;
-        } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
         } catch (final DatabaseUpdateException e) {
             LOG.error(e.getMessage(), e);
             throw e;
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw new OXContextRestoreException(Code.UNEXPECTED_ERROR, e, e.getMessage());
         }
     }
 
