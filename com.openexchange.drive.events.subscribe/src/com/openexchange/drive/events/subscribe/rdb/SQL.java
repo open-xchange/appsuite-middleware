@@ -93,7 +93,7 @@ public class SQL {
 
     public static final String DELETE_SUBSCRIPTION_STMT =
         "DELETE FROM driveEventSubscriptions " +
-        "WHERE cid=? AND user=? AND service=? AND token=? AND folder=?;";
+        "WHERE cid=? AND user=? AND service=? AND token=? AND REVERSE(folder)=?;";
 
     public static final String UPDATE_TOKEN_STMT =
         "UPDATE driveEventSubscriptions SET token=? " +
