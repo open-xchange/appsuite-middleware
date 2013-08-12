@@ -156,7 +156,7 @@ public final class ListAction extends AbstractFolderAction {
                 parentId,
                 all,
                 session,
-                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put(PARAM_IGNORE_TRANSLATION, request.getParameter(PARAM_IGNORE_TRANSLATION)));
+                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")));
         /*
          * Determine max. last-modified time stamp
          */
@@ -173,7 +173,6 @@ public final class ListAction extends AbstractFolderAction {
         /*
          * length > 0
          */
-        final boolean ignoreTranslation = parseBoolean(request.getParameter(PARAM_IGNORE_TRANSLATION), false);
         // Align to client identifier
         if (filterDuplicateNames) {
             // Filter equally named folder
@@ -185,7 +184,7 @@ public final class ListAction extends AbstractFolderAction {
                 if (null == locale) {
                     locale = FolderWriter.DEFAULT_LOCALE;
                 }
-                final String name = ignoreTranslation ? userizedFolder.getLocalizedName(locale) : userizedFolder.getName();
+                final String name = userizedFolder.getLocalizedName(locale);
                 final UserizedFolder prev = name2folder.get(name);
                 if (null == prev) {
                     name2folder.put(name, userizedFolder);
@@ -224,7 +223,7 @@ public final class ListAction extends AbstractFolderAction {
         /*
          * Write subfolders as JSON arrays to JSON array
          */
-        final JSONArray jsonArray = FolderWriter.writeMultiple2Array(columns, subfolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST, ignoreTranslation ? parametersFor(PARAM_IGNORE_TRANSLATION, Boolean.TRUE) : null);
+        final JSONArray jsonArray = FolderWriter.writeMultiple2Array(columns, subfolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST, null);
         /*
          * Return appropriate result
          */

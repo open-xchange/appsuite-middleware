@@ -52,7 +52,6 @@ package com.openexchange.folder.json.actions;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -145,7 +144,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
                 all,
                 session,
                 new FolderServiceDecorator().setTimeZone(timeZone).setAllowedContentTypes(allowedContentTypes).put(
-                    "mailRootFolders", mailRootFolders).put(sAltNames, altNames).put(PARAM_IGNORE_TRANSLATION, request.getParameter(PARAM_IGNORE_TRANSLATION)));
+                    "mailRootFolders", mailRootFolders).put(sAltNames, altNames));
         /*
          * Get all shared folders
          */
@@ -206,18 +205,16 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
          * Write subfolders as JSON arrays to JSON object
          */
         try {
-            final boolean ignoreTranslation = parseBoolean(request.getParameter(PARAM_IGNORE_TRANSLATION), false);
-            final Map<String, Object> params = ignoreTranslation ? parametersFor(PARAM_IGNORE_TRANSLATION, Boolean.TRUE) : null;
             final JSONObject ret = new JSONObject(4);
             final AdditionalFolderFieldList additionalFolderFieldList = Constants.ADDITIONAL_FOLDER_FIELD_LIST;
             if (null != privateFolders && privateFolders.length > 0) {
-                ret.put("private", FolderWriter.writeMultiple2Array(columns, privateFolders, session, additionalFolderFieldList, params));
+                ret.put("private", FolderWriter.writeMultiple2Array(columns, privateFolders, session, additionalFolderFieldList, null));
             }
             if (null != publicFolders && publicFolders.length > 0) {
-                ret.put("public", FolderWriter.writeMultiple2Array(columns, publicFolders, session, additionalFolderFieldList, params));
+                ret.put("public", FolderWriter.writeMultiple2Array(columns, publicFolders, session, additionalFolderFieldList, null));
             }
             if (null != sharedFolders && sharedFolders.length > 0) {
-                ret.put("shared", FolderWriter.writeMultiple2Array(columns, sharedFolders, session, additionalFolderFieldList, params));
+                ret.put("shared", FolderWriter.writeMultiple2Array(columns, sharedFolders, session, additionalFolderFieldList, null));
             }
             /*
              * Gather possible warnings

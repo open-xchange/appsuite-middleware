@@ -80,11 +80,6 @@ import com.openexchange.tools.session.ServerSession;
 public abstract class AbstractFolderAction implements AJAXActionService {
 
     /**
-     * <code>"ignoreTranslation"</code>.
-     */
-    public static final String PARAM_IGNORE_TRANSLATION = "ignoreTranslation".intern();
-
-    /**
      * Initializes a new {@link AbstractFolderAction}.
      */
     protected AbstractFolderAction() {
