@@ -80,6 +80,7 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.java.Charsets;
@@ -511,9 +512,17 @@ public final class ConfigJSlobService implements JSlobService {
                         if (path.endsWith("/")) {
                             path = path.substring(0, path.length() - 1);
                         }
-                        final Setting setting = configTree.getSettingByPath(path);
-                        setting.setSingleValue(entry.getValue());
-                        saveSettingWithSubs(stor, setting);
+                        try {
+                            final Setting setting = configTree.getSettingByPath(path);
+                            setting.setSingleValue(entry.getValue());
+                            saveSettingWithSubs(stor, setting);
+                        } catch (OXException x) {
+                            if (SettingExceptionCodes.UNKNOWN_PATH.equals(x)) {
+                                LOG.error("Ignoring update to unmappable path", x);
+                            } else {
+                                throw x;
+                            }
+                        }
                     }
                 }
             }
