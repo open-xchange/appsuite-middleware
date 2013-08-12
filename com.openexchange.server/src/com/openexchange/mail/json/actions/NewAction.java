@@ -292,7 +292,7 @@ public final class NewAction extends AbstractMailAction {
             }
         }
         // Get rfc822 bytes and create corresponding mail message
-        final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
+        final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), false);
         final PutNewMailData data;
         {
             final MimeMessage message = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(Charsets.toAsciiBytes((String) req.getRequest().requireData())));
