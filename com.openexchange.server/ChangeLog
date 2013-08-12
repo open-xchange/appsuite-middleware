@@ -1,3 +1,7 @@
+* 2013-08-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28003 + 28192: Use proper primary-key-dependent SQL statement + fixed SQL query
+
 * 2013-08-09 - marcus.klein@open-xchange.com
 
  - Fix for bug 24624: White listed our known clients to have their logins recorded always. Testing the client login parameter for
