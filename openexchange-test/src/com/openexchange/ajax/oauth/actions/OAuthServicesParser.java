@@ -80,15 +80,17 @@ public class OAuthServicesParser extends AbstractAJAXParser<OAuthServicesRespons
     protected OAuthServicesResponse createResponse(Response response) throws JSONException {
         List<OAuthService> services = new ArrayList<OAuthService>();
         JSONObject json = ResponseWriter.getJSON(response);
-        JSONValue data = (JSONValue) json.get("data");
-        if (data.isArray()) {
-            JSONArray arr = data.toArray();
-            for (int i = 0; i < arr.length(); i++) {
-                JSONObject obj = arr.getJSONObject(i);
-                services.add(parseService(obj));
+        if (json.has("data")) {
+            JSONValue data = (JSONValue) json.get("data");
+            if (data.isArray()) {
+                JSONArray arr = data.toArray();
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    services.add(parseService(obj));
+                }
+            } else {
+                services.add(parseService(data.toObject()));
             }
-        } else {
-            services.add(parseService(data.toObject()));
         }
 
         return new OAuthServicesResponse(response, services);
