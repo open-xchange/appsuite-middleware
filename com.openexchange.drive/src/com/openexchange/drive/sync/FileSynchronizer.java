@@ -68,10 +68,11 @@ import com.openexchange.drive.comparison.ThreeWayComparison;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.internal.UploadHelper;
-import com.openexchange.drive.storage.filter.SynchronizedFileFilter;
+import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -239,6 +240,12 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                      */
                     result.addActionForClient(new ErrorFileAction(null, comparison.getClientVersion(), comparison, path,
                         DriveExceptionCodes.INVALID_FILENAME.create(comparison.getClientVersion().getName()), true));
+                } else if (isIgnoredName(comparison.getClientVersion().getName())) {
+                    /*
+                     * ignored file, indicate as error with quarantine flag
+                     */
+                    result.addActionForClient(new ErrorFileAction(null, comparison.getClientVersion(), comparison, path,
+                        DriveExceptionCodes.IGNORED_FILENAME.create(comparison.getClientVersion().getName()), true));
                 } else {
                     /*
                      * let client upload the file
@@ -387,15 +394,38 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     }
 
     /**
-     * Gets a value indicating whether the supplied filename is invalid, i.e. it contains illegal characters, is not supported for
-     * other reasons, or is excluded from synchronization by definition.
+     * Gets a value indicating whether the supplied filename is invalid, i.e. it contains illegal characters or is not supported for
+     * other reasons.
      *
      * @param fileName The filename to check
      * @return <code>true</code> if the filename is considered invalid, <code>false</code>, otherwise
      * @throws OXException
      */
     private static boolean isInvalidName(String fileName) throws OXException {
-        return false == SynchronizedFileFilter.getInstance().accept(fileName);
+        if (Strings.isEmpty(fileName)) {
+            return true; // no empty filenames
+        }
+        if (false == DriveConstants.FILENAME_VALIDATION_PATTERN.matcher(fileName).matches()) {
+            return true; // no invalid filenames
+        }
+        return false;
+    }
+
+    /**
+     * Gets a value indicating whether the supplied filename is ignored, i.e. it is excluded from synchronization by definition.
+     *
+     * @param fileName The filename to check
+     * @return <code>true</code> if the filename is considered to be ignored, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    private static boolean isIgnoredName(String fileName) throws OXException {
+        if (fileName.endsWith(DriveConstants.FILEPART_EXTENSION)) {
+            return true; // no temporary upload files
+        }
+        if (DriveConstants.EXCLUDED_FILENAMES_PATTERN.matcher(fileName).matches()) {
+            return true; // no excluded files
+        }
+        return false;
     }
 
 }

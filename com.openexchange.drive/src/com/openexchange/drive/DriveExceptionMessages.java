@@ -77,6 +77,7 @@ public final class DriveExceptionMessages implements LocalizableStrings {
     public static final String NO_CREATE_DIRECTORY_PERMISSION_MSG = "You are not allowed to create directories at \"%1$s\"";
     public static final String QUOTA_REACHED_MSG = "The allowed Quota is reached";
     public static final String INVALID_FILENAME_MSG = "The file name \"%1$s\" is invalid";
+    public static final String IGNORED_FILENAME_MSG = "The file name \"%1$s\" is ignored";
 
     /**
      * Prevent instantiation.

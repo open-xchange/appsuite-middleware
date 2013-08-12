@@ -111,6 +111,9 @@ public enum DriveExceptionCodes implements OXExceptionCode {
 
     /** The file name \"%1$s\" is invalid */
     INVALID_FILENAME(DriveExceptionMessages.INVALID_FILENAME_MSG, Category.CATEGORY_USER_INPUT, 17),
+
+    /** The file name \"%1$s\" is ignored */
+    IGNORED_FILENAME(DriveExceptionMessages.IGNORED_FILENAME_MSG, Category.CATEGORY_USER_INPUT, 18),
     ;
 
     private static final String PREFIX = "DRV";

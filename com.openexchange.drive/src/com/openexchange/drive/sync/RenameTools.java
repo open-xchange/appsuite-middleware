@@ -49,12 +49,9 @@
 
 package com.openexchange.drive.sync;
 
-import java.util.Arrays;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.drive.storage.DriveConstants;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 
 
@@ -64,24 +61,6 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class RenameTools {
-
-
-    public static String sanitizeFilename(String invalidName) {
-        /*
-         * remove invalid characters
-         */
-        StringAllocator stringAllocator = new StringAllocator();
-        for (int i = 0; i < invalidName.length(); i++) {
-            char c = invalidName.charAt(i);
-            if (0 > Arrays.binarySearch(DriveConstants.ILLEGAL_FILENAME_CHARS, c)) {
-                stringAllocator.append(c);
-            }
-        }
-        /*
-         * check for reserved
-         */
-        return stringAllocator.toString();
-    }
 
     /**
      * Finds an alternative filename for the supplied conflicting name, considering the given set of already used filenames.

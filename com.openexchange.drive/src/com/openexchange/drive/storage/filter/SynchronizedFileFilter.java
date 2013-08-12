@@ -49,10 +49,6 @@
 
 package com.openexchange.drive.storage.filter;
 
-import java.util.Arrays;
-import java.util.regex.Pattern;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -60,49 +56,43 @@ import com.openexchange.java.Strings;
 /**
  * {@link SynchronizedFileFilter}
  *
- * A {@link FileNameFilter} that only lets through files that are actually synchronized, i.e. temporary files or infostore entries
- * without attached document.
+ * A {@link FileNameFilter} that only lets through files that are actually synchronized, i.e. temporary files, infostore entries
+ * without attached document, or files with invalid / ignored filenames are excluded.
  *
- * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class SynchronizedFileFilter extends FileNameFilter {
 
+    /**
+     * Gets the {@link SynchronizedFileFilter} instance.
+     *
+     * @return The singleton instance.
+     */
     public static final SynchronizedFileFilter getInstance() {
         return INSTANCE;
     }
 
     private static final SynchronizedFileFilter INSTANCE = new SynchronizedFileFilter();
 
-    private final Pattern excudedFilesPattern;
-
+    /**
+     * Initializes a new {@link SynchronizedFileFilter}.
+     */
     private SynchronizedFileFilter() {
         super();
-        ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
-        String excludedFilesPattern = "thumbs\\.db|desktop\\.ini|\\.ds_store|icon\\\r";
-        if (null != configService) {
-            excludedFilesPattern = configService.getProperty("com.openexchange.drive.excludedFilesPattern", excludedFilesPattern);
-        }
-        this.excudedFilesPattern = Pattern.compile(excludedFilesPattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
     }
 
     @Override
-    public boolean accept(String fileName) throws OXException {
+    protected boolean accept(String fileName) throws OXException {
         if (Strings.isEmpty(fileName)) {
             return false; // no empty filenames
         }
         if (fileName.endsWith(DriveConstants.FILEPART_EXTENSION)) {
             return false; // no temporary upload files
         }
-        for (int i = 0; i < fileName.length(); i++) {
-            char c = fileName.charAt(i);
-            if (0 <= Arrays.binarySearch(DriveConstants.ILLEGAL_FILENAME_CHARS, c)) {
-                return false; // no invalid characters
-            }
+        if (false == DriveConstants.FILENAME_VALIDATION_PATTERN.matcher(fileName).matches()) {
+            return false; // no invalid filenames
         }
-//        if (DriveConstants.FILENAME_VALIDATION_PATTERN.matcher(fileName).matches()) {
-//            return false; // no invalid filenames
-//        }
-        if (excudedFilesPattern.matcher(fileName).matches()) {
+        if (DriveConstants.EXCLUDED_FILENAMES_PATTERN.matcher(fileName).matches()) {
             return false; // no excluded files
         }
         return true;
