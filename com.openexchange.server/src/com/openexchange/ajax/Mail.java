@@ -3649,7 +3649,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
             // Get rfc822 bytes and create corresponding mail message
-            final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
+            final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), false);
             final PutNewMailData data;
             {
                 final MimeMessage message;
@@ -3986,7 +3986,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     force = STR_1.equals(tmp) || Boolean.parseBoolean(tmp);
                 }
             }
-            final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
+            final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), false);
             MailServletInterface mailInterface = MailServletInterface.getInstance(session);
             final BlockingQueue<MimeMessage> queue = new ArrayBlockingQueue<MimeMessage>(100);
             Future<Object> future = null;

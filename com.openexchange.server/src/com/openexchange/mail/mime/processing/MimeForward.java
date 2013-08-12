@@ -247,7 +247,7 @@ public final class MimeForward {
              * Set from
              */
             if (usm.getSendAddr() != null) {
-                forwardMsg.setFrom(new QuotedInternetAddress(usm.getSendAddr(), true));
+                forwardMsg.setFrom(new QuotedInternetAddress(usm.getSendAddr(), false));
             }
             if (usm.isForwardAsAttachment() || origMsgs.length > 1) {
                 /*

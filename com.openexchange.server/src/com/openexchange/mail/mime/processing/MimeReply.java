@@ -293,9 +293,9 @@ public final class MimeReply {
                         if (null != owner) {
                             final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
                             if (null != users && users.length > 0) {
-                                final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
+                                final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), false);
                                 replyMsg.setFrom(onBehalfOf);
-                                final QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), true);
+                                final QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), false);
                                 replyMsg.setSender(sender);
                             }
                         }

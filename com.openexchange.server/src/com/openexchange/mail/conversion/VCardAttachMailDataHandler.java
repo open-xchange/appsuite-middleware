@@ -160,7 +160,7 @@ public final class VCardAttachMailDataHandler implements DataHandler {
              * Set from
              */
             if (usm.getSendAddr() != null) {
-                mimeMessage.setFrom(new QuotedInternetAddress(usm.getSendAddr(), true));
+                mimeMessage.setFrom(new QuotedInternetAddress(usm.getSendAddr(), false));
             }
             /*
              * Create multipart and its nested parts

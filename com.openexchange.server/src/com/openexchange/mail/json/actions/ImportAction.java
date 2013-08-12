@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
@@ -161,7 +160,7 @@ public final class ImportAction extends AbstractMailAction {
              * Iterate upload files
              */
             final ServerSession session = mailRequest.getSession();
-            final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
+            final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), false);
             MailServletInterface mailInterface = MailServletInterface.getInstance(session);
             final BlockingQueue<MimeMessage> queue = new ArrayBlockingQueue<MimeMessage>(100);
             Future<Object> future = null;
