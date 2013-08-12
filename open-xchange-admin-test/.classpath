@@ -19,5 +19,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.user.copy.rmi"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.plugin.hosting"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.io_2.0.1.v201105210651.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
