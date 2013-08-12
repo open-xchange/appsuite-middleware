@@ -87,12 +87,7 @@ public final class ManagedServiceTracker extends ServiceTracker<ManagedService, 
                 final ManagedService service = super.addingService(reference);
                 serviceObtained = true;
 
-                final Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
-                properties.put("manager.root", configService.getProperty("com.openexchange.webconsole.servletPath", "/servlet/console"));
-                properties.put("username", configService.getProperty("com.openexchange.webconsole.username", "open-xchange"));
-                properties.put("password", configService.getProperty("com.openexchange.webconsole.password", "secret"));
-                properties.put("realm", configService.getProperty("com.openexchange.webconsole.realm", "Open-Xchange Management Console"));
-                service.updated(properties);
+                configureWebConsole(service, configService);
 
                 return service;
             }
@@ -107,6 +102,22 @@ public final class ManagedServiceTracker extends ServiceTracker<ManagedService, 
             context.ungetService(reference);
         }
         return null;
+    }
+
+    /**
+     * Configures the Web Console.
+     *
+     * @param service The associated managed service
+     * @param configService The config service
+     * @throws ConfigurationException If configuration fails
+     */
+    public static void configureWebConsole(final ManagedService service, ConfigurationService configService) throws ConfigurationException {
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
+        properties.put("manager.root", configService.getProperty("com.openexchange.webconsole.servletPath", "/servlet/console"));
+        properties.put("username", configService.getProperty("com.openexchange.webconsole.username", "open-xchange"));
+        properties.put("password", configService.getProperty("com.openexchange.webconsole.password", "secret"));
+        properties.put("realm", configService.getProperty("com.openexchange.webconsole.realm", "Open-Xchange Management Console"));
+        service.updated(properties);
     }
 
 }
