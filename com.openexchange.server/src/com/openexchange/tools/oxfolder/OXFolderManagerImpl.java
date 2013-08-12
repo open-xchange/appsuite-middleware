@@ -81,6 +81,7 @@ import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.internal.FolderDeleteListenerRegistry;
 import com.openexchange.folderstorage.FolderStorage;
@@ -1793,7 +1794,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         infostoreFacade.setTransactional(true);
         infostoreFacade.startTransaction();
         try {
-            infostoreFacade.removeDocument(folderID, System.currentTimeMillis(), ServerSessionAdapter.valueOf(session, ctx));
+            infostoreFacade.removeDocument(folderID, FileStorageFileAccess.DISTANT_FUTURE, ServerSessionAdapter.valueOf(session, ctx));
             infostoreFacade.commit();
         } catch (final OXException x) {
             infostoreFacade.rollback();
