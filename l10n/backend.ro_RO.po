@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-07-28 12:28+0100\n"
+"PO-Revision-Date: 2013-08-06 23:12+0000\n"
 "Last-Translator: Daiana Heinrich <xdaiana@yahoo.com>\n"
 "Language-Team: Romanian <kde-i18n-doc@kde.org>\n"
 "Language: ro\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2;\n"
-"X-Generator: Poedit 1.5.7\n"
+"X-Generator: Lokalize 1.4\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #. %1$s will be replaced with a detailed exception message.
@@ -1158,6 +1158,7 @@ msgstr "A apărut o eroare JSON: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:68
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:224
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:67
@@ -3408,6 +3409,693 @@ msgstr "Verificați dacă fișierul este formatat corect."
 msgid "Please make sure the file is readable by the groupware."
 msgstr "Asigurați-vă că fișierul poate fi citit de programele partajate."
 
+#. *
+#. * No connection available to access mailbox
+#.
+#. No connection available to access mailbox
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:466
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:100
+msgid "No connection available to access mailbox"
+msgstr "Nu există conexuni disponibile pentru accesul la căsuța poștală"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:68
+msgid ""
+"No connection available to access mailbox on server %1$s with login %2$s "
+"(user=%3$s, context=%4$s)"
+msgstr ""
+"Nu există conexiuni disponibile pentru accesul la căsuța poștală pe serverul "
+"%1$s cu autentificarea %2$s (utilizator=%3$s, context=%4$s)"
+
+#. *
+#. * User %1$s has no mail module access due to user configuration
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:76
+msgid "User %1$s has no mail module access due to user configuration"
+msgstr ""
+"Utilizatorul %1$s nu are acces la modulul de mail datorită configurației "
+"utilizatorului"
+
+#. *
+#. * No access to mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:80
+msgid "No access to mail folder %1$s"
+msgstr "Nu s-a putut accesa dosarul de mail %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:74
+msgid ""
+"No access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Nu s-a putut accesa dosarul de mail %1$s pe serverul %2$s cu autentificarea "
+"%3$s (utilizator=%4$s, context=%5$s)"
+
+#. *
+#. * No lookup access to mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:84
+msgid "No lookup access to mail folder %1$s"
+msgstr "Nu aveți drepturi de căutare în dosarul de mail %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:78
+msgid ""
+"No lookup access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nu aveți drepturi de căutare în dosarul de mail %1$s pe serverul %2$s cu "
+"autentificarea %3$s (utilizator=%4$s, context=%5$s)"
+
+#. *
+#. * No read access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:88
+msgid "No read access to mail folder %1$s"
+msgstr "Nu aveți drepturi de citire în dosarul de mail %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:82
+msgid ""
+"No read access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nu aveți drepturi de citire în dosarul de mail %1$s pe serverul %2$s cu "
+"autentificarea %3$s (utilizator=%4$s, context=%5$s)"
+
+#. *
+#. * No delete access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:92
+msgid "No delete access to mail folder %1$s"
+msgstr "Nu aveți drepturi de ștergere în dosarul de mail %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:86
+msgid ""
+"No delete access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nu aveți drepturi de ștergere în dosarul de mail %1$s pe serverul %2$s cu "
+"autentificarea %3$s (utilizator=%4$s, context=%5$s)"
+
+#. *
+#. * No insert access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:96
+msgid "No insert access to mail folder %1$s"
+msgstr "Nu aveți drepturi de inserare în dosarul de mail %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:90
+msgid ""
+"No insert access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nu aveți drepturi de inserare în dosarul de mail %1$s pe serverul %2$s cu "
+"autentificarea %3$s (utilizator=%4$s, context=%5$s)"
+
+#. *
+#. * No administer access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:100
+msgid "No administer access to mail folder %1$s"
+msgstr "Nu se poate accesa dosarul de mail %1$s în mod administrator"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:94
+msgid ""
+"No administer access to mail folder %1$s on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Nu se poate accesa dosarul de mail %1$s în mod administrator pe serverul "
+"%2$s cu autentificarea %3$s (utilizator=%4$s, context=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:96
+msgid "No write access to IMAP folder %1$s"
+msgstr "Nu aveți drepturi de scriere în dosarul IMAP %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:98
+msgid ""
+"No write access to IMAP folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nu aveți drepturi de scriere în dosarul IMAP %1$s pe serverul %2$s cu "
+"autentificarea %3$s (utilizator=%4$s, context=%5$s)"
+
+#. *
+#. * No keep-seen access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:108
+msgid "No keep-seen access to mail folder %1$s"
+msgstr "Nu aveți drepturi de marcare în dosarul de mail %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:102
+msgid ""
+"No keep-seen access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nu aveți drepturi de marcare în dosarul de mail %1$s pe serverul %2$s cu "
+"autentificarea %3$s (utilizator=%4$s, context=%5$s)"
+
+#. *
+#. * Folder %1$s does not allow subfolders.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:112
+msgid "Folder %1$s does not allow subfolders."
+msgstr "Dosarul %1$s nu permite dosare subordonate."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:106
+msgid ""
+"Folder %1$s does not allow subfolders on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)."
+msgstr ""
+"Dosarul %1$s nu permite dosare subordonate pe serverul %2$s cu "
+"autentificarea %3$s (utilizator=%4$s, context=%5$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:108
+msgid ""
+"Mail folder \"%1$s\" could not be created (maybe due to insufficient "
+"permission on parent folder %2$s or due to an invalid folder name)"
+msgstr ""
+"Dosarul de mail \"%1$s\" nu a putut fi creat (poate din cauza permisiunilor "
+"insuficiente în dosarul părinte %2$s sau din cauza unui nume incorect)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:110
+msgid ""
+"Mail folder \"%1$s\" could not be created (maybe due to insufficient "
+"permission on parent folder %2$s or due to an invalid folder name) on server "
+"%3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Dosarul de mail \"%1$s\" nu a putut fi creat (poate din cauza permisiunilor "
+"insuficiente în dosarul părinte %2$s sau din cauza unui nume incorect) pe "
+"serverul %3$s cu autentificarea %4$s (utilizator=%5$s, context=%6$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:112
+msgid ""
+"The composed rights could not be applied to new folder %1$s due to missing "
+"administer right in its initial rights specified by IMAP server. However, "
+"the folder has been created."
+msgstr ""
+"Drepturile compuse nu au putut fi aplicate dosarului nou %1$s, deoarece "
+"lipsește dreptul de administrare în permisiunile inițiale specificate de "
+"serverul IMAP. Dosarul a fost totuși creat."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:114
+msgid ""
+"The composed rights could not be applied to new folder %1$s due to missing "
+"administer right in its initial rights specified by IMAP server. However, "
+"the folder has been created on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)."
+msgstr ""
+"Drepturile compuse nu au putut fi aplicate dosarului nou %1$s, deoarece "
+"lipsește dreptul de administrare în permisiunile inițiale specificate de "
+"serverul IMAP. Dosarul a fost totuși creat pe serverul %2$s cu "
+"autentificarea %3$s (utilizator=%4$s, context=%5$s)."
+
+#. *
+#. * No admin permission specified for folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:125
+msgid "No administer permission specified for folder %1$s"
+msgstr "Nu au fost specificate permisiuni de administrare pentru dosarul %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:118
+msgid ""
+"No administer permission specified for folder %1$s on server %2$s with login "
+"%3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Nu au fost specificate permisiuni de administrare pentru dosarul %1$s pe "
+"serverul %2$s cu autentificarea %3$s (utilizator=%4$s, context=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:120
+msgid "Default folder %1$s must not be updated"
+msgstr "Dosarul implicit %1$s nu se poate actualiza"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:122
+msgid ""
+"Default folder %1$s must not be updated on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Dosarul implicit %1$s nu se poate actualiza pe serverul %2$s cu "
+"autentificarea %3$s (utilizator=%4$s, context=%5$s)"
+
+#. *
+#. * Deletion of folder %1$s failed
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:124
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:133
+msgid "Deletion of folder %1$s failed"
+msgstr "Ștergerea dosarului %1$s a eșuat"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:126
+msgid ""
+"Deletion of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Ștergerea dosarului %1$s a eșuat pe serverul %2$s cu autentificarea %3$s "
+"(utilizator=%4$s, context=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:128
+msgid "IMAP default folder %1$s could not be created"
+msgstr "Dosarul implicit IMAP %1$s nu a putut fi creat"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:130
+msgid ""
+"IMAP default folder %1$s could not be created on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Dosarul implicit IMAP %1$s nu a putut fi creat pe serverul %2$s cu "
+"autentificarea %3$s (utilizator=%4$s, context=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:132
+msgid "Missing default %1$s folder"
+msgstr "Lipsește dosarul implicit %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:134
+msgid ""
+"Missing default %1$s folder on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Lipsește dosarul implicit %1$s pe serverul %2$s cu autentificarea %3$s "
+"(utilizator=%4$s, context=%5$s)"
+
+#. *
+#. * Update of folder %1$s failed
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:136
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:145
+msgid "Update of folder %1$s failed"
+msgstr "Actualizarea dosarului %1$s a eșuat"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:138
+msgid ""
+"Update of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Actualizarea dosarului %1$s a eșuat pe serverul %2$s cu autentificarea %3$s "
+"(utilizator=%4$s, context=%5$s)"
+
+#. *
+#. * Folder %1$s must not be deleted
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:140
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:149
+msgid "Folder %1$s cannot be deleted"
+msgstr "Dosarul %1$s nu poate fi șters"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:142
+msgid ""
+"Folder %1$s cannot be deleted on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Dosarul %1$s nu poate fi șters de pe serverul %2$s cu autentificarea %3$s "
+"(utilizator=%4$s, context=%5$s)"
+
+#. *
+#. * Default folder %1$s must not be deleted
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:144
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:153
+msgid "Default folder %1$s cannot be deleted"
+msgstr "Dosarul implicit %1$s nu poate fi șters"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:146
+msgid ""
+"Default folder %1$s cannot be deleted on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Dosarul implicit %1$s nu poate fi șters de pe serverul %2$s cu "
+"autentificarea %3$s (utilizator=%4$s, context=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:148
+msgid "Flag %1$s could not be changed due to following reason \"%2$s\""
+msgstr "Marcajul %1$s nu a putut fi modificat din următorul motiv \"%2$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:150
+msgid ""
+"Flag %1$s could not be changed due to following reason \"%2$s\" on server "
+"%3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Marcajul %1$s nu a putut fi modificat din următorul motiv \"%2$s\" pe "
+"serverul %3$s cu autentificarea %4$s (utilizator=%5$s, context=%6$s)"
+
+#. *
+#. * Number of search fields (%d) do not match number of search patterns (%d)
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:152
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:161
+msgid ""
+"Number of search fields (%d) do not match number of search patterns (%d)"
+msgstr ""
+"Numărul de câmpuri de căutare (%d) nu corespunde cu numărul de modele de "
+"căutare (%d)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:154
+msgid ""
+"IMAP search failed due to reason \"%1$s\". Switching to application-based "
+"search"
+msgstr ""
+"Căutarea IMAP a eșuat din motivul \"%1$s\". Se trece pe căutarea bazată pe "
+"aplicații"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:156
+msgid ""
+"IMAP search failed due to reason \"%1$s\" on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s). Switching to application-based search."
+msgstr ""
+"Căutarea IMAP a eșuat din motivul \"%1$s\" pe serverul %2$s cu "
+"autentificarea %3$s (utilizator=%4$s, context=%5$s). Se trece pe căutarea "
+"bazată pe aplicații."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:158
+msgid ""
+"IMAP sort failed due to reason \"%1$s\". Switching to application-based "
+"sorting."
+msgstr ""
+"Sortarea IMAP a eșuat din motivul \"%1$s\". Se trece pe sortarea bazată pe "
+"aplicații."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:160
+msgid ""
+"IMAP sort failed due to reason \"%1$s\" on server %2$s with login %3$s (user="
+"%4$s, context=%5$s). Switching to application-based sorting."
+msgstr ""
+"Sortarea IMAP a eșuat din motivul \"%1$s\" pe serverul %2$s cu "
+"autentificarea %3$s (utilizator=%4$s, context=%5$s). Se trece pe sortarea "
+"bazată pe aplicații."
+
+#. *
+#. * Unknown search field: %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:173
+msgid "Unknown search field: %1$s"
+msgstr "Câmp de căutare necunoscut %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:164
+msgid ""
+"Unknown search field: %1$s on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Câmp de căutare necunoscut: %1$s pe serverul %2$s cu autentificarea %3$s "
+"(utilizator=%4$s, context=%5$s)"
+
+#. *
+#. * Mail folder %1$s must not be moved to subsequent folder %2$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:166
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:177
+msgid "Mail folder %1$s must not be moved to subsequent folder %2$s"
+msgstr "Dosarul de mail %1$s nu poate fi mutat în dosarul următor %2$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:168
+msgid ""
+"Mail folder %1$s must not be moved to subsequent folder %2$s on server %3$s "
+"with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Dosarul de mail %1$s nu poate fi mutat în dosarul următor %2$s pe serverul "
+"%3$s cu autentificarea %4$s (utilizator=%5$s, context=%6$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:170
+msgid ""
+"This message could not be moved to trash folder, possibly because your "
+"mailbox is nearly full.\n"
+"In that case, please try to empty your deleted items first, or delete "
+"smaller messages first."
+msgstr ""
+"Nu s-a putut muta mesajul în dosarul de coș de gunoi, probabil deoarece "
+"căsuța dumneavoastră poștală este aproape plină.\n"
+"Goliți mai întâi dosarul de elemente șterse sau ștergeți mesajele mai scurte. "
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:172
+msgid ""
+"This message could not be moved to trash folder on server %1$s with login "
+"%2$s (user=%3$s, context=%4$s), possibly because your mailbox is nearly "
+"full.\n"
+"In that case, please try to empty your deleted items first, or delete "
+"smaller messages first."
+msgstr ""
+"Nu s-a putut muta mesajul în dosarul de coș de gunoi pe serverul %1$s cu "
+"autentificarea %2$s (utilizator=%3$s, context=%4$s), probabil deoarece "
+"căsuța dumneavoastră poștală este aproape plină.\n"
+"Goliți mai întâi dosarul de elemente șterse sau ștergeți mesajele mai scurte. "
+
+#. *
+#. * Missing %1$s folder in mail move operation
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:174
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:186
+msgid "Missing %1$s folder in mail move operation"
+msgstr "Lipsește dosarul %1$s din operația de mutare a mesajelor"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:176
+msgid ""
+"Missing %1$s folder in mail move operation on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Lipsește dosarul %1$s din operația de mutare a mesajelor pe serverul %2$s cu "
+"autentificarea%3$s (utilizator=%4$s, context=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:178
+msgid ""
+"Message move aborted for user %1$s. Source and destination folder are equal "
+"to \"%2$s\""
+msgstr ""
+"Mutarea mesajului a fost abandonată pentru utilizatorul %1$s. Dosarul sursă "
+"și cel destinație sunt egale cu \"%2$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:180
+msgid ""
+"Message move aborted for user %1$s. Source and destination folder are equal "
+"to \"%2$s\" on server %3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Mutarea mesajului a fost abandonată pentru utilizatorul %1$s. Dosarul sursă "
+"și cel destinație sunt egale cu \"%2$s\" pe serverul %3$s cu autentificarea "
+"%4$s (utilizator=%5$s, context=%6$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:182
+msgid "IMAP folder read-only check failed"
+msgstr "Verificarea în mod citire a dosarului IMAP a eșuat."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:184
+msgid ""
+"Folder read-only check failed on server %1$s with login %2$s (user=%3$s, "
+"context=%4$s)"
+msgstr ""
+"Verificarea în mod citire a dosarului a eșuat pe serverul %1$s cu "
+"autentificarea %2$s (utilizator=%3$s, context=%4$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:186
+msgid "Unknown folder open mode %1$s"
+msgstr "Modul de deschiere a dosarului este necunoscut %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:188
+msgid ""
+"Unknown folder open mode %1$s on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Modul de deschidere a dosarului este necunoscut %1$s pe serverul %2$s cu "
+"autentificarea %3$s (utilizator=%4$s, context=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:190
+msgid ""
+"Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
+msgstr ""
+"Mesajele %1$s din dosarul %2$s nu au putut fi șterse din cauza erorii \"%3$s"
+"\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:192
+msgid ""
+"Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\" on "
+"server %4$s with login %5$s (user=%6$s, context=%7$s)"
+msgstr ""
+"Mesajele %1$s din dosarul %2$s nu au putut fi șterse din cauza erorii \"%3$s"
+"\" pe serverul %4$s cu autentificarea %5$s (utilizator=%6$s, context=%7$s)"
+
+#. *
+#. * Not allowed to open folder %1$s due to missing read access
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:194
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:206
+msgid "Not allowed to open folder %1$s due to missing read access"
+msgstr "Nu se permite deschiderea dosarului %1$s, lipsește dreptul de citire"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:196
+msgid ""
+"Not allowed to open folder %1$s due to missing read access on server %2$s "
+"with login %3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Nu se permite deschiderea dosarului %1$s, lipsește dreptul de citire pe "
+"serverul %2$s cu autentificarea %3$s (utilizator=%4$s, context=%5$s)"
+
+#. *
+#. * The raw content's input stream of message %1$s in folder %2$s cannot be read
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:198
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:210
+msgid ""
+"The raw content's input stream of message %1$s in folder %2$s cannot be read"
+msgstr ""
+"Fluxul de intrare al conținutului brut al mesajului %1$s din dosarul %2$s nu "
+"poate fi citit"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:200
+msgid ""
+"The raw content's input stream of message %1$s in folder %2$s cannot be read "
+"on server %3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"Fluxul de intrare al conținutului brut al mesajului %1$s din dosarul %2$s nu "
+"poate fi citit pe serverul %3$s cu autentificarea %4$s (utilizator=%5$s, "
+"context=%6$s)"
+
+#. *
+#. * No attachment was found with id %1$s in message
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:202
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:214
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:203
+msgid "No attachment was found with id %1$s in message"
+msgstr "Nu a fost găsit niciun fișier atașat cu identificatorul %1$s în mesaj"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:204
+msgid ""
+"No attachment was found with id %1$s in message on server %2$s with login "
+"%3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Nu a fost găsit niciun fișier atașat cu identificatorul %1$s în mesaj pe "
+"serverul %2$s cu autentificarea %3$s (utilizator=%4$s, context=%5$s)"
+
+#. *
+#. * Versit object %1$s could not be saved
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:206
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:218
+msgid "Versit object could not be saved"
+msgstr "Obiectul Versit nu a putut fi salvat"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:208
+msgid "No support of capability \"THREAD=REFERENCES\""
+msgstr "Capabilitate nesuportată \"THREAD=REFERENCES\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:210
+msgid ""
+"No support of capability \"THREAD=REFERENCES\" on server %2$s with login "
+"%3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Capabilitate nesuportată \"THREAD=REFERENCES\" pe serverul %2$s cu "
+"autentificarea %3$s (utilizator=%4$s, context=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:212
+msgid ""
+"A protocol exception occurred during execution of IMAP request \"%1$s\".\n"
+"Error message: %2$s"
+msgstr ""
+"A apărut o excepție de protocol în timpul execuției cererii IMAP \"%1$s\".\n"
+"Mesaj de eroare: %2$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:214
+msgid ""
+"Mailbox' root folder must not be source or the destination full name of a "
+"move operation."
+msgstr ""
+"Dosarul rădăcină al căsuței poștale nu poate fi sursa sau numele complet al "
+"destinației unei operații de mutare."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:216
+msgid "Sort field %1$s is not supported via IMAP SORT command"
+msgstr "Câmpul de sortare %1$s nu este suportat de comanda IMAP SORT"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:218
+msgid ""
+"Sort field %1$s is not supported via IMAP SORT command on server %2$s with "
+"login %3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Câmpul de sortare %1$s nu este suportat de comanda IMAP SORT pe serverul  "
+"%2$s cu autentificarea %3$s (utilizator=%4$s, context=%5$s)"
+
+#. *
+#. * Missing personal namespace
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:220
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:238
+msgid "Missing personal namespace"
+msgstr "Lipsește domeniul de nume personal"
+
+#. *
+#. * Parsing thread-sort string failed: %1$s.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:222
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:242
+msgid "Parsing thread-sort string failed: %1$s."
+msgstr "Analiza șirului de sortare de thread a eșuat: %1$s."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:226
+msgid "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\"."
+msgstr "Redenumirea dosarului \"%1$s\" în \"%2$s\" a eșuat cu \"%3$s\"."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:228
+msgid ""
+"Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\" on server %4$s "
+"with login %5$s (user=%6$s, context=%7$s)."
+msgstr ""
+"Redenumirea dosarului \"%1$s\" în \"%2$s\" a eșuat cu \"%3$s\" pe serverul "
+"%4$s cu autentificarea %5$s (utilizator=%6$s, context=%7$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:230
+msgid "No rename access to mail folder %1$s"
+msgstr "Nu aveți drepturi de redenumire în dosarul de mail %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:232
+msgid ""
+"No rename access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nu aveți drepturi de redenumire în dosarul de mail %1$s pe serverul %2$s cu "
+"autentificarea %3$s (utilizator=%4$s, context=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:234
+msgid "Unable to parse IMAP server URI \"%1$s\"."
+msgstr "Nu s-a putut analiza URI-ul serverului IMAP\"%1$s\"."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:236
+msgid "Default folder %1$s must not be unsubscribed."
+msgstr "Dosarul implicit %1$s nu se poate dezabona."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:238
+msgid ""
+"Default folder %1$s must not be unsubscribed on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Dosarul implicit %1$s nu se poate dezabona pe serverul %2$s cu "
+"autentificarea %3$s (utilizator=%4$s, context=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:240
+msgid "IMAP server refuses to import one or more E-Mails."
+msgstr "Serverul IMAP refuză să importe unul sau mai multe e-mailuri."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:242
+msgid ""
+"IMAP server %1$s refuses to import one or more E-Mails with login %2$s (user="
+"%3$s, context=%4$s)"
+msgstr ""
+"Serverul IMAP %1$s refuză să importe unul sau mai multe e-mailuri cu "
+"autentificarea %2$s (utilizator=%3$s, context=%4$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:244
+msgid ""
+"Currently not possible to establish a new connection to server %1$s with "
+"login %2$s. Please try again."
+msgstr ""
+"Momentan nu se poate stabili o nouă conexiune cu serverul %1$s cu "
+"autentificarea %2$s. Încercați din nou."
+
 #. Implementing class could not be found
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:70
 msgid "Implementing class could not be found"
@@ -4038,7 +4726,7 @@ msgstr "Album"
 
 #. The internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:105
 msgid "Confirmed ham"
 msgstr "Mesaje legitime confirmate"
 
@@ -4048,7 +4736,7 @@ msgstr "Dosar de mesaje legitime confirmate"
 
 #. The internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:97
 msgid "Confirmed spam"
 msgstr "Spam confirmat"
 
@@ -4061,7 +4749,7 @@ msgstr "Dosar de spam confirmat"
 #. The name for the drafts folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:65
 msgid "Drafts"
 msgstr "Schițe"
@@ -4083,7 +4771,7 @@ msgstr "Dosar de mesaje trimise"
 #. The name for the spam folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:89
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:166
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:71
 msgid "Spam"
 msgstr "Spam"
@@ -4097,7 +4785,7 @@ msgstr "Dosar de spam"
 #. The name for the trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:85
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:150
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:74
 msgid "Trash"
 msgstr "Coș de gunoi"
@@ -4574,86 +5262,11 @@ msgid "Unsupported action %1$s via %2$s request"
 msgstr "Acțiune nesuportată %1$s prin cererea %2$s"
 
 #. *
-#. * No connection available to access mailbox
-#.
-#. No connection available to access mailbox
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:466
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:100
-msgid "No connection available to access mailbox"
-msgstr "Nu există conexuni disponibile pentru accesul la căsuța poștală"
-
-#. *
-#. * User %1$s has no mail module access due to user configuration
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:76
-msgid "User %1$s has no mail module access due to user configuration"
-msgstr ""
-"Utilizatorul %1$s nu are acces la modulul de mail datorită configurației "
-"utilizatorului"
-
-#. *
-#. * No access to mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:80
-msgid "No access to mail folder %1$s"
-msgstr "Nu s-a putut accesa dosarul de mail %1$s"
-
-#. *
-#. * No lookup access to mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:84
-msgid "No lookup access to mail folder %1$s"
-msgstr "Nu aveți drepturi de căutare în dosarul de mail %1$s"
-
-#. *
-#. * No read access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:88
-msgid "No read access to mail folder %1$s"
-msgstr "Nu aveți drepturi de citire în dosarul de mail %1$s"
-
-#. *
-#. * No delete access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:92
-msgid "No delete access to mail folder %1$s"
-msgstr "Nu aveți drepturi de ștergere în dosarul de mail %1$s"
-
-#. *
-#. * No insert access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:96
-msgid "No insert access to mail folder %1$s"
-msgstr "Nu aveți drepturi de inserare în dosarul de mail %1$s"
-
-#. *
-#. * No administer access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:100
-msgid "No administer access to mail folder %1$s"
-msgstr "Nu se poate accesa dosarul de mail %1$s în mod administrator"
-
-#. *
 #. * No write access to POP3 folder %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:104
 msgid "No write access to POP3 folder %1$s"
 msgstr "Nu aveți drepturi de scriere în dosarul POP3 %1$s"
-
-#. *
-#. * No keep-seen access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:108
-msgid "No keep-seen access to mail folder %1$s"
-msgstr "Nu aveți drepturi de marcare în dosarul de mail %1$s"
-
-#. *
-#. * Folder %1$s does not allow subfolders.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:112
-msgid "Folder %1$s does not allow subfolders."
-msgstr "Dosarul %1$s nu permite dosare subordonate."
 
 #. *
 #. * POP3 does not support mail folder creation
@@ -4677,25 +5290,11 @@ msgstr ""
 "includ permisiuni de administrare. Dosarul a fost totuși creat."
 
 #. *
-#. * No admin permission specified for folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:125
-msgid "No administer permission specified for folder %1$s"
-msgstr "Nu au fost specificate permisiuni de administrare pentru dosarul %1$s"
-
-#. *
 #. * Default folder %1$s must not be updated
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:129
 msgid "Default folder %1$s cannot be updated"
 msgstr "Dosarul implicit %1$s nu poate fi actualizat"
-
-#. *
-#. * Deletion of folder %1$s failed
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:133
-msgid "Deletion of folder %1$s failed"
-msgstr "Ștergerea dosarului %1$s a eșuat"
 
 #. *
 #. * POP3 default folder %1$s could not be created
@@ -4713,42 +5312,11 @@ msgid "Missing default %1$s folder in user mail settings"
 msgstr "Lipsește dosarul implicit %1$s în setările de mail ale utilizatorului"
 
 #. *
-#. * Update of folder %1$s failed
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:145
-msgid "Update of folder %1$s failed"
-msgstr "Actualizarea dosarului %1$s a eșuat"
-
-#. *
-#. * Folder %1$s must not be deleted
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:149
-msgid "Folder %1$s cannot be deleted"
-msgstr "Dosarul %1$s nu poate fi șters"
-
-#. *
-#. * Default folder %1$s must not be deleted
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:153
-msgid "Default folder %1$s cannot be deleted"
-msgstr "Dosarul implicit %1$s nu poate fi șters"
-
-#. *
 #. * Flag %1$s could not be changed due to following reason: %2$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:157
 msgid "Flag %1$s could not be changed due to the following reason: %2$s"
 msgstr "Marcajul %1$s nu a putut fi modificat din următorul motiv: %2$s"
-
-#. *
-#. * Number of search fields (%d) do not match number of search patterns (%d)
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:161
-msgid ""
-"Number of search fields (%d) do not match number of search patterns (%d)"
-msgstr ""
-"Numărul de câmpuri de căutare (%d) nu corespunde cu numărul de modele de "
-"căutare (%d)"
 
 #. *
 #. * POP3 search failed due to following reason: %1$s. Switching to application-based search
@@ -4773,20 +5341,6 @@ msgstr ""
 "pe aplicații"
 
 #. *
-#. * Unknown search field: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:173
-msgid "Unknown search field: %1$s"
-msgstr "Câmp de căutare necunoscut %1$s"
-
-#. *
-#. * Mail folder %1$s must not be moved to subsequent folder %2$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:177
-msgid "Mail folder %1$s must not be moved to subsequent folder %2$s"
-msgstr "Dosarul de mail %1$s nu poate fi mutat în dosarul următor %2$s"
-
-#. *
 #. * This message could not be moved to trash folder, possibly because your mailbox is nearly full.<br>
 #. * In that case, please try to empty your deleted items first, or delete smaller messages first.
 #.
@@ -4804,13 +5358,6 @@ msgid ""
 "smaller messages first."
 msgstr ""
 "Goliți mai întâi dosarul de elemente șterse sau ștergeți mesajele mai mici. "
-
-#. *
-#. * Missing %1$s folder in mail move operation
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:186
-msgid "Missing %1$s folder in mail move operation"
-msgstr "Lipsește dosarul %1$s din operația de mutare a mesajelor"
 
 #. *
 #. * Message move aborted for user %1$s. Source and destination folder are equal: %2$s
@@ -4849,38 +5396,6 @@ msgstr ""
 "erori: %3$s"
 
 #. *
-#. * Not allowed to open folder %1$s due to missing read access
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:206
-msgid "Not allowed to open folder %1$s due to missing read access"
-msgstr "Nu se permite deschiderea dosarului %1$s, lipsește dreptul de citire"
-
-#. *
-#. * The raw content's input stream of message %1$s in folder %2$s cannot be read
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:210
-msgid ""
-"The raw content's input stream of message %1$s in folder %2$s cannot be read"
-msgstr ""
-"Fluxul de intrare al conținutului brut al mesajului %1$s din dosarul %2$s nu "
-"poate fi citit"
-
-#. *
-#. * No attachment was found with id %1$s in message
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:214
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:203
-msgid "No attachment was found with id %1$s in message"
-msgstr "Nu a fost găsit niciun fișier atașat cu identificatorul %1$s în mesaj"
-
-#. *
-#. * Versit object %1$s could not be saved
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:218
-msgid "Versit object could not be saved"
-msgstr "Obiectul Versit nu a putut fi salvat"
-
-#. *
 #. * POP3 server does not support capability "THREAD=REFERENCES"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:222
@@ -4908,20 +5423,6 @@ msgstr "POP3 nu suportă mutarea de dosare."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:234
 msgid "Sort field %1$s is not supported via POP3 SORT command"
 msgstr "Câmpul de sortare %1$s nu este suportat de comanda POP3 SORT"
-
-#. *
-#. * Missing personal namespace
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:238
-msgid "Missing personal namespace"
-msgstr "Lipsește domeniul de nume personal"
-
-#. *
-#. * Parsing thread-sort string failed: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:242
-msgid "Parsing thread-sort string failed: %1$s."
-msgstr "Analiza șirului de sortare de thread a eșuat: %1$s."
 
 #. *
 #. * POP3 does not support to create folders.
@@ -7201,7 +7702,7 @@ msgstr "Mesaje primite"
 #. The internationalized name for the sent mail folder
 #. The name for trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
 msgid "Sent objects"
 msgstr "Obiecte trimise"
 
@@ -7212,18 +7713,25 @@ msgstr "Obiecte trimise"
 msgid "Sent items"
 msgstr "Mesaje trimise"
 
+#. The internationalized name for the archive mail folder
+#. The name for trash folder
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:170
+msgid "Archive"
+msgstr "Arhivă"
+
 #. The alternative internationalized name for the confirmed-spam mail folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:101
 msgid "confirmed-spam"
 msgstr "spam-confirmat"
 
 #. The alternative internationalized name for the confirmed-spam mail folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:105
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:109
 msgid "confirmed-ham"
 msgstr "mesaje-legitime-confirmate"
 
 #. The internationalized subject for a read acknowledgement
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:114
 msgid "Read acknowledgement"
 msgstr "Citește declarația"
 
@@ -7231,7 +7739,7 @@ msgstr "Citește declarația"
 #. #DATE# is replaced with the sent date of referenced email
 #. #RECIPIENT# is replaced with personal and/or email address of recipient(s)
 #. #SUBJECT# is replaced with referenced email's subject
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:120
 msgid ""
 "This is a delivery receipt for the mail that you sent on #DATE# to "
 "#RECIPIENT# with subject \"#SUBJECT#\".\n"
@@ -7251,7 +7759,7 @@ msgstr ""
 #. #DATE# is replaced with the sent date of referenced email
 #. #TIME# is replaced with time of referenced email
 #. #SENDER# is replaced with personal and/or email address of the sender
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:122
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:126
 msgid "On #DATE# at #TIME# #SENDER# wrote:"
 msgstr "Pe #DATE# la #TIME# #SENDER# a scris:"
 
@@ -7263,7 +7771,7 @@ msgstr "Pe #DATE# la #TIME# #SENDER# a scris:"
 #. #DATE# is replaced with the sent date of referenced email
 #. #TIME# is replaced with time of referenced email
 #. #SUBJECT# is replaced with referenced email's subject
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:132
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:136
 msgid ""
 "---------- Original Message ----------\n"
 "From: #FROM#\n"
@@ -7278,26 +7786,26 @@ msgstr ""
 "Subiect: #SUBJECT#"
 
 #. The internationalized default subject.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:135
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:139
 msgid "[No Subject]"
 msgstr "[Fără subiect]"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Hints to the available attachments for affected message
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:139
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:143
 msgid ""
 "The available attachments for this E-Mail can be accessed via the links:"
 msgstr "Fișierele atașate acestui mesaj pot fi accesate utilizând legăturile:"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the elapsed date for affected message's attachments
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:143
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:147
 msgid "The links will be deleted on #DATE#"
 msgstr "Legăturile vor fi șterse în #DATE#"
 
 #. The greeting used for form mails. E.g.
 #. "Dear Sir or Madam Jane Doe"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:147
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:151
 msgid "Dear Sir or Madam"
 msgstr "Stimată doamnă/Stimate domn"
 
@@ -15460,14 +15968,6 @@ msgstr "Zulu"
 #~ msgid "%s"
 #~ msgstr "%s"
 
-#~ msgid ""
-#~ "A protocol exception occurred during execution of IMAP request \"%1$s\".\n"
-#~ "Error message: %2$s"
-#~ msgstr ""
-#~ "A apărut o excepție de protocol în timpul execuției cererii IMAP \"%1$s"
-#~ "\".\n"
-#~ "Mesaj de eroare: %2$s"
-
 #~ msgid "A server name cannot be found in the server URL \"%1$s\"."
 #~ msgstr "În URL-ul server \"%1$s\" nu poate fi găsit niciun nume de server."
 
@@ -15513,47 +16013,6 @@ msgstr "Zulu"
 #~ msgid "Couldn't reach the filestore"
 #~ msgstr "Nu s-a putut accesa depozitul de fișiere"
 
-#~ msgid ""
-#~ "Currently not possible to establish a new connection to server %1$s with "
-#~ "login %2$s. Please try again."
-#~ msgstr ""
-#~ "Momentan nu se poate stabili o nouă conexiune cu serverul %1$s cu "
-#~ "autentificarea %2$s. Încercați din nou."
-
-#~ msgid ""
-#~ "Default folder %1$s cannot be deleted on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Dosarul implicit %1$s nu poate fi șters de pe serverul %2$s cu "
-#~ "autentificarea %3$s (utilizator=%4$s, context=%5$s)"
-
-#~ msgid ""
-#~ "Default folder %1$s must not be unsubscribed on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Dosarul implicit %1$s nu se poate dezabona pe serverul %2$s cu "
-#~ "autentificarea %3$s (utilizator=%4$s, context=%5$s)"
-
-#~ msgid "Default folder %1$s must not be unsubscribed."
-#~ msgstr "Dosarul implicit %1$s nu se poate dezabona."
-
-#~ msgid "Default folder %1$s must not be updated"
-#~ msgstr "Dosarul implicit %1$s nu se poate actualiza"
-
-#~ msgid ""
-#~ "Default folder %1$s must not be updated on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Dosarul implicit %1$s nu se poate actualiza pe serverul %2$s cu "
-#~ "autentificarea %3$s (utilizator=%4$s, context=%5$s)"
-
-#~ msgid ""
-#~ "Deletion of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Ștergerea dosarului %1$s a eșuat pe serverul %2$s cu autentificarea %3$s "
-#~ "(utilizator=%4$s, context=%5$s)"
-
 #~ msgid "Empty SEND_BODY_CHUNK package MUST NOT be sent"
 #~ msgstr "Pachetul gol SEND_BODY_CHUNK NU POATE fi trimis"
 
@@ -15571,85 +16030,8 @@ msgstr "Zulu"
 #~ msgid "File is not a directory: %s"
 #~ msgstr "Fișierul nu este un director: %s"
 
-#~ msgid "Flag %1$s could not be changed due to following reason \"%2$s\""
-#~ msgstr "Marcajul %1$s nu a putut fi modificat din următorul motiv \"%2$s\""
-
-#~ msgid ""
-#~ "Flag %1$s could not be changed due to following reason \"%2$s\" on server "
-#~ "%3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Marcajul %1$s nu a putut fi modificat din următorul motiv \"%2$s\" pe "
-#~ "serverul %3$s cu autentificarea %4$s (utilizator=%5$s, context=%6$s)"
-
-#~ msgid ""
-#~ "Folder %1$s does not allow subfolders on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)."
-#~ msgstr ""
-#~ "Dosarul %1$s nu permite dosare subordonate pe serverul %2$s cu "
-#~ "autentificarea %3$s (utilizator=%4$s, context=%5$s)."
-
 #~ msgid "Folder of the object is missing."
 #~ msgstr "Lipsește dosarul obiectului."
-
-#~ msgid ""
-#~ "Folder read-only check failed on server %1$s with login %2$s (user=%3$s, "
-#~ "context=%4$s)"
-#~ msgstr ""
-#~ "Verificarea în mod citire a dosarului a eșuat pe serverul %1$s cu "
-#~ "autentificarea %2$s (utilizator=%3$s, context=%4$s)"
-
-#~ msgid "IMAP default folder %1$s could not be created"
-#~ msgstr "Dosarul implicit IMAP %1$s nu a putut fi creat"
-
-#~ msgid ""
-#~ "IMAP default folder %1$s could not be created on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Dosarul implicit IMAP %1$s nu a putut fi creat pe serverul %2$s cu "
-#~ "autentificarea %3$s (utilizator=%4$s, context=%5$s)"
-
-#~ msgid "IMAP folder read-only check failed"
-#~ msgstr "Verificarea în mod citire a dosarului IMAP a eșuat."
-
-#~ msgid ""
-#~ "IMAP search failed due to reason \"%1$s\" on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s). Switching to application-based search."
-#~ msgstr ""
-#~ "Căutarea IMAP a eșuat din motivul \"%1$s\" pe serverul %2$s cu "
-#~ "autentificarea %3$s (utilizator=%4$s, context=%5$s). Se trece pe căutarea "
-#~ "bazată pe aplicații."
-
-#~ msgid ""
-#~ "IMAP search failed due to reason \"%1$s\". Switching to application-based "
-#~ "search"
-#~ msgstr ""
-#~ "Căutarea IMAP a eșuat din motivul \"%1$s\". Se trece pe căutarea bazată "
-#~ "pe aplicații"
-
-#~ msgid ""
-#~ "IMAP server %1$s refuses to import one or more E-Mails with login %2$s "
-#~ "(user=%3$s, context=%4$s)"
-#~ msgstr ""
-#~ "Serverul IMAP %1$s refuză să importe unul sau mai multe e-mailuri cu "
-#~ "autentificarea %2$s (utilizator=%3$s, context=%4$s)"
-
-#~ msgid "IMAP server refuses to import one or more E-Mails."
-#~ msgstr "Serverul IMAP refuză să importe unul sau mai multe e-mailuri."
-
-#~ msgid ""
-#~ "IMAP sort failed due to reason \"%1$s\" on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s). Switching to application-based sorting."
-#~ msgstr ""
-#~ "Sortarea IMAP a eșuat din motivul \"%1$s\" pe serverul %2$s cu "
-#~ "autentificarea %3$s (utilizator=%4$s, context=%5$s). Se trece pe sortarea "
-#~ "bazată pe aplicații."
-
-#~ msgid ""
-#~ "IMAP sort failed due to reason \"%1$s\". Switching to application-based "
-#~ "sorting."
-#~ msgstr ""
-#~ "Sortarea IMAP a eșuat din motivul \"%1$s\". Se trece pe sortarea bazată "
-#~ "pe aplicații."
 
 #~ msgid "Identifier of the object is missing."
 #~ msgstr "Lipsește identificatorul obiectului."
@@ -15672,40 +16054,8 @@ msgstr "Zulu"
 #~ msgid "Lexical error: %1$s"
 #~ msgstr "Eroare lexicală: %1$s"
 
-#~ msgid ""
-#~ "Mail folder \"%1$s\" could not be created (maybe due to insufficient "
-#~ "permission on parent folder %2$s or due to an invalid folder name)"
-#~ msgstr ""
-#~ "Dosarul de mail \"%1$s\" nu a putut fi creat (poate din cauza "
-#~ "permisiunilor insuficiente în dosarul părinte %2$s sau din cauza unui "
-#~ "nume incorect)"
-
-#~ msgid ""
-#~ "Mail folder \"%1$s\" could not be created (maybe due to insufficient "
-#~ "permission on parent folder %2$s or due to an invalid folder name) on "
-#~ "server %3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Dosarul de mail \"%1$s\" nu a putut fi creat (poate din cauza "
-#~ "permisiunilor insuficiente în dosarul părinte %2$s sau din cauza unui "
-#~ "nume incorect) pe serverul %3$s cu autentificarea %4$s (utilizator=%5$s, "
-#~ "context=%6$s)"
-
-#~ msgid ""
-#~ "Mail folder %1$s must not be moved to subsequent folder %2$s on server "
-#~ "%3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Dosarul de mail %1$s nu poate fi mutat în dosarul următor %2$s pe "
-#~ "serverul %3$s cu autentificarea %4$s (utilizator=%5$s, context=%6$s)"
-
 #~ msgid "Mail(s)  could not be found in folder "
 #~ msgstr "Unul sau mai multe mesaje nu au putut fi găsite în dosar"
-
-#~ msgid ""
-#~ "Mailbox' root folder must not be source or the destination full name of a "
-#~ "move operation."
-#~ msgstr ""
-#~ "Dosarul rădăcină al căsuței poștale nu poate fi sursa sau numele complet "
-#~ "al destinației unei operații de mutare."
 
 #~ msgid "Mapping file \"%s\" not valid"
 #~ msgstr "Fișierul de mapare \"%s\" nu este valid"
@@ -15723,52 +16073,6 @@ msgstr "Zulu"
 #~ msgstr ""
 #~ "Mesajul a fost trimis cu succes, dar nu s-a putut copia în dosarul de "
 #~ "mesaje trimise din cauza depășirii limitei de stocare."
-
-#~ msgid ""
-#~ "Message move aborted for user %1$s. Source and destination folder are "
-#~ "equal to \"%2$s\""
-#~ msgstr ""
-#~ "Mutarea mesajului a fost abandonată pentru utilizatorul %1$s. Dosarul "
-#~ "sursă și cel destinație sunt egale cu \"%2$s\""
-
-#~ msgid ""
-#~ "Message move aborted for user %1$s. Source and destination folder are "
-#~ "equal to \"%2$s\" on server %3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Mutarea mesajului a fost abandonată pentru utilizatorul %1$s. Dosarul "
-#~ "sursă și cel destinație sunt egale cu \"%2$s\" pe serverul %3$s cu "
-#~ "autentificarea %4$s (utilizator=%5$s, context=%6$s)"
-
-#~ msgid ""
-#~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
-#~ msgstr ""
-#~ "Mesajele %1$s din dosarul %2$s nu au putut fi șterse din cauza erorii "
-#~ "\"%3$s\""
-
-#~ msgid ""
-#~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\" "
-#~ "on server %4$s with login %5$s (user=%6$s, context=%7$s)"
-#~ msgstr ""
-#~ "Mesajele %1$s din dosarul %2$s nu au putut fi șterse din cauza erorii "
-#~ "\"%3$s\" pe serverul %4$s cu autentificarea %5$s (utilizator=%6$s, "
-#~ "context=%7$s)"
-
-#~ msgid ""
-#~ "Missing %1$s folder in mail move operation on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Lipsește dosarul %1$s din operația de mutare a mesajelor pe serverul %2$s "
-#~ "cu autentificarea%3$s (utilizator=%4$s, context=%5$s)"
-
-#~ msgid "Missing default %1$s folder"
-#~ msgstr "Lipsește dosarul implicit %1$s"
-
-#~ msgid ""
-#~ "Missing default %1$s folder on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Lipsește dosarul implicit %1$s pe serverul %2$s cu autentificarea %3$s "
-#~ "(utilizator=%4$s, context=%5$s)"
 
 #~ msgid "Missing or wrong Interval value: %d"
 #~ msgstr "Valoarea pentru Interval lipsește sau este eronată: %d"
@@ -15802,43 +16106,8 @@ msgstr "Zulu"
 #~ "Nu este configurat niciun canal UDP. Verificați dacă există tentative "
 #~ "eșuate de deschidere de canale la pornirea serverului."
 
-#~ msgid ""
-#~ "No access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Nu s-a putut accesa dosarul de mail %1$s pe serverul %2$s cu "
-#~ "autentificarea %3$s (utilizator=%4$s, context=%5$s)"
-
-#~ msgid ""
-#~ "No administer access to mail folder %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nu se poate accesa dosarul de mail %1$s în mod administrator pe serverul "
-#~ "%2$s cu autentificarea %3$s (utilizator=%4$s, context=%5$s)"
-
-#~ msgid ""
-#~ "No administer permission specified for folder %1$s on server %2$s with "
-#~ "login %3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nu au fost specificate permisiuni de administrare pentru dosarul %1$s pe "
-#~ "serverul %2$s cu autentificarea %3$s (utilizator=%4$s, context=%5$s)"
-
-#~ msgid ""
-#~ "No attachment was found with id %1$s in message on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nu a fost găsit niciun fișier atașat cu identificatorul %1$s în mesaj pe "
-#~ "serverul %2$s cu autentificarea %3$s (utilizator=%4$s, context=%5$s)"
-
 #~ msgid "No attribute name could be found for code: %1$d"
 #~ msgstr "Nu a putut fi găsit niciun nume de atribut cu codul: %1$d"
-
-#~ msgid ""
-#~ "No connection available to access mailbox on server %1$s with login %2$s "
-#~ "(user=%3$s, context=%4$s)"
-#~ msgstr ""
-#~ "Nu există conexiuni disponibile pentru accesul la căsuța poștală pe "
-#~ "serverul %1$s cu autentificarea %2$s (utilizator=%3$s, context=%4$s)"
 
 #~ msgid ""
 #~ "No data provided from web server: input stream returned \"-1\" while "
@@ -15853,55 +16122,10 @@ msgstr "Zulu"
 #~ msgstr ""
 #~ "Nu s-a specificat niciun constructor implicit în clasa servlet \"%s\""
 
-#~ msgid ""
-#~ "No delete access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nu aveți drepturi de ștergere în dosarul de mail %1$s pe serverul %2$s cu "
-#~ "autentificarea %3$s (utilizator=%4$s, context=%5$s)"
-
-#~ msgid ""
-#~ "No insert access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nu aveți drepturi de inserare în dosarul de mail %1$s pe serverul %2$s cu "
-#~ "autentificarea %3$s (utilizator=%4$s, context=%5$s)"
-
-#~ msgid ""
-#~ "No keep-seen access to mail folder %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nu aveți drepturi de marcare în dosarul de mail %1$s pe serverul %2$s cu "
-#~ "autentificarea %3$s (utilizator=%4$s, context=%5$s)"
-
-#~ msgid ""
-#~ "No lookup access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nu aveți drepturi de căutare în dosarul de mail %1$s pe serverul %2$s cu "
-#~ "autentificarea %3$s (utilizator=%4$s, context=%5$s)"
-
 #~ msgid "No parent recurring appointment found for series exception: %s"
 #~ msgstr ""
 #~ "Nu s-a găsit nicio întâlnire periodică părinte pentru excepția de la "
 #~ "serie: %s"
-
-#~ msgid ""
-#~ "No read access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nu aveți drepturi de citire în dosarul de mail %1$s pe serverul %2$s cu "
-#~ "autentificarea %3$s (utilizator=%4$s, context=%5$s)"
-
-#~ msgid "No rename access to mail folder %1$s"
-#~ msgstr "Nu aveți drepturi de redenumire în dosarul de mail %1$s"
-
-#~ msgid ""
-#~ "No rename access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nu aveți drepturi de redenumire în dosarul de mail %1$s pe serverul %2$s "
-#~ "cu autentificarea %3$s (utilizator=%4$s, context=%5$s)"
 
 #~ msgid ""
 #~ "No servlet class name found for key \"%s\". Please check servlet mappings."
@@ -15909,48 +16133,11 @@ msgstr "Zulu"
 #~ "Nu a fost găsită nicio clasă servlet pentru cheia \"%s\". Verificați "
 #~ "mapările de servlet."
 
-#~ msgid "No support of capability \"THREAD=REFERENCES\""
-#~ msgstr "Capabilitate nesuportată \"THREAD=REFERENCES\""
-
-#~ msgid ""
-#~ "No support of capability \"THREAD=REFERENCES\" on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Capabilitate nesuportată \"THREAD=REFERENCES\" pe serverul %2$s cu "
-#~ "autentificarea %3$s (utilizator=%4$s, context=%5$s)"
-
-#~ msgid "No write access to IMAP folder %1$s"
-#~ msgstr "Nu aveți drepturi de scriere în dosarul IMAP %1$s"
-
-#~ msgid ""
-#~ "No write access to IMAP folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nu aveți drepturi de scriere în dosarul IMAP %1$s pe serverul %2$s cu "
-#~ "autentificarea %3$s (utilizator=%4$s, context=%5$s)"
-
-#~ msgid ""
-#~ "Not allowed to open folder %1$s due to missing read access on server %2$s "
-#~ "with login %3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nu se permite deschiderea dosarului %1$s, lipsește dreptul de citire pe "
-#~ "serverul %2$s cu autentificarea %3$s (utilizator=%4$s, context=%5$s)"
-
 #~ msgid "Problem with a thread."
 #~ msgstr "Problemă cu un fir de execuție."
 
 #~ msgid "Property error: %s"
 #~ msgstr "Eroare de proprietate: %s"
-
-#~ msgid ""
-#~ "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\" on server %4$s "
-#~ "with login %5$s (user=%6$s, context=%7$s)."
-#~ msgstr ""
-#~ "Redenumirea dosarului \"%1$s\" în \"%2$s\" a eșuat cu \"%3$s\" pe "
-#~ "serverul %4$s cu autentificarea %5$s (utilizator=%6$s, context=%7$s)."
-
-#~ msgid "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\"."
-#~ msgstr "Redenumirea dosarului \"%1$s\" în \"%2$s\" a eșuat cu \"%3$s\"."
 
 #~ msgid "Response package exceeds max package size value of 8192k: %1$s"
 #~ msgstr ""
@@ -15972,38 +16159,8 @@ msgstr "Zulu"
 #~ "Socketul a fost închis de serverul web. Așteptarea pentru datele "
 #~ "pachetului #%1$d a durat %2$dmsec."
 
-#~ msgid "Sort field %1$s is not supported via IMAP SORT command"
-#~ msgstr "Câmpul de sortare %1$s nu este suportat de comanda IMAP SORT"
-
-#~ msgid ""
-#~ "Sort field %1$s is not supported via IMAP SORT command on server %2$s "
-#~ "with login %3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Câmpul de sortare %1$s nu este suportat de comanda IMAP SORT pe serverul  "
-#~ "%2$s cu autentificarea %3$s (utilizator=%4$s, context=%5$s)"
-
 #~ msgid "String parse exception: No ending 0x00 found"
 #~ msgstr "Eroare la analiza șirului: Nu a fost găsit caracterul de final 0x00"
-
-#~ msgid ""
-#~ "The composed rights could not be applied to new folder %1$s due to "
-#~ "missing administer right in its initial rights specified by IMAP server. "
-#~ "However, the folder has been created on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)."
-#~ msgstr ""
-#~ "Drepturile compuse nu au putut fi aplicate dosarului nou %1$s, deoarece "
-#~ "lipsește dreptul de administrare în permisiunile inițiale specificate de "
-#~ "serverul IMAP. Dosarul a fost totuși creat pe serverul %2$s cu "
-#~ "autentificarea %3$s (utilizator=%4$s, context=%5$s)."
-
-#~ msgid ""
-#~ "The composed rights could not be applied to new folder %1$s due to "
-#~ "missing administer right in its initial rights specified by IMAP server. "
-#~ "However, the folder has been created."
-#~ msgstr ""
-#~ "Drepturile compuse nu au putut fi aplicate dosarului nou %1$s, deoarece "
-#~ "lipsește dreptul de administrare în permisiunile inițiale specificate de "
-#~ "serverul IMAP. Dosarul a fost totuși creat."
 
 #~ msgid ""
 #~ "The configuration requests a master password but none is given in the "
@@ -16044,17 +16201,6 @@ msgstr "Zulu"
 #~ msgstr "Poziția pentru adăugarea regulii este prea mare"
 
 #~ msgid ""
-#~ "The raw content's input stream of message %1$s in folder %2$s cannot be "
-#~ "read on server %3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "Fluxul de intrare al conținutului brut al mesajului %1$s din dosarul %2$s "
-#~ "nu poate fi citit pe serverul %3$s cu autentificarea %4$s (utilizator="
-#~ "%5$s, context=%6$s)"
-
-#~ msgid "Unable to parse IMAP server URI \"%1$s\"."
-#~ msgstr "Nu s-a putut analiza URI-ul serverului IMAP\"%1$s\"."
-
-#~ msgid ""
 #~ "Unexpected empty body package received from web server. Total-Received: "
 #~ "%1$d | Content-Length: %2$d.\n"
 #~ "Corresponding AJP forward package:\n"
@@ -16068,34 +16214,10 @@ msgstr "Zulu"
 #~ msgid "Unknown Request Prefix Code: %1$s"
 #~ msgstr "Codul prefix al cererii este necunoscut : %1$s"
 
-#~ msgid "Unknown folder open mode %1$s"
-#~ msgstr "Modul de deschiere a dosarului este necunoscut %1$s"
-
-#~ msgid ""
-#~ "Unknown folder open mode %1$s on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Modul de deschidere a dosarului este necunoscut %1$s pe serverul %2$s cu "
-#~ "autentificarea %3$s (utilizator=%4$s, context=%5$s)"
-
-#~ msgid ""
-#~ "Unknown search field: %1$s on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Câmp de căutare necunoscut: %1$s pe serverul %2$s cu autentificarea %3$s "
-#~ "(utilizator=%4$s, context=%5$s)"
-
 #~ msgid "Unparseable header field %1$s in forward request package"
 #~ msgstr ""
 #~ "Nu se poate analiza câmpul de antet %1$s în pachetul de cerere de "
 #~ "redirecționare"
-
-#~ msgid ""
-#~ "Update of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Actualizarea dosarului %1$s a eșuat pe serverul %2$s cu autentificarea "
-#~ "%3$s (utilizator=%4$s, context=%5$s)"
 
 #~ msgid "mail filter servlet cannot be registered: %s"
 #~ msgstr "Servletul de filtrare de mesaje nu poate fi înregistrat: %s"

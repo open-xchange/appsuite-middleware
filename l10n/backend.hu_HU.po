@@ -45,15 +45,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2013-07-29 02:04+0200\n"
-"Last-Translator: Gabor Kelemen <kelemeng at gnome dot hu>\n"
+"PO-Revision-Date: 2013-08-04 16:10+0200\n"
+"Last-Translator: Kalman Kemenczy <kkemenczy@gmail.com>\n"
 "Language-Team: Hungarian <kde-l10n-hu@kde.org>\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 1.5\n"
+"X-Generator: Lokalize 1.2\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #. %1$s will be replaced with a detailed exception message.
@@ -1192,6 +1192,7 @@ msgstr "JSON hiba történt: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:68
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:224
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:67
@@ -3406,6 +3407,705 @@ msgid "Please make sure the file is readable by the groupware."
 msgstr ""
 "Győződjön meg róla, hogy a fájlt tudja olvasni a csoportmunka-szoftver."
 
+#. *
+#. * No connection available to access mailbox
+#.
+#. No connection available to access mailbox
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:466
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:100
+msgid "No connection available to access mailbox"
+msgstr "Nincs kapcsolat a postafiók eléréséhez"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:68
+msgid ""
+"No connection available to access mailbox on server %1$s with login %2$s "
+"(user=%3$s, context=%4$s)"
+msgstr ""
+"Nincs kapcsolat a postafiók eléréséhez a(z) %1$s levélkiszolgálón a(z) %2$s "
+"bejelentkezéssel (felhasználó=%3$s, kontextus=%4$s)"
+
+#. *
+#. * User %1$s has no mail module access due to user configuration
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:76
+msgid "User %1$s has no mail module access due to user configuration"
+msgstr ""
+"A felhasználói beállítások miatt a(z) %1$s felhasználónak nincs hozzáférése "
+"a levelezőmodulhoz"
+
+#. *
+#. * No access to mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:80
+msgid "No access to mail folder %1$s"
+msgstr "Nincs hozzáférés a(z) %1$s levélmappához"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:74
+msgid ""
+"No access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Nincs hozzáférés a(z) %1$s levélmappához a(z) %2$s kiszolgálón a(z) %3$s "
+"bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#. *
+#. * No lookup access to mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:84
+msgid "No lookup access to mail folder %1$s"
+msgstr "Nincs keresési hozzáférés a(z) %1$s levélmappához"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:78
+msgid ""
+"No lookup access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nincs kikeresési hozzáférés a(z) %1$s levélmappához a(z) %2$s kiszolgálón a"
+"(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#. *
+#. * No read access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:88
+msgid "No read access to mail folder %1$s"
+msgstr "Nincs olvasási hozzáférés a(z) %1$s levélmappához"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:82
+msgid ""
+"No read access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nincs olvasási hozzáférés a(z) %1$s levélmappához a(z) %2$s kiszolgálón a(z) "
+"%3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#. *
+#. * No delete access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:92
+msgid "No delete access to mail folder %1$s"
+msgstr "Nincs törlési hozzáférés a(z) %1$s levélmappához"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:86
+msgid ""
+"No delete access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nincs törlési hozzáférés a(z) %1$s levélmappához a(z) %2$s kiszolgálón a(z) "
+"%3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#. *
+#. * No insert access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:96
+msgid "No insert access to mail folder %1$s"
+msgstr "Nincs beszúrási hozzáférés a(z) %1$s levélmappához"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:90
+msgid ""
+"No insert access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nincs beszúrási hozzáférés a(z) %1$s levélmappához a(z) %2$s kiszolgálón a"
+"(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#. *
+#. * No administer access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:100
+msgid "No administer access to mail folder %1$s"
+msgstr "Nincs adminisztrációs hozzáférés a(z) %1$s levélmappához"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:94
+msgid ""
+"No administer access to mail folder %1$s on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Nincs adminisztrációs hozzáférés a(z) %1$s levélmappához a(z) %2$s "
+"kiszolgálón a(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:96
+msgid "No write access to IMAP folder %1$s"
+msgstr "Nincs írási hozzáférés a(z) %1$s IMAP-mappához"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:98
+msgid ""
+"No write access to IMAP folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nincs írási hozzáférés a(z) %1$s IMAP-mappához a(z) %2$s kiszolgálón a(z) "
+"%3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#. *
+#. * No keep-seen access on mail folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:108
+msgid "No keep-seen access to mail folder %1$s"
+msgstr "Nincs olvasottként hagyási hozzáférés a(z) %1$s levélmappához"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:102
+msgid ""
+"No keep-seen access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nincs olvasottként hagyási hozzáférés a(z) %1$s levélmappához a(z) %2$s "
+"kiszolgálón a(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#. *
+#. * Folder %1$s does not allow subfolders.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:112
+msgid "Folder %1$s does not allow subfolders."
+msgstr "A(z) %1$s mappa nem engedélyez almappákat."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:106
+msgid ""
+"Folder %1$s does not allow subfolders on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)."
+msgstr ""
+"A(z) %1$s mappa nem engedélyez almappákat a(z) %2$s levélkiszolgálón a(z) "
+"%3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:108
+msgid ""
+"Mail folder \"%1$s\" could not be created (maybe due to insufficient "
+"permission on parent folder %2$s or due to an invalid folder name)"
+msgstr ""
+"A(z) „%1$s” levélmappa nem hozható létre (talán mert nincs megfelelő "
+"jogosultsága a(z) %2$s szülőmappán, vagy mert a mappanév érvénytelen)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:110
+msgid ""
+"Mail folder \"%1$s\" could not be created (maybe due to insufficient "
+"permission on parent folder %2$s or due to an invalid folder name) on server "
+"%3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"A(z) „%1$s” levélmappa nem hozható létre (talán mert nincs megfelelő "
+"jogosultsága a(z) %2$s szülőmappán, vagy mert a mappanév érvénytelen) a(z) "
+"%3$s kiszolgálón a(z) %4$s bejelentkezéssel (felhasználó=%5$s, kontextus="
+"%6$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:112
+msgid ""
+"The composed rights could not be applied to new folder %1$s due to missing "
+"administer right in its initial rights specified by IMAP server. However, "
+"the folder has been created."
+msgstr ""
+"Az összesített jogok nem alkalmazhatók a(z) %1$s új mappára az IMAP-"
+"kiszolgáló által megadott kiinduló jogok közül hiányzó adminisztrációs jog "
+"miatt. A mappa ennek ellenére létrejött."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:114
+msgid ""
+"The composed rights could not be applied to new folder %1$s due to missing "
+"administer right in its initial rights specified by IMAP server. However, "
+"the folder has been created on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)."
+msgstr ""
+"Az összesített jogok nem alkalmazhatók a(z) %1$s új mappára az IMAP-"
+"kiszolgáló által megadott kiinduló jogok közül hiányzó adminisztrációs jog "
+"miatt. A mappa ennek ellenére létrejött a(z) %2$s kiszolgálón a(z) %3$s "
+"bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)."
+
+#. *
+#. * No admin permission specified for folder %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:125
+msgid "No administer permission specified for folder %1$s"
+msgstr "Nincs megadva adminisztrátori jogosultság a(z) %1$s mappához"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:118
+msgid ""
+"No administer permission specified for folder %1$s on server %2$s with login "
+"%3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Nincs megadva adminisztrátori jogosultság a(z) %1$s mappához a(z) %2$s "
+"kiszolgálón a(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:120
+msgid "Default folder %1$s must not be updated"
+msgstr "A(z) „%1$s” alapértelmezett mappát nem szabad frissíteni"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:122
+msgid ""
+"Default folder %1$s must not be updated on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"A(z) „%1$s” alapértelmezett mappát nem szabad frissíteni a(z) %2$s "
+"kiszolgálón a(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#. *
+#. * Deletion of folder %1$s failed
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:124
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:133
+msgid "Deletion of folder %1$s failed"
+msgstr "A(z) %1$s mappa törlése sikertelen"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:126
+msgid ""
+"Deletion of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"A(z) %1$s mappa törlése sikertelen a(z) %2$s kiszolgálón %3$s "
+"bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:128
+msgid "IMAP default folder %1$s could not be created"
+msgstr "A(z) %1$s alapértelmezett IMAP-mappa nem hozható létre"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:130
+msgid ""
+"IMAP default folder %1$s could not be created on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"A(z) %1$s alapértelmezett IMAP-mappa nem hozható létre a(z) %2$s kiszolgálón "
+"a(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:132
+msgid "Missing default %1$s folder"
+msgstr "Hiányzó alapértelmezett %1$s mappa"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:134
+msgid ""
+"Missing default %1$s folder on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Hiányzó alapértelmezett %1$s mappa a(z) %2$s kiszolgálón a(z) %3$s "
+"bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#. *
+#. * Update of folder %1$s failed
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:136
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:145
+msgid "Update of folder %1$s failed"
+msgstr "A(z) %1$s mappa frissítése sikertelen"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:138
+msgid ""
+"Update of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"A(z) %1$s mappa frissítése sikertelen a(z) %2$s kiszolgálón %3$s "
+"bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#. *
+#. * Folder %1$s must not be deleted
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:140
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:149
+msgid "Folder %1$s cannot be deleted"
+msgstr "A(z) %1$s mappa nem törölhető"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:142
+msgid ""
+"Folder %1$s cannot be deleted on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"A(z) %1$s mappa nem törölhető a(z) %2$s kiszolgálón a(z) %3$s "
+"bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#. *
+#. * Default folder %1$s must not be deleted
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:144
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:153
+msgid "Default folder %1$s cannot be deleted"
+msgstr "Az alapértelmezett %1$s mappa nem törölhető"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:146
+msgid ""
+"Default folder %1$s cannot be deleted on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Az alapértelmezett %1$s mappa nem törölhető a(z) %2$s kiszolgálón a(z) %3$s "
+"bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:148
+msgid "Flag %1$s could not be changed due to following reason \"%2$s\""
+msgstr "A(z) %1$s jelzőt nem szabad módosítani a következő ok miatt: „%2$s”"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:150
+msgid ""
+"Flag %1$s could not be changed due to following reason \"%2$s\" on server "
+"%3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"A(z) %1$s jelzőt nem szabad módosítani a következő ok miatt: „%2$s” a(z) "
+"%3$s kiszolgálón a(z) %4$s bejelentkezéssel (felhasználó=%5$s, kontextus="
+"%6$s)"
+
+#. *
+#. * Number of search fields (%d) do not match number of search patterns (%d)
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:152
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:161
+msgid ""
+"Number of search fields (%d) do not match number of search patterns (%d)"
+msgstr ""
+"A keresési mezők száma (%d) nem egyezik a keresési minták számával (%d)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:154
+msgid ""
+"IMAP search failed due to reason \"%1$s\". Switching to application-based "
+"search"
+msgstr ""
+"Az IMAP-keresés sikertelen a(z) „%1$s” ok miatt. Váltás alkalmazás alapú "
+"keresésre"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:156
+msgid ""
+"IMAP search failed due to reason \"%1$s\" on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s). Switching to application-based search."
+msgstr ""
+"Az IMAP-keresés sikertelen a(z) „%1$s” ok miatt a(z) %2$s kiszolgálón a(z) "
+"%3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s). Váltás alkalmazás "
+"alapú keresésre."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:158
+msgid ""
+"IMAP sort failed due to reason \"%1$s\". Switching to application-based "
+"sorting."
+msgstr ""
+"Az IMAP-rendezés sikertelen a(z) „%1$s” ok miatt. Váltás alkalmazás alapú "
+"rendezésre."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:160
+msgid ""
+"IMAP sort failed due to reason \"%1$s\" on server %2$s with login %3$s (user="
+"%4$s, context=%5$s). Switching to application-based sorting."
+msgstr ""
+"Az IMAP-rendezés sikertelen a(z) „%1$s” ok miatt a(z) %2$s kiszolgálón a(z) "
+"%3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s). Váltás alkalmazás "
+"alapú rendezésre."
+
+#. *
+#. * Unknown search field: %1$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:173
+msgid "Unknown search field: %1$s"
+msgstr "Ismeretlen keresőmező: %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:164
+msgid ""
+"Unknown search field: %1$s on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Ismeretlen keresőmező (%1$s) a(z) %2$s kiszolgálón a(z) %3$s "
+"bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#. *
+#. * Mail folder %1$s must not be moved to subsequent folder %2$s
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:166
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:177
+msgid "Mail folder %1$s must not be moved to subsequent folder %2$s"
+msgstr "A(z) %1$s levélmappát nem szabad a rákövetkező %2$s mappába mozgatni"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:168
+msgid ""
+"Mail folder %1$s must not be moved to subsequent folder %2$s on server %3$s "
+"with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"A(z) %1$s levélmappát nem szabad a rákövetkező %2$s mappába mozgatni a(z) "
+"%3$s kiszolgálón a(z) %4$s bejelentkezéssel (felhasználó=%5$s, kontextus="
+"%6$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:170
+msgid ""
+"This message could not be moved to trash folder, possibly because your "
+"mailbox is nearly full.\n"
+"In that case, please try to empty your deleted items first, or delete "
+"smaller messages first."
+msgstr ""
+"Ez az üzenet nem mozgatható a törölt elemek mappába, amelynek lehetséges oka, "
+"hogy a postafiók majdnem megtelt.\n"
+"Ebben az esetben először próbálja meg kiüríteni a törölt elemek mappát vagy "
+"letörölni a kisebb üzeneteket."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:172
+msgid ""
+"This message could not be moved to trash folder on server %1$s with login "
+"%2$s (user=%3$s, context=%4$s), possibly because your mailbox is nearly "
+"full.\n"
+"In that case, please try to empty your deleted items first, or delete "
+"smaller messages first."
+msgstr ""
+"Ez az üzenet nem mozgatható a törölt elemek mappába a(z) %1$s kiszolgálón "
+"a(z) "
+"%2$s bejelentkezéssel (felhasználó=%3$s, kontextus=%4$s), amelynek lehetséges "
+"oka, hogy a postafiók majdnem megtelt.\n"
+"Ebben az esetben először próbálja meg kiüríteni a törölt elemek mappát vagy "
+"letörölni a kisebb üzeneteket."
+
+#. *
+#. * Missing %1$s folder in mail move operation
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:174
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:186
+msgid "Missing %1$s folder in mail move operation"
+msgstr "Hiányzó %1$s mappa a levélmozgatási műveletben"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:176
+msgid ""
+"Missing %1$s folder in mail move operation on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"Hiányzó %1$s mappa a levélmozgatási műveletben a(z) %2$s kiszolgálón %3$s "
+"bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:178
+msgid ""
+"Message move aborted for user %1$s. Source and destination folder are equal "
+"to \"%2$s\""
+msgstr ""
+"A(z) 1$s felhasználó üzenetének mozgatása megszakítva. A forrás és a cél "
+"mappa azonosak ezzel: „%2$s”"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:180
+msgid ""
+"Message move aborted for user %1$s. Source and destination folder are equal "
+"to \"%2$s\" on server %3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"A(z) 1$s felhasználó üzenetének mozgatása megszakítva. A forrás és a cél "
+"mappa azonosak ezzel: „%2$s” a(z) %3$s kiszolgálón a(z) %4$s "
+"bejelentkezéssel (felhasználó=%5$s, kontextus=%6$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:182
+msgid "IMAP folder read-only check failed"
+msgstr "Az IMAP-mappa írásvédelem-ellenőrzése sikertelen"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:184
+msgid ""
+"Folder read-only check failed on server %1$s with login %2$s (user=%3$s, "
+"context=%4$s)"
+msgstr ""
+"A mappa írásvédelem-ellenőrzése sikertelen a(z) %1$s kiszolgálón a(z) %2$s "
+"bejelentkezéssel (felhasználó=%3$s, kontextus=%4$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:186
+msgid "Unknown folder open mode %1$s"
+msgstr "Ismeretlen mappamegnyitási mód: %1$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:188
+msgid ""
+"Unknown folder open mode %1$s on server %2$s with login %3$s (user=%4$s, "
+"context=%5$s)"
+msgstr ""
+"Ismeretlen mappamegnyitási mód (%1$s) a(z) %2$s kiszolgálón %3$s "
+"bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:190
+msgid ""
+"Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
+msgstr ""
+"Az üzenetek (%1$s) nem törölhetők a(z) %2$s mappában a(z) „%3$s” hiba miatt"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:192
+msgid ""
+"Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\" on "
+"server %4$s with login %5$s (user=%6$s, context=%7$s)"
+msgstr ""
+"Az üzenetek (%1$s) nem törölhetők a(z) %2$s mappában a(z) „%3$s” hiba miatt a"
+"(z) %4$s kiszolgálón a(z) %5$s bejelentkezéssel (felhasználó=%6$s, kontextus="
+"%7$s)"
+
+#. *
+#. * Not allowed to open folder %1$s due to missing read access
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:194
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:206
+msgid "Not allowed to open folder %1$s due to missing read access"
+msgstr ""
+"A hiányzó olvasási hozzáférés miatt nem engedélyezett a(z) %1$s mappa "
+"megnyitása"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:196
+msgid ""
+"Not allowed to open folder %1$s due to missing read access on server %2$s "
+"with login %3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"A hiányzó olvasási hozzáférés miatt nem engedélyezett a(z) %1$s mappa "
+"megnyitása a(z) %2$s kiszolgálón %3$s bejelentkezéssel (felhasználó=%4$s, "
+"kontextus=%5$s)"
+
+#. *
+#. * The raw content's input stream of message %1$s in folder %2$s cannot be read
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:198
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:210
+msgid ""
+"The raw content's input stream of message %1$s in folder %2$s cannot be read"
+msgstr ""
+"A nyers tartalom bemeneti adatfolyama nem olvasható a(z) %1$s üzenetből a(z) "
+"%2$s mappában"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:200
+msgid ""
+"The raw content's input stream of message %1$s in folder %2$s cannot be read "
+"on server %3$s with login %4$s (user=%5$s, context=%6$s)"
+msgstr ""
+"A nyers tartalom bemeneti adatfolyama nem olvasható a(z) %1$s üzenetből a(z) "
+"%2$s mappában a(z) %3$s kiszolgálón a(z) %4$s bejelentkezéssel (felhasználó="
+"%5$s, kontextus=%6$s)"
+
+#. *
+#. * No attachment was found with id %1$s in message
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:202
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:214
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:203
+msgid "No attachment was found with id %1$s in message"
+msgstr "Nem található %1$s azonosítójú melléklet az üzenetben"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:204
+msgid ""
+"No attachment was found with id %1$s in message on server %2$s with login "
+"%3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"Nem található %1$s azonosítójú melléklet az üzenetben a(z) %2$s kiszolgálón a"
+"(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#. *
+#. * Versit object %1$s could not be saved
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:206
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:218
+msgid "Versit object could not be saved"
+msgstr "A Versit objektum nem menthető"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:208
+msgid "No support of capability \"THREAD=REFERENCES\""
+msgstr "A „THREAD=REFERENCES” képesség nem támogatott"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:210
+msgid ""
+"No support of capability \"THREAD=REFERENCES\" on server %2$s with login "
+"%3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"A „THREAD=REFERENCES” képesség nem támogatott a(z) %2$s kiszolgálón a(z) "
+"%3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:212
+msgid ""
+"A protocol exception occurred during execution of IMAP request \"%1$s\".\n"
+"Error message: %2$s"
+msgstr ""
+"Protokollkivétel történt a(z) „%1$s” IMAP-kérés végrehajtásakor.\n"
+"Hibaüzenet: %2$s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:214
+msgid ""
+"Mailbox' root folder must not be source or the destination full name of a "
+"move operation."
+msgstr ""
+"A postafiók gyökérmappája nem lehet mozgatási művelet forrás vagy cél teljes "
+"neve."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:216
+msgid "Sort field %1$s is not supported via IMAP SORT command"
+msgstr ""
+"A(z) %1$s rendezési mező nem támogatott az IMAP SORT parancson keresztül"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:218
+msgid ""
+"Sort field %1$s is not supported via IMAP SORT command on server %2$s with "
+"login %3$s (user=%4$s, context=%5$s)"
+msgstr ""
+"A(z) %1$s rendezési mező nem támogatott az IMAP SORT parancson keresztül a"
+"(z) %2$s kiszolgálón a(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus="
+"%5$s)"
+
+#. *
+#. * Missing personal namespace
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:220
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:238
+msgid "Missing personal namespace"
+msgstr "Hiányzó személyes névtér"
+
+#. *
+#. * Parsing thread-sort string failed: %1$s.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:222
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:242
+msgid "Parsing thread-sort string failed: %1$s."
+msgstr "A szálrendezési karakterlánc feldolgozása sikertelen: %1$s."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:226
+msgid "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\"."
+msgstr ""
+"Nem sikerült a(z) „%1$s” mappát „%2$s” névre átnevezni, hibaüzenet: „%3$s”."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:228
+msgid ""
+"Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\" on server %4$s "
+"with login %5$s (user=%6$s, context=%7$s)."
+msgstr ""
+"Nem sikerült a(z) „%1$s” mappát „%2$s” névre átnevezni a(z) %4$s kiszolgálón "
+"a(z) %5$s bejelentkezéssel, hibaüzenet: „%3$s” (felhasználó=%6$s, kontextus="
+"%7$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:230
+msgid "No rename access to mail folder %1$s"
+msgstr "Nincs átnevezési hozzáférés a(z) %1$s levélmappához"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:232
+msgid ""
+"No rename access to mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
+msgstr ""
+"Nincs átnevezési hozzáférés a(z) %1$s levélmappához a(z) %2$s kiszolgálón a"
+"(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:234
+msgid "Unable to parse IMAP server URI \"%1$s\"."
+msgstr "Nem dolgozható fel a(z) „%1$s” IMAP-kiszolgáló URI."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:236
+msgid "Default folder %1$s must not be unsubscribed."
+msgstr "A(z) „%1$s” alapértelmezett mappáról nem szabad leiratkozni."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:238
+msgid ""
+"Default folder %1$s must not be unsubscribed on server %2$s with login %3$s "
+"(user=%4$s, context=%5$s)"
+msgstr ""
+"A(z) „%1$s” alapértelmezett mappáról nem szabad leiratkozni a(z) %2$s "
+"kiszolgálón a(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:240
+msgid "IMAP server refuses to import one or more E-Mails."
+msgstr "Az IMAP-kiszolgáló elutasított egy vagy több e-mail importálását."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:242
+msgid ""
+"IMAP server %1$s refuses to import one or more E-Mails with login %2$s (user="
+"%3$s, context=%4$s)"
+msgstr ""
+"A(z) %1$s alapértelmezett IMAP-kiszolgáló elutasította egy vagy több e-mail "
+"importálását a(z) %2$s bejelentkezéssel (felhasználó=%3$s, kontextus=%4$s)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:244
+msgid ""
+"Currently not possible to establish a new connection to server %1$s with "
+"login %2$s. Please try again."
+msgstr ""
+"Pillanatnyilag nem lehetséges új kapcsolat létrehozása a(z) %1$s "
+"kiszolgálóval a(z) %2$s bejelentkezés használatával. Próbálja újra."
+
 #. Implementing class could not be found
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:70
 msgid "Implementing class could not be found"
@@ -4032,7 +4732,7 @@ msgstr "Album"
 
 #. The internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:105
 msgid "Confirmed ham"
 msgstr "Elfogadott ál-kéretlen"
 
@@ -4042,7 +4742,7 @@ msgstr "Elfogadott ál-kéretlen mappa"
 
 #. The internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:97
 msgid "Confirmed spam"
 msgstr "Elfogadott kéretlen"
 
@@ -4055,7 +4755,7 @@ msgstr "Elfogadott kéretlen mappa"
 #. The name for the drafts folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:77
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:65
 msgid "Drafts"
 msgstr "Piszkozatok"
@@ -4077,7 +4777,7 @@ msgstr "Elküldött mappa"
 #. The name for the spam folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:81
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:89
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:166
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:71
 msgid "Spam"
 msgstr "Levélszemét"
@@ -4091,7 +4791,7 @@ msgstr "Levélszemét mappa"
 #. The name for the trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/FormStrings.java:85
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:150
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:154
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/NameStrings.java:74
 msgid "Trash"
 msgstr "Törölt elemek"
@@ -4563,86 +5263,11 @@ msgid "Unsupported action %1$s via %2$s request"
 msgstr "Nem támogatott %1$s művelet %2$s kérésen keresztül"
 
 #. *
-#. * No connection available to access mailbox
-#.
-#. No connection available to access mailbox
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:466
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:100
-msgid "No connection available to access mailbox"
-msgstr "Nincs kapcsolat a postafiók eléréséhez"
-
-#. *
-#. * User %1$s has no mail module access due to user configuration
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:76
-msgid "User %1$s has no mail module access due to user configuration"
-msgstr ""
-"A felhasználói beállítások miatt a(z) %1$s felhasználónak nincs hozzáférése "
-"a levelezőmodulhoz"
-
-#. *
-#. * No access to mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:80
-msgid "No access to mail folder %1$s"
-msgstr "Nincs hozzáférés a(z) %1$s levélmappához"
-
-#. *
-#. * No lookup access to mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:84
-msgid "No lookup access to mail folder %1$s"
-msgstr "Nincs keresési hozzáférés a(z) %1$s levélmappához"
-
-#. *
-#. * No read access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:88
-msgid "No read access to mail folder %1$s"
-msgstr "Nincs olvasási hozzáférés a(z) %1$s levélmappához"
-
-#. *
-#. * No delete access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:92
-msgid "No delete access to mail folder %1$s"
-msgstr "Nincs törlési hozzáférés a(z) %1$s levélmappához"
-
-#. *
-#. * No insert access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:96
-msgid "No insert access to mail folder %1$s"
-msgstr "Nincs beszúrási hozzáférés a(z) %1$s levélmappához"
-
-#. *
-#. * No administer access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:100
-msgid "No administer access to mail folder %1$s"
-msgstr "Nincs adminisztrációs hozzáférés a(z) %1$s levélmappához"
-
-#. *
 #. * No write access to POP3 folder %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:104
 msgid "No write access to POP3 folder %1$s"
 msgstr "Nincs írási hozzáférés a(z) %1$s POP3-mappához"
-
-#. *
-#. * No keep-seen access on mail folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:108
-msgid "No keep-seen access to mail folder %1$s"
-msgstr "Nincs olvasottként hagyási hozzáférés a(z) %1$s levélmappához"
-
-#. *
-#. * Folder %1$s does not allow subfolders.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:112
-msgid "Folder %1$s does not allow subfolders."
-msgstr "A(z) %1$s mappa nem engedélyez almappákat."
 
 #. *
 #. * POP3 does not support mail folder creation
@@ -4666,25 +5291,11 @@ msgstr ""
 "miatt. A mappa ennek ellenére létrejött."
 
 #. *
-#. * No admin permission specified for folder %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:125
-msgid "No administer permission specified for folder %1$s"
-msgstr "Nincs megadva adminisztrátori jogosultság a(z) %1$s mappához"
-
-#. *
 #. * Default folder %1$s must not be updated
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:129
 msgid "Default folder %1$s cannot be updated"
 msgstr "Az alapértelmezett %1$s mappa nem frissíthető"
-
-#. *
-#. * Deletion of folder %1$s failed
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:133
-msgid "Deletion of folder %1$s failed"
-msgstr "A(z) %1$s mappa törlése sikertelen"
 
 #. *
 #. * POP3 default folder %1$s could not be created
@@ -4702,41 +5313,11 @@ msgid "Missing default %1$s folder in user mail settings"
 msgstr "Hiányzó alapértelmezett %1$s mappa a felhasználó levélbeállításaiban"
 
 #. *
-#. * Update of folder %1$s failed
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:145
-msgid "Update of folder %1$s failed"
-msgstr "A(z) %1$s mappa frissítése sikertelen"
-
-#. *
-#. * Folder %1$s must not be deleted
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:149
-msgid "Folder %1$s cannot be deleted"
-msgstr "A(z) %1$s mappa nem törölhető"
-
-#. *
-#. * Default folder %1$s must not be deleted
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:153
-msgid "Default folder %1$s cannot be deleted"
-msgstr "Az alapértelmezett %1$s mappa nem törölhető"
-
-#. *
 #. * Flag %1$s could not be changed due to following reason: %2$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:157
 msgid "Flag %1$s could not be changed due to the following reason: %2$s"
 msgstr "A(z) %1$s jelzőt nem sikerült módosítani a következő ok miatt: %2$s"
-
-#. *
-#. * Number of search fields (%d) do not match number of search patterns (%d)
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:161
-msgid ""
-"Number of search fields (%d) do not match number of search patterns (%d)"
-msgstr ""
-"A keresési mezők száma (%d) nem egyezik a keresési minták számával (%d)"
 
 #. *
 #. * POP3 search failed due to following reason: %1$s. Switching to application-based search
@@ -4761,20 +5342,6 @@ msgstr ""
 "alapú rendezésre."
 
 #. *
-#. * Unknown search field: %1$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:173
-msgid "Unknown search field: %1$s"
-msgstr "Ismeretlen keresőmező: %1$s"
-
-#. *
-#. * Mail folder %1$s must not be moved to subsequent folder %2$s
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:177
-msgid "Mail folder %1$s must not be moved to subsequent folder %2$s"
-msgstr "A(z) %1$s levélmappát nem szabad a rákövetkező %2$s mappába mozgatni"
-
-#. *
 #. * This message could not be moved to trash folder, possibly because your mailbox is nearly full.<br>
 #. * In that case, please try to empty your deleted items first, or delete smaller messages first.
 #.
@@ -4793,13 +5360,6 @@ msgid ""
 msgstr ""
 "Próbálja meg előbb üríteni a törölt elemek mappát, vagy kisebb üzeneteket "
 "törölni."
-
-#. *
-#. * Missing %1$s folder in mail move operation
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:186
-msgid "Missing %1$s folder in mail move operation"
-msgstr "Hiányzó %1$s mappa a levélmozgatási műveletben"
 
 #. *
 #. * Message move aborted for user %1$s. Source and destination folder are equal: %2$s
@@ -4838,40 +5398,6 @@ msgstr ""
 "%3$s"
 
 #. *
-#. * Not allowed to open folder %1$s due to missing read access
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:206
-msgid "Not allowed to open folder %1$s due to missing read access"
-msgstr ""
-"A hiányzó olvasási hozzáférés miatt nem engedélyezett a(z) %1$s mappa "
-"megnyitása"
-
-#. *
-#. * The raw content's input stream of message %1$s in folder %2$s cannot be read
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:210
-msgid ""
-"The raw content's input stream of message %1$s in folder %2$s cannot be read"
-msgstr ""
-"A nyers tartalom bemeneti adatfolyama nem olvasható a(z) %1$s üzenetből a(z) "
-"%2$s mappában"
-
-#. *
-#. * No attachment was found with id %1$s in message
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:214
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:203
-msgid "No attachment was found with id %1$s in message"
-msgstr "Nem található %1$s azonosítójú melléklet az üzenetben"
-
-#. *
-#. * Versit object %1$s could not be saved
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:218
-msgid "Versit object could not be saved"
-msgstr "A Versit objektum nem menthető"
-
-#. *
 #. * POP3 server does not support capability "THREAD=REFERENCES"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:222
@@ -4899,20 +5425,6 @@ msgstr "A POP3 nem támogatja a mappák mozgatását."
 msgid "Sort field %1$s is not supported via POP3 SORT command"
 msgstr ""
 "A(z) %1$s rendezési mező nem támogatott a POP3 SORT parancson keresztül"
-
-#. *
-#. * Missing personal namespace
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:238
-msgid "Missing personal namespace"
-msgstr "Hiányzó személyes névtér"
-
-#. *
-#. * Parsing thread-sort string failed: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:242
-msgid "Parsing thread-sort string failed: %1$s."
-msgstr "A szálrendezési karakterlánc feldolgozása sikertelen: %1$s."
 
 #. *
 #. * POP3 does not support to create folders.
@@ -7167,7 +7679,7 @@ msgstr "Beérkezett üzenetek"
 #. The internationalized name for the sent mail folder
 #. The name for trash folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:158
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:162
 msgid "Sent objects"
 msgstr "Elküldött elemek"
 
@@ -7178,18 +7690,25 @@ msgstr "Elküldött elemek"
 msgid "Sent items"
 msgstr "Elküldött elemek"
 
+#. The internationalized name for the archive mail folder
+#. The name for trash folder
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:170
+msgid "Archive"
+msgstr "Archívum"
+
 #. The alternative internationalized name for the confirmed-spam mail folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:101
 msgid "confirmed-spam"
 msgstr "elfogadott kéretlen"
 
 #. The alternative internationalized name for the confirmed-spam mail folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:105
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:109
 msgid "confirmed-ham"
 msgstr "elfogadott ál-kéretlen"
 
 #. The internationalized subject for a read acknowledgement
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:114
 msgid "Read acknowledgement"
 msgstr "Köszönetnyilvánítás elolvasása"
 
@@ -7197,7 +7716,7 @@ msgstr "Köszönetnyilvánítás elolvasása"
 #. #DATE# is replaced with the sent date of referenced email
 #. #RECIPIENT# is replaced with personal and/or email address of recipient(s)
 #. #SUBJECT# is replaced with referenced email's subject
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:120
 msgid ""
 "This is a delivery receipt for the mail that you sent on #DATE# to "
 "#RECIPIENT# with subject \"#SUBJECT#\".\n"
@@ -7217,7 +7736,7 @@ msgstr ""
 #. #DATE# is replaced with the sent date of referenced email
 #. #TIME# is replaced with time of referenced email
 #. #SENDER# is replaced with personal and/or email address of the sender
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:122
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:126
 msgid "On #DATE# at #TIME# #SENDER# wrote:"
 msgstr "#DATE#, #TIME#-kor #SENDER# ezt írta:"
 
@@ -7229,7 +7748,7 @@ msgstr "#DATE#, #TIME#-kor #SENDER# ezt írta:"
 #. #DATE# is replaced with the sent date of referenced email
 #. #TIME# is replaced with time of referenced email
 #. #SUBJECT# is replaced with referenced email's subject
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:132
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:136
 msgid ""
 "---------- Original Message ----------\n"
 "From: #FROM#\n"
@@ -7244,13 +7763,13 @@ msgstr ""
 "Tárgy: #SUBJECT#"
 
 #. The internationalized default subject.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:135
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:139
 msgid "[No Subject]"
 msgstr "[Nincs tárgy]"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Hints to the available attachments for affected message
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:139
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:143
 msgid ""
 "The available attachments for this E-Mail can be accessed via the links:"
 msgstr ""
@@ -7259,13 +7778,13 @@ msgstr ""
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the elapsed date for affected message's attachments
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:143
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:147
 msgid "The links will be deleted on #DATE#"
 msgstr "A hivatkozások törlésre kerülnek: #DATE#"
 
 #. The greeting used for form mails. E.g.
 #. "Dear Sir or Madam Jane Doe"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:147
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:151
 msgid "Dear Sir or Madam"
 msgstr "Tisztelt Hölgyem/Uram"
 
@@ -10551,7 +11070,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:269
 msgid "A command sent to mail server failed. Server response: %1$s"
 msgstr ""
-"A levelezőkiszolgálónak küldött parancs sikertelen. A kiszolgáló válasza: %1$s"
+"A levelezőkiszolgálónak küldött parancs sikertelen. A kiszolgáló válasza: "
+"%1$s"
 
 #. *
 #. * A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4$s). Server response: %5$s
@@ -11085,7 +11605,8 @@ msgid ""
 "The specified length %1$d for the file \"%2$s\" (current size: %3$d) is "
 "invalid."
 msgstr ""
-"A megadott $1$d hossz a(z) „%2$s” fájlhoz (jelenlegi méret: %3$d) érvénytelen."
+"A megadott $1$d hossz a(z) „%2$s” fájlhoz (jelenlegi méret: %3$d) "
+"érvénytelen."
 
 #. * Couldn't reach the filestore
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/file/external/QuotaFileStorageExceptionMessage.java:69
@@ -11751,9 +12272,9 @@ msgid ""
 "User %1$s granted invalid permissions on shared folder %2$s in context %3$s. "
 "Only the owner of the parent shared folder %4$s can administrate the folder."
 msgstr ""
-"A(z) %1$s felhasználó érvénytelen jogosultságokat adott a(z) %3$s "
-"kontextus %2$s megosztott mappájára. Csak a szülő megosztott mappa (%4$s) "
-"tulajdonosa adminisztrálhatja a mappát."
+"A(z) %1$s felhasználó érvénytelen jogosultságokat adott a(z) %3$s kontextus "
+"%2$s megosztott mappájára. Csak a szülő megosztott mappa (%4$s) tulajdonosa "
+"adminisztrálhatja a mappát."
 
 #. *
 #. * Owner %1$s of default folder %2$s must keep the folder admin permission
@@ -15396,13 +15917,6 @@ msgstr "Zulu"
 #~ msgid "%s"
 #~ msgstr "%s"
 
-#~ msgid ""
-#~ "A protocol exception occurred during execution of IMAP request \"%1$s\".\n"
-#~ "Error message: %2$s"
-#~ msgstr ""
-#~ "Protokollkivétel történt a(z) „%1$s” IMAP-kérés végrehajtásakor.\n"
-#~ "Hibaüzenet: %2$s"
-
 #~ msgid "A server name cannot be found in the server URL \"%1$s\"."
 #~ msgstr "A kiszolgáló nem található a „%1$s” kiszolgáló URL-en."
 
@@ -15448,47 +15962,6 @@ msgstr "Zulu"
 #~ msgid "Couldn't reach the filestore"
 #~ msgstr "Nem érhető el a fájltároló"
 
-#~ msgid ""
-#~ "Currently not possible to establish a new connection to server %1$s with "
-#~ "login %2$s. Please try again."
-#~ msgstr ""
-#~ "Pillanatnyilag nem lehetséges új kapcsolat létrehozása a(z) %1$s "
-#~ "kiszolgálóval a(z) %2$s bejelentkezés használatával. Próbálja újra."
-
-#~ msgid ""
-#~ "Default folder %1$s cannot be deleted on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Az alapértelmezett %1$s mappa nem törölhető a(z) %2$s kiszolgálón a(z) "
-#~ "%3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
-
-#~ msgid ""
-#~ "Default folder %1$s must not be unsubscribed on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "A(z) „%1$s” alapértelmezett mappáról nem szabad leiratkozni a(z) %2$s "
-#~ "kiszolgálón a(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
-
-#~ msgid "Default folder %1$s must not be unsubscribed."
-#~ msgstr "A(z) „%1$s” alapértelmezett mappáról nem szabad leiratkozni."
-
-#~ msgid "Default folder %1$s must not be updated"
-#~ msgstr "A(z) „%1$s” alapértelmezett mappát nem szabad frissíteni"
-
-#~ msgid ""
-#~ "Default folder %1$s must not be updated on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "A(z) „%1$s” alapértelmezett mappát nem szabad frissíteni a(z) %2$s "
-#~ "kiszolgálón a(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
-
-#~ msgid ""
-#~ "Deletion of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "A(z) %1$s mappa törlése sikertelen a(z) %2$s kiszolgálón %3$s "
-#~ "bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
-
 #~ msgid "Empty SEND_BODY_CHUNK package MUST NOT be sent"
 #~ msgstr "NEM KÜLDHETŐ üres SEND_BODY_CHUNK csomag"
 
@@ -15507,87 +15980,8 @@ msgstr "Zulu"
 #~ msgid "File is not a directory: %s"
 #~ msgstr "A fájl nem egy könyvtár: %s"
 
-#~ msgid "Flag %1$s could not be changed due to following reason \"%2$s\""
-#~ msgstr "A(z) %1$s jelzőt nem szabad módosítani a következő ok miatt: „%2$s”"
-
-#~ msgid ""
-#~ "Flag %1$s could not be changed due to following reason \"%2$s\" on server "
-#~ "%3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "A(z) %1$s jelzőt nem szabad módosítani a következő ok miatt: „%2$s” a(z) "
-#~ "%3$s kiszolgálón a(z) %4$s bejelentkezéssel (felhasználó=%5$s, kontextus="
-#~ "%6$s)"
-
-#~ msgid ""
-#~ "Folder %1$s does not allow subfolders on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)."
-#~ msgstr ""
-#~ "A(z) %1$s mappa nem engedélyez almappákat a(z) %2$s levélkiszolgálón a(z) "
-#~ "%3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)."
-
 #~ msgid "Folder of the object is missing."
 #~ msgstr "Az objektum mappája hiányzik."
-
-#~ msgid ""
-#~ "Folder read-only check failed on server %1$s with login %2$s (user=%3$s, "
-#~ "context=%4$s)"
-#~ msgstr ""
-#~ "A mappa írásvédelem-ellenőrzése sikertelen a(z) %1$s kiszolgálón a(z) "
-#~ "%2$s bejelentkezéssel (felhasználó=%3$s, kontextus=%4$s)"
-
-#~ msgid "IMAP default folder %1$s could not be created"
-#~ msgstr "A(z) %1$s alapértelmezett IMAP-mappa nem hozható létre"
-
-#~ msgid ""
-#~ "IMAP default folder %1$s could not be created on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "A(z) %1$s alapértelmezett IMAP-mappa nem hozható létre a(z) %2$s "
-#~ "kiszolgálón a(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
-
-#~ msgid "IMAP folder read-only check failed"
-#~ msgstr "Az IMAP-mappa írásvédelem-ellenőrzése sikertelen"
-
-#~ msgid ""
-#~ "IMAP search failed due to reason \"%1$s\" on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s). Switching to application-based search."
-#~ msgstr ""
-#~ "Az IMAP-keresés sikertelen a(z) „%1$s” ok miatt a(z) %2$s kiszolgálón a"
-#~ "(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s). Váltás "
-#~ "alkalmazás alapú keresésre."
-
-#~ msgid ""
-#~ "IMAP search failed due to reason \"%1$s\". Switching to application-based "
-#~ "search"
-#~ msgstr ""
-#~ "Az IMAP-keresés sikertelen a(z) „%1$s” ok miatt. Váltás alkalmazás alapú "
-#~ "keresésre"
-
-#~ msgid ""
-#~ "IMAP server %1$s refuses to import one or more E-Mails with login %2$s "
-#~ "(user=%3$s, context=%4$s)"
-#~ msgstr ""
-#~ "A(z) %1$s alapértelmezett IMAP-kiszolgáló elutasította egy vagy több e-"
-#~ "mail importálását a(z) %2$s bejelentkezéssel (felhasználó=%3$s, kontextus="
-#~ "%4$s)"
-
-#~ msgid "IMAP server refuses to import one or more E-Mails."
-#~ msgstr "Az IMAP-kiszolgáló elutasított egy vagy több e-mail importálását."
-
-#~ msgid ""
-#~ "IMAP sort failed due to reason \"%1$s\" on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s). Switching to application-based sorting."
-#~ msgstr ""
-#~ "Az IMAP-rendezés sikertelen a(z) „%1$s” ok miatt a(z) %2$s kiszolgálón a"
-#~ "(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s). Váltás "
-#~ "alkalmazás alapú rendezésre."
-
-#~ msgid ""
-#~ "IMAP sort failed due to reason \"%1$s\". Switching to application-based "
-#~ "sorting."
-#~ msgstr ""
-#~ "Az IMAP-rendezés sikertelen a(z) „%1$s” ok miatt. Váltás alkalmazás alapú "
-#~ "rendezésre."
 
 #~ msgid "Identifier of the object is missing."
 #~ msgstr "Az objektum azonosítója hiányzik."
@@ -15611,40 +16005,8 @@ msgstr "Zulu"
 #~ msgid "Lexical error: %1$s"
 #~ msgstr "Szótári hiba: %1$s"
 
-#~ msgid ""
-#~ "Mail folder \"%1$s\" could not be created (maybe due to insufficient "
-#~ "permission on parent folder %2$s or due to an invalid folder name)"
-#~ msgstr ""
-#~ "A(z) „%1$s” levélmappa nem hozható létre (talán mert nincs megfelelő "
-#~ "jogosultsága a(z) %2$s szülőmappán, vagy mert a mappanév érvénytelen)"
-
-#~ msgid ""
-#~ "Mail folder \"%1$s\" could not be created (maybe due to insufficient "
-#~ "permission on parent folder %2$s or due to an invalid folder name) on "
-#~ "server %3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "A(z) „%1$s” levélmappa nem hozható létre (talán mert nincs megfelelő "
-#~ "jogosultsága a(z) %2$s szülőmappán, vagy mert a mappanév érvénytelen) a"
-#~ "(z) %3$s kiszolgálón a(z) %4$s bejelentkezéssel (felhasználó=%5$s, "
-#~ "kontextus=%6$s)"
-
-#~ msgid ""
-#~ "Mail folder %1$s must not be moved to subsequent folder %2$s on server "
-#~ "%3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "A(z) %1$s levélmappát nem szabad a rákövetkező %2$s mappába mozgatni a(z) "
-#~ "%3$s kiszolgálón a(z) %4$s bejelentkezéssel (felhasználó=%5$s, kontextus="
-#~ "%6$s)"
-
 #~ msgid "Mail(s)  could not be found in folder "
 #~ msgstr "A levelek nem találhatók a mappában "
-
-#~ msgid ""
-#~ "Mailbox' root folder must not be source or the destination full name of a "
-#~ "move operation."
-#~ msgstr ""
-#~ "A postafiók gyökérmappája nem lehet mozgatási művelet forrás vagy cél "
-#~ "teljes neve."
 
 #~ msgid "Mapping file \"%s\" not valid"
 #~ msgstr "A(z) „%s” leképezésfájl érvénytelen"
@@ -15662,52 +16024,6 @@ msgstr "Zulu"
 #~ msgstr ""
 #~ "Az üzenet sikeresen elküldve, de a másolat nem helyezhető a kimenő "
 #~ "mappába a túllépett kvóta miatt."
-
-#~ msgid ""
-#~ "Message move aborted for user %1$s. Source and destination folder are "
-#~ "equal to \"%2$s\""
-#~ msgstr ""
-#~ "A(z) 1$s felhasználó üzenetének mozgatása megszakítva. A forrás és a cél "
-#~ "mappa azonosak ezzel: „%2$s”"
-
-#~ msgid ""
-#~ "Message move aborted for user %1$s. Source and destination folder are "
-#~ "equal to \"%2$s\" on server %3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "A(z) 1$s felhasználó üzenetének mozgatása megszakítva. A forrás és a cél "
-#~ "mappa azonosak ezzel: „%2$s” a(z) %3$s kiszolgálón a(z) %4$s "
-#~ "bejelentkezéssel (felhasználó=%5$s, kontextus=%6$s)"
-
-#~ msgid ""
-#~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
-#~ msgstr ""
-#~ "Az üzenetek (%1$s) nem törölhetők a(z) %2$s mappában a(z) „%3$s” hiba "
-#~ "miatt"
-
-#~ msgid ""
-#~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\" "
-#~ "on server %4$s with login %5$s (user=%6$s, context=%7$s)"
-#~ msgstr ""
-#~ "Az üzenetek (%1$s) nem törölhetők a(z) %2$s mappában a(z) „%3$s” hiba "
-#~ "miatt a(z) %4$s kiszolgálón a(z) %5$s bejelentkezéssel (felhasználó=%6$s, "
-#~ "kontextus=%7$s)"
-
-#~ msgid ""
-#~ "Missing %1$s folder in mail move operation on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Hiányzó %1$s mappa a levélmozgatási műveletben a(z) %2$s kiszolgálón %3$s "
-#~ "bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
-
-#~ msgid "Missing default %1$s folder"
-#~ msgstr "Hiányzó alapértelmezett %1$s mappa"
-
-#~ msgid ""
-#~ "Missing default %1$s folder on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Hiányzó alapértelmezett %1$s mappa a(z) %2$s kiszolgálón a(z) %3$s "
-#~ "bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
 
 #~ msgid "Missing or wrong Interval value: %d"
 #~ msgstr "Hiányzó vagy hibás Időköz érték: %d"
@@ -15742,43 +16058,8 @@ msgstr "Zulu"
 #~ "Nincs beállítva UDP csatorna. Ellenőrizze, hogy van-e hibás "
 #~ "csatornanyitás a kiszolgáló indításakor."
 
-#~ msgid ""
-#~ "No access to mail folder %1$s on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Nincs hozzáférés a(z) %1$s levélmappához a(z) %2$s kiszolgálón a(z) %3$s "
-#~ "bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
-
-#~ msgid ""
-#~ "No administer access to mail folder %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nincs adminisztrációs hozzáférés a(z) %1$s levélmappához a(z) %2$s "
-#~ "kiszolgálón a(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
-
-#~ msgid ""
-#~ "No administer permission specified for folder %1$s on server %2$s with "
-#~ "login %3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nincs megadva adminisztrátori jogosultság a(z) %1$s mappához a(z) %2$s "
-#~ "kiszolgálón a(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
-
-#~ msgid ""
-#~ "No attachment was found with id %1$s in message on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nem található %1$s azonosítójú melléklet az üzenetben a(z) %2$s "
-#~ "kiszolgálón a(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
-
 #~ msgid "No attribute name could be found for code: %1$d"
 #~ msgstr "Nem található attribútumnév ehhez a kódhoz: %1$d"
-
-#~ msgid ""
-#~ "No connection available to access mailbox on server %1$s with login %2$s "
-#~ "(user=%3$s, context=%4$s)"
-#~ msgstr ""
-#~ "Nincs kapcsolat a postafiók eléréséhez a(z) %1$s levélkiszolgálón a(z) "
-#~ "%2$s bejelentkezéssel (felhasználó=%3$s, kontextus=%4$s)"
 
 #~ msgid ""
 #~ "No data provided from web server: input stream returned \"-1\" while "
@@ -15793,53 +16074,8 @@ msgstr "Zulu"
 #~ msgstr ""
 #~ "Nincs megadva alapértelmezett konstruktor a(z) „%s” servlet osztályban"
 
-#~ msgid ""
-#~ "No delete access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nincs törlési hozzáférés a(z) %1$s levélmappához a(z) %2$s kiszolgálón a"
-#~ "(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
-
-#~ msgid ""
-#~ "No insert access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nincs beszúrási hozzáférés a(z) %1$s levélmappához a(z) %2$s kiszolgálón a"
-#~ "(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
-
-#~ msgid ""
-#~ "No keep-seen access to mail folder %1$s on server %2$s with login %3$s "
-#~ "(user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nincs olvasottként hagyási hozzáférés a(z) %1$s levélmappához a(z) %2$s "
-#~ "kiszolgálón a(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
-
-#~ msgid ""
-#~ "No lookup access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nincs kikeresési hozzáférés a(z) %1$s levélmappához a(z) %2$s kiszolgálón "
-#~ "a(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
-
 #~ msgid "No parent recurring appointment found for series exception: %s"
 #~ msgstr "Nem található az ismétlődő találkozó a kivételsorozathoz: %s"
-
-#~ msgid ""
-#~ "No read access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nincs olvasási hozzáférés a(z) %1$s levélmappához a(z) %2$s kiszolgálón a"
-#~ "(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
-
-#~ msgid "No rename access to mail folder %1$s"
-#~ msgstr "Nincs átnevezési hozzáférés a(z) %1$s levélmappához"
-
-#~ msgid ""
-#~ "No rename access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nincs átnevezési hozzáférés a(z) %1$s levélmappához a(z) %2$s kiszolgálón "
-#~ "a(z) %3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
 
 #~ msgid ""
 #~ "No servlet class name found for key \"%s\". Please check servlet mappings."
@@ -15847,52 +16083,11 @@ msgstr "Zulu"
 #~ "Nem található servletosztály-név a(z) „%s” kulcshoz. Ellenőrizze a "
 #~ "servletleképezéseket."
 
-#~ msgid "No support of capability \"THREAD=REFERENCES\""
-#~ msgstr "A „THREAD=REFERENCES” képesség nem támogatott"
-
-#~ msgid ""
-#~ "No support of capability \"THREAD=REFERENCES\" on server %2$s with login "
-#~ "%3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "A „THREAD=REFERENCES” képesség nem támogatott a(z) %2$s kiszolgálón a(z) "
-#~ "%3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
-
-#~ msgid "No write access to IMAP folder %1$s"
-#~ msgstr "Nincs írási hozzáférés a(z) %1$s IMAP-mappához"
-
-#~ msgid ""
-#~ "No write access to IMAP folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "Nincs írási hozzáférés a(z) %1$s IMAP-mappához a(z) %2$s kiszolgálón a(z) "
-#~ "%3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
-
-#~ msgid ""
-#~ "Not allowed to open folder %1$s due to missing read access on server %2$s "
-#~ "with login %3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "A hiányzó olvasási hozzáférés miatt nem engedélyezett a(z) %1$s mappa "
-#~ "megnyitása a(z) %2$s kiszolgálón %3$s bejelentkezéssel (felhasználó=%4$s, "
-#~ "kontextus=%5$s)"
-
 #~ msgid "Problem with a thread."
 #~ msgstr "Probléma egy szállal."
 
 #~ msgid "Property error: %s"
 #~ msgstr "Tulajdonság hiba: %1$s"
-
-#~ msgid ""
-#~ "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\" on server %4$s "
-#~ "with login %5$s (user=%6$s, context=%7$s)."
-#~ msgstr ""
-#~ "Nem sikerült a(z) „%1$s” mappát „%2$s” névre átnevezni a(z) %4$s "
-#~ "kiszolgálón a(z) %5$s bejelentkezéssel, hibaüzenet: „%3$s” (felhasználó="
-#~ "%6$s, kontextus=%7$s)."
-
-#~ msgid "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\"."
-#~ msgstr ""
-#~ "Nem sikerült a(z) „%1$s” mappát „%2$s” névre átnevezni, hibaüzenet: "
-#~ "„%3$s”."
 
 #~ msgid "Response package exceeds max package size value of 8192k: %1$s"
 #~ msgstr ""
@@ -15914,40 +16109,8 @@ msgstr "Zulu"
 #~ "A webkiszolgáló lezárta a foglalatot. A várakozás a(z) %1$d. csomag "
 #~ "bemeneti adataira %2$d msec-ig tartott."
 
-#~ msgid "Sort field %1$s is not supported via IMAP SORT command"
-#~ msgstr ""
-#~ "A(z) %1$s rendezési mező nem támogatott az IMAP SORT parancson keresztül"
-
-#~ msgid ""
-#~ "Sort field %1$s is not supported via IMAP SORT command on server %2$s "
-#~ "with login %3$s (user=%4$s, context=%5$s)"
-#~ msgstr ""
-#~ "A(z) %1$s rendezési mező nem támogatott az IMAP SORT parancson keresztül a"
-#~ "(z) %2$s kiszolgálón a(z) %3$s bejelentkezéssel (felhasználó=%4$s, "
-#~ "kontextus=%5$s)"
-
 #~ msgid "String parse exception: No ending 0x00 found"
 #~ msgstr "Karakterlánc-feldolgozási kivétel: nem található a 0x00 befejezés"
-
-#~ msgid ""
-#~ "The composed rights could not be applied to new folder %1$s due to "
-#~ "missing administer right in its initial rights specified by IMAP server. "
-#~ "However, the folder has been created on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)."
-#~ msgstr ""
-#~ "Az összesített jogok nem alkalmazhatók a(z) %1$s új mappára az IMAP-"
-#~ "kiszolgáló által megadott kiinduló jogok közül hiányzó adminisztrációs "
-#~ "jog miatt. A mappa ennek ellenére létrejött a(z) %2$s kiszolgálón a(z) "
-#~ "%3$s bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)."
-
-#~ msgid ""
-#~ "The composed rights could not be applied to new folder %1$s due to "
-#~ "missing administer right in its initial rights specified by IMAP server. "
-#~ "However, the folder has been created."
-#~ msgstr ""
-#~ "Az összesített jogok nem alkalmazhatók a(z) %1$s új mappára az IMAP-"
-#~ "kiszolgáló által megadott kiinduló jogok közül hiányzó adminisztrációs "
-#~ "jog miatt. A mappa ennek ellenére létrejött."
 
 #~ msgid ""
 #~ "The configuration requests a master password but none is given in the "
@@ -15986,17 +16149,6 @@ msgstr "Zulu"
 #~ msgstr "A pozíció, ahová a szabályt hozzá kellene adni túl nagy"
 
 #~ msgid ""
-#~ "The raw content's input stream of message %1$s in folder %2$s cannot be "
-#~ "read on server %3$s with login %4$s (user=%5$s, context=%6$s)"
-#~ msgstr ""
-#~ "A nyers tartalom bemeneti adatfolyama nem olvasható a(z) %1$s üzenetből a"
-#~ "(z) %2$s mappában a(z) %3$s kiszolgálón a(z) %4$s bejelentkezéssel "
-#~ "(felhasználó=%5$s, kontextus=%6$s)"
-
-#~ msgid "Unable to parse IMAP server URI \"%1$s\"."
-#~ msgstr "Nem dolgozható fel a(z) „%1$s” IMAP-kiszolgáló URI."
-
-#~ msgid ""
 #~ "Unexpected empty body package received from web server. Total-Received: "
 #~ "%1$d | Content-Length: %2$d.\n"
 #~ "Corresponding AJP forward package:\n"
@@ -16010,32 +16162,8 @@ msgstr "Zulu"
 #~ msgid "Unknown Request Prefix Code: %1$s"
 #~ msgstr "Ismeretlen kéréselőtagkód: %1$s"
 
-#~ msgid "Unknown folder open mode %1$s"
-#~ msgstr "Ismeretlen mappamegnyitási mód: %1$s"
-
-#~ msgid ""
-#~ "Unknown folder open mode %1$s on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Ismeretlen mappamegnyitási mód (%1$s) a(z) %2$s kiszolgálón %3$s "
-#~ "bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
-
-#~ msgid ""
-#~ "Unknown search field: %1$s on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Ismeretlen keresőmező (%1$s) a(z) %2$s kiszolgálón a(z) %3$s "
-#~ "bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
-
 #~ msgid "Unparseable header field %1$s in forward request package"
 #~ msgstr "Feldolgozhatatlan fejlécmező (%1$s) az előzetes kéréscsomagban"
-
-#~ msgid ""
-#~ "Update of folder %1$s failed on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "A(z) %1$s mappa frissítése sikertelen a(z) %2$s kiszolgálón %3$s "
-#~ "bejelentkezéssel (felhasználó=%4$s, kontextus=%5$s)"
 
 #~ msgid "mail filter servlet cannot be registered: %s"
 #~ msgstr "a levélszűrő servlet nem regisztrálható: %1$s."
