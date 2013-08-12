@@ -188,6 +188,10 @@ public class QueryAction extends RTAction {
             LOG.error(e);
             RealtimeException re = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(e, e.getMessage());
             throw re;
+        } catch (Throwable e) {
+            LOG.error(e);
+            RealtimeException re = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(e, e.getMessage());
+            throw re;
         } finally {
             sendLock.unlock();
         }
