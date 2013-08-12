@@ -79,9 +79,9 @@ import com.openexchange.realtime.util.StanzaSequenceGate;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class RTProtocolImpl implements RTProtocol {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(RTProtocol.class);
-    
+
     private static final AtomicReference<RTProtocolImpl> PROTOCOL = new AtomicReference<RTProtocolImpl>();
 
     public static RTProtocol getInstance() {
@@ -98,7 +98,7 @@ public class RTProtocolImpl implements RTProtocol {
     public void getReceived(RTClientState state, StanzaTransmitter transmitter) {
         emptyBuffer(state, transmitter);
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.realtime.atmosphere.protocol.RTProtocol#ping(com.openexchange.realtime.packet.ID, boolean, com.openexchange.realtime.atmosphere.protocol.RTClientState, com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter)
      */
@@ -136,7 +136,7 @@ public class RTProtocolImpl implements RTProtocol {
             state.unlock();
         }
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.realtime.atmosphere.protocol.RTProtocol#receivedMessage(com.openexchange.realtime.packet.Stanza, com.openexchange.realtime.util.StanzaSequenceGate, com.openexchange.realtime.atmosphere.protocol.RTClientState, boolean, com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter)
      */
@@ -166,12 +166,12 @@ public class RTProtocolImpl implements RTProtocol {
             state.unlock();
         }
     }
-    
+
     @Override
     public void nextSequence(ID constructedId, int newSequence, StanzaSequenceGate gate) {
         gate.resetThreshold(constructedId, newSequence);
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.realtime.atmosphere.protocol.RTProtocol#receivedMessage(com.openexchange.realtime.packet.Stanza, com.openexchange.realtime.util.StanzaSequenceGate, com.openexchange.realtime.atmosphere.protocol.RTClientState, boolean, com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter)
      */
@@ -201,6 +201,7 @@ public class RTProtocolImpl implements RTProtocol {
     @Override
     public void emptyBuffer(RTClientState state, StanzaTransmitter transmitter) {
         if (transmitter == null) {
+            LOG.debug("Transmitter was null.");
             return;
         }
         try {
@@ -209,6 +210,7 @@ public class RTProtocolImpl implements RTProtocol {
 
             List<Stanza> stanzasToSend = state.getStanzasToSend();
             if (stanzasToSend.isEmpty()) {
+                LOG.debug("No stanzas to send. Suspending transmitter...");
                 transmitter.suspend();
                 return;
             }
@@ -225,9 +227,9 @@ public class RTProtocolImpl implements RTProtocol {
             state.unlock();
         }
     }
-    
+
     // Protected methods
-    
+
     protected void sendPong(ID to, RTClientState state, StanzaTransmitter transmitter) {
         Stanza s = new Message();
         s.setFrom(to);
@@ -240,7 +242,7 @@ public class RTProtocolImpl implements RTProtocol {
         state.enqueue(s);
         emptyBuffer(state, transmitter);
     }
-    
+
     protected void enqueueNextSequence(ID to, RTClientState state, StanzaTransmitter transmitter) {
         NextSequence nextSequence = new NextSequence(to, to, 0);
         state.enqueue(nextSequence);
@@ -275,11 +277,11 @@ public class RTProtocolImpl implements RTProtocol {
             } catch (Exception e) {
                 LOG.error("Error while handling RealtimeException: " + stanza, e);
             }
-            
-        } 
+
+        }
         LOG.error(exception.getMessage(), exception);
     }
-    
+
     @Override
     public void handleRealtimeExceptionDirectly(RealtimeException exception, AtmosphereResource resource) {
         try {
