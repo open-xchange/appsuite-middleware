@@ -65,7 +65,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.jcs.access.exception.CacheException;
-import org.apache.jcs.engine.control.CompositeCache;
 import org.apache.jcs.engine.control.CompositeCacheConfigurator;
 import org.apache.jcs.engine.control.CompositeCacheManager;
 import com.openexchange.caching.CacheExceptionCode;
@@ -431,9 +430,6 @@ public final class JCSCacheServiceInit {
         }
         props = null;
         defaultCacheRegions = null;
-        // Destroy default event queue processor
-        CompositeCache.elementEventQ.destroy();
-        // Shutdown cache manager
         ccmInstance.shutDown();
         ccmInstance = null;
         LOG.info("JCS caching system successfully stopped.");
