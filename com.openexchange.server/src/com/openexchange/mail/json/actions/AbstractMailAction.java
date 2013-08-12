@@ -435,10 +435,15 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     }
 
     protected static String getDefaultSendAddress(final ServerSession session) throws OXException {
+        return session.getUserSettingMail().getSendAddr();
+        /*-
+         *
         final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
             MailAccountStorageService.class,
             true);
         return storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()).getPrimaryAddress();
+         *
+         */
     }
 
     protected static boolean isEmpty(final String string) {
