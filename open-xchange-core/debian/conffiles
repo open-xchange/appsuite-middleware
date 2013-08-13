@@ -2,7 +2,6 @@ opt/open-xchange/etc/attachment.properties
 opt/open-xchange/etc/cache.ccf
 opt/open-xchange/etc/cache.properties
 opt/open-xchange/etc/calendar.properties
-opt/open-xchange/etc/cluster.properties
 opt/open-xchange/etc/configdb.properties
 opt/open-xchange/etc/contact.properties
 opt/open-xchange/etc/contactcollector.properties
