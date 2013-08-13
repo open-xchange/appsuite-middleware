@@ -130,6 +130,17 @@ public interface UserService {
     /**
      * Reads the data from a user from the underlying persistent data storage.
      *
+     * @param uid The user identifier.
+     * @param contextId The context identifier.
+     * @return The user
+     * @throws OXException If an error occurs while reading from the persistent storage or the user doesn't exist.
+     * @see #getContext(int)
+     */
+    User getUser(int uid, int contextId) throws OXException;
+
+    /**
+     * Reads the data from a user from the underlying persistent data storage.
+     *
      * @param con The database connection
      * @param uid The user identifier.
      * @param context The context
@@ -213,7 +224,7 @@ public interface UserService {
      * @see #getContext(int)
      */
     User searchUser(String email, Context context) throws OXException;
-    
+
     /**
      * Searches a user by its email address. This is used for converting iCal to appointments.
      *

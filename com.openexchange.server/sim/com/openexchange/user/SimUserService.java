@@ -100,6 +100,12 @@ public class SimUserService implements UserService {
     }
 
     @Override
+    public User getUser(int uid, int contextId) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
     public User[] getUser(final Context context, final int[] userIds) throws OXException {
         // Nothing to do
         return null;
