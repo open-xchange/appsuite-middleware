@@ -46,12 +46,12 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-
 package com.openexchange.realtime.atmosphere.impl;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.openexchange.realtime.packet.Message;
-import static org.junit.Assert.*;
 
 
 /**
@@ -59,19 +59,25 @@ import static org.junit.Assert.*;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class EnqueuedStanzaTest {
+public class EnqueuedStanzaTest extends EnqueuedStanza {
+
     @Test
     public void incCounterShouldReturnTrueTheFirstOneHundredTimesAndFalseAfterThat() {
-        Message message = new Message();
-        message.setSequenceNumber(23);
-        
-        EnqueuedStanza enqueuedStanza = new EnqueuedStanza(message);
-        for(long i = 0; i < Integer.MAX_VALUE + 1; i++) {
-            if (i < 100) {
-                assertTrue(enqueuedStanza.incCounter());
+        sequenceNumber = 23L;
+        count = 0;
+        stanza = new Message();
+
+        for(int i = 0; i < getInfinity() + 1; i++) {
+            if (i < getInfinity()) {
+                assertTrue(incCounter());
             } else {
-                assertFalse(enqueuedStanza.incCounter());
+                assertFalse(incCounter());
             }
         }
+    }
+
+    @Override
+    protected int getInfinity() {
+        return 100;
     }
 }

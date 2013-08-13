@@ -65,6 +65,8 @@ public class EnqueuedStanza implements Comparable<EnqueuedStanza>{
     public long sequenceNumber;
     public int count;
     
+    protected EnqueuedStanza() {}
+    
     public EnqueuedStanza(Stanza stanza) {
         this.stanza = stanza;
         this.sequenceNumber = stanza.getSequenceNumber();
@@ -82,7 +84,7 @@ public class EnqueuedStanza implements Comparable<EnqueuedStanza>{
     public boolean incCounter() {
         synchronized(stanza) {
             count++;
-            if (count > INFINITY) {
+            if (count > getInfinity()) {
                 return false;
             }
             return true;
@@ -97,5 +99,10 @@ public class EnqueuedStanza implements Comparable<EnqueuedStanza>{
     @Override
     public boolean equals(Object obj) {
         return ((EnqueuedStanza)obj).sequenceNumber == sequenceNumber;
+    }
+    
+    
+    protected int getInfinity() {
+        return INFINITY;
     }
 }
