@@ -12,8 +12,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-imap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-kerberos"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authorization-standard"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-cluster-discovery-static"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-cluster-discovery-mdns"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-dav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-imap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-smtp"/>

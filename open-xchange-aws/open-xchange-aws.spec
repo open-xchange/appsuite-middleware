@@ -16,7 +16,6 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange AWS cluster package
 Requires:      open-xchange-core >= @OXVERSION@
-Conflicts:     open-xchange-mdns
 
 %description
 This package installs the OSGi bundles needed for the AWS cluster.
