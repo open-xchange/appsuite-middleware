@@ -1,3 +1,9 @@
+open-xchange-themes-default (7.4.0-4) stable; urgency=low
+
+  * Fourth release candidate for 7.4.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 13 Aug 2013 08:27:58 +0200
+
 open-xchange-themes-default (7.4.0-3) stable; urgency=low
 
   * Third release candidate for 7.4.0

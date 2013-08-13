@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -57,6 +57,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/solr/*
 
 %changelog
+* Tue Aug 13 2013 Steffen Templin <steffen.templin@open-xchange.com>
+Fourth release candidate for 7.4.0
 * Tue Aug 06 2013 Steffen Templin <steffen.templin@open-xchange.com>
 Third release candidate for 7.4.0
 * Fri Aug 02 2013 Steffen Templin <steffen.templin@open-xchange.com>
@@ -107,8 +109,8 @@ prepare for next EDP drop
 Release build for EDP drop #2
 * Mon Jun 04 2012 Steffen Templin <steffen.templin@open-xchange.com>
 Release build for EDP drop #2
-* Tue May 08 2012 Steffen Templin <steffen.templin@open-xchange.com>
-Build for Rev. 3
+* Fri May 11 2012 Steffen Templin <steffen.templin@open-xchange.com>
+Build for Rev. 4
 * Mon May 07 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Internal release build for EDP drop #2
 * Tue Feb 28 2012 Marcus Klein <marcus.klein@open-xchange.com>

@@ -1,3 +1,9 @@
+open-xchange-grizzly (7.4.0-4) stable; urgency=low
+
+  * Fourth release candidate for 7.4.0
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Tue, 13 Aug 2013 08:26:54 +0200
+
 open-xchange-grizzly (7.4.0-3) stable; urgency=low
 
   * Third release candidate for 7.4.0
