@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -48,51 +48,65 @@
  */
 
 
-package com.openexchange.hazelcast.configuration.osgi;
+package com.openexchange.hazelcast.configuration.internal;
 
-import org.apache.commons.logging.Log;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
-import com.openexchange.config.ConfigurationService;
+import com.hazelcast.config.TcpIpConfig;
+import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
-import com.openexchange.hazelcast.configuration.internal.AddNodeUtilCommandProvider;
-import com.openexchange.hazelcast.configuration.internal.HazelcastConfigurationServiceImpl;
-import com.openexchange.hazelcast.configuration.internal.Services;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.strings.StringParser;
+import com.openexchange.java.Strings;
 
 /**
- * {@link HazelcastConfigurationActivator}
+ * {@link AddNodeUtilCommandProvider}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class HazelcastConfigurationActivator extends HousekeepingActivator {
+public class AddNodeUtilCommandProvider implements CommandProvider {
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastConfigurationActivator.class);
+    private final HazelcastConfigurationService configService;
 
-    /**
-     * Initializes a new {@link HazelcastActivator}.
-     */
-    public HazelcastConfigurationActivator() {
+    public AddNodeUtilCommandProvider(HazelcastConfigurationService configService) {
         super();
+        this.configService = configService;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, StringParser.class };
+    public String getHelp() {
+        return "    addnode - Add a hazelcast node." + Strings.getLineSeparator();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.set(this);
-        HazelcastConfigurationServiceImpl configService = new HazelcastConfigurationServiceImpl(context);
-        registerService(HazelcastConfigurationService.class, configService);
-        registerService(CommandProvider.class, new AddNodeUtilCommandProvider(configService));
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        super.stopBundle();
-        Services.set(null);
+    public void _addnode(CommandInterpreter commandInterpreter) {
+        String ip = commandInterpreter.nextArgument();
+        if (Strings.isEmpty(ip)) {
+            commandInterpreter.println("Couldn't resolve IP: " + ip);
+            return;
+        }
+        try {
+            if (false == configService.isEnabled()) {
+                commandInterpreter.println("Hazelcast is disabled by configuration.");
+                return;
+            }
+            TcpIpConfig tcpIpConfig = configService.getConfig().getNetworkConfig().getJoin().getTcpIpConfig();
+            if (false == tcpIpConfig.isEnabled()) {
+                commandInterpreter.println("Hazelcast newtork join is not configured to use TCP/IP.");
+            }
+            InetAddress address = null;
+            try {
+                address = InetAddress.getByName(ip);
+            } catch (final UnknownHostException e) {
+                commandInterpreter.println("Couldn't resolve address: " + ip);
+            }
+            if (null != address) {
+                tcpIpConfig.addMember(address.getHostAddress());
+                commandInterpreter.println("Added node to cluster network configuration: " + ip);
+            }
+        } catch (OXException e) {
+            commandInterpreter.println("Error adding node to cluster network configuration: " + e.getMessage());
+            commandInterpreter.printStackTrace(e);
+        }
     }
 
 }

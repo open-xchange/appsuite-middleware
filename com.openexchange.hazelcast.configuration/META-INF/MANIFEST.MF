@@ -18,6 +18,7 @@ Import-Package: com.hazelcast.config,
  com.openexchange.server,
  com.openexchange.tools.strings,
  org.apache.commons.logging,
+ org.eclipse.osgi.framework.console;version="1.1.0",
  org.osgi.framework,
  org.osgi.util.tracker
 Bundle-ClassPath: .
