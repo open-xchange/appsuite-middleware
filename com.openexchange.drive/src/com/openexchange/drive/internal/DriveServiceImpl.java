@@ -673,7 +673,11 @@ public class DriveServiceImpl implements DriveService {
                 Map<String, FileStorageFolder> folders = session.getStorage().getFolders();
                 List<String> folderIDs = new ArrayList<String>(folders.size());
                 for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
-                    folderIDs.add(entry.getValue().getId());
+                    if (false == DriveConstants.PATH_VALIDATION_PATTERN.matcher(entry.getKey()).matches()) {
+                        session.trace("Skipping invalid server directory: " + entry.getKey());
+                    } else {
+                        folderIDs.add(entry.getValue().getId());
+                    }
                 }
                 List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(session, folderIDs);
                 List<ServerDirectoryVersion> serverDirectories = new ArrayList<ServerDirectoryVersion>(folderIDs.size());

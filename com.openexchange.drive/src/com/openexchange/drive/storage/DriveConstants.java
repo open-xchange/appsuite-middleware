@@ -128,7 +128,6 @@ public class DriveConstants {
      * http://msdn.microsoft.com/en-us/library/aa365247%28v=vs.85%29.aspx#file_and_directory_names
      */
     public static final Pattern FILENAME_VALIDATION_PATTERN = Pattern.compile(
-        "# Match a valid Windows filename (unspecified file system).          \n" +
         "^                                # Anchor to start of string.        \n" +
         "(?!                              # Assert filename is not: CON, PRN, \n" +
         "  (?:                            # AUX, NUL, COM1, COM2, COM3, COM4, \n" +
@@ -138,10 +137,18 @@ public class DriveConstants {
         "  (?:\\.[^.]*)?                  # followed by optional extension    \n" +
         "  $                              # and end of string                 \n" +
         ")                                # End negative lookahead assertion. \n" +
-        "[^<>:\"/\\\\|?*\\x00-\\x1F]*     # Zero or more valid filename chars.\n" +
-        "[^<>:\"/\\\\|?*\\x00-\\x1F\\ .]  # Last char is not a space or dot.  \n" +
+        "[^<>:/?*\"\\\\|\\x00-\\x1F]*     # Zero or more valid filename chars.\n" +
+        "[^<>:/?*\"\\\\|\\x00-\\x1F\\ .]  # Last char is not a space or dot.  \n" +
         "$                                # Anchor to end of string.            ",
         Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | Pattern.COMMENTS);
+
+    /**
+     * Pattern to match valid path names as used by the drive module, based on
+     * http://msdn.microsoft.com/en-us/library/aa365247%28v=vs.85%29.aspx#file_and_directory_names
+     */
+    public static final Pattern PATH_VALIDATION_PATTERN = Pattern.compile(
+        "^(?:/|(?:/[^<>:/?*\"\\\\|\\x00-\\x1F]*[^<>:/?*\"\\\\|\\x00-\\x1F\\ .])+)$",
+        Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
     /**
      * Pattern to match filenames that are excluded from synchronization, i.e. system files like "Thumbs.db" or ".DS_Store".
