@@ -126,8 +126,9 @@ public interface GeneralControlMBean {
 
     /**
      * Shuts down the OSGi framework through invoking closure of top-level system bundle.
+     * @param waitForExit <code>true</code> to wait for the OSGi framework being shut down completely; otherwise <code>false</code>.
      */
-    public void shutdown();
+    public boolean shutdown(boolean waitForExit);
 
     /**
      * Lists all available registered services.

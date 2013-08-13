@@ -1025,21 +1025,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      */
     private static final int SIZE_THRESHOLD = 1048576;
 
-    private static volatile DeleteOnExitFileCleaningTracker fileCleaningTracker;
-    private static DeleteOnExitFileCleaningTracker fileCleaningTracker() {
-        DeleteOnExitFileCleaningTracker tmp = fileCleaningTracker;
-        if (null == tmp) {
-            synchronized (AJAXServlet.class) {
-                tmp = fileCleaningTracker;
-                if (null == tmp) {
-                    tmp = new DeleteOnExitFileCleaningTracker(false);
-                    fileCleaningTracker = tmp;
-                }
-            }
-        }
-        return tmp;
-    }
-
     /**
      * Creates a new {@code ServletFileUpload} instance.
      *
@@ -1051,23 +1036,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         // Set factory constraints; threshold for single files
         factory.setSizeThreshold(SIZE_THRESHOLD);
         factory.setRepository(new File(ServerConfig.getProperty(Property.UploadDirectory)));
-        factory.setFileCleaningTracker(fileCleaningTracker());
         // Create a new file upload handler
         final ServletFileUpload sfu = new ServletFileUpload(factory);
         // Set overall request size constraint
         sfu.setSizeMax(-1);
         return sfu;
-    }
-
-    /**
-     * Exits the file cleaning tracker.
-     */
-    public static void exitTracker() {
-        final DeleteOnExitFileCleaningTracker tracker = AJAXServlet.fileCleaningTracker;
-        if (null != tracker) {
-            tracker.deleteAllTracked();
-            AJAXServlet.fileCleaningTracker = null;
-        }
     }
 
     private static final Set<String> UPLOAD_ACTIONS =

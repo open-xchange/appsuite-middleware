@@ -1,3 +1,7 @@
+* 2013-08-13 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23141: Terminate OSGi framework and backend gracefully allowing components to remove their temporary things.
+
 * 2013-08-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 23992: Introduced property to disable folder caches in IMAP
@@ -2047,7 +2051,6 @@
 
 * 2012-09-29 - thorben.betten@open-xchange.com
 
- - Fix for bug 23141: Introduced special FileCleaningTracker which invokes File.deleteOnExit() on each incoming file upload
  - Fix for bug 23139: Configuration option whether to prefer GSSAPI authentication mechanism if supported by SIEVE backend
  - Fix for bug 23042: Sanitize Content-Type header prior to writing a message's content
  - Fix for bug 23039: Convert string representation of a decimal number with arbitrary length to an integer value

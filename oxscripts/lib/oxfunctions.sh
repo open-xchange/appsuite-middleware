@@ -150,22 +150,23 @@ ox_stop_daemon() {
     test -z "$name" && die "ox_stop_daemon: missing name argument (arg 1)"
     ox_system_type
     local type=$?
+    /opt/open-xchange/sbin/shutdown -w
     if [ $type -eq $DEBIAN -o $type -eq $UCS ] ; then
-	start-stop-daemon --stop --oknodo --pidfile /var/run/${name}.pid
-	rm -f /var/run/${name}.pid
+        start-stop-daemon --stop --oknodo --pidfile /var/run/${name}.pid
+        rm -f /var/run/${name}.pid
     elif [ $(( $type & $LSB )) -eq $LSB ]; then
-	if [ ! -f /var/run/${name}.pid ]; then
-	    return 0
-	fi
-	read PID < /var/run/${name}.pid
-	test -z "$PID" && { echo "unable to read pid"; return 1; }
-	if ! ps $PID > /dev/null; then
-	    return 0
-	fi
-	kill -TERM $PID
-	rm -f /var/run/${name}.pid
+        if [ ! -f /var/run/${name}.pid ]; then
+            return 0
+        fi
+        read PID < /var/run/${name}.pid
+        test -z "$PID" && { echo "unable to read pid"; return 1; }
+        if ! ps $PID > /dev/null; then
+            return 0
+        fi
+        kill -TERM $PID
+        rm -f /var/run/${name}.pid
     else
-	die "Unable to handle unknown system type"
+        die "Unable to handle unknown system type"
     fi
 }
 
