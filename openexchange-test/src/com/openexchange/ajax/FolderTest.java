@@ -1191,8 +1191,8 @@ public class FolderTest extends AbstractAJAXTest {
         for (int i = 0; i < size; i++) {
             final JSONArray row = arr.optJSONArray(i);
             assertNotNull(row);
-            assertTrue(row.length() == 1);
-            assertNotNull(row.get(0));
+            assertTrue(row.length() == 2);
+            assertNotNull(row.get(1));
         }
     }
 
