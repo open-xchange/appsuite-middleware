@@ -154,4 +154,24 @@ public class HazelcastActivator extends HousekeepingActivator {
         openTrackers();
     }
 
+    @Override
+    protected void stopBundle() throws Exception {
+        boolean infoEnabled = LOG.isInfoEnabled();
+        if (infoEnabled) {
+            String lf = Strings.getLineSeparator();
+            LOG.info(lf + "Hazelcast:" + lf + "    Shutting down..." + lf);
+        }
+        long start = infoEnabled ? System.currentTimeMillis() : 0L;
+        HazelcastInstance instance = REF_HAZELCAST_INSTANCE.get();
+        if (null != instance) {
+            instance.getLifecycleService().shutdown();
+            REF_HAZELCAST_INSTANCE.set(null);
+        }
+        if (LOG.isInfoEnabled()) {
+            String lf = Strings.getLineSeparator();
+            LOG.info(lf + "Hazelcast:" + lf + "    Shutdown completed after " + (System.currentTimeMillis() - start) + " msec." + lf);
+        }
+        super.stopBundle();
+    }
+
 }
