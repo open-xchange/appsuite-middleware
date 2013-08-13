@@ -3395,14 +3395,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              */
             final MailPath msgref = composedMail.getMsgref();
             if (msgref != null && draftFullName.equals(msgref.getFolder())) {
-                if (accountId != msgref.getAccountId()) {
-                    LOG.warn(
-                        new com.openexchange.java.StringAllocator("Differing account ID in msgref attribute.\nMessage storage account ID: ").append(accountId).append(
-                            ".\nmsgref account ID: ").append(msgref.getAccountId()).toString(),
-                        new Throwable());
+                final ComposeType sendType = composedMail.getSendType();
+                if (null == sendType || ComposeType.DRAFT_EDIT.equals(sendType)) {
+                    if (accountId != msgref.getAccountId()) {
+                        LOG.warn(
+                            new com.openexchange.java.StringAllocator("Differing account ID in msgref attribute.\nMessage storage account ID: ").append(accountId).append(
+                                ".\nmsgref account ID: ").append(msgref.getAccountId()).toString(),
+                                new Throwable());
+                    }
+                    deleteMessagesLong(msgref.getFolder(), new long[] { parseUnsignedLong(msgref.getMailID()) }, true);
+                    composedMail.setMsgref(null);
                 }
-                deleteMessagesLong(msgref.getFolder(), new long[] { parseUnsignedLong(msgref.getMailID()) }, true);
-                composedMail.setMsgref(null);
             }
             /*
              * Force folder update
