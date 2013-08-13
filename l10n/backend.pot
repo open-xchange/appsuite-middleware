@@ -226,7 +226,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.loxandra/src/com/openexchange/loxandra/LoxandraExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:92
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.management/src/com/openexchange/management/ManagementExceptionMessage.java:106
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mdns/src/com/openexchange/mdns/MDNSExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:70
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:70
@@ -241,7 +240,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/configuration/ConfigurationExceptionMessage.java:94
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:118
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/passwordchange/PasswordChangeExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/TextXtractExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tokenlogin/src/com/openexchange/tokenlogin/TokenLoginExceptionMessages.java:73
@@ -1077,7 +1075,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.loxandra/src/com/openexchange/loxandra/LoxandraExceptionMessages.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:62
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mdns/src/com/openexchange/mdns/MDNSExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.sms/src/com/openexchange/messaging/sms/service/SMSMessagingExceptionMessages.java:62
@@ -1100,7 +1097,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:86
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:125
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/passwordchange/PasswordChangeExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:116
@@ -1125,7 +1121,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:65
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:71
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mdns/src/com/openexchange/mdns/MDNSExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:73
@@ -11407,58 +11402,6 @@ msgstr ""
 #. "%1$s" is a directory.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/webdav/protocol/WebdavProtocolExceptionMessage.java:91
 msgid "\"%1$s\" is a directory."
-msgstr ""
-
-#. The IP address of host %1$s could not be determined.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:69
-msgid "The IP address of host %1$s could not be determined."
-msgstr ""
-
-#. Integer value is too big: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:72
-msgid "Integer value is too big: %1$s"
-msgstr ""
-
-#. Missing previous truncated message package(s).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:75
-msgid "Missing previous truncated message package(s)."
-msgstr ""
-
-#. Conflicting truncated message package(s).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:78
-msgid "Conflicting truncated message package(s)."
-msgstr ""
-
-#. Missing or wrong magic bytes: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:81
-msgid "Missing or wrong magic bytes: %1$s"
-msgstr ""
-
-#. Unknown prefix code: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:84
-msgid "Unknown prefix code: %1$s"
-msgstr ""
-
-#. Invalid message package
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:87
-msgid "Invalid message package"
-msgstr ""
-
-#. Unparseable string.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:90
-msgid "Unparsable string."
-msgstr ""
-
-#. Invalid quoted-printable encoding.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:93
-msgid "Invalid quoted-printable encoding."
-msgstr ""
-
-#. Messaging server socket could not be bound to port %1$d. Probably another process is already listening on this port.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.service.messaging/src/com/openexchange/service/messaging/MessagingServiceExceptionMessages.java:96
-msgid ""
-"Messaging server socket could not be bound to port %1$d. Probably another "
-"process is already listening on this port."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage.nosql/src/com/openexchange/sessionstorage/nosql/exceptions/OXNoSQLSessionStorageExceptionMessages.java:61
