@@ -22,7 +22,6 @@ Requires:      open-xchange-mailstore
 Requires:      open-xchange-httpservice
 Requires:      open-xchange-theme-default
 Requires:      open-xchange-smtp >= @OXVERSION@
-Requires:      open-xchange-cluster-discovery
 %if 0%{?rhel_version}
 # Bug #23216
 Requires:      redhat-lsb
