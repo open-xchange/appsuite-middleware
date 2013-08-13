@@ -55,6 +55,7 @@ import com.openexchange.i18n.LocalizableStrings;
  * {@link UploadExceptionMessage}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UploadExceptionMessage implements LocalizableStrings {
 
@@ -65,66 +66,47 @@ public class UploadExceptionMessage implements LocalizableStrings {
         super();
     }
 
-    /**
-     * File upload failed: %1$s
-     */
+    // File upload failed: %1$s
     public final static String UPLOAD_FAILED_MSG = "File upload failed: %1$s";
 
-    /**
-     * Missing affiliation id
-     */
+    // Missing affiliation id
     public final static String MISSING_AFFILIATION_ID_MSG = "Missing affiliation id";
 
-    /**
-     * Unknown action value: %1$s
-     */
+    // Unknown action value: %1$s
     public final static String UNKNOWN_ACTION_VALUE_MSG = "Unknown action value: %1$s";
 
-    /**
-     * Header "content-type" does not indicate multipart content
-     */
+    // Header "content-type" does not indicate multipart content
     public final static String NO_MULTIPART_CONTENT_MSG = "Header \"content-type\" does not indicate multipart content";
 
-    /**
-     * Request rejected because its size (%1$s) exceeds the maximum configured size of %2$s
-     */
+    // Request rejected because its size (%1$s) exceeds the maximum configured size of %2$s
     public final static String MAX_UPLOAD_SIZE_EXCEEDED_MSG = "Request rejected because its size (%1$s) exceeds the maximum configured size of %2$s";
 
-    /**
-     * Missing parameter %1$s
-     */
+    // Missing parameter %1$s
     public final static String MISSING_PARAM_MSG = "Missing parameter %1$s";
 
-    /**
-     * Unknown module: %1$d
-     */
+    // Unknown module: %1$d
     public final static String UNKNOWN_MODULE_MSG = "Unknown module: %1$d";
 
-    /**
-     * An uploaded file referenced by %1$s could not be found
-     */
+    // An uploaded file referenced by %1$s could not be found
     public final static String UPLOAD_FILE_NOT_FOUND_MSG = "An uploaded file referenced by %1$s could not be found";
 
-    /**
-     * Invalid action value: %1$s
-     */
+    // Invalid action value: %1$s
     public final static String INVALID_ACTION_VALUE_MSG = "Invalid action value: %1$s";
 
-    /**
-     * Upload file with id %1$s could not be found
-     */
+    // Upload file with id %1$s could not be found
     public final static String FILE_NOT_FOUND_MSG = "Upload file with id %1$s could not be found";
 
     // Upload file's content type \"%1$s\" does not match given file filter \"%2$s\"
     // Thrown to indicate that currently uploaded file's MIME type does not obey a certain search criterion
     public final static String INVALID_FILE_TYPE_MSG = "Upload file's content type \"%1$s\" does not match given file filter \"%2$s\"";
 
-    /**
-     * An error occurred: %1$s
-     */
+    // An error occurred: %1$s
     public final static String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
 
     // Request rejected because its size exceeds the maximum configured size of %1$s
     public static final String MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN_MSG = "Request rejected because its size exceeds the maximum configured size of %1$s";
+
+    // Connection has been closed unexpectedly. Please try again.
+    public static final String UNEXPECTED_EOF_MSG = "Connection has been closed unexpectedly. Please try again.";
 
 }
