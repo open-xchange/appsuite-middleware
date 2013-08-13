@@ -280,4 +280,14 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         return Boolean.parseBoolean(tmp.trim());
     }
 
+    @Override
+    public boolean allowFolderCaches() {
+        final String tmp = properties.get("com.openexchange.imap.allowFolderCaches");
+        if (null == tmp) {
+            return IMAPProperties.getInstance().allowFolderCaches();
+        }
+
+        return Boolean.parseBoolean(tmp.trim());
+    }
+
 }

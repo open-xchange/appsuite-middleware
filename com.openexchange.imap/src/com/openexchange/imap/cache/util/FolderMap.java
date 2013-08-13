@@ -52,8 +52,7 @@ package com.openexchange.imap.cache.util;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.Weighers;
+import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
@@ -70,7 +69,7 @@ public final class FolderMap {
      */
     public FolderMap(final int maximumCapacity) {
         super();
-        map = new ConcurrentLinkedHashMap.Builder<String, MailFolder>().maximumWeightedCapacity(maximumCapacity).weigher(Weighers.entrySingleton()).build();
+        map = new ConcurrentLinkedHashMap<String, MailFolder>(maximumCapacity, 0.75F, 4, maximumCapacity, new ExpirationPolicy(0, 300000));
     }
 
     public MailFolder putIfAbsent(final String key, final MailFolder value) {

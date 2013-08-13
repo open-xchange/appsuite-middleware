@@ -60,6 +60,7 @@ import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.AccessedIMAPStore;
+import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.session.Session;
@@ -127,7 +128,7 @@ public final class ListLsubCache {
         return new Key(session.getUserId(), session.getContextId());
     }
 
-    private static final long TIMEOUT = 300000;
+    private static final long DEFAULT_TIMEOUT = 300000;
 
     private static final String INBOX = "INBOX";
 
@@ -439,7 +440,7 @@ public final class ListLsubCache {
         /*
          * Check collection's stamp
          */
-        if (collection.isDeprecated() || ((System.currentTimeMillis() - collection.getStamp()) > TIMEOUT)) {
+        if (collection.isDeprecated() || ((System.currentTimeMillis() - collection.getStamp()) > getTimeout())) {
             collection.reinit(imapFolder, DO_STATUS, DO_GETACL);
             return true;
         }
@@ -447,7 +448,11 @@ public final class ListLsubCache {
     }
 
     private static boolean isAccessible(final ListLsubCollection collection) {
-        return !collection.isDeprecated() && ((System.currentTimeMillis() - collection.getStamp()) <= TIMEOUT);
+        return !collection.isDeprecated() && ((System.currentTimeMillis() - collection.getStamp()) <= getTimeout());
+    }
+
+    private static long getTimeout() {
+        return IMAPProperties.getInstance().allowFolderCaches() ? DEFAULT_TIMEOUT : 20000L;
     }
 
     /**
