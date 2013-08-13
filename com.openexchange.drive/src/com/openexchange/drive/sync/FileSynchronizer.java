@@ -110,6 +110,32 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 uploadActions.get(i).getParameters().put(DriveAction.PARAMETER_OFFSET, uploadOffsets.get(i));
             }
         }
+        /*
+         * handle any case-conflicting client versions
+         */
+        if (null != mapper.getCaseConflictingClientVersions() && 0 < mapper.getCaseConflictingClientVersions().size()) {
+            for (FileVersion clientVersion : mapper.getCaseConflictingClientVersions()) {
+                /*
+                 * let client first rename it's file...
+                 */
+                FileVersion renamedVersion = getRenamedVersion(session, clientVersion);
+                ThreeWayComparison<FileVersion> twc = new ThreeWayComparison<FileVersion>();
+                twc.setClientVersion(clientVersion);
+                syncResult.addActionForClient(new EditFileAction(clientVersion, renamedVersion, twc, path));
+                /*
+                 * ... then upload it if possible
+                 */
+                if (mayCreate()) {
+                    UploadFileAction uploadAction = new UploadFileAction(null, renamedVersion, twc, path, 0);
+                    uploadActions.add(uploadAction);
+                    syncResult.addActionForClient(uploadAction);
+                } else {
+                    syncResult.addActionForClient(new ErrorFileAction(clientVersion, renamedVersion, null, path,
+                        DriveExceptionCodes.NO_CREATE_FILE_PERMISSION.create(path), true));
+                }
+            }
+
+        }
         return syncResult;
     }
 
