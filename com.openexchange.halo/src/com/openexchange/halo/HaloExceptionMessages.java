@@ -47,41 +47,38 @@
  *
  */
 
-package com.openexchange.halo.linkedin;
+package com.openexchange.halo;
 
-import java.util.List;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.halo.HaloContactDataSource;
-import com.openexchange.halo.HaloContactQuery;
-import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.i18n.LocalizableStrings;
 
-public class LinkedinUpdatesDataSource extends AbstractLinkedinDataSource implements HaloContactDataSource {
 
-    public LinkedinUpdatesDataSource(final ServiceLookup lookup) {
-        setServiceLookup(lookup);
-    }
+/**
+ * {@link HaloExceptionMessages} - Exception messages for halo module that needs to be translated.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class HaloExceptionMessages implements LocalizableStrings {
 
-    @Override
-    public AJAXRequestResult investigate(final HaloContactQuery query, final AJAXRequestData req, final ServerSession session) throws OXException {
-        final String password = session.getPassword();
-        final int uid = session.getUserId();
-        final int cid = session.getContextId();
+    // An error occurred: %1$s
+    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
 
-        final List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", session, uid, cid);
-        if (accounts.isEmpty()) {
-            throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
-        }
+    // An I/O error occurred: %1$s
+    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
 
-        final OAuthAccount linkedinAccount = accounts.get(0);
-        final JSONObject json = getLinkedinService().getNetworkUpdates(session, uid, cid, linkedinAccount.getId());
-        final AJAXRequestResult result = new AJAXRequestResult();
-        result.setResultObject(json, "json");
-        return result;
+    // Unknown provider: %1$s
+    public static final String UNKNOWN_PROVIDER_MSG = "Unknown provider: %1$s";
+
+    // Unavailable provider: %1$s
+    public static final String UNAVAILABLE_PROVIDER_MSG = "Unavailable provider: %1$s";
+
+    // Cannot search a contact that is neither an internal user nor has an e-mail address.
+    public static final String INVALID_CONTACT_MSG = "Cannot search a contact that is neither an internal user nor has an e-mail address.";
+
+    /**
+     * Initializes a new {@link HaloExceptionMessages}.
+     */
+    private HaloExceptionMessages() {
+        super();
     }
 
 }

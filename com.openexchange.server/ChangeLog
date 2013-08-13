@@ -4,6 +4,7 @@
  - Fix for bug 26023: Specify supported SSL protocols on secure connect attempt
  - Change for bug 27420: Handle possible unexpected EOF gracefully
  - Fix for bug 28125: Track I18nService as an optional service
+ - Fix for bug 27565/28241: Orderly check for Halo service's availability
 
 * 2013-08-12 - thorben.betten@open-xchange.com
 

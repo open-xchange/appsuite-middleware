@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.halo.linkedin;
 
 import java.util.List;
@@ -59,29 +60,28 @@ import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
-public class LinkedinInboxDataSource extends AbstractLinkedinDataSource
-		implements HaloContactDataSource {
+public class LinkedinInboxDataSource extends AbstractLinkedinDataSource implements HaloContactDataSource {
 
-	public LinkedinInboxDataSource(final ServiceLookup lookup) {
-		setServiceLookup(lookup);
-	}
+    public LinkedinInboxDataSource(final ServiceLookup lookup) {
+        setServiceLookup(lookup);
+    }
 
-	@Override
-	public AJAXRequestResult investigate(final HaloContactQuery query, final AJAXRequestData req, final ServerSession session) throws OXException {
-		final String password = session.getPassword();
-		final int uid = session.getUserId();
-		final int cid = session.getContextId();
+    @Override
+    public AJAXRequestResult investigate(final HaloContactQuery query, final AJAXRequestData req, final ServerSession session) throws OXException {
+        final String password = session.getPassword();
+        final int uid = session.getUserId();
+        final int cid = session.getContextId();
 
-		final List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", session, uid, cid);
-		if(accounts.size() == 0) {
-            throw new OXException(1).setPrefix("HAL-LI").setLogMessage("Need at least 1 LinkedIn account");
+        final List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", session, uid, cid);
+        if (accounts.isEmpty()) {
+            throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
         }
 
-		final OAuthAccount linkedinAccount = accounts.get(0);
-		final JSONObject json = getLinkedinService().getMessageInbox(session, uid, cid, linkedinAccount.getId());
-		final AJAXRequestResult result = new AJAXRequestResult();
-		result.setResultObject(json, "json");
-		return result;
-	}
+        final OAuthAccount linkedinAccount = accounts.get(0);
+        final JSONObject json = getLinkedinService().getMessageInbox(session, uid, cid, linkedinAccount.getId());
+        final AJAXRequestResult result = new AJAXRequestResult();
+        result.setResultObject(json, "json");
+        return result;
+    }
 
 }
