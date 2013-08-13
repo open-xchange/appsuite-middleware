@@ -49,39 +49,33 @@
 
 package com.openexchange.halo.linkedin;
 
-import java.util.List;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.halo.HaloContactDataSource;
-import com.openexchange.halo.HaloContactQuery;
-import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.i18n.LocalizableStrings;
 
-public class LinkedinUpdatesDataSource extends AbstractLinkedinDataSource implements HaloContactDataSource {
 
-    public LinkedinUpdatesDataSource(final ServiceLookup lookup) {
-        setServiceLookup(lookup);
-    }
+/**
+ * {@link LinkedinHaloExceptionMessages} - Exception messages for Linked-In halo module that needs to be translated.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class LinkedinHaloExceptionMessages implements LocalizableStrings {
 
-    @Override
-    public AJAXRequestResult investigate(final HaloContactQuery query, final AJAXRequestData req, final ServerSession session) throws OXException {
-        final String password = session.getPassword();
-        final int uid = session.getUserId();
-        final int cid = session.getContextId();
+    // An error occurred: %1$s
+    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
 
-        final List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", session, uid, cid);
-        if (accounts.isEmpty()) {
-            throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
-        }
+    // An I/O error occurred: %1$s
+    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
 
-        final OAuthAccount linkedinAccount = accounts.get(0);
-        final JSONObject json = getLinkedinService().getNetworkUpdates(session, uid, cid, linkedinAccount.getId());
-        final AJAXRequestResult result = new AJAXRequestResult();
-        result.setResultObject(json, "json");
-        return result;
+    // No Linked-In account available.
+    public static final String NO_ACCOUNT_MSG = "No Linked-In account available.";
+
+    // Need an e-mail address to look up Linked-In data
+    public static final String MISSING_EMAIL_ADDR_MSG = "Need an e-mail address to look up Linked-In data.";
+
+    /**
+     * Initializes a new {@link LinkedinHaloExceptionMessages}.
+     */
+    private LinkedinHaloExceptionMessages() {
+        super();
     }
 
 }

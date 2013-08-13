@@ -50,9 +50,7 @@ package com.openexchange.halo.linkedin;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
@@ -92,13 +90,13 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
 
 		final List<String> email = getEMail(contact);
 		if(email == null || email.isEmpty()) {
-            throw new OXException(2).setPrefix("HAL-LI").setLogMessage("Need an e-mail address to look up LinkedIn data");
+            throw LinkedinHaloExceptionCodes.MISSING_EMAIL_ADDR.create();
         }
 
 
 		final List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", session, uid, cid);
-		if(accounts.size() == 0) {
-            throw new OXException(1).setPrefix("HAL-LI").setLogMessage("Need at least 1 LinkedIn account");
+		if(accounts.isEmpty()) {
+            throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
         }
 
 		final OAuthAccount linkedinAccount = accounts.get(0);
