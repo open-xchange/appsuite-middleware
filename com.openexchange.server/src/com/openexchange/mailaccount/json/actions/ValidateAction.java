@@ -190,6 +190,10 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         boolean validated = checkMailServerURL(accountDescription, session, warnings);
         // Failed?
         if (!validated) {
+
+            checkTransportServerURL(accountDescription, session, warnings);
+
+
             return Boolean.FALSE;
         }
         if (ignoreInvalidTransport) {
