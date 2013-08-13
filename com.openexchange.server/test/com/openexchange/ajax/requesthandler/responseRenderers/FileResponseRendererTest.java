@@ -56,6 +56,8 @@ import junit.framework.TestCase;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.SimConfigurationService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.SimHtmlService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -78,6 +80,9 @@ public class FileResponseRendererTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         ServerServiceRegistry.getInstance().addService(HtmlService.class, new SimHtmlService());
+        final SimConfigurationService simConfigurationService = new SimConfigurationService();
+        simConfigurationService.stringProperties.put("UPLOAD_DIRECTORY", "/tmp/");
+        ServerServiceRegistry.getInstance().addService(ConfigurationService.class, simConfigurationService);
     }
 
     @Override

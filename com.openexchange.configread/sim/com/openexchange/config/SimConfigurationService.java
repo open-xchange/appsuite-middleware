@@ -121,20 +121,17 @@ public class SimConfigurationService implements ConfigurationService {
 
     @Override
     public String getProperty(final String name, final PropertyListener listener) {
-        // Nothing to do
-        return null;
+        return stringProperties.get(name);
     }
 
     @Override
     public String getProperty(final String name, final String defaultValue, final PropertyListener listener) {
-        // Nothing to do
-        return null;
+        return stringProperties.containsKey(name) ? stringProperties.get(name) : defaultValue;
     }
 
     @Override
     public Iterator<String> propertyNames() {
-        // Nothing to do
-        return null;
+        return stringProperties.keySet().iterator();
     }
 
     @Override
