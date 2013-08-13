@@ -132,7 +132,7 @@ public class FileEventTest {
                 Set<String> versions = FileStorageEventHelper.extractVersions(event);
                 assertEquals("Wrong folder.", file.getFolderId(), folderId);
                 assertEquals("Wrong id.", file.getId(), objectId);
-                assertTrue("Too much versions.", versions.size() == 1);
+                assertEquals("Too much versions.", 1, versions.size());
                 String next = versions.iterator().next();
                 assertTrue("Wrong version.", next == file.getVersion());
             }
