@@ -69,6 +69,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
@@ -279,17 +280,9 @@ public abstract class MailConfig {
         /*
          * Fetch mail account
          */
-        final MailAccount mailAccount;
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
-        {
-            final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            if (accountId == MailAccount.DEFAULT_ID) {
-                mailAccount = storage.getDefaultMailAccount(userId, contextId);
-            } else {
-                mailAccount = storage.getMailAccount(accountId, userId, contextId);
-            }
-        }
+        final MailAccount mailAccount = ServerServiceRegistry.getServize(MailAccountStorageService.class, true).getMailAccount(accountId, userId, contextId);
         mailConfig.accountId = accountId;
         mailConfig.session = session;
         mailConfig.applyStandardNames(mailAccount);
@@ -769,22 +762,10 @@ public abstract class MailConfig {
     }
 
     private static void put(final int index, final String value, final String[] arr) {
-        if (isEmpty(value)) {
+        if (Strings.isEmpty(value)) {
             return;
         }
         arr[index] = MailFolderUtility.prepareMailFolderParam(value).getFullname();
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     @Override
