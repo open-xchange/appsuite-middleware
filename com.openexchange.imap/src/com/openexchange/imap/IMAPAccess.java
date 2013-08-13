@@ -1416,6 +1416,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Needed for JavaMail >= 1.4
              */
             // Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
+            /*
+             * Specify SSL protocols
+             */
+            imapProps.put("mail.imap.ssl.protocols", "SSLv3");
         } else {
             /*
              * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.

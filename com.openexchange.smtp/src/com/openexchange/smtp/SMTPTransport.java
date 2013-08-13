@@ -390,7 +390,7 @@ public final class SMTPTransport extends MailTransport {
                         /*
                          * Specify SSL protocols
                          */
-                        // smtpProps.put("mail.smtp.ssl.protocols", "SSLv3 TLSv1");
+                        smtpProps.put("mail.smtp.ssl.protocols", "SSLv3");
                         // smtpProps.put("mail.smtp.ssl", "true");
                         /*
                          * Needed for JavaMail >= 1.4
@@ -979,12 +979,10 @@ public final class SMTPTransport extends MailTransport {
         boolean close = false;
         final SMTPConfig config = getTransportConfig0();
         try {
-            try {
-                connectTransport(transport, config);
-                close = true;
-            } catch (final javax.mail.AuthenticationFailedException e) {
-                throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, config.getServer(), e.getMessage());
-            }
+            connectTransport(transport, config);
+            close = true;
+        } catch (final javax.mail.AuthenticationFailedException e) {
+            throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, config.getServer(), e.getMessage());
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, config, session);
         } finally {
