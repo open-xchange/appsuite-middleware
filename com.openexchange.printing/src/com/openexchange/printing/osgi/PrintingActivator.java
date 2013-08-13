@@ -57,24 +57,32 @@ import com.openexchange.printing.tasks.TaskTemplateHelperFactory;
 import com.openexchange.templating.TemplateHelperFactory;
 import com.openexchange.user.UserService;
 
+/**
+ * {@link PrintingActivator} - The activator for printing module.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class PrintingActivator extends AJAXModuleActivator {
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class[]{ I18nService.class, UserService.class};
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { UserService.class };
+    }
 
-	@Override
-	protected void startBundle() throws Exception {
-		PrintingServices.LOOKUP.set(this);
+    @Override
+    protected void startBundle() throws Exception {
+        PrintingServices.LOOKUP.set(this);
+
+        trackService(I18nService.class);
 
         registerService(TemplateHelperFactory.class, new ContactTemplateHelperFactory(this));
         registerService(TemplateHelperFactory.class, new TaskTemplateHelperFactory(this));
         registerService(TemplateHelperFactory.class, new EmailTemplateHelperFactory(this));
-	}
-	
-	protected void stopBundle() throws Exception {
-		PrintingServices.LOOKUP.set(null);
-		super.stopBundle();
-	}
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        PrintingServices.LOOKUP.set(null);
+        super.stopBundle();
+    }
 }
