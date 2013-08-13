@@ -64,6 +64,7 @@ import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -75,6 +76,26 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
 
     public DirectorySynchronizer(SyncSession session, VersionMapper<DirectoryVersion> mapper) throws OXException {
         super(session, mapper);
+    }
+
+    @Override
+    public IntermediateSyncResult<DirectoryVersion> sync() throws OXException {
+        IntermediateSyncResult<DirectoryVersion> syncResult = super.sync();
+        /*
+         * handle any case-conflicting client versions
+         */
+        if (null != mapper.getCaseConflictingClientVersions() && 0 < mapper.getCaseConflictingClientVersions().size()) {
+            for (DirectoryVersion clientVersion : mapper.getCaseConflictingClientVersions()) {
+                /*
+                 * indicate as error with quarantine flag
+                 */
+                ThreeWayComparison<DirectoryVersion> twc = new ThreeWayComparison<DirectoryVersion>();
+                twc.setClientVersion(clientVersion);
+                syncResult.addActionForClient(new ErrorDirectoryAction(null, clientVersion, twc,
+                    DriveExceptionCodes.CONFLICTING_PATH.create(clientVersion.getPath()), true));
+            }
+        }
+        return syncResult;
     }
 
     @Override
@@ -132,18 +153,26 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
             }
             break;
         case NEW:
-            String parentPath = getLastExistingParentPath(comparison.getClientVersion().getPath());
-            if (mayCreate(parentPath)) {
+            if (isInvalidPath(comparison.getClientVersion().getPath())) {
                 /*
-                 * new on client, let client synchronize the directory
-                 */
-                result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
-            } else {
-                /*
-                 * not allowed, indicate as error with quarantine flag
+                 * invalid path, indicate as error with quarantine flag
                  */
                 result.addActionForClient(new ErrorDirectoryAction(null, comparison.getClientVersion(), comparison,
-                    DriveExceptionCodes.NO_CREATE_DIRECTORY_PERMISSION.create(parentPath), true));
+                    DriveExceptionCodes.INVALID_PATH.create(comparison.getClientVersion().getPath()), true));
+            } else {
+                String parentPath = getLastExistingParentPath(comparison.getClientVersion().getPath());
+                if (mayCreate(parentPath)) {
+                    /*
+                     * new on client, let client synchronize the directory
+                     */
+                    result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
+                } else {
+                    /*
+                     * not allowed, indicate as error with quarantine flag
+                     */
+                    result.addActionForClient(new ErrorDirectoryAction(null, comparison.getClientVersion(), comparison,
+                        DriveExceptionCodes.NO_CREATE_DIRECTORY_PERMISSION.create(parentPath), true));
+                }
             }
             break;
         case MODIFIED:
@@ -246,6 +275,24 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
             }
         } while (0 < idx);
         return DriveConstants.ROOT_PATH;
+    }
+
+    /**
+     * Gets a value indicating whether the supplied path is invalid, i.e. it contains illegal characters or is not supported for
+     * other reasons.
+     *
+     * @param path The path to check
+     * @return <code>true</code> if the path is considered invalid, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    private static boolean isInvalidPath(String path) throws OXException {
+        if (Strings.isEmpty(path)) {
+            return true; // no empty paths
+        }
+        if (false == DriveConstants.PATH_VALIDATION_PATTERN.matcher(path).matches()) {
+            return true; // no invalid paths
+        }
+        return false;
     }
 
 }
