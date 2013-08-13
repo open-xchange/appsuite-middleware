@@ -715,7 +715,6 @@ public final class ServerActivator extends HousekeepingActivator {
             eventHandlerList.clear();
             // Stop all inside the server.
             starter.stop();
-            AJAXServlet.exitTracker();
             /*
              * Clear service registry
              */

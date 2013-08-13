@@ -51,6 +51,7 @@ package com.openexchange.control.console;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+import com.openexchange.control.console.internal.ValueObject;
 import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
@@ -66,9 +67,16 @@ public final class ShutDown extends AbstractConsoleHandler {
      * @param args The command-line arguments
      */
     public ShutDown(final String args[]) {
+        boolean completed = false;
         try {
             init(args, true);
-            shutdown();
+            boolean waitForExit = false;
+            for (ValueObject valueObject : getParser().getValueObjects()) {
+                if ("-w".equals(valueObject.getValue())) {
+                    waitForExit = true;
+                }
+            }
+            completed = shutdown(waitForExit);
         } catch (final Exception exc) {
             final Throwable cause = exc.getCause();
             if (cause != null) {
@@ -85,9 +93,11 @@ public final class ShutDown extends AbstractConsoleHandler {
             try {
                 close();
             } catch (final Exception exc) {
-                System.out.println("closing all connections failed: " + exc);
-                exc.printStackTrace();
+                // Ignore. If the backend terminates successfully exception may appear here.
             }
+        }
+        if (!completed) {
+            System.exit(1);
         }
     }
 
@@ -95,10 +105,15 @@ public final class ShutDown extends AbstractConsoleHandler {
         initJMX(jmxHost, jmxPort, jmxLogin, jmxPassword);
     }
 
-    public void shutdown() throws Exception {
+    public boolean shutdown(boolean waitForExit) throws Exception {
         final ObjectName objectName = getObjectName();
         final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
-        mBeanServerConnection.invoke(objectName, "shutdown", new Object[] {}, new String[] {});
+        Object result = mBeanServerConnection.invoke(objectName, "shutdown", new Object[] { Boolean.valueOf(waitForExit) }, new String[] { "boolean" });
+        boolean retval = false;
+        if (result instanceof Boolean) {
+            retval = ((Boolean) result).booleanValue();
+        }
+        return retval;
     }
 
     public static void main(final String args[]) {
@@ -108,7 +123,8 @@ public final class ShutDown extends AbstractConsoleHandler {
     @Override
     protected void showHelp() {
         System.out.println("Shuts down the OSGi framework through invoking closure of top-level system bundle.");
-        System.out.println("Usage: shutdown (-h <jmx host> -p <jmx port> -l (optional) <jmx login> -pw (optional) <jmx password>)");
+        System.out.println("If the parameter -w is defined the tools awaits the completion of the shutdown process and returns if it was successful.");
+        System.out.println("Usage: shutdown (-h <jmx host> -p <jmx port> -l (optional) <jmx login> -pw (optional) <jmx password>) (-w (optional))");
     }
 
     @Override

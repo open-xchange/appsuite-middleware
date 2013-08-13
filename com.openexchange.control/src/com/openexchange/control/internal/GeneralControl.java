@@ -190,9 +190,9 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
     }
 
     @Override
-    public void shutdown() {
+    public boolean shutdown(boolean waitForExit) {
         LOG.info("control command: shutdown");
-        shutdown(bundleContext, false);
+        return shutdown(bundleContext, waitForExit);
     }
 
     /**
@@ -200,8 +200,11 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
      *
      * @param bundleContext The bundle context
      * @param waitForExit <code>true</code> to wait for the OSGi framework being shut down completely; otherwise <code>false</code>
+     * @return <code>true</code> if the shutdown did complete successfully. This is only valid if waitForExit parameter is set to
+     * <code>true</code>.
      */
-    public static final void shutdown(final BundleContext bundleContext, final boolean waitForExit) {
+    public static final boolean shutdown(final BundleContext bundleContext, final boolean waitForExit) {
+        boolean completed = false;
         try {
             /*
              * Simply shut-down the system bundle to enforce invocation of close() method on all running bundles
@@ -233,7 +236,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
                     // Wait on condition
                     shutdownLock.lock();
                     try {
-                        shutdownCompleted.await(10, TimeUnit.SECONDS);
+                        completed = shutdownCompleted.await(120, TimeUnit.SECONDS);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         LOG.error(e.getMessage(), e);
@@ -249,6 +252,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         } catch (final BundleException e) {
             LOG.error(e.getMessage(), e);
         }
+        return completed;
     }
 
     @Override

@@ -67,8 +67,8 @@ import com.openexchange.report.osgi.ReportActivator;
 public class ServerCompositeActivator extends CompositeBundleActivator {
 
     private final BundleActivator[] activators = {
-    	new PrefixServiceActivator(),
-    	new JsonCacheActivator(),
+        new PrefixServiceActivator(),
+        new JsonCacheActivator(),
         new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
         new com.openexchange.tools.file.osgi.DefaultFileStorageActivator(),
         new com.openexchange.tools.file.osgi.DBQuotaFileStorageActivator(),
@@ -107,10 +107,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new PreviewCacheActivator(),
         new ReportActivator(),
         new QuotaGWActivator(),
-        new PingActivator(),
-
-        // Very last one:
-        new FileCleaningActivator()
+        new PingActivator()
     };
 
     public ServerCompositeActivator() {
