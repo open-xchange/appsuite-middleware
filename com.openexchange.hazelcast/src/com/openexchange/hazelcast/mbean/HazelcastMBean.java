@@ -59,33 +59,7 @@ import javax.management.MBeanException;
  */
 public interface HazelcastMBean {
 
-    public static final String HAZELCAST_DOMAIN = "com.openexchange.hazelcast";
-
-    public static final String MAP_NAME = "ox-jmx-test-map";
-
-    /**
-     * Removes names element.
-     *
-     * @param name The name
-     */
-    void remove(String name);
-
-    /**
-     * Puts named element.
-     *
-     * @param name The name
-     * @param value The value
-     * @throws MBeanException If put fails
-     */
-    void put(String name, String value) throws MBeanException;
-
-    /**
-     * Gets names element
-     *
-     * @param name The name
-     * @return The associated value or <code>null</code>
-     */
-    String get(String name);
+    static final String HAZELCAST_DOMAIN = "com.openexchange.hazelcast";
 
     /**
      * Gets the list of (possible) cluster members.

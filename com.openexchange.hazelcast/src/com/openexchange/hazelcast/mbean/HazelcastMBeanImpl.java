@@ -52,13 +52,12 @@ package com.openexchange.hazelcast.mbean;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
-import com.openexchange.hazelcast.init.HazelcastInitializer;
+import com.openexchange.hazelcast.osgi.HazelcastActivator;
 
 
 /**
@@ -68,8 +67,6 @@ import com.openexchange.hazelcast.init.HazelcastInitializer;
  */
 public final class HazelcastMBeanImpl extends StandardMBean implements HazelcastMBean {
 
-    private static final AtomicReference<HazelcastInstance> REF_HAZELCAST_INSTANCE = HazelcastInitializer.REF_HAZELCAST_INSTANCE;
-
     /**
      * Initializes a new {@link HazelcastMBeanImpl}.
      *
@@ -77,34 +74,6 @@ public final class HazelcastMBeanImpl extends StandardMBean implements Hazelcast
      */
     public HazelcastMBeanImpl() throws NotCompliantMBeanException {
         super(HazelcastMBean.class);
-    }
-
-    @Override
-    public void remove(final String name) {
-        final HazelcastInstance hazelcastInstance = REF_HAZELCAST_INSTANCE.get();
-        if (null == hazelcastInstance) {
-            return;
-        }
-        hazelcastInstance.getMap(MAP_NAME).remove(name);
-    }
-
-    @Override
-    public void put(final String name, final String value) throws MBeanException {
-        final HazelcastInstance hazelcastInstance = REF_HAZELCAST_INSTANCE.get();
-        if (null == hazelcastInstance) {
-            throw new MBeanException(null, "HazelcastInstance is absent.");
-        }
-        hazelcastInstance.getMap(MAP_NAME).put(name, value);
-    }
-
-    @Override
-    public String get(final String name) {
-        final HazelcastInstance hazelcastInstance = REF_HAZELCAST_INSTANCE.get();
-        if (null == hazelcastInstance) {
-            return "null";
-        }
-        final Object value = hazelcastInstance.getMap(MAP_NAME).get(name);
-        return null == value ? "null" : value.toString();
     }
 
     @Override
@@ -147,7 +116,7 @@ public final class HazelcastMBeanImpl extends StandardMBean implements Hazelcast
      * @throws MBeanException If there's no Hazelcast instance
      */
     private static HazelcastInstance getHazelcastInstance() throws MBeanException {
-        HazelcastInstance hazelcastInstance = REF_HAZELCAST_INSTANCE.get();
+        HazelcastInstance hazelcastInstance = HazelcastActivator.REF_HAZELCAST_INSTANCE.get();
         if (null == hazelcastInstance) {
             throw new MBeanException(null, "HazelcastInstance is absent.");
         }
