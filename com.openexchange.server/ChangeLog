@@ -1,3 +1,7 @@
+* 2013-08-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 23992: Introduced property to disable folder caches in IMAP
+
 * 2013-08-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 28003 + 28192: Use proper primary-key-dependent SQL statement + fixed SQL query
