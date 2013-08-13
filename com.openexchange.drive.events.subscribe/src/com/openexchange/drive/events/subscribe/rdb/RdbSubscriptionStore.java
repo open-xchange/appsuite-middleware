@@ -87,11 +87,14 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
     }
 
     @Override
-    public Subscription subscribe(Session session, String serviceID, String token, String rootFolderID) throws OXException {
+    public Subscription subscribe(Session session, String serviceID, String token, String rootFolderID, boolean removePrevious) throws OXException {
         Subscription subscription = new Subscription(
             newUid(), session.getContextId(), session.getUserId(), serviceID, token, rootFolderID);
         Connection connection = databaseService.getWritable(session.getContextId());
         try {
+            if (removePrevious) {
+                deleteSubscriptionsForToken(connection, session.getContextId(), serviceID, token);
+            }
             if (0 == insertSubscription(connection, subscription)) {
                 // already exists?
                 String uuid = selectSubscriptionUuid(connection, session.getContextId(), session.getUserId(), serviceID, token, rootFolderID);
@@ -194,6 +197,19 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             stmt.setString(3, service);
             stmt.setString(4, token);
             stmt.setString(5, SQL.escape(folder));
+            return SQL.logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static int deleteSubscriptionsForToken(Connection connection, int cid, String service, String token) throws SQLException, OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.DELETE_SUBSCRIPTIONS_FOR_TOKEN_STMT);
+            stmt.setInt(1, cid);
+            stmt.setString(2, service);
+            stmt.setString(3, token);
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
