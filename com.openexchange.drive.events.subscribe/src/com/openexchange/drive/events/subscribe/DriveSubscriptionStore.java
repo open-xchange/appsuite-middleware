@@ -68,10 +68,11 @@ public interface DriveSubscriptionStore {
      * @param serviceID The service ID
      * @param token The device's registration token
      * @param rootFolderID The root folder ID
+     * @param removePrevious <code>true</code> to remove any existing previous subscriptions for this token, <code>false</code>, otherwise
      * @return The new subscription
      * @throws OXException
      */
-    Subscription subscribe(Session session, String serviceID, String token, String rootFolderID) throws OXException;
+    Subscription subscribe(Session session, String serviceID, String token, String rootFolderID, boolean removePrevious) throws OXException;
 
     /**
      * Removes a subscription for the device with given registration ID to the specified root folder ID.
