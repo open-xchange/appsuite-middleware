@@ -66,7 +66,7 @@ public class EnqueuedStanzaTest {
         message.setSequenceNumber(23);
         
         EnqueuedStanza enqueuedStanza = new EnqueuedStanza(message);
-        for(long i = 0; i < Integer.MAX_VALUE + 1; i++) {
+        for(int i = 0; i < 101; i++) {
             if (i < 100) {
                 assertTrue(enqueuedStanza.incCounter());
             } else {
