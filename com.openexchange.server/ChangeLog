@@ -2,6 +2,7 @@
 
  - Fix for bug 23992: Introduced property to disable folder caches in IMAP
  - Fix for bug 26023: Specify supported SSL protocols on secure connect attempt
+ - Change for bug 27420: Handle possible unexpected EOF gracefully
 
 * 2013-08-12 - thorben.betten@open-xchange.com
 

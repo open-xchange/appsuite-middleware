@@ -51,6 +51,7 @@ package com.openexchange.ajax;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -1128,6 +1129,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                             final String limit = message.substring(19, pos);
                             throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, limit);
                         }
+                    } else if (cause instanceof EOFException) {
+                        // Stream closed/ended unexpectedly
+                        throw UploadException.UploadCode.UNEXPECTED_EOF.create(cause, cause.getMessage());
                     }
                     throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage()));
                 } finally {
