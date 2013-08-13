@@ -65,14 +65,20 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.LifecycleEvent;
+import com.hazelcast.core.LifecycleEvent.LifecycleState;
+import com.hazelcast.core.LifecycleListener;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
 import com.openexchange.cluster.discovery.ClusterMember;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.hazelcast.Hazelcasts;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.init.HazelcastInitializer;
+import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceContainer;
@@ -94,6 +100,11 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HazelcastActivator extends HousekeepingActivator {
+
+    /**
+     * The {@code AtomicReference} for {@code HazelcastInstance}.
+     */
+    public static final AtomicReference<HazelcastInstance> REF_HAZELCAST_INSTANCE = new AtomicReference<HazelcastInstance>();
 
     /**
      * The logger for HazelcastActivator.
@@ -124,6 +135,76 @@ public class HazelcastActivator extends HousekeepingActivator {
         return new Class[] { ConfigurationService.class, TimerService.class, HazelcastConfigurationService.class };
     }
 
+    @Override
+    protected void startBundle() throws Exception {
+        boolean infoEnabled = LOG.isInfoEnabled();
+        String lf = Strings.getLineSeparator();
+        if (infoEnabled) {
+            LOG.info(lf + "Hazelcast:" + lf + "    Starting..." + lf);
+        }
+        long bundleStart = infoEnabled ? System.currentTimeMillis() : 0L;
+        /*
+         * Get hazelcast config service
+         */
+        HazelcastConfigurationService configService = getService(HazelcastConfigurationService.class);
+        if (false == configService.isEnabled()) {
+            if (infoEnabled) {
+                LOG.info(lf + "Hazelcast:" + lf +
+                    "    Startup of Hazelcast clustering and data distribution platform denied per configuration." + lf);
+            }
+            return;
+        }
+        /*
+         * Create hazelcast instance from configuration
+         */
+        Config config = configService.getConfig();
+        if (infoEnabled) {
+            LOG.info(lf + "Hazelcast:" + lf + "    Creating new hazelcast instance..." + lf);
+            if (config.getNetworkConfig().getJoin().getMulticastConfig().isEnabled()) {
+                LOG.info(lf + "Hazelcast:" + lf +
+                    "    Using network join: " + config.getNetworkConfig().getJoin().getMulticastConfig() + lf);
+            }
+            if (config.getNetworkConfig().getJoin().getTcpIpConfig().isEnabled()) {
+                LOG.info(lf + "Hazelcast:" + lf +
+                    "    Using network join: " + config.getNetworkConfig().getJoin().getTcpIpConfig() + lf);
+            }
+        }
+        long hzStart = infoEnabled ? System.currentTimeMillis() : 0L;
+        HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
+        if (infoEnabled) {
+            LOG.info(lf + "Hazelcast:" + lf +
+                "    New hazelcast instance successfully created in " + (System.currentTimeMillis() - hzStart) + " msec." + lf);
+        }
+        /*
+         * Add lifecycle listener
+         */
+        hazelcastInstance.getLifecycleService().addLifecycleListener(new LifecycleListener() {
+
+            @Override
+            public void stateChanged(final LifecycleEvent event) {
+                final LifecycleState state = event.getState();
+                if (LifecycleState.RESTARTING.equals(state)) {
+                    Hazelcasts.setPaused(true);
+                } else if (LifecycleState.RESTARTED.equals(state)) {
+                    Hazelcasts.setPaused(false);
+                }
+            }
+        });
+        /*
+         * Register instance
+         */
+        registerService(HazelcastInstance.class, hazelcastInstance);
+        REF_HAZELCAST_INSTANCE.set(hazelcastInstance);
+        if (infoEnabled) {
+            LOG.info(lf + "Hazelcast:" + lf + "    Started in " + (System.currentTimeMillis() - bundleStart) + " msec." + lf);
+        }
+        /*
+         * Register management mbean dynamically
+         */
+        track(ManagementService.class, new ManagementRegisterer(context));
+        openTrackers();
+    }
+
     /** Gets the ranking */
     protected static int getRanking(final ServiceReference<?> reference) {
         final Object property = reference.getProperty(Constants.SERVICE_RANKING);
@@ -133,8 +214,7 @@ public class HazelcastActivator extends HousekeepingActivator {
         return ((Integer) property).intValue();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
+    protected void startBundle_OLD() throws Exception {
         final Log logger = com.openexchange.log.Log.loggerFor(HazelcastActivator.class);
         final HazelcastConfigurationService service = getService(HazelcastConfigurationService.class);
         final String lf = System.getProperty("line.separator");

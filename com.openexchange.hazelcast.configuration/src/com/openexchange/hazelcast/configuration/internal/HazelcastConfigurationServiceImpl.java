@@ -64,6 +64,7 @@ import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import com.hazelcast.config.Config;
+import com.hazelcast.config.ConfigLoader;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.MapIndexConfig;
 import com.hazelcast.config.MultiMapConfig;
@@ -89,6 +90,11 @@ import com.openexchange.tools.strings.TimeSpanParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HazelcastConfigurationServiceImpl implements HazelcastConfigurationService {
+
+    private static final String NETWORK_JOIN_EMPTY = "empty";
+    private static final String NETWORK_JOIN_STATIC = "static";
+    private static final String NETWORK_JOIN_MULTICAST = "multicast";
+    private static final String NETWORK_JOIN_AWS = "aws";
 
     /** Named logger instance */
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastConfigurationServiceImpl.class);
@@ -118,6 +124,169 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
 
     @Override
     public synchronized Config getConfig() throws OXException {
+        if (null != this.config) {
+            return this.config;
+        }
+        /*
+         * Load or create default config
+         */
+        config = loadXMLConfig();
+        if (null == config) {
+            config = new Config();
+        }
+        /*
+         * Set values from properties file
+         */
+        ConfigurationService configService = Services.getService(ConfigurationService.class);
+        /*
+         * General
+         */
+        String join = configService.getProperty("com.openexchange.hazelcast.network.join", NETWORK_JOIN_EMPTY);
+        String groupName = configService.getProperty("com.openexchange.hazelcast.group.name");
+        if (false == Strings.isEmpty(groupName)) {
+            config.getGroupConfig().setName(groupName);
+        } else if (false == NETWORK_JOIN_EMPTY.equalsIgnoreCase(join)) {
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.hazelcast.group.name");
+        }
+        String groupPassword = configService.getProperty("com.openexchange.hazelcast.group.password");
+        if (false == Strings.isEmpty(groupPassword)) {
+            config.getGroupConfig().setPassword(groupPassword);
+        }
+        /*
+         * Network Join
+         */
+        if (NETWORK_JOIN_EMPTY.equalsIgnoreCase(join)) {
+            config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
+            config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+            config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(false);
+        } else if (NETWORK_JOIN_STATIC.equalsIgnoreCase(join)) {
+            config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
+            config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+            config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(true);
+            config.getNetworkConfig().getJoin().getTcpIpConfig().setConnectionTimeoutSeconds(
+                configService.getIntProperty("com.openexchange.hazelcast.network.join.static.connectionTimeout", 10));
+            String[] members = Strings.splitByComma(
+                configService.getProperty("com.openexchange.hazelcast.network.join.static.nodes"));
+            if (null != members && 0 < members.length) {
+                for (String member : members) {
+                    if (false == isEmpty(member)) {
+                        config.getNetworkConfig().getJoin().getTcpIpConfig().addMember(member);
+                    }
+                }
+            }
+        } else if (NETWORK_JOIN_MULTICAST.equalsIgnoreCase(join)) {
+            config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
+            config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(false);
+            config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(true);
+            String group = configService.getProperty("com.openexchange.hazelcast.network.join.multicast.group", "224.2.2.3");
+            int port = configService.getIntProperty("com.openexchange.hazelcast.network.join.multicast.group", 54327);
+            config.getNetworkConfig().getJoin().getMulticastConfig().setMulticastGroup(group).setMulticastPort(port);
+        } else if (NETWORK_JOIN_AWS.equalsIgnoreCase(join)) {
+            config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+            config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(false);
+            config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(true);
+            String accessKey = configService.getProperty("com.openexchange.hazelcast.network.join.aws.accessKey");
+            if (Strings.isEmpty(accessKey)) {
+                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.hazelcast.network.join.aws.accessKey");
+            }
+            config.getNetworkConfig().getJoin().getAwsConfig().setAccessKey(accessKey);
+            String secretKey = configService.getProperty("com.openexchange.hazelcast.network.join.aws.secretKey");
+            if (Strings.isEmpty(secretKey)) {
+                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.hazelcast.network.join.aws.secretKey");
+            }
+            config.getNetworkConfig().getJoin().getAwsConfig().setSecretKey(secretKey);
+            String region = configService.getProperty("com.openexchange.hazelcast.network.join.aws.region", "us-west-1");
+            config.getNetworkConfig().getJoin().getAwsConfig().setRegion(region);
+            String hostHeader = configService.getProperty("com.openexchange.hazelcast.network.join.aws.hostHeader", "ec2.amazonaws.com");
+            config.getNetworkConfig().getJoin().getAwsConfig().setHostHeader(hostHeader);
+            String tagKey = configService.getProperty("com.openexchange.hazelcast.network.join.aws.tagKey", "type");
+            config.getNetworkConfig().getJoin().getAwsConfig().setTagKey(tagKey);
+            String tagValue = configService.getProperty("com.openexchange.hazelcast.network.join.aws.tagValue", "hz-nodes");
+            config.getNetworkConfig().getJoin().getAwsConfig().setTagValue(tagValue);
+        } else {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("com.openexchange.hazelcast.network.join");
+        }
+        String mergeFirstRunDelay = configService.getProperty("com.openexchange.hazelcast.merge.firstRunDelay", "120s");
+        config.setProperty(GroupProperties.PROP_MERGE_FIRST_RUN_DELAY_SECONDS,
+            String.valueOf(TimeSpanParser.parseTimespan(mergeFirstRunDelay).longValue() / 1000));
+        String mergeRunDelay = configService.getProperty("com.openexchange.hazelcast.merge.runDelay", "120s");
+        config.setProperty(GroupProperties.PROP_MERGE_NEXT_RUN_DELAY_SECONDS,
+            String.valueOf(TimeSpanParser.parseTimespan(mergeRunDelay).longValue() / 1000));
+        /*
+         * Network Config
+         */
+        String[] interfaces = Strings.splitByComma(configService.getProperty("com.openexchange.hazelcast.network.interfaces"));
+        if (null != interfaces && 0 < interfaces.length) {
+            for (String interfaze : interfaces) {
+                if (false == isEmpty(interfaze)) {
+                    config.getNetworkConfig().getInterfaces().setEnabled(true).addInterface(interfaze);
+                }
+            }
+        }
+        int port = configService.getIntProperty("com.openexchange.hazelcast.network.port", 5701);
+        boolean portAutoIncrement = configService.getBoolProperty("com.openexchange.hazelcast.network.portAutoIncrement", true);
+        config.getNetworkConfig().setPort(port).setPortAutoIncrement(portAutoIncrement);
+        String[] outboundPortDefinitions = Strings.splitByComma(
+            configService.getProperty("com.openexchange.hazelcast.network.outboundPortDefinitions"));
+        if (null != outboundPortDefinitions && 0 < outboundPortDefinitions.length) {
+            for (String portDefintion : outboundPortDefinitions) {
+                if (false == isEmpty(portDefintion)) {
+                    config.getNetworkConfig().addOutboundPortDefinition(portDefintion);
+                }
+            }
+        }
+        if (configService.getBoolProperty("com.openexchange.hazelcast.network.enableIPv6Support", false)) {
+            config.setProperty(GroupProperties.PROP_PREFER_IPv4_STACK, "false");
+        }
+        /*
+         * Miscellaneous
+         */
+        boolean loggingEnabled = configService.getBoolProperty("com.openexchange.hazelcast.logging.enabled", true);
+        if (loggingEnabled) {
+            // Check if log4j is running
+            boolean hasLog4J = false;
+            final Bundle[] bundles = context.getBundles();
+            for (int i = 0; !hasLog4J && i < bundles.length; i++) {
+                hasLog4J = ("org.apache.commons.logging.log4j".equals(bundles[i].getSymbolicName()));
+            }
+            if (hasLog4J) {
+                System.setProperty(GroupProperties.PROP_LOGGING_TYPE, "log4j");
+                config.setProperty(GroupProperties.PROP_LOGGING_TYPE, "log4j");
+            }
+        } else {
+            System.setProperty(GroupProperties.PROP_LOGGING_TYPE, "none");
+            config.setProperty(GroupProperties.PROP_LOGGING_TYPE, "none");
+        }
+        config.setProperty(GroupProperties.PROP_MAX_OPERATION_TIMEOUT,
+            configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "5000"));
+        config.setProperty(GroupProperties.PROP_ENABLE_JMX, configService.getProperty("com.openexchange.hazelcast.jmx", "true"));
+        config.setProperty(GroupProperties.PROP_ENABLE_JMX_DETAILED,
+            configService.getProperty("com.openexchange.hazelcast.jmxDetailed", "false"));
+        config.setProperty(GroupProperties.PROP_ENABLE_JMX_DETAILED,
+            configService.getProperty("com.openexchange.hazelcast.jmxDetailed", "false"));
+        config.setProperty(GroupProperties.PROP_REDO_GIVE_UP_THRESHOLD,
+            configService.getProperty("com.openexchange.hazelcast.redo.giveupThreshold", "10"));
+        /*
+         * Arbitrary Hazelcast properties
+         */
+        Map<String, String> properties = configService.getProperties(new WildcardNamePropertyFilter("hazelcast.*"));
+        if (null != properties && !properties.isEmpty()) {
+            for (Entry<String, String> entry : properties.entrySet()) {
+                String value = entry.getValue();
+                if (!Strings.isEmpty(value)) {
+                    config.setProperty(entry.getKey(), value.trim());
+                }
+            }
+        }
+        /*
+         * Data structure configs
+         */
+        applyDataStructures(config, listPropertyFiles());
+
+        return this.config;
+    }
+
+    public synchronized Config getConfig_OLD() throws OXException {
         if (null == this.config) {
             ConfigurationService configService = Services.getService(ConfigurationService.class);
             config = new Config();
@@ -373,6 +542,29 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             }
         }
         return true;
+    }
+
+    /**
+     * Loads a hazelcast configuration from a file named <code>hazelcast.xml</code> in the {@link #DIRECTORY_NAME} folder if present.
+     *
+     * @return The loaded hazelcast config, or <code>null</code> if no such file exists or can't be loaded
+     * @throws OXException
+     */
+    private static Config loadXMLConfig() throws OXException {
+        File directory = Services.getService(ConfigurationService.class).getDirectory(DIRECTORY_NAME);
+        if (null != directory) {
+            File xmlConfigFile = new File(directory, "hazelcast.xml");
+            if (xmlConfigFile.exists()) {
+                try {
+                    return ConfigLoader.load(xmlConfigFile.getAbsolutePath());
+                } catch (RuntimeException e) {
+                   LOG.warn("Error loading configuration from file " + xmlConfigFile.getAbsolutePath(), e);
+                } catch (IOException e) {
+                    LOG.warn("Error loading configuration from file " + xmlConfigFile.getAbsolutePath(), e);
+                }
+            }
+        }
+        return null;
     }
 
 }
