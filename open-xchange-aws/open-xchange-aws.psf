@@ -6,6 +6,5 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,com.openexchange.aws.s3"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,com.openexchange.aws.loadbalancing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,com.openexchange.aws.autoscaling"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,com.openexchange.cluster.discovery.aws"/>
 </provider>
 </psf>
