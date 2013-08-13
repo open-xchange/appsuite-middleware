@@ -338,7 +338,7 @@ public class IMAPDefaultFolderChecker {
              * Check full names for primary account:
              *
              * Null'ify full name if not on root level OR not equal to name; meaning not intended to create default folders next to INBOX
-             * In that case create them with respect determined prefix
+             * In that case create them with respect to determined prefix
              */
             for (int i = 0; i < fullNames.length; i++) {
                 final String fullName = fullNames[i];
