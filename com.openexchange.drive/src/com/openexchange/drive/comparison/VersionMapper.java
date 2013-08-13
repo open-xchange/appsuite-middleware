@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.comparison;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -73,6 +74,7 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
     private final Collection<? extends T> originalVersions;
     private final Collection<? extends T> clientVersions;
     private final Collection<? extends T> serverVersions;
+    private Collection<T> caseConflictingClientVersions;
     private final SortedMap<String, ThreeWayComparison<T>> map;
 
     /**
@@ -98,7 +100,16 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
         } else {
             this.clientVersions = clientVersions;
             for (T fileVersion : clientVersions) {
-                getOrCreate(getKey(fileVersion)).setClientVersion(fileVersion);
+                ThreeWayComparison<T> comparison = getOrCreate(getKey(fileVersion));
+                if (null != comparison.getClientVersion()) {
+                    // case conflict, handle separately
+                    if (null == caseConflictingClientVersions) {
+                        caseConflictingClientVersions = new ArrayList<T>();
+                    }
+                    caseConflictingClientVersions.add(fileVersion);
+                } else {
+                    comparison.setClientVersion(fileVersion);
+                }
             }
         }
         if (null == serverVersions) {
@@ -163,6 +174,16 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
     }
 
     /**
+     * Gets any client versions that are causing a case conflict, i.e. versions that were already reported with the same name, yet
+     * different case.
+     *
+     * @return The case conflicting versions, or <code>null</code> if none present
+     */
+    public Collection<? extends T> getCaseConflictingClientVersions() {
+        return caseConflictingClientVersions;
+    }
+
+    /**
      * Gets the key used to map the supplied version.
      *
      * @param version The version
@@ -200,6 +221,13 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
             stringAllocator.append(null != comparison.getServerVersion() ? comparison.getServerVersion().getChecksum() : "                                ");
             stringAllocator.append(Change.NONE == comparison.getServerChange() ? "  " : ' ' + comparison.getServerChange().toString().substring(0, 1));
             stringAllocator.append('\n');
+        }
+
+        if (null != caseConflictingClientVersions && 0 < caseConflictingClientVersions.size()) {
+            stringAllocator.append("\nCase conflicting client versions:\n");
+            for (T version : caseConflictingClientVersions) {
+                stringAllocator.append("  ").append(getKey(version)).append(" | ").append(version.getChecksum()).append('\n');
+            }
         }
         return stringAllocator.toString();
     }
