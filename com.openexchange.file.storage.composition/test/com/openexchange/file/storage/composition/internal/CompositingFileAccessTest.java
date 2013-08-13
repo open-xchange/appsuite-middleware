@@ -333,30 +333,19 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         final FileStorageFileAccess.IDTuple tuple2 = new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId());
         fileAccess.expectCall("hashCode").andReturn(1); // Look if it's there
         fileAccess.expectCall("hashCode").andReturn(1); // Store it
-        fileAccess.expectCall("getDocuments", Collections.singletonList(tuple), Arrays.asList(new Field[] { Field.ID, Field.FOLDER_ID }));
-        fileAccess.expectCall("hashCode").andReturn(2); // Look if it's there
-        fileAccess.expectCall("hashCode").andReturn(2); // Store it
-        fileAccess.expectCall("getDocuments", Collections.singletonList(tuple2), Arrays.asList(new Field[] { Field.ID, Field.FOLDER_ID }));
+        fileAccess.expectCall("hashCode").andReturn(1); 
+        fileAccess.expectCall("getDocuments", Arrays.asList(tuple, tuple2), Arrays.asList(new Field[] { Field.ID, Field.FOLDER_ID }));
 
-        fileAccess.expectCall("removeDocument", Arrays.asList(tuple), 12L).andReturn(Arrays.asList(tuple));
+        fileAccess.expectCall("removeDocument", Arrays.asList(tuple, tuple2), 12L).andReturn(Arrays.asList(tuple));
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         fileAccess.expectCall("getAccountAccess").andReturn(this);
 
-
-        fileAccess.expectCall("removeDocument", Arrays.asList(tuple2), 12L).andReturn(Arrays.asList(tuple2));
-        fileAccess.expectCall("getAccountAccess").andReturn(this);
-        fileAccess.expectCall("getAccountAccess").andReturn(this);
-        fileAccess.expectCall("getAccountAccess").andReturn(this);
 
         final List<String> ids = Arrays.asList(fileId.toUniqueID(), fileId2.toUniqueID());
         final List<String> conflicted = removeDocument(ids, 12);
 
-        assertEquals(Arrays.asList(new FileID(getId(), getAccountId(), fileId.getFolderId(), fileId.getFileId()).toUniqueID(), new FileID(
-            getId(),
-            getAccountId(),
-            fileId2.getFolderId(),
-            fileId2.getFileId()).toUniqueID()), conflicted);
+        assertEquals(Arrays.asList(new FileID(getId(), getAccountId(), fileId.getFolderId(), fileId.getFileId()).toUniqueID()), conflicted);
 
         verifyAccount();
         verifyAccount2();
