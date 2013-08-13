@@ -63,7 +63,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -905,11 +904,11 @@ public final class MessageParser {
     private static final String CT_ALTERNATIVE = "alternative";
 
     private static String parseContentType(final String ctStrArg) {
-        final String ctStr = ctStrArg.toLowerCase(Locale.ENGLISH).trim();
+        final String ctStr = toLowerCase(ctStrArg).trim();
         if (ctStr.indexOf(CT_ALTERNATIVE) != -1) {
             return MimeTypes.MIME_MULTIPART_ALTERNATIVE;
         }
-        if (MimeTypes.MIME_TEXT_PLAIN.equals(ctStr)) {
+        if (MimeTypes.MIME_TEXT_PLAIN.equals(ctStr) || "text".equals(ctStr)) {
             return MimeTypes.MIME_TEXT_PLAIN;
         }
         return MimeTypes.MIME_TEXT_HTML;
