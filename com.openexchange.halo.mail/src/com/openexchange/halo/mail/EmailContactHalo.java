@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.halo.mail;
 
 import java.util.Arrays;
@@ -77,125 +78,123 @@ import com.openexchange.mail.search.ToTerm;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 public class EmailContactHalo extends AbstractContactHalo implements HaloContactDataSource {
 
-	private final ServiceLookup services;
+    private final ServiceLookup services;
 
-	public EmailContactHalo(ServiceLookup services) {
-		this.services = services;
-	}
+    /**
+     * Initializes a new {@link EmailContactHalo}.
+     *
+     * @param services The service look-up
+     */
+    public EmailContactHalo(final ServiceLookup services) {
+        super();
+        this.services = ExceptionOnAbsenceServiceLookup.valueOf(services);
+    }
 
-	@Override
-	public String getId() {
-		return "com.openexchange.halo.mail";
-	}
+    @Override
+    public String getId() {
+        return "com.openexchange.halo.mail";
+    }
 
-	@Override
-	public AJAXRequestResult investigate(HaloContactQuery query,
-			AJAXRequestData req, ServerSession session) throws OXException {
+    @Override
+    public AJAXRequestResult investigate(final HaloContactQuery query, final AJAXRequestData req, final ServerSession session) throws OXException {
+        final MailService mailService = services.getService(MailService.class);
 
-		int[] params = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-		int limit = req.getIntParameter(AJAXServlet.PARAMETER_LIMIT);
-		limit = limit < 0 ? 10 : limit;
+        final int[] params = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+        int limit = req.getIntParameter(AJAXServlet.PARAMETER_LIMIT);
+        limit = limit < 0 ? 10 : limit;
 
-		List<String> addresses = getEMailAddresses(query.getContact());
-		if (isUserThemselves(session.getUser(), addresses)){
-			return new AJAXRequestResult(Collections.<MailMessage> emptyList(), "mail");
-		}
+        final List<String> addresses = getEMailAddresses(query.getContact());
+        if (isUserThemselves(session.getUser(), addresses)) {
+            return new AJAXRequestResult(Collections.<MailMessage> emptyList(), "mail");
+        }
 
-		MailField[] requestedFields = MailField.getFields(params);
-
-		MailService mailService = services.getService(MailService.class);
-		MailAccountStorageService mailAccountService = services.getService(MailAccountStorageService.class);
-
-		MailAccount[] userMailAccounts;
-		if (searchingExternalMailboxesIsFast()){
-			userMailAccounts = mailAccountService.getUserMailAccounts(session.getUserId(), session.getContextId());
-		} else {
-			userMailAccounts = new MailAccount[]{mailAccountService.getDefaultMailAccount(session.getUserId(), session.getContextId())};
-		}
+        final MailField[] requestedFields = MailField.getFields(params);
 
 
-		List<MailMessage> messages = new LinkedList<MailMessage>();
-		for (MailAccount mailAccount : userMailAccounts) {
-			MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-			try {
-			mailAccess = mailService.getMailAccess(session, mailAccount.getId());
-			mailAccess.connect();
-			List<MailMessage> moreMessages = Arrays.asList(mailAccess.getMessageStorage().searchMessages(
-				"INBOX",
-				IndexRange.NULL,
-				MailSortField.RECEIVED_DATE,
-				OrderDirection.DESC,
-				generateSenderSearch(addresses),
-				requestedFields ));
-			messages.addAll(moreMessages);
+        MailAccount[] userMailAccounts;
+        {
+            final MailAccountStorageService mailAccountService = services.getService(MailAccountStorageService.class);
+            if (searchingExternalMailboxesIsFast()) {
+                userMailAccounts = mailAccountService.getUserMailAccounts(session.getUserId(), session.getContextId());
+            } else {
+                userMailAccounts = new MailAccount[] { mailAccountService.getDefaultMailAccount(session.getUserId(), session.getContextId()) };
+            }
+        }
 
-			String sentFullName = mailAccess.getFolderStorage().getSentFolder();
-			moreMessages = Arrays.asList(mailAccess.getMessageStorage().searchMessages(
-					sentFullName,
-					IndexRange.NULL,
-					MailSortField.RECEIVED_DATE,
-					OrderDirection.DESC,
-					generateRecipientSearch(addresses),
-					requestedFields ));
-			messages.addAll(moreMessages);
-			} finally {
-				if (mailAccess != null) {
-					mailAccess.close(true);
-				}
-			}
-		}
+        List<MailMessage> messages = new LinkedList<MailMessage>();
+        for (final MailAccount mailAccount : userMailAccounts) {
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+            try {
+                mailAccess = mailService.getMailAccess(session, mailAccount.getId());
+                mailAccess.connect();
+                List<MailMessage> moreMessages = Arrays.asList(mailAccess.getMessageStorage().searchMessages("INBOX", IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.DESC, generateSenderSearch(addresses), requestedFields));
+                messages.addAll(moreMessages);
 
-		Collections.sort(messages, new Comparator<MailMessage>(){
+                final String sentFullName = mailAccess.getFolderStorage().getSentFolder();
+                moreMessages = Arrays.asList(mailAccess.getMessageStorage().searchMessages(sentFullName, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.DESC, generateRecipientSearch(addresses), requestedFields));
+                messages.addAll(moreMessages);
+            } finally {
+                if (mailAccess != null) {
+                    mailAccess.close(true);
+                }
+            }
+        }
 
-			@Override
-			public int compare(final MailMessage arg0, final MailMessage arg1) {
-				final Date sentDate1 = arg1.getSentDate();
+        Collections.sort(messages, new Comparator<MailMessage>() {
+
+            @Override
+            public int compare(final MailMessage arg0, final MailMessage arg1) {
+                final Date sentDate1 = arg1.getSentDate();
                 final Date sentDate0 = arg0.getSentDate();
                 if (sentDate1 == null) {
                     return null == sentDate0 ? 0 : -1;
                 }
                 return null == sentDate0 ? 1 : sentDate1.compareTo(sentDate0);
-			}});
+            }
+        });
 
-		messages = messages.subList(0, Math.min(limit, messages.size()));
-		return new AJAXRequestResult(messages, "mail");
-	}
+        messages = messages.subList(0, Math.min(limit, messages.size()));
+        return new AJAXRequestResult(messages, "mail");
+    }
 
-	protected SearchTerm<?> generateSenderSearch(List<String> addresses) {
-		List<FromTerm> queries = new LinkedList<FromTerm>();
-		for (String addr : addresses) {
-			queries.add(new FromTerm(addr));
-		}
-		final int size = queries.size();
-        if (size == 3) {
-            return new ORTerm(new ORTerm(queries.get(0), queries.get(1)), queries.get(2));
+    protected SearchTerm<?> generateSenderSearch(final List<String> addresses) {
+        final List<SearchTerm<?>> queries = new LinkedList<SearchTerm<?>>();
+        for (final String addr : addresses) {
+            queries.add(new FromTerm(addr));
         }
-		if (size == 2) {
-            return new ORTerm(queries.get(0), queries.get(1));
-        }
-		return queries.get(0);
-	}
+        return generateSearch(queries);
+    }
 
-	protected SearchTerm<?> generateRecipientSearch(List<String> addresses) {
-		List<ORTerm> queries = new LinkedList<ORTerm>();
-		for (String addr : addresses) {
-			queries.add(new ORTerm(new CcTerm(addr), new ToTerm(addr)));
-		}
-		if (queries.size() == 3) {
-            return new ORTerm(new ORTerm(queries.get(0), queries.get(1)), queries.get(2));
+    protected SearchTerm<?> generateRecipientSearch(final List<String> addresses) {
+        final List<SearchTerm<?>> queries = new LinkedList<SearchTerm<?>>();
+        for (final String addr : addresses) {
+            queries.add(new ORTerm(new CcTerm(addr), new ToTerm(addr)));
         }
-		if (queries.size() == 2) {
-            return new ORTerm(queries.get(0), queries.get(1));
-        }
-		return queries.get(0);
-	}
+        return generateSearch(queries);
+    }
 
-	protected boolean searchingExternalMailboxesIsFast(){
-		return false; //TODO: once indexing is implemented, this should check whether it is turned on.
-	}
+    protected SearchTerm<?> generateSearch(final List<SearchTerm<?>> terms) {
+        if (terms == null || terms.isEmpty()) {
+            return null;
+        }
+        final int size = terms.size();
+        if (1 == size) {
+            return terms.get(0);
+        }
+        ORTerm orTerm = new ORTerm(terms.get(0), terms.get(1));
+        for (int i = 2; i < size; i++) {
+            orTerm = new ORTerm(orTerm, terms.get(i));
+        }
+        return orTerm;
+    }
+
+    protected boolean searchingExternalMailboxesIsFast() {
+        return false; // TODO: once indexing is implemented, this should check whether it is turned on.
+    }
 }
