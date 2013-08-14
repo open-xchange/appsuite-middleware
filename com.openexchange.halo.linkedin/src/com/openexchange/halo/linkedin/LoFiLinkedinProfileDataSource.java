@@ -52,7 +52,6 @@ package com.openexchange.halo.linkedin;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -62,6 +61,8 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.halo.linkedin.helpers.ContactEMailCompletor;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -76,7 +77,7 @@ import com.openexchange.user.UserService;
 public class LoFiLinkedinProfileDataSource extends AbstractLinkedinDataSource implements HaloContactDataSource {
 
     public LoFiLinkedinProfileDataSource(final ServiceLookup serviceLookup) {
-        this.serviceLookup = serviceLookup;
+        super(serviceLookup);
     }
 
     @Override
@@ -94,31 +95,30 @@ public class LoFiLinkedinProfileDataSource extends AbstractLinkedinDataSource im
         final UserService userService = serviceLookup.getService(UserService.class);
         final ContactEMailCompletor cc = new ContactEMailCompletor(session, contactService, userService);
         cc.complete(contact);
-        
+
         final List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", session, uid, cid);
         if(accounts.size() == 0) {
-            throw new OXException(1).setPrefix("HAL-LI").setLogMessage("Need at least 1 LinkedIn account");
+            throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
         }
-        
+
         String firstName = contact.getGivenName();
         String lastName = contact.getSurName();
-        
+
         if (firstName == null || lastName == null) {
             List<String> eMail = getEMail(contact);
             for (String string : eMail) {
-                String personal;
                 try {
-                    personal = new InternetAddress(string).getPersonal();
-                    personal.replace(",", " ");
-                    if (null != personal && !"".equals(personal)) {
-                        String[] pSplit = personal.split("\\s+");
+                    final String personal = new QuotedInternetAddress(string, false).getPersonal();
+                    if (!Strings.isEmpty(personal)) {
+                        String[] pSplit = personal.replace(",", " ").split("\\s+");
                         if (pSplit.length == 2) {
                             firstName = pSplit[0];
                             lastName = pSplit[1];
                             break;
                         }
                     }
-                } catch (AddressException e) {
+                } catch (final AddressException e) {
+                    // Ignore
                 }
             }
         }

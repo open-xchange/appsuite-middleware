@@ -46,73 +46,65 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.halo.linkedin;
 
-import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
-import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.linkedin.LinkedInService;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
-public abstract class AbstractLinkedinDataSource  implements HaloContactDataSource {
+/**
+ * {@link AbstractLinkedinDataSource}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public abstract class AbstractLinkedinDataSource implements HaloContactDataSource {
 
-	private LinkedInService linkedinService;
-	private OAuthService oauthService;
-	protected ServiceLookup serviceLookup;
+    protected final ServiceLookup serviceLookup;
 
-	public ServiceLookup getServiceLookup() {
-		return serviceLookup;
-	}
+    /**
+     * Initializes a new {@link AbstractLinkedinDataSource}.
+     */
+    protected AbstractLinkedinDataSource(final ServiceLookup serviceLookup) {
+        super();
+        this.serviceLookup = ExceptionOnAbsenceServiceLookup.valueOf(serviceLookup);
+    }
 
-	public void setServiceLookup(final ServiceLookup serviceLookup) {
-		this.serviceLookup = serviceLookup;
-	}
+    /**
+     * Gets the service look-up.
+     */
+    public ServiceLookup getServiceLookup() {
+        return serviceLookup;
+    }
 
-	public LinkedInService getLinkedinService() {
-		if(linkedinService != null) {
-            return linkedinService;
-        }
-		return serviceLookup.getService(LinkedInService.class);
-	}
+    public LinkedInService getLinkedinService() {
+        return serviceLookup.getService(LinkedInService.class);
+    }
 
-	public void setLinkedinService(final LinkedInService linkedinService) {
-		this.linkedinService = linkedinService;
-	}
+    public OAuthService getOauthService() {
+        return serviceLookup.getService(OAuthService.class);
+    }
 
-	public OAuthService getOauthService() {
-		if(oauthService != null) {
-            return oauthService;
-        }
-		return serviceLookup.getService(OAuthService.class);
-	}
+    @Override
+    public String getId() {
+        return "com.openexchange.halo.linkedIn:fullProfile";
+    }
 
-	public void setOauthService(final OAuthService oauthService) {
-		this.oauthService = oauthService;
-	}
+    @Override
+    public boolean isAvailable(final ServerSession session) throws OXException {
+        final int uid = session.getUserId();
+        final int cid = session.getContextId();
+        return !getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", session, uid, cid).isEmpty();
+    }
 
-
-	@Override
-	public String getId() {
-		return "com.openexchange.halo.linkedIn:fullProfile";
-	}
-
-	@Override
-	public boolean isAvailable(final ServerSession session) throws OXException {
-		final String password = session.getPassword();
-		final int uid = session.getUserId();
-		final int cid = session.getContextId();
-
-		final List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", session, uid, cid);
-		return !accounts.isEmpty();
-	}
-
-	@Override
-	public abstract AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException;
+    @Override
+    public abstract AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException;
 
 }

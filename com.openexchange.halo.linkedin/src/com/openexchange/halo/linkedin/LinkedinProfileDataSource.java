@@ -68,7 +68,7 @@ import com.openexchange.user.UserService;
 public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implements HaloContactDataSource {
 
 	public LinkedinProfileDataSource(final ServiceLookup serviceLookup) {
-		this.serviceLookup = serviceLookup;
+		super(serviceLookup);
 	}
 
 	@Override
@@ -78,7 +78,6 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
 
 	@Override
 	public AJAXRequestResult investigate(final HaloContactQuery query, final AJAXRequestData req, final ServerSession session) throws OXException {
-		final String password = session.getPassword();
 		final int uid = session.getUserId();
 		final int cid = session.getContextId();
 
