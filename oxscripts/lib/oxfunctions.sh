@@ -151,7 +151,7 @@ ox_stop_daemon() {
     ox_system_type
     local type=$?
     read PID < /var/run/${name}.pid
-    if [ -z "$PID" ]; then
+    if [ -n "$PID" ]; then
         ps $PID || /opt/open-xchange/sbin/shutdown -w || kill -QUIT $PID
     fi
     if [ $type -eq $DEBIAN -o $type -eq $UCS ] ; then
