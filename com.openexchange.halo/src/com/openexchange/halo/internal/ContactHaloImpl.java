@@ -69,24 +69,31 @@ import com.openexchange.halo.ContactHalo;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.halo.HaloExceptionCodes;
-import com.openexchange.session.SessionSpecificContainerRetrievalService;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
+/**
+ * {@link ContactHaloImpl} - The <code>ContactHalo</code> implementation.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class ContactHaloImpl implements ContactHalo {
 
-    private final UserService userService;
-    private final ContactService contactService;
-    private final ConfigViewFactory configViews;
+    private final Map<String, HaloContactDataSource> contactDataSources;
+    private final ServiceLookup services;
 
-    private final Map<String, HaloContactDataSource> contactDataSources = new ConcurrentHashMap<String, HaloContactDataSource>();
-
-    public ContactHaloImpl(final UserService userService, final ContactService contactService, final SessionSpecificContainerRetrievalService sessionScope, final ConfigViewFactory configViews) {
+    /**
+     * Initializes a new {@link ContactHaloImpl}.
+     *
+     * @param services The service look-up
+     */
+    public ContactHaloImpl(final ServiceLookup services) {
         super();
-        this.userService = userService;
-        this.contactService = contactService;
-        this.configViews = configViews;
+        contactDataSources = new ConcurrentHashMap<String, HaloContactDataSource>(8);
+        this.services = ExceptionOnAbsenceServiceLookup.valueOf(services);
     }
 
     @Override
@@ -105,7 +112,10 @@ public class ContactHaloImpl implements ContactHalo {
     }
 
     private HaloContactQuery buildQuery(Contact contact, final ServerSession session) throws OXException {
-        HaloContactQuery contactQuery = new HaloContactQuery();
+        final UserService userService = services.getService(UserService.class);
+        final ContactService contactService = services.getService(ContactService.class);
+
+        final HaloContactQuery contactQuery = new HaloContactQuery();
 
         // Try to find a user with a given eMail address
 
@@ -146,7 +156,7 @@ public class ContactHaloImpl implements ContactHalo {
             contactsToMerge.add(contact);
         } else {
             // Try to find a contact
-            ContactSearchObject contactSearch = new ContactSearchObject();
+            final ContactSearchObject contactSearch = new ContactSearchObject();
             contactSearch.setEmail1(contact.getEmail1());
             contactSearch.setEmail2(contact.getEmail1());
             contactSearch.setEmail3(contact.getEmail1());
@@ -175,6 +185,7 @@ public class ContactHaloImpl implements ContactHalo {
 
     @Override
     public List<String> getProviders(final ServerSession session) throws OXException {
+        final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
         final ConfigView view = configViews.getView(session.getUserId(), session.getContextId());
         final List<String> providers = new ArrayList<String>();
         for (final Entry<String, HaloContactDataSource> entry : contactDataSources.entrySet()) {

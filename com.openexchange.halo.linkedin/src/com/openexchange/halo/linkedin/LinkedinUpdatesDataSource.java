@@ -63,12 +63,11 @@ import com.openexchange.tools.session.ServerSession;
 public class LinkedinUpdatesDataSource extends AbstractLinkedinDataSource implements HaloContactDataSource {
 
     public LinkedinUpdatesDataSource(final ServiceLookup lookup) {
-        setServiceLookup(lookup);
+        super(lookup);
     }
 
     @Override
     public AJAXRequestResult investigate(final HaloContactQuery query, final AJAXRequestData req, final ServerSession session) throws OXException {
-        final String password = session.getPassword();
         final int uid = session.getUserId();
         final int cid = session.getContextId();
 
