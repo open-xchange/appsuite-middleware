@@ -86,7 +86,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class ManagedFileManagementImpl implements ManagedFileManagement {
+public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ManagedFileManagementImpl.class));
 
@@ -148,8 +148,6 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         }
     }
 
-    private static volatile ManagedFileManagementImpl instance;
-
     /*-
      * ############################ MEMBER SECTION ############################
      */
@@ -158,68 +156,27 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     private static final String SUFFIX = ".tmp";
 
-    /**
-     * Gets the file management instance.
-     *
-     * @return The file management instance
-     */
-    static ManagedFileManagementImpl getInstance() {
-        ManagedFileManagementImpl tmp = instance;
-        if (tmp == null) {
-            synchronized (ManagedFileManagementImpl.class) {
-                tmp = instance;
-                if (tmp == null) {
-                    tmp = instance = new ManagedFileManagementImpl();
-                }
-            }
-        }
-        return tmp;
-    }
-
-    /**
-     * Releases the file management instance.
-     */
-    static void releaseInstance() {
-        if (instance != null) {
-            synchronized (ManagedFileManagementImpl.class) {
-                if (instance != null) {
-                    instance.shutDown(true);
-                    instance = null;
-                }
-            }
-        }
-    }
-
+    private final ConfigurationService cs;
+    private final TimerService timer;
     private final ConcurrentMap<String, ManagedFileImpl> files;
 
-    private volatile PropertyListener propertyListener;
+    private final PropertyListener propertyListener;
 
-    private volatile ScheduledTimerTask timerTask;
+    private ScheduledTimerTask timerTask;
 
     private final AtomicReference<File> tmpDirReference;
 
-    /**
-     * Initializes a new {@link ManagedFileManagementImpl}.
-     */
-    private ManagedFileManagementImpl() {
+    public ManagedFileManagementImpl(ConfigurationService cs, TimerService timer) {
         super();
+        this.cs = cs;
+        this.timer = timer;
         files = new ConcurrentHashMap<String, ManagedFileImpl>();
         tmpDirReference = new AtomicReference<File>();
-        final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
-        // Get configuration service
-        final ConfigurationService cs = registry.getService(ConfigurationService.class);
-        if (null == cs) {
-            throw new IllegalStateException("Missing configuration service");
-        }
-        final FileManagementPropertyListener propertyListener = new FileManagementPropertyListener(tmpDirReference);
-        this.propertyListener = propertyListener;
+
+        propertyListener = new FileManagementPropertyListener(tmpDirReference);
         final String path = cs.getProperty("UPLOAD_DIRECTORY", propertyListener);
         tmpDirReference.set(getTmpDirByPath(path));
         // Register timer task
-        final TimerService timer = registry.getService(TimerService.class);
-        if (null == timer) {
-            throw new IllegalStateException("Missing timer service");
-        }
         timerTask = timer.scheduleWithFixedDelay(
             new FileManagementTask(files, TIME_TO_LIVE, LOG),
             INITIAL_DELAY,
@@ -295,7 +252,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     @Override
     public ManagedFile createManagedFile(final File temporaryFile) throws OXException {
-        final ManagedFileImpl mf = new ManagedFileImpl(UUID.randomUUID().toString(), temporaryFile);
+        final ManagedFileImpl mf = new ManagedFileImpl(this, UUID.randomUUID().toString(), temporaryFile);
         mf.setSize(temporaryFile.length());
         files.put(mf.getID(), mf);
         return mf;
@@ -375,7 +332,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
             if (isEmpty(id)) {
                 id = UUID.randomUUID().toString();
             }
-            mf = new ManagedFileImpl(id, tmpFile, optTtl);
+            mf = new ManagedFileImpl(this, id, tmpFile, optTtl);
             mf.setSize(tmpFile.length());
         } while (!tmpDirReference.compareAndSet(directory, directory)); // Directory changed in the meantime
         files.put(mf.getID(), mf);
@@ -542,41 +499,29 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         files.remove(id);
     }
 
+    public void shutDown() {
+        shutDown(true);
+    }
+
     void shutDown(final boolean complete) {
-        final PropertyListener propertyListener = this.propertyListener;
         if (complete && propertyListener != null) {
-            final ConfigurationService cs = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            if (null != cs) {
-                cs.removePropertyListener("UPLOAD_DIRECTORY", propertyListener);
-            }
-            this.propertyListener = null;
+            cs.removePropertyListener("UPLOAD_DIRECTORY", propertyListener);
         }
-        final ScheduledTimerTask timerTask = this.timerTask;
         if (timerTask != null) {
             timerTask.cancel(true);
-            final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
-            if (null != timer) {
-                timer.purge();
-            }
-            this.timerTask = null;
+            timer.purge();
         }
         tmpDirReference.set(null);
         clear();
     }
 
     void startUp() {
-        if (timerTask == null) {
-            // Register timer task
-            final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
-            if (null == timer) {
-                throw new IllegalStateException("Missing timer service");
-            }
-            timerTask = timer.scheduleWithFixedDelay(
-                new FileManagementTask(files, TIME_TO_LIVE, LOG),
-                INITIAL_DELAY,
-                DELAY,
-                TimeUnit.MILLISECONDS);
-        }
+        timerTask.cancel(true);
+        timerTask = timer.scheduleWithFixedDelay(
+            new FileManagementTask(files, TIME_TO_LIVE, LOG),
+            INITIAL_DELAY,
+            DELAY,
+            TimeUnit.MILLISECONDS);
     }
 
     private static void copyFile(final File sourceFile, final File destFile) throws IOException {
