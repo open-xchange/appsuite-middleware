@@ -64,9 +64,7 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-
 
 /**
  * {@link ManagedFileImageDataSource}
@@ -79,18 +77,21 @@ public final class ManagedFileImageDataSource implements ImageDataSource {
 
     private static final String ARG = REG_NAME + ".id";
 
+    private final ManagedFileManagement management;
+
     /**
      * Initializes a new {@link ManagedFileImageDataSource}.
+     * @param management 
      */
-    public ManagedFileImageDataSource() {
+    public ManagedFileImageDataSource(ManagedFileManagement management) {
         super();
+        this.management = management;
     }
 
     @Override
     public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session) throws OXException {
         try {
-            final ManagedFileManagement fileManagement = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class, true);
-            final ManagedFile managedFile = fileManagement.getByID(dataArguments.get(ARG));
+            final ManagedFile managedFile = management.getByID(dataArguments.get(ARG));
             final DataProperties properties = new DataProperties();
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, managedFile.getContentType());
             properties.put(DataProperties.PROPERTY_CHARSET, "UTF-8");

@@ -72,7 +72,6 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.Infostore;
@@ -114,6 +113,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.filemanagement.DistributedFileManagement;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderDeleteListenerServiceTrackerCustomizer;
@@ -180,7 +180,6 @@ import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.quota.QuotaService;
-import com.openexchange.report.internal.LastLoginRecorder;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.search.SearchService;
 import com.openexchange.search.internal.SearchServiceImpl;
@@ -505,6 +504,7 @@ public final class ServerActivator extends HousekeepingActivator {
          * Track candidates for file storage
          */
         track(FileStorageFactoryCandidate.class, new CompositeFileStorageFactory());
+        track(ManagedFileManagement.class, new RegistryCustomizer<ManagedFileManagement>(context, ManagedFileManagement.class));
 
         // Start up server the usual way
         starter.start();

@@ -78,8 +78,7 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ManagedFileImpl.class));
 
-    private static final ManagedFileImageDataSource IMAGE_DATA_SOURCE = new ManagedFileImageDataSource();
-
+    private final ManagedFileManagementImpl management;
     private final String id;
 
     private final File file;
@@ -98,6 +97,7 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
 
     private int optTtl;
 
+
     
     /**
      * Initializes a new {@link ManagedFileImpl}.
@@ -105,8 +105,8 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
      * @param id The unique ID
      * @param file The kept file
      */
-    public ManagedFileImpl(final String id, final File file) {
-        this(id, file, -1);
+    public ManagedFileImpl(ManagedFileManagementImpl management, final String id, final File file) {
+        this(management, id, file, -1);
     }
 
     /**
@@ -116,8 +116,9 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
      * @param file The kept file
      * @param optTtl The optional TTL
      */
-    public ManagedFileImpl(final String id, final File file, int optTtl) {
+    public ManagedFileImpl(ManagedFileManagementImpl management, final String id, final File file, int optTtl) {
         super();
+        this.management = management;
         this.optTtl = optTtl;
         this.id = id;
         this.file = file;
@@ -133,7 +134,7 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
     @Override
     public String constructURL(final Session session) throws OXException {
         if (null != contentType && contentType.regionMatches(true, 0, "image/", 0, 6)) {
-            return IMAGE_DATA_SOURCE.generateUrl(new ImageLocation.Builder(id).build(), session);
+            return new ManagedFileImageDataSource(management).generateUrl(new ImageLocation.Builder(id).build(), session);
         }
         final StringBuilder sb = new StringBuilder(64);
         final String prefix;
@@ -187,7 +188,7 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
                 LOG.warn("Temporary file could not be deleted: " + file.getPath());
             }
         }
-        ManagedFileManagementImpl.getInstance().removeFromFiles(id);
+        management.removeFromFiles(id);
     }
 
     @Override

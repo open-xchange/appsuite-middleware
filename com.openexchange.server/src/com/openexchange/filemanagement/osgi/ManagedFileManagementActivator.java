@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,62 +47,45 @@
  *
  */
 
-package com.openexchange.filemanagement.internal;
+package com.openexchange.filemanagement.osgi;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Stack;
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.server.Initialization;
-import com.openexchange.server.osgi.ServerActivator;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.filemanagement.internal.ManagedFileManagementImpl;
+import com.openexchange.osgi.DependantServiceRegisterer;
+import com.openexchange.timer.TimerService;
 
 /**
- * {@link ManagedFileInitialization} - Initialization for {@link ManagedFileManagement}.
+ * {@link ManagedFileManagementActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class ManagedFileInitialization implements Initialization {
+public final class ManagedFileManagementActivator implements BundleActivator {
 
-    private final AtomicBoolean started;
+    private Stack<ServiceTracker<?,?>> trackers = new Stack<ServiceTracker<?,?>>();
 
-    private volatile ServiceRegistration<ManagedFileManagement> registerService;
-
-    /**
-     * Initializes a new {@link ManagedFileInitialization}
-     */
-    public ManagedFileInitialization() {
+    public ManagedFileManagementActivator() {
         super();
-        started = new AtomicBoolean();
     }
 
     @Override
-    public void start() {
-        if (!started.compareAndSet(false, true)) {
-            return;
-        }
-        // Simulate bundle registration
-        final ManagedFileManagementImpl fileManagement = ManagedFileManagementImpl.getInstance();
-        ServerServiceRegistry.getInstance().addService(ManagedFileManagement.class, fileManagement);
-        final BundleContext context = ServerActivator.getContext();
-        if (null != context) {
-            registerService = context.registerService(ManagedFileManagement.class, fileManagement, null);
+    public void start(BundleContext context) throws Exception {
+        trackers.add(new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new TmpFileCleaner(context)));
+        DependantServiceRegisterer<ManagedFileManagement> registerer = new DependantServiceRegisterer<ManagedFileManagement>(context, ManagedFileManagement.class, ManagedFileManagementImpl.class, null, ConfigurationService.class, TimerService.class);
+        trackers.add(new ServiceTracker<Object, Object>(context, registerer.getFilter(), registerer));
+        for (ServiceTracker<?,?> tracker : trackers) {
+            tracker.open();
         }
     }
 
     @Override
-    public void stop() {
-        if (!started.compareAndSet(true, false)) {
-            return;
+    public void stop(BundleContext context) {
+        while (!trackers.isEmpty()) {
+            trackers.pop().close();
         }
-        final ServiceRegistration<ManagedFileManagement> registerService = this.registerService;
-        if (null != registerService) {
-            registerService.unregister();
-            this.registerService = null;
-        }
-        // Simulate bundle shut-down
-        ServerServiceRegistry.getInstance().removeService(ManagedFileManagement.class);
-        ManagedFileManagementImpl.releaseInstance();
     }
-
 }
