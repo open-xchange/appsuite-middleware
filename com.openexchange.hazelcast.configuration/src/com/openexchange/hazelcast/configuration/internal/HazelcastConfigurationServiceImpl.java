@@ -150,6 +150,10 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         }
         String groupPassword = configService.getProperty("com.openexchange.hazelcast.group.password");
         if (false == Strings.isEmpty(groupPassword)) {
+            if ("wtV6$VQk8#+3ds!a".equalsIgnoreCase(groupPassword)) {
+                LOG.warn("The value 'wtV6$VQk8#+3ds!a' for 'com.openexchange.hazelcast.group.password' has not been changed from it's " +
+                    "default. Please do so to restrict access to your cluster.");
+            }
             config.getGroupConfig().setPassword(groupPassword);
         }
         /*
@@ -266,6 +270,10 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             configService.getProperty("com.openexchange.hazelcast.jmxDetailed", "false"));
         config.setProperty(GroupProperties.PROP_REDO_GIVE_UP_THRESHOLD,
             configService.getProperty("com.openexchange.hazelcast.redo.giveupThreshold", "10"));
+        config.setProperty(GroupProperties.PROP_MEMCACHE_ENABLED,
+            configService.getProperty("com.openexchange.hazelcast.memcache.enabled", "false"));
+        config.setProperty(GroupProperties.PROP_REST_ENABLED,
+            configService.getProperty("com.openexchange.hazelcast.rest.enabled", "false"));
         /*
          * Arbitrary Hazelcast properties
          */
