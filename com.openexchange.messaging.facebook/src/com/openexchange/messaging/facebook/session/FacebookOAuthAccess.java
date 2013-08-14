@@ -72,7 +72,7 @@ import com.openexchange.messaging.facebook.FacebookConfiguration;
 import com.openexchange.messaging.facebook.FacebookConstants;
 import com.openexchange.messaging.facebook.FacebookMessagingExceptionCodes;
 import com.openexchange.messaging.facebook.FacebookMessagingResource;
-import com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry;
+import com.openexchange.messaging.facebook.services.Services;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -159,7 +159,7 @@ public final class FacebookOAuthAccess {
             }
             oauthAccountId = ((Integer) accountId).intValue();
         }
-        final OAuthService oAuthService = FacebookMessagingServiceRegistry.getServiceRegistry().getService(OAuthService.class);
+        final OAuthService oAuthService = Services.getService(OAuthService.class);
         try {
             oauthAccount = oAuthService.getAccount(oauthAccountId, session, user, contextId);
             facebookAccessToken = new Token(checkToken(oauthAccount.getToken()), oauthAccount.getSecret());

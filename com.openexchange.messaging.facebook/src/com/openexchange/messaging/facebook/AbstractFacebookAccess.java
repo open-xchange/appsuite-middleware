@@ -49,7 +49,6 @@
 
 package com.openexchange.messaging.facebook;
 
-import static com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry.getServiceRegistry;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
@@ -66,6 +65,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingFolder;
+import com.openexchange.messaging.facebook.services.Services;
 import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
 import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
@@ -130,8 +130,8 @@ public abstract class AbstractFacebookAccess {
             /*
              * Duplicate initialization isn't harmful; no "synchronized" needed
              */
-            final ContextService cs = getServiceRegistry().getService(ContextService.class, true);
-            userLocale = tmp = getServiceRegistry().getService(UserService.class).getUser(user, cs.getContext(cid)).getLocale();
+            final ContextService cs = Services.getService(ContextService.class);
+            userLocale = tmp = Services.getService(UserService.class).getUser(user, cs.getContext(cid)).getLocale();
         }
         return tmp;
     }
