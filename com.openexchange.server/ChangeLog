@@ -8,6 +8,7 @@
 
  - Fix for bug 26597: Apply default charset if multipart/form-data POST request misses mail-safe encoding for non-ascii words
  - Fix for bug 26869: Added missing imports to RSS messaging bundle
+ - Fix for bug 24799: Refactored parsing of FB stream content to avoid strange empty messages
 
 * 2013-08-14 - tobias.friedrich@open-xchange.com
 

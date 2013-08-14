@@ -71,7 +71,7 @@ import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.facebook.FacebookMessagingExceptionCodes;
 import com.openexchange.messaging.facebook.FacebookURLConnectionContent;
-import com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry;
+import com.openexchange.messaging.facebook.services.Services;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingMessage;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility;
 import com.openexchange.messaging.generic.Utility;
@@ -732,7 +732,7 @@ public final class FacebookFQLStreamParser {
         final String preparedContent;
         {
             String tmp = messageText.toString();
-            final HtmlService service = FacebookMessagingServiceRegistry.getServiceRegistry().getService(HtmlService.class, true);
+            final HtmlService service = Services.getService(HtmlService.class);
             htmlContent = service.replaceImages(tmp, session.getSessionID());
             tmp = replaceImages(tmp);
             preparedContent = service.replaceImages(tmp, session.getSessionID());
