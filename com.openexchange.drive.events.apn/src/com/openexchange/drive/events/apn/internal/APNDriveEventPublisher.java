@@ -72,10 +72,9 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class APNDriveEventPublisher implements DriveEventPublisher {
+public abstract class APNDriveEventPublisher implements DriveEventPublisher {
 
-    private static final String SERIVCE_ID = "apn";
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(APNDriveEventPublisher.class);
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(APNDriveEventPublisher.class);
 
     private final APNAccess access;
 
@@ -84,14 +83,16 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
         this.access = access;
     }
 
+    protected abstract String getServiceID();
+
     @Override
     public void publish(DriveEvent event) {
         List<Subscription> subscriptions = null;
         try {
             subscriptions = Services.getService(DriveSubscriptionStore.class, true).getSubscriptions(
-                event.getContextID(), SERIVCE_ID, event.getFolderIDs());
+                event.getContextID(), getServiceID(), event.getFolderIDs());
         } catch (OXException e) {
-            LOG.error("unable to get subscriptions for service " + SERIVCE_ID, e);
+            LOG.error("unable to get subscriptions for service " + getServiceID(), e);
         }
         if (null != subscriptions && 0 < subscriptions.size()) {
             List<PayloadPerDevice> payloads = getPayloads(event, subscriptions);

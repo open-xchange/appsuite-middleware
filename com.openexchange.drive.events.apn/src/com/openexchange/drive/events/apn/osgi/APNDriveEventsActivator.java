@@ -54,7 +54,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.drive.events.apn.internal.APNAccess;
-import com.openexchange.drive.events.apn.internal.APNDriveEventPublisher;
+import com.openexchange.drive.events.apn.internal.IOSDriveEventPublisher;
+import com.openexchange.drive.events.apn.internal.MacOSDriveEventPublisher;
 import com.openexchange.drive.events.apn.internal.Services;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.exception.OXException;
@@ -86,27 +87,38 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.drive.events.apn");
         com.openexchange.drive.events.apn.internal.Services.set(this);
-        ConfigurationService configService = Services.getService(ConfigurationService.class, true);
-        if (configService.getBoolProperty("com.openexchange.drive.events.apn.enabled", false)) {
-            getService(DriveEventService.class).registerPublisher(new APNDriveEventPublisher(getAccess(configService)));
+        ConfigurationService configService = getService(ConfigurationService.class);
+        DriveEventService eventService = getService(DriveEventService.class);
+        /*
+         * iOS
+         */
+        if (configService.getBoolProperty("com.openexchange.drive.events.apn.ios.enabled", false)) {
+            eventService.registerPublisher(new IOSDriveEventPublisher(
+                getAccess(configService, "com.openexchange.drive.events.apn.ios.")));
         } else {
-            LOG.info("Drive events via APN are disabled, skipping publisher registration.");
+            LOG.info("Drive events for iOS clients via APN are disabled, skipping publisher registration.");
+        }
+        /*
+         * Mac OS
+         */
+        if (configService.getBoolProperty("com.openexchange.drive.events.apn.macos.enabled", false)) {
+            eventService.registerPublisher(new MacOSDriveEventPublisher(
+                getAccess(configService, "com.openexchange.drive.events.apn.macos.")));
+        } else {
+            LOG.info("Drive events for Mac OS clients via APN are disabled, skipping publisher registration.");
         }
     }
 
-    private static APNAccess getAccess(ConfigurationService configService) throws OXException {
-        String property = "com.openexchange.drive.events.apn.keystore";
-        String keystore = configService.getProperty(property);
+    private static APNAccess getAccess(ConfigurationService configService, String prefix) throws OXException {
+        String keystore = configService.getProperty(prefix + "keystore");
         if (Strings.isEmpty(keystore)) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property);
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prefix + "keystore");
         }
-        property = "com.openexchange.drive.events.apn.password";
-        String password = configService.getProperty(property);
+        String password = configService.getProperty(prefix + "password");
         if (Strings.isEmpty(password)) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property);
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prefix + "password");
         }
-        property = "com.openexchange.drive.events.apn.production";
-        boolean production = configService.getBoolProperty(property, true);
+        boolean production = configService.getBoolProperty(prefix + "production", true);
         return new APNAccess(keystore, password, production);
     }
 

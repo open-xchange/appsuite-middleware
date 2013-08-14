@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,49 +47,30 @@
  *
  */
 
-package com.openexchange.drive.json.action;
-
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveSession;
-import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
-import com.openexchange.drive.json.internal.Services;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+package com.openexchange.drive.events.apn.internal;
 
 
 /**
- * {@link SubscribeAction}
+ * {@link MacOSDriveEventPublisher}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SubscribeAction extends AbstractDriveAction {
+public class MacOSDriveEventPublisher extends APNDriveEventPublisher {
+
+    private static final String SERIVCE_ID = "apn.macos";
+
+    /**
+     * Initializes a new {@link MacOSDriveEventPublisher}.
+     *
+     * @param access The apn access to use
+     */
+    public MacOSDriveEventPublisher(APNAccess access) {
+        super(access);
+    }
 
     @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
-        /*
-         * get parameters
-         */
-        String token = requestData.getParameter("token");
-        if (Strings.isEmpty(token)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("token");
-        }
-        String serviceID = requestData.getParameter("service");
-        if (Strings.isEmpty(serviceID)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("service");
-        }
-        /*
-         * add subscription
-         */
-        DriveSubscriptionStore subscriptionStore = Services.getService(DriveSubscriptionStore.class, true);
-        boolean removePrevious = serviceID.startsWith("apn");
-        subscriptionStore.subscribe(session.getServerSession(), serviceID, token, session.getRootFolderID(), removePrevious);
-        /*
-         * return empty json object to indicate success
-         */
-        return new AJAXRequestResult(new JSONObject(0), "json");
+    protected String getServiceID() {
+        return SERIVCE_ID;
     }
 
 }
