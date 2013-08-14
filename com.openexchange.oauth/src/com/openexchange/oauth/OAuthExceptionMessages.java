@@ -68,48 +68,6 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
     // A JSON error occurred: %1$s
     public static final String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
 
-    // Response is not of type: %1$s
-    public static final String NOT_OF_TYPE_MSG = "Response is not of type: %1$s";
-
-    // A HTTP error occurred: %1$s
-    public static final String HTTP_ERROR_MSG = "A HTTP error occurred: %1$s";
-
-    // General error: %1$s
-    public static final String GENERAL_ERROR_MSG = "General error: %1$s";
-
-    // Not found: %1$s
-    public static final String NOT_FOUND_MSG = "Not found: %1$s";
-
-    // The source and destination URIs are equal: %1$s.
-    public static final String EQUAL_NAME_MSG = "The source and destination URIs are equal: %1$s.";
-
-    // Conflict. The resource cannot be created until one or more parental directories have been created: %1$s.
-    public static final String CONFLICT_MSG = "Conflict. The resource cannot be created until one or more parental directories have been created: %1$s.";
-
-    // Such a resource already exists: %1$s.
-    public static final String PRECONDITION_FAILED_MSG = "Such a resource already exists: %1$s.";
-
-    // Resource limit exceeded.
-    public static final String INSUFFICIENT_STORAGE_MSG = "Resource limit exceeded.";
-
-    // Unexpected status %1$s (%2$s)
-    public static final String UNEXPECTED_STATUS_MSG = "Unexpected status %1$s (%2$s)";
-
-    // Name contains illegal characters or parent is read-only: %1$s.
-    public static final String ILLEGAL_CHARS_OR_READ_ONLY_MSG = "Name contains illegal characters or parent is read-only: %1$s.";
-
-    // Invalid URL: %1$s
-    public static final String INVALID_URL_MSG = "Invalid URL: %1$s";
-
-    // Unsupported protocol for SmartDrive server access: %1$s
-    public static final String UNSUPPORTED_PROTOCOL_MSG = "Unsupported protocol for SmartDrive server access: %1$s";
-
-    // This resource is not a file
-    public static final String NOT_A_FILE_MSG = "This resource is not a file";
-
-    // This resource is not a directory
-    public static final String NOT_A_DIRECTORY_MSG = "This resource is not a directory";
-
     // Unknown OAuth service meta data: %1$s
     public static final String UNKNOWN_OAUTH_SERVICE_META_DATA_MSG = "Unknown OAuth service meta data: %1$s";
 
