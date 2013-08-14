@@ -1,3 +1,7 @@
+* 2013-08-14 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28260: Disable Hazelcast's REST and Memcache client request listener services by default 
+
 * 2013-08-13 - marcus.klein@open-xchange.com
 
  - Fix for bug 23141: Terminate OSGi framework and backend gracefully allowing components to remove their temporary things.
