@@ -47,61 +47,73 @@
  *
  */
 
-package com.openexchange.server;
+package com.openexchange.groupware.notify;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.ajax.LoginAddFragmentTest;
-import com.openexchange.ajax.MailAttachmentTest;
-import com.openexchange.ajax.ProcessUploadStaticTest;
-import com.openexchange.ajax.parser.ContactSearchtermSqlConverterTest;
-import com.openexchange.ajax.parser.TaskLastModifiedTest;
-import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest;
-import com.openexchange.groupware.ldap.UserAttributeDiffTest;
-import com.openexchange.groupware.notify.ParticipantNotifyTest;
-import com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTableTest;
-import com.openexchange.groupware.userconfiguration.UserConfigurationTest;
-import com.openexchange.i18n.tools.replacement.TaskEndDateReplacementTest;
-import com.openexchange.mail.mime.MimeSmilFixerTest;
-import com.openexchange.mail.mime.MimeStructureFixerTest;
-import com.openexchange.mail.utils.MsisdnUtilityTest;
-import com.openexchange.tools.collections.OXCollectionsTest;
-import com.openexchange.tools.iterator.SearchIteratorDelegatorTest;
-import com.openexchange.tools.net.URIParserTest;
+import org.junit.Assert;
+import org.junit.Test;
+import com.openexchange.groupware.container.UserParticipant;
+
 
 /**
- * {@link UnitTests}
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * Unit tests for {@link ParticipantNotify}
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    ContactSearchtermSqlConverterTest.class,
-    TaskLastModifiedTest.class,
-    LoginAddFragmentTest.class,
-    UserAttributeDiffTest.class,
-    TaskEndDateReplacementTest.class,
-    OXCollectionsTest.class,
-    SearchIteratorDelegatorTest.class,
-    URIParserTest.class,
-    MsisdnUtilityTest.class,
-    MakeFolderIdPrimaryForDelContactsTableTest.class,
-    MailAttachmentTest.class,
-    FileResponseRendererTest.class,
-    MsisdnUtilityTest.class,
-    UserConfigurationTest.class,
-    MimeStructureFixerTest.class,
-    MimeSmilFixerTest.class,
-    ParticipantNotifyTest.class
-})
-public class UnitTests {
+public class ParticipantNotifyTest {
 
     /**
-     * Initializes a new {@link UnitTests}.
+     * The first user participant
      */
-    public UnitTests() {
-        super();
+    private UserParticipant userParticipant1 = new UserParticipant(1);
+
+    /**
+     * The second user participant
+     */
+    private UserParticipant userParticipant2 = new UserParticipant(2);
+
+    /**
+     * The third user participant
+     */
+    private UserParticipant userParticipant3 = new UserParticipant(3);
+
+    /**
+     * The user that is not included in user array
+     */
+    private UserParticipant notIncludedUser = new UserParticipant(4);
+
+    /**
+     * All users
+     */
+    private UserParticipant[] userParticipants = new UserParticipant[] { userParticipant1, userParticipant2, userParticipant3 };
+
+    @Test
+    public void testContains_toSearchNull_ReturnFalse() {
+        boolean containsUser = ParticipantNotify.contains(null, userParticipants);
+
+        Assert.assertFalse(containsUser);
     }
+
+    @Test
+    public void testContains_ArrayToSearchWithinNull_ReturnFalse() {
+        boolean containsUser = ParticipantNotify.contains(userParticipant1, null);
+
+        Assert.assertFalse(containsUser);
+    }
+
+    @Test
+    public void testContains_UserNotIncludedInSearchArray_ReturnTrue() {
+        boolean containsUser = ParticipantNotify.contains(notIncludedUser, userParticipants);
+
+        Assert.assertFalse(containsUser);
+    }
+
+    @Test
+    public void testContains_UserIncludedInSearchArray_ReturnTrue() {
+        boolean containsUser = ParticipantNotify.contains(userParticipant3, userParticipants);
+
+        Assert.assertTrue(containsUser);
+    }
+
 
 }

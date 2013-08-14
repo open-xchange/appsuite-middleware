@@ -473,7 +473,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             if (DEBUG) {
                 LOG.debug(new StringBuilder(256).append("Dropping notification for ").append(
                     (state.getModule() == Types.APPOINTMENT ? "appointment " : "task ")).append(title).append(" (").append(
-                    newObj.getObjectID()).append(") since it indicates to discard its notification").toString());
+                        newObj.getObjectID()).append(") since it indicates to discard its notification").toString());
             }
             return;
         }
@@ -482,7 +482,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 if (DEBUG) {
                     final StringBuilder builder = new StringBuilder(256).append("Dropping notification for ").append(
                         (state.getModule() == Types.APPOINTMENT ? "appointment " : "task ")).append(title).append(" (").append(
-                        newObj.getObjectID()).append(") since it contains NO participants");
+                            newObj.getObjectID()).append(") since it contains NO participants");
                     LOG.debug(builder.toString());
                 }
                 return;
@@ -553,7 +553,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     if (e instanceof OXException) {
                         final StringBuilder builder = new StringBuilder(256).append(
                             "Could not set correct recurrence information in notification for appointment").append(title).append(" (").append(
-                            newObj.getObjectID()).append("). Cause:\n");
+                                newObj.getObjectID()).append("). Cause:\n");
                         LOG.error(builder.toString() + e.getMessage(), e);
                     }
                 }
@@ -651,8 +651,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 } else {
                     sendMail = !p.ignoreNotification && (!newObj.containsNotification() || newObj.getNotification()) || (newObj.getModifiedBy() != p.id && forceNotifyOthers);
                     sendMail = sendMail && (!ParticipantNotify.isStatusUpdate(state) || p.email.equals(newObj.getOrganizer()));
-//                    sendMail = sendMail && (!EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(
-//                        state.getType()) || p.email.equals(newObj.getOrganizer()));
+                    //                    sendMail = sendMail && (!EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(
+                    //                        state.getType()) || p.email.equals(newObj.getOrganizer()));
                     if (p.timeZone != null) {
                         tz = p.timeZone;
                     }
@@ -696,7 +696,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         if (DEBUG) {
                             LOG.debug(new StringBuilder(128).append((Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task")).append(
                                 " update (id = ").append(newObj.getObjectID()).append(") notification added to pool for receiver ").append(
-                                p.email).toString());
+                                    p.email).toString());
                         }
                     } else {
                         /*
@@ -724,8 +724,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                             if (DEBUG) {
                                 LOG.debug(new StringBuilder(128).append((Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task")).append(
                                     " (id = ").append(newObj.getObjectID()).append(") \"").append(
-                                    EmailableParticipant.STATE_NEW == p.state ? "New" : (EmailableParticipant.STATE_REMOVED == p.state ? "Deleted" : state.getType().toString())).append(
-                                    "\" notification message generated for receiver ").append(p.email).toString());
+                                        EmailableParticipant.STATE_NEW == p.state ? "New" : (EmailableParticipant.STATE_REMOVED == p.state ? "Deleted" : state.getType().toString())).append(
+                                            "\" notification message generated for receiver ").append(p.email).toString());
                             }
                         }
                     }
@@ -851,7 +851,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 if (Types.APPOINTMENT == state.getModule()) {
                     msg.title = b.append(
                         new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_DELETED, locale).getReplacement()).append(": ").append(
-                        title).toString();
+                            title).toString();
                     b.setLength(0);
                     /*
                      * Render proper message for removed participant
@@ -1487,7 +1487,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
         renderMap.put(new CreationDateReplacement(
             newObj.containsCreationDate() ? newObj.getCreationDate() : (oldObj == null ? null : oldObj.getCreationDate()),
-            null));
+                null));
         {
             final SeriesReplacement seriesRepl;
             if (newObj.containsRecurrenceType() || newObj.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
@@ -1562,8 +1562,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         final Participant[] oldParticipants = oldObj.getParticipants();
         final Context ctx = session.getContext();
         if (oldParticipants != null) {
-            for (int i = 0; i < oldParticipants.length; i++) {
-                final Participant participant = oldParticipants[i];
+            for (final Participant participant : oldParticipants) {
                 switch (participant.getType()) {
                 case Participant.USER:
                     EmailableParticipant p = getUserParticipant(participant, ctx);
@@ -2037,7 +2036,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         for (final UserParticipant participant : newParticipants) {
             final EmailableParticipant p = getUserParticipant(participant, ctx);
             if (p != null) {
-                p.state = containsUser(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
+                p.state = contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
                 addSingleParticipant(p, participantSet, null, receivers, all, false);
             }
         }
@@ -2046,7 +2045,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             for (final UserParticipant participant : oldParticipants) {
                 final EmailableParticipant p = getUserParticipant(participant, ctx);
                 if (p != null) {
-                    p.state = containsUser(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
+                    p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
                     if (forUpdate) {
                         addSingleParticipant(p, participantSet, null, receivers, all, false);
                     } else {
@@ -2142,21 +2141,16 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         public boolean internal;
     }
 
-    private static final boolean containsUser(final UserParticipant toSearch, final UserParticipant[] userParticipants) {
-        if (null == userParticipants) {
-            return true;
-        }
-        for (final UserParticipant userParticipant : userParticipants) {
-            if (userParticipant != null && userParticipant.equals(toSearch)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static final boolean contains(final Participant toSearch, final Participant[] participants) {
+    /**
+     * Checks if the participant is included in the participants array.
+     * 
+     * @param toSearch - the participant to search for
+     * @param participants - the array to search within
+     * @return true, if the toSearch participant is included within the array. Otherwise false.
+     */
+    protected static final boolean contains(final Participant toSearch, final Participant[] participants) {
         if (null == participants) {
-            return true;
+            return false;
         }
         for (final Participant participant : participants) {
             if (participant != null && participant.equals(toSearch)) {
@@ -2376,10 +2370,10 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      * @return <code>true</code>, if it is a status update, <code>false</code>, otherwise
      */
     private static boolean isStatusUpdate(final State state) {
-    	return null != state &&
-			State.Type.ACCEPTED.equals(state.getType()) ||
-        	State.Type.DECLINED.equals(state.getType()) ||
-        	State.Type.TENTATIVELY_ACCEPTED.equals(state.getType()) ||
+        return null != state &&
+            State.Type.ACCEPTED.equals(state.getType()) ||
+            State.Type.DECLINED.equals(state.getType()) ||
+            State.Type.TENTATIVELY_ACCEPTED.equals(state.getType()) ||
             State.Type.NONE_ACCEPTED.equals(state.getType());
     }
 
