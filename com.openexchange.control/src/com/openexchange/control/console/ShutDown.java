@@ -49,8 +49,12 @@
 
 package com.openexchange.control.console;
 
+import java.io.IOException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+import javax.management.ReflectionException;
 import com.openexchange.control.console.internal.ValueObject;
 import com.openexchange.control.internal.BundleNotFoundException;
 
@@ -76,7 +80,7 @@ public final class ShutDown extends AbstractConsoleHandler {
                     waitForExit = true;
                 }
             }
-            completed = shutdown(waitForExit);
+            completed = shutdown(waitForExit) || !waitForExit;
         } catch (final Exception exc) {
             final Throwable cause = exc.getCause();
             if (cause != null) {
@@ -105,13 +109,23 @@ public final class ShutDown extends AbstractConsoleHandler {
         initJMX(jmxHost, jmxPort, jmxLogin, jmxPassword);
     }
 
-    public boolean shutdown(boolean waitForExit) throws Exception {
+    public boolean shutdown(boolean waitForExit) throws InstanceNotFoundException, MBeanException, ReflectionException, IOException {
         final ObjectName objectName = getObjectName();
         final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
-        Object result = mBeanServerConnection.invoke(objectName, "shutdown", new Object[] { Boolean.valueOf(waitForExit) }, new String[] { "boolean" });
         boolean retval = false;
-        if (result instanceof Boolean) {
-            retval = ((Boolean) result).booleanValue();
+        try {
+            Object result = mBeanServerConnection.invoke(objectName, "shutdown", new Object[] { Boolean.valueOf(waitForExit) }, new String[] { "boolean" });
+            if (result instanceof Boolean) {
+                retval = ((Boolean) result).booleanValue();
+            }
+        } catch (ReflectionException e) {
+            if (e.getCause() instanceof NoSuchMethodException) {
+                // Happens only once when upgrading to version 7.4.0 because newer CLT tries to stop older backend which does not have extended method.
+                // This can be removed if no version before 7.4.0 is running somewhere anymore.
+                mBeanServerConnection.invoke(objectName, "shutdown", new Object[] { }, new String[] { });
+            } else {
+                throw e;
+            }
         }
         return retval;
     }

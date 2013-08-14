@@ -150,7 +150,10 @@ ox_stop_daemon() {
     test -z "$name" && die "ox_stop_daemon: missing name argument (arg 1)"
     ox_system_type
     local type=$?
-    /opt/open-xchange/sbin/shutdown -w
+    read PID < /var/run/${name}.pid
+    if [ -z "$PID" ]; then
+        ps $PID || /opt/open-xchange/sbin/shutdown -w || kill -QUIT $PID
+    fi
     if [ $type -eq $DEBIAN -o $type -eq $UCS ] ; then
         start-stop-daemon --stop --oknodo --pidfile /var/run/${name}.pid
         rm -f /var/run/${name}.pid
