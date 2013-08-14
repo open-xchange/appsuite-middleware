@@ -1495,7 +1495,7 @@ public class OXFolderTools {
      */
     public static boolean canDeleteAllObjectsInFolder(final FolderObject fo, final Session session, final Connection readCon) throws OXException {
         final int userId = session.getUserId();
-        final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+        final Context ctx = ContextStorage.getStorageContext(session);
         final UserPermissionBits permissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), ctx);
         try {
             /*
@@ -1534,7 +1534,7 @@ public class OXFolderTools {
                     return !db.hasFolderForeignObjects(
                         fo.getObjectID(),
                         ctx,
-                        UserStorage.getStorageUser(session.getUserId(), ctx),
+                        UserStorage.getStorageUser(session),
                         permissionBits);
                 default:
                     throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(fo.getModule()),

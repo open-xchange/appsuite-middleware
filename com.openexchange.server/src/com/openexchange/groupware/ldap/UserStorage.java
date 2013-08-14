@@ -61,6 +61,8 @@ import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.log.LogFactory;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * This interface provides methods to read data from users in the directory
@@ -429,5 +431,18 @@ public abstract class UserStorage {
             LOG.error(e.getMessage(), e);
             return null;
         }
+    }
+
+    /**
+     * Reads the data from a user from the underlying persistent data storage.
+     *
+     * @param session The associated session
+     * @return A user or <code>null</code> on exception.
+     */
+    public static User getStorageUser(final Session session) {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser();
+        }
+        return getStorageUser(session.getUserId(), session.getContextId());
     }
 }

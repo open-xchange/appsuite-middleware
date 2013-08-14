@@ -54,6 +54,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * This class defines the methods for accessing the storage of contexts.
@@ -227,6 +228,9 @@ public abstract class ContextStorage {
      * @throws OXException if getting the context fails.
      */
     public static Context getStorageContext(final Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getContext();
+        }
         return getStorageContext(session.getContextId());
     }
 
