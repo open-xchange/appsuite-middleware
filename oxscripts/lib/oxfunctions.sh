@@ -97,7 +97,7 @@ ox_start_daemon() {
     local user="$3"
     local group="$4"
     test -z "$path" && die "ox_start_daemon: missing path argument (arg 1)"
-    test -x $path   || die "ox_stop_daemon: $path is not executable"
+    test -x $path   || die "ox_start_daemon: $path is not executable"
     test -z "$name" && die "ox_start_daemon: missing name argument (arg 2)"
     local runasuser=
     test -n "$user"   && runasuser="--chuid $user"
