@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.printing;
+package com.openexchange.calendar.printing;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -60,9 +60,6 @@ import java.util.TimeZone;
 import com.openexchange.calendar.itip.Messages;
 import com.openexchange.i18n.tools.StringHelper;
 
-/*
- * Copied from com.openexchange.printing, where is was completely pointless, because rolled back that release.
- */
 public class DateFormatter {
 
 	protected DateFormat timeFormat;

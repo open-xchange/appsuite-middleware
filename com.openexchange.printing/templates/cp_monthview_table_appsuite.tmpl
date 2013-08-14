@@ -26,8 +26,11 @@ body {
   background-color: transparent;
 }
 
-html, body, .calendar, #contentArea, #layout, .date-cell {
+html, body, #contentArea, #layout, .date-cell {
   height: 100%;
+}
+.calendar {
+  height: 96%;
 }
 .date-cell {
 	position: relative;
@@ -111,15 +114,26 @@ ul {
   margin: 0px 0px 1px 0px; 
   border: 1px solid #6CB8E1; 
 }
+
+h1 {
+  text-align: center;
+  font-size: 1.1em;
+  max-height: 4%;
+  height: 4%;
+  min-height: 4%;
+  vertical-align: bottom;
+}
+
     </style>
     <#assign middleDay = days[days?size / 2]>
-    <title>${documentTitle} - ${i18n.tr("Calendar")} - ${middleDay.format("MMMM", middleDay.time)}</title>
+    <title>${documentTitle} ${i18n.tr("Calendar")}: ${middleDay.format("MMMM", middleDay.time)} ${middleDay.format("yyyy", middleDay.time)}</title>
   </head>
   <body onload="window.print()">
     <div id="layout" class="flexChilds">
       <div id="headArea">
       </div>
       <div id="contentArea">
+        <h1>${documentTitle} ${i18n.tr("Calendar")}: ${middleDay.format("MMMM", middleDay.time)} ${middleDay.format("yyyy", middleDay.time)}</h1>
         <table border="0" id="calendarMonth" class="calendar">
           <thead>
             <tr>
