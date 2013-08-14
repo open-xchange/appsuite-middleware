@@ -190,6 +190,12 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
     }
 
     @Override
+    public boolean shutdown() {
+        LOG.info("control command: shutdown");
+        return shutdown(bundleContext, false);
+    }
+
+    @Override
     public boolean shutdown(boolean waitForExit) {
         LOG.info("control command: shutdown");
         return shutdown(bundleContext, waitForExit);

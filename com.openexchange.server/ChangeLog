@@ -1,3 +1,7 @@
+* 2013-08-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 28272: Extended new graceful shutdown method with necessary checks prior to executing it.
+
 * 2013-08-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 26597: Apply default charset if multipart/form-data POST request misses mail-safe encoding for non-ascii words
