@@ -70,62 +70,55 @@ import com.openexchange.log.LogFactory;
  */
 public class SQL {
 
-    public static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SQL.class));
-
     public static String getCreateDriveEventSubscriptionsTableStmt() {
         return "CREATE TABLE driveEventSubscriptions (" +
-            "uuid BINARY(16) NOT NULL," +
             "cid INT4 UNSIGNED NOT NULL," +
-            "user INT4 UNSIGNED NOT NULL," +
             "service VARCHAR(64) NOT NULL," +
             "token VARCHAR(255) NOT NULL," +
+            "user INT4 UNSIGNED NOT NULL," +
             "folder VARCHAR(512)," +
-            "PRIMARY KEY (cid, uuid)," +
+            "timestamp BIGINT(20) NOT NULL," +
+            "PRIMARY KEY (cid,service,token)," +
             "INDEX (cid,service,folder)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=ascii;";
     }
 
-    // no UNIQUE constraint possible due to combined length of required columns
-    public static final String INSERT_SUBSCRIPTION_STMT =
-        "INSERT INTO driveEventSubscriptions (uuid,cid,user,service,token,folder) " +
-        "SELECT UNHEX(?),?,?,?,?,REVERSE(?) FROM DUAL WHERE NOT EXISTS " +
-        "(SELECT uuid FROM driveEventSubscriptions WHERE cid=? AND user=? AND service=? AND token=? AND folder=REVERSE(?));";
+    public static final String REPLACE_SUBSCRIPTION_STMT =
+        "REPLACE INTO driveEventSubscriptions (cid,service,token,user,folder,timestamp) " +
+        "VALUES (?,?,?,?,REVERSE(?),?);";
 
     public static final String DELETE_SUBSCRIPTION_STMT =
-        "DELETE FROM driveEventSubscriptions " +
-        "WHERE cid=? AND user=? AND service=? AND token=? AND REVERSE(folder)=?;";
-
-    public static final String DELETE_SUBSCRIPTIONS_FOR_TOKEN_STMT =
         "DELETE FROM driveEventSubscriptions " +
         "WHERE cid=? AND service=? AND token=?;";
 
     public static final String UPDATE_TOKEN_STMT =
         "UPDATE driveEventSubscriptions SET token=? " +
-        "WHERE cid=? AND user=? AND service=? AND token=?;";
-
-    public static final String DELETE_SUBSCRIPTIONS_IN_CONTEXT_STMT =
-        "DELETE FROM driveEventSubscriptions " +
-        "WHERE cid=?;";
-
-    public static final String DELETE_SUBSCRIPTIONS_FOR_USER_STMT =
-        "DELETE FROM driveEventSubscriptions " +
-        "WHERE cid=? AND user=?;";
-
-    public static final String SELECT_SUBSCRIPTION_UUID_STMT =
-        "SELECT LOWER(HEX(uuid)) FROM driveEventSubscriptions " +
-        "WHERE cid=? AND user=? AND service=? AND token=? AND folder=REVERSE(?);";
+        "WHERE cid=? AND service=? AND token=?;";
 
     /**
-     * SELECT LOWER(HEX(uuid)),user,token,REVERSE(folder) FROM driveEventSubscriptions
-     * WHERE cid=? AND service=? AND REVERSE(folder) IN (...);"
+     * SELECT service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions
+     * WHERE cid=? AND service IN (...) AND REVERSE(folder) IN (...);"
      */
-    public static final String SELECT_SUBSCRIPTIONS_STMT(Collection<String> rootFolderIDs) throws OXException {
+    public static final String SELECT_SUBSCRIPTIONS_STMT(String[] services, Collection<String> rootFolderIDs) throws OXException {
         if (null == rootFolderIDs || 0 == rootFolderIDs.size()) {
             throw new IllegalArgumentException("folderIDs");
         }
+        if (null == services || 0 == services.length) {
+            throw new IllegalArgumentException("services");
+        }
         StringAllocator allocator = new StringAllocator();
-        allocator.append("SELECT LOWER(HEX(uuid)),user,token,REVERSE(folder) FROM driveEventSubscriptions ");
-        allocator.append("WHERE cid=? AND service=? AND REVERSE(folder)");
+        allocator.append("SELECT service,token,user,REVERSE(folder),timestamp FROM driveEventSubscriptions ");
+        allocator.append("WHERE cid=? AND service");
+        if (1 == services.length) {
+            allocator.append("='").append(services[0]).append("'");
+        } else {
+            allocator.append(" IN ('").append(services[0]);
+            for (int i = 1; i < services.length; i++) {
+                allocator.append("','").append(services[i]);
+            }
+            allocator.append("')");
+        }
+        allocator.append(" AND REVERSE(folder)");
         Iterator<String> iterator = rootFolderIDs.iterator();
         if (1 == rootFolderIDs.size()) {
             allocator.append("='").append(escape(iterator.next())).append("';");
@@ -138,6 +131,18 @@ public class SQL {
         }
         return allocator.toString();
     }
+
+    public static final String DELETE_SUBSCRIPTIONS_FOR_TOKEN_STMT =
+        "DELETE FROM driveEventSubscriptions " +
+        "WHERE service=? AND token=? AND timestamp<?;";
+
+    public static final String DELETE_SUBSCRIPTIONS_IN_CONTEXT_STMT =
+        "DELETE FROM driveEventSubscriptions " +
+        "WHERE cid=?;";
+
+    public static final String DELETE_SUBSCRIPTIONS_FOR_USER_STMT =
+        "DELETE FROM driveEventSubscriptions " +
+        "WHERE cid=? AND user=?;";
 
     public static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
         if (false == LOG.isDebugEnabled()) {
@@ -180,6 +185,8 @@ public class SQL {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
     }
+
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SQL.class));
 
     private SQL() {
         super();

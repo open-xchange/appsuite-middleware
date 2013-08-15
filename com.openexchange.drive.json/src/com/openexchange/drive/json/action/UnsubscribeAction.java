@@ -68,6 +68,11 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 public class UnsubscribeAction extends AbstractDriveAction {
 
     @Override
+    protected boolean requiresRootFolderID() {
+        return false;
+    }
+
+    @Override
     public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
         /*
          * get parameters
@@ -84,7 +89,7 @@ public class UnsubscribeAction extends AbstractDriveAction {
          * add subscription
          */
         DriveSubscriptionStore subscriptionStore = Services.getService(DriveSubscriptionStore.class, true);
-        subscriptionStore.unsubscribe(session.getServerSession(), serviceID, token, session.getRootFolderID());
+        subscriptionStore.unsubscribe(session.getServerSession(), serviceID, token);
         /*
          * return empty json object to indicate success
          */
