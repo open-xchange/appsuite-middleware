@@ -54,6 +54,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.drive.events.apn.internal.APNAccess;
+import com.openexchange.drive.events.apn.internal.APNDriveEventPublisher;
 import com.openexchange.drive.events.apn.internal.IOSDriveEventPublisher;
 import com.openexchange.drive.events.apn.internal.MacOSDriveEventPublisher;
 import com.openexchange.drive.events.apn.internal.Services;
@@ -61,6 +62,8 @@ import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.timer.TimerService;
+import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
  * {@link APNDriveEventsActivator}
@@ -80,7 +83,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, ConfigurationService.class };
+        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, ConfigurationService.class, TimerService.class };
     }
 
     @Override
@@ -93,8 +96,12 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
          * iOS
          */
         if (configService.getBoolProperty("com.openexchange.drive.events.apn.ios.enabled", false)) {
-            eventService.registerPublisher(new IOSDriveEventPublisher(
-                getAccess(configService, "com.openexchange.drive.events.apn.ios.")));
+            IOSDriveEventPublisher publisher = new IOSDriveEventPublisher(
+                getAccess(configService, "com.openexchange.drive.events.apn.ios."));
+            eventService.registerPublisher(publisher);
+            String feedbackQueryInterval = configService.getProperty(
+                "com.openexchange.drive.events.apn.ios.feedbackQueryInterval", (String)null);
+            setupFeedbackQueries(publisher, feedbackQueryInterval);
         } else {
             LOG.info("Drive events for iOS clients via APN are disabled, skipping publisher registration.");
         }
@@ -102,10 +109,31 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
          * Mac OS
          */
         if (configService.getBoolProperty("com.openexchange.drive.events.apn.macos.enabled", false)) {
-            eventService.registerPublisher(new MacOSDriveEventPublisher(
-                getAccess(configService, "com.openexchange.drive.events.apn.macos.")));
+            MacOSDriveEventPublisher publisher = new MacOSDriveEventPublisher(
+                getAccess(configService, "com.openexchange.drive.events.apn.macos."));
+            eventService.registerPublisher(publisher);
+            String feedbackQueryInterval = configService.getProperty(
+                "com.openexchange.drive.events.apn.macos.feedbackQueryInterval", (String)null);
+            setupFeedbackQueries(publisher, feedbackQueryInterval);
         } else {
             LOG.info("Drive events for Mac OS clients via APN are disabled, skipping publisher registration.");
+        }
+    }
+
+    private static void setupFeedbackQueries(final APNDriveEventPublisher publisher, String feedbackQueryInterval) throws OXException {
+        if (false == Strings.isEmpty(feedbackQueryInterval)) {
+            long interval = TimeSpanParser.parseTimespan(feedbackQueryInterval);
+            if (60 * 1000 <= interval) {
+                Services.getService(TimerService.class).scheduleWithFixedDelay(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        publisher.queryFeedbackService();
+                    }
+                }, interval, interval);
+            } else {
+                LOG.warn("Ignoring too small value '" + feedbackQueryInterval + " for APN feedback query interval.");
+            }
         }
     }
 

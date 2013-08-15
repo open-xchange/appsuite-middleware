@@ -54,6 +54,7 @@ import java.util.List;
 import javapns.Push;
 import javapns.communication.exceptions.CommunicationException;
 import javapns.communication.exceptions.KeystoreException;
+import javapns.devices.Device;
 import javapns.devices.exceptions.InvalidDeviceTokenFormatException;
 import javapns.json.JSONException;
 import javapns.notification.PayloadPerDevice;
@@ -90,7 +91,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
         List<Subscription> subscriptions = null;
         try {
             subscriptions = Services.getService(DriveSubscriptionStore.class, true).getSubscriptions(
-                event.getContextID(), getServiceID(), event.getFolderIDs());
+                event.getContextID(), new String[] { getServiceID() }, event.getFolderIDs());
         } catch (OXException e) {
             LOG.error("unable to get subscriptions for service " + getServiceID(), e);
         }
@@ -112,6 +113,39 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
         }
     }
 
+    /**
+     * Queries the feedback service and processes the received results, removing reported tokens from the subscription store if needed.
+     */
+    public void queryFeedbackService() {
+        LOG.info("Querying APN feedback service for '" + getServiceID() + "'...");
+        long start = System.currentTimeMillis();
+        try {
+            List<Device> devices = null;
+            try {
+                 devices = Push.feedback(access.getKeystore(), access.getPassword(), access.isProduction());
+            } catch (CommunicationException e) {
+                LOG.warn("error querying feedback service", e);
+            } catch (KeystoreException e) {
+                LOG.warn("error querying feedback service", e);
+            }
+            if (null != devices && 0 < devices.size()) {
+                DriveSubscriptionStore subscriptionStore = Services.getService(DriveSubscriptionStore.class, true);
+                for (Device device : devices) {
+                    LOG.debug("Got feedback for device with token: " +
+                        device.getToken() + ", last registered: " + device.getLastRegister());
+                    int removed = subscriptionStore.removeSubscriptions(
+                        getServiceID(), device.getToken(), device.getLastRegister().getTime());
+                    LOG.info("Removed " + removed + " subscriptions for device with token: " + device.getToken() + ".");
+                }
+            } else {
+                LOG.debug("No devices to unregister received from feedback service.");
+            }
+        } catch (OXException e) {
+            LOG.warn("Error querying feedback service", e);
+        }
+        LOG.info("Finished processing APN feedback for '" + getServiceID() + "' after " + (System.currentTimeMillis() - start) + " ms.");
+    }
+
     private static List<PayloadPerDevice> getPayloads(DriveEvent event, List<Subscription> subscriptions) {
         List<PayloadPerDevice> payloads = new ArrayList<PayloadPerDevice>(subscriptions.size());
         for (Subscription subscription : subscriptions) {
@@ -126,10 +160,20 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
             } catch (JSONException e) {
                 LOG.warn("error constructing payload", e);
             } catch (InvalidDeviceTokenFormatException e) {
-                LOG.warn("error constructing payload", e);
+                LOG.warn("Invalid device token: '" + subscription.getToken() + "', removing from subscription store.", e);
+                removeSubscription(subscription);
             }
         }
         return payloads;
+    }
+
+    private static boolean removeSubscription(Subscription subscription) {
+        try {
+            return Services.getService(DriveSubscriptionStore.class, true).removeSubscription(subscription);
+        } catch (OXException e) {
+            LOG.error("Error removing subscription", e);
+        }
+        return false;
     }
 
     @Override
