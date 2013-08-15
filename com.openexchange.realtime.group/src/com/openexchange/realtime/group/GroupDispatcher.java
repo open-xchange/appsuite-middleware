@@ -241,6 +241,18 @@ public class GroupDispatcher implements ComponentHandle {
     }
 
     /**
+     * Relay this message just to a specific receiver
+     */
+    public void relayToID(Stanza stanza, ID id) throws OXException {
+        MessageDispatcher dispatcher = SERVICE_REF.get().getService(MessageDispatcher.class);
+
+        // Send a copy of the stanza
+        Stanza copy = copyFor(stanza, id);
+        stamp(copy);
+        dispatcher.send(copy);
+    }
+
+    /**
      * Deliver this stanza to its recipient. Delegates to the {@link MessageDispatcher}
      */
     public void send(Stanza stanza) throws OXException {
