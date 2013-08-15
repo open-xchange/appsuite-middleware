@@ -49,36 +49,34 @@
 
 package com.openexchange.server.ajax.ping;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link PingAJAXActionFactory}
+ * {@link WhoAmIAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class PingAJAXActionFactory implements AJAXActionServiceFactory {
-    
-    private static final Collection<String> SUPPORTED_SERVICES = Arrays.asList("ping", "whoami");
-    private final Map<String, AJAXActionService> ACTIONS = new HashMap<String, AJAXActionService>() {{
-        put("ping", new PingAction());
-        put("whoami", new WhoAmIAction());
-    }};
-    
-    @Override
-    public Collection<?> getSupportedServices() {
-        return SUPPORTED_SERVICES;
-    }
+public class WhoAmIAction implements AJAXActionService {
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return ACTIONS.get(action);
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        JSONObject json = new JSONObject();
+        try {
+            LoginWriter.write(session, json);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        }
+
+        return new AJAXRequestResult(json, "json");
     }
 
 }
