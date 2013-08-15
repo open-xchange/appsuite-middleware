@@ -948,6 +948,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         CacheKey key = cacheService.newCacheKey(contextId, userId);
                         Cache cache = cacheService.getCache("User");
                         cache.remove(key);
+                        cache = cacheService.getCache("UserPermissionBits");
+                        cache.remove(key);
                         cache = cacheService.getCache("UserConfiguration");
                         cache.remove(key);
                         cache = cacheService.getCache("UserSettingMail");
@@ -2298,6 +2300,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             final CacheKey key = cacheService.newCacheKey(contextId, user.getId());
                             Cache cache = cacheService.getCache("User");
                             cache.remove(key);
+                            cache = cacheService.getCache("UserPermissionBits");
+                            cache.remove(key);
                             cache = cacheService.getCache("UserConfiguration");
                             cache.remove(key);
                             cache = cacheService.getCache("UserSettingMail");
@@ -2456,6 +2460,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         for (int userId : userIds) {
                             final CacheKey key = cacheService.newCacheKey(contextId, userId);
                             Cache cache = cacheService.getCache("User");
+                            cache.remove(key);
+                            cache = cacheService.getCache("UserPermissionBits");
                             cache.remove(key);
                             cache = cacheService.getCache("UserConfiguration");
                             cache.remove(key);
