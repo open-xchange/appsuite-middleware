@@ -259,7 +259,7 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      */
     PROTOCOL_ERROR(MimeMailExceptionMessage.PROTOCOL_ERROR_MSG, CATEGORY_ERROR, 1027),
     /**
-     * Protocol error in data sent to to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
+     * Protocol error in data sent to the mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
      */
     PROTOCOL_ERROR_EXT(MimeMailExceptionMessage.PROTOCOL_ERROR_EXT_MSG, PROTOCOL_ERROR.category, PROTOCOL_ERROR.detailNumber),
     /**
