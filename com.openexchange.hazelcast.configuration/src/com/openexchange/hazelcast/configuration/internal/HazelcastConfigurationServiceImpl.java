@@ -242,6 +242,8 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         if (configService.getBoolProperty("com.openexchange.hazelcast.network.enableIPv6Support", false)) {
             config.setProperty(GroupProperties.PROP_PREFER_IPv4_STACK, "false");
         }
+        config.setProperty(GroupProperties.PROP_SOCKET_BIND_ANY, String.valueOf(
+            configService.getBoolProperty("com.openexchange.hazelcast.socket.bindAny", false)));
         /*
          * Miscellaneous
          */
