@@ -80,8 +80,8 @@ public class AtmosphereExceptionMessage implements LocalizableStrings {
     public static final String PRESENCE_DATA_MALFORMED_MSG = "Malformed Presence Data";
     /** Malformed Message Data */
     public static final String MESSAGE_DATA_MALFORMED_MSG = "Malformed Message Data";
-    /** Malformed Iq Data */
-    public static final String IQ_DATA_MALFORMED_MSG = "Malformed Iq Data";
+    /** Malformed IQ Data */
+    public static final String IQ_DATA_MALFORMED_MSG = "Malformed IQ Data";
     /** Malformed Presence Element: \"%1$s\" */
     public static final String PRESENCE_DATA_ELEMENT_MALFORMED_MSG = "Malformed Presence Element: \"%1$s\"";
     /** Malformed Message Element: \"%1$s\" */

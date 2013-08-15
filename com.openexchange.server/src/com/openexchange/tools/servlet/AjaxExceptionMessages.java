@@ -145,7 +145,7 @@ public final class AjaxExceptionMessages implements LocalizableStrings {
     // Missing cookie: %1$s
     public static final String MISSING_COOKIE_MSG = "Missing cookie: %1$s";
 
-    // Cookie "%1$s" cannot be found because requests does not have any cookies.
-    public static final String MISSING_COOKIES_MSG = "Cookie \"%1$s\" cannot be found because requests does not have any cookies.";
+    // Cookie "%1$s" cannot be found because requests do not have any cookies.
+    public static final String MISSING_COOKIES_MSG = "Cookie \"%1$s\" cannot be found because requests do not have any cookies.";
 
 }
