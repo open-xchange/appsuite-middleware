@@ -54,7 +54,6 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.ajax.LoginAddFragmentTest;
 import com.openexchange.ajax.MailAttachmentTest;
-import com.openexchange.ajax.ProcessUploadStaticTest;
 import com.openexchange.ajax.parser.ContactSearchtermSqlConverterTest;
 import com.openexchange.ajax.parser.TaskLastModifiedTest;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest;
