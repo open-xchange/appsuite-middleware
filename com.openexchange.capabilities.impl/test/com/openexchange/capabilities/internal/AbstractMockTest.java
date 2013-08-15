@@ -47,55 +47,38 @@
  *
  */
 
-package com.openexchange.http.testservlet;
+package com.openexchange.capabilities.internal;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.powermock.modules.junit4.PowerMockRunner;
+
 
 /**
- * {@link PingServlet} - Default TestServlet for basic server tests.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * Each unit test written should extend this class.<br>
+ * <br>
+ * Globally required mocks can be inserted into the list of @PrepareForTest({ ... }) and be mocked in
+ * com.openexchange.test.mock.test.AbstractMockTest.AbstractMockTest().
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
  */
-public class PingServlet extends HttpServlet {
-
-    private static final long serialVersionUID = -4037317824217606661L;
+@RunWith(PowerMockRunner.class)
+public abstract class AbstractMockTest {
 
     /**
-     * Default constructor.
+     * Initializes a new {@link AbstractMockTest}.
      */
-    public PingServlet() {
+    public AbstractMockTest() {
         super();
     }
 
-    @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        // Create a new HttpSession if it's missing
-        req.getSession(true);
-        super.service(req, resp);
-    }
-
     /**
-     * {@inheritDoc}
+     * Setup all mocks that are required for this test
+     * 
+     * @throws Exception - thrown when no mock could be created.
      */
-    @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        final StringBuilder page = new StringBuilder(1024);
-        page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
-        page.append("<html>\n");
-        page.append("<head><title>TestServlet's doGet Page</title></head>\n");
-        page.append("<body>\n");
-        page.append("<h1>Ping</h1><hr/>\n");
-        page.append("<p>Open-Xchange Ping</p>\n");
-        page.append("</body>\n</html>");
-        resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType("text/html; charset=UTF-8");
-        final byte[] output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
-        resp.setContentLength(output.length);
-        resp.getOutputStream().write(output);
-    }
+    @Before
+    public abstract void setUp() throws Exception;
 
 }

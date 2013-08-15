@@ -15,7 +15,10 @@ import com.openexchange.groupware.userconfiguration.service.PermissionAvailabili
 import com.openexchange.java.ConcurrentHashSet;
 import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.server.ServiceLookup;
+<<<<<<< HEAD
 import com.openexchange.test.mock.main.test.AbstractMockTest;
+=======
+>>>>>>> release-7.4.0
 
 /**
  * Unit tests for {@link CapabilityServiceImpl}

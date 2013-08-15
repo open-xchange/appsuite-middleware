@@ -61,6 +61,10 @@ import com.openexchange.realtime.packet.Message;
  */
 public class EnqueuedStanzaTest extends EnqueuedStanza {
 
+    public EnqueuedStanzaTest() {
+        super();
+    }
+
     @Test
     public void incCounterShouldReturnTrueTheFirstOneHundredTimesAndFalseAfterThat() {
         sequenceNumber = 23L;

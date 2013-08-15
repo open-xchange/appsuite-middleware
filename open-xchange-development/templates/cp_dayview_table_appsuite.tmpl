@@ -58,6 +58,7 @@ ol ol li                                          { margin: 1px 5px; margin-left
 ol ol ol li                                       { background: none; padding: 0 }
 
 .appointmentDayStartEnd                           { background: #6CB8E1; height: 15px; overflow: hidden; padding: 0 0 2px 5px; border: 1px solid #808080;}
+h1                                                {font-size: 12px; text-align: left;}
 
 /* Name
 ---------------------------------------------------*/
@@ -84,16 +85,24 @@ ol ol ol li                                       { background: none; padding: 0
 #calendarDay #events                              { width: 50%; }
 
 #calendarDay .appointment                         { overflow: hidden; background-color: #6CB8E1; border: 1px solid #000; }
-#calendarDay .appointment div { padding: 2px; }
+#calendarDay .appointment div                     { padding: 2px; }
     </style>
-    <title>${documentTitle} - ${i18n.tr("Calendar")} - ${day.format("EEEE", day.time)}, ${day.format("d. MMMM", day.time)}</title>
+    <title>${documentTitle} ${i18n.tr("Calendar")}: ${dateFormatter.formatDate(day.time)}</title>
   </head>
   <body onload="window.print()">
     <div id="layout" class="flexChilds">
       <div id="headArea">
       </div>
       <div id="contentArea">
+        
         <table border="0" id="calendarDay" class="calendar">
+          <thead>
+            <tr>
+              <th></th>
+              <th>
+                <h1>${documentTitle} ${i18n.tr("Calendar")}: ${dateFormatter.formatDate(day.time)}</h1>
+              </th>
+          </thead>
           <tbody>
             <#setting locale="en"/>
             <#setting number_format="0.##">

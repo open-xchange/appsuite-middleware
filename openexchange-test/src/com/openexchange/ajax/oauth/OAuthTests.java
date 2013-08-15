@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,20 @@
  *
  */
 
-package com.openexchange.oauth.linkedin.osgi;
+package com.openexchange.ajax.oauth;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.config.ConfigurationService;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 
 /**
- * {@link ConfigurationServiceRegisterer}
+ * {@link OAuthTests}
  *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ConfigurationServiceRegisterer implements ServiceTrackerCustomizer<ConfigurationService,ConfigurationService> {
-
-    private final BundleContext context;
-    private final Activator activator;
-
-    public ConfigurationServiceRegisterer(final BundleContext context, final Activator activator) {
-        super();
-        this.context = context;
-        this.activator = activator;
-    }
-
-    @Override
-    public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
-        final ConfigurationService configurationService = context.getService(reference);
-        activator.setConfigurationService(configurationService);
-        activator.registerServices();
-        return configurationService;
-    }
-
-    @Override
-    public void modifiedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
-        //nothing to do here
-    }
-
-    @Override
-    public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
-        activator.unregisterServices();
-        context.ungetService(reference);
-    }
+@RunWith(Suite.class)
+@SuiteClasses({ OAuthServiceTest.class })
+public class OAuthTests {
 
 }

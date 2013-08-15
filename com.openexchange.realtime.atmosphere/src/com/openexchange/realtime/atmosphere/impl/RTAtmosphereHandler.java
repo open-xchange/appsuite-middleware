@@ -82,7 +82,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link RTAtmosphereHandler} - Handler that gets associated with the {@link RTAtmosphereChannel} and does the main work of handling
  * incoming and outgoing Stanzas. Transformation of Stanzas is handed over to the proper OXRTHandler
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -102,7 +102,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 handleIncoming(stanza);
         }
     };
-    
+
     JSONProtocolHandler protocolHandler = new JSONProtocolHandler(protocol, gate);
 
     public RTAtmosphereHandler() {
@@ -127,7 +127,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         ID constructedId = null;
         /*
          * Two level exception handling needed:
-         * 1. We didn't identify the sender yet so our only way to inform him about the exception is via 
+         * 1. We didn't identify the sender yet so our only way to inform him about the exception is via
          *    RTProtocol.handleRealtimeExceptionDirectly
          * 2. We know the ID of the sender and can inform him RTProtocol.handleRealtimeException
          */
@@ -138,7 +138,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             } catch (OXException e) {
                 RealtimeException invalidSessionException = RealtimeExceptionCodes.SESSION_INVALID.create();
                 protocol.handleRealtimeExceptionDirectly(invalidSessionException, resource);
-                // no clean up neede, simply return because of invalid session
+                // no clean up needed, simply return because of invalid session
                 return;
             }
             if (method.equalsIgnoreCase("GET")) {
@@ -186,7 +186,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     /**
      * Handle incoming Stanza. Called by the StanzaSequenceGate to dispatch stanzas.
-     * 
+     *
      * @param stanza The Stanza to handle
      * @throws OXException
      */
@@ -213,7 +213,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     /**
      * Build an unique {@link ID} <code>{"ox", userLogin, context, resource}</code> from the infos given by the AtmosphereResource and
      * ServerSession.
-     * 
+     *
      * @param atmosphereResource the current AtmosphereResource
      * @param serverSession the associated serverSession
      * @return the constructed unique ID

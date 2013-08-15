@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,31 +47,56 @@
  *
  */
 
-package com.openexchange.drive.events.apn.internal;
+package com.openexchange.ajax.oauth.actions;
 
+import java.io.IOException;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 
 /**
- * {@link IOSDriveEventPublisher}
+ * {@link GetOAuthServiceRequest}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class IOSDriveEventPublisher extends APNDriveEventPublisher {
+public class GetOAuthServiceRequest extends AbstractOAuthServiceRequest<OAuthServicesResponse> {
 
-    private static final String SERIVCE_ID = "apn";
+    private final String serviceId;
 
-    /**
-     * Initializes a new {@link IOSDriveEventPublisher}.
-     *
-     * @param access The apn access to use
-     */
-    public IOSDriveEventPublisher(APNAccess access) {
-        super(access);
+    private final boolean failOnError;
+
+    public GetOAuthServiceRequest(String serviceId) {
+        this(serviceId, true);
+    }
+
+    public GetOAuthServiceRequest(String serviceId, boolean failOnError) {
+        super();
+        this.serviceId = serviceId;
+        this.failOnError = failOnError;
     }
 
     @Override
-    protected String getServiceID() {
-        return SERIVCE_ID;
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
+            new Parameter("id", serviceId)
+        };
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends OAuthServicesResponse> getParser() {
+        return new OAuthServicesParser(failOnError);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
     }
 
 }

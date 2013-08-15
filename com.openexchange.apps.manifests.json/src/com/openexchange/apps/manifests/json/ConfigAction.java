@@ -86,7 +86,7 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(noSession = true)
 public class ConfigAction implements AJAXActionService {
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
     private final ServerConfigServicesLookup registry;
     private final ComputedServerConfigValueService[] computedValues;
 

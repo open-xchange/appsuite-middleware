@@ -1,3 +1,9 @@
+open-xchange-aws (7.4.0-0) unstable; urgency=low
+
+  * prepare for 7.4.0
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 16 Jul 2013 15:14:50 +0200
+
 open-xchange-aws (7.4.0-0) UNRELEASED; urgency=low
 
   * prepare for 7.4.0

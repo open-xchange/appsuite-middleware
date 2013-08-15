@@ -53,6 +53,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
 import org.apache.commons.logging.Log;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.services.Services;
@@ -104,6 +106,25 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
         return apiKey;
     }
 
+    @Override
+    public boolean isEnabled(int userId, int contextId) throws OXException {
+        ConfigView view = Services.getService(ConfigViewFactory.class).getView(userId, contextId);
+        ComposedConfigProperty<Boolean> property = view.property(getEnabledProperty(), Boolean.class);
+        if (!property.isDefined()) {
+            return true;
+        }
+
+        return property.get().booleanValue();
+    }
+
+    /**
+     * The name of the property that indicates if this service is enabled.
+     * Defaults to {@link #getId()} and must be overwritten if the properties name differs
+     * from the services id.
+     */
+    protected String getEnabledProperty() {
+        return getId();
+    }
 
     /**
      * Used to look up the apiKey in the config cascade

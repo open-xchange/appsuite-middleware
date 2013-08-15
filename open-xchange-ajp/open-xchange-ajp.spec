@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 10
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -134,11 +134,25 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Aug 13 2013 Marc Arens <marc.arens@open-xchange.com>
+Fourth release candidate for 7.4.0
+* Tue Aug 06 2013 Marc Arens <marc.arens@open-xchange.com>
+Third release candidate for 7.4.0
 * Mon Aug 05 2013 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2013-08-09
+* Mon Aug 05 2013 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2013-08-09
+* Fri Aug 02 2013 Marc Arens <marc.arens@open-xchange.com>
+Second release candidate for 7.4.0
+* Wed Jul 17 2013 Marc Arens <marc.arens@open-xchange.com>
+First release candidate for 7.4.0
+* Tue Jul 16 2013 Marc Arens <marc.arens@open-xchange.com>
+prepare for 7.4.0
 * Mon Jul 15 2013 Marc Arens <marc.arens@open-xchange.com>
 Second build for patch  2013-07-18
 * Mon Jul 15 2013 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2013-07-18
+* Fri Jul 12 2013 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2013-07-18
 * Fri Jul 12 2013 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2013-07-18
@@ -158,16 +172,12 @@ Second feature freeze for 7.2.2 release
 Feature freeze for 7.2.2 release
 * Tue Jun 11 2013 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2013-06-13
-* Mon Jun 10 2013 Marc Arens <marc.arens@open-xchange.com>
-Build for patch 2013-06-11
 * Fri Jun 07 2013 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2013-06-20
 * Mon Jun 03 2013 Marc Arens <marc.arens@open-xchange.com>
 First sprint increment for 7.2.2 release
 * Wed May 29 2013 Marc Arens <marc.arens@open-xchange.com>
 First candidate for 7.2.2 release
-* Tue May 28 2013 Marc Arens <marc.arens@open-xchange.com>
-Second build for patch 2013-05-28
 * Tue May 28 2013 Marc Arens <marc.arens@open-xchange.com>
 Second build for patch 2013-05-28
 * Mon May 27 2013 Marc Arens <marc.arens@open-xchange.com>
@@ -201,6 +211,8 @@ Build for patch 2013-04-17
 * Mon Apr 22 2013 Marc Arens <marc.arens@open-xchange.com>
 First candidate for 7.2.1 release
 * Mon Apr 15 2013 Marc Arens <marc.arens@open-xchange.com>
+prepare for 7.4.0
+* Mon Apr 15 2013 Marc Arens <marc.arens@open-xchange.com>
 prepare for 7.2.1
 * Fri Apr 12 2013 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2013-04-12
@@ -208,8 +220,6 @@ Build for patch 2013-04-12
 Fourth candidate for 7.2.0 release
 * Tue Apr 09 2013 Marc Arens <marc.arens@open-xchange.com>
 Third candidate for 7.2.0 release
-* Tue Apr 02 2013 Marc Arens <marc.arens@open-xchange.com>
-Build for patch 2013-04-04
 * Tue Apr 02 2013 Marc Arens <marc.arens@open-xchange.com>
 Second candidate for 7.2.0 release
 * Tue Apr 02 2013 Marc Arens <marc.arens@open-xchange.com>

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,49 +47,34 @@
  *
  */
 
-package com.openexchange.oauth.linkedin.osgi;
+package com.openexchange.ajax.oauth.actions;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.oauth.OAuthService;
+import java.util.List;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.oauth.types.OAuthService;
 
 
 /**
- * {@link OAuthServiceRegisterer}
+ * {@link OAuthServicesResponse}
  *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class OAuthServiceRegisterer implements ServiceTrackerCustomizer<OAuthService,OAuthService> {
+public class OAuthServicesResponse extends AbstractAJAXResponse {
 
-    private final BundleContext context;
-    private final Activator activator;
+    private final List<OAuthService> services;
 
-    public OAuthServiceRegisterer(final BundleContext context, final Activator activator) {
-        super();
-        this.context = context;
-        this.activator = activator;
+    /**
+     * Initializes a new {@link OAuthServicesResponse}.
+     * @param response
+     */
+    protected OAuthServicesResponse(Response response, List<OAuthService> services) {
+        super(response);
+        this.services = services;
     }
 
-    @Override
-    public OAuthService addingService(final ServiceReference<OAuthService> reference) {
-        final OAuthService oauth = context.getService(reference);
-        activator.setOauthService(oauth);
-        activator.registerServices();
-        return oauth;
-
-
-    }
-
-    @Override
-    public void modifiedService(final ServiceReference<OAuthService> reference, final OAuthService service) {
-        //nothing to do here
-    }
-
-    @Override
-    public void removedService(final ServiceReference<OAuthService> reference, final OAuthService service) {
-        activator.setOauthService(null);
-        context.ungetService(reference);
+    public List<OAuthService> getServices() {
+        return services;
     }
 
 }

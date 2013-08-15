@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 10
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -50,11 +50,25 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc config
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Aug 13 2013 Carsten Hoeger <choeger@open-xchange.com>
+Fourth release candidate for 7.4.0
+* Tue Aug 06 2013 Carsten Hoeger <choeger@open-xchange.com>
+Third release candidate for 7.4.0
 * Mon Aug 05 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-08-09
+* Mon Aug 05 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-08-09
+* Fri Aug 02 2013 Carsten Hoeger <choeger@open-xchange.com>
+Second release candidate for 7.4.0
+* Wed Jul 17 2013 Carsten Hoeger <choeger@open-xchange.com>
+First release candidate for 7.4.0
+* Tue Jul 16 2013 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 7.4.0
 * Mon Jul 15 2013 Carsten Hoeger <choeger@open-xchange.com>
 Second build for patch  2013-07-18
 * Mon Jul 15 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-07-18
+* Fri Jul 12 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-07-18
 * Fri Jul 12 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-07-18
@@ -84,8 +98,6 @@ First sprint increment for 7.2.2 release
 First candidate for 7.2.2 release
 * Tue May 28 2013 Carsten Hoeger <choeger@open-xchange.com>
 Second build for patch 2013-05-28
-* Tue May 28 2013 Carsten Hoeger <choeger@open-xchange.com>
-Second build for patch 2013-05-28
 * Mon May 27 2013 Carsten Hoeger <choeger@open-xchange.com>
 prepare for 7.2.2
 * Thu May 23 2013 Carsten Hoeger <choeger@open-xchange.com>
@@ -94,7 +106,7 @@ Third candidate for 7.2.1 release
 Build for patch 2013-05-22
 * Wed May 22 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-05-22
-* Wed May 22 2013 Carsten Hoeger <choegeropen-xchange.com>
+* Wed May 22 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-05-22
 * Wed May 15 2013 Carsten Hoeger <choeger@open-xchange.com>
 Second candidate for 7.2.1 release
@@ -104,11 +116,11 @@ Build for patch 2013-05-10
 Build for patch 2013-05-09
 * Mon May 13 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-05-09
-* Mon May 13 2013 Carsten Hoeger <choegeropen-xchange.com>
+* Mon May 13 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-05-09
-* Mon May 13 2013 Carsten Hoeger <choegeropen-xchange.com>
+* Mon May 13 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-05-09
-* Mon May 13 2013 Carsten Hoeger <choegeropen-xchange.com>
+* Mon May 13 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-05-09
 * Fri May 03 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-04-23
@@ -116,6 +128,8 @@ Build for patch 2013-04-23
 Build for patch 2013-04-17
 * Mon Apr 22 2013 Carsten Hoeger <choeger@open-xchange.com>
 First candidate for 7.2.1 release
+* Mon Apr 15 2013 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 7.4.0
 * Mon Apr 15 2013 Carsten Hoeger <choeger@open-xchange.com>
 prepare for 7.2.1
 * Fri Apr 12 2013 Carsten Hoeger <choeger@open-xchange.com>
@@ -125,16 +139,14 @@ Fourth candidate for 7.2.0 release
 * Tue Apr 09 2013 Carsten Hoeger <choeger@open-xchange.com>
 Third candidate for 7.2.0 release
 * Tue Apr 02 2013 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2013-04-04
-* Tue Apr 02 2013 Carsten Hoeger <choeger@open-xchange.com>
 Second candidate for 7.2.0 release
-* Tue Apr 02 2013 Carsten Hoeger <choegeropen-xchange.com>
+* Tue Apr 02 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-04-04
 * Tue Apr 02 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-04-04
-* Tue Apr 02 2013 Carsten Hoeger <choegeropen-xchange.com>
+* Tue Apr 02 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-04-04
-* Tue Apr 02 2013 Carsten Hoeger <choegeropen-xchange.com>
+* Tue Apr 02 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-04-04
 * Tue Mar 26 2013 Carsten Hoeger <choeger@open-xchange.com>
 First release candidate for 7.2.0
@@ -162,14 +174,6 @@ First release candidate for 6.22.2/7.0.2
 Build for patch 2013-02-22
 * Mon Feb 25 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-02-22
-* Mon Feb 25 2013 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2013-02-22
-* Mon Feb 25 2013 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2013-02-22
-* Tue Feb 19 2013 Carsten Hoeger <choeger@open-xchange.com>
-Fourth release candidate for 7.0.1
-* Tue Feb 19 2013 Carsten Hoeger <choeger@open-xchange.com>
-Third release candidate for 7.0.1
 * Tue Feb 19 2013 Carsten Hoeger <choeger@open-xchange.com>
 Fourth release candidate for 7.0.1
 * Tue Feb 19 2013 Carsten Hoeger <choeger@open-xchange.com>

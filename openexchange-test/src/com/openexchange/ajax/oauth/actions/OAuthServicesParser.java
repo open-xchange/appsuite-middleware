@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,58 @@
  *
  */
 
-package com.openexchange.soap.cxf.interceptor;
+package com.openexchange.ajax.oauth.actions;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import org.apache.cxf.binding.soap.SoapMessage;
-import org.apache.cxf.helpers.CastUtils;
-import org.apache.cxf.interceptor.Fault;
-import org.apache.cxf.message.Message;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONValue;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.oauth.types.OAuthService;
+import com.openexchange.ajax.writer.ResponseWriter;
+
 
 /**
- * {@link SoapActionInInterceptor} - Extends {@link org.apache.cxf.binding.soap.interceptor.SoapActionInInterceptor CXF's
- * SoapActionInInterceptor} by removing <code>"SOAPAction"</code> protocol header.
+ * {@link OAuthServicesParser}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SoapActionInInterceptor extends org.apache.cxf.binding.soap.interceptor.SoapActionInInterceptor {
+public class OAuthServicesParser extends AbstractAJAXParser<OAuthServicesResponse> {
 
     /**
-     * Initializes a new {@link SoapActionInInterceptor}.
+     * Initializes a new {@link OAuthServicesParser}.
+     * @param failOnError
      */
-    public SoapActionInInterceptor() {
-        super();
+    protected OAuthServicesParser(boolean failOnError) {
+        super(failOnError);
     }
 
     @Override
-    public void handleMessage(SoapMessage message) throws Fault {
-        // Remove SOAPAction to be compliant to previous SOAP request handling
-        final Map<String, List<String>> headers = CastUtils.cast((Map<?, ?>) message.get(Message.PROTOCOL_HEADERS));
-        headers.remove("SOAPAction");
+    protected OAuthServicesResponse createResponse(Response response) throws JSONException {
+        List<OAuthService> services = new ArrayList<OAuthService>();
+        JSONObject json = ResponseWriter.getJSON(response);
+        if (json.has("data")) {
+            JSONValue data = (JSONValue) json.get("data");
+            if (data.isArray()) {
+                JSONArray arr = data.toArray();
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    services.add(parseService(obj));
+                }
+            } else {
+                services.add(parseService(data.toObject()));
+            }
+        }
 
-        super.handleMessage(message);
+        return new OAuthServicesResponse(response, services);
+    }
+
+    protected OAuthService parseService(JSONObject obj) throws JSONException {
+        OAuthService service = new OAuthService(obj.getString("id"), obj.getString("displayName"));
+        return service;
     }
 
 }

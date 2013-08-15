@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,68 +47,47 @@
  *
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.ajax.oauth.actions;
 
-import static org.junit.Assert.assertThat;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.TimeZone;
-import org.hamcrest.CoreMatchers;
-import org.json.JSONException;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.task.actions.DeleteRequest;
-import com.openexchange.ajax.task.actions.GetRequest;
-import com.openexchange.ajax.task.actions.GetResponse;
-import com.openexchange.ajax.task.actions.InsertRequest;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.tasks.Create;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 
 /**
- * {@link Bug27840Test}
+ * {@link AbstractOAuthServiceRequest}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class Bug27840Test extends AbstractTaskTest {
+public abstract class AbstractOAuthServiceRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
-    private AJAXClient client;
-    private Task task;
-    private TimeZone tz;
+    private boolean failOnError;
 
-    public Bug27840Test(String name) {
-        super(name);
+    /**
+     * URL of the oauth AJAX interface.
+     */
+    public static final String OAUTH_URL = "/ajax/oauth/services";
+
+    protected AbstractOAuthServiceRequest() {
+        super();
     }
 
-    @Before
     @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-        tz = getTimeZone();
-        task = Create.createWithDefaults(getPrivateFolder(), "Task to test for bug 27840");
-        // NUMERIC(12,2) in the database. The following should be the corresponding maximal and minimal possible values.
-        task.setTargetCosts(new BigDecimal( "9999999999.99"));
-        task.setActualCosts(new BigDecimal("-9999999999.99"));
+    public String getServletPath() {
+        return OAUTH_URL;
     }
 
-    @After
     @Override
-    protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(task));
-        super.tearDown();
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
-    @Test
-    public void testForBug() throws OXException, IOException, JSONException {
-        client.execute(new InsertRequest(task, tz)).fillTask(task);
-        GetResponse response = client.execute(new GetRequest(task));
-        Task test = response.getTask(tz);
-        assertThat("Actual costs not equal", test.getActualCosts(), CoreMatchers.equalTo(task.getActualCosts()));
-        assertThat("Target costs not equal", test.getTargetCosts(), CoreMatchers.equalTo(task.getTargetCosts()));
-        task = test;
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
     }
+
+    public boolean isFailOnError() {
+        return failOnError;
+    }
+
 }

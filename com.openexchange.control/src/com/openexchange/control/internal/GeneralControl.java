@@ -53,19 +53,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import javax.management.MBeanException;
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.BundleListener;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -217,42 +211,21 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
              */
             final Bundle systemBundle = bundleContext.getBundle(0);
             if (null != systemBundle && systemBundle.getState() == Bundle.ACTIVE) {
+                LOG.info("Stopping system bundle...");
+                // Note that stopping process is done in a separate thread
+                systemBundle.stop();
                 if (waitForExit) {
-                    final Lock shutdownLock = new ReentrantLock();
-                    final Condition shutdownCompleted = shutdownLock.newCondition();
-                    // Add bundle listener
-                    systemBundle.getBundleContext().addBundleListener(new BundleListener() {
-
-                        @Override
-                        public void bundleChanged(BundleEvent event) {
-                            if (systemBundle.getState() == Bundle.RESOLVED) {
-                                try {
-                                    shutdownLock.lock();
-                                    shutdownCompleted.signalAll();
-
-                                } finally {
-                                    shutdownLock.unlock();
-                                }
-                            }
+                    // Wait on condition. The BundleListener for the system bundle does not work reliably therefore we have to poll the
+                    // state.
+                    final long timeout = System.currentTimeMillis() + 120 * 1000;
+                    while (!completed && System.currentTimeMillis() < timeout) {
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            LOG.error(e.getMessage(), e);
                         }
-                    });
-                    LOG.info("Stopping system bundle...");
-                    // Note that stopping process is done in a separate thread
-                    systemBundle.stop();
-                    // Wait on condition
-                    shutdownLock.lock();
-                    try {
-                        completed = shutdownCompleted.await(120, TimeUnit.SECONDS);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        LOG.error(e.getMessage(), e);
-                    } finally {
-                        shutdownLock.unlock();
+                        completed = Bundle.RESOLVED == systemBundle.getState();
                     }
-                } else {
-                    LOG.info("Stopping system bundle...");
-                    // Note that stopping process is done in a separate thread
-                    systemBundle.stop();
                 }
             }
         } catch (final BundleException e) {

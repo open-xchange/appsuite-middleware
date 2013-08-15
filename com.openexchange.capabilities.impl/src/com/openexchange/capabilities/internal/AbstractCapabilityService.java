@@ -90,8 +90,6 @@ import com.openexchange.userconf.UserPermissionService;
 /**
  * {@link AbstractCapabilityService}
  *
- * {@link CapabilityServiceImpl}
- *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

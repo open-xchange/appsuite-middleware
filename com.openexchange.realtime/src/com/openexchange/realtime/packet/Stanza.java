@@ -82,7 +82,7 @@ import com.openexchange.realtime.util.ElementPath;
 public abstract class Stanza implements Serializable {
 
     public static final ElementPath ERROR_PATH = new ElementPath("error");
-    
+
     private static final long serialVersionUID = 1L;
 
     private static final Log LOG = LogFactory.getLog(Stanza.class);
@@ -105,7 +105,7 @@ public abstract class Stanza implements Serializable {
 
     private long sequenceNumber = -1;
 
-    private String tracer; 
+    private String tracer;
 
     private List<String> logEntries = new LinkedList<String>();
 
@@ -176,7 +176,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Get the error element describing the error-type Stanza in more detail.
-     * 
+     *
      * @return Null or the OXException representing the error
      */
     public RealtimeException getError() {
@@ -185,7 +185,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Set the error element describing the error-type Stanza in more detail.
-     * 
+     *
      * @param error The OXException representing the error
      */
     public void setError(RealtimeException error) {
@@ -436,14 +436,28 @@ public abstract class Stanza implements Serializable {
 
     public void trace(Object trace) {
         if (traceEnabled()) {
-            LOG.info(tracer+": "+trace);
+            StringBuilder sb = new StringBuilder(tracer)
+                .append(": ")
+                .append(trace)
+                .append(", from: ")
+                .append(getFrom())
+                .append(", to: ")
+                .append(getTo());
+            LOG.info(sb.toString());
             logEntries.add(trace.toString());
         }
     }
 
     public void trace(Object trace, Throwable t) {
         if (traceEnabled()) {
-            LOG.info(tracer+": "+trace, t);
+            StringBuilder sb = new StringBuilder(tracer)
+                .append(": ")
+                .append(trace)
+                .append(", from: ")
+                .append(getFrom())
+                .append(", to: ")
+                .append(getTo());
+            LOG.info(sb.toString(), t);
             StringWriter w = new StringWriter();
             t.printStackTrace(new PrintWriter(w));
             logEntries.add(trace.toString());
@@ -482,7 +496,7 @@ public abstract class Stanza implements Serializable {
     /**
      * Write a payload to the PayloadTree identified by the ElementPath. There is only one tree for the default elements which only contains
      * one node so we can set the data by directly writing to the root node.
-     * 
+     *
      * @param path The ElementPath identifying the PayloadTree.
      * @param data The payload data to write into the root node.
      */

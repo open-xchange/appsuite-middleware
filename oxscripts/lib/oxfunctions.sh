@@ -97,7 +97,7 @@ ox_start_daemon() {
     local user="$3"
     local group="$4"
     test -z "$path" && die "ox_start_daemon: missing path argument (arg 1)"
-    test -x $path   || die "ox_stop_daemon: $path is not executable"
+    test -x $path   || die "ox_start_daemon: $path is not executable"
     test -z "$name" && die "ox_start_daemon: missing name argument (arg 2)"
     local runasuser=
     test -n "$user"   && runasuser="--chuid $user"
@@ -150,27 +150,16 @@ ox_stop_daemon() {
     test -z "$name" && die "ox_stop_daemon: missing name argument (arg 1)"
     ox_system_type
     local type=$?
+
+    if [ ! -f /var/run/${name}.pid ]; then
+        return 0
+    fi
     read PID < /var/run/${name}.pid
-    if [ -n "$PID" ]; then
-        ps $PID || /opt/open-xchange/sbin/shutdown -w || kill -QUIT $PID
-    fi
-    if [ $type -eq $DEBIAN -o $type -eq $UCS ] ; then
-        start-stop-daemon --stop --oknodo --pidfile /var/run/${name}.pid
-        rm -f /var/run/${name}.pid
-    elif [ $(( $type & $LSB )) -eq $LSB ]; then
-        if [ ! -f /var/run/${name}.pid ]; then
-            return 0
-        fi
-        read PID < /var/run/${name}.pid
-        test -z "$PID" && { echo "unable to read pid"; return 1; }
-        if ! ps $PID > /dev/null; then
-            return 0
-        fi
-        kill -TERM $PID
-        rm -f /var/run/${name}.pid
-    else
-        die "Unable to handle unknown system type"
-    fi
+    test -z "$PID" && { echo "No process in pidfile '/var/run/${name}.pid' found running; none killed."; return 1; }
+    ps $PID > /dev/null && /opt/open-xchange/sbin/shutdown -w > /dev/null 2>&1
+    ps $PID > /dev/null && kill -QUIT $PID
+    ps $PID > /dev/null && kill -TERM $PID
+    rm -f /var/run/${name}.pid
 }
 
 ox_daemon_status() {

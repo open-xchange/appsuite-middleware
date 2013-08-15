@@ -9,6 +9,10 @@ Homepage: http://www.open-xchange.com
 Package: open-xchange-munin-scripts-jolokia
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-core (>= @OXVERSION@), perl, munin-node
+<<<<<<< HEAD
+=======
+Conflicts: open-xchange-munin-scripts
+>>>>>>> release-7.4.0
 Description: network-wide graphing framework (user contributed plugins for node)
  Munin is a highly flexible and powerful solution used to create graphs of
  virtually everything imaginable throughout your network, while still

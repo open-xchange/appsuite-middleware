@@ -118,8 +118,6 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
                     }
                 } catch (Exception e) {
                     LOG.warn("error publishing drive events.", e);
-                } catch (Throwable t) {
-                    LOG.warn("error publishing drive events.", t);
                 }
             }
         }, publisherDelay, publisherDelay);

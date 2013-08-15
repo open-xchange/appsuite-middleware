@@ -4762,6 +4762,16 @@ msgstr ""
 msgid "Password changed successfully. Please logout and login back again."
 msgstr ""
 
+#. Unsupported action %1$s via %2$s request
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.servlet/src/com/openexchange/passwordchange/servlet/PasswordChangeServletExceptionMessage.java:75
+msgid "Unsupported action %1$s via %2$s request"
+msgstr ""
+
+#. Password changed successfully. Please logout and login back again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.servlet/src/com/openexchange/passwordchange/servlet/PasswordChangeServletExceptionMessage.java:81
+msgid "Password changed successfully. Please logout and login back again."
+msgstr ""
+
 #. *
 #. * No write access to POP3 folder %1$s
 #.

@@ -136,7 +136,7 @@ public final class OAuthActivator extends HousekeepingActivator {
             /*
              * Collect OAuth services
              */
-            OSGiMetaDataRegistry.initialize(getService(ConfigViewFactory.class));
+            OSGiMetaDataRegistry.initialize();
             final OSGiMetaDataRegistry registry = OSGiMetaDataRegistry.getInstance();
             final BundleContext context = this.context;
             registry.start(context);

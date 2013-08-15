@@ -82,7 +82,6 @@ public class RssActivator extends AJAXModuleActivator {
         final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
         properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "rss");
         registerService(CapabilityChecker.class, new CapabilityChecker() {
-
             @Override
             public boolean isEnabled(String capability, Session ses) throws OXException {
                 if ("rss".equals(capability)) {
@@ -96,8 +95,8 @@ public class RssActivator extends AJAXModuleActivator {
                         return view.opt("com.openexchange.rss", boolean.class, Boolean.TRUE).booleanValue();
                     }
                 }
-                return true;
 
+                return true;
             }
         }, properties);
 

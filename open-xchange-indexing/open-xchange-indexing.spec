@@ -57,10 +57,22 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/solr/*
 
 %changelog
+* Tue Aug 13 2013 Steffen Templin <steffen.templin@open-xchange.com>
+Fourth release candidate for 7.4.0
+* Tue Aug 06 2013 Steffen Templin <steffen.templin@open-xchange.com>
+Third release candidate for 7.4.0
+* Fri Aug 02 2013 Steffen Templin <steffen.templin@open-xchange.com>
+Second release candidate for 7.4.0
+* Wed Jul 17 2013 Steffen Templin <steffen.templin@open-xchange.com>
+First release candidate for 7.4.0
+* Tue Jul 16 2013 Steffen Templin <steffen.templin@open-xchange.com>
+prepare for 7.4.0
 * Fri Jun 21 2013 Steffen Templin <steffen.templin@open-xchange.com>
 Second feature freeze for 7.2.2 release
 * Mon Jun 17 2013 Steffen Templin <steffen.templin@open-xchange.com>
 Feature freeze for 7.2.2 release
+* Mon Apr 15 2013 Steffen Templin <steffen.templin@open-xchange.com>
+prepare for 7.4.0
 * Tue Apr 02 2013 Steffen Templin <steffen.templin@open-xchange.com>
 Second candidate for 7.2.0 release
 * Tue Mar 26 2013 Steffen Templin <steffen.templin@open-xchange.com>
@@ -97,8 +109,8 @@ prepare for next EDP drop
 Release build for EDP drop #2
 * Mon Jun 04 2012 Steffen Templin <steffen.templin@open-xchange.com>
 Release build for EDP drop #2
-* Tue May 08 2012 Steffen Templin <steffen.templin@open-xchange.com>
-Build for Rev. 3
+* Fri May 11 2012 Steffen Templin <steffen.templin@open-xchange.com>
+Build for Rev. 4
 * Mon May 07 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Internal release build for EDP drop #2
 * Tue Feb 28 2012 Marcus Klein <marcus.klein@open-xchange.com>

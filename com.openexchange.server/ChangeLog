@@ -1,3 +1,12 @@
+* 2013-08-15 - marcus.klein@open-xchange.com
+
+ - Fix for bug 28283: Need to poll the system bundle to check if shutdown was successful and extended scripting for calling shutdown process
+   to reduce error output.
+
+* 2013-08-15 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28260: Restrict socket binding to local loopback address only by default. 
+
 * 2013-08-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 28317: Change the password for all user-associated sessions on password-change operation
@@ -158,7 +167,7 @@
 * 2013-07-25 - marcus.klein@open-xchange.com
 
  - Fix for bug 26607: Optimized JMX queries for certain MBeans using object names and removed multi threading.
- 
+
 * 2013-07-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 27345: Suppress "Shared files" folder if it does not contain user-visible subfolders
@@ -221,6 +230,10 @@
  - Fix for bug 27554: Removed unneeded System.out.println
  - Fix for bug 26913: Update task to delete redundant keys & removed them from table definitions
 
+* 2013-07-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27468: Log USS-0009 error code in log file although associated category "USER_INPUT" implies not to do so
+
 * 2013-07-16 - marc.arens@open-xchange.com
 
  - Fix for bug 27469: Stop checking aliases as soon as a valid match was found
@@ -274,10 +287,6 @@
 
  - Fix for bug 27309: Remove 'days' property when changing recurrence rule from weekly to daily   
  - Fix for bug 27300: Pass down changed folder ID when updating referenced distribution list members   
-
-* 2013-07-16 - marc.arens@open-xchange.com
-
- - Fix for bug 27469: Stop checking aliases as soon as a valid match was found
 
 * 2013-07-01 - marc.arens@open-xchange.com
 

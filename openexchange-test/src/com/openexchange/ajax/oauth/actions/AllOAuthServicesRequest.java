@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,22 +47,50 @@
  *
  */
 
-package com.openexchange.file.storage.fs;
+package com.openexchange.ajax.oauth.actions;
 
-import java.io.File;
-import java.io.FileFilter;
+import java.io.IOException;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 
 /**
- * {@link OnlyFiles}
+ * {@link AllOAuthServicesRequest}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class OnlyFiles implements FileFilter {
+public class AllOAuthServicesRequest extends AbstractOAuthServiceRequest<OAuthServicesResponse> {
+
+    private final boolean failOnError;
+
+    public AllOAuthServicesRequest() {
+        this(true);
+    }
+
+    public AllOAuthServicesRequest(boolean failOnError) {
+        super();
+        this.failOnError = failOnError;
+    }
 
     @Override
-    public boolean accept(File pathname) {
-        return pathname.isFile();
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL) };
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends OAuthServicesResponse> getParser() {
+        return new OAuthServicesParser(failOnError);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
     }
 
 }

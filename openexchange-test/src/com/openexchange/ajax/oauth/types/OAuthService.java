@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +47,87 @@
  *
  */
 
-package com.sun.mail.iap;
+package com.openexchange.ajax.oauth.types;
 
 
 /**
- * {@link ConnectQuotaExceededException}
+ * {@link OAuthService}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ConnectQuotaExceededException extends ProtocolException {
+public class OAuthService {
 
-    private static final long serialVersionUID = -6785664248904143608L;
+    private final String id;
+
+    private final String displayName;
 
     /**
-     * Initializes a new {@link ConnectQuotaExceededException}.
+     * Initializes a new {@link OAuthService}.
+     *
+     * @param id
+     * @param displayName
      */
-    public ConnectQuotaExceededException() {
+    public OAuthService(String id, String displayName) {
         super();
+        this.id = id;
+        this.displayName = displayName;
     }
 
     /**
-     * Initializes a new {@link ConnectQuotaExceededException}.
-     * @param message
+     * Gets the id
+     *
+     * @return The id
      */
-    public ConnectQuotaExceededException(final String message) {
-        super(message);
+    public String getId() {
+        return id;
     }
 
     /**
-     * Initializes a new {@link ConnectQuotaExceededException}.
-     * @param message
-     * @param cause
+     * Gets the displayName
+     *
+     * @return The displayName
      */
-    public ConnectQuotaExceededException(final String message, final Throwable cause) {
-        super(message, cause);
+    public String getDisplayName() {
+        return displayName;
     }
 
-    /**
-     * Initializes a new {@link ConnectQuotaExceededException}.
-     * @param r
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#hashCode()
      */
-    public ConnectQuotaExceededException(final Response r) {
-        super(r);
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        OAuthService other = (OAuthService) obj;
+        if (displayName == null) {
+            if (other.displayName != null)
+                return false;
+        } else if (!displayName.equals(other.displayName))
+            return false;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
     }
 
 }
