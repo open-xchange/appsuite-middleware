@@ -47,28 +47,23 @@
  *
  */
 
-package com.openexchange;
+package com.openexchange.textxtraction;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.tools.id.IDManglerTest;
-import com.openexchange.tools.iterator.MergingSearchIteratorTest;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.textxtraction.internal.TikaTextXtractServiceTest;
+
 
 /**
  * {@link UnitTests}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
+@RunWith(Suite.class)
+@SuiteClasses({
+    TikaTextXtractServiceTest.class
+})
 public class UnitTests {
 
-    public UnitTests() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(IDManglerTest.class);
-        tests.addTestSuite(MergingSearchIteratorTest.class);
-        return tests;
-    }
 }

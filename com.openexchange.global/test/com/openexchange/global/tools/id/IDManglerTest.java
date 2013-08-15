@@ -47,12 +47,13 @@
  *
  */
 
-package com.openexchange.tools.id;
+package com.openexchange.global.tools.id;
 
 
 import java.util.Arrays;
 import java.util.List;
 import junit.framework.TestCase;
+import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link IDManglerTest}

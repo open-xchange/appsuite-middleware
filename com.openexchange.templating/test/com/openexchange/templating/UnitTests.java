@@ -51,6 +51,7 @@ package com.openexchange.templating;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import com.openexchange.templating.impl.DocumentMetadataMatcherTest;
 
 /**
  * {@link UnitTests}
@@ -66,6 +67,7 @@ public final class UnitTests {
     public static final Test suite() {
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(TestTemplateService.class);
+        tests.addTestSuite(DocumentMetadataMatcherTest.class);
         return tests;
     }
 }

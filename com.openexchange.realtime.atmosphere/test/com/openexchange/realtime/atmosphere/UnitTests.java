@@ -54,7 +54,14 @@ import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.realtime.atmosphere.impl.EnqueuedStanzaTest;
 import com.openexchange.realtime.atmosphere.impl.ProtocolHandlerTest;
 import com.openexchange.realtime.atmosphere.impl.RTClientStateTest;
+import com.openexchange.realtime.atmosphere.impl.StateManagerTest;
 import com.openexchange.realtime.atmosphere.impl.stanza.PresenceBuilderTest;
+import com.openexchange.realtime.atmosphere.payload.converter.JSONToRealtimeExceptionConverterTest;
+import com.openexchange.realtime.atmosphere.payload.converter.JSONToStackTraceElementConverterTest;
+import com.openexchange.realtime.atmosphere.payload.converter.JSONToThrowableConverterTest;
+import com.openexchange.realtime.atmosphere.payload.converter.RealtimeExceptionToJSONConverterTest;
+import com.openexchange.realtime.atmosphere.payload.converter.StackTraceElementToJSONConverterTest;
+import com.openexchange.realtime.atmosphere.payload.converter.ThrowableToJSONConverterTest;
 import com.openexchange.realtime.atmosphere.presence.converter.JSONToPresenceStateTest;
 import com.openexchange.realtime.atmosphere.protocol.RTProtocolTest;
 
@@ -70,7 +77,15 @@ import com.openexchange.realtime.atmosphere.protocol.RTProtocolTest;
     EnqueuedStanzaTest.class,
     RTClientStateTest.class,
     RTProtocolTest.class,
-    ProtocolHandlerTest.class
+    ProtocolHandlerTest.class,
+    StateManagerTest.class,
+    JSONToRealtimeExceptionConverterTest.class,
+    JSONToStackTraceElementConverterTest.class,
+    JSONToThrowableConverterTest.class,
+    RealtimeExceptionToJSONConverterTest.class,
+    StackTraceElementToJSONConverterTest.class,
+    ThrowableToJSONConverterTest.class,
+    JSONToPresenceStateTest.class
 })
 public class UnitTests {
 

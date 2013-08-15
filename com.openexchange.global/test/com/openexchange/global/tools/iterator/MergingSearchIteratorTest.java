@@ -47,47 +47,71 @@
  *
  */
 
-package com.openexchange.subscribe.database;
+package com.openexchange.global.tools.iterator;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.sql.grammar.Constant.ASTERISK;
-import static com.openexchange.sql.schema.Tables.subscriptions;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.Comparator;
+import junit.framework.TestCase;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.ldap.MockUser;
-import com.openexchange.sql.builder.StatementBuilder;
-import com.openexchange.sql.grammar.EQUALS;
-import com.openexchange.sql.grammar.SELECT;
-import com.openexchange.subscribe.SubscriptionStorage;
-import com.openexchange.subscribe.sql.AbstractSubscriptionSQLStorageTest;
+import com.openexchange.tools.iterator.ArrayIterator;
+import com.openexchange.tools.iterator.MergingSearchIterator;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link SubscriptionUserDeleteListenerTest}
+ * {@link MergingSearchIteratorTest}
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SubscriptionUserDeleteListenerTest extends AbstractSubscriptionSQLStorageTest {
+public class MergingSearchIteratorTest extends TestCase {
 
-    public void testShouldDeleteSubscriptionOnDeletionOfUser() throws OXException, OXException, SQLException {
-        final Connection writeConnection = getDBProvider().getWriteConnection(ctx);
+    public void testMerge() throws OXException {
+        final Integer[] a = new Integer[] { 0, 3, 4, 7, 9, 12, 13, 16 };
+        final Integer[] b = new Integer[] { 1, 2, 5, 10, 18 };
+        final Integer[] c = new Integer[] { 1, 6, 8, 11, 14, 20 };
 
-        final SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener() {
-            @Override
-            protected SubscriptionStorage getStorage(final Connection writeCon) {
-                return storage;
-            }
-        };
+        final Integer[] expected = new Integer[] { 0, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 18, 20 };
 
-        final MockUser user = new MockUser(userId);
+        final SearchIterator<Integer> complete = new MergingSearchIterator<Integer>(
+            new IntegerComparator(),
+            new ArrayIterator<Integer>(a),
+            new ArrayIterator<Integer>(b),
+            new ArrayIterator<Integer>(c)
+            );
 
-        storage.rememberSubscription(subscription);
-        final DeleteEvent event = new DeleteEvent(user, userId, DeleteEvent.TYPE_USER, ctx);
-        listener.deletePerformed(event, null, writeConnection);
+        for(int i = 0; i < complete.size(); i++) {
+            assertTrue(complete.hasNext());
+            assertEquals(expected[i], complete.next());
+        }
 
-        final SELECT select = new SELECT(ASTERISK).FROM(subscriptions).WHERE(
-            new EQUALS("cid", I(ctx.getContextId())).AND(new EQUALS("user_id", I(userId))));
-        assertNoResult(new StatementBuilder().buildCommand(select));
+        assertFalse(complete.hasNext());
+    }
+
+    public void testMergeEmptyWithFull() throws OXException {
+        final Integer[] a = new Integer[0];
+        final Integer[] b = new Integer[] { 1, 2, 5, 10, 18 };
+
+        final Integer[] expected = b;
+
+
+        final SearchIterator<Integer> complete = new MergingSearchIterator<Integer>(
+            new IntegerComparator(),
+            new ArrayIterator<Integer>(a),
+            new ArrayIterator<Integer>(b)
+            );
+
+        for(int i = 0; i < complete.size(); i++) {
+            assertTrue(complete.hasNext());
+            assertEquals(expected[i], complete.next());
+        }
+
+        assertFalse(complete.hasNext());
+    }
+
+    private static final class IntegerComparator implements Comparator<Integer> {
+
+        @Override
+        public int compare(final Integer o1, final Integer o2) {
+            return o2 - o1;
+        }
+
     }
 }

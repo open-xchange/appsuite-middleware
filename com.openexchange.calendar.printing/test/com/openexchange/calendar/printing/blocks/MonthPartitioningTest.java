@@ -54,15 +54,19 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import org.junit.Test;
+import com.openexchange.calendar.printing.AbstractDateTest;
 import com.openexchange.calendar.printing.CPAppointment;
 import com.openexchange.calendar.printing.CPCalendar;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class MonthPartitioningTest extends AbstractPartitioningTest {
+public class MonthPartitioningTest extends AbstractDateTest {
 
     private Calendar calendar;
+
+    protected WeekPartitioningStrategy strategy;
 
     @Override
     protected void setUp() throws Exception {
@@ -77,6 +81,7 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
         super.tearDown();
     }
 
+    @Test
     public void testShouldPartitionTwoDatesInTwoMonthsIntoTwoBlocks() {
         CPAppointment app1 = new CPAppointment();
         app1.setTitle("First appointment");
@@ -99,6 +104,7 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
         assertTrue("Should contain a month break after the first element", monthbreakFound);
     }
 
+    @Test
     public void testShouldDetermineMissingDays() {
         List<Date> daysInbetween = strategy.getMissingDaysInbetween(THURSDAY(), SUNDAY());
         assertEquals("Should have two days inbetween", 2, daysInbetween.size());
@@ -108,6 +114,7 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
         assertEquals("Second day inbetween would be Saturday", Calendar.SATURDAY, calendar.get(Calendar.DAY_OF_WEEK));
     }
 
+    @Test
     public void testShouldDetermineMissingDaysBetweenTwoWeeks() {
         List<Date> daysInbetween = strategy.getMissingDaysInbetween(THURSDAY(), WEDNESDAY_NEXT_WEEK());
         assertEquals("Should have five days inbetween", 5, daysInbetween.size());
@@ -123,6 +130,7 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
         assertEquals("Fifth day inbetween would be Tuesday", Calendar.TUESDAY, calendar.get(Calendar.DAY_OF_WEEK));
     }
 
+    @Test
     public void testShouldDefaultToOneDayBeforeMonthStartIfNoneGiven() {
         CPAppointment first = null; // implies a date one the 31.12.2008
         CPAppointment second = new CPAppointment();
@@ -137,6 +145,7 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
         assertEquals("Should have ten days (until 11.1.2) inbetween", 10, i);
     }
 
+    @Test
     public void testShouldDefaultToOneDayAfterLastWeekDayIfNoneGiven() {
         CPAppointment first = new CPAppointment();
         first.setStartDate(WEDNESDAY());
@@ -157,6 +166,7 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
 
     }
 
+    @Test
     public void testShouldGiveDayInfo() {
         CPAppointment app1 = new CPAppointment();
         app1.setTitle("First appointment");
@@ -182,6 +192,7 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
         assertEquals("Should contain day breaks for every day of January", 31, numberOfDayBreaks);
     }
 
+    @Test
     public void testShouldAlwaysContainTwelveMonthbreaksPerYear() {
         calendar.set(Calendar.DAY_OF_YEAR, 1);
         CPAppointment app1 = new CPAppointment();
@@ -206,6 +217,7 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
         assertEquals("Should contain twelve months per year", 12, months.size());
     }
 
+    @Test
     public void testShouldNotMissDayInSecondWeek() {
         calendar.set(Calendar.HOUR_OF_DAY, 9);
         calendar.set(Calendar.YEAR, 2009);
@@ -235,6 +247,7 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
         assertEquals("Should be Wednesday (when using CPAppointments)", Calendar.WEDNESDAY, calendar.get(Calendar.DAY_OF_WEEK));
     }
 
+    @Test
     public void testShouldCountWeekEndDaysWhenCalculatingNumberOfDaybreaks() {
         CPAppointment app1 = new CPAppointment();
         app1.setTitle("First appointment");
@@ -273,6 +286,7 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
         assertEquals("Should find 2 daybreaks in week after Wednesday", 2, daysAfterWednesday);
     }
 
+    @Test
     public void testShouldCountWholeDaysWhenDeterminingMissingDays() {
         calendar.set(Calendar.YEAR, 2009);
         calendar.set(Calendar.DAY_OF_MONTH, 25);
@@ -289,6 +303,7 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
         assertEquals("Should find one day inbetween", 1, daysInbetween.size());
     }
 
+    @Test
     public void testShouldInsertFillerIfMonthsFirstWeekDoesContainDaysFromLastMonth() {
         // if the first day of a month is a wednesday, then you need to fill up the beginning of the week with place holders for week views.
         // Other views may chose to ignore them. The situation is: You have a month break (but no week break in the beginning, because the
@@ -317,7 +332,4 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
         assertEquals("First week should have three filler markers", 3, fillersCounted);
     }
 
-    public void testShouldInsertYearBreak() {
-        // TODO
-    }
 }

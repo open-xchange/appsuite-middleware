@@ -47,40 +47,29 @@
  *
  */
 
-package com.openexchange.calendar.printing.blocks;
+package com.openexchange.publish.basic;
 
-import java.util.Arrays;
-import com.openexchange.calendar.printing.AbstractDateTest;
-import com.openexchange.calendar.printing.CPAppointment;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import com.openexchange.publish.impl.ContactFolderLoaderTest;
+import com.openexchange.publish.impl.InfostoreDocumentLoaderTest;
+import com.openexchange.publish.tools.CompositePublicationTargetDiscovererTest;
+import com.openexchange.publish.tools.PublicationTargetCollectorTest;
 
 
 /**
- * {@link AbstractPartitioningTest}
+ * {@link UnitTests}
  *
- * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public abstract class AbstractPartitioningTest extends AbstractDateTest {
-
-    protected WeekPartitioningStrategy strategy;
-
-    public void testShouldPartitionConsecutiveDatesInOneWeekIntoOneBlock() {
-        CPAppointment app1 = new CPAppointment();
-        CPAppointment app2 = new CPAppointment();
-        app1.setTitle("First appointment");
-        app2.setTitle("Second appointment");
-        app1.setStartDate(WEDNESDAY());
-        app1.setEndDate(plusOneHour(WEDNESDAY()));
-        app2.setStartDate(THURSDAY());
-        app2.setEndDate(plusOneHour(THURSDAY()));
-
-        CPPartition partitions = strategy.partition(Arrays.asList(new CPAppointment[] { app1, app2 }));
-        boolean foundWeekBreak = false;
-        for (CPFormattingInformation info : partitions.getFormattingInformation()) {
-            if (info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK & info.getPosition() == 1) {
-                foundWeekBreak = true;
-            }
-        }
-        assertTrue("Two consecutive days, Wednesday and Thursday, should not have any week break info between them", !foundWeekBreak);
-        assertEquals("Partition should contain two appointments", 2, partitions.getAppointments().size());
+public class UnitTests extends TestSuite {
+    public static Test suite() {
+        final TestSuite pubSuite = new TestSuite();
+        pubSuite.addTestSuite(ContactFolderLoaderTest.class);
+        pubSuite.addTestSuite(InfostoreDocumentLoaderTest.class);
+        // pubSuite.addTestSuite(PublicationSQLTest.class);
+        pubSuite.addTestSuite(CompositePublicationTargetDiscovererTest.class);
+        pubSuite.addTestSuite(PublicationTargetCollectorTest.class);
+        return pubSuite;
     }
 }

@@ -47,64 +47,28 @@
  *
  */
 
-package com.openexchange.publish.database;
+package com.openexchange.global;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.sql.grammar.Constant.ASTERISK;
-import static com.openexchange.sql.schema.Tables.publications;
-import java.sql.Connection;
-import java.sql.SQLException;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.ldap.MockUser;
-import com.openexchange.publish.PublicationStorage;
-import com.openexchange.publish.sql.AbstractPublicationSQLStorageTest;
-import com.openexchange.sql.builder.StatementBuilder;
-import com.openexchange.sql.grammar.EQUALS;
-import com.openexchange.sql.grammar.SELECT;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import com.openexchange.global.tools.id.IDManglerTest;
+import com.openexchange.global.tools.iterator.MergingSearchIteratorTest;
 
 /**
- * {@link PublicationUserDeleteListenerTest}
+ * {@link UnitTests}
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class PublicationUserDeleteListenerTest extends AbstractPublicationSQLStorageTest {
+public class UnitTests {
 
-    private MockUser user;
-
-    private PublicationUserDeleteListener listener;
-
-    private Connection writeCon;
-
-    private Connection readCon;
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-
-        this.user = new MockUser(userId);
-
-        this.listener = new PublicationUserDeleteListener() {
-            @Override
-            protected PublicationStorage getStorage(Connection writeCon) {
-                return storage;
-            }
-        };
-
-        this.writeCon = getDBProvider().getWriteConnection(ctx);
-        this.readCon = getDBProvider().getReadConnection(ctx);
+    public UnitTests() {
+        super();
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-    public void testShouldPerformDeletionAttempt() throws OXException, SQLException, OXException {
-        DeleteEvent event = new DeleteEvent(user, user.getId(), DeleteEvent.TYPE_USER, ctx);
-        storage.rememberPublication(pub1);
-        listener.deletePerformed(event, readCon , writeCon );
-        SELECT select = new SELECT(ASTERISK).FROM(publications).WHERE( new EQUALS("user_id", I(userId)).AND( new EQUALS("cid", I(ctx.getContextId() ) ) ) );
-        assertNoResult(new StatementBuilder().buildCommand(select));
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTestSuite(IDManglerTest.class);
+        tests.addTestSuite(MergingSearchIteratorTest.class);
+        return tests;
     }
 }

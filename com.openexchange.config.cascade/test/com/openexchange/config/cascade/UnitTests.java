@@ -47,44 +47,29 @@
  *
  */
 
-package com.openexchange.calendar.printing;
+package com.openexchange.config.cascade;
 
-import junit.framework.TestCase;
-import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.config.cascade.impl.CascadingConfigurationImplTest;
 
 /**
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * Unit tests for the bundle com.openexchange.config.cascade
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
  */
-public class CPTypeTest extends TestCase {
+@RunWith(Suite.class)
+@SuiteClasses({
+    CascadingConfigurationImplTest.class
+})
+public class UnitTests {
 
-    private void checkType(String template, CPType expected) {
-        assertEquals(
-            "The template string '" + template + "' should lead to a template of type " + expected,
-            expected,
-            CPType.getByTemplateName(template));
-    }
-
-    @Test
-    public void testShouldFindCorrectTypeByTemplateName() {
-        CPType evil = CPType.WORKWEEKVIEW;
-        for (CPType type : CPType.values()) {
-            checkType("cp_" + type.getName() + "_" + evil.getName() + "someTemplate", type);
-            checkType("cp_" + type.getName() + "_" + "someTemplate" + evil.getName(), type);
-            checkType("cp_" + evil.getName() + "_" + type.getName() + "_" + "someTemplate", evil);
-            checkType("cp_" + type.getName() + "_" + evil.getName() + "_" + "someTemplate", type);
-
-            checkType("cp_" + type.getNumber() + "_" + evil.getNumber() + "someTemplate", type);
-            checkType("cp_" + type.getNumber() + "_" + "someTemplate" + evil.getNumber(), type);
-            checkType("cp_" + evil.getNumber() + "_" + type.getNumber() + "_" + "someTemplate", evil);
-            checkType("cp_" + type.getNumber() + "_" + evil.getNumber() + "_" + "someTemplate", type);
-        }
-    }
-
-    @Test
-    public void testShouldReturnNullOnFailure() {
-        checkType("", null);
-        checkType("666/template.tmpl", null);
-        checkType("/1/666/template.tmpl", null);
-        checkType("cp_666_template.tmpl", null);
+    /**
+     * Initializes a new {@link UnitTests}.
+     */
+    public UnitTests() {
+        super();
     }
 }

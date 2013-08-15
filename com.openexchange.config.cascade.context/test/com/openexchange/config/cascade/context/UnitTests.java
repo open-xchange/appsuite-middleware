@@ -47,68 +47,31 @@
  *
  */
 
-package com.openexchange.tools.iterator;
+package com.openexchange.config.cascade.context;
 
-import java.util.Comparator;
-import junit.framework.TestCase;
-import com.openexchange.exception.OXException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.config.cascade.context.matching.ContextSetTermParserTest;
+import com.openexchange.config.cascade.context.matching.UserConfigurationAnalyzerTest;
 
 /**
- * {@link MergingSearchIteratorTest}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * Unit tests for the bundle com.openexchange.config.cascade.context
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
  */
-public class MergingSearchIteratorTest extends TestCase {
+@RunWith(Suite.class)
+@SuiteClasses({
+    ContextSetTermParserTest.class,
+    UserConfigurationAnalyzerTest.class
+})
+public class UnitTests {
 
-    public void testMerge() throws OXException {
-        final Integer[] a = new Integer[] { 0, 3, 4, 7, 9, 12, 13, 16 };
-        final Integer[] b = new Integer[] { 1, 2, 5, 10, 18 };
-        final Integer[] c = new Integer[] { 1, 6, 8, 11, 14, 20 };
-
-        final Integer[] expected = new Integer[] { 0, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 18, 20 };
-
-        final SearchIterator<Integer> complete = new MergingSearchIterator<Integer>(
-            new IntegerComparator(),
-            new ArrayIterator<Integer>(a),
-            new ArrayIterator<Integer>(b),
-            new ArrayIterator<Integer>(c)
-        );
-
-        for(int i = 0; i < complete.size(); i++) {
-            assertTrue(complete.hasNext());
-            assertEquals(expected[i], complete.next());
-        }
-
-        assertFalse(complete.hasNext());
-    }
-
-    public void testMergeEmptyWithFull() throws OXException {
-        final Integer[] a = new Integer[0];
-        final Integer[] b = new Integer[] { 1, 2, 5, 10, 18 };
-
-        final Integer[] expected = b;
-
-
-        final SearchIterator<Integer> complete = new MergingSearchIterator<Integer>(
-            new IntegerComparator(),
-            new ArrayIterator<Integer>(a),
-            new ArrayIterator<Integer>(b)
-        );
-
-        for(int i = 0; i < complete.size(); i++) {
-            assertTrue(complete.hasNext());
-            assertEquals(expected[i], complete.next());
-        }
-
-        assertFalse(complete.hasNext());
-    }
-
-    private static final class IntegerComparator implements Comparator<Integer> {
-
-        @Override
-        public int compare(final Integer o1, final Integer o2) {
-            return o2 - o1;
-        }
-
+    /**
+     * Initializes a new {@link UnitTests}.
+     */
+    public UnitTests() {
+        super();
     }
 }

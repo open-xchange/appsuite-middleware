@@ -47,32 +47,29 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.rss;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.publish.database.PublicationUserDeleteListenerTest;
-import com.openexchange.publish.impl.ContactFolderLoaderTest;
-import com.openexchange.publish.impl.InfostoreDocumentLoaderTest;
-import com.openexchange.publish.sql.PublicationSQLTest;
-import com.openexchange.publish.tools.CompositePublicationTargetDiscovererTest;
-import com.openexchange.publish.tools.PublicationTargetCollectorTest;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.rss.preprocessors.PreprocessorChainingTest;
 
 /**
- * {@link PublicationsTestSuite}
- *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * Unit tests for the bundle com.openexchange.rss
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
  */
-public class PublicationsTestSuite extends TestSuite {
-    public static Test suite() {
-        final TestSuite pubSuite = new TestSuite();
-        pubSuite.addTestSuite(ContactFolderLoaderTest.class);
-        pubSuite.addTestSuite(InfostoreDocumentLoaderTest.class);
-        pubSuite.addTestSuite(PublicationSQLTest.class);
-        pubSuite.addTestSuite(CompositePublicationTargetDiscovererTest.class);
-        pubSuite.addTestSuite(PublicationTargetCollectorTest.class);
-        pubSuite.addTestSuite(PublicationUserDeleteListenerTest.class);
-        return pubSuite;
+@RunWith(Suite.class)
+@SuiteClasses({
+    PreprocessorChainingTest.class
+})
+public class UnitTests {
+
+    /**
+     * Initializes a new {@link UnitTests}.
+     */
+    public UnitTests() {
+        super();
     }
 }

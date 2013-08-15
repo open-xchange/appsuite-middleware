@@ -47,55 +47,28 @@
  *
  */
 
-package com.openexchange.datatypes.genericonf.json;
+package com.openexchange.messaging.generic;
 
-import static com.openexchange.json.JSONAssertion.assertValidates;
-import java.util.HashMap;
-import java.util.Map;
-import junit.framework.TestCase;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.json.JSONAssertion;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * {@link FormContentWriterTest}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * Unit tests for the bundle com.openexchange.messaging.generic
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
  */
-public class FormContentWriterTest extends TestCase {
+@RunWith(Suite.class)
+@SuiteClasses({
+    MessagingComparatorTest.class
+})
+public class UnitTests {
 
-    private Map<String, Object> content = null;
-    private DynamicFormDescription form = null;
-
-    @Override
-    public void setUp() throws Exception {
-        content = new HashMap<String, Object>();
-        form = new DynamicFormDescription();
-
-        form.add(FormElement.input("login", "Login Name")).add(FormElement.password("password", "Password")).add(FormElement.checkbox("checkbox", "Checkbox")).add(FormElement.link("url", "URL")).add(FormElement.link("absolute", "Absolute URL"));
-
-        content.put("login", "blupp");
-        content.put("password", "geheim");
-        content.put("checkbox", true);
-        content.put("url", "/server/relative");
-        content.put("absolute", "http://www.somewhere.invalid/absoluteURL");
-
+    /**
+     * Initializes a new {@link UnitTests}.
+     */
+    public UnitTests() {
+        super();
     }
-
-    public void testWrite() throws JSONException {
-        JSONObject object = new FormContentWriter().write(form, content, "https://myserver.invalid");
-        JSONAssertion assertion = new JSONAssertion().isObject()
-            .hasKey("login").withValue("blupp")
-            .hasKey("password").withValue("xxxxxxxx")
-            .hasKey("checkbox").withValue(true)
-            .hasKey("url").withValue("https://myserver.invalid/server/relative")
-            .hasKey("absolute").withValue("http://www.somewhere.invalid/absoluteURL")
-       .objectEnds();
-
-        assertValidates(assertion, object);
-    }
-
 }

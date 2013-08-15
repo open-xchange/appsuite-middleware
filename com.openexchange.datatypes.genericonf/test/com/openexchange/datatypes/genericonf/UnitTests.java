@@ -47,22 +47,32 @@
  *
  */
 
-package com.openexchange.textxtraction.internal;
+package com.openexchange.datatypes.genericonf;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-
+import com.openexchange.datatypes.genericonf.json.FormContentParserTest;
+import com.openexchange.datatypes.genericonf.json.FormDescriptionWriterTest;
 
 /**
- * {@link UnitTests}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * Unit tests for the bundle com.openexchange.datatypes.genericonf
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    TikaTextXtractServiceTest.class
+    DynamicFormDescriptionTest.class,
+    FormContentParserTest.class,
+    FormDescriptionWriterTest.class
 })
 public class UnitTests {
 
+    /**
+     * Initializes a new {@link UnitTests}.
+     */
+    public UnitTests() {
+        super();
+    }
 }

@@ -47,32 +47,29 @@
  *
  */
 
-package com.openexchange.calendar.printing;
+package com.openexchange.groupware.tools;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.calendar.printing.blocks.MonthPartitioningTest;
-import com.openexchange.calendar.printing.blocks.WeekPartitioningTest;
-import com.openexchange.calendar.printing.blocks.WorkWeekPartitioningTest;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.groupware.tools.chunk.ChunkPerformerTest;
 
 /**
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * Unit tests for the bundle com.openexchange.groupware.tools
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4
  */
-public class CPTestSuite extends TestSuite {
+@RunWith(Suite.class)
+@SuiteClasses({
+    ChunkPerformerTest.class
+})
+public class UnitTests {
 
-    private CPTestSuite() {
+    /**
+     * Initializes a new {@link UnitTests}.
+     */
+    public UnitTests() {
         super();
-    }
-
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(CPTypeTest.class);
-        suite.addTestSuite(CPCalendarTest.class);
-        suite.addTestSuite(CPParameterTest.class);
-        suite.addTestSuite(CPToolTest.class);
-        suite.addTestSuite(WorkWeekPartitioningTest.class);
-        suite.addTestSuite(WeekPartitioningTest.class);
-        suite.addTestSuite(MonthPartitioningTest.class);
-        return suite;
     }
 }
