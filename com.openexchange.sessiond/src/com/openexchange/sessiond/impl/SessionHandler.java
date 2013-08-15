@@ -680,20 +680,42 @@ public final class SessionHandler {
         if (null == sessionControl) {
             throw SessionExceptionCodes.PASSWORD_UPDATE_FAILED.create();
         }
-        // TODO: Check permission via security service
-        sessionControl.getSession().setPassword(newPassword);
-        final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-        if (sessionStorageService != null) {
-            final Task<Void> c = new AbstractTask<Void>() {
 
-                @Override
-                public Void call() throws Exception {
-                    sessionStorageService.changePassword(sessionid, newPassword);
-                    return null;
-                }
-            };
-            submitAndIgnoreRejection(c);
+        // Change the passwords of all sessions belonging to this user and that have the same old password set
+
+        final SessionImpl session = sessionControl.getSession();
+        final String oldPassword = session.getPassword();
+
+        final Map<String, SessionControl> sessionControls = new HashMap<String, SessionControl>(16);
+        sessionControls.put(sessionid, sessionControl);
+        for (final SessionControl sc : sessionData.getUserSessions(session.getUserId(), session.getContextId())) {
+            final SessionImpl ses = sc.getSession();
+            if (oldPassword.equals(ses.getPassword())) {
+                sessionControls.put(ses.getSessionID(), sc);
+            }
         }
+
+        changePasswordsFor(sessionControls, newPassword);
+    }
+
+    private static void changePasswordsFor(final Map<String, SessionControl> sessionControls, final String newPassword) {
+        final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+
+        for (final Map.Entry<String, SessionControl> scEntry : sessionControls.entrySet()) {
+            scEntry.getValue().getSession().setPassword(newPassword);
+            if (sessionStorageService != null) {
+                final Task<Void> c = new AbstractTask<Void>() {
+
+                    @Override
+                    public Void call() throws Exception {
+                        sessionStorageService.changePassword(scEntry.getKey(), newPassword);
+                        return null;
+                    }
+                };
+                submitAndIgnoreRejection(c);
+            }
+        }
+
     }
 
     /**

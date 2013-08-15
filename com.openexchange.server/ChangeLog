@@ -1,3 +1,7 @@
+* 2013-08-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28317: Change the password for all user-associated sessions on password-change operation
+
 * 2013-08-01 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 27975: Also try full login info as read from principal URL when resolving the user
