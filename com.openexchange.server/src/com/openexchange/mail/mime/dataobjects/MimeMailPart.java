@@ -50,6 +50,7 @@
 package com.openexchange.mail.mime.dataobjects;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import static com.openexchange.mail.mime.utils.MimeMessageUtility.getMultipartContentFrom;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
@@ -564,7 +565,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                     /*
                      * Compose a new body part with multipart/ data
                      */
-                    this.part = part = createBodyMultipart(getStreamFromMultipart((Multipart) part.getContent()), contentType.toString());
+                    this.part = part = createBodyMultipart(getStreamFromMultipart(getMultipartContentFrom(part)), contentType.toString());
                     this.multipart = null;
                     contentLoaded = true;
                 } else {
@@ -628,7 +629,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                     serializedContent = getBytesFromPart((Message) part.getContent());
                 } else if (contentType.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
                     serializeType = STYPE_MIME_BODY_MULTI;
-                    serializedContent = getBytesFromMultipart((Multipart) part.getContent());
+                    serializedContent = getBytesFromMultipart(getMultipartContentFrom(part));
                     serializedContentType = contentType.toString();
                 } else {
                     serializeType = STYPE_MIME_BODY;
