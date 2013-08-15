@@ -125,6 +125,10 @@ public class UploadHelper {
                 checksum = ChecksumProvider.getChecksum(session, uploadFile).getChecksum();
             }
             if (false == checksum.equals(newVersion.getChecksum())) {
+                /*
+                 * checksum mismatch, clean up & throw error
+                 */
+                session.getStorage().deleteFile(uploadFile);
                 throw DriveExceptionCodes.UPLOADED_FILE_CHECKSUM_ERROR.create(checksum, newVersion.getName(), newVersion.getChecksum());
             }
             /*
