@@ -29,6 +29,7 @@ Import-Package: com.openexchange.tools.ssl,
  javax.xml.transform.stax,
  javax.xml.transform.stream,
  org.apache.commons.logging,
+ org.osgi.framework;version="1.7.0",
  sun.security.util
 Export-Package: com.sun.activation.registries;version="1.1",
  com.sun.activation.viewers;version="1.1";uses:="javax.activation",
@@ -103,3 +104,4 @@ Export-Package: com.sun.activation.registries;version="1.1",
 Bundle-ClassPath: lib/libidn-1.9.jar,
  lib/tnef-1.8.0.jar,
  .
+Bundle-Activator: javax.mail.osgi.JavaMailActivator
