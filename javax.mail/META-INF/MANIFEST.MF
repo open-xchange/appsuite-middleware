@@ -31,6 +31,7 @@ Import-Package: com.openexchange.tools.ssl,
  javax.xml.transform.stax,
  javax.xml.transform.stream,
  org.apache.commons.logging,
+ org.osgi.framework;version="1.7.0",
  sun.security.util
 Export-Package: com.sun.mail.auth;version="1.4.7",
  com.sun.mail.handlers;version="1.4.7";
@@ -100,3 +101,4 @@ Export-Package: com.sun.mail.auth;version="1.4.7",
  net.freeutils.tnef.msg
 Bundle-ClassPath: lib/tnef-1.8.0.jar,
  .
+Bundle-Activator: javax.mail.osgi.JavaMailActivator
