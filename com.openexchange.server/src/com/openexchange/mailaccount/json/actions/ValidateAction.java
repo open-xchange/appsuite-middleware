@@ -60,6 +60,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.crypto.CryptoErrorMessage;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -125,18 +126,19 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             /*
              * ID is delivered, but password not set. Thus load from storage version.
              */
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
 
-            final String password =
-                storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId()).getPassword();
-            accountDescription.setPassword(MailPasswordUtil.decrypt(
-                password,
-                session,
-                accountDescription.getId(),
-                accountDescription.getLogin(),
-                accountDescription.getMailServer()));
+            try {
+                final String password = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId()).getPassword();
+                accountDescription.setPassword(MailPasswordUtil.decrypt(password, session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer()));
+            } catch (final OXException e) {
+                if (!CryptoErrorMessage.BadPassword.equals(e)) {
+                    throw e;
+                }
+                storageService.invalidateMailAccounts(session.getUserId(), session.getContextId());
+                final String password = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId()).getPassword();
+                accountDescription.setPassword(MailPasswordUtil.decrypt(password, session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer()));
+            }
         }
 
         checkNeededFields(accountDescription);

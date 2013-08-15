@@ -241,6 +241,9 @@ public abstract class PasswordChangeService {
                 Cache jcs = cacheService.getCache("User");
                 jcs.remove(key);
 
+                jcs = cacheService.getCache("UserPermissionBits");
+                jcs.remove(key);
+
                 jcs = cacheService.getCache("UserConfiguration");
                 jcs.remove(key);
 

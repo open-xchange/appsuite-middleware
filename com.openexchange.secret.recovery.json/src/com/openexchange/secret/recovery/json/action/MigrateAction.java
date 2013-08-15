@@ -58,6 +58,9 @@ import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.secret.recovery.json.SecretRecoveryAJAXRequest;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.SetableSession;
+import com.openexchange.session.SetableSessionFactory;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MigrateAction}
@@ -66,13 +69,13 @@ import com.openexchange.server.ServiceLookup;
  */
 public final class MigrateAction extends AbstractSecretRecoveryAction {
 
-    private Set<SecretMigrator> secretMigrators;
+    private final Set<SecretMigrator> secretMigrators;
 
     /**
      * Initializes a new {@link MigrateAction}.
      *
      * @param services
-     * @param secretMigrators 
+     * @param secretMigrators
      */
     public MigrateAction(final ServiceLookup services, Set<SecretMigrator> secretMigrators) {
         super(services);
@@ -87,10 +90,18 @@ public final class MigrateAction extends AbstractSecretRecoveryAction {
         }
 
         final String password = req.getParameter("password");
-        final String secret = secretService.getSecret(req.getSession());
+        final ServerSession session = req.getSession();
+        final SetableSession setableSession = SetableSessionFactory.getFactory().setableSessionFor(session);
+
+        // Old secret
+        setableSession.setPassword(password);
+        final String oldSecret = secretService.getSecret(setableSession);
+
+        // New secret
+        final String secret = secretService.getSecret(session);
 
         for (SecretMigrator migrator : secretMigrators) {
-            migrator.migrate(password, secret, req.getSession());
+            migrator.migrate(oldSecret, secret, session);
         }
 
         return new AJAXRequestResult(Integer.valueOf(1), "int");
