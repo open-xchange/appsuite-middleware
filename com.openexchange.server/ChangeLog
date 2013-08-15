@@ -1,3 +1,8 @@
+* 2013-08-15 - marcus.klein@open-xchange.com
+
+ - Fix for bug 28283: Need to poll the system bundle to check if shutdown was successful and extended scripting for calling shutdown process
+   to reduce error output.
+
 * 2013-08-15 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 28260: Restrict socket binding to local loopback address only by default. 
