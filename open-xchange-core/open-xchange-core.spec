@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -744,6 +744,15 @@ for I in $(seq 1 ${#OLDNAMES[@]}); do
     fi
     if ! ox_exists_property $NEWNAME $pfile; then
         ox_set_property $NEWNAME "$VALUE" $pfile
+    fi
+done
+NEWPROPS=( com.openexchange.hazelcast.jmxDetailed com.openexchange.hazelcast.network.join.multicast.group com.openexchange.hazelcast.network.join.multicast.port com.openexchange.hazelcast.group.password com.openexchange.hazelcast.memcache.enabled com.openexchange.hazelcast.rest.enabled com.openexchange.hazelcast.socket.bindAny )
+DEFAULTS=( false 224.2.2.3 54327 'wtV6$VQk8#+3ds!a' false false false )
+for I in $(seq 1 ${#NEWPROPS[@]}); do
+    NEWPROP=${NEWPROPS[$I-1]}
+    DEFAULT=${DEFAULTS[$I-1]}
+    if ! ox_exists_property $NEWPROP $pfile; then
+        ox_set_property $NEWPROP "$DEFAULT" $pfile
     fi
 done
 
