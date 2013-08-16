@@ -196,20 +196,20 @@ ox_set_property() {
     ox_system_type
     local type=$?
     if [ $type -eq $DEBIAN -o $type -eq $UCS ]; then
-	local origfile="${propfile}.dpkg-new"
-	if [ ! -e $origfile ]; then
-	    local origfile="${propfile}.dpkg-dist"
-	fi
+        local origfile="${propfile}.dpkg-new"
+        if [ ! -e $origfile ]; then
+            local origfile="${propfile}.dpkg-dist"
+        fi
     else
-	local origfile="${propfile}.rpmnew"
+        local origfile="${propfile}.rpmnew"
     fi
     if [ -n "$origfile" ] && [ -e "$origfile" ]; then
-	export origfile
-	export propfile
-	export prop
-	export val
+        export origfile
+        export propfile
+        export prop
+        export val
 
-	perl -e '
+        perl -e '
 use strict;
 
 open(IN,"$ENV{origfile}") || die "unable to open $ENV{origfile}: $!";
@@ -224,14 +224,14 @@ my $count = 0;
 my $back  = 1;
 my $out = "";
 foreach my $line (@LINES) {
-  if ( $line =~ /^$opt\s*[:=]/ ) {
-    $out = $line;
-    $out =~ s/^(.*?[:=]).*$/$1$val/;
-    while ( $LINES[$count-$back] =~ /^#/ ) {
-      $out = $LINES[$count-$back++].$out;
+    if ( $line =~ /^$opt\s*[:=]/ ) {
+      $out = $line;
+      $out =~ s/^(.*?[:=]).*$/$1$val/;
+      while ( $LINES[$count-$back] =~ /^#/ ) {
+          $out = $LINES[$count-$back++].$out;
+      }
     }
-  }
-  $count++;
+    $count++;
 }
 
 $back  = 0;
@@ -240,69 +240,70 @@ my $start = 0;
 my $end = 0;
 my $found = 0;
 foreach my $line (@OUTLINES) {
-  if ( $line =~ /^$opt\s*[:=]/ ) {
-    $found=1;
-    $end=$count;
-    while ( $OUTLINES[$count-++$back] =~ /^#/ ) {
+    if ( $line =~ /^$opt\s*[:=]/ ) {
+        $found=1;
+        $end=$count;
+        while ( $OUTLINES[$count-++$back] =~ /^#/ ) {
+        }
+        ;
+        if ( $count > 0 && $back > 1 ) {
+            $start=$count-$back+1;
+        } else {
+            $start=$end;
+        }
     }
-    ;
-    if ( $count > 0 && $back > 1 ) {
-       $start=$count-$back+1;
-    } else {
-       $start=$end;
-    }
-  }
-  $count++;
+    $count++;
 }
 
 if ( length($out) == 0 ) {
-   $out=$opt."=".$val."\n";
+    $out=$opt."=".$val."\n";
 }
 
 if ( $found ) {
-  for (my $i=0; $i<=$#OUTLINES; $i++) {
-    if ( $i < $start || $i > $end ) {
-        print $OUTLINES[$i];
-        print "\n" if( substr($OUTLINES[$i],-1) ne "\n" );
+    for (my $i=0; $i<=$#OUTLINES; $i++) {
+        if ( $i < $start || $i > $end ) {
+            print $OUTLINES[$i];
+            print "\n" if( substr($OUTLINES[$i],-1) ne "\n" );
+        }
+        if ( $i == $start ) {
+            print $out;
+            print "\n";
+        }
     }
-    if ( $i == $start ) {
-      print $out;
-      print "\n" if( substr($out,-1) ne "\n" );
-    }
-  }
 } else {
-  print @OUTLINES;
-  print "\n" if( substr($OUTLINES[-1],-1) ne "\n" );
-  print $out;
-  print "\n" if( substr($out,-1) ne "\n" );
+    print @OUTLINES;
+    print "\n" if( substr($OUTLINES[-1],-1) ne "\n" );
+    print $out;
+    print "\n";
 }
 ' > $tmp
-	if [ $? -gt 0 ]; then
-	    rm -f $tmp
-	    die "ox_set_property: FATAL: error setting property $prop to \"$val\" in $propfile"
-	else
-	    mv $tmp $propfile
-	fi
-	unset origfile
-	unset propfile
-	unset prop
-	unset val
+        if [ $? -gt 0 ]; then
+            rm -f $tmp
+            die "ox_set_property: FATAL: error setting property $prop to \"$val\" in $propfile"
+        else
+            mv $tmp $propfile
+        fi
+        unset origfile
+        unset propfile
+        unset prop
+        unset val
     else
         # quote & in URLs to make sed happy
-	test -n "$val" && val="$(echo $val | sed 's/\&/\\\&/g')"
-	if grep -E "^$prop *[:=]" $propfile >/dev/null; then
-	    cat<<EOF | sed -f - $propfile > $tmp
+        test -n "$val" && val="$(echo $val | sed 's/\&/\\\&/g')"
+        if grep -E "^$prop *[:=]" $propfile >/dev/null; then
+            cat<<EOF | sed -f - $propfile > $tmp
 s;\(^$prop[[:space:]]*[:=]\).*$;\1${val};
 EOF
-	else
-	    echo "${prop}=$val" >> $tmp
-	fi
+        else
+            echo "${prop}=$val" >> $tmp
+            echo "" >> $tmp
+        fi
         if [ $? -gt 0 ]; then
-	    rm -f $tmp
-	    die "ox_set_property: FATAL: error setting property $prop to \"$val\" in $propfile"
-	else
-	    mv $tmp $propfile
-	fi
+            rm -f $tmp
+            die "ox_set_property: FATAL: error setting property $prop to \"$val\" in $propfile"
+        else
+            mv $tmp $propfile
+        fi
     fi
 }
 
