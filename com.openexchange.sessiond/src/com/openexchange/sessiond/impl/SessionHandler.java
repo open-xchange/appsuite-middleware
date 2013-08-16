@@ -639,42 +639,56 @@ public final class SessionHandler {
         if (null == sessionControl) {
             throw SessionExceptionCodes.PASSWORD_UPDATE_FAILED.create();
         }
+        /*
+         * Change password in current session
+         */
+        final SessionImpl currentSession = sessionControl.getSession();
+        currentSession.setPassword(newPassword);
+        final SessionStorageService sessionStorage = getServiceRegistry().getService(SessionStorageService.class);
+        if (null != sessionStorage) {
+            final Task<Void> c = new AbstractTask<Void>() {
 
-        // Change the passwords of all sessions belonging to this user and that have the same old password set
-
-        final SessionImpl session = sessionControl.getSession();
-        final String oldPassword = session.getPassword();
-
-        final Map<String, SessionControl> sessionControls = new HashMap<String, SessionControl>(16);
-        sessionControls.put(sessionid, sessionControl);
-        for (final SessionControl sc : sessionData.getUserSessions(session.getUserId(), session.getContextId())) {
-            final SessionImpl ses = sc.getSession();
-            if (oldPassword.equals(ses.getPassword())) {
-                sessionControls.put(ses.getSessionID(), sc);
+                @Override
+                public Void call() throws Exception {
+                    sessionStorage.changePassword(sessionid, newPassword);
+                    return null;
+                }
+            };
+            submitAndIgnoreRejection(c);
+        }
+        /*
+         * Invalidate all other user sessions known by local session containers
+         */
+        SessionControl[] userSessionControls = sessionData.getUserSessions(currentSession.getUserId(), currentSession.getContextId());
+        if (null != userSessionControls && 0 < userSessionControls.length) {
+            for (SessionControl userSessionControl : userSessionControls) {
+                String otherSessionID = userSessionControl.getSession().getSessionID();
+                if (null != otherSessionID && false == otherSessionID.equals(sessionid)) {
+                    clearSession(otherSessionID);
+                }
             }
         }
+        /*
+         * Invalidate all further user sessions in session storage if needed
+         */
+        if (null != sessionStorage) {
+            final Task<Session[]> c = new AbstractTask<Session[]>() {
 
-        changePasswordsFor(sessionControls, newPassword);
-    }
-
-    private static void changePasswordsFor(final Map<String, SessionControl> sessionControls, final String newPassword) {
-        final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-
-        for (final Map.Entry<String, SessionControl> scEntry : sessionControls.entrySet()) {
-            scEntry.getValue().getSession().setPassword(newPassword);
-            if (sessionStorageService != null) {
-                final Task<Void> c = new AbstractTask<Void>() {
-
-                    @Override
-                    public Void call() throws Exception {
-                        sessionStorageService.changePassword(scEntry.getKey(), newPassword);
-                        return null;
+                @Override
+                public Session[] call() throws Exception {
+                    return sessionStorage.getUserSessions(currentSession.getUserId(), currentSession.getContextId());
+                }
+            };
+            Session[] sessions = getFrom(c, new Session[0]);
+            if (null != sessions && 0 < sessions.length) {
+                for (Session session : sessions) {
+                    String otherSessionID = session.getSessionID();
+                    if (null != otherSessionID && false == otherSessionID.equals(sessionid)) {
+                        clearSession(otherSessionID);
                     }
-                };
-                submitAndIgnoreRejection(c);
+                }
             }
         }
-
     }
 
     /**
