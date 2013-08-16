@@ -109,5 +109,6 @@
 	<classpathentry kind="lib" path="lib/hamcrest-core-1.3.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.codec_1.6.0.v201305230611.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.io_2.0.1.v201105210651.jar"/>
+	<classpathentry kind="src" path="/com.openexchange.admin.rmi"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
