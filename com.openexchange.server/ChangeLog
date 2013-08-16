@@ -1,3 +1,7 @@
+* 2013-08-16 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 28350: Check if another distribution list with same name already exists
+
 * 2013-08-16 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 28317: Invalidate all other user sessions after password change
