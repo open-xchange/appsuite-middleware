@@ -162,10 +162,9 @@ public class UploadHelper {
                         file.setCreated(created);
                         fields.add(Field.CREATED);
                     }
-                    if (null != modified) {
-                        file.setLastModified(modified);
-                        fields.add(Field.LAST_MODIFIED);
-                    }
+                    Date now = new Date();
+                    file.setLastModified(null != modified && modified.before(now) ? modified : now);
+                    fields.add(Field.LAST_MODIFIED);
 
                     if (null != originalVersion) {
                         File originalFile = session.getStorage().findFileByName(path, originalVersion.getName());
