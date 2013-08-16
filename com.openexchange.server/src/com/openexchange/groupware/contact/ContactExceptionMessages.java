@@ -125,6 +125,8 @@ public class ContactExceptionMessages implements LocalizableStrings {
     public static final String NO_CHANGE_PERMISSION_MSG = "You are not allowed to modify contact %1$d in context %2$d.";
 
     public static final String EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS_MSG = "An E-Mail address is mandatory for external distribution list members. Please add a valid E-Mail address.";
+    
+    public static final String DLIST_NAME_IN_USE_MSG = "The name you entered is already assigned to another distribution list. Please choose another display name. Context %1$d Object %2$d";
 
     public static final String LOAD_OBJECT_FAILED_MSG = "Unable to load objects. Context %1$d user %2$d";
 
