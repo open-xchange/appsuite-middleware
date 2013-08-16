@@ -11,10 +11,7 @@ Import-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.file.storage,
  com.openexchange.file.storage.generic,
  com.openexchange.groupware.results,
-<<<<<<< HEAD
  com.openexchange.i18n,
-=======
->>>>>>> release-7.4.0
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,

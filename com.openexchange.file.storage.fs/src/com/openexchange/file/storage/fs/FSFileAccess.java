@@ -111,11 +111,7 @@ public class FSFileAccess implements FileStorageFileAccess {
             throw OXException.general(("No directory traversal, please"));
         }
 
-<<<<<<< HEAD
         if (!file.getParentFile().getParentFile().equals(directory) && !file.getParentFile().equals(directory)) {
-=======
-        if (!file.getParentFile().getParentFile().equals(directory)) {
->>>>>>> release-7.4.0
             throw OXException.general(("No directory traversal, please"));
         }
 
