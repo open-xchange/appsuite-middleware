@@ -935,7 +935,7 @@ public class MimeMessageFiller {
                     final byte[] bbuf = new byte[BUF_SIZE];
                     for (int i = 0; i < size; i++) {
                         final MailPart enclosedMailPart = mail.getEnclosedMailPart(i);
-                        if (enclosedMailPart.getContentType().startsWith("message/rfc822")) {
+                        if (enclosedMailPart.getContentType().startsWith("message/rfc822") || (enclosedMailPart.getContentType().getNameParameter() != null && enclosedMailPart.getContentType().getNameParameter().endsWith(".eml"))) {
                             addNestedMessage(enclosedMailPart, primaryMultipart, sb, out, bbuf);
                         } else {
                             addMessageBodyPart(primaryMultipart, enclosedMailPart, false);

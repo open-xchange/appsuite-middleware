@@ -228,6 +228,7 @@ public class MimeFilter {
         for (int i = 0; i < count; i++) {
             final BodyPart bodyPart = multipart.getBodyPart(i);
             String contentType = bodyPart.getContentType();
+            String name = new ContentType(contentType).getNameParameter();
             if (isEmpty(contentType)) {
                 newMultipart.addBodyPart(bodyPart);
             } else {
@@ -246,7 +247,7 @@ public class MimeFilter {
                     MessageUtility.setContent(newSubMultipart, mimeBodyPart);
                     // mimeBodyPart.setContent(newSubMultipart);
                     newMultipart.addBodyPart(mimeBodyPart);
-                } else if (contentType.startsWith("message/rfc822")) {
+                } else if (contentType.startsWith("message/rfc822") || (name != null && name.endsWith(".eml"))) {
                     final MimeFilter nestedFilter = new MimeFilter(ignorableContentTypes);
                     final MimeMessage filteredMessage;
                     {
