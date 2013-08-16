@@ -315,8 +315,8 @@ public final class MimeForward {
         final MatcherReplacer mr = new MatcherReplacer(m, html);
         final StringBuilder replaceBuffer = new StringBuilder(html.length());
         if (m.find()) {
-            replaceBuffer.append("<meta content=\"").append(contentType.getBaseType().toLowerCase(Locale.ENGLISH));
-            replaceBuffer.append("; charset=").append(contentType.getCharsetParameter()).append("\" http-equiv=\"Content-Type\" />");
+            replaceBuffer.append("<meta http-equiv=\"Content-Type\" content=\"").append(contentType.getBaseType().toLowerCase(Locale.ENGLISH));
+            replaceBuffer.append("; charset=").append(contentType.getCharsetParameter()).append("\" />");
             final String replacement = replaceBuffer.toString();
             replaceBuffer.setLength(0);
             mr.appendLiteralReplacement(replaceBuffer, replacement);
