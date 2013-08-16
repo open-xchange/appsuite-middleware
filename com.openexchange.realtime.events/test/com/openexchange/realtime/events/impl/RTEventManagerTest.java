@@ -49,12 +49,21 @@
 
 package com.openexchange.realtime.events.impl;
 
+import static com.openexchange.realtime.events.RTEventMatcher.isRTEvent;
+import static com.openexchange.realtime.packet.StanzaMatcher.isStanza;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
 import org.mockito.Mockito;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
@@ -63,12 +72,7 @@ import com.openexchange.realtime.events.RTEventEmitterService;
 import com.openexchange.realtime.events.RTListener;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.server.MockingServiceLookup;
-
-import static com.openexchange.realtime.packet.StanzaMatcher.isStanza;
-import static com.openexchange.realtime.events.RTEventMatcher.isRTEvent;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import com.openexchange.test.mock.main.test.AbstractMockTest;
 
 
 /**
@@ -76,14 +80,14 @@ import static org.mockito.Mockito.*;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class RTEventManagerTest {
-    
+public class RTEventManagerTest extends AbstractMockTest {
+
     private MockingServiceLookup services;
     private RTEventManager events = null;
     private ID id = new ID("test://test1@1");
-    
+
     private RTListener listener;
-    
+
     private RTEventEmitterService emitter = new RTEventEmitterService() {
 
         @Override
@@ -107,21 +111,21 @@ public class RTEventManagerTest {
                 listener = null;
             }
         }
-        
+
     };
-    
-    @Before
-    public void instantiateEventManager() {
+
+    @Override
+    public void setUp() throws Exception {
         services = new MockingServiceLookup();
         events = new RTEventManager(services);
     }
-    
+
     @Test
     public void shouldListAllAvailableEvents() {
         RTEventEmitterService emitter1 = mock(RTEventEmitterService.class);
         when(emitter1.getNamespace()).thenReturn("em1");
         when(emitter1.getSupportedEvents()).thenReturn(new HashSet<String>(Arrays.asList("ev1", "ev2")));
-        
+
         RTEventEmitterService emitter2 = mock(RTEventEmitterService.class);
         when(emitter2.getNamespace()).thenReturn("em2");
         when(emitter2.getSupportedEvents()).thenReturn(new HashSet<String>(Arrays.asList("ev1", "ev2")));
@@ -133,82 +137,82 @@ public class RTEventManagerTest {
         events.addEmitter(emitter1);
         events.addEmitter(emitter2);
         events.addEmitter(emitter3);
-        
+
         Set<String> supported = events.getSupportedEvents();
-        
+
         assertNotNull(supported);
-        
+
         assertEquals(6, supported.size());
-        
+
         assertTrue(supported.remove("em1:ev1"));
         assertTrue(supported.remove("em1:ev2"));
-        
+
         assertTrue(supported.remove("em2:ev1"));
         assertTrue(supported.remove("em2:ev2"));
 
         assertTrue(supported.remove("em3:ev1"));
         assertTrue(supported.remove("em3:ev2"));
     }
-    
+
     @Test
     public void shouldManageEventSubscriptions() {
 
         RTEventEmitterService emitter = setUpEmitter();
-        
+
         events.subscribe("em1:ev2", "abc", id, null, null);
-        
+
         Set<String> subscriptions = events.getSubscriptions(id);
-        
+
         assertNotNull(subscriptions);
         assertEquals(1, subscriptions.size());
         assertTrue(subscriptions.remove("em1:ev2"));
-        
+
         verify(emitter, times(1)).register( eq("ev2"), Mockito.<RTListener> anyObject() );
     }
-    
+
     @Test
     public void shouldIgnoreDoubleSubscription() {
 
         RTEventEmitterService emitter = setUpEmitter();
-        
+
         events.subscribe("em1:ev2", "abc", id, null, null);
         events.subscribe("em1:ev2", "abc", id, null, null);
-        
+
         Set<String> subscriptions = events.getSubscriptions(id);
-        
+
         assertNotNull(subscriptions);
         assertEquals(1, subscriptions.size());
         assertTrue(subscriptions.remove("em1:ev2"));
-        
+
         verify(emitter, times(1)).register( eq("ev2"), Mockito.<RTListener> anyObject() );
     }
-    
+
     @Test
     public void shouldPassAlongEvents() throws OXException {
         events.addEmitter(emitter);
         events.subscribe("em1:ev2", "abc", id, null, null);
-        
+
         // Trigger Event
         listener.handle(new RTEvent("Hello", "string"));
-        
-        
+
+
         // Verify the MessageDispatcher was used to send the event
         MessageDispatcher dispatcher = services.getService(MessageDispatcher.class);
-        
+
         verify(dispatcher).send(argThat(isStanza(id, id, "event", "event", "abc", isRTEvent("em1:ev2", "Hello"))));
     }
 
-    @Test 
+    @Test
     public void itShouldBePossibleToUnsubscribeFromAnEvent() {
         RTEventEmitterService emitter = setUpEmitter();
 
         events.subscribe("em1:ev2", "abc", id, null, null);
         events.subscribe("em1:ev1", "abc", id, null, null);
-    
+
         events.unsubscribe("em1:ev2", id);
 
         Set<String> subscriptions = events.getSubscriptions(id);
-        
+
         assertEquals(1, subscriptions.size());
         assertTrue(subscriptions.remove("em1:ev1"));
 
@@ -216,19 +220,19 @@ public class RTEventManagerTest {
         verify(emitter, times(1)).register( eq("ev1"), Mockito.<RTListener> anyObject() );
         verify(emitter, times(1)).unregister( eq("ev2"), Mockito.<RTListener> anyObject() );
     }
-    
-    
+
+
     @Test
     public void unsubscribeShouldClearAllSubscriptions() {
         RTEventEmitterService emitter = setUpEmitter();
 
         events.subscribe("em1:ev2", "abc", id, null, null);
         events.subscribe("em1:ev1", "abc", id, null, null);
-        
+
         assertEquals(2, events.getSubscriptions(id).size());
 
         events.unsubscribe(id);
-        
+
         Set<String> subscriptions = events.getSubscriptions(id);
         assertTrue(subscriptions.isEmpty());
 
@@ -238,18 +242,18 @@ public class RTEventManagerTest {
         verify(emitter, times(1)).unregister( eq("ev1"), Mockito.<RTListener> anyObject() );
 
     }
-    
-    @Test 
+
+    @Test
     public void shouldUnsubscribeWhenIDIsDisposedOf() {
         RTEventEmitterService emitter = setUpEmitter();
 
         events.subscribe("em1:ev2", "abc", id, null, null);
         events.subscribe("em1:ev1", "abc", id, null, null);
-        
+
         assertEquals(2, events.getSubscriptions(id).size());
-        
+
         id.trigger(ID.Events.DISPOSE, this);
-        
+
         Set<String> subscriptions = events.getSubscriptions(id);
         assertTrue(subscriptions.isEmpty());
 
@@ -258,16 +262,17 @@ public class RTEventManagerTest {
         verify(emitter, times(1)).unregister( eq("ev2"), Mockito.<RTListener> anyObject() );
         verify(emitter, times(1)).unregister( eq("ev1"), Mockito.<RTListener> anyObject() );
     }
-    
-    
+
+
     private RTEventEmitterService setUpEmitter() {
         RTEventEmitterService emitter = mock(RTEventEmitterService.class);
         when(emitter.getNamespace()).thenReturn("em1");
         when(emitter.getSupportedEvents()).thenReturn(new HashSet<String>(Arrays.asList("ev1", "ev2")));
-        
+
         events.addEmitter(emitter);
-        
-        
+
+
         return emitter;
     }
+
 }

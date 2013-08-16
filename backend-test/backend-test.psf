@@ -45,6 +45,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.quartz"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime.atmosphere"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime.events"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.rss"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.server"/>
