@@ -1,3 +1,7 @@
+* 2013-08-16 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28317: Invalidate all other user sessions after password change
+
 * 2013-08-15 - marcus.klein@open-xchange.com
 
  - Fix for bug 28283: Need to poll the system bundle to check if shutdown was successful and extended scripting for calling shutdown process
@@ -9,7 +13,6 @@
 
 * 2013-08-15 - thorben.betten@open-xchange.com
 
- - Fix for bug 28317: Change the password for all user-associated sessions on password-change operation
  - Fix for bug 28026: Allowing relative URL paths specified as a UWA widget's source URL
 
 * 2013-08-14 - marcus.klein@open-xchange.com
