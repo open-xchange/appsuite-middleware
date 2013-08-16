@@ -576,18 +576,18 @@ if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $p
    ox_set_property com.openexchange.contactcollector.folder.deleteDenied false $pfile
 fi
 
+# SoftwareChange_Request-1529
+pfile=/opt/open-xchange/etc/server.properties
+if ! ox_exists_property com.openexchange.server.fullPrimaryKeySupport $pfile; then
+    ox_set_property com.openexchange.server.fullPrimaryKeySupport false $pfile
+fi
+
 # SoftwareChange_Request-1556
 pfile=/opt/open-xchange/etc/excludedupdatetasks.properties
 if ! grep "com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask" >/dev/null $pfile; then
     echo -e "\n# v7.4.0 update tasks start here\n" >> $pfile
     echo "# Changes the columns actual_costs and target_costs for tasks from float to NUMERIC(12, 2)" >> $pfile
     echo "!com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask" >> $pfile
-fi
-
-# SoftwareChange_Request-1529
-pfile=/opt/open-xchange/etc/server.properties
-if ! ox_exists_property com.openexchange.server.fullPrimaryKeySupport $pfile; then
-    ox_set_property com.openexchange.server.fullPrimaryKeySupport false $pfile
 fi
 
 # SoftwareChange_Request-1564
