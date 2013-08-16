@@ -52,9 +52,6 @@ package com.openexchange.calendar.printing;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.calendar.printing.blocks.MonthPartitioningTest;
-import com.openexchange.calendar.printing.blocks.WeekPartitioningTest;
-import com.openexchange.calendar.printing.blocks.WorkWeekPartitioningTest;
 
 /**
  * Unit tests for bundle com.openexchange.calendar.printing
@@ -66,10 +63,7 @@ import com.openexchange.calendar.printing.blocks.WorkWeekPartitioningTest;
 @SuiteClasses({
     CPCalendarTest.class,
     CPToolTest.class,
-    CPTypeTest.class,
-    MonthPartitioningTest.class,
-    WeekPartitioningTest.class,
-    WorkWeekPartitioningTest.class
+ CPTypeTest.class
 })
 public class UnitTests {
 
