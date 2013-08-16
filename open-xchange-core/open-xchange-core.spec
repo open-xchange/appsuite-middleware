@@ -647,6 +647,35 @@ if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $p
    ox_set_property com.openexchange.contactcollector.folder.deleteDenied false $pfile
 fi
 
+# Patch_Request-1593
+pfile=/opt/open-xchange/etc/hazelcast.properties
+OLDNAMES=( com.openexchange.hazelcast.interfaces )
+NEWNAMES=( com.openexchange.hazelcast.network.interfaces )
+DEFAULTS=( 127.0.0.1 )
+for I in $(seq 1 ${#OLDNAMES[@]}); do
+    OLDNAME=${OLDNAMES[$I-1]}
+    NEWNAME=${NEWNAMES[$I-1]}
+    VALUE=$(ox_read_property $OLDNAME $pfile)
+    if ox_exists_property $OLDNAME $pfile; then
+        ox_remove_property $OLDNAME $pfile
+    fi
+    if [ -z "$VALUE" ]; then
+        VALUE="${DEFAULTS[$I-1]}"
+    fi
+    if ! ox_exists_property $NEWNAME $pfile; then
+        ox_set_property $NEWNAME "$VALUE" $pfile
+    fi
+done
+NEWPROPS=( com.openexchange.hazelcast.group.password com.openexchange.hazelcast.memcache.enabled com.openexchange.hazelcast.rest.enabled com.openexchange.hazelcast.socket.bindAny )
+DEFAULTS=( 'wtV6$VQk8#+3ds!a' false false false )
+for I in $(seq 1 ${#NEWPROPS[@]}); do
+    NEWPROP=${NEWPROPS[$I-1]}
+    DEFAULT=${DEFAULTS[$I-1]}
+    if ! ox_exists_property $NEWPROP $pfile; then
+        ox_set_property $NEWPROP "$DEFAULT" $pfile
+    fi
+done
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT
 do
