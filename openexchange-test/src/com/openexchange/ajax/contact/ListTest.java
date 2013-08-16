@@ -2,6 +2,7 @@ package com.openexchange.ajax.contact;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.json.JSONArray;
 import com.openexchange.ajax.contact.action.ListRequest;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -98,6 +99,7 @@ public class ListTest extends AbstractContactTest {
 	public void testListWithNotExistingEntries() throws Exception {
 		final Contact contactObject = createCompleteContactObject();
 		final int objectId = insertContact(contactObject);
+		contactObject.setDisplayName(UUID.randomUUID().toString());
 		final int objectId2 = insertContact(contactObject);
 		final int cols[] = new int[]{ Contact.OBJECT_ID, Contact.SUR_NAME, Contact.DISPLAY_NAME } ;
 
