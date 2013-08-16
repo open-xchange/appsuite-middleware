@@ -52,8 +52,10 @@ package com.openexchange.mail.parser.handlers;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -1184,6 +1186,18 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 try {
                     nestedMail =
                         MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), (InputStream) content));
+                } catch (final MessagingException e) {
+                    throw MimeMailException.handleMessagingException(e);
+                }
+            } else if (content instanceof String) {
+                try {
+                    try {
+                        nestedMail =
+                            MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), new ByteArrayInputStream(((String) content).getBytes("UTF-8"))));
+                    } catch (UnsupportedEncodingException e) {
+                        // Impossible
+                        return true;
+                    }
                 } catch (final MessagingException e) {
                     throw MimeMailException.handleMessagingException(e);
                 }

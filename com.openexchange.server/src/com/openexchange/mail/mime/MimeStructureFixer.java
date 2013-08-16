@@ -432,7 +432,7 @@ public final class MimeStructureFixer {
                     MessageUtility.setContent(mpReference.get(), mimeBodyPart);
                     // mimeBodyPart.setContent(newSubMultipart);
                     newMimeMultipart.addBodyPart(mimeBodyPart);
-                } else if (contentType.startsWith("message/rfc822")) {
+                } else if (contentType.startsWith("message/rfc822") || (contentType.getNameParameter() != null && contentType.getNameParameter().endsWith(".eml"))) {
                     final MimeMessage filteredMessage;
                     {
                         final Object content = bodyPart.getContent();

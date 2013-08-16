@@ -314,6 +314,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
         try {
             // Almighty Content-Type
             final ContentType contentType = new ContentType(mimePart.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null));
+            final String name = contentType.getNameParameter();
             // Body
             if (contentType.startsWith("multipart/")) {
                 final Multipart m = (Multipart) mimePart.getContent();
@@ -330,7 +331,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
                     mime4jMultipart.addBodyPart(mime4jBodyPart);
                 }
                 entity.setMultipart(mime4jMultipart);
-            } else if (contentType.startsWith("message/rfc822")) {
+            } else if (contentType.startsWith("message/rfc822") || (name != null && name.endsWith(".eml"))) {
                 final MimeMessage m = (MimeMessage) mimePart.getContent();
                 final MessageImpl mime4jMessage = new MessageImpl();
                 mime4jOf(m, mime4jMessage, bodyFactory, mailConfig, session);
@@ -378,7 +379,15 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
         if (toLowerCase(sContentType).startsWith("message/rfc822")) {
             return new MessageImpl();
         }
+        try {
+            String name = new ContentType(sContentType).getNameParameter();
+            if (name != null && name.endsWith(".eml")) {
+                return new MessageImpl();
+            }
+        } catch (OXException e) {
+        }
         return new BodyPart();
+
     }
 
     private static String parseSubType(final String sContentType) {

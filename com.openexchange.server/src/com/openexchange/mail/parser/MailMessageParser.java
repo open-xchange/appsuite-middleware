@@ -411,7 +411,7 @@ public final class MailMessageParser {
                     return;
                 }
             }
-        } else if (isText(lcct)) {
+        } else if (isText(lcct, fileName)) {
             if (isInline) {
                 final String content = readContent(mailPart, contentType, mailId, folder);
                 final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
@@ -495,7 +495,7 @@ public final class MailMessageParser {
                 stop = true;
                 return;
             }
-        } else if (isMessage(lcct)) {
+        } else if (isMessage(lcct, fileName)) {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
@@ -988,9 +988,13 @@ public final class MailMessageParser {
      * </ul>
      *
      * @param contentType The content type
+     * @param fileName 
      * @return <code>true</code> if content type matches text; otherwise <code>false</code>
      */
-    private static boolean isText(final String contentType) {
+    private static boolean isText(final String contentType, String name) {
+        if (name != null && name.endsWith(".eml")) {
+            return false;
+        }
         if (contentType.startsWith(PRIMARY_TEXT, 0)) {
             final int off = PRIMARY_TEXT.length();
             for (final String subtype : SUB_TEXT) {
@@ -1046,7 +1050,10 @@ public final class MailMessageParser {
      * @param contentType The content type
      * @return <code>true</code> if content type matches <code>message/rfc822</code>; otherwise <code>false</code>
      */
-    private static boolean isMessage(final String contentType) {
+    private static boolean isMessage(final String contentType, String name) {
+        if (name != null && name.endsWith(".eml")) {
+            return true;
+        }
         return contentType.startsWith(PRIMARY_RFC822, 0);
     }
 
