@@ -1,3 +1,8 @@
+* 2013-08-16 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28260: Restrict socket binding to local loopback address only by default, disable Hazelcast's REST and Memcache client 
+                      request listener services by default 
+
 * 2013-08-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 28317: Change the password for all user-associated sessions on password-change operation
