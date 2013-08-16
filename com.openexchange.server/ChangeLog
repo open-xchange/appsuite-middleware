@@ -1,3 +1,11 @@
+* 2013-08-16 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 28350: Check if another distribution list with same name already exists
+
+* 2013-08-16 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28317: Invalidate all other user sessions after password change
+
 * 2013-08-15 - marcus.klein@open-xchange.com
 
  - Fix for bug 28283: Need to poll the system bundle to check if shutdown was successful and extended scripting for calling shutdown process
