@@ -2,6 +2,7 @@
 
  - Fix for bug 24629: Preload folder names on root subfolder retrieval
  - Fix for bug 28381: Display appropriate warning in case folder owner's admin permission is auto-restored
+ - Fix for bug 28397: Fixed possible ArrayIndexOutOfBoundsException while listing folders
 
 * 2013-08-16 - jan.bauerdick@open-xchange.com
 
