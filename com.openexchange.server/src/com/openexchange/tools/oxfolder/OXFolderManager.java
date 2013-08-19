@@ -50,6 +50,7 @@
 package com.openexchange.tools.oxfolder;
 
 import java.sql.Connection;
+import java.util.List;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -141,6 +142,13 @@ public abstract class OXFolderManager {
     public static final OXFolderManager getInstance(final Session session, final OXFolderAccess oxfolderAccess, final Connection readCon, final Connection writeCon) throws OXException {
         return new OXFolderManagerImpl(session, oxfolderAccess, readCon, writeCon);
     }
+
+    /**
+     * Gets the warnings
+     *
+     * @return The warnings
+     */
+    public abstract List<OXException> getWarnings();
 
     /**
      * Creates a folder filled with values from given folder object. <b>NOTE:</b> given instance of <tt>FolderObject</tt> is going to be

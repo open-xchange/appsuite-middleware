@@ -1,6 +1,7 @@
 * 2013-08-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 24629: Preload folder names on root subfolder retrieval
+ - Fix for bug 28381: Display appropriate warning in case folder owner's admin permission is auto-restored
 
 * 2013-08-16 - jan.bauerdick@open-xchange.com
 

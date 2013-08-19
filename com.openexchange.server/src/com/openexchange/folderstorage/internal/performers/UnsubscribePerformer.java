@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.internal.performers;
 
 import java.util.ArrayList;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -133,6 +134,14 @@ public final class UnsubscribePerformer extends AbstractPerformer {
             for (final FolderStorage fs : openedStorages) {
                 fs.commitTransaction(storageParameters);
             }
+
+            final Set<OXException> warnings = storageParameters.getWarnings();
+            if (null != warnings) {
+                for (final OXException warning : warnings) {
+                    addWarning(warning);
+                }
+            }
+
         } catch (final OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);

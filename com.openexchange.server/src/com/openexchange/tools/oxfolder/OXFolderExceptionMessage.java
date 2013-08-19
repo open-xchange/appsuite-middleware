@@ -535,4 +535,7 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
     // Folder %1$s must not be deleted in context %2$s.
     public static final String DELETE_DENIED_MSG = "Folder %1$s must not be deleted in context %2$s.";
 
+    // Owner %1$s of folder %2$s has been restored to keep the folder admin permission
+    public static final String CREATOR_STAYS_ADMIN_MSG = "Owner %1$s of folder %2$s has been restored to keep the folder admin permission";
+
 }

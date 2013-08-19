@@ -1422,10 +1422,24 @@ public final class CacheFolderStorage implements FolderStorage {
                 final UpdatePerformer updatePerformer = new UpdatePerformer(storageParameters.getUser(), storageParameters.getContext(), storageParameters.getDecorator(), registry);
                 updatePerformer.setCheck4Duplicates(false);
                 updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
+
+                final Set<OXException> warnings = updatePerformer.getWarnings();
+                if (null != warnings) {
+                    for (final OXException warning : warnings) {
+                        storageParameters.addWarning(warning);
+                    }
+                }
             } else {
                 final UpdatePerformer updatePerformer = new UpdatePerformer(ServerSessionAdapter.valueOf(session), storageParameters.getDecorator(), registry);
                 updatePerformer.setCheck4Duplicates(false);
                 updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
+
+                final Set<OXException> warnings = updatePerformer.getWarnings();
+                if (null != warnings) {
+                    for (final OXException warning : warnings) {
+                        storageParameters.addWarning(warning);
+                    }
+                }
             }
             /*
              * Get folder from appropriate storage
