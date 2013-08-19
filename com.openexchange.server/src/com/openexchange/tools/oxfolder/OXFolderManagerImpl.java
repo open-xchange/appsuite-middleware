@@ -67,6 +67,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.fields.FolderChildFields;
@@ -140,19 +141,13 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     private static final String TABLE_OXFOLDER_TREE = "oxfolder_tree";
 
     private final Connection readCon;
-
     private final Connection writeCon;
-
     private final Context ctx;
-
     private final UserConfiguration userConfig;
-
     private final User user;
-
     private final Session session;
-
+    private final List<OXException> warnings;
     private OXFolderAccess oxfolderAccess;
-
     private AppointmentSQLInterface cSql;
 
     /**
@@ -227,6 +222,12 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         } else {
             this.cSql = null;
         }
+        warnings = new LinkedList<OXException>();
+    }
+
+    @Override
+    public List<OXException> getWarnings() {
+        return warnings;
     }
 
     private OXFolderAccess getOXFolderAccess() {
@@ -334,7 +335,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         /*
          * Check if admin exists and permission structure
          */
-        OXFolderUtility.checkFolderPermissions(folderObj, user.getId(), ctx);
+        OXFolderUtility.checkFolderPermissions(folderObj, user.getId(), ctx, warnings);
         OXFolderUtility.checkPermissionsAgainstUserConfigs(folderObj, ctx);
         if (FolderObject.PUBLIC == folderObj.getType()) {
             new CheckPermissionOnInsert(session, writeCon, ctx).checkParentPermissions(
@@ -715,7 +716,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         fo.setCreatedBy(storageObj.getCreatedBy());
         fo.setDefaultFolder(storageObj.isDefaultFolder());
         OXFolderUtility.checkPermissionsAgainstSessionUserConfig(fo, userConfig, ctx);
-        OXFolderUtility.checkFolderPermissions(fo, user.getId(), ctx);
+        OXFolderUtility.checkFolderPermissions(fo, user.getId(), ctx, warnings);
         OXFolderUtility.checkPermissionsAgainstUserConfigs(fo, ctx);
         OXFolderUtility.checkSystemFolderPermissions(fo.getObjectID(), fo.getNonSystemPermissionsAsArray(), user, ctx);
         if (FolderObject.PUBLIC == fo.getType()) {

@@ -533,6 +533,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 throw OXFolderExceptionCode.CREATE_FAILED.create(new Object[0]);
             }
             folder.setID(String.valueOf(fuid));
+
+            final List<OXException> warnings = folderManager.getWarnings();
+            if (null != warnings) {
+                for (final OXException warning : warnings) {
+                    storageParameters.addWarning(warning);
+                }
+            }
         } finally {
             provider.close();
         }
@@ -596,6 +603,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             }
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
             folderManager.clearFolder(fo, true, System.currentTimeMillis());
+
+            final List<OXException> warnings = folderManager.getWarnings();
+            if (null != warnings) {
+                for (final OXException warning : warnings) {
+                    storageParameters.addWarning(warning);
+                }
+            }
         } finally {
             provider.close();
         }
@@ -626,6 +640,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
              *
              */
             folderManager.deleteFolder(fo, true, System.currentTimeMillis());
+
+            final List<OXException> warnings = folderManager.getWarnings();
+            if (null != warnings) {
+                for (final OXException warning : warnings) {
+                    storageParameters.addWarning(warning);
+                }
+            }
         } finally {
             provider.close();
         }
@@ -1624,6 +1645,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             }
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
             folderManager.updateFolder(updateMe, true, StorageParametersUtility.isHandDownPermissions(storageParameters), millis.getTime());
+
+            final List<OXException> warnings = folderManager.getWarnings();
+            if (null != warnings) {
+                for (final OXException warning : warnings) {
+                    storageParameters.addWarning(warning);
+                }
+            }
         } finally {
             provider.close();
         }

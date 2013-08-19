@@ -232,6 +232,14 @@ public final class SubscribePerformer extends AbstractPerformer {
             for (final FolderStorage fs : openedStorages) {
                 fs.commitTransaction(storageParameters);
             }
+
+            final Set<OXException> warnings = storageParameters.getWarnings();
+            if (null != warnings) {
+                for (final OXException warning : warnings) {
+                    addWarning(warning);
+                }
+            }
+
         } catch (final OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);

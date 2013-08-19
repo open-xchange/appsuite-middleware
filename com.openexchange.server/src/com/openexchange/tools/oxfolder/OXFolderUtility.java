@@ -260,9 +260,10 @@ public final class OXFolderUtility {
      * @param folderObj The folder
      * @param userId The user ID
      * @param ctx The context
+     * @param warnings
      * @throws OXException If specified folder's permissions do not pass the checks
      */
-    public static void checkFolderPermissions(final FolderObject folderObj, final int userId, final Context ctx) throws OXException {
+    public static void checkFolderPermissions(final FolderObject folderObj, final int userId, final Context ctx, final List<OXException> warnings) throws OXException {
         final boolean isPrivate = (folderObj.getType() == FolderObject.PRIVATE || folderObj.getType() == FolderObject.SHARED);
         final TIntList adminEntities = new TIntArrayList(isPrivate ? 1 : 4);
         final int permissionsSize = folderObj.getPermissions().size();
@@ -293,6 +294,9 @@ public final class OXFolderUtility {
             for (int i = 0; !found && i < permissionsSize; i++) {
                 final OCLPermission oclPerm = iter.next();
                 if (oclPerm.getEntity() == creator) {
+                    if (!oclPerm.isFolderAdmin()) {
+                        warnings.add(OXFolderExceptionCode.CREATOR_STAYS_ADMIN.create(getUserName(creator, ctx), getFolderName(folderObj.getObjectID(), ctx)));
+                    }
                     oclPerm.setFolderAdmin(true);
                     found = true;
                 }
