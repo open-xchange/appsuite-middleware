@@ -713,22 +713,23 @@ public final class SessionHandler {
          * Invalidate all further user sessions in session storage if needed
          */
         if (null != sessionStorage) {
-            final Task<Session[]> c = new AbstractTask<Session[]>() {
+            final Task<Void> c = new AbstractTask<Void>() {
 
                 @Override
-                public Session[] call() throws Exception {
-                    return sessionStorage.getUserSessions(currentSession.getUserId(), currentSession.getContextId());
+                public Void call() throws Exception {
+                    Session[] sessions = sessionStorage.getUserSessions(currentSession.getUserId(), currentSession.getContextId());
+                    if (null != sessions && 0 < sessions.length) {
+                        for (Session session : sessions) {
+                            String otherSessionID = session.getSessionID();
+                            if (null != otherSessionID && false == otherSessionID.equals(sessionid)) {
+                                sessionStorage.removeSession(otherSessionID);
+                            }
+                        }
+                    }
+                    return null;
                 }
             };
-            Session[] sessions = getFrom(c, new Session[0]);
-            if (null != sessions && 0 < sessions.length) {
-                for (Session session : sessions) {
-                    String otherSessionID = session.getSessionID();
-                    if (null != otherSessionID && false == otherSessionID.equals(sessionid)) {
-                        clearSession(otherSessionID);
-                    }
-                }
-            }
+            submitAndIgnoreRejection(c);
         }
     }
 

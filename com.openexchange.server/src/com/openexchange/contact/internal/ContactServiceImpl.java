@@ -120,21 +120,22 @@ public class ContactServiceImpl extends DefaultContactService {
 		Check.noPrivateInPublic(folder, contact, session);
 		Check.canWriteInGAB(storage, session, folderID, contact);
 		
-		/*
-		 * If contact is distribution list, check if another list with that name exists
-		 */
-		if (contact.getMarkAsDistribtuionlist()) {
-		    ContactSearchObject searchObject = new ContactSearchObject();
-		    searchObject.setDisplayName(contact.getDisplayName());
-		    searchObject.addFolder(folder.getObjectID());
-		    SearchIterator<Contact> duplicates = doSearchContacts(session, searchObject, new ContactField[] { ContactField.MARK_AS_DISTRIBUTIONLIST }, SortOptions.EMPTY);
-		    while (duplicates.hasNext()) {
-		        Contact duplicate = duplicates.next();
-		        if (null != duplicate && duplicate.getMarkAsDistribtuionlist()) {
-		            throw ContactExceptionCodes.DLIST_NAME_IN_USE.create(contextID, duplicate.getObjectID());
-		        }
-		    }
-		}
+//      See bug #28350
+//		/*
+//		 * If contact is distribution list, check if another list with that name exists
+//		 */
+//		if (contact.getMarkAsDistribtuionlist()) {
+//		    ContactSearchObject searchObject = new ContactSearchObject();
+//		    searchObject.setDisplayName(contact.getDisplayName());
+//		    searchObject.addFolder(folder.getObjectID());
+//		    SearchIterator<Contact> duplicates = doSearchContacts(session, searchObject, new ContactField[] { ContactField.MARK_AS_DISTRIBUTIONLIST }, SortOptions.EMPTY);
+//		    while (duplicates.hasNext()) {
+//		        Contact duplicate = duplicates.next();
+//		        if (null != duplicate && duplicate.getMarkAsDistribtuionlist()) {
+//		            throw ContactExceptionCodes.DLIST_NAME_IN_USE.create(contextID, duplicate.getObjectID());
+//		        }
+//		    }
+//		}
 		
 		/*
 		 * prepare create

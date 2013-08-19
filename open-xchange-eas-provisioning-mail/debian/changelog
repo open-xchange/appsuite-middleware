@@ -1,3 +1,9 @@
+open-xchange-eas-provisioning-mail (7.4.0-5) stable; urgency=low
+
+  * Fifth release candidate for 7.4.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 19 Aug 2013 11:54:28 +0200
+
 open-xchange-eas-provisioning-mail (7.4.0-4) stable; urgency=low
 
   * Fourth release candidate for 7.4.0
