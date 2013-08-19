@@ -89,7 +89,8 @@ public class ConfigServer extends AbstractConfigSource {
         client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
 
         // GET method
-        final GetMethod getMethod = new GetMethod(new StringAllocator("http://autoconfig.").append(emailDomain).append("/mail/config-v1.1.xml").toString());
+        String uri = new StringAllocator("http://autoconfig.").append(emailDomain).append("/mail/config-v1.1.xml").toString();
+        final GetMethod getMethod = new GetMethod(uri);
         try {
             // Name-value-pairs
             final List<NameValuePair> pairs = new ArrayList<NameValuePair>(4);
@@ -104,7 +105,8 @@ public class ConfigServer extends AbstractConfigSource {
             if (statusCode != 200) {
                 LOG.info("Could not retrieve config XML from autoconfig server. Return code was: " + statusCode);
                 // Try 2nd URL
-                getMethod.setURI(new URI(new StringAllocator(64).append("http://").append(emailDomain).append("/.well-known/autoconfig/mail/config-v1.1.xml").toString(), false));
+                uri = new StringAllocator(64).append("http://").append(emailDomain).append("/.well-known/autoconfig/mail/config-v1.1.xml").toString();
+                getMethod.setURI(new URI(uri, false));
                 statusCode = client.executeMethod(getMethod);
                 if (statusCode != 200) {
                     LOG.info("Could not retrieve config XML from main domain. Return code was: " + statusCode);
@@ -118,11 +120,17 @@ public class ConfigServer extends AbstractConfigSource {
             replaceUsername(autoconfig, emailLocalPart, emailDomain);
             return autoconfig;
 
+        } catch (OXException e) {
+            if (3 != e.getCode() || !"MAIL-AUTOCONFIG".equals(e.getPrefix())) {
+                throw e;
+            }
+            // No valid XML received...
+            LOG.info("No valid XML received from URI: " + uri, e.getCause());
         } catch (HttpException e) {
             LOG.warn("Could not retrieve config XML.", e);
         } catch (final java.net.UnknownHostException e) {
             // Obviously that host does not exist
-            LOG.debug("Could not retrieve config XML, because of an unknown host for URL: " + ("http://autoconfig." + emailDomain + "/mail/config-v1.1.xml"), e);
+            LOG.debug("Could not retrieve config XML, because of an unknown host for URL: " + uri, e);
         } catch (final IOException e) {
             LOG.warn("Could not retrieve config XML.", e);
         }
