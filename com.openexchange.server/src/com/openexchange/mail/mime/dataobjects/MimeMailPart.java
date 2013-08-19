@@ -50,7 +50,6 @@
 package com.openexchange.mail.mime.dataobjects;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import static com.openexchange.mail.mime.utils.MimeMessageUtility.getMultipartContentFrom;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
@@ -553,18 +552,18 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                         contentType = new ContentType(MimeTypes.MIME_DEFAULT);
                     }
                 }
-                if (contentType.isMimeType(MimeTypes.MIME_MESSAGE_RFC822)) {
+                if (contentType.startsWith("multipart/")) {
+                    /*
+                     * Compose a new body part with multipart/ data
+                     */
+                    this.part = part = createBodyMultipart(getStreamFromMultipart(getMultipartContentFrom(part, contentType.toString())), contentType.toString());
+                    this.multipart = null;
+                    contentLoaded = true;
+                } else if (contentType.startsWith(MimeTypes.MIME_MESSAGE_RFC822)) {
                     /*
                      * Compose a new body part with message/rfc822 data
                      */
                     this.part = part = createBodyMessage(getStreamFromPart((Message) part.getContent()));
-                    contentLoaded = true;
-                } else if (contentType.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
-                    /*
-                     * Compose a new body part with multipart/ data
-                     */
-                    this.part = part = createBodyMultipart(getStreamFromMultipart(getMultipartContentFrom(part)), contentType.toString());
-                    this.multipart = null;
                     contentLoaded = true;
                 } else {
                     this.part = part = createBodyPart(getStreamFromPart(part));
@@ -587,6 +586,18 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /** Gets the multipart content from specified part. */
+    private static Multipart getMultipartContentFrom(final Part part, final String contentType) throws MessagingException, IOException {
+        final Object content = part.getContent();
+        if (content instanceof Multipart) {
+            return (Multipart) content;
+        }
+        if (content instanceof InputStream) {
+            return new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
+        }
+        return null;
     }
 
     /**
@@ -622,13 +633,13 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                         contentType = new ContentType(MimeTypes.MIME_DEFAULT);
                     }
                 }
-                if (contentType.isMimeType(MimeTypes.MIME_MESSAGE_RFC822)) {
+                if (contentType.startsWith("multipart/")) {
+                    serializeType = STYPE_MIME_BODY_MULTI;
+                    serializedContent = getBytesFromMultipart(getMultipartContentFrom(part, contentType.toString()));
+                    serializedContentType = contentType.toString();
+                } else if (contentType.startsWith(MimeTypes.MIME_MESSAGE_RFC822)) {
                     serializeType = STYPE_MIME_BODY_MSG;
                     serializedContent = getBytesFromPart((Message) part.getContent());
-                } else if (contentType.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
-                    serializeType = STYPE_MIME_BODY_MULTI;
-                    serializedContent = getBytesFromMultipart(getMultipartContentFrom(part));
-                    serializedContentType = contentType.toString();
                 } else {
                     serializeType = STYPE_MIME_BODY;
                     serializedContent = getBytesFromPart(part);
