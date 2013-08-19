@@ -1360,7 +1360,15 @@ public class JSONObject extends AbstractJSONValue {
                     jo.put(fieldName, JSONObject.NULL);
                     break;
                 case VALUE_NUMBER_FLOAT:
-                    jo.put(fieldName, jParser.getDecimalValue());
+                    try {
+                        jo.put(fieldName, jParser.getDecimalValue());
+                    } catch (final RuntimeException e) {
+                        final String text = jParser.getText();
+                        if (!"NaN".equals(text)) {
+                            throw new IllegalStateException("JSON parsing failed. Could not convert \"" + text + "\" to a big decimal number.", e);
+                        }
+                        // Discard
+                    }
                     break;
                 case VALUE_NUMBER_INT:
                     try {
