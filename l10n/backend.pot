@@ -11064,6 +11064,13 @@ msgstr ""
 msgid "Folder %1$s must not be deleted in context %2$s."
 msgstr ""
 
+#. Owner %1$s of folder %2$s has been restored to keep the folder admin permission
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:539
+msgid ""
+"Owner %1$s of folder %2$s has been restored to keep the folder admin "
+"permission"
+msgstr ""
+
 #. Unknown AJAX action: %s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:70
 msgid "Unknown AJAX action: %s."
