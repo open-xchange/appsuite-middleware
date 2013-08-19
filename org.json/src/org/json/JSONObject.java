@@ -1365,7 +1365,7 @@ public class JSONObject extends AbstractJSONValue {
                     } catch (final RuntimeException e) {
                         final String text = jParser.getText();
                         if (!"NaN".equals(text)) {
-                            throw new IllegalStateException("JSON parsing failed. Could not convert \"" + text + "\" to a big decimal number.", e);
+                            throw new JSONException("JSON parsing failed. Could not convert \"" + text + "\" to a big decimal number.", e);
                         }
                         // Discard
                     }
