@@ -182,18 +182,24 @@ perl -pi -e 's;%{buildroot};;' %{configfiles}
 perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 
 %pre
-. /opt/open-xchange/lib/oxfunctions.sh
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
 
-# SoftwareChange_Request-1564
-VALUE="empty"
-if [ -e /opt/open-xchange/bundles/com.openexchange.cluster.discovery.mdns.jar ]; then
-    VALUE="multicast"
-elif [ -e /opt/open-xchange/bundles/com.openexchange.cluster.discovery.static.jar ]; then
-    VALUE="static"
-fi
-pfile=/opt/open-xchange/etc/hazelcast.properties
-if [ -e $pfile ] && ! ox_exists_property com.openexchange.hazelcast.network.join $pfile; then
-    ox_set_property com.openexchange.hazelcast.network.join "$VALUE" $pfile
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # SoftwareChange_Request-1564
+    VALUE="empty"
+    if [ -e /opt/open-xchange/bundles/com.openexchange.cluster.discovery.mdns.jar ]; then
+        VALUE="multicast"
+    elif [ -e /opt/open-xchange/bundles/com.openexchange.cluster.discovery.static.jar ]; then
+        VALUE="static"
+    fi
+    pfile=/opt/open-xchange/etc/hazelcast.properties
+    if [ -e $pfile ] && ! ox_exists_property com.openexchange.hazelcast.network.join $pfile; then
+        ox_set_property com.openexchange.hazelcast.network.join "$VALUE" $pfile
+    fi
 fi
 
 %post
