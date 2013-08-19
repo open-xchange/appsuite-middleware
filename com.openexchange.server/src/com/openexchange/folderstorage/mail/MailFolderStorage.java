@@ -416,7 +416,7 @@ public final class MailFolderStorage implements FolderStorage {
             final String fullname = mailAccess.getFolderStorage().createFolder(mfd);
             addWarnings(mailAccess, storageParameters);
             folder.setID(prepareFullname(accountId, fullname));
-            postEvent(accountId, mfd.getParentFullname(), false, storageParameters);
+            postEvent(accountId, mfd.getParentFullname(), false, true, storageParameters);
         } finally {
             closeMailAccess(mailAccess);
         }
@@ -437,7 +437,7 @@ public final class MailFolderStorage implements FolderStorage {
             mailAccess.connect(null == accessFast ? true : !accessFast.booleanValue());
             final String fullname = arg.getFullname();
             /*
-             * Only backup if fullname does not denote trash (sub)folder
+             * Only backup if full name does not denote trash (sub)folder
              */
             final String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
             final boolean hardDelete = fullname.startsWith(trashFullname);
@@ -465,9 +465,9 @@ public final class MailFolderStorage implements FolderStorage {
                 for (int i = 0; i < subf.length; i++) {
                     final String subFullname = subf[i].getFullname();
                     mailAccess.getFolderStorage().deleteFolder(subFullname, true);
-                    postEvent(accountId, subFullname, false, storageParameters);
+                    postEvent(accountId, subFullname, false, true, storageParameters);
                 }
-                postEvent(accountId, trashFullname, false, storageParameters);
+                postEvent(accountId, trashFullname, false, true, storageParameters);
             }
         } finally {
             closeMailAccess(mailAccess);
