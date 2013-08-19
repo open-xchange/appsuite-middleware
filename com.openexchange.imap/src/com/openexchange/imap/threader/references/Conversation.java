@@ -214,7 +214,8 @@ public final class Conversation {
      * @return <code>true</code> if the intersection of the collections is non-empty
      */
     private static boolean containsAny(final Set<String> set1, final Set<String> set2) {
-        for (final Iterator<String> it = set2.iterator(); it.hasNext();) {
+        final Iterator<String> it = set2.iterator();
+        for (int i = set2.size(); i-- > 0;) {
             if (set1.contains(it.next())) {
                 return true;
             }
