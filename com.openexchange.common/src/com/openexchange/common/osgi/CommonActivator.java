@@ -49,14 +49,6 @@
 
 package com.openexchange.common.osgi;
 
-import java.io.BufferedReader;
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.Writer;
-import java.util.HashMap;
-import java.util.Map;
 import javax.activation.MailcapCommandMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -108,66 +100,6 @@ public final class CommonActivator implements BundleActivator {
                 		"#image/jpeg;;       x-java-content-handler=com.sun.mail.handlers.image_jpeg\n" +
                 		"";
                 mailcapRegistration = context.registerService(MailcapCommandMap.class, new OXMailcapCommandMap(mailcap), null);
-
-                String userHome = System.getProperty("user.home");
-                if (userHome != null) {
-                    final class Closer {
-                        void close(final Closeable toClose) {
-                            if (null != toClose) {
-                                try {
-                                    toClose.close();
-                                } catch (final Exception e) {
-                                    // Ignore
-                                }
-                            }
-                        }
-                    }
-
-                    final Closer closer = new Closer();
-                    final String path = userHome + File.separator + ".mailcap";
-                    final File userMailcap = new File(path);
-
-                    final Map<String, String> caps = new HashMap<String, String>(6);
-                    caps.put("text/plain", "text/plain;;        x-java-content-handler=com.sun.mail.handlers.text_plain");
-                    caps.put("text/html", "text/html;;        x-java-content-handler=com.sun.mail.handlers.text_html");
-                    caps.put("text/xml", "text/xml;;        x-java-content-handler=com.sun.mail.handlers.text_xml");
-                    caps.put("multipart/*", "multipart/*;;       x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true");
-                    caps.put("message/rfc822", "message/rfc822;;        x-java-content-handler=com.sun.mail.handlers.message_rfc822");
-
-                    if (userMailcap.exists()) {
-                        BufferedReader reader = null;
-                        try {
-                            reader = new BufferedReader(new FileReader(userMailcap));
-                            for (String line; (line = reader.readLine()) != null;) {
-                                line = line.trim();
-                                if (line.length() > 0 && !line.startsWith("#")) {
-                                    final int pos = line.indexOf(';');
-                                    if (pos > 0) {
-                                        caps.remove(line.substring(0, pos).trim());
-                                    }
-                                }
-                            }
-                        } finally {
-                            closer.close(reader);
-                        }
-                    }
-
-                    if (!caps.isEmpty()) {
-                        Writer writer = null;
-                        try {
-                            writer = new FileWriter(userMailcap, true);
-                            final String lineSep = System.getProperty("line.separator");
-                            writer.write(lineSep);
-                            for (final String cap : caps.values()) {
-                                writer.write(cap + lineSep);
-                            }
-                            writer.write(lineSep);
-                            writer.flush();
-                        } finally {
-                            closer.close(writer);
-                        }
-                    }
-                }
             }
         } catch (final Exception e) {
             logger.info("Starting bundle 'com.openexchange.common' failed: " + e.getMessage(), e);
