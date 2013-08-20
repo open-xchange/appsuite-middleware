@@ -47,6 +47,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %changelog
 * Mon Aug 19 2013 Carsten Hoeger <choeger@open-xchange.com>
 Fifth release candidate for 7.4.0
+* Mon Aug 19 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-08-21
 * Tue Aug 13 2013 Carsten Hoeger <choeger@open-xchange.com>
 Fourth release candidate for 7.4.0
 * Tue Aug 06 2013 Carsten Hoeger <choeger@open-xchange.com>

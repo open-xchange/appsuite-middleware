@@ -173,6 +173,7 @@ public final class ListAction extends AbstractFolderAction {
         /*
          * length > 0
          */
+        final boolean ignoreTranslation = parseBoolean(request.getParameter(PARAM_IGNORE_TRANSLATION), false);
         // Align to client identifier
         if (filterDuplicateNames) {
             // Filter equally named folder
@@ -184,7 +185,7 @@ public final class ListAction extends AbstractFolderAction {
                 if (null == locale) {
                     locale = FolderWriter.DEFAULT_LOCALE;
                 }
-                final String name = userizedFolder.getLocalizedName(locale);
+                final String name = ignoreTranslation ? userizedFolder.getLocalizedName(locale) : userizedFolder.getName();
                 final UserizedFolder prev = name2folder.get(name);
                 if (null == prev) {
                     name2folder.put(name, userizedFolder);
