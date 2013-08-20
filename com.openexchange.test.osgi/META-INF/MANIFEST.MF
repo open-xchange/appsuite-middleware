@@ -15,5 +15,4 @@ Import-Package: com.openexchange.osgi,
  org.w3c.dom
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
-Export-Package: com.openexchange.test.osgi,
- org.junit
+Export-Package: com.openexchange.test.osgi
