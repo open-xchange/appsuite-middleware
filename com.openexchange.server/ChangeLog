@@ -1,3 +1,7 @@
+* 2013-08-20 - thorben.betten@open-xchange.com
+
+ - Preparation to fix bug 28163: Don't perform any image transformation if not needed as signaled by URL parameters and/or image type
+
 * 2013-08-16 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 28260: Restrict socket binding to local loopback address only by default, disable Hazelcast's REST and Memcache client 
