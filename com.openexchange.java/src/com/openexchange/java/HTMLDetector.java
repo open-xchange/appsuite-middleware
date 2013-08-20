@@ -91,12 +91,6 @@ public final class HTMLDetector {
         if (containsIgnoreCase(sequence, "<img")) {
             return true;
         }
-        if (containsIgnoreCase(sequence, "<br>")) {
-            return true;
-        }
-        if (containsIgnoreCase(sequence, "<p>")) {
-            return true;
-        }
         if (containsIgnoreCase(sequence, "<object")) {
             return true;
         }
@@ -159,12 +153,6 @@ public final class HTMLDetector {
         if (containsIgnoreCase(sequence, "<img")) {
             return true;
         }
-        if (containsIgnoreCase(sequence, "<br>")) {
-            return true;
-        }
-        if (containsIgnoreCase(sequence, "<p>")) {
-            return true;
-        }
         if (containsIgnoreCase(sequence, "<object")) {
             return true;
         }
@@ -212,12 +200,6 @@ public final class HTMLDetector {
             return true;
         }
         if (containsIgnoreCase(b, "<img")) {
-            return true;
-        }
-        if (containsIgnoreCase(b, "<br>")) {
-            return true;
-        }
-        if (containsIgnoreCase(b, "<p>")) {
             return true;
         }
         if (containsIgnoreCase(b, "<object")) {
