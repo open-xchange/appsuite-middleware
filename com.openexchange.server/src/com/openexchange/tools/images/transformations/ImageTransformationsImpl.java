@@ -49,7 +49,12 @@
 
 package com.openexchange.tools.images.transformations;
 
+import static com.openexchange.tools.images.ImageTransformationUtility.canRead;
+import static com.openexchange.tools.images.ImageTransformationUtility.getImageFormat;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,9 +82,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.images.TransformedImage;
@@ -227,6 +232,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
                 }
             }
         }
+        image = removeTransparencyIfNeeded(image, formatName);
         return image;
     }
 
@@ -466,92 +472,25 @@ public class ImageTransformationsImpl implements ImageTransformations {
     }
 
     /**
-     * Strips a leading "image/" as well as trailing additional properties after the first ";" from the supplied value if necessary from
-     * image formats passed as content type. Also implicitly converts "pjpeg"- and "x-png"-formats as used by Internet Explorer to their
-     * common format names.
+     * Removes the transparency from the given image if necessary, i.e. the color model has an alpha channel and the supplied image
+     * format is supposed to not support transparency.
      *
-     * @param value The sImage
-     * @return The cleaned image format
+     * @param image The image
+     * @param formatName The image format name, e.g. "jpeg" or "tiff"
+     * @return The processed buffered image, or the previous image if no processing was necessary
      */
-    private static String getImageFormat(final String value) {
-        if (null == value) {
-            LOG.debug("No format name specified, falling back to 'jpeg'.");
-            return "jpeg";
-        }
-        // Sanitize given image format
-        String val = value;
-        if (val.toLowerCase().startsWith("image/")) {
-            val = val.substring(6);
-        }
-        int idx = val.indexOf(';');
-        if (0 < idx) {
-            val = val.substring(0, idx);
-        }
-        if ("pjpeg".equals(val)) {
-            LOG.debug("Assuming 'jpeg' for image format " + val);
-            return "jpeg";
-        }
-        if ("x-png".equals(val)) {
-            LOG.debug("Assuming 'png' for image format " + val);
-            return "png";
-        }
-        if ("x-ms-bmp".equals(val)) {
-            LOG.debug("Assuming 'bmp' for image format " + val);
-            return "bmp";
-        }
-        return val;
-    }
-
-    /**
-     * Gets a value indicating whether an image format can be read or not.
-     *
-     * @param formatName The image format name
-     * @return <code>true</code> if the image format can be read, <code>false</code>, otherwise
-     */
-    private static boolean canRead(String formatName) {
-        String tmp = toLowerCase(formatName);
-        if ("vnd.microsoft.icon".equals(tmp) || "x-icon".equals(tmp)) {
-            return false;
-        }
-        //TODO: cache reader format names
-        for (String readerFormatName : ImageIO.getReaderFormatNames()) {
-            if (toLowerCase(readerFormatName).equals(tmp)) {
-                return true;
+    private static BufferedImage removeTransparencyIfNeeded(BufferedImage image, String formatName) {
+        if (null != formatName && false == ImageTransformationUtility.supportsTransparency(formatName) && null != image) {
+            ColorModel colorModel = image.getColorModel();
+            if (null != colorModel && colorModel.hasAlpha()) {
+                BufferedImage targetImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+                Graphics2D graphics = targetImage.createGraphics();
+                graphics.drawImage(image, 0, 0, Color.WHITE, null);
+                graphics.dispose();
+                return targetImage;
             }
         }
-        return false;
+        return image;
     }
 
-    /**
-     * Gets a value indicating whether an image format can be written or not.
-     *
-     * @param formatName The image format name
-     * @return <code>true</code> if the image format can be written, <code>false</code>, otherwise
-     */
-//    private static boolean canWrite(String formatName) {
-//        String tmp = toLowerCase(formatName);
-//        if ("vnd.microsoft.icon".equals(tmp) || "x-icon".equals(tmp)) {
-//            return false;
-//        }
-//        for (String writerFormatName : ImageIO.getWriterFormatNames()) {
-//            if (toLowerCase(writerFormatName).equals(tmp)) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
 }

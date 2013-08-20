@@ -1,6 +1,17 @@
+* 2013-08-20 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 26350: Many calendar deletes in a multiple request lead to database deadlocks.
+
+* 2013-08-20 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28163: Implicitly remove alpha channel when transforming to JPEG
+ - Fix for bug 27176: Don't query user service unless needed, don't evaluate global addressbook permissions repeatedly
+
 * 2013-08-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 28368: Ignore possibly contained <p> tag in image's binary data
+ - Preparation to fix bug 28163: Don't perform any image transformation if not needed as signaled by URL parameters and/or image type
+ - Fix for bug 27009: Removed auto-correct attempt for special folders on read-only access operations
 
 * 2013-08-19 - thorben.betten@open-xchange.com
 

@@ -63,7 +63,6 @@ import com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter;
 import com.openexchange.realtime.atmosphere.util.GenericErrorUtil;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeException;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.GenericError;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Message;
@@ -96,6 +95,7 @@ public class RTProtocolImpl implements RTProtocol {
      */
     @Override
     public void getReceived(RTClientState state, StanzaTransmitter transmitter) {
+        LOG.debug("Get received from " + state.getId());
         emptyBuffer(state, transmitter);
     }
 
@@ -210,11 +210,12 @@ public class RTProtocolImpl implements RTProtocol {
 
             List<Stanza> stanzasToSend = state.getStanzasToSend();
             if (stanzasToSend.isEmpty()) {
-                LOG.debug("No stanzas to send. Suspending transmitter...");
+                LOG.debug("No stanzas to send for " + state.getId() + ". Suspending transmitter.");
                 transmitter.suspend();
                 return;
             }
             try {
+                LOG.debug("Trying to send " + stanzasToSend.size() + " stanzas to " + state.getId() + ".");
                 transmitter.send(stanzasToSend);
             } catch (OXException e) {
                 if(LOG.isDebugEnabled()) {
