@@ -227,12 +227,12 @@ public final class InlineImageDataSource implements ImageDataSource {
                 throw DataExceptionCodes.ERROR.create("Missing header 'Content-Type' in requested mail part");
             }
             final String fileName = mailPart.getFileName();
-            if (!contentType.isMimeType(MimeTypes.MIME_IMAGE_ALL)) {
+            if (!contentType.startsWith("image/")) {
                 /*
                  * Either general purpose "application/octet-stream" or check by file name
                  */
                 if (null == fileName) {
-                    if (!contentType.isMimeType(MimeTypes.MIME_APPL_OCTET)) {
+                    if (!contentType.startsWith(MimeTypes.MIME_APPL_OCTET)) {
                         throw DataExceptionCodes.ERROR.create("Requested mail part is not an image: " + contentType.getBaseType());
                     }
                 } else {
@@ -243,7 +243,7 @@ public final class InlineImageDataSource implements ImageDataSource {
                          */
                         contentType.setBaseType(byFileName);
                     } else {
-                        if (!contentType.isMimeType(MimeTypes.MIME_APPL_OCTET)) {
+                        if (!contentType.startsWith(MimeTypes.MIME_APPL_OCTET)) {
                             throw DataExceptionCodes.ERROR.create("Requested mail part is not an image: " + contentType.getBaseType());
                         }
                     }
