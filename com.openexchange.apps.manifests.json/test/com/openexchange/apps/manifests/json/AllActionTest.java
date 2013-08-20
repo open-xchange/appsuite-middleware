@@ -179,7 +179,7 @@ public class AllActionTest extends AbstractMockTest {
 
         JSONArray array = AllAction.getManifests(this.serverSession, manifests, this.serviceLookup);
 
-        Assert.assertEquals(24, array.length());
+        Assert.assertEquals(manifests.length(), array.length());
     }
 
     @Test
@@ -191,6 +191,6 @@ public class AllActionTest extends AbstractMockTest {
 
         JSONArray array = AllAction.getManifests(this.serverSession, manifests, this.serviceLookup);
 
-        Assert.assertEquals(24, array.length());
+        Assert.assertEquals(manifests.length(), array.length());
     }
 }
