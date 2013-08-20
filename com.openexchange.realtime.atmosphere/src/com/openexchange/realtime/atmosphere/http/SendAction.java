@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -124,6 +125,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class SendAction extends RTAction  {
 
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SendAction.class);
+
     private final JSONProtocolHandler protocolHandler;
     private final StateManager stateManager;
 
@@ -153,6 +156,7 @@ public class SendAction extends RTAction  {
             throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create("Missing request body");
         }
 
+        LOG.debug("Messages arrived in SendAction: " + objects.toString());
         ID id = constructID(request, session);
 
         StateEntry entry = stateManager.retrieveState(id);
