@@ -69,6 +69,8 @@ fi
 %changelog
 * Mon Aug 19 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Fifth release candidate for 7.4.0
+* Mon Aug 19 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2013-08-21
 * Tue Aug 13 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Fourth release candidate for 7.4.0
 * Tue Aug 06 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
