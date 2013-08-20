@@ -224,7 +224,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         /*
          * Start response
          */
-        final boolean writeThreadAsObjects = true || AJAXRequestDataTools.parseBoolParameter("konfetti", requestData);
+        final boolean writeThreadAsObjects = !requestData.isSet("writeThreadAsObjects") || AJAXRequestDataTools.parseBoolParameter("writeThreadAsObjects", requestData);
         final boolean containsMultipleFolders = containsMultipleFolders(structure, new HashSet<String>(2));
         jsonWriter.array();
         try {
