@@ -278,11 +278,11 @@ public final class HTMLDetector {
      */
     private static boolean containsIgnoreCase(final byte[] sequence, final String str) {
         // lower-case
-        if (indexOf(sequence, Charsets.toAsciiBytes(toLowerCase(str)), 0, sequence.length) != -1) {
+        if (indexOf(sequence, Charsets.toAsciiBytes(toLowerCase(str)), 0, sequence.length) >= 0) {
             return true;
         }
         // upper-case
-        return (indexOf(sequence, Charsets.toAsciiBytes(toUpperCase(str)), 0, sequence.length) != -1);
+        return (indexOf(sequence, Charsets.toAsciiBytes(toUpperCase(str)), 0, sequence.length) >= 0);
     }
 
     /**
