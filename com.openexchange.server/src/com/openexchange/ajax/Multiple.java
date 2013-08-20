@@ -212,7 +212,7 @@ public class Multiple extends SessionServlet {
                     }
                     // Check if module indicates serial or concurrent execution
                     final String module = dataObject.getString(MODULE);
-                    if (MODULE_MAIL.equals(module)) {
+                    if (indicatesSerial(dataObject)) {
                         if (null == serialTasks) {
                             serialTasks = new ArrayList<JsonInOut>(length);
                         }
@@ -270,6 +270,19 @@ public class Multiple extends SessionServlet {
             }
         }
         return respArr;
+    }
+
+    private static boolean indicatesSerial(JSONObject dataObject) throws JSONException {
+        String module = dataObject.getString(MODULE);
+        if (module.equals(MODULE_MAIL)) {
+            return true;
+        }
+
+        if (module.equals(MODULE_CALENDAR) && dataObject.hasAndNotNull(ACTION) && dataObject.getString(ACTION).equals(ACTION_DELETE)) {
+            return true;
+        }
+
+        return false;
     }
 
     protected static final void performActionElement(final JsonInOut jsonInOut, final String module, final ServerSession session, final HttpServletRequest req) {
