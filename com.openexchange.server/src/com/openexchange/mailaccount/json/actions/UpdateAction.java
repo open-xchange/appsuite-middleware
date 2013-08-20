@@ -49,12 +49,13 @@
 
 package com.openexchange.mailaccount.json.actions;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -65,6 +66,7 @@ import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -73,8 +75,6 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlobId;
-import com.openexchange.mail.MailSessionCache;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
@@ -88,16 +88,12 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link UpdateAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "update", description = "Update a mail account", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
-}, requestBody = "A JSON object identifiying (field ID is present) and describing the account to update. See mail account data.",
-responseDescription = "A JSON object representing the updated mail account. See mail account data.")
+@Action(method = RequestMethod.PUT, name = "update", description = "Update a mail account", parameters = { @Parameter(name = "session", description = "A session ID previously obtained from the login module.") }, requestBody = "A JSON object identifiying (field ID is present) and describing the account to update. See mail account data.", responseDescription = "A JSON object representing the updated mail account. See mail account data.")
 public final class UpdateAction extends AbstractMailAccountAction implements MailAccountFields {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdateAction.class));
@@ -111,26 +107,9 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
         super();
     }
 
-    private static final EnumSet<Attribute> DEFAULT =
-        EnumSet.of(
-            Attribute.CONFIRMED_HAM_FULLNAME_LITERAL,
-            Attribute.CONFIRMED_HAM_LITERAL,
-            Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL,
-            Attribute.CONFIRMED_SPAM_LITERAL,
-            Attribute.DRAFTS_FULLNAME_LITERAL,
-            Attribute.DRAFTS_LITERAL,
-            Attribute.SENT_FULLNAME_LITERAL,
-            Attribute.SENT_LITERAL,
-            Attribute.SPAM_FULLNAME_LITERAL,
-            Attribute.SPAM_LITERAL,
-            Attribute.TRASH_FULLNAME_LITERAL,
-            Attribute.TRASH_LITERAL);
+    private static final EnumSet<Attribute> DEFAULT = EnumSet.of(Attribute.CONFIRMED_HAM_FULLNAME_LITERAL, Attribute.CONFIRMED_HAM_LITERAL, Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL, Attribute.CONFIRMED_SPAM_LITERAL, Attribute.DRAFTS_FULLNAME_LITERAL, Attribute.DRAFTS_LITERAL, Attribute.SENT_FULLNAME_LITERAL, Attribute.SENT_LITERAL, Attribute.SPAM_FULLNAME_LITERAL, Attribute.SPAM_LITERAL, Attribute.TRASH_FULLNAME_LITERAL, Attribute.TRASH_LITERAL);
 
-    private static final Set<Attribute> WEBMAIL_ALLOWED = EnumSet.of(
-        Attribute.ID_LITERAL,
-        Attribute.PERSONAL_LITERAL,
-        Attribute.REPLY_TO_LITERAL,
-        Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
+    private static final Set<Attribute> WEBMAIL_ALLOWED = EnumSet.of(Attribute.ID_LITERAL, Attribute.PERSONAL_LITERAL, Attribute.REPLY_TO_LITERAL, Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
 
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
@@ -162,28 +141,28 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
             }
         }
 
-        final Set<Attribute> notAllowed = new HashSet<Attribute>(fieldsToUpdate);
-        notAllowed.removeAll(WEBMAIL_ALLOWED);
         final int contextId = session.getContextId();
-        if (!session.getUserPermissionBits().isMultipleMailAccounts() && (!isDefaultMailAccount(accountDescription) || (!notAllowed.isEmpty()))) {
-            throw
-                MailAccountExceptionCodes.NOT_ENABLED.create(
-                Integer.valueOf(session.getUserId()),
-                Integer.valueOf(contextId));
+
+        // Check attributes to update
+        {
+            final Set<Attribute> notAllowed = EnumSet.copyOf(fieldsToUpdate);
+            notAllowed.removeAll(WEBMAIL_ALLOWED);
+            if (!session.getUserPermissionBits().isMultipleMailAccounts() && (!isDefaultMailAccount(accountDescription) || (!notAllowed.isEmpty()))) {
+                throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(contextId));
+            }
         }
 
-        final MailAccountStorageService storageService =
-            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        // Acquire storage service
+        final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
+        // Get & check the account to update
         final MailAccount toUpdate = storageService.getMailAccount(id, session.getUserId(), contextId);
         if (isUnifiedINBOXAccount(toUpdate)) {
             // Treat as no hit
-            throw MailAccountExceptionCodes.NOT_FOUND.create(
-                Integer.valueOf(id),
-                Integer.valueOf(session.getUserId()),
-                Integer.valueOf(contextId));
+            throw MailAccountExceptionCodes.NOT_FOUND.create(Integer.valueOf(id), Integer.valueOf(session.getUserId()), Integer.valueOf(contextId));
         }
 
+        // Check whether to clear POP3 account's time stamp
         boolean clearStamp = false;
         {
             // Don't check for POP3 account due to access restrictions (login only allowed every n minutes)
@@ -207,13 +186,67 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
             }
         }
 
-        storageService.updateMailAccount(
-            accountDescription,
-            fieldsToUpdate,
-            session.getUserId(),
-            contextId,
-            session);
+        // Update
+        MailAccount updatedAccount = null;
+        {
+            final Connection wcon = Database.get(contextId, true);
+            boolean rollback = false;
+            try {
+                Databases.startTransaction(wcon);
+                rollback = true;
 
+                // Invoke update
+                storageService.updateMailAccount(accountDescription, fieldsToUpdate, session.getUserId(), contextId, session, wcon, false);
+
+                // Reload
+                final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), contextId, wcon);
+                for (final MailAccount mailAccount : accounts) {
+                    if (mailAccount.getId() == id) {
+                        updatedAccount = mailAccount;
+                        break;
+                    }
+                }
+
+                // Any standard folders changed?
+                if ((null != updatedAccount) && (fieldsToUpdate.removeAll(DEFAULT))) {
+                    updatedAccount = checkFullNames(updatedAccount, storageService, session, wcon);
+                }
+
+                // Clear POP3 account's time stamp
+                if (clearStamp) {
+                    PreparedStatement stmt = null;
+                    try {
+                        // Delete possibly existing mapping
+                        stmt = wcon.prepareStatement("DELETE FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ? AND name = ?");
+                        int pos = 1;
+                        stmt.setInt(pos++, contextId);
+                        stmt.setInt(pos++, session.getUserId());
+                        stmt.setInt(pos++, id);
+                        stmt.setString(pos++, "pop3.lastaccess");
+                        stmt.executeUpdate();
+                    } catch (final SQLException e) {
+                        throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                    } finally {
+                        closeSQLStuff(null, stmt);
+                    }
+                }
+
+                wcon.commit();
+                rollback = false;
+            } catch (final SQLException e) {
+                throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } catch (final RuntimeException e) {
+                throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } finally {
+                if (rollback) {
+                    rollback(wcon);
+                }
+                autocommit(wcon);
+                Database.back(contextId, true, wcon);
+            }
+        }
+
+        // Check for possible meta information
         {
             final JSONObject jBody = jData.toObject();
             if (jBody.hasAndNotNull(META)) {
@@ -222,57 +255,13 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
             }
         }
 
-        if (clearStamp) {
-            final Connection con = Database.get(contextId, true);
-            PreparedStatement stmt = null;
-            try {
-                // Delete possibly existing mapping
-                stmt = con.prepareStatement("DELETE FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ? AND name = ?");
-                int pos = 1;
-                stmt.setInt(pos++, contextId);
-                stmt.setInt(pos++, session.getUserId());
-                stmt.setInt(pos++, id);
-                stmt.setString(pos++, "pop3.lastaccess");
-                stmt.executeUpdate();
-            } catch (final SQLException e) {
-                throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                closeSQLStuff(null, stmt);
-                Database.back(contextId, true, con);
-            }
+        // Write to JSON structure
+        final JSONObject jsonAccount;
+        if (null == updatedAccount) {
+            jsonAccount = MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), contextId));
+        } else {
+            jsonAccount = MailAccountWriter.write(updatedAccount);
         }
-
-        if (fieldsToUpdate.removeAll(DEFAULT)) {
-            /*
-             * Drop all session parameters related to default folders for this account
-             */
-            MailSessionCache.getInstance(session).removeAccountParameters(id);
-            /*-
-             *
-            session.setParameter(MailSessionParameterNames.getParamDefaultFolderArray(id), null);
-            session.setParameter(MailSessionParameterNames.getParamDefaultFolderChecked(id), null);
-             */
-            /*
-             * Re-Init account's default folders
-             */
-            try {
-                MailAccess<?, ?> mailAccess = null;
-                try {
-                    mailAccess = MailAccess.getInstance(session, id);
-                    mailAccess.connect(false);
-                    mailAccess.getFolderStorage().checkDefaultFolders();
-                } finally {
-                    if (null != mailAccess) {
-                        mailAccess.close(true);
-                    }
-                }
-            } catch (final OXException e) {
-                LOG.warn(e.getMessage(), e);
-            }
-        }
-
-        final JSONObject jsonAccount =
-            MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), contextId));
 
         return new AJAXRequestResult(jsonAccount).addWarnings(warnings);
     }

@@ -11,6 +11,7 @@
 
  - Fix for bug 28368: Ignore possibly contained <p> tag in image's binary data
  - Preparation to fix bug 28163: Don't perform any image transformation if not needed as signaled by URL parameters and/or image type
+ - Fix for bug 27009: Removed auto-correct attempt for special folders on read-only access operations
 
 * 2013-08-19 - thorben.betten@open-xchange.com
 
