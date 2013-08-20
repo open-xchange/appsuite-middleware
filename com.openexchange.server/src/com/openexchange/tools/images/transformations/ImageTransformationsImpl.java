@@ -51,7 +51,10 @@ package com.openexchange.tools.images.transformations;
 
 import static com.openexchange.tools.images.ImageTransformationUtility.canRead;
 import static com.openexchange.tools.images.ImageTransformationUtility.getImageFormat;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -81,6 +84,7 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.images.TransformedImage;
@@ -228,6 +232,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
                 }
             }
         }
+        image = removeTransparencyIfNeeded(image, formatName);
         return image;
     }
 
@@ -465,6 +470,28 @@ public class ImageTransformationsImpl implements ImageTransformations {
             return null;
         }
         return new ImageInformation(orientation, width, height);
+    }
+
+    /**
+     * Removes the transparency from the given image if necessary, i.e. the color model has an alpha channel and the supplied image
+     * format is supposed to not support transparency.
+     *
+     * @param image The image
+     * @param formatName The image format name, e.g. "jpeg" or "tiff"
+     * @return The processed buffered image, or the previous image if no processing was necessary
+     */
+    private static BufferedImage removeTransparencyIfNeeded(BufferedImage image, String formatName) {
+        if (null != formatName && false == ImageTransformationUtility.supportsTransparency(formatName) && null != image) {
+            ColorModel colorModel = image.getColorModel();
+            if (null != colorModel && colorModel.hasAlpha()) {
+                BufferedImage targetImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+                Graphics2D graphics = targetImage.createGraphics();
+                graphics.drawImage(image, 0, 0, Color.WHITE, null);
+                graphics.dispose();
+                return targetImage;
+            }
+        }
+        return image;
     }
 
 }
