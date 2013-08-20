@@ -1,6 +1,7 @@
 * 2013-08-20 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 28163: Implicitly remove alpha channel when transforming to JPEG
+ - Fix for bug 27176: Don't query user service unless needed, don't evaluate global addressbook permissions repeatedly
 
 * 2013-08-20 - thorben.betten@open-xchange.com
 

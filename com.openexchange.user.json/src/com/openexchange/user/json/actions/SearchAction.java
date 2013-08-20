@@ -74,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -84,6 +85,7 @@ import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
 import com.openexchange.user.json.UserContact;
 import com.openexchange.user.json.field.UserField;
+import com.openexchange.user.json.filter.UserCensorship;
 import com.openexchange.user.json.mapping.UserMapper;
 import com.openexchange.user.json.services.ServiceRegistry;
 
@@ -187,6 +189,9 @@ public final class SearchAction extends AbstractUserAction {
         final ContactField[] contactFields = ContactMapper.getInstance().getFields(columns,
         		ContactField.INTERNAL_USERID, ContactField.LAST_MODIFIED);
         final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
+        UserField[] userFields = UserMapper.getInstance().getFields(columns);
+        boolean needsUserData = null != userFields && 0 < userFields.length;
+        UserCensorship censorship = needsUserData ? getUserCensorship(session) : null;
         SearchIterator<Contact> searchIterator = null;
         try {
         	searchIterator = contactService.searchUsers(session, contactSearch, contactFields, sortOptions);
@@ -201,11 +206,21 @@ public final class SearchAction extends AbstractUserAction {
             	if (contact.getLastModified().after(lastModified)) {
             		lastModified = contact.getLastModified();
             	}
-            	/*
-            	 * Get corresponding user
-            	 */
-            	final User user = userService.getUser(contact.getInternalUserId(), session.getContext());
-            	userContacts.add(new UserContact(contact, censor(session, user)));
+                /*
+                 * Get corresponding user & apply censorship if needed
+                 */
+                User user;
+                if (needsUserData) {
+                    user = userService.getUser(contact.getInternalUserId(), session.getContext());
+                    if (null != censorship && session.getUserId() != user.getId()) {
+                        user = censorship.censor(user);
+                    }
+                } else {
+                    UserImpl placeholder = new UserImpl();
+                    placeholder.setId(contact.getInternalUserId());
+                    user = placeholder;
+                }
+            	userContacts.add(new UserContact(contact, user));
             }
         } finally {
         	if (null != searchIterator) {
