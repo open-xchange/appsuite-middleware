@@ -50,6 +50,7 @@
 package com.openexchange.imap.threader.references;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -177,6 +178,28 @@ public final class Conversation {
     }
 
     /**
+     * Checks if this conversation references OR is referenced by given message
+     *
+     * @param message The message
+     * @return <code>true</code> if references or referenced-by; otherwise <code>false</code>
+     */
+    public boolean referencesOrIsReferencedBy(final MailMessage message) {
+        if (!this.references.isEmpty()) {
+            final String messageId = message.getMessageId();
+            if (null != messageId && this.references.contains(messageId)) {
+                return true;
+            }
+        }
+        if (!this.messageIds.isEmpty()) {
+            final String[] sReferences = message.getReferences();
+            if (null != sReferences && containsAny(this.messageIds, setFor(sReferences))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Checks if this conversation references OR is referenced by given conversation
      *
      * @param other The other conversation
@@ -221,6 +244,10 @@ public final class Conversation {
             }
         }
         return false;
+    }
+
+    private static Set<String> setFor(final String[] sReferences) {
+        return new HashSet<String>(Arrays.asList(sReferences));
     }
 
     /**
