@@ -148,6 +148,9 @@ public class JSONArray extends AbstractJSONValue {
      */
     public JSONArray(final Reader reader) throws JSONException {
         this();
+        if (null == reader) {
+            throw new JSONException("Reader must not be null.");
+        }
         parse(reader, this);
     }
 
@@ -160,7 +163,12 @@ public class JSONArray extends AbstractJSONValue {
      */
     public JSONArray(final String string) throws JSONException {
         this();
-        parse(new UnsynchronizedStringReader(string), this);
+        if (null == string) {
+            throw new JSONException("String must not be null.");
+        }
+        if (!"[]".equals(string)) {
+            parse(new UnsynchronizedStringReader(string), this);
+        }
     }
 
     private static String checkString(final String string) throws JSONException {
