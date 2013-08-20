@@ -62,6 +62,7 @@ import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -150,42 +151,41 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
         }
 
         final int cid = session.getContextId();
-        Connection con = null;
-        try {
-            con = Database.get(cid, true);
-        } catch (final OXException e) {
-            throw e;
-        }
         final int id;
         MailAccount newAccount = null;
-        try {
-            con.setAutoCommit(false);
-            id = storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), session, con);
-            // Check full names after successful creation
-            final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), cid, con);
-            for (final MailAccount mailAccount : accounts) {
-                if (mailAccount.getId() == id) {
-                    newAccount = mailAccount;
-                    break;
+        {
+            final Connection wcon = Database.get(cid, true);
+            boolean rollback = false;
+            try {
+                Databases.startTransaction(wcon);
+                rollback = true;
+                id = storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), session, wcon);
+                // Check full names after successful creation
+                final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), cid, wcon);
+                for (final MailAccount mailAccount : accounts) {
+                    if (mailAccount.getId() == id) {
+                        newAccount = mailAccount;
+                        break;
+                    }
                 }
-            }
-            con.commit();
-        } catch (final SQLException e) {
-            rollback(con);
-            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            rollback(con);
-            throw e;
-        } catch (final RuntimeException e) {
-            rollback(con);
-            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            autocommit(con);
-            Database.back(cid, true, con);
-        }
 
-        if (null != newAccount) {
-            checkFullNames(newAccount, storageService, session, null);
+                if (null != newAccount) {
+                    newAccount = checkFullNames(newAccount, storageService, session, wcon);
+                }
+
+                wcon.commit();
+                rollback = false;
+            } catch (final SQLException e) {
+                throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } catch (final RuntimeException e) {
+                throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } finally {
+                if (rollback) {
+                    rollback(wcon);
+                }
+                autocommit(wcon);
+                Database.back(cid, true, wcon);
+            }
         }
 
         {
@@ -196,11 +196,12 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
             }
         }
 
-        final JSONObject jsonAccount =
-            MailAccountWriter.write(checkFullNames(
-                storageService.getMailAccount(id, session.getUserId(), session.getContextId()),
-                storageService,
-                session));
+        final JSONObject jsonAccount;
+        if (null == newAccount) {
+            jsonAccount = MailAccountWriter.write(checkFullNames(storageService.getMailAccount(id, session.getUserId(), session.getContextId()), storageService, session));
+        } else {
+            jsonAccount = MailAccountWriter.write(newAccount);
+        }
 
         return new AJAXRequestResult(jsonAccount).addWarnings(warnings);
     }
