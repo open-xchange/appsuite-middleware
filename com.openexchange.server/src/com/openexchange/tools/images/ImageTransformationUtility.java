@@ -146,4 +146,14 @@ public class ImageTransformationUtility {
 //        return false;
 //    }
 
+    /**
+     * Gets a value indicating whether supplied image format is supposed to support transparency or not.
+     *
+     * @param formatName The image format name, e.g. "jpeg" or "tiff"
+     * @return <code>true</code> if transparency is supported, <code>false</code>, otherwise
+     */
+    public static boolean supportsTransparency(String formatName) {
+        return false == "jpeg".equalsIgnoreCase(formatName) && false == "jpg".equalsIgnoreCase(formatName);
+    }
+
 }
