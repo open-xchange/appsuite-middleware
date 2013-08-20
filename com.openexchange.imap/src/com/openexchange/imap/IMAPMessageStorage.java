@@ -187,6 +187,7 @@ import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.textxtraction.TextXtractService;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.AbstractTrackableTask;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPools;
@@ -1570,8 +1571,87 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 if (DEBUG) {
                     LOG.debug("\tIMAPMessageStorage.getThreadSortedMessages(): Using built-in by-reference-only threader." + (byEnvelope ? " Preferring ENVELOPE." : ""));
                 }
-                final Future<ThreadableMapping> submittedTask = mergeWithSent ? getThreadableMapping(sentFolder, limit, fetchProfile, byEnvelope) : null;
+                /*
+                 * Dummy switch to get back to old behavior
+                 */
+                final boolean doListAppend = true;
+                if (false == doListAppend) {
+                    // Old behavior...
+                    final Future<ThreadableMapping> submittedTask = mergeWithSent ? getThreadableMapping(sentFolder, limit, fetchProfile, byEnvelope) : null;
+                    final List<Conversation> conversations = Conversations.conversationsFor(imapFolder, limit, fetchProfile, byEnvelope);
+                    Conversations.fold(conversations);
+                    // Comparator
+                    final MailMessageComparator threadComparator = COMPARATOR_DESC;
+                    // Sort
+                    List<List<MailMessage>> list = new ArrayList<List<MailMessage>>(conversations.size());
+                    for (final Conversation conversation : conversations) {
+                        list.add(conversation.getMessages(threadComparator));
+                    }
+                    // Sort root elements
+                    {
+                        final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
+                        final Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale());
+                        Collections.sort(list, listComparator);
+                    }
+                    // Check for available mapping indicating that sent folder results have to be merged
+                    if (null != submittedTask) {
+                        final ThreadableMapping threadableMapping = getFrom(submittedTask);
+                        for (final List<MailMessage> thread : list) {
+                            if (threadableMapping.checkFor(new ArrayList<MailMessage>(thread), thread)) { // Iterate over copy
+                                // Re-Sort thread
+                                Collections.sort(thread, threadComparator);
+                            }
+                        }
+                    }
+                    if (null != indexRange) {
+                        final int fromIndex = indexRange.start;
+                        int toIndex = indexRange.end;
+                        final int size = list.size();
+                        if ((fromIndex) > size) {
+                            // Return empty iterator if start is out of range
+                            return Collections.emptyList();
+                        }
+                        // Reset end index if out of range
+                        if (toIndex >= size) {
+                            toIndex = size;
+                        }
+                        list = list.subList(fromIndex, toIndex);
+                    }
+                    /*
+                     * Apply account identifier
+                     */
+                    setAccountInfo2(list);
+                    // Return list
+                    return list;
+                }
+                /*
+                 * Do list append
+                 */
+                Future<List<MailMessage>> messagesFromSentFolder = null;
+                if (mergeWithSent) {
+                    final IMAPFolder zentFolder = sentFolder;
+                    messagesFromSentFolder = ThreadPools.getThreadPool().submit(new AbstractTask<List<MailMessage>>() {
+
+                        @Override
+                        public List<MailMessage> call() throws Exception {
+                            return Conversations.messagesFor(zentFolder, limit, fetchProfile, byEnvelope);
+                        }
+                    });
+                }
+                // Retrieve from actual folder
                 final List<Conversation> conversations = Conversations.conversationsFor(imapFolder, limit, fetchProfile, byEnvelope);
+                // Retrieve from sent folder
+                if (null != messagesFromSentFolder) {
+                    final List<MailMessage> sentMessages = getFrom(messagesFromSentFolder);
+                    for (final Conversation conversation : conversations) {
+                        for (final MailMessage sentMessage : sentMessages) {
+                            if (conversation.referencesOrIsReferencedBy(sentMessage)) {
+                                conversation.addMessage(sentMessage);
+                            }
+                        }
+                    }
+                }
+                // Fold it
                 Conversations.fold(conversations);
                 // Comparator
                 final MailMessageComparator threadComparator = COMPARATOR_DESC;
@@ -1586,16 +1666,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     final Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, getLocale());
                     Collections.sort(list, listComparator);
                 }
-                // Check for available mapping indicating that sent folder results have to be merged
-                if (null != submittedTask) {
-                    final ThreadableMapping threadableMapping = getFrom(submittedTask);
-                    for (final List<MailMessage> thread : list) {
-                        if (threadableMapping.checkFor(new ArrayList<MailMessage>(thread), thread)) { // Iterate over copy
-                            // Re-Sort thread
-                            Collections.sort(thread, threadComparator);
-                        }
-                    }
-                }
+                // Check for index range
                 if (null != indexRange) {
                     final int fromIndex = indexRange.start;
                     int toIndex = indexRange.end;
