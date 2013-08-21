@@ -195,7 +195,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
 
         }
 
-        private final static Pattern database = Pattern.compile("^.*?\\s+Database:\\s+`?([^` ]*)`?.*$");
+        private final static Pattern database = Pattern.compile("^.*?Current Database:\\s+`?([^` ]*)`?.*$");
 
         private final static Pattern table = Pattern.compile("^Table\\s+structure\\s+for\\s+table\\s+`([^`]*)`.*$");
 

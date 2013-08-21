@@ -1,3 +1,8 @@
+* 2013-08-21 - choeger@open-xchange.com
+
+ - Bugfix #28431: contextrestore does not work when mysql db contains
+   help_topic table with CREATE DATABASE explanations
+
 * 2012-06-15 - jan.bauerdick@open-xchange.com
 
  - Moved packages c.o.admin.contextrestore.rmi & c.o.admin.contextrestore.console to dedicated bundles
