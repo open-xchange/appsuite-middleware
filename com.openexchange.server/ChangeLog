@@ -1,3 +1,7 @@
+* 2013-08-21 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28420: Resolve hostnames before passing them into hazelcast configuration
+
 * 2013-08-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 28110: User proper SQL statement for updating the transport settings on password transcription
