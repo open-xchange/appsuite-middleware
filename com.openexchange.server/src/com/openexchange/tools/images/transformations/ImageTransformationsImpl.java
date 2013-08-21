@@ -480,7 +480,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * @return The processed buffered image, or the previous image if no processing was necessary
      */
     private static BufferedImage removeTransparencyIfNeeded(BufferedImage image, String formatName) {
-        if (null != formatName && false == ImageTransformationUtility.supportsTransparency(formatName) && null != image) {
+        if (null != image && null != formatName && false == ImageTransformationUtility.supportsTransparency(formatName)) {
             ColorModel colorModel = image.getColorModel();
             if (null != colorModel && colorModel.hasAlpha()) {
                 BufferedImage targetImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);

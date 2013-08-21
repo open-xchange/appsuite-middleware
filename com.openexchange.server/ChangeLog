@@ -1,6 +1,7 @@
 * 2013-08-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 28110: User proper SQL statement for updating the transport settings on password transcription
+ - Fix for bug 28429: Also consider signaled content length (if available) when checking for a valid image
 
 * 2013-08-20 - martin.herfurth@open-xchange.com
 
