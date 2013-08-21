@@ -1,3 +1,9 @@
+open-xchange-parallels (7.0.2-13) stable; urgency=low
+
+  * Build for patch 2013-08-22
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 21 Aug 2013 16:45:44 +0200
+
 open-xchange-parallels (7.0.2-12) unstable; urgency=low
 
   * Second build for patch  2013-07-18
