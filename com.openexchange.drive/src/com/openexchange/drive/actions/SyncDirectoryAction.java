@@ -58,10 +58,15 @@ import com.openexchange.drive.comparison.ThreeWayComparison;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SyncDirectoryAction extends AbstractAction<DirectoryVersion> {
+public class SyncDirectoryAction extends AbstractDirectoryAction {
 
     public SyncDirectoryAction(DirectoryVersion version, ThreeWayComparison<DirectoryVersion> comparison) {
+        this(version, comparison, false);
+    }
+
+    public SyncDirectoryAction(DirectoryVersion version, ThreeWayComparison<DirectoryVersion> comparison, boolean reset) {
         super(version, null, comparison);
+        parameters.put(PARAMETER_RESET, Boolean.valueOf(reset));
     }
 
     @Override

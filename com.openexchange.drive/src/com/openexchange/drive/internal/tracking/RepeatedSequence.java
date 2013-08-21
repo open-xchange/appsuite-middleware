@@ -47,45 +47,60 @@
  *
  */
 
-package com.openexchange.drive.actions;
+package com.openexchange.drive.internal.tracking;
 
-import com.openexchange.drive.Action;
-import com.openexchange.drive.FileVersion;
-import com.openexchange.drive.comparison.ThreeWayComparison;
-import com.openexchange.file.storage.File;
+import java.util.List;
+import com.openexchange.java.StringAllocator;
+
 
 /**
- * {@link DownloadFileAction}
+ * {@link RepeatedSequence}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DownloadFileAction extends AbstractFileAction {
+public class RepeatedSequence<T> {
 
-    public DownloadFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, long totalLength, String contentType, Long created, Long modified) {
-        super(file, newFile, comparison);
-        parameters.put(PARAMETER_TOTAL_LENGTH, Long.valueOf(totalLength));
-        parameters.put(PARAMETER_PATH, path);
-        if (null != contentType) {
-            parameters.put(PARAMETER_CONTENT_TYPE, contentType);
-        }
-        if (null != created) {
-            parameters.put(PARAMETER_CREATED, created);
-        }
-        if (null != modified) {
-            parameters.put(PARAMETER_MODIFIED, modified);
-        }
+    private final List<T> sequence;
+    private final int repetitions;
+
+    /**
+     * Initializes a new {@link RepeatedSequence}.
+     *
+     * @param sequence The sequence
+     * @param repetitions The repetitions
+     */
+    public RepeatedSequence(List<T> sequence, int repetitions) {
+        super();
+        this.sequence = sequence;
+        this.repetitions = repetitions;
     }
 
-    public DownloadFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, File serverFile) {
-        this(file, newFile, comparison, path, serverFile.getFileSize(), serverFile.getFileMIMEType(),
-            null != serverFile.getCreated() ? serverFile.getCreated().getTime() : null,
-            null != serverFile.getLastModified() ? serverFile.getLastModified().getTime() : null
-        );
+    /**
+     * Gets the sequence
+     *
+     * @return The sequence
+     */
+    public List<T> getSequence() {
+        return sequence;
+    }
+
+    /**
+     * Gets the repetitions
+     *
+     * @return The repetitions
+     */
+    public int getRepetitions() {
+        return repetitions;
     }
 
     @Override
-    public Action getAction() {
-        return Action.DOWNLOAD;
+    public String toString() {
+        StringAllocator stringAllocator = new StringAllocator();
+        stringAllocator.append("RepeatedSequence: ").append(repetitions).append("x :\n");
+        for (int i = 0; i < sequence.size(); i++) {
+            stringAllocator.append(" (").append(i + 1).append(") ").append(sequence.get(i)).append('\n');
+        }
+        return stringAllocator.toString();
     }
 
 }

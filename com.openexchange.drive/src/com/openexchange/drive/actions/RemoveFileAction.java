@@ -62,7 +62,7 @@ import com.openexchange.drive.comparison.ThreeWayComparison;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RemoveFileAction extends AbstractAction<FileVersion> {
+public class RemoveFileAction extends AbstractFileAction {
 
     /**
      * Initializes a new {@link RemoveFileAction}.
