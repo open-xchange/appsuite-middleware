@@ -49,12 +49,12 @@
 
 package com.openexchange.subscribe.json.actions;
 
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -71,69 +71,61 @@ import com.openexchange.subscribe.SubscriptionExecutionService;
  */
 public class RefreshSubscriptionAction extends AbstractSubscribeAction {
 
-	/**
-	 * Initializes a new {@link RefreshSubscriptionAction}.
-	 * @param services
-	 */
-	public RefreshSubscriptionAction(ServiceLookup services) {
-		super();
-		this.services = services;
+    /**
+     * Initializes a new {@link RefreshSubscriptionAction}.
+     *
+     * @param services
+     */
+    public RefreshSubscriptionAction(ServiceLookup services) {
+        super(services);
+    }
 
-	}
-
-	/* (non-Javadoc)
-	 * @see com.openexchange.subscribe.json.actions.AbstractSubscribeSourcesAction#perform(com.openexchange.subscribe.json.actions.SubscribeRequest)
-	 */
-	@Override
-	public AJAXRequestResult perform(SubscribeRequest subscribeRequest)
-			throws OXException {
-		final List<Subscription> subscriptionsToRefresh = new ArrayList<Subscription>(10);
-        final Set<Integer> ids = new HashSet<Integer>();
+    @Override
+    public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException, JSONException {
+        final List<Subscription> subscriptionsToRefresh = new ArrayList<Subscription>(10);
+        final TIntSet ids = new TIntHashSet();
         JSONObject parameters = new JSONObject(subscribeRequest.getRequestData().getParameters());
         if (parameters.has("folder")) {
             String folderId;
-			try {
-				folderId = parameters.getString("folder");
-				List<Subscription> allSubscriptions = null;
-	            allSubscriptions = getSubscriptionsInFolder(subscribeRequest.getServerSession(), folderId, services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
-	            Collections.sort(allSubscriptions, new Comparator<Subscription>() {
+            folderId = parameters.getString("folder");
+            List<Subscription> allSubscriptions = null;
+            allSubscriptions = getSubscriptionsInFolder(
+                subscribeRequest.getServerSession(),
+                folderId,
+                services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
+            Collections.sort(allSubscriptions, new Comparator<Subscription>() {
 
-	                @Override
-                    public int compare(final Subscription o1, final Subscription o2) {
-	                    if(o1.getLastUpdate() == o2.getLastUpdate()) {
-	                        return o2.getId() - o1.getId();
-	                    }
-	                    return (int) (o2.getLastUpdate() - o1.getLastUpdate());
-	                }
+                @Override
+                public int compare(final Subscription o1, final Subscription o2) {
+                    if (o1.getLastUpdate() == o2.getLastUpdate()) {
+                        return o2.getId() - o1.getId();
+                    }
+                    return (int) (o2.getLastUpdate() - o1.getLastUpdate());
+                }
 
-	            });
-	            for (final Subscription subscription : allSubscriptions) {
-	                ids.add(subscription.getId());
-	                subscriptionsToRefresh.add(subscription);
-	            }
-			} catch (JSONException e) {
-				throw new OXException(e);
-			}
-
+            });
+            for (final Subscription subscription : allSubscriptions) {
+                ids.add(subscription.getId());
+                subscriptionsToRefresh.add(subscription);
+            }
         }
         if (parameters.has("id")) {
-            int id;
-			try {
-				id = parameters.getInt("id");
-				final Subscription subscription = loadSubscription(id, subscribeRequest.getServerSession(), parameters.optString("source"), services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
-	            if (!ids.contains(id)) {
-	                ids.add(id);
-	                subscriptionsToRefresh.add(subscription);
-	            }
-			} catch (JSONException e) {
-				throw new OXException(e);
-			}
-
+            int id = parameters.getInt("id");
+            final Subscription subscription = loadSubscription(
+                id,
+                subscribeRequest.getServerSession(),
+                parameters.optString("source"),
+                services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
+            if (ids.add(id)) {
+                subscriptionsToRefresh.add(subscription);
+            }
         }
 
-        int resultCode = services.getService(SubscriptionExecutionService.class).executeSubscriptions(subscriptionsToRefresh, subscribeRequest.getServerSession());
+        int resultCode = services.getService(SubscriptionExecutionService.class).executeSubscriptions(
+            subscriptionsToRefresh,
+            subscribeRequest.getServerSession());
 
-		return new AJAXRequestResult(resultCode, "json");
-	}
+        return new AJAXRequestResult(Integer.valueOf(resultCode), "json");
+    }
 
 }

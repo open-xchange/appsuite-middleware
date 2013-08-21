@@ -58,7 +58,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
@@ -79,20 +78,18 @@ public class AllSubscriptionAction extends AbstractSubscribeAction {
      * @param services
      */
     public AllSubscriptionAction(ServiceLookup services) {
-        super();
-        this.services = services;
+        super(services);
     }
 
     @Override
-    public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException {
+    public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException, JSONException {
         String folderId = null;
         boolean containsFolder = false;
+
         if (subscribeRequest.getRequestData().getParameter("folder") != null) {
             folderId = subscribeRequest.getRequestData().getParameter("folder");
             containsFolder = true;
         }
-
-        final Context context = subscribeRequest.getServerSession().getContext();
 
         List<Subscription> allSubscriptions = null;
         if (containsFolder) {
@@ -104,16 +101,10 @@ public class AllSubscriptionAction extends AbstractSubscribeAction {
 
         JSONObject parameters = new JSONObject(subscribeRequest.getRequestData().getParameters());
         final String[] basicColumns = getBasicColumns(parameters);
-        Map<String, String[]> dynamicColumns;
-        try {
-            dynamicColumns = getDynamicColumns(parameters);
-            final List<String> dynamicColumnOrder = getDynamicColumnOrder(parameters);
-            JSONArray jsonArray = (JSONArray) createResponse(allSubscriptions, basicColumns, dynamicColumns, dynamicColumnOrder, subscribeRequest.getTimeZone());
-            return new AJAXRequestResult(jsonArray, "json");
-        } catch (JSONException e) {
-            throw new OXException(e);
-        }
-
+        Map<String, String[]> dynamicColumns = getDynamicColumns(parameters);
+        final List<String> dynamicColumnOrder = getDynamicColumnOrder(parameters);
+        JSONArray jsonArray = (JSONArray) createResponse(allSubscriptions, basicColumns, dynamicColumns, dynamicColumnOrder, subscribeRequest.getTimeZone());
+        return new AJAXRequestResult(jsonArray, "json");
     }
 
     private List<Subscription> getAllSubscriptions(final ServerSession session, final String secret) throws OXException {
@@ -124,7 +115,7 @@ public class AllSubscriptionAction extends AbstractSubscribeAction {
             final Collection<Subscription> subscriptions = subscribeService.loadSubscriptions(session.getContext(), session.getUserId(), secret);
             allSubscriptions.addAll(subscriptions);
         }
-
         return allSubscriptions;
     }
+
 }
