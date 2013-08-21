@@ -149,7 +149,13 @@ public class Activator implements BundleActivator {
         for (final File file : files) {
             try {
                 if (file.isFile() && file.getPath().endsWith(".yml")) {
-                    crawlers.add(Yaml.loadType(file, CrawlerDescription.class));
+                    final CrawlerDescription crawlerDescription = Yaml.loadType(file, CrawlerDescription.class);
+                    // Only add if not explicitly disabled as per file 'crawler.properties'
+                    if (config.getBoolProperty(crawlerDescription.getId(), true)) {
+                        crawlers.add(crawlerDescription);
+                    } else {
+                        LOG.info("Ignoring crawler description \"" + crawlerDescription.getId() + "\" as per 'crawler.properties' file.");
+                    }
                 }
             } catch (final FileNotFoundException e) {
                 // Should not appear because file existence is checked before.
