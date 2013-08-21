@@ -99,9 +99,9 @@ public class AllAction implements AJAXActionService {
 
                 for (int i = 0, size = manifests.length(); i < size; i++) {
                     JSONObject definition = manifests.getJSONObject(i);
-                    if (isSigninPlugin(definition)) {
+                    //if (hasCapability(capMap, definition)) {
                         result.put(new JSONObject(definition));
-                    }
+                    //}
                 }
 
             } else {

@@ -253,6 +253,7 @@ class UpdateData {
             origTask = storage.selectTask(ctx, getTaskId(), type);
             origTask.setParentFolderID(getFolderId());
             origTask.setUsers(TaskLogic.createUserParticipants(getOrigParticipants()));
+            origTask.setParticipants(TaskLogic.createParticipants(getOrigParticipants()));
         }
         return origTask;
     }

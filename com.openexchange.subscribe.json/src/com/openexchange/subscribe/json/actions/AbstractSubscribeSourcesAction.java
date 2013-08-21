@@ -62,28 +62,25 @@ import com.openexchange.subscribe.json.I18nServices;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- *
  */
-public abstract class AbstractSubscribeSourcesAction  implements AJAXActionService {
+public abstract class AbstractSubscribeSourcesAction implements AJAXActionService {
 
-	protected ServiceLookup services;
+    protected ServiceLookup services;
 
-	public abstract AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException;
+    protected abstract AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException;
 
-	@Override
-    public AJAXRequestResult perform(AJAXRequestData requestData,
-			ServerSession session) throws OXException {
-		SubscribeRequest subscribeRequest = new SubscribeRequest(requestData, session);
-		return perform(subscribeRequest);
-	}
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        SubscribeRequest subscribeRequest = new SubscribeRequest(requestData, session);
+        return perform(subscribeRequest);
+    }
 
-	protected SubscriptionSourceDiscoveryService getAvailableSources(final ServerSession session) throws OXException {
+    protected SubscriptionSourceDiscoveryService getAvailableSources(final ServerSession session) throws OXException {
         return services.getService(SubscriptionSourceDiscoveryService.class).filter(session.getUserId(), session.getContextId());
     }
 
-	protected Translator createTranslator(final ServerSession session) {
+    protected Translator createTranslator(final ServerSession session) {
         final I18nService service = I18nServices.getInstance().getService(session.getUser().getLocale());
         return null == service ? Translator.EMPTY : new I18nTranslator(service);
     }

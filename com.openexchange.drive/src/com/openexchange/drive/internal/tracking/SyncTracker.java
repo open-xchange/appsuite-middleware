@@ -268,7 +268,6 @@ public class SyncTracker {
 
             @Override
             public String getPath() {
-                // TODO Auto-generated method stub
                 return path;
             }
         };
@@ -283,15 +282,15 @@ public class SyncTracker {
                 .append(cycle.getRepetitions()).append(" times:\n\n");
             for (int i = 0; i < sequence.size(); i++) {
                 HistoryEntry entry = sequence.get(i);
-                stringAllocator.append(" # ").append(i + 1).append(" [").append(entry.hashCode()).append("] :\n");
-                stringAllocator.append(entry.getSyncResult());
+                stringAllocator.append(" # ").append(i + 1).append(" [").append(entry.hashCode()).append("] ")
+                    .append(null != entry.getPath() ? entry.getPath() : "").append(" :\n").append(entry.getSyncResult());
             }
             session.trace(stringAllocator.toString());
         }
     }
 
     /**
-     * Finds repetitions of the same sequence towards the end of the supplied list. An element sequence is considered to repeate if the
+     * Finds repetitions of the same sequence towards the end of the supplied list. An element sequence is considered to repeat if the
      * same elements in the same order are repeating until the end of the list, i.e.:
      * <ul>
      * <li><code>ABCABCABCABC => 4x ABC</code></li>
