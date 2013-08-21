@@ -107,6 +107,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new PreviewCacheActivator(),
         new ReportActivator(),
         new QuotaGWActivator(),
+        new PingActivator(),
     };
 
     public ServerCompositeActivator() {
