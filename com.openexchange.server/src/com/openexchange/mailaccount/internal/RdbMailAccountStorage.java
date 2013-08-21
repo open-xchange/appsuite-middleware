@@ -470,24 +470,35 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 } while (rs.next());
                 // Add aliases, too
                 if (MailAccount.DEFAULT_ID == id) {
-                    final StringAllocator sb = new StringAllocator(128);
-                    sb.append(mailAccount.getPrimaryAddress());
-                    final Set<String> s = new HashSet<String>(4);
-                    s.add(mailAccount.getPrimaryAddress());
-                    for (final String alias : UserStorage.getStorageUser(user, cid).getAliases()) {
-                        if (s.add(alias)) {
-                            sb.append(", ").append(alias);
-                        }
-                    }
-                    properties.put("addresses", sb.toString());
+                    properties.put("addresses", getAliases(user, cid, mailAccount));
                 }
                 mailAccount.setProperties(properties);
             } else {
-                mailAccount.setProperties(Collections.<String, String> emptyMap());
+                // Add aliases, too
+                if (MailAccount.DEFAULT_ID == id) {
+                    Map<String, String> properties = new HashMap<String, String>(8, 1);
+                    properties.put("addresses", getAliases(user, cid, mailAccount));
+                    mailAccount.setProperties(properties);
+                } else {
+                    mailAccount.setProperties(Collections.<String, String> emptyMap());
+                }
             }
         } finally {
             closeSQLStuff(rs, stmt);
         }
+    }
+
+    private static String getAliases(int user, int cid, AbstractMailAccount mailAccount) {
+        StringAllocator sb = new StringAllocator(128);
+        sb.append(mailAccount.getPrimaryAddress());
+        Set<String> s = new HashSet<String>(4);
+        s.add(mailAccount.getPrimaryAddress());
+        for (String alias : UserStorage.getStorageUser(user, cid).getAliases()) {
+            if (s.add(alias)) {
+                sb.append(", ").append(alias);
+            }
+        }
+        return sb.toString();
     }
 
     /**
@@ -2229,7 +2240,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             final String transcribed = encryptionService.encrypt(session, decrypted);
                             // Add to batch update
                             if (null == updateStmt) {
-                                updateStmt = con.prepareStatement(UPDATE_PASSWORD1);
+                                updateStmt = con.prepareStatement(UPDATE_PASSWORD2);
                                 updateStmt.setInt(2, cid);
                                 updateStmt.setInt(4, user);
                             }
