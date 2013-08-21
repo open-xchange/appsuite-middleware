@@ -71,10 +71,12 @@ public interface OAuthServiceMetaDataRegistry {
      * Gets the service belonging to specified identifier.
      *
      * @param id The service identifier
+     * @param user The user identifier
+     * @param contextId The context identifier
      * @return The service
      * @throws OXException If service look-up fails
      */
-    OAuthServiceMetaData getService(String id, int uid, int cid) throws OXException;
+    OAuthServiceMetaData getService(String id, int user, int contextId) throws OXException;
 
     /**
      * Checks for existence of specified service

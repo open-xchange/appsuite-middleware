@@ -60,6 +60,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.html.HtmlService;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
+import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthAccountInvalidationListener;
@@ -83,13 +84,13 @@ import com.openexchange.timer.TimerService;
 import com.openexchange.tools.session.SessionHolder;
 
 /**
- * {@link OAuthActivator}
+ * {@link OAuthActivator} - The activator for OAuth bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OAuthActivator extends HousekeepingActivator {
 
-    private OSGiDelegateServiceMap delegateServices;
+    private volatile OSGiDelegateServiceMap delegateServices;
 
     /**
      * Initializes a new {@link OAuthActivator}.
@@ -103,22 +104,6 @@ public final class OAuthActivator extends HousekeepingActivator {
         return new Class<?>[] {
             DatabaseService.class, SessiondService.class, EventAdmin.class, SecretEncryptionFactoryService.class, SessionHolder.class,
             CryptoService.class, ConfigViewFactory.class, TimerService.class };
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OAuthActivator.class));
-        if (logger.isInfoEnabled()) {
-            logger.info("Re-available service: " + clazz.getName());
-        }
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OAuthActivator.class));
-        if (logger.isWarnEnabled()) {
-            logger.warn("Absent service: " + clazz.getName());
-        }
     }
 
     @Override
@@ -146,6 +131,7 @@ public final class OAuthActivator extends HousekeepingActivator {
             track(OAuthAccountDeleteListener.class, new DeleteListenerServiceTracker(context));
             track(OAuthAccountInvalidationListener.class, new InvalidationListenerServiceTracker(context));
             trackService(HtmlService.class);
+            trackService(DeferringURLService.class);
             openTrackers();
             /*
              * Register
@@ -153,7 +139,8 @@ public final class OAuthActivator extends HousekeepingActivator {
             CallbackRegistry cbRegistry = new CallbackRegistry();
             getService(TimerService.class).scheduleAtFixedRate(cbRegistry, 600000, 600000);
 
-            delegateServices = new OSGiDelegateServiceMap();
+            final OSGiDelegateServiceMap delegateServices = new OSGiDelegateServiceMap();
+            this.delegateServices = delegateServices;
             delegateServices.put(DBProvider.class, new OSGiDatabaseServiceDBProvider().start(context));
             delegateServices.put(ContextService.class, new OSGiContextService().start(context));
             delegateServices.put(IDGeneratorService.class, new OSGiIDGeneratorService().start(context));
@@ -208,9 +195,10 @@ public final class OAuthActivator extends HousekeepingActivator {
                 log.info("stopping bundle: com.openexchange.oauth");
             }
             cleanUp();
+            final OSGiDelegateServiceMap delegateServices = this.delegateServices;
             if (null != delegateServices) {
                 delegateServices.clear();
-                delegateServices = null;
+                this.delegateServices = null;
             }
             DeleteListenerRegistry.releaseInstance();
             OSGiMetaDataRegistry.releaseInstance();

@@ -89,6 +89,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.html.HtmlService;
+import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
@@ -246,27 +247,52 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
 
     @Override
-    public OAuthInteraction initOAuth(final String serviceMetaData, String callbackUrl, Session session) throws OXException {
+    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, final Session session) throws OXException {
         try {
-            final OAuthServiceMetaData metaData = registry.getService(serviceMetaData, -1, -1);
             /*
-             * Get appropriate Scribe service implementation
+             * Get associated OAuth meta data implementation
+             */
+            final OAuthServiceMetaData metaData = registry.getService(serviceMetaData, session.getUserId(), session.getContextId());
+
+            // ------------------------------------------------------------------------------------------ //
+
+            /*
+             * Check for individual OAuthInteraction
              */
             final OAuthInteraction interaction = metaData.initOAuth(callbackUrl, session);
             if (interaction != null) {
                 return interaction;
             }
-            final String modifiedUrl = metaData.modifyCallbackURL(callbackUrl, session);
-            if (modifiedUrl != null) {
-                callbackUrl = modifiedUrl;
+
+            // ------------------------------------------------------------------------------------------ //
+
+            String cbUrl = callbackUrl;
+            /*
+             * Apply possible modifications to call-back URL
+             */
+            {
+                final String modifiedUrl = metaData.modifyCallbackURL(cbUrl, session);
+                if (modifiedUrl != null) {
+                    cbUrl = modifiedUrl;
+                }
             }
-            final org.scribe.oauth.OAuthService service = getScribeService(metaData, callbackUrl, session);
-            final Token scribeToken;
-            if (metaData.needsRequestToken()) {
-                scribeToken = service.getRequestToken();
-            } else {
-                scribeToken = null; // Empty token
+            /*
+             * Check for available deferrer service
+             */
+            {
+                final DeferringURLService ds = Services.getService(DeferringURLService.class);
+                if (null != ds) {
+                    final String deferredURL = ds.getDeferredURL(cbUrl);
+                    if (deferredURL != null) {
+                        cbUrl = deferredURL;
+                    }
+                }
             }
+            /*
+             * Get associated Scribe service
+             */
+            final org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session);
+            final Token scribeToken = metaData.needsRequestToken() ? service.getRequestToken() : null;
             final StringBuilder authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
             /*
              * Add optional scope
@@ -280,19 +306,20 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Process authorization URL
              */
-            final String authURL = metaData.processAuthorizationURLCallbackAware(metaData.processAuthorizationURL(authorizationURL.toString()), callbackUrl);
+            final String authURL = metaData.processAuthorizationURLCallbackAware(metaData.processAuthorizationURL(authorizationURL.toString()), cbUrl);
+            /*
+             * Register deferrer
+             */
+            if (metaData.registerTokenBasedDeferrer() && null != scribeToken) {
+                callbackRegistry.add(cbUrl, scribeToken.getToken());
+            }
             /*
              * Return interaction
              */
-
-            if (metaData.registerTokenBasedDeferrer()) {
-            	callbackRegistry.add(callbackUrl, scribeToken.getToken());
-            }
-
             return new OAuthInteractionImpl(
                 scribeToken == null ? OAuthToken.EMPTY_TOKEN : new ScribeOAuthToken(scribeToken),
                 authURL,
-                callbackUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK);
+                cbUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK);
         } catch (final org.scribe.exceptions.OAuthException e) {
             throw handleScribeOAuthException(e);
         } catch (final Exception e) {
@@ -705,7 +732,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 if (null == requestToken) {
                     throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
                 }
-                
+
                 Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
                 /*
                  * With the request token and the verifier (which is a number) we need now to get the access token
@@ -964,7 +991,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             provider.releaseWriteConnection(context, con);
         }
     }
-    
+
     @Override
     public void removeUnrecoverableItems(String secret, ServerSession session) throws OXException {
         final CryptoService cryptoService = Services.getService(CryptoService.class);

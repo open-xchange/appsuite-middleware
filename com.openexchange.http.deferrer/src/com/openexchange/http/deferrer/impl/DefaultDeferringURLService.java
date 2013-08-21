@@ -76,22 +76,29 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
             if (deferrerURL == null) {
                 return url;
             }
+            if (url.startsWith(deferrerURL)) {
+                // Already deferred
+                return url;
+            }
+            // Return deferred URL
             return deferrerURL + PREFIX.get().getPrefix() + "defer?redirect=" + URLEncoder.encode(url, "UTF-8");
         } catch (final UnsupportedEncodingException e) {
             throw new IllegalStateException("UTF-8 seems to be unavailable");
         }
     }
 
-    public abstract String getDeferrerURL();
+    /**
+     * Gets the deferrer URL; e.g. "https://my.maindomain.org"
+     *
+     * @return The deferrer URL
+     */
+    protected abstract String getDeferrerURL();
 
 
     @Override
     public String getBasicDeferrerURL() {
     	final String deferrerURL = getDeferrerURL();
-        if (deferrerURL == null) {
-            return PREFIX.get().getPrefix() + "defer";
-        }
-        return deferrerURL + PREFIX.get().getPrefix() + "defer";
+        return deferrerURL == null ? PREFIX.get().getPrefix() + "defer" : deferrerURL + PREFIX.get().getPrefix() + "defer";
     }
 
 }
