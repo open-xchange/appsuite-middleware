@@ -490,7 +490,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             closeSQLStuff(rs, stmt);
         }
     }
-    
+
     private static String getAliases(int user, int cid, AbstractMailAccount mailAccount) {
         StringAllocator sb = new StringAllocator(128);
         sb.append(mailAccount.getPrimaryAddress());
@@ -2313,7 +2313,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             final String transcribed = encryptionService.encrypt(session, decrypted);
                             // Add to batch update
                             if (null == updateStmt) {
-                                updateStmt = con.prepareStatement(UPDATE_PASSWORD1);
+                                updateStmt = con.prepareStatement(UPDATE_PASSWORD2);
                                 updateStmt.setInt(2, cid);
                                 updateStmt.setInt(4, user);
                             }

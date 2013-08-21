@@ -754,7 +754,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         try {
             final InputStream transformed = transformations.getInputStream(file.getContentType());
             if (null == transformed) {
-                LOG.warn("Got no resulting input stream from transformation, trying to recover original input");
+                if (DEBUG) {
+                    LOG.debug("Got no resulting input stream from transformation, trying to recover original input");
+                }
                 if (markSupported) {
                     try {
                         stream.reset();
@@ -763,7 +765,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                         LOG.warn("Error resetting input stream", e);
                     }
                 }
-                LOG.error("Unable to transform image from " + file);
+                LOG.warn("Unable to transform image from " + file.getName());
                 return file.repetitive() ? file : null;
             }
             return new FileHolder(transformed, -1, file.getContentType(), file.getName());
@@ -801,6 +803,10 @@ public class FileResponseRenderer implements ResponseRenderer {
     }
 
     private boolean isImage(final IFileHolder file) {
+        if (0 == file.getLength()) {
+            // File signals no available data
+            return false;
+        }
         String contentType = file.getContentType();
         if (null == contentType || !contentType.startsWith("image/")) {
             final String fileName = file.getName();

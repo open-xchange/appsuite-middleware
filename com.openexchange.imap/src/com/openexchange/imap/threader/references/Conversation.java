@@ -192,7 +192,7 @@ public final class Conversation {
         }
         if (!this.messageIds.isEmpty()) {
             final String[] sReferences = message.getReferences();
-            if (null != sReferences && containsAny(this.messageIds, setFor(sReferences))) {
+            if (null != sReferences && containsAny(this.messageIds, Arrays.asList(sReferences))) {
                 return true;
             }
         }
@@ -232,22 +232,18 @@ public final class Conversation {
     /**
      * Checks if at least one element is in both collections.
      *
-     * @param set1 The first collection, must not be <code>null</code>
-     * @param set2 The second collection, must not be <code>null</code>
+     * @param set The first collection, must not be <code>null</code>
+     * @param col The second collection, must not be <code>null</code>
      * @return <code>true</code> if the intersection of the collections is non-empty
      */
-    private static boolean containsAny(final Set<String> set1, final Set<String> set2) {
-        final Iterator<String> it = set2.iterator();
-        for (int i = set2.size(); i-- > 0;) {
-            if (set1.contains(it.next())) {
+    private static boolean containsAny(final Set<String> set, final Collection<String> col) {
+        final Iterator<String> it = col.iterator();
+        for (int i = col.size(); i-- > 0;) {
+            if (set.contains(it.next())) {
                 return true;
             }
         }
         return false;
-    }
-
-    private static Set<String> setFor(final String[] sReferences) {
-        return new HashSet<String>(Arrays.asList(sReferences));
     }
 
     /**
