@@ -50,42 +50,22 @@
 package com.openexchange.drive.actions;
 
 import com.openexchange.drive.Action;
-import com.openexchange.drive.FileVersion;
-import com.openexchange.drive.comparison.ThreeWayComparison;
-import com.openexchange.file.storage.File;
 
 /**
- * {@link DownloadFileAction}
+ * {@link SyncDirectoriesAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DownloadFileAction extends AbstractFileAction {
+public class SyncDirectoriesAction extends AbstractDirectoryAction {
 
-    public DownloadFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, long totalLength, String contentType, Long created, Long modified) {
-        super(file, newFile, comparison);
-        parameters.put(PARAMETER_TOTAL_LENGTH, Long.valueOf(totalLength));
-        parameters.put(PARAMETER_PATH, path);
-        if (null != contentType) {
-            parameters.put(PARAMETER_CONTENT_TYPE, contentType);
-        }
-        if (null != created) {
-            parameters.put(PARAMETER_CREATED, created);
-        }
-        if (null != modified) {
-            parameters.put(PARAMETER_MODIFIED, modified);
-        }
-    }
-
-    public DownloadFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, File serverFile) {
-        this(file, newFile, comparison, path, serverFile.getFileSize(), serverFile.getFileMIMEType(),
-            null != serverFile.getCreated() ? serverFile.getCreated().getTime() : null,
-            null != serverFile.getLastModified() ? serverFile.getLastModified().getTime() : null
-        );
+    public SyncDirectoriesAction(boolean reset) {
+        super(null, null, null);
+        parameters.put(PARAMETER_RESET, Boolean.valueOf(reset));
     }
 
     @Override
     public Action getAction() {
-        return Action.DOWNLOAD;
+        return Action.SYNC;
     }
 
 }

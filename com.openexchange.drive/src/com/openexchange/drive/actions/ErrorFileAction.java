@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ErrorFileAction extends AbstractAction<FileVersion> {
+public class ErrorFileAction extends AbstractFileAction {
 
     public ErrorFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, OXException error, boolean quarantine) {
         super(file, newFile, comparison);

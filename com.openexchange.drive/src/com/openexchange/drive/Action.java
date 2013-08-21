@@ -89,6 +89,11 @@ public enum Action {
     SYNC,
 
     /**
+     * Resets the local client state for a directory.
+     */
+    RESET,
+
+    /**
      * Signals an erroneous version.
      */
     ERROR

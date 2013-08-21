@@ -69,7 +69,7 @@ import com.openexchange.file.storage.File;
  * </ul>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AcknowledgeFileAction extends AbstractAction<FileVersion> {
+public class AcknowledgeFileAction extends AbstractFileAction {
 
     /**
      * Initializes a new {@link AcknowledgeFileAction}.

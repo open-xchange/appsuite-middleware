@@ -125,6 +125,15 @@ public class IntermediateSyncResult<T extends DriveVersion> {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((actionsForClient == null) ? 0 : actionsForClient.hashCode());
+        result = prime * result + ((actionsForServer == null) ? 0 : actionsForServer.hashCode());
+        return result;
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -135,7 +144,7 @@ public class IntermediateSyncResult<T extends DriveVersion> {
         if (!(obj instanceof IntermediateSyncResult)) {
             return false;
         }
-        IntermediateSyncResult<T> other = (IntermediateSyncResult<T>) obj;
+        IntermediateSyncResult other = (IntermediateSyncResult) obj;
         if (actionsForClient == null) {
             if (other.actionsForClient != null) {
                 return false;

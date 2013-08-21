@@ -50,42 +50,80 @@
 package com.openexchange.drive.actions;
 
 import com.openexchange.drive.Action;
-import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.comparison.ThreeWayComparison;
-import com.openexchange.file.storage.File;
 
 /**
- * {@link DownloadFileAction}
+ * {@link AbstractDirectoryAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DownloadFileAction extends AbstractFileAction {
+public abstract class AbstractDirectoryAction extends AbstractAction<DirectoryVersion> {
 
-    public DownloadFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, long totalLength, String contentType, Long created, Long modified) {
-        super(file, newFile, comparison);
-        parameters.put(PARAMETER_TOTAL_LENGTH, Long.valueOf(totalLength));
-        parameters.put(PARAMETER_PATH, path);
-        if (null != contentType) {
-            parameters.put(PARAMETER_CONTENT_TYPE, contentType);
-        }
-        if (null != created) {
-            parameters.put(PARAMETER_CREATED, created);
-        }
-        if (null != modified) {
-            parameters.put(PARAMETER_MODIFIED, modified);
-        }
-    }
-
-    public DownloadFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, File serverFile) {
-        this(file, newFile, comparison, path, serverFile.getFileSize(), serverFile.getFileMIMEType(),
-            null != serverFile.getCreated() ? serverFile.getCreated().getTime() : null,
-            null != serverFile.getLastModified() ? serverFile.getLastModified().getTime() : null
-        );
+    /**
+     * Initializes a new {@link AbstractDirectoryAction}.
+     *
+     * @param version
+     * @param newVersion
+     */
+    protected AbstractDirectoryAction(DirectoryVersion version, DirectoryVersion newVersion, ThreeWayComparison<DirectoryVersion> comparison) {
+        super(version, newVersion, comparison);
     }
 
     @Override
-    public Action getAction() {
-        return Action.DOWNLOAD;
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + DirectoryVersion.class.hashCode();
+        Action action = getAction();
+        result = prime * result + ((null == action) ? 0 : action.hashCode());
+        if (null != version) {
+            result = prime * result + version.getChecksum().hashCode();
+            result = prime * result + version.getPath().hashCode();
+        }
+        if (null != newVersion) {
+            result = prime * result + newVersion.getChecksum().hashCode();
+            result = prime * result + newVersion.getPath().hashCode();
+        }
+        result = prime * result + ((null == parameters) ? 0 : parameters.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof AbstractDirectoryAction)) {
+            return false;
+        }
+        AbstractDirectoryAction other = (AbstractDirectoryAction) obj;
+        if (newVersion == null) {
+            if (other.newVersion != null) {
+                return false;
+            }
+        } else if (!newVersion.equals(other.newVersion)) {
+            return false;
+        }
+        if (parameters == null) {
+            if (other.parameters != null) {
+                return false;
+            }
+        } else if (!parameters.equals(other.parameters)) {
+            return false;
+        }
+        if (version == null) {
+            if (other.version != null) {
+                return false;
+            }
+        } else if (!version.equals(other.version)) {
+            return false;
+        }
+        return true;
     }
 
 }
+

@@ -79,6 +79,7 @@ public final class DriveExceptionMessages implements LocalizableStrings {
     public static final String INVALID_FILENAME_MSG = "The file name \"%1$s\" is invalid";
     public static final String IGNORED_FILENAME_MSG = "The file name \"%1$s\" is ignored";
     public static final String CONFLICTING_PATH_MSG = "The path \"%1$s\" is conflicting";
+    public static final String SYNC_CYCLE_DETECTED_MSG = "A synchronization cycle consisting of the last %1$d sync results has been detected - please clear the local state of the client";
 
     /**
      * Prevent instantiation.

@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ErrorDirectoryAction extends AbstractAction<DirectoryVersion> {
+public class ErrorDirectoryAction extends AbstractDirectoryAction {
 
     public ErrorDirectoryAction(DirectoryVersion version, DirectoryVersion newVersion, ThreeWayComparison<DirectoryVersion> comparison, OXException error, boolean quarantine) {
         super(version, newVersion, comparison);

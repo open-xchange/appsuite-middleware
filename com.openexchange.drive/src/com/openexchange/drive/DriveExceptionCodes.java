@@ -118,6 +118,9 @@ public enum DriveExceptionCodes implements OXExceptionCode {
     /** The directory path \"%1$s\" is conflicting */
     CONFLICTING_PATH(DriveExceptionMessages.CONFLICTING_PATH_MSG, Category.CATEGORY_USER_INPUT, 19),
 
+    /** A synchronization cycle consisting of the last %1$d sync results has been detected - please clear the local state of the client */
+    SYNC_CYCLE_DETECTED(DriveExceptionMessages.SYNC_CYCLE_DETECTED_MSG, Category.CATEGORY_ERROR, 20),
+
     ;
 
     private static final String PREFIX = "DRV";

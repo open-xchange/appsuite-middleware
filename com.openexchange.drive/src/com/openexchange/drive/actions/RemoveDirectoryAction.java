@@ -59,7 +59,7 @@ import com.openexchange.drive.comparison.ThreeWayComparison;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RemoveDirectoryAction extends AbstractAction<DirectoryVersion> {
+public class RemoveDirectoryAction extends AbstractDirectoryAction {
 
     public RemoveDirectoryAction(DirectoryVersion version, ThreeWayComparison<DirectoryVersion> comparison) {
         super(version, null, comparison);
