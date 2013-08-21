@@ -1833,6 +1833,12 @@ msgstr ""
 msgid "The path \"%1$s\" is conflicting"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:82
+msgid ""
+"A synchronization cycle consisting of the last %1$d sync results has been "
+"detected - please clear the local state of the client"
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:63
 msgid "An error occurred for action: %1$s"
 msgstr ""
