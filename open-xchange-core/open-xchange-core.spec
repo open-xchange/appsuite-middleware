@@ -762,6 +762,13 @@ for I in $(seq 1 ${#NEWPROPS[@]}); do
     fi
 done
 
+# SoftwareChange_Request-1540
+pfile=/opt/open-xchange/etc/permissions.properties
+if ! grep "com.openexchange.capability.boring" >/dev/null $pfile; then
+    echo -e "\n# Mark this installation as boring, i.e. disable an easter egg\" >> $pfile
+    echo "# com.openexchange.capability.boring=true" >> $pfile
+fi
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT
 do
