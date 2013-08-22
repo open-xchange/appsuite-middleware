@@ -154,7 +154,11 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             try {
                 removed += deleteSubscriptionsForToken(connection, serviceID, token, timestamp);
             } catch (SQLException e) {
-                throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+                if ("42S02".equals(e.getSQLState())) {
+                    // "Table 'driveEventSubscriptions' doesn't exist" => no update task for drive tables in this schema yet, so ignore
+                } else {
+                    throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+                }
             } finally {
                 databaseService.backWritable(contextID, connection);
             }
