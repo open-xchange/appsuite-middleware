@@ -56,6 +56,8 @@ import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -174,7 +176,12 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             if (null != members && 0 < members.length) {
                 for (String member : members) {
                     if (false == isEmpty(member)) {
-                        config.getNetworkConfig().getJoin().getTcpIpConfig().addMember(member);
+                        try {
+                            config.getNetworkConfig().getJoin().getTcpIpConfig().addMember(InetAddress.getByName(member).getHostAddress());
+                        } catch (UnknownHostException e) {
+                            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(
+                                e, "com.openexchange.hazelcast.network.join.static.nodes");
+                        }
                     }
                 }
             }

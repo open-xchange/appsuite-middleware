@@ -50,14 +50,12 @@
 package com.openexchange.subscribe.json.actions;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.json.SubscriptionJSONWriter;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
@@ -65,35 +63,31 @@ import com.openexchange.subscribe.json.SubscriptionJSONWriter;
 public class NewSubscriptionAction extends AbstractSubscribeAction {
 
     public NewSubscriptionAction(ServiceLookup services) {
-        this.services = services;
+        super(services);
     }
 
     @Override
-    public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException {
-        Subscription subscription;
-        try {
-            subscription =
-                getSubscription(
-                    subscribeRequest.getRequestData(),
-                    subscribeRequest.getServerSession(),
-                    services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
-            subscription.setId(-1);
-            final SubscribeService subscribeService = subscription.getSource().getSubscribeService();
-            subscribeService.subscribe(subscription);
-            String urlPrefix = "";
-            {
-                String serverUrl = subscribeRequest.getRequestData().getParameter("__serverURL");
-                if (serverUrl != null) {
-                    urlPrefix = serverUrl;
-                }
+    public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException, JSONException {
+        Subscription subscription = getSubscription(
+            subscribeRequest.getRequestData(),
+            subscribeRequest.getServerSession(),
+            services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
+        subscription.setId(-1);
+        final SubscribeService subscribeService = subscription.getSource().getSubscribeService();
+        subscribeService.subscribe(subscription);
+        String urlPrefix = "";
+        {
+            String serverUrl = subscribeRequest.getRequestData().getParameter("__serverURL");
+            if (serverUrl != null) {
+                urlPrefix = serverUrl;
             }
-            JSONObject jsonTemp =
-                new SubscriptionJSONWriter().write(subscription, subscription.getSource().getFormDescription(), urlPrefix, subscribeRequest.getTimeZone());
-            return new AJAXRequestResult(Integer.valueOf(jsonTemp.getInt("id")), "json");
-        } catch (JSONException e) {
-            throw new OXException(e);
         }
-
+        // JSONObject jsonTemp = new SubscriptionJSONWriter().write(
+        // subscription,
+        // subscription.getSource().getFormDescription(),
+        // urlPrefix,
+        // subscribeRequest.getTimeZone());
+        return new AJAXRequestResult(Integer.valueOf(subscription.getId()), "json");
     }
 
 }

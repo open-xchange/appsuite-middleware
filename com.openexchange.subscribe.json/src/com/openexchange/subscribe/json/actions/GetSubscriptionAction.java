@@ -49,7 +49,6 @@
 
 package com.openexchange.subscribe.json.actions;
 
-import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -67,54 +66,50 @@ import com.openexchange.subscribe.json.SubscriptionJSONWriter;
  */
 public class GetSubscriptionAction extends AbstractSubscribeAction {
 
-	public GetSubscriptionAction(ServiceLookup services) {
-		super();
-		this.services = services;
+    public GetSubscriptionAction(ServiceLookup services) {
+        super(services);
+    }
 
-	}
+    @Override
+    public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException, JSONException {
+        JSONObject parameters = new JSONObject(subscribeRequest.getRequestData().getParameters());
 
-	@Override
-	public AJAXRequestResult perform(SubscribeRequest subscribeRequest)
-			throws OXException {
-		try {
-			JSONObject parameters = new JSONObject(subscribeRequest
-					.getRequestData().getParameters());
-			final int id;
-            try {
-                id = parameters.getInt("id");
-            } catch (final JSONException e) {
-                if (!parameters.hasAndNotNull("id")) {
-                    throw e;
-                }
-                final Object obj = parameters.get("id");
-                throw new JSONException("JSONObject[\"id\"] is not a number: " + obj);
+        final int id;
+        try {
+            id = parameters.getInt("id");
+        } catch (final JSONException e) {
+            if (!parameters.hasAndNotNull("id")) {
+                throw e;
             }
-			String source = "";
-			if (parameters.has("source")) {
-				source = parameters.getString("source");
-			}
-			final Subscription subscription = loadSubscription(
-					id,
-					subscribeRequest.getServerSession(),
-					source,
-					services.getService(SecretService.class).getSecret(
-							subscribeRequest.getServerSession()));
-			if (subscription == null) {
-				throw SubscriptionJSONErrorMessages.UNKNOWN_SUBSCRIPTION.create();
-			}
-			String urlPrefix = "";
-			if (subscribeRequest.getRequestData().getParameter("__serverURL") != null) {
-				urlPrefix = subscribeRequest.getRequestData().getParameter(
-						"__serverURL");
-			}
-			
-			JSONObject json = new SubscriptionJSONWriter().write(subscription,
-					subscription.getSource().getFormDescription(), urlPrefix, subscribeRequest.getTimeZone());
-			return new AJAXRequestResult(json, "json");
-		} catch (JSONException e) {
-		    throw SubscriptionJSONErrorMessages.THROWABLE.create(e, e.getMessage());
-		}
+            final Object obj = parameters.get("id");
+            throw new JSONException("JSONObject[\"id\"] is not a number: " + obj);
+        }
 
-	}
+        String source = "";
+        if (parameters.has("source")) {
+            source = parameters.getString("source");
+        }
+
+        final Subscription subscription = loadSubscription(
+            id,
+            subscribeRequest.getServerSession(),
+            source,
+            services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
+        if (subscription == null) {
+            throw SubscriptionJSONErrorMessages.UNKNOWN_SUBSCRIPTION.create();
+        }
+
+        String urlPrefix = "";
+        if (subscribeRequest.getRequestData().getParameter("__serverURL") != null) {
+            urlPrefix = subscribeRequest.getRequestData().getParameter("__serverURL");
+        }
+
+        JSONObject json = new SubscriptionJSONWriter().write(
+            subscription,
+            subscription.getSource().getFormDescription(),
+            urlPrefix,
+            subscribeRequest.getTimeZone());
+        return new AJAXRequestResult(json, "json");
+    }
 
 }
