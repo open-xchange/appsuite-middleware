@@ -112,7 +112,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     private final Appointment appointment;
 
-    private Appointment original;
+    private final Appointment original;
 
     private final ITipIntegrationUtility util;
 
@@ -128,7 +128,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     private final ServiceLookup services;
 
-    private List<NotificationParticipant> participants;
+    private final List<NotificationParticipant> participants;
 
     private final User user;
 
@@ -608,7 +608,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     }
 
     protected NotificationMail stateChanged(final NotificationMail mail, final ConfirmStatus status) throws OXException {
-        switch (status) {
+        final ConfirmStatus stat = null == status ? ConfirmStatus.NONE : status;
+        switch (stat) {
         case ACCEPT:
             mail.setSubject(prefix(mail) + new Sentence(Messages.SUBJECT_STATE_CHANGED).add(actor.getDisplayName()).add(Messages.ACCEPTED, ArgumentType.STATUS, status).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
             mail.setTemplateName("notify.appointment.accept");
@@ -1030,7 +1031,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
                 removeParticipant(appointmentToReport, session.getUserId());
                 NotificationMail request = request(participant, appointmentToReport, State.Type.MODIFIED);
                 request.setOriginal(appointment);
-                
+
                 List<NotificationParticipant> newParticipants = new ArrayList<NotificationParticipant>();
                 for (NotificationParticipant np : participants) {
                     if (np.getIdentifier() != session.getUserId()) {
