@@ -1,9 +1,3 @@
-open-xchange-realtime-atmosphere (7.2.2-13) stable; urgency=low
-
-  * Build for patch 2013-08-22
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 22 Aug 2013 14:13:23 +0200
-
 open-xchange-realtime-atmosphere (7.2.2-12) stable; urgency=low
 
   * Build for patch 2013-08-19
