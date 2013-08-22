@@ -197,7 +197,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         /*
          * set interfaces
          */
-        String interfaces = configService.getProperty("com.openexchange.hazelcast.interfaces");
+        String interfaces = configService.getProperty("com.openexchange.hazelcast.network.interfaces");
         if (false == isEmpty(interfaces)) {
             String[] ips = Strings.splitByComma(interfaces);
             if (null != ips && 0 < ips.length) {
