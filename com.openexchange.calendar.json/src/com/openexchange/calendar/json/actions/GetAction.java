@@ -59,8 +59,10 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -93,7 +95,11 @@ public final class GetAction extends AppointmentAction {
         final int inFolder = req.checkInt( AJAXServlet.PARAMETER_FOLDERID);
 
         final ServerSession session = req.getSession();
-        final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(session);
+        final AppointmentSqlFactoryService sqlFactoryService = getService();
+        if (null == sqlFactoryService) {
+            throw ServiceExceptionCode.serviceUnavailable(AppointmentSqlFactoryService.class);
+        }
+        final AppointmentSQLInterface appointmentsql = sqlFactoryService.createAppointmentSql(session);
 
         try {
             final Appointment appointmentobject = appointmentsql.getObjectById(id, inFolder);
