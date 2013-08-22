@@ -1,3 +1,7 @@
+* 2013-08-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27095: Don't replace spaces with pluses in servlet's path info
+
 * 2013-08-21 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 28420: Resolve hostnames before passing them into hazelcast configuration
