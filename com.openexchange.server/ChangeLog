@@ -1,6 +1,7 @@
 * 2013-08-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 27095: Don't replace spaces with pluses in servlet's path info
+ - Partial fix for 28472: Avoid update attempt for a non-existing subscription
 
 * 2013-08-21 - tobias.friedrich@open-xchange.com
 

@@ -162,7 +162,11 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     @Override
     public void update(final Subscription subscription) throws OXException {
-    	checkUpdate(loadSubscription(subscription.getContext(), subscription.getId(), null));
+        final Subscription loadedSubscription = loadSubscription(subscription.getContext(), subscription.getId(), null);
+        if (null == loadedSubscription) {
+            throw SubscriptionErrorMessage.SubscriptionNotFound.create();
+        }
+        checkUpdate(loadedSubscription);
         modifyIncoming(subscription);
         STORAGE.get().updateSubscription(subscription);
         modifyOutgoing(subscription);
