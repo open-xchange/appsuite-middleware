@@ -729,6 +729,14 @@ if ! grep "com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask" 
     echo "!com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask" >> $pfile
 fi
 
+# SoftwareChange_Request-1558
+pfile=/opt/open-xchange/etc/import.properties
+if ! grep "com.openexchange.import.contacts.limit" >/dev/null $pfile; then
+    echo -e "\n# sets the limit on how many contacts can be imported at once\n" >> $pfile
+    echo "# -1 means unlimited, defaults to -1" >> $pfile
+    echo "# com.openexchange.import.contacts.limit=-1" >> $pfile
+fi
+
 # SoftwareChange_Request-1564
 [ -e /opt/open-xchange/etc/cluster.properties ] && VALUE=$(ox_read_property com.openexchange.cluster.name /opt/open-xchange/etc/cluster.properties)
 TOVALUE=$(ox_read_property com.openexchange.hazelcast.group.name /opt/open-xchange/etc/hazelcast.properties)
