@@ -64,6 +64,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
 import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -87,6 +88,7 @@ import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -351,6 +353,17 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             final UnifiedInboxUID uid = new UnifiedInboxUID(mailId);
             MailAccess<?, ?> mailAccess = null;
             try {
+                // Determine unread count
+                final UnifiedInboxAccess access = this.access;
+                final Future<Integer> future = ThreadPools.getThreadPool().submit(new AbstractTask<Integer>() {
+
+                    @Override
+                    public Integer call() throws OXException {
+                        return Integer.valueOf(access.getFolderStorage().getUnreadCounter(fullName));
+                    }
+                });
+
+                // Get the message
                 mailAccess = MailAccess.getInstance(session, uid.getAccountId());
                 mailAccess.connect();
                 MailMessage mail = mailAccess.getMessageStorage().getMessage(uid.getFullName(), uid.getId(), markSeen);
@@ -362,6 +375,14 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 mail.setMailId(mailId);
                 mail.setFolder(fullName);
                 mail.setAccountId(uid.getAccountId());
+                try {
+                    mail.setUnreadMessages(future.get().intValue());
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
+                } catch (ExecutionException e) {
+                    throw ThreadPools.launderThrowable(e, OXException.class);
+                }
                 return mail;
             } finally {
                 closeSafe(mailAccess);

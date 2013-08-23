@@ -1,6 +1,7 @@
 * 2013-08-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 28472: Give a meaningful error message to user if login to Google Mail fails
+ - Fix for bug 28428: Return up-to-date value for unread/unseen messages
 
 * 2013-08-22 - thorben.betten@open-xchange.com
 
