@@ -14,7 +14,7 @@ Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
-URL:           http://www.open-xchange.com/            
+URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The essential core of an Open-Xchange backend
 Requires:      open-xchange-osgi >= @OXVERSION@
@@ -776,6 +776,9 @@ for I in $(seq 1 ${#NEWPROPS[@]}); do
         ox_set_property $NEWPROP "$DEFAULT" $pfile
     fi
 done
+
+# SoftwareChange_Request-1601
+ox_set_property com.openexchange.server.considerXForwards "true" /opt/open-xchange/etc/server.properties
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT

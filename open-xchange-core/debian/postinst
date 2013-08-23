@@ -648,6 +648,9 @@ for I in $(seq 1 ${#NEWPROPS[@]}); do
     fi
 done
 
+# SoftwareChange_Request-1601
+ox_set_property com.openexchange.server.considerXForwards "true" /opt/open-xchange/etc/server.properties
+
 setConfigFilePermissions() {
     PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
     for FILE in $PROTECT
