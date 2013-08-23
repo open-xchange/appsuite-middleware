@@ -353,16 +353,6 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             final UnifiedInboxUID uid = new UnifiedInboxUID(mailId);
             MailAccess<?, ?> mailAccess = null;
             try {
-                // Determine unread count
-                final UnifiedInboxAccess access = this.access;
-                final Future<Integer> future = ThreadPools.getThreadPool().submit(new AbstractTask<Integer>() {
-
-                    @Override
-                    public Integer call() throws OXException {
-                        return Integer.valueOf(access.getFolderStorage().getUnreadCounter(fullName));
-                    }
-                });
-
                 // Get the message
                 mailAccess = MailAccess.getInstance(session, uid.getAccountId());
                 mailAccess.connect();
@@ -370,18 +360,34 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 if (null == mail) {
                     return null;
                 }
+                // Determine unread count
+                final boolean wasUnseen = markSeen && mail.containsPrevSeen() && !mail.isPrevSeen();
+                Future<Integer> future = null;
+                if (wasUnseen) {
+                    final UnifiedInboxAccess access = this.access;
+                    future = ThreadPools.getThreadPool().submit(new AbstractTask<Integer>() {
+
+                        @Override
+                        public Integer call() throws OXException {
+                            return Integer.valueOf(access.getFolderStorage().getUnreadCounter(fullName));
+                        }
+                    });
+                }
+                // Convert to Unified Mail message
                 mail = new UnifiedMailMessage(mail, access.getAccountId());
                 mail.loadContent();
                 mail.setMailId(mailId);
                 mail.setFolder(fullName);
                 mail.setAccountId(uid.getAccountId());
-                try {
-                    mail.setUnreadMessages(future.get().intValue());
-                } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
-                } catch (ExecutionException e) {
-                    throw ThreadPools.launderThrowable(e, OXException.class);
+                if (null != future) {
+                    try {
+                        mail.setUnreadMessages(future.get().intValue());
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
+                    } catch (ExecutionException e) {
+                        throw ThreadPools.launderThrowable(e, OXException.class);
+                    }
                 }
                 return mail;
             } finally {
