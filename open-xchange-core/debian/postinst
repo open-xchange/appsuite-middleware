@@ -582,12 +582,27 @@ if ! ox_exists_property com.openexchange.server.fullPrimaryKeySupport $pfile; th
     ox_set_property com.openexchange.server.fullPrimaryKeySupport false $pfile
 fi
 
+# SoftwareChange_Request-1540
+pfile=/opt/open-xchange/etc/permissions.properties
+if ! grep "com.openexchange.capability.boring" >/dev/null $pfile; then
+    echo -e "\n# Mark this installation as boring, i.e. disable an easter egg\n" >> $pfile
+    echo "# com.openexchange.capability.boring=true" >> $pfile
+fi
+
 # SoftwareChange_Request-1556
 pfile=/opt/open-xchange/etc/excludedupdatetasks.properties
 if ! grep "com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask" >/dev/null $pfile; then
     echo -e "\n# v7.4.0 update tasks start here\n" >> $pfile
     echo "# Changes the columns actual_costs and target_costs for tasks from float to NUMERIC(12, 2)" >> $pfile
     echo "!com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask" >> $pfile
+fi
+
+# SoftwareChange_Request-1558
+pfile=/opt/open-xchange/etc/import.properties
+if ! grep "com.openexchange.import.contacts.limit" >/dev/null $pfile; then
+    echo -e "\n# sets the limit on how many contacts can be imported at once\n" >> $pfile
+    echo "# -1 means unlimited, defaults to -1" >> $pfile
+    echo "# com.openexchange.import.contacts.limit=-1" >> $pfile
 fi
 
 # SoftwareChange_Request-1564
@@ -632,13 +647,6 @@ for I in $(seq 1 ${#NEWPROPS[@]}); do
         ox_set_property $NEWPROP "$DEFAULT" $pfile
     fi
 done
-
-# SoftwareChange_Request-1540
-pfile=/opt/open-xchange/etc/permissions.properties
-if ! grep "com.openexchange.capability.boring" >/dev/null $pfile; then
-    echo -e "\n# Mark this installation as boring, i.e. disable an easter egg" >> $pfile
-    echo "# com.openexchange.capability.boring=true" >> $pfile
-fi
 
 setConfigFilePermissions() {
     PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"

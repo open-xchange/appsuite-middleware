@@ -107,18 +107,20 @@ public class LoFiLinkedinProfileDataSource extends AbstractLinkedinDataSource im
         if (firstName == null || lastName == null) {
             List<String> eMail = getEMail(contact);
             for (String string : eMail) {
-                try {
-                    final String personal = new QuotedInternetAddress(string, false).getPersonal();
-                    if (!Strings.isEmpty(personal)) {
-                        String[] pSplit = personal.replace(",", " ").split("\\s+");
-                        if (pSplit.length == 2) {
-                            firstName = pSplit[0];
-                            lastName = pSplit[1];
-                            break;
+                if (!Strings.isEmpty(string)) {
+                    try {
+                        final String personal = new QuotedInternetAddress(string, false).getPersonal();
+                        if (!Strings.isEmpty(personal)) {
+                            String[] pSplit = personal.replace(",", " ").split("\\s+");
+                            if (pSplit.length == 2) {
+                                firstName = pSplit[0];
+                                lastName = pSplit[1];
+                                break;
+                            }
                         }
+                    } catch (final AddressException e) {
+                        // Ignore
                     }
-                } catch (final AddressException e) {
-                    // Ignore
                 }
             }
         }

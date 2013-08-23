@@ -10,4 +10,4 @@ com.openexchange.import.ical.limit=10000
 
 # sets the limit on how many contacts can be imported at once
 # -1 means unlimited, defaults to -1
-#com.openexchange.import.contacts.limit=-1
+# com.openexchange.import.contacts.limit=-1

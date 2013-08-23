@@ -121,6 +121,8 @@ public class DriveServiceImpl implements DriveService {
     public SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions,
         List<DirectoryVersion> clientVersions) throws OXException {
         long start = System.currentTimeMillis();
+        DriveVersionValidator.validateDirectoryVersions(originalVersions);
+        DriveVersionValidator.validateDirectoryVersions(clientVersions);
         int retryCount = 0;
         while (true) {
             /*
@@ -174,6 +176,8 @@ public class DriveServiceImpl implements DriveService {
     @Override
     public SyncResult<FileVersion> syncFiles(DriveSession session, final String path, List<FileVersion> originalVersions, List<FileVersion> clientVersions) throws OXException {
         long start = System.currentTimeMillis();
+        DriveVersionValidator.validateFileVersions(originalVersions);
+        DriveVersionValidator.validateFileVersions(clientVersions);
         int retryCount = 0;
         while (true) {
             /*
@@ -227,6 +231,7 @@ public class DriveServiceImpl implements DriveService {
 
     @Override
     public IFileHolder download(DriveSession session, String path, FileVersion fileVersion, long offset, long length) throws OXException {
+        DriveVersionValidator.validateFileVersion(fileVersion);
         SyncSession driveSession = new SyncSession(session);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Handling download: file version: " + fileVersion + ", offset: " + offset + ", length: " + length);
@@ -238,6 +243,10 @@ public class DriveServiceImpl implements DriveService {
     @Override
     public SyncResult<FileVersion> upload(DriveSession session, String path, InputStream uploadStream, FileVersion originalVersion,
         FileVersion newVersion, String contentType, long offset, long totalLength, Date created, Date modified) throws OXException {
+        DriveVersionValidator.validateFileVersion(newVersion);
+        if (null != originalVersion) {
+            DriveVersionValidator.validateFileVersion(originalVersion);
+        }
         SyncSession driveSession = new SyncSession(session);
         if (driveSession.isTraceEnabled()) {
             driveSession.trace("Handling upload: original version: " + originalVersion + ", new version: " + newVersion +
