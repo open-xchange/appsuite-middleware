@@ -326,7 +326,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     tokenMailId = mailId;
                     jsonObject.put(DataFields.ID, mailId);
                 }
-                jsonObject.put(UNREAD, mail.getUnreadMessages());
+                final int unreadMessages = mail.getUnreadMessages();
+                if (unreadMessages >= 0) {
+                    jsonObject.put(UNREAD, unreadMessages);
+                }
                 jsonObject.put(
                     HAS_ATTACHMENTS,
                     mail.containsHasAttachment() ? mail.hasAttachment() : mail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_MIXED));

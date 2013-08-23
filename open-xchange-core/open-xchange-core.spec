@@ -9,12 +9,12 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
-URL:           http://www.open-xchange.com/            
+URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The essential core of an Open-Xchange backend
 Requires:      open-xchange-osgi >= @OXVERSION@
@@ -777,6 +777,9 @@ for I in $(seq 1 ${#NEWPROPS[@]}); do
     fi
 done
 
+# SoftwareChange_Request-1601
+ox_set_property com.openexchange.server.considerXForwards "true" /opt/open-xchange/etc/server.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT
 do
@@ -820,12 +823,14 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Fri Aug 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth candidate for 7.4.0 release
 * Tue Aug 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-19
 * Mon Aug 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Fifth release candidate for 7.4.0
-* Mon Aug 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-21
+* Mon Aug 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 7.4.0
 * Tue Aug 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth release candidate for 7.4.0
 * Tue Aug 06 2013 Marcus Klein <marcus.klein@open-xchange.com>

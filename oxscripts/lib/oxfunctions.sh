@@ -267,7 +267,7 @@ if ( $found ) {
         }
         if ( $i == $start ) {
             print $out;
-            print "\n";
+            print "\n" if( substr($OUTLINES[$i],-1) ne "\n" );
         }
     }
 } else {
@@ -398,27 +398,28 @@ my $back  = 1;
 my $start = 0;
 my $end = 0;
 foreach my $line (@LINES) {
-  if ( $line =~ /^$opt\s*[:=]/ ) {
-    $end=$count;
-    while ( $LINES[$count-$back++] =~ /^#/ ) {
+    if ( $line =~ /^$opt\s*[:=]/ ) {
+        $end=$count;
+        while ( $LINES[$count-$back++] =~ /^#/ ) {
+        }
+        $start=$count-$back;
     }
-    ;
-    $start=$count-$back;
-  }
-  $count++;
+    $count++;
 }
-
+if ( $LINES[$end+1] =~ /^\s*$/ ) {
+    $end++;
+}
 for (my $i=0; $i<=$#LINES; $i++) {
-  if ( $i <= $start+1 || $i > $end ) {
-    print $LINES[$i];
-  }
+    if ( $i <= $start+1 || $i > $end ) {
+        print $LINES[$i];
+    }
 }
 ' > $tmp
     if [ $? -gt 0 ]; then
- 	rm -f $tmp
- 	die "ox_remove_property: FATAL: error removing property $prop from $propfile"
+        rm -f $tmp
+        die "ox_remove_property: FATAL: error removing property $prop from $propfile"
     else
- 	mv $tmp $propfile
+        mv $tmp $propfile
     fi
     unset propfile
     unset prop
@@ -441,7 +442,7 @@ ox_comment(){
     local tmp=${propfile}.tmp$$
     cp -a --remove-destination $propfile $tmp
     if [ "$action" == "add" ]; then
-	sed "s/^$prop/# $prop/" < $propfile > $tmp;
+        sed "s/^$prop/# $prop/" < $propfile > $tmp;
         if [ $? -gt 0 ]; then
             rm -f $tmp
             die "ox_comment: FATAL: could not add comment in file $propfile to $prop"

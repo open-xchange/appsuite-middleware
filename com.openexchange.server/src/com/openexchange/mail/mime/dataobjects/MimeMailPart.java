@@ -82,6 +82,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -366,6 +367,10 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     @Override
     public InputStream getInputStream() throws OXException {
+        return getInputStream0(true);
+    }
+
+    private InputStream getInputStream0(final boolean handleNpe) throws OXException {
         final Part part = this.part;
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
@@ -383,10 +388,39 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 return getRawInputStream(e);
             } catch (final MessagingException e) {
                 return getRawInputStream(e);
+            } catch (final NullPointerException e) {
+                // Occurs in case of non-JavaMail-parseable Content-Type header
+                if (!handleNpe) {
+                    throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+                final InputStream in = sanitizeAndGetInputStream(part);
+                if (null == in) {
+                    throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+                return in;
             }
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
+    }
+
+    private InputStream sanitizeAndGetInputStream(final Part part) throws OXException {
+        try {
+            Part p = part;
+            final String cts = MimeMessageUtility.getHeader("Content-Type", null, p);
+            if (null == cts) {
+                return null;
+            }
+            if (p.getClass().getName().startsWith("com.sun.mail.imap.IMAP")) {
+                loadContent();
+                p = this.part;
+            }
+            p.setHeader("Content-Type", new ContentType(cts).toString(true));
+        } catch (final Exception x) {
+            // Couldn't sanitize
+            return null;
+        }
+        return getInputStream0(false);
     }
 
     private InputStream getRawInputStream(final Exception e) throws MessagingException, OXException {
@@ -414,6 +448,8 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             throw me;
         }
     }
+
+
 
     @Override
     public MailPart getEnclosedMailPart(final int index) throws OXException {
