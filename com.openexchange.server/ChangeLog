@@ -1,3 +1,7 @@
+* 2013-08-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28472: Give a meaningful error message to user if login to Google Mail fails
+
 * 2013-08-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 27095: Don't replace spaces with pluses in servlet's path info

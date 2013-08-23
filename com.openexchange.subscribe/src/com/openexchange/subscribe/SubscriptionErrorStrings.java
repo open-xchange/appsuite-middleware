@@ -127,4 +127,7 @@ public class SubscriptionErrorStrings implements LocalizableStrings {
 
 	// An unexpected error occurred: %1$s.
     public static final String UNEXPECTED_ERROR = "An unexpected error occurred: %1$s.";
+
+    // Please specify your full E-Mail address as login name.
+    public static final String EMAIL_ADDR_LOGIN = "Please specify your full E-Mail address as login name.";
 }
