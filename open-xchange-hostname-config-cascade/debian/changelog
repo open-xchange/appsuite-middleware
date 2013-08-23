@@ -1,3 +1,9 @@
+open-xchange-hostname-config-cascade (7.4.0-6) stable; urgency=low
+
+  * Sixth candidate for 7.4.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 23 Aug 2013 12:09:20 +0200
+
 open-xchange-hostname-config-cascade (7.4.0-5) stable; urgency=low
 
   * Fifth release candidate for 7.4.0
