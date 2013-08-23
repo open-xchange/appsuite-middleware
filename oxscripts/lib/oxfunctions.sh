@@ -267,7 +267,7 @@ if ( $found ) {
         }
         if ( $i == $start ) {
             print $out;
-            print "\n";
+            print "\n" if( substr($OUTLINES[$i],-1) ne "\n" );
         }
     }
 } else {
@@ -442,7 +442,7 @@ ox_comment(){
     local tmp=${propfile}.tmp$$
     cp -a --remove-destination $propfile $tmp
     if [ "$action" == "add" ]; then
-	sed "s/^$prop/# $prop/" < $propfile > $tmp;
+        sed "s/^$prop/# $prop/" < $propfile > $tmp;
         if [ $? -gt 0 ]; then
             rm -f $tmp
             die "ox_comment: FATAL: could not add comment in file $propfile to $prop"
