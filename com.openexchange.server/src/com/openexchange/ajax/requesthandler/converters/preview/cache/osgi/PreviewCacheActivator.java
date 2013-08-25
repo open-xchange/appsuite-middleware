@@ -54,10 +54,13 @@ import java.util.Hashtable;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter;
-import com.openexchange.ajax.requesthandler.converters.preview.cache.PreviewCacheImpl;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.FileStorePreviewCacheImpl;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.RdbPreviewCacheImpl;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.AddRefIdForPreviewCacheTable;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheCreateTableService;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheCreateTableTask;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheDeleteListener;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -83,24 +86,38 @@ public final class PreviewCacheActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        final PreviewCacheImpl cacheImpl = new PreviewCacheImpl();
-        registerService(PreviewCache.class, cacheImpl);
+        final PreviewCache cache;
+        final EventHandler eventHandler;
+        {
+            final String type = getService(ConfigurationService.class).getProperty("com.openexchange.preview.cache.type", "FS");
+            if ("DB".equalsIgnoreCase(type)) {
+                final RdbPreviewCacheImpl rdbPreviewCacheImpl = new RdbPreviewCacheImpl();
+                cache = rdbPreviewCacheImpl;
+                eventHandler = rdbPreviewCacheImpl;
+            } else {
+                final FileStorePreviewCacheImpl fileStorePreviewCache = new FileStorePreviewCacheImpl();
+                cache = fileStorePreviewCache;
+                eventHandler = fileStorePreviewCache;
+            }
+        }
+        // Register stuff
+        registerService(PreviewCache.class, cache);
         {
             final Dictionary<String, Object> d = new Hashtable<String, Object>(1);
             d.put(EventConstants.EVENT_TOPIC, new String[] { FileStorageEventConstants.UPDATE_TOPIC, FileStorageEventConstants.DELETE_TOPIC });
-            registerService(EventHandler.class, cacheImpl, d);
+            registerService(EventHandler.class, eventHandler, d);
         }
-        AbstractPreviewResultConverter.setPreviewCache(cacheImpl);
+        AbstractPreviewResultConverter.setPreviewCache(cache);
         /*
          * Register update task, create table job and delete listener
          */
         registerService(CreateTableService.class, new PreviewCacheCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PreviewCacheCreateTableTask()));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PreviewCacheCreateTableTask(), new AddRefIdForPreviewCacheTable()));
         registerService(DeleteListener.class, new PreviewCacheDeleteListener());
     }
 

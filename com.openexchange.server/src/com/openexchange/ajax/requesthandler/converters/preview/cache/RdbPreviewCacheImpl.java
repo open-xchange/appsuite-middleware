@@ -74,18 +74,18 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
- * {@link PreviewCacheImpl} - The database-backed preview cache implementation for documents.
+ * {@link RdbPreviewCacheImpl} - The database-backed preview cache implementation for documents.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PreviewCacheImpl implements PreviewCache, EventHandler {
+public final class RdbPreviewCacheImpl implements PreviewCache, EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(PreviewCacheImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbPreviewCacheImpl.class);
 
     /**
-     * Initializes a new {@link PreviewCacheImpl}.
+     * Initializes a new {@link RdbPreviewCacheImpl}.
      */
-    public PreviewCacheImpl() {
+    public RdbPreviewCacheImpl() {
         super();
     }
 
