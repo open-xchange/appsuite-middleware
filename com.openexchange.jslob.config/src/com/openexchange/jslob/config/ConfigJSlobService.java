@@ -413,7 +413,11 @@ public final class ConfigJSlobService implements JSlobService {
 
                     jObject.put(lobPath, convert2JS(setting));
                 } catch (final OXException e) {
-                    LOG.warn("Illegal path: " + configTreePath + ". Please check paths.perfMap file.", e);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.warn("Illegal path: " + configTreePath + ". Please check paths.perfMap file.", e);
+                    } else {
+                        LOG.warn("Illegal path: " + configTreePath + ". Please check paths.perfMap file.");
+                    }
                 }
             }
 
