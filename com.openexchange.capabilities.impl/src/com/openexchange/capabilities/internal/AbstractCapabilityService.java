@@ -224,8 +224,6 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     @Override
     public Set<Capability> getCapabilities(final int userId, final int contextId, final boolean computeCapabilityFilters) throws OXException {
-        long st = System.currentTimeMillis();
-
         ServerSession serverSession = ServerSessionAdapter.valueOf(userId, contextId);
 
         Set<Capability> capabilities = new HashSet<Capability>(64);
@@ -398,10 +396,6 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         if (computeCapabilityFilters) {
             applyUIFilter(capabilities);
         }
-
-
-        long d = System.currentTimeMillis() - st;
-        System.out.println("AbstractCapabilityService.getCapabilities() took " + d + "msec");
 
 //        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 //        System.out.println("AbstractCapabilityService.getCapabilities()");
