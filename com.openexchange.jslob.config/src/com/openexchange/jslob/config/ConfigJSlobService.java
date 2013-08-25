@@ -413,9 +413,9 @@ public final class ConfigJSlobService implements JSlobService {
                     jObject.put(lobPath, convert2JS(setting));
                 } catch (final OXException e) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.warn("Illegal config-tree path: " + configTreePath + ". Please check paths.perfMap file. (JSlob ID: " + lobPath + ")", e);
+                        LOG.warn("Illegal config-tree path: " + configTreePath + ". Please check paths.perfMap file (JSlob ID: " + lobPath + ") OR if path-associatd bundle has been started.", e);
                     } else {
-                        LOG.warn("Illegal config-tree path: " + configTreePath + ". Please check paths.perfMap file. (JSlob ID: " + lobPath + ")");
+                        LOG.warn("Illegal config-tree path: " + configTreePath + ". Please check paths.perfMap file (JSlob ID: " + lobPath + ") OR if path-associatd bundle has been started.");
                     }
                 }
             }
