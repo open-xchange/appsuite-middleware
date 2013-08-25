@@ -406,7 +406,6 @@ public final class ConfigJSlobService implements JSlobService {
             for (final Map.Entry<String, String> mapping : entrySet) {
                 final String configTreePath = mapping.getKey();
                 final String lobPath = mapping.getValue();
-
                 try {
                     final Setting setting = configTree.getSettingByPath(configTreePath);
                     stor.readValues(setting);
@@ -414,9 +413,9 @@ public final class ConfigJSlobService implements JSlobService {
                     jObject.put(lobPath, convert2JS(setting));
                 } catch (final OXException e) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.warn("Illegal path: " + configTreePath + ". Please check paths.perfMap file.", e);
+                        LOG.warn("Illegal config-tree path: " + configTreePath + ". Please check paths.perfMap file. (JSlob ID: " + lobPath + ")", e);
                     } else {
-                        LOG.warn("Illegal path: " + configTreePath + ". Please check paths.perfMap file.");
+                        LOG.warn("Illegal config-tree path: " + configTreePath + ". Please check paths.perfMap file. (JSlob ID: " + lobPath + ")");
                     }
                 }
             }
