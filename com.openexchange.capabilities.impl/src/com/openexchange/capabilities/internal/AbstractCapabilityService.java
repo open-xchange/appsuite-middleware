@@ -80,6 +80,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
+import com.openexchange.java.ConcurrentEnumMap;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -109,7 +110,29 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     // ------------------------------------------------------------------------------------------------ //
 
+    private static final ConcurrentEnumMap<Permission, Capability> p2capabilities = new ConcurrentEnumMap<Permission, Capability>(Permission.class);
     private static final ConcurrentMap<String, Capability> capabilities = new ConcurrentHashMap<String, Capability>(96);
+
+    /**
+     * Gets the singleton capability for given identifier
+     *
+     * @param permission The permission
+     * @return The singleton capability
+     */
+    public static Capability getCapability(final Permission permission) {
+        if (null == permission) {
+            return null;
+        }
+        Capability capability = p2capabilities.get(permission);
+        if (null == capability) {
+            final Capability newcapability = getCapability(toLowerCase(permission.name()));
+            capability = p2capabilities.putIfAbsent(permission, newcapability);
+            if (null == capability) {
+                capability = newcapability;
+            }
+        }
+        return capability;
+    }
 
     /**
      * Gets the singleton capability for given identifier
@@ -118,6 +141,9 @@ public abstract class AbstractCapabilityService implements CapabilityService {
      * @return The singleton capability
      */
     public static Capability getCapability(final String id) {
+        if (null == id) {
+            return null;
+        }
         Capability capability = capabilities.get(id);
         if (capability != null) {
             return capability;
@@ -183,9 +209,12 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             synchronized (this) {
                 tmp = autologin;
                 if (null == tmp) {
-                    tmp = Boolean.valueOf(services.getService(ConfigurationService.class).getBoolProperty(
-                        "com.openexchange.sessiond.autologin",
-                        false));
+                    final ConfigurationService configurationService = services.getService(ConfigurationService.class);
+                    if (null == configurationService) {
+                        // Return default value
+                        return false;
+                    }
+                    tmp = Boolean.valueOf(configurationService.getBoolProperty("com.openexchange.sessiond.autologin", false));
                     autologin = tmp;
                 }
             }
@@ -195,6 +224,8 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     @Override
     public Set<Capability> getCapabilities(final int userId, final int contextId, final boolean computeCapabilityFilters) throws OXException {
+        long st = System.currentTimeMillis();
+
         ServerSession serverSession = ServerSessionAdapter.valueOf(userId, contextId);
 
         Set<Capability> capabilities = new HashSet<Capability>(64);
@@ -210,7 +241,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             final UserPermissionBits userPermissionBits = services.getService(UserPermissionService.class).getUserPermissionBits(serverSession.getUserId(), serverSession.getContext());
             // Capabilities by user permission bits
             for (final Permission p: Permission.byBits(userPermissionBits.getPermissionBits())) {
-                capabilities.add(getCapability(toLowerCase(p.name())));
+                capabilities.add(getCapability(p));
             }
             // Apply capabilities for non-transient sessions
             if (!serverSession.isTransient()) {
@@ -293,7 +324,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                     for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
                         if (entry.getKey().startsWith("com.openexchange.capability.")) {
                             boolean value = Boolean.parseBoolean(entry.getValue().get());
-                            String name = entry.getKey().substring(28);
+                            String name = toLowerCase(entry.getKey().substring(28));
                             if (value) {
                                 capabilities.add(getCapability(name));
                             } else {
@@ -301,6 +332,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                             }
                         }
                     }
+
                 }
             }
         }
@@ -366,6 +398,10 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         if (computeCapabilityFilters) {
             applyUIFilter(capabilities);
         }
+
+
+        long d = System.currentTimeMillis() - st;
+        System.out.println("AbstractCapabilityService.getCapabilities() took " + d + "msec");
 
 //        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 //        System.out.println("AbstractCapabilityService.getCapabilities()");
