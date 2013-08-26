@@ -101,7 +101,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.regex.Pattern;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
@@ -117,7 +116,6 @@ import org.osgi.service.http.NamespaceException;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.servletfilter.RequestReportingFilter;
 import com.openexchange.http.grizzly.servletfilter.WrappingFilter;
-import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.tools.exceptions.ExceptionUtils;
 
@@ -537,7 +535,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         final MappingData mappingData = request.obtainMappingData();
         //Change contextPath from "/" to the empty Sring for the default context in the httpservice
         mappingData.contextPath.setString("");
-
+        
         mappingData.wrapperPath.setString(alias);
 
         if (alias.length() != originalAlias.length()) {
@@ -546,24 +544,9 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                 pathInfo = "/" + pathInfo;
             }
 
-            mappingData.pathInfo.setString(replaceSpacesWithPluses(pathInfo));
-        } else {
-            String pathInfo = mappingData.pathInfo.toString();
-            if (null != pathInfo) {
-                mappingData.pathInfo.setString(replaceSpacesWithPluses(pathInfo));
-            }
+            mappingData.pathInfo.setString(pathInfo);
         }
 
         updatePaths(request, mappingData);
     }
-
-    private static final Pattern P_SPACE = Pattern.compile(" ");
-
-    private static String replaceSpacesWithPluses(final String str) {
-        if (Strings.isEmpty(str)) {
-            return str;
-        }
-        return P_SPACE.matcher(str).replaceAll("+");
-    }
-
 }
