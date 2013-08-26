@@ -66,6 +66,9 @@ import com.openexchange.ajax.requesthandler.converters.preview.cache.PreviewCach
 import com.openexchange.ajax.requesthandler.converters.preview.cache.PreviewCacheMBeanImpl;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.RdbPreviewCacheImpl;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.AddRefIdForPreviewCacheTable;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.DropDataFromPreviewCacheTable;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheCreateDataTableService;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheCreateDataTableTask;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheCreateTableService;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheCreateTableTask;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheDeleteListener;
@@ -165,7 +168,8 @@ public final class PreviewCacheActivator extends HousekeepingActivator {
          * Register update task, create table job and delete listener
          */
         registerService(CreateTableService.class, new PreviewCacheCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PreviewCacheCreateTableTask(), new AddRefIdForPreviewCacheTable()));
+        registerService(CreateTableService.class, new PreviewCacheCreateDataTableService());
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PreviewCacheCreateTableTask(), new AddRefIdForPreviewCacheTable(), new PreviewCacheCreateDataTableTask(), new DropDataFromPreviewCacheTable()));
         registerService(DeleteListener.class, new PreviewCacheDeleteListener());
     }
 
