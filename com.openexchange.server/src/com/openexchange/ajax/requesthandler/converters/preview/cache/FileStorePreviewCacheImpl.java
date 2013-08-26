@@ -128,13 +128,15 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
     private void batchDeleteFiles(final Collection<String> ids, final FileStorage fileStorage) {
         try {
             fileStorage.deleteFiles(ids.toArray(new String[0]));
-        } catch (final OXException e) {
+        } catch (final Exception e) {
             // Retry one-by-one
             for (final String id : ids) {
-                try {
-                    fileStorage.deleteFile(id);
-                } catch (final Exception x) {
-                    // Ignore
+                if (null != id) {
+                    try {
+                        fileStorage.deleteFile(id);
+                    } catch (final Exception x) {
+                        // Ignore
+                    }
                 }
             }
         }
@@ -290,13 +292,13 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
 
         final ConfigurationService confService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         if (null != confService) {
-            String property = confService.getProperty("com.openexchange.preview.cache.quota", "-1").trim();
+            String property = confService.getProperty("com.openexchange.preview.cache.quota", "10485760").trim();
             try {
                 quota = Long.parseLong(property);
             } catch (final NumberFormatException e) {
                 quota = -1L;
             }
-            property = confService.getProperty("com.openexchange.preview.cache.quotaPerDocument", "-1").trim();
+            property = confService.getProperty("com.openexchange.preview.cache.quotaPerDocument", "524288").trim();
             try {
                 quotaPerDocument = Long.parseLong(property);
             } catch (final NumberFormatException e) {
