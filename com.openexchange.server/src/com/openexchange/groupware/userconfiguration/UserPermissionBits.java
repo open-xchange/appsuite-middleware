@@ -219,12 +219,16 @@ public class UserPermissionBits implements Serializable, Cloneable {
     public static final int DENIED_PORTAL = 1 << 28;
 
     /**
-     * The permission bit for caldav access. ATTENTION: This is actually handled by the config cascade!
+     * The permission bit for caldav access.
+     * <p>
+     * <b>ATTENTION</b>: This is actually handled by the config cascade!
      */
     public static final int CALDAV = 1 << 29;
 
     /**
-     * The permission bit for carddav access. ATTENTION: This is actually handled by the config cascade!
+     * The permission bit for carddav access.
+     * <p>
+     * <b>ATTENTION</b>: This is actually handled by the config cascade!
      */
     public static final int CARDDAV = 1 << 30;
 
