@@ -52,6 +52,7 @@ package com.openexchange.ajax.requesthandler.converters.preview.cache;
 import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -78,6 +79,7 @@ import com.openexchange.preview.cache.PreviewCache;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageCodes;
 
@@ -90,32 +92,36 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(FileStorePreviewCacheImpl.class);
 
-    private static final ConcurrentTIntObjectHashMap<QuotaFileStorage> FILE_STORE_CACHE = new ConcurrentTIntObjectHashMap<QuotaFileStorage>();
+    private static final ConcurrentTIntObjectHashMap<FileStorage> FILE_STORE_CACHE = new ConcurrentTIntObjectHashMap<FileStorage>();
 
-    private static QuotaFileStorage getFileStorage(final Context ctx) throws OXException {
+    private static FileStorage getFileStorage(final Context ctx, final boolean quotaAware) throws OXException {
         final int key = ctx.getContextId();
-        QuotaFileStorage qfs = FILE_STORE_CACHE.get(key);
-        if (null == qfs) {
-            final QuotaFileStorage quotaFileStorage = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
-            qfs = FILE_STORE_CACHE.putIfAbsent(key, quotaFileStorage);
-            if (null == qfs) {
-                qfs = quotaFileStorage;
+        FileStorage fs = FILE_STORE_CACHE.get(key);
+        if (null == fs) {
+            final URI uri = FilestoreStorage.createURI(ctx);
+            final FileStorage newFileStorage = quotaAware ? QuotaFileStorage.getInstance(uri, ctx) : FileStorage.getInstance(uri);
+            fs = FILE_STORE_CACHE.putIfAbsent(key, newFileStorage);
+            if (null == fs) {
+                fs = newFileStorage;
             }
         }
-        return qfs;
+        return fs;
     }
 
-    private static QuotaFileStorage getFileStorage(final int contextId) throws OXException {
-        return getFileStorage(ContextStorage.getStorageContext(contextId));
+    private static FileStorage getFileStorage(final int contextId, final boolean quotaAware) throws OXException {
+        return getFileStorage(ContextStorage.getStorageContext(contextId), quotaAware);
     }
 
     // ------------------------------------------------------------------------------- //
 
+    private final boolean quotaAware;
+
     /**
      * Initializes a new {@link FileStorePreviewCacheImpl}.
      */
-    public FileStorePreviewCacheImpl() {
+    public FileStorePreviewCacheImpl(final boolean quotaAware) {
         super();
+        this.quotaAware = quotaAware;
     }
 
     @Override
@@ -181,11 +187,11 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
         }
 
         // Save file
-        final QuotaFileStorage fileStorage = getFileStorage(contextId);
+        final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         if (null != refId) {
             fileStorage.deleteFile(refId);
         }
-        refId = fileStorage.saveNewFile(Streams.newByteArrayInputStream(bytes), bytes.length);
+        refId = fileStorage.saveNewFile(Streams.newByteArrayInputStream(bytes));
 
         final Connection con = databaseService.getWritable(contextId);
         boolean committed = true;
@@ -368,7 +374,7 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
                 stmt.executeUpdate();
 
                 // Remove from file storage
-                final QuotaFileStorage fileStorage = getFileStorage(contextId);
+                final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
                 fileStorage.deleteFiles(map.values().toArray(new String[0]));
             }
         } catch (final SQLException e) {
@@ -443,7 +449,7 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
                 return null;
             }
             final String refIf = rs.getString(1);
-            final QuotaFileStorage fileStorage = getFileStorage(contextId);
+            final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
             return new CachedPreview(fileStorage.getFile(refIf), rs.getString(2), rs.getString(3), rs.getLong(4));
         } catch (final SQLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
@@ -509,7 +515,7 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
                 rollback = false;
 
                 // Remove from file storage
-                final QuotaFileStorage fileStorage = getFileStorage(contextId);
+                final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
                 fileStorage.deleteFiles(map.values().toArray(new String[0]));
             }
 
@@ -587,7 +593,7 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
                 rollback = false;
 
                 // Remove from file storage
-                final QuotaFileStorage fileStorage = getFileStorage(contextId);
+                final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
                 fileStorage.deleteFiles(map.values().toArray(new String[0]));
             }
         } catch (final DataTruncation e) {
@@ -664,7 +670,7 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
                 return null;
             }
             final String refId = rs.getString(1);
-            final QuotaFileStorage fileStorage = getFileStorage(contextId);
+            final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
             try {
                 Streams.close(fileStorage.getFile(refId));
             } catch (OXException e) {
