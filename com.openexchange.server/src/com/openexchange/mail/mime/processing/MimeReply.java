@@ -308,7 +308,7 @@ public final class MimeReply {
                         /*
                          * Message holds header 'Reply-To'
                          */
-                        tmpSet.addAll(Arrays.asList(QuotedInternetAddress.parseHeader(unfold(replyTo[0]), true)));
+                        tmpSet.addAll(Arrays.asList(QuotedInternetAddress.parseHeader(unfold(replyTo[0]), false)));
                         fromAdded = false;
                     }
                 }
