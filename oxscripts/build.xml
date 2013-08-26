@@ -47,6 +47,7 @@
         </copy>
         <chmod perm="755" file="${sbinInstallDir}/checkconsistency"/>
         <chmod perm="755" file="${sbinInstallDir}/checkconfigconsistency"/>
+    	<chmod perm="755" file="${sbinInstallDir}/clearpreviewcache"/>
         <chmod perm="755" file="${sbinInstallDir}/closesessions"/>
         <chmod perm="755" file="${sbinInstallDir}/forceupdatetask"/>
         <chmod perm="755" file="${sbinInstallDir}/getmissingservices"/>
@@ -70,7 +71,7 @@
             <fileset dir="${sbinDir}"/>
             <mapper type="glob" from="*.in" to="*"/>
         </copy>
-        <replace dir="${patchSbinDir}" includes="checkconsistency checkconfigconsistency closesessions forceupdatetask getmissingservices listExecutedUpdateTasks logincounter lastlogintimestamp open-xchange restoregabdefaults runupdate">
+        <replace dir="${patchSbinDir}" includes="checkconsistency checkconfigconsistency clearpreviewcache closesessions forceupdatetask getmissingservices listExecutedUpdateTasks logincounter lastlogintimestamp open-xchange restoregabdefaults runupdate">
             <replacefilter token="@oxfunctions@" value="${prefix}/${libDir}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@" value="${confInstallDir}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
