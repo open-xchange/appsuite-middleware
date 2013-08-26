@@ -95,13 +95,13 @@ public final class PreviewCacheActivator extends HousekeepingActivator {
         final EventHandler eventHandler;
         {
             final ConfigurationService configurationService = getService(ConfigurationService.class);
-            final String type = configurationService.getProperty("com.openexchange.preview.cache.type", "FS");
+            final String type = configurationService.getProperty("com.openexchange.preview.cache.type", "FS").trim();
             if ("DB".equalsIgnoreCase(type)) {
                 final RdbPreviewCacheImpl rdbPreviewCacheImpl = new RdbPreviewCacheImpl();
                 cache = rdbPreviewCacheImpl;
                 eventHandler = rdbPreviewCacheImpl;
             } else {
-                final boolean quotaAware = configurationService.getBoolProperty("com.openexchange.preview.cache.quotaAware", true);
+                final boolean quotaAware = configurationService.getBoolProperty("com.openexchange.preview.cache.quotaAware", false);
                 final FileStorePreviewCacheImpl fileStorePreviewCache = new FileStorePreviewCacheImpl(quotaAware);
                 cache = fileStorePreviewCache;
                 eventHandler = fileStorePreviewCache;

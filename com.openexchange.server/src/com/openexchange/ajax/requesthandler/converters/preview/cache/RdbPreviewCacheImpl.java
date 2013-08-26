@@ -350,6 +350,45 @@ public final class RdbPreviewCacheImpl implements PreviewCache, EventHandler {
     }
 
     @Override
+    public void clearFor(final int contextId) throws OXException {
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        if (dbService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+        }
+        final Connection con = dbService.getWritable(contextId);
+        try {
+            clearFor(contextId, con);
+        } finally {
+            dbService.backWritable(contextId, con);
+        }
+    }
+
+    private void clearFor(final int contextId, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        boolean rollback = false;
+        try {
+            Databases.startTransaction(con);
+            rollback = true;
+
+            stmt = con.prepareStatement("DELETE FROM preview WHERE cid=?");
+            stmt.setInt(1, contextId);
+            stmt.executeUpdate();
+
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    @Override
     public CachedPreview get(final String id, final int userId, final int contextId) throws OXException {
         if (null == id || contextId <= 0) {
             return null;

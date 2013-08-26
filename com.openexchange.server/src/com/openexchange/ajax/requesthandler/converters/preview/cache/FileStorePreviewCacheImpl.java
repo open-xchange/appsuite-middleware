@@ -59,6 +59,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.logging.Log;
@@ -122,6 +123,21 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
     public FileStorePreviewCacheImpl(final boolean quotaAware) {
         super();
         this.quotaAware = quotaAware;
+    }
+
+    private void batchDeleteFiles(final Collection<String> ids, final FileStorage fileStorage) {
+        try {
+            fileStorage.deleteFiles(ids.toArray(new String[0]));
+        } catch (final OXException e) {
+            // Retry one-by-one
+            for (final String id : ids) {
+                try {
+                    fileStorage.deleteFile(id);
+                } catch (final Exception x) {
+                    // Ignore
+                }
+            }
+        }
     }
 
     @Override
@@ -375,7 +391,7 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
 
                 // Remove from file storage
                 final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
-                fileStorage.deleteFiles(map.values().toArray(new String[0]));
+                batchDeleteFiles(map.values(), fileStorage);
             }
         } catch (final SQLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
@@ -409,6 +425,70 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
+    }
+
+    @Override
+    public void clearFor(final int contextId) throws OXException {
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        if (dbService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+        }
+        final Connection con = dbService.getWritable(contextId);
+        boolean changed = false;
+        try {
+            changed = clearFor(contextId, con);
+        } finally {
+            if (changed) {
+                dbService.backWritable(contextId, con);
+            } else {
+                dbService.backWritableAfterReading(contextId, con);
+            }
+        }
+    }
+
+    private boolean clearFor(final int contextId, final Connection con) throws OXException {
+        boolean changed = false;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        boolean rollback = false;
+        try {
+            Databases.startTransaction(con);
+            rollback = true;
+
+            stmt = con.prepareStatement("SELECT id, refId FROM preview WHERE cid=?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            final Map<String, String> map = new HashMap<String, String>(16);
+            while (rs.next()) {
+                map.put(rs.getString(1), rs.getString(2));
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            if (!map.isEmpty()) {
+                stmt = con.prepareStatement("DELETE FROM preview WHERE cid=?");
+                stmt.setInt(1, contextId);
+                stmt.executeUpdate();
+                changed = true;
+
+                // Remove from file storage
+                final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
+                batchDeleteFiles(map.values(), fileStorage);
+            }
+
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+            Databases.closeSQLStuff(rs, stmt);
+        }
+        return changed;
     }
 
     @Override
@@ -516,7 +596,7 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
 
                 // Remove from file storage
                 final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
-                fileStorage.deleteFiles(map.values().toArray(new String[0]));
+                batchDeleteFiles(map.values(), fileStorage);
             }
 
         } catch (final DataTruncation e) {
@@ -594,7 +674,7 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
 
                 // Remove from file storage
                 final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
-                fileStorage.deleteFiles(map.values().toArray(new String[0]));
+                batchDeleteFiles(map.values(), fileStorage);
             }
         } catch (final DataTruncation e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
@@ -673,10 +753,11 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
             final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
             try {
                 Streams.close(fileStorage.getFile(refId));
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
                     throw e;
                 }
+                dropFromTable(id, userId, contextId);
                 return null;
             }
             return refId;
@@ -684,6 +765,37 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private void dropFromTable(final String id, final int userId, final int contextId) {
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        if (dbService != null) {
+            Connection con = null;
+            PreparedStatement stmt = null;
+            try {
+                con = dbService.getWritable(contextId);
+                if (userId > 0) {
+                    // A user-sensitive document
+                    stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND user = ? AND id = ?");
+                    stmt.setLong(1, contextId);
+                    stmt.setLong(2, userId);
+                    stmt.setString(3, id);
+                } else {
+                    // A context-global document
+                    stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND id = ?");
+                    stmt.setLong(1, contextId);
+                    stmt.setString(2, id);
+                }
+                stmt.executeUpdate();
+            } catch (final Exception e) {
+                // Ignore
+            } finally {
+                Databases.closeSQLStuff(stmt);
+                if (null != con) {
+                    dbService.backWritable(contextId, con);
+                }
+            }
         }
     }
 
