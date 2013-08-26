@@ -47,58 +47,61 @@
  *
  */
 
-package com.openexchange.carddav.osgi;
+package com.openexchange.ajax.requesthandler.converters.preview.cache.groupware;
 
-import org.osgi.service.http.HttpService;
-import com.openexchange.carddav.servlet.CardDAV;
-import com.openexchange.carddav.servlet.CarddavPerformer;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.contact.ContactService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
-import com.openexchange.webdav.directory.PathRegistration;
-import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
-public class CarddavActivator extends HousekeepingActivator {
+/**
+ * {@link AddRefIdForPreviewCacheTable}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.0
+ */
+public class AddRefIdForPreviewCacheTable extends UpdateTaskAdapter {
 
-    private volatile OSGiPropertyMixin mixin;
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { HttpService.class, FolderService.class, ConfigViewFactory.class, UserService.class, ContactService.class };
+    public AddRefIdForPreviewCacheTable() {
+        super();
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    public void perform(final PerformParameters params) throws OXException {
+        final int ctxId = params.getContextId();
+        final Connection con = Database.getNoTimeout(ctxId, true);
+        boolean rollback = false;
         try {
-            CardDAV.setServiceLookup(this);
-            CarddavPerformer.setServices(this);
-
-            getService(HttpService.class).registerServlet("/servlet/dav/carddav", new CardDAV(), null, null);
-
-            CarddavPerformer performer = CarddavPerformer.getInstance();
-            final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
-            performer.setGlobalMixins(mixin);
-            this.mixin = mixin;
-
-            registerService(PathRegistration.class, new PathRegistration("carddav"));
-
-            openTrackers();
-        } catch (Throwable t) {
-            com.openexchange.log.Log.loggerFor(CarddavActivator.class).error(t.getMessage(), t);
+            startTransaction(con);
+            rollback = true;
+            if (!Tools.columnExists(con, "preview", "refId")) {
+                Tools.addColumns(con, "preview", new Column("refId", "varchar(255) CHARACTER SET latin1 DEFAULT NULL"));
+            }
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            Database.backNoTimeout(ctxId, true, con);
         }
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        final OSGiPropertyMixin mixin = this.mixin;
-        if (null != mixin) {
-            mixin.close();
-            this.mixin = null;
-        }
-        super.stopBundle();
+    public String[] getDependencies() {
+        return new String[] { PreviewCacheCreateTableTask.class.getName() };
     }
-
-
 }
