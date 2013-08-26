@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tasks;
 
+import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.util.Iterator;
 import junit.framework.AssertionFailedError;
@@ -57,7 +58,6 @@ import com.mysql.jdbc.AssertionFailedException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.databaseold.Database;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -75,8 +75,8 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
-import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 
 /**
@@ -316,7 +316,7 @@ public class DowngradeTest extends TestCase {
                 OCLPermission.DELETE_ALL_OBJECTS);
             oclp2.setFolderAdmin(false);
             FolderObject fo = new FolderObject();
-            fo.setFolderName("DowngradeTest" + System.currentTimeMillis());
+            fo.setFolderName("DowngradeTest");
             fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
             fo.setModule(FolderObject.TASK);
             fo.setType(FolderObject.PUBLIC);
