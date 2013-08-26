@@ -1,3 +1,7 @@
+* 2013-08-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28448: Enhanced CapabilityService to consider relevant contextSets, too
+
 * 2013-08-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 28472: Give a meaningful error message to user if login to Google Mail fails

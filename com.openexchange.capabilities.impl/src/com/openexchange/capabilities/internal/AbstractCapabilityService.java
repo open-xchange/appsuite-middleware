@@ -54,6 +54,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -107,6 +108,45 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     private static final String PERMISSION_PROPERTY = "permissions".intern();
 
     private static final Pattern P_SPLIT = Pattern.compile("\\s*[, ]\\s*");
+
+    // ------------------------------------------------------------------------------------------------ //
+
+    private static interface PropertyHandler {
+
+        void handleProperty(String propValue, Set<Capability> capabilities) throws OXException;
+    }
+
+    private static final Map<String, PropertyHandler> PROPERTY_HANDLERS;
+
+    static {
+        final Map<String, PropertyHandler> map = new HashMap<String, PropertyHandler>(4);
+
+        map.put("com.openexchange.caldav.enabled", new PropertyHandler() {
+
+            @Override
+            public void handleProperty(final String propValue, final Set<Capability> capabilities) throws OXException {
+                if (Boolean.parseBoolean(propValue)) {
+                    capabilities.add(getCapability(Permission.CALDAV));
+                } else {
+                    capabilities.remove(getCapability(Permission.CALDAV));
+                }
+            }
+        });
+
+        map.put("com.openexchange.carddav.enabled", new PropertyHandler() {
+
+            @Override
+            public void handleProperty(final String propValue, final Set<Capability> capabilities) throws OXException {
+                if (Boolean.parseBoolean(propValue)) {
+                    capabilities.add(getCapability(Permission.CARDDAV));
+                } else {
+                    capabilities.remove(getCapability(Permission.CARDDAV));
+                }
+            }
+        });
+
+        PROPERTY_HANDLERS = Collections.unmodifiableMap(map);
+    }
 
     // ------------------------------------------------------------------------------------------------ //
 
@@ -294,8 +334,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 } else {
                     capabilities.remove(getCapability("gab"));
                 }
-
-                // permission properties
+                // Permission properties
                 final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
                 if (configViews != null) {
                     final ConfigView view = configViews.getView(userId, contextId);
@@ -318,15 +357,22 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                         }
                     }
 
-                    Map<String, ComposedConfigProperty<String>> all = view.all();
+                    final Map<String, ComposedConfigProperty<String>> all = view.all();
                     for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
-                        if (entry.getKey().startsWith("com.openexchange.capability.")) {
+                        final String propName = entry.getKey();
+                        if (propName.startsWith("com.openexchange.capability.")) {
                             boolean value = Boolean.parseBoolean(entry.getValue().get());
-                            String name = toLowerCase(entry.getKey().substring(28));
+                            String name = toLowerCase(propName.substring(28));
                             if (value) {
                                 capabilities.add(getCapability(name));
                             } else {
                                 capabilities.remove(getCapability(name));
+                            }
+                        } else {
+                            // Check for a property handler
+                            final PropertyHandler handler = PROPERTY_HANDLERS.get(propName);
+                            if (null != handler) {
+                                handler.handleProperty(entry.getValue().get(), capabilities);
                             }
                         }
                     }
