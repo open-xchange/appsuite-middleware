@@ -65,5 +65,4 @@ Import-Package: com.openexchange.api2,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
-Bundle-ClassPath: .,
- com.openexchange.data.conversion.ical.ical4j.jar
+Bundle-ClassPath: .

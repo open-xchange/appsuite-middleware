@@ -49,37 +49,50 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.TimeZone;
+import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.ICalResource;
+import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link CalDAVBugSuite}
+ * {@link Bug28490Test}
+ *
+ * Appointment on mobile shifted one hour
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class CalDAVBugSuite {
+public class Bug28490Test extends CalDAVTest {
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(Bug21794Test.class);
-        suite.addTestSuite(Bug22094Test.class);
-        suite.addTestSuite(Bug22352Test.class);
-        suite.addTestSuite(Bug22338Test.class);
-        suite.addTestSuite(Bug22395Test.class);
-        suite.addTestSuite(Bug22451Test.class);
-        suite.addTestSuite(Bug22723Test.class);
-        suite.addTestSuite(Bug23067Test.class);
-        suite.addTestSuite(Bug23167Test.class);
-        suite.addTestSuite(Bug23181Test.class);
-        suite.addTestSuite(Bug22689Test.class);
-        suite.addTestSuite(Bug23610Test.class);
-        suite.addTestSuite(Bug23612Test.class);
-        suite.addTestSuite(Bug24682Test.class);
-        suite.addTestSuite(Bug25783Test.class);
-        suite.addTestSuite(Bug25672Test.class);
-        suite.addTestSuite(Bug27224Test.class);
-        suite.addTestSuite(Bug27309Test.class);
-        suite.addTestSuite(Bug28490Test.class);
-        return suite;
-    }
+	public Bug28490Test(String name) {
+		super(name);
+	}
+
+	public void testTimeZoneCET() throws Exception {
+		/*
+		 * create appointment series on server
+		 */
+		String uid = randomUID();
+        Appointment appointment = new Appointment();
+        appointment.setUid(uid);
+        appointment.setTitle(getClass().getCanonicalName());
+        appointment.setIgnoreConflicts(true);
+        appointment.setStartDate(TimeTools.D("last january on friday at 16:00", TimeZone.getTimeZone("CET")));
+        appointment.setEndDate(TimeTools.D("last january on friday at 16:30", TimeZone.getTimeZone("CET")));
+        appointment.setRecurrenceType(Appointment.WEEKLY);
+        appointment.setDays(Appointment.FRIDAY);
+        appointment.setInterval(1);
+        appointment.setTimezone("CET");
+        super.create(appointment);
+        super.rememberForCleanUp(appointment);
+        /*
+         * verify appointment on client
+         */
+        ICalResource iCalResource = super.get(uid, null);
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
+        assertNotNull("No TZID attribute found in DTSTART property", iCalResource.getVEvent().getProperty("DTSTART").getAttribute("TZID"));
+        assertNotNull("No TZID attribute found in DTEND property", iCalResource.getVEvent().getProperty("DTEND").getAttribute("TZID"));
+	}
+
 }
