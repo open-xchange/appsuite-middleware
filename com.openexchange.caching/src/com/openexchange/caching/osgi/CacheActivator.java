@@ -95,7 +95,7 @@ public final class CacheActivator extends HousekeepingActivator {
         return cacheService;
     }
 
-    private ObjectName objectName;
+    private volatile ObjectName objectName;
 
     /**
      * Initializes a new {@link CacheActivator}.
@@ -218,9 +218,11 @@ public final class CacheActivator extends HousekeepingActivator {
     }
 
     void registerCacheMBean(final ManagementService management) {
+        ObjectName objectName = this.objectName;
         if (objectName == null) {
             try {
                 objectName = getObjectName(JCSCacheInformation.class.getName(), CacheInformationMBean.CACHE_DOMAIN);
+                this.objectName = objectName;
                 management.registerMBean(objectName, new JCSCacheInformation());
             } catch (final MalformedObjectNameException e) {
                 LOG.error(e.getMessage(), e);
@@ -233,13 +235,14 @@ public final class CacheActivator extends HousekeepingActivator {
     }
 
     void unregisterCacheMBean(final ManagementService management) {
+        final ObjectName objectName = this.objectName;
         if (objectName != null) {
             try {
                 management.unregisterMBean(objectName);
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             } finally {
-                objectName = null;
+                this.objectName = null;
             }
         }
     }
