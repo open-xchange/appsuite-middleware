@@ -157,6 +157,7 @@ public class OAuthServiceTest {
 
     @Test
     public void testGetAllServicesWithoutPermission() throws Exception {
+        Thread.sleep(3000);
         AJAXClient client2 = null;
         try {
             client2 = new AJAXClient(AJAXClient.User.User2);
@@ -180,6 +181,7 @@ public class OAuthServiceTest {
 
     @Test
     public void testGetTestServiceWithoutPermission() throws Exception {
+        Thread.sleep(3000);
         AJAXClient client2 = null;
         try {
             client2 = new AJAXClient(AJAXClient.User.User2);
