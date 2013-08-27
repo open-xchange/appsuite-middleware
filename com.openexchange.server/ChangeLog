@@ -4,6 +4,7 @@
  - Fix for bug 28538: Using sanitizing URL-encode routine in deferrer bundle (approved by it-sec)
  - Fix for bug 28522: Deal with possibly non-numeric file identifier when handling file storage events in InfoStore module
  - Fix for bug 28523: Unregister MBean with proper ObjectName instance
+ - Fix for bug 28459: Avoid duplicate mangling of file storage folder identifiers
 
 * 2013-08-26 - tobias.friedrich@open-xchange.com
 

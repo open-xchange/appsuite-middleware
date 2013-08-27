@@ -75,7 +75,14 @@ public class FolderID {
         super();
         this.service = service;
         this.accountId = accountId;
-        this.folderId = folderId;
+
+        // Check folder identifier
+        if (folderId.indexOf("://") > 0) {
+            final List<String> unmangled = IDMangler.unmangle(folderId);
+            this.folderId = unmangled.size() > 2 ? unmangled.get(2) : "";
+        } else {
+            this.folderId = folderId;
+        }
     }
 
     /**
