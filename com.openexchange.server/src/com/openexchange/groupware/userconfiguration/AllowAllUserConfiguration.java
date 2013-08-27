@@ -81,13 +81,6 @@ public class AllowAllUserConfiguration extends UserConfiguration {
     }
 
     @Override
-    public UserPermissionBits getUserPermissionBits() {
-        final UserPermissionBits retval = super.getUserPermissionBits();
-        retval.setPermissionBits(getPermissionBits());
-        return retval;
-    }
-
-    @Override
     public int getPermissionBits() {
         return Integer.MAX_VALUE & ~DENIED_PORTAL;
     }
