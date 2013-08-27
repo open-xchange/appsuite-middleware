@@ -74,7 +74,6 @@ public final class ContactBugTestSuite extends TestSuite {
         tests.addTestSuite(Bug13915FileAsViaJSON.class);
         tests.addTestSuite(Bug18608Test_SpecialCharsInEmailTest.class);
         tests.addTestSuite(Bug19827Test.class);
-//        tests.addTestSuite(Bug28350Test.class);
         return tests;
     }
 }
