@@ -132,7 +132,7 @@ public class ListTest extends TaskTest {
         taskObj.setLabel(2);
         taskObj.setNote("note");
         taskObj.setCategories("testcat1,testcat2,testcat3");
-        taskObj.setActualCosts(new BigDecimal("1.5"));
+        taskObj.setActualCosts(new BigDecimal("1.50"));
         taskObj.setActualDuration(L(210));
         taskObj.setBillingInformation("billing information");
         taskObj.setCompanies("companies");
@@ -141,7 +141,7 @@ public class ListTest extends TaskTest {
         taskObj.setPercentComplete(50);
         taskObj.setPriority(Task.HIGH);
         taskObj.setStatus(Task.IN_PROGRESS);
-        taskObj.setTargetCosts(new BigDecimal("5.5"));
+        taskObj.setTargetCosts(new BigDecimal("5.50"));
         taskObj.setTargetDuration(L(450));
         taskObj.setTripMeter("trip meter");
 
@@ -180,7 +180,7 @@ public class ListTest extends TaskTest {
         taskObj.setLabel(2);
         taskObj.setNote("note");
         taskObj.setCategories("testcat1,testcat2,testcat3");
-        taskObj.setActualCosts(new BigDecimal("1.5"));
+        taskObj.setActualCosts(new BigDecimal("1.50"));
         taskObj.setActualDuration(L(210));
         taskObj.setBillingInformation("billing information");
         taskObj.setCompanies("companies");
@@ -189,7 +189,7 @@ public class ListTest extends TaskTest {
         taskObj.setPercentComplete(50);
         taskObj.setPriority(Task.HIGH);
         taskObj.setStatus(Task.IN_PROGRESS);
-        taskObj.setTargetCosts(new BigDecimal("5.5"));
+        taskObj.setTargetCosts(new BigDecimal("5.50"));
         taskObj.setTargetDuration(L(450));
         taskObj.setTripMeter("trip meter");
         taskObj.setParentFolderID(taskFolderId);
