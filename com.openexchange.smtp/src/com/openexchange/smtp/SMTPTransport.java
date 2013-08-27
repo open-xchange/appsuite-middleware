@@ -54,6 +54,7 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -943,9 +944,16 @@ public final class SMTPTransport extends MailTransport {
             for (final Address address : recipients) {
                 internetAddress = (InternetAddress) address;
                 final String sAddress = internetAddress.getAddress();
-                if (MsisdnCheck.checkMsisdn(sAddress) && sAddress.indexOf('/') < 0) {
-                    // Detected a MSISDN address that misses "/TYPE=" appendix necessary for the MTA
-                    internetAddress.setAddress(sAddress + "/TYPE=PLMN");
+                if (MsisdnCheck.checkMsisdn(sAddress)) {
+                    if (sAddress.indexOf('/') < 0) {
+                        // Detected a MSISDN address that misses "/TYPE=" appendix necessary for the MTA
+                        internetAddress.setAddress(sAddress + "/TYPE=PLMN");
+                    }
+                    try {
+                        internetAddress.setPersonal(null);
+                    } catch (final UnsupportedEncodingException e) {
+                        // Ignore as personal is cleared
+                    }
                 }
             }
         }
