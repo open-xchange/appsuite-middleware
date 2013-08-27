@@ -53,7 +53,7 @@ import org.scribe.builder.api.Api;
 import org.scribe.builder.api.LinkedInApi;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
-import com.openexchange.oauth.linkedin.osgi.Activator;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link OAuthServiceMetaDataLinkedInImpl}
@@ -63,8 +63,11 @@ import com.openexchange.oauth.linkedin.osgi.Activator;
  */
 public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
 
-    public OAuthServiceMetaDataLinkedInImpl(Activator activator) {
+    private final ServiceLookup services;
+
+    public OAuthServiceMetaDataLinkedInImpl(ServiceLookup services) {
         super();
+        this.services = services;
         setAPIKeyName("com.openexchange.socialplugin.linkedin.apikey");
         setAPISecretName("com.openexchange.socialplugin.linkedin.apisecret");
     }
