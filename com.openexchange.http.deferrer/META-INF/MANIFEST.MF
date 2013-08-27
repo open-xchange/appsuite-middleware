@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.http.deferrer
 Bundle-Version: 7.4.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.config,
+Import-Package: com.openexchange.ajax,
+ com.openexchange.config,
  com.openexchange.dispatcher,
  com.openexchange.exception,
  com.openexchange.i18n,
