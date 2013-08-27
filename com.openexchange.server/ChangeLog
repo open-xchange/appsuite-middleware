@@ -1,3 +1,7 @@
+* 2013-08-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28484: Don't signal reminder(s) for declined calendar events
+
 * 2013-08-26 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 28490: Introduced CET- and CEST-aliases for use with iCal4j timezone registry  
