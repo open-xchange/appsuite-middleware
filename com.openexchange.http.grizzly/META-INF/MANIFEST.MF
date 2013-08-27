@@ -61,6 +61,7 @@ Bundle-ClassPath: .,
  lib/grizzly-rcm-2.2.22-SNAPSHOT.jar,
  lib/grizzly-websockets-2.2.22-SNAPSHOT.jar
 Export-Package: com.openexchange.http.grizzly.service.atmosphere,
+ com.openexchange.http.grizzly.service.comet,
  org.atmosphere.cache,
  org.atmosphere.client,
  org.atmosphere.config,
@@ -74,4 +75,6 @@ Export-Package: com.openexchange.http.grizzly.service.atmosphere,
  org.atmosphere.util,
  org.atmosphere.util.uri,
  org.atmosphere.websocket,
- org.atmosphere.websocket.protocol
+ org.atmosphere.websocket.protocol,
+ org.glassfish.grizzly.comet,
+ org.glassfish.grizzly.http.server

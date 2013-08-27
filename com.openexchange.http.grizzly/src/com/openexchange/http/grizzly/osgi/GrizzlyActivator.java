@@ -67,6 +67,8 @@ import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
 import com.openexchange.http.grizzly.service.atmosphere.AtmosphereService;
 import com.openexchange.http.grizzly.service.atmosphere.AtmosphereServiceImpl;
+import com.openexchange.http.grizzly.service.comet.CometContextService;
+import com.openexchange.http.grizzly.service.comet.impl.CometContextServiceImpl;
 import com.openexchange.http.grizzly.service.http.HttpServiceFactory;
 import com.openexchange.http.grizzly.threadpool.GrizzlOXExecutorService;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
@@ -178,6 +180,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
                     LOG.info("Enabling Comet for Grizzly server.");
                 }
                 networkListener.registerAddOn(new CometAddOn());
+                registerService(CometContextService.class, new CometContextServiceImpl());
             }
 
 //            if (LOG.isInfoEnabled()) {
