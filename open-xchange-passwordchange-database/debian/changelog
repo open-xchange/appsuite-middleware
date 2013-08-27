@@ -1,3 +1,9 @@
+open-xchange-passwordchange-database (7.4.0-7) stable; urgency=low
+
+  * Seventh candidate for 7.4.0 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 27 Aug 2013 13:44:43 +0200
+
 open-xchange-passwordchange-database (7.4.0-6) stable; urgency=low
 
   * Sixth candidate for 7.4.0 release
