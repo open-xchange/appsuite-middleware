@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  java-devel >= 1.6.0
 BuildRequires:  open-xchange-core
 Version:        @OXVERSION@
-%define         ox_release 12
+%define         ox_release 13
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -51,6 +51,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.upsell.multiple/ChangeLog
 
 %changelog
+* Tue Aug 27 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-09-03
 * Tue Jun 11 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-06-13
 * Mon May 13 2013 Carsten Hoeger <choeger@open-xchange.com>
@@ -77,3 +79,5 @@ Second release candidate for 6.22.0
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Carsten Hoeger <choeger@open-xchange.com>
 prepare for 6.22.0
+* Wed Jul 18 2012 Carsten Hoeger <choeger@open-xchange.com>
+Initial release
