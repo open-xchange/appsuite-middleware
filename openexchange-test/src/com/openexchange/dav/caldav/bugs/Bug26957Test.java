@@ -49,38 +49,29 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.dav.caldav.CalDAVTest;
 
 /**
- * {@link CalDAVBugSuite}
+ * {@link Bug26957Test}
+ *
+ * NPE in caldav caused by Evolution
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class CalDAVBugSuite {
+public class Bug26957Test extends CalDAVTest {
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(Bug21794Test.class);
-        suite.addTestSuite(Bug22094Test.class);
-        suite.addTestSuite(Bug22352Test.class);
-        suite.addTestSuite(Bug22338Test.class);
-        suite.addTestSuite(Bug22395Test.class);
-        suite.addTestSuite(Bug22451Test.class);
-        suite.addTestSuite(Bug22723Test.class);
-        suite.addTestSuite(Bug23067Test.class);
-        suite.addTestSuite(Bug23167Test.class);
-        suite.addTestSuite(Bug23181Test.class);
-        suite.addTestSuite(Bug22689Test.class);
-        suite.addTestSuite(Bug23610Test.class);
-        suite.addTestSuite(Bug23612Test.class);
-        suite.addTestSuite(Bug24682Test.class);
-        suite.addTestSuite(Bug25783Test.class);
-        suite.addTestSuite(Bug25672Test.class);
-        suite.addTestSuite(Bug26957Test.class);
-        suite.addTestSuite(Bug27224Test.class);
-        suite.addTestSuite(Bug27309Test.class);
-        suite.addTestSuite(Bug28490Test.class);
-        return suite;
-    }
+	public Bug26957Test(String name) {
+		super(name);
+	}
+
+	public void testPutICalWithoutVEvent() throws Exception {
+	    /*
+         * try to create appointment
+         */
+        String uid = randomUID();
+        String iCal = "BEGIN:VCALENDAR\nCALSCALE:GREGORIAN\nVERSION:2.0\nMETHOD:PUBLISH\nPRODID:-//Apple Inc.//Mac OS X 10.8.4//EN\nEND:VCALENDAR\n";
+        assertEquals("response code wrong", HttpServletResponse.SC_BAD_REQUEST, super.putICal(uid, iCal));
+	}
+
 }

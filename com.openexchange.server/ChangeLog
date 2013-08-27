@@ -1,3 +1,7 @@
+* 2013-08-27 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 26957: Respond with HTTP 400 (Bad Request) when no VEVENTs could be parsed   
+
 * 2013-08-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 28484: Don't signal reminder(s) for declined calendar events
