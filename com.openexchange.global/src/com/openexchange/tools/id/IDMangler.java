@@ -225,21 +225,23 @@ public class IDMangler {
         return list;
     }
 
-    private static final BitSet PRINTABLE_CHARS = new BitSet(256);
+    private static final BitSet PRINTABLE_CHARS;
     // Static initializer for printable chars collection
     static {
+        final BitSet bitSet = new BitSet(256);
         for (int i = '0'; i <= '9'; i++) {
-            PRINTABLE_CHARS.set(i);
+            bitSet.set(i);
         }
         for (int i = 'A'; i <= 'Z'; i++) {
-            PRINTABLE_CHARS.set(i);
+            bitSet.set(i);
         }
         for (int i = 'a'; i <= 'z'; i++) {
-            PRINTABLE_CHARS.set(i);
+            bitSet.set(i);
         }
-        PRINTABLE_CHARS.set('.');
-        PRINTABLE_CHARS.set('-');
-        PRINTABLE_CHARS.set('_');
+        bitSet.set('.');
+        bitSet.set('-');
+        bitSet.set('_');
+        PRINTABLE_CHARS = bitSet;
     }
 
     private static String encodeQP(final String string) {
