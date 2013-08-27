@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,47 @@
  *
  */
 
-package com.openexchange.http.deferrer.impl;
+package com.openexchange.http.grizzly.service.comet.impl;
 
-import static com.openexchange.ajax.AJAXServlet.encodeUrl;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.http.deferrer.DeferringURLService;
+import org.glassfish.grizzly.comet.CometContext;
+import org.glassfish.grizzly.comet.CometEngine;
+import org.glassfish.grizzly.comet.NotificationHandler;
+import com.openexchange.http.grizzly.service.comet.CometContextService;
+
+
 
 /**
- * {@link DefaultDeferringURLService}
+ * {@link CometContextServiceImpl}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class DefaultDeferringURLService implements DeferringURLService {
+public class CometContextServiceImpl implements CometContextService {
 
     /**
-     * The {@link DefaultDeferringURLService} reference.
+     * Initializes a new {@link CometContextServiceImpl}.
      */
-    public static final java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService> PREFIX = new java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService>();
-
-    @Override
-    public String getDeferredURL(final String url) {
-        if (url == null) {
-            return null;
-        }
-        final String deferrerURL = getDeferrerURL();
-        if (deferrerURL == null) {
-            return url;
-        }
-        if (url.startsWith(deferrerURL)) {
-            // Already deferred
-            return url;
-        }
-        // Return deferred URL
-        return deferrerURL + PREFIX.get().getPrefix() + "defer?redirect=" + encodeUrl(url, true, true);
+    public CometContextServiceImpl() {
+        super();
     }
 
-    /**
-     * Gets the deferrer URL; e.g. "https://my.maindomain.org"
-     *
-     * @return The deferrer URL
-     */
-    protected abstract String getDeferrerURL();
-
+    @Override
+    public <E> CometContext<E> register(String topic) {
+        return CometEngine.getEngine().register(topic);
+    }
 
     @Override
-    public String getBasicDeferrerURL() {
-    	final String deferrerURL = getDeferrerURL();
-        return deferrerURL == null ? PREFIX.get().getPrefix() + "defer" : deferrerURL + PREFIX.get().getPrefix() + "defer";
+    public <E> CometContext<E> register(String topic, Class<? extends NotificationHandler> notificationClass) {
+        return CometEngine.getEngine().register(topic, notificationClass);
+    }
+
+    @Override
+    public <E> CometContext<E> getCometContext(String topic) {
+        return CometEngine.getEngine().getCometContext(topic);
+    }
+
+    @Override
+    public <E> CometContext<E> deregister(String topic) {
+        return CometEngine.getEngine().deregister(topic);
     }
 
 }

@@ -117,7 +117,8 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
                 } catch (OXException e) {
                     LOG.error(e.getMessage(), e);
                 } catch (NumberFormatException e) {
-                    LOG.error(e.getMessage(), e);
+                    // Obviously no numeric identifier; therefore not related to InfoStore file storage
+                    LOG.debug(e.getMessage(), e);
                 } finally {
                     try {
                         infoProperties.finish();

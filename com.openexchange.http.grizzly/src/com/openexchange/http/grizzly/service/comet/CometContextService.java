@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,54 @@
  *
  */
 
-package com.openexchange.http.deferrer.impl;
+package com.openexchange.http.grizzly.service.comet;
 
-import static com.openexchange.ajax.AJAXServlet.encodeUrl;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.http.deferrer.DeferringURLService;
+import org.glassfish.grizzly.comet.CometContext;
+import org.glassfish.grizzly.comet.CometEngine;
+import org.glassfish.grizzly.comet.NotificationHandler;
 
 /**
- * {@link DefaultDeferringURLService}
+ * {@link CometContextService}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class DefaultDeferringURLService implements DeferringURLService {
+public interface CometContextService {
 
     /**
-     * The {@link DefaultDeferringURLService} reference.
-     */
-    public static final java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService> PREFIX = new java.util.concurrent.atomic.AtomicReference<DispatcherPrefixService>();
-
-    @Override
-    public String getDeferredURL(final String url) {
-        if (url == null) {
-            return null;
-        }
-        final String deferrerURL = getDeferrerURL();
-        if (deferrerURL == null) {
-            return url;
-        }
-        if (url.startsWith(deferrerURL)) {
-            // Already deferred
-            return url;
-        }
-        // Return deferred URL
-        return deferrerURL + PREFIX.get().getPrefix() + "defer?redirect=" + encodeUrl(url, true, true);
-    }
-
-    /**
-     * Gets the deferrer URL; e.g. "https://my.maindomain.org"
+     * Registers a context path with the underlying comet engine using a default notification handler based on an comet-internal
+     * thread pool.
      *
-     * @return The deferrer URL
+     * @param topic The topic used to register the context
+     * @return CometContext A new configured comet context, or the existing one if it was registered previously.
+     * @see CometEngine#register(String)
      */
-    protected abstract String getDeferrerURL();
+    <E> CometContext<E> register(String topic);
 
+    /**
+     * Registers a context path with the underlying comet engine using a new instance of the supplied notification handler.
+     *
+     * @param topic The topic used to register the context
+     * @param notificationClass The type of the desired notification handler
+     * @return CometContext A new configured comet context, or the existing one if it was registered previously.
+     * @see CometEngine#register(String, Class)
+     */
+    <E> CometContext<E> register(String topic, Class<? extends NotificationHandler> notificationClass);
 
-    @Override
-    public String getBasicDeferrerURL() {
-    	final String deferrerURL = getDeferrerURL();
-        return deferrerURL == null ? PREFIX.get().getPrefix() + "defer" : deferrerURL + PREFIX.get().getPrefix() + "defer";
-    }
+    /**
+     * Gets the comet context associated with the topic.
+     *
+     * @param topic The topic used to create the comet context
+     * @see CometEngine#getCometContext(String)
+     */
+    <E> CometContext<E> getCometContext(String topic);
+
+    /**
+     * Unregisters and removes a previously registered comet context.
+     *
+     * @param topic The topic used to register the context
+     * @return The removed comet context
+     * @see CometEngine#deregister(String)
+     */
+    <E> CometContext<E> deregister(String topic);
 
 }

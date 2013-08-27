@@ -1,6 +1,9 @@
 * 2013-08-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 28484: Don't signal reminder(s) for declined calendar events
+ - Fix for bug 28538: Using sanitizing URL-encode routine in deferrer bundle (approved by it-sec)
+ - Fix for bug 28522: Deal with possibly non-numeric file identifier when handling file storage events in InfoStore module
+ - Fix for bug 28523: Unregister MBean with proper ObjectName instance
 
 * 2013-08-26 - tobias.friedrich@open-xchange.com
 
