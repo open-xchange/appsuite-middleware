@@ -104,6 +104,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
+import org.glassfish.grizzly.http.Cookie;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
@@ -114,6 +115,7 @@ import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.exception.OXException;
+import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.servletfilter.RequestReportingFilter;
 import com.openexchange.http.grizzly.servletfilter.WrappingFilter;
 import com.openexchange.log.LogProperties;
@@ -137,11 +139,10 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(OSGiMainHandler.class);
 
-    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-
+    private final ReentrantReadWriteLock lock;
     private final Bundle bundle;
-
     private final OSGiCleanMapper mapper;
+    private final boolean httpOnly;
 
     /**
      * Constructor.
@@ -150,8 +151,11 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
      * @param bundle Bundle that we create if for, for local data reference.
      */
     public OSGiMainHandler(Bundle bundle) {
+        super();
+        lock = new ReentrantReadWriteLock();
         this.bundle = bundle;
         this.mapper = new OSGiCleanMapper();
+        httpOnly = GrizzlyConfig.getInstance().isCookieHttpOnly();
     }
 
     /**
@@ -187,7 +191,18 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                 try {
                     updateMappingInfo(request, alias, originalAlias);
 
+                    // Perform Servlet service
                     httpHandler.service(request, response);
+
+                    // Handle cookies
+                    final Cookie[] cookies = response.getCookies();
+                    if (null != cookies) {
+                        for (final Cookie cookie : cookies) {
+                            if (null != cookie && !cookie.isHttpOnly()) {
+                                cookie.setHttpOnly(httpOnly);
+                            }
+                        }
+                    }
                 } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
                     StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
@@ -211,6 +226,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                     // not found and haven't run in cutoff mode
                     cutOff = true;
                 }
+
             }
         }
         if (!invoked) {
@@ -535,7 +551,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         final MappingData mappingData = request.obtainMappingData();
         //Change contextPath from "/" to the empty Sring for the default context in the httpservice
         mappingData.contextPath.setString("");
-        
+
         mappingData.wrapperPath.setString(alias);
 
         if (alias.length() != originalAlias.length()) {
