@@ -100,7 +100,7 @@ public class MsisdnCheck {
         }
         String num = number;
         {
-            final int pos = num.indexOf("/TYPE");
+            final int pos = num.indexOf('/');
             if (pos > 0) {
                 num = num.substring(0, pos);
             }
