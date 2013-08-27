@@ -86,6 +86,8 @@ public class RequestReportingFilter implements Filter {
 
     private static final String EAS_PING = "Ping";
 
+    private static final String DRIVE_URI = "/ajax/drive";
+
     private final boolean isFilterEnabled;
 
     /**
@@ -111,8 +113,7 @@ public class RequestReportingFilter implements Filter {
         if (isFilterEnabled) {
             final HttpServletRequest httpServletRequest = (HttpServletRequest) request;
             final HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-            final boolean longRunning = EAS_URI.equals(httpServletRequest.getRequestURI()) && EAS_PING.equals(request.getParameter(EAS_CMD));
-            if (longRunning) { // don't track long running requests
+            if (isLongRunning(httpServletRequest)) { // don't track long running requests
                 chain.doFilter(request, response);
             } else {
                 final RequestWatcherService requestWatcherService = Services.getService(RequestWatcherService.class);
@@ -145,6 +146,20 @@ public class RequestReportingFilter implements Filter {
     @Override
     public void destroy() {
         // nothing to do here
+    }
+
+    private boolean isLongRunning(final HttpServletRequest httpServletRequest) {
+        return  isDriveRequest(httpServletRequest) || isEASRequest(httpServletRequest);
+    }
+
+    private final boolean isDriveRequest(final HttpServletRequest httpServletRequest) {
+        final boolean isDriveRequest = DRIVE_URI.equals(httpServletRequest.getRequestURI());
+        return isDriveRequest;
+    }
+
+    private final boolean isEASRequest(final HttpServletRequest httpServletRequest) {
+        final boolean isEASRequest = EAS_URI.equals(httpServletRequest.getRequestURI()) && EAS_PING.equals(httpServletRequest.getParameter(EAS_CMD));
+        return isEASRequest;
     }
 
 }
