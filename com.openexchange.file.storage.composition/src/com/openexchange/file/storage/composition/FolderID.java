@@ -60,6 +60,21 @@ import com.openexchange.tools.id.IDMangler;
  */
 public class FolderID {
 
+    /**
+     * Checks if given folder identifier appears to be mangled.
+     *
+     * @param folderId The folder identifier to check
+     * @return <code>true</code> if mangled; otherwise <code>false</code>
+     */
+    public static boolean isMangled(final String folderId) {
+        if (null == folderId) {
+            return false;
+        }
+        return (folderId.indexOf("://") > 0) && (IDMangler.unmangle(folderId).size() > 1);
+    }
+
+    // -------------------------------------------------------------------------------------------- //
+
     private String service;
     private String accountId;
     private String folderId;
