@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 7
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -45,28 +45,31 @@ if [ ${1:-0} -eq 2 ]; then
 
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc imap.properties
 
-    # SoftwareChange_Request-1470
     pfile=/opt/open-xchange/etc/imap.properties
-    if ox_exists_property com.openexchange.imap.maxIMAPConnectionIdleTime $pfile; then
-        ox_remove_property com.openexchange.imap.maxIMAPConnectionIdleTime $pfile
-    fi
-
-    # SoftwareChange_Request-1215
-    pfile=/opt/open-xchange/etc/imap.properties
-    if ! ox_exists_property com.openexchange.imap.maxMailboxNameLength $pfile; then
-        ox_set_property com.openexchange.imap.maxMailboxNameLength 60 $pfile
-    fi
 
     # SoftwareChange_Request-1142
-    pfile=/opt/open-xchange/etc/imap.properties
     if ! ox_exists_property com.openexchange.imap.umlautFilterThreshold $pfile; then
         ox_set_property com.openexchange.imap.umlautFilterThreshold 50 $pfile
     fi
 
+    # SoftwareChange_Request-1215
+    if ! ox_exists_property com.openexchange.imap.maxMailboxNameLength $pfile; then
+        ox_set_property com.openexchange.imap.maxMailboxNameLength 60 $pfile
+    fi
+
+    # SoftwareChange_Request-1470
+    if ox_exists_property com.openexchange.imap.maxIMAPConnectionIdleTime $pfile; then
+        ox_remove_property com.openexchange.imap.maxIMAPConnectionIdleTime $pfile
+    fi
+
     # SoftwareChange_Request-1566
-    pfile=/opt/open-xchange/etc/imap.properties
     if ! ox_exists_property com.openexchange.imap.invalidMailboxNameCharacters $pfile; then
         ox_set_property com.openexchange.imap.invalidMailboxNameCharacters "" $pfile
+    fi
+
+    # SoftwareChange_Request-1586
+    if ! ox_exists_property com.openexchange.imap.allowFolderCaches $pfile; then
+        ox_set_property com.openexchange.imap.allowFolderCaches true $pfile
     fi
 fi
 
@@ -83,6 +86,16 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Aug 27 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Seventh candidate for 7.4.0 release
+* Fri Aug 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth candidate for 7.4.0 release
+* Tue Aug 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-08-19
+* Mon Aug 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-08-21
+* Mon Aug 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 7.4.0
 * Tue Aug 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth release candidate for 7.4.0
 * Tue Aug 06 2013 Marcus Klein <marcus.klein@open-xchange.com>

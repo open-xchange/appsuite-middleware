@@ -162,7 +162,7 @@ public final class ListAction extends AbstractFolderAction {
          */
         long lastModified = 0;
         UserizedFolder[] subfolders = subfoldersResponse.getResponse();
-        final int length = subfolders.length;
+        int length = subfolders.length;
         if (length <= 0) {
             /*
              * Return appropriate result
@@ -173,6 +173,7 @@ public final class ListAction extends AbstractFolderAction {
         /*
          * length > 0
          */
+        final boolean ignoreTranslation = parseBoolean(request.getParameter(PARAM_IGNORE_TRANSLATION), false);
         // Align to client identifier
         if (filterDuplicateNames) {
             // Filter equally named folder
@@ -184,7 +185,7 @@ public final class ListAction extends AbstractFolderAction {
                 if (null == locale) {
                     locale = FolderWriter.DEFAULT_LOCALE;
                 }
-                final String name = userizedFolder.getLocalizedName(locale);
+                final String name = ignoreTranslation ? userizedFolder.getLocalizedName(locale) : userizedFolder.getName();
                 final UserizedFolder prev = name2folder.get(name);
                 if (null == prev) {
                     name2folder.put(name, userizedFolder);
@@ -210,6 +211,7 @@ public final class ListAction extends AbstractFolderAction {
                 }
             }
             subfolders = ret.toArray(new UserizedFolder[0]);
+            length = subfolders.length;
         }
 
         // Determine last-modified time stamp
@@ -220,6 +222,7 @@ public final class ListAction extends AbstractFolderAction {
                 lastModified = ((lastModified >= time) ? lastModified : time);
             }
         }
+
         /*
          * Write subfolders as JSON arrays to JSON array
          */

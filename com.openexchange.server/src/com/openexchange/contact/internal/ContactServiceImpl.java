@@ -119,6 +119,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		Check.isContactFolder(folder, session);
 		Check.noPrivateInPublic(folder, contact, session);
 		Check.canWriteInGAB(storage, session, folderID, contact);
+		
 		/*
 		 * prepare create
 		 */

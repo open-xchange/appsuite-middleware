@@ -59,7 +59,7 @@ import com.openexchange.drive.comparison.ThreeWayComparison;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class EditFileAction extends AbstractAction<FileVersion> {
+public class EditFileAction extends AbstractFileAction {
 
     private int sortKey;
 

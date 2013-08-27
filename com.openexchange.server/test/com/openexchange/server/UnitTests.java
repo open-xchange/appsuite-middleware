@@ -49,39 +49,42 @@
 
 package com.openexchange.server;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * {@link UnitTests}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
+@RunWith(Suite.class)
+@SuiteClasses({
+    com.openexchange.ajax.parser.ContactSearchtermSqlConverterTest.class,
+    com.openexchange.ajax.parser.TaskLastModifiedTest.class,
+    com.openexchange.ajax.LoginAddFragmentTest.class,
+    com.openexchange.groupware.ldap.UserAttributeDiffTest.class,
+    com.openexchange.i18n.tools.replacement.TaskEndDateReplacementTest.class,
+    com.openexchange.tools.collections.OXCollectionsTest.class,
+    com.openexchange.tools.iterator.SearchIteratorDelegatorTest.class,
+    com.openexchange.tools.net.URIParserTest.class,
+    com.openexchange.mail.utils.MsisdnUtilityTest.class,
+    com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTableTest.class,
+    com.openexchange.ajax.MailAttachmentTest.class,
+    com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
+    com.openexchange.groupware.userconfiguration.AllowAllUserConfigurationTest.class,
+    com.openexchange.groupware.userconfiguration.UserConfigurationTest.class,
+    com.openexchange.mail.mime.MimeStructureFixerTest.class,
+    com.openexchange.mail.mime.MimeSmilFixerTest.class,
+    com.openexchange.groupware.notify.ParticipantNotifyTest.class
+})
 public class UnitTests {
 
-    private UnitTests() {
+    /**
+     * Initializes a new {@link UnitTests}.
+     */
+    public UnitTests() {
         super();
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(com.openexchange.ajax.parser.ContactSearchtermSqlConverterTest.class);
-        tests.addTestSuite(com.openexchange.ajax.parser.TaskLastModifiedTest.class);
-        tests.addTestSuite(com.openexchange.ajax.LoginAddFragmentTest.class);
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.groupware.ldap.UserAttributeDiffTest.class));
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.i18n.tools.replacement.TaskEndDateReplacementTest.class));
-        tests.addTestSuite(com.openexchange.tools.collections.OXCollectionsTest.class);
-        tests.addTestSuite(com.openexchange.tools.iterator.SearchIteratorDelegatorTest.class);
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.tools.net.URIParserTest.class));
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.mail.utils.MsisdnUtilityTest.class));
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTableTest.class));
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.MailAttachmentTest.class));
-        tests.addTestSuite(com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class);
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.mail.utils.MsisdnUtilityTest.class));
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.groupware.userconfiguration.UserConfigurationTest.class));
-        tests.addTestSuite(com.openexchange.mail.mime.MimeStructureFixerTest.class);
-        tests.addTestSuite(com.openexchange.mail.mime.MimeSmilFixerTest.class);
-        return tests;
-    }
 }

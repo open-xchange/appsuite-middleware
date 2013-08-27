@@ -442,9 +442,11 @@ public abstract class Stanza implements Serializable {
                 .append(", from: ")
                 .append(getFrom())
                 .append(", to: ")
-                .append(getTo());
+                .append(getTo())
+                .append(", selector: ")
+                .append(getSelector());
             LOG.info(sb.toString());
-            logEntries.add(trace.toString());
+//            logEntries.add(trace.toString());
         }
     }
 
@@ -456,12 +458,14 @@ public abstract class Stanza implements Serializable {
                 .append(", from: ")
                 .append(getFrom())
                 .append(", to: ")
-                .append(getTo());
+                .append(getTo())
+                .append(", selector: ")
+                .append(getSelector());
             LOG.info(sb.toString(), t);
             StringWriter w = new StringWriter();
             t.printStackTrace(new PrintWriter(w));
-            logEntries.add(trace.toString());
-            logEntries.add(w.toString());
+//            logEntries.add(trace.toString());
+//            logEntries.add(w.toString());
         }
     }
 

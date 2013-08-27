@@ -4902,6 +4902,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         update.setContext(ctx);
                         update.setObjectID(edao.getRecurrenceID());
                         update.setModifiedBy(uid);
+                        update.setRecurrenceCalculator(edao.getRecurrenceCalculator());
                         if ((!edao.containsRecurrenceDatePosition() || edao.getRecurrenceDatePosition() == null)) {
                             /*
                              * Determine recurrence date position
@@ -4944,6 +4945,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         update.setContext(ctx);
                         update.setObjectID(edao.getRecurrenceID());
                         update.setModifiedBy(uid);
+                        update.setRecurrenceCalculator(edao.getRecurrenceCalculator());
                         if ((!edao.containsRecurrenceDatePosition() || edao.getRecurrenceDatePosition() == null)) {
                             /*
                              * Determine recurrence date position

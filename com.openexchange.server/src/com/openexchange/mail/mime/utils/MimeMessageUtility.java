@@ -91,6 +91,7 @@ import javax.mail.Part;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
+import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
@@ -129,6 +130,7 @@ import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.utils.CP932EmojiMapping;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -2136,6 +2138,32 @@ public final class MimeMessageUtility {
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Gets the multipart content from specified part.
+     *
+     * @param part The part
+     * @return The multipart or <code>null</code>
+     * @throws MessagingException If a messaging error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    public static Multipart getMultipartContentFrom(final Part part) throws MessagingException, IOException {
+        if (null == part) {
+            return null;
+        }
+        final String contentType = getHeader("Content-Type", null, part);
+        if (null == contentType || !toLowerCase(contentType).startsWith("multipart/")) {
+            return null;
+        }
+        final Object content = part.getContent();
+        if (content instanceof Multipart) {
+            return (Multipart) content;
+        }
+        if (content instanceof InputStream) {
+            return new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
+        }
+        return null;
     }
 
 }

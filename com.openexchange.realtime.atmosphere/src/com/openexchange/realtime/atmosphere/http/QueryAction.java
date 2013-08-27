@@ -228,6 +228,7 @@ public class QueryAction extends RTAction {
             LOG.error(realtimeException.getMessage(), realtimeException);
             stanza.setError(realtimeException);
             stanza.transformPayloads("json");
+            stanza.setSequenceNumber(-1L);
             return new AJAXRequestResult(new StanzaWriter().write(stanza), "json");
         }
         Stanza answerStanza = (Stanza)answer;
@@ -253,14 +254,14 @@ public class QueryAction extends RTAction {
             "json",
             "atmosphere",
             "received").build()));
-        
+
         if(LOG.isDebugEnabled()) {
             LOG.debug("Acknowledging Stanza: " +new StanzaWriter().write(s));
         }
-        
+
         services.getService(MessageDispatcher.class).send(s);
         }
-        
+
     }
 
 }

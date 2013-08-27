@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.ConcurrentList;
 import com.openexchange.subscribe.helpers.FilteredSubscriptionSourceDiscoveryService;
 
 
@@ -64,15 +65,11 @@ import com.openexchange.subscribe.helpers.FilteredSubscriptionSourceDiscoverySer
  * {@link CompositeSubscriptionSourceDiscoveryService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class CompositeSubscriptionSourceDiscoveryService implements SubscriptionSourceDiscoveryService {
 
-    private final List<SubscriptionSourceDiscoveryService> services = new ArrayList<SubscriptionSourceDiscoveryService>();
+    private final List<SubscriptionSourceDiscoveryService> services = new ConcurrentList<SubscriptionSourceDiscoveryService>();
 
-    /* (non-Javadoc)
-     * @see com.openexchange.subscribe.SubscriptionSourceDiscoveryService#getSource(java.lang.String)
-     */
     @Override
     public SubscriptionSource getSource(final String identifier) {
         SubscriptionSource current = null;

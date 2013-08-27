@@ -1251,7 +1251,7 @@ public final class HtmlServiceImpl implements HtmlService {
             sb.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">").append(lineSeparator);
             sb.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">").append(lineSeparator);
             sb.append("<head>").append(lineSeparator);
-            sb.append("    <meta content=\"text/html; charset=").append(charset).append("\" http-equiv=\"Content-Type\"/>").append(lineSeparator);
+            sb.append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=").append(charset).append("\" />").append(lineSeparator);
             sb.append("</head>").append(lineSeparator);
             sb.append("<body>").append(lineSeparator);
             sb.append(htmlContent);
@@ -1269,7 +1269,7 @@ public final class HtmlServiceImpl implements HtmlService {
         // Check for <head> tag
         if (!HEAD_START.matcher(htmlContent).find()) {
             sb.append("<head>").append(lineSeparator);
-            sb.append("    <meta content=\"text/html; charset=").append(charset).append("\" http-equiv=\"Content-Type\"/>").append(lineSeparator);
+            sb.append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=").append(charset).append("\" />").append(lineSeparator);
             sb.append("</head>").append(lineSeparator);
         }
         // Check for <body> tag
@@ -1327,12 +1327,12 @@ public final class HtmlServiceImpl implements HtmlService {
                 /*-
                  * In reverse order:
                  *
-                 * "\r\n    <meta content=\"text/html; charset=" + <charset> + "\" http-equiv=\"Content-Type\" />\r\n "
+                 * "\r\n    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=" + <charset> + "\" />\r\n "
                  *
                  */
-                sb.insert(start, "\" http-equiv=\"Content-Type\" />\r\n ");
+                sb.insert(start, "\" />\r\n ");
                 sb.insert(start, cs);
-                sb.insert(start, "\r\n    <meta content=\"text/html; charset=");
+                sb.insert(start, "\r\n    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=");
                 html = sb.toString();
             }
         }

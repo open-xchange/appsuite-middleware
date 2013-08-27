@@ -80,6 +80,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -364,6 +365,10 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     @Override
     public InputStream getInputStream() throws OXException {
+        return getInputStream0(true);
+    }
+
+    private InputStream getInputStream0(final boolean handleNpe) throws OXException {
         final Part part = this.part;
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
@@ -381,10 +386,39 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 return getRawInputStream(e);
             } catch (final MessagingException e) {
                 return getRawInputStream(e);
+            } catch (final NullPointerException e) {
+                // Occurs in case of non-JavaMail-parseable Content-Type header
+                if (!handleNpe) {
+                    throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+                final InputStream in = sanitizeAndGetInputStream(part);
+                if (null == in) {
+                    throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+                return in;
             }
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
+    }
+
+    private InputStream sanitizeAndGetInputStream(final Part part) throws OXException {
+        try {
+            Part p = part;
+            final String cts = MimeMessageUtility.getHeader("Content-Type", null, p);
+            if (null == cts) {
+                return null;
+            }
+            if (p.getClass().getName().startsWith("com.sun.mail.imap.IMAP")) {
+                loadContent();
+                p = this.part;
+            }
+            p.setHeader("Content-Type", new ContentType(cts).toString(true));
+        } catch (final Exception x) {
+            // Couldn't sanitize
+            return null;
+        }
+        return getInputStream0(false);
     }
 
     private InputStream getRawInputStream(final Exception e) throws MessagingException, OXException {
@@ -412,6 +446,8 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             throw me;
         }
     }
+
+
 
     @Override
     public MailPart getEnclosedMailPart(final int index) throws OXException {
@@ -552,18 +588,18 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                         contentType = new ContentType(MimeTypes.MIME_DEFAULT);
                     }
                 }
-                if (contentType.isMimeType(MimeTypes.MIME_MESSAGE_RFC822)) {
+                if (contentType.startsWith("multipart/")) {
+                    /*
+                     * Compose a new body part with multipart/ data
+                     */
+                    this.part = part = createBodyMultipart(getStreamFromMultipart(getMultipartContentFrom(part, contentType.toString())), contentType.toString());
+                    this.multipart = null;
+                    contentLoaded = true;
+                } else if (contentType.startsWith(MimeTypes.MIME_MESSAGE_RFC822)) {
                     /*
                      * Compose a new body part with message/rfc822 data
                      */
                     this.part = part = createBodyMessage(getStreamFromPart((Message) part.getContent()));
-                    contentLoaded = true;
-                } else if (contentType.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
-                    /*
-                     * Compose a new body part with multipart/ data
-                     */
-                    this.part = part = createBodyMultipart(getStreamFromMultipart((Multipart) part.getContent()), contentType.toString());
-                    this.multipart = null;
                     contentLoaded = true;
                 } else {
                     this.part = part = createBodyPart(getStreamFromPart(part));
@@ -586,6 +622,18 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /** Gets the multipart content from specified part. */
+    private static Multipart getMultipartContentFrom(final Part part, final String contentType) throws MessagingException, IOException {
+        final Object content = part.getContent();
+        if (content instanceof Multipart) {
+            return (Multipart) content;
+        }
+        if (content instanceof InputStream) {
+            return new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
+        }
+        return null;
     }
 
     /**
@@ -621,13 +669,13 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                         contentType = new ContentType(MimeTypes.MIME_DEFAULT);
                     }
                 }
-                if (contentType.isMimeType(MimeTypes.MIME_MESSAGE_RFC822)) {
+                if (contentType.startsWith("multipart/")) {
+                    serializeType = STYPE_MIME_BODY_MULTI;
+                    serializedContent = getBytesFromMultipart(getMultipartContentFrom(part, contentType.toString()));
+                    serializedContentType = contentType.toString();
+                } else if (contentType.startsWith(MimeTypes.MIME_MESSAGE_RFC822)) {
                     serializeType = STYPE_MIME_BODY_MSG;
                     serializedContent = getBytesFromPart((Message) part.getContent());
-                } else if (contentType.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
-                    serializeType = STYPE_MIME_BODY_MULTI;
-                    serializedContent = getBytesFromMultipart((Multipart) part.getContent());
-                    serializedContentType = contentType.toString();
                 } else {
                     serializeType = STYPE_MIME_BODY;
                     serializedContent = getBytesFromPart(part);

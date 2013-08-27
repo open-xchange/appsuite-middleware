@@ -122,6 +122,16 @@ public class ClientLoginCount implements ReportSystemHandler {
         Map<String, Integer> calDavResults = loginCounterService.getNumberOfLogins(startDate, endDate, true, "CALDAV");
         Integer calDav = calDavResults.get(LoginCounterService.SUM);
         report.set(ns, "caldav", calDav.toString());
+
+        Map<String, Integer> ox6Results = loginCounterService.getNumberOfLogins(startDate, endDate, true, "com.openexchange.ox.gui.dhtml");
+        Integer ox6 = ox6Results.get(LoginCounterService.SUM);
+        report.set(ns, "ox6", ox6.toString());
+
+        Map<String, Integer> appsuiteResults = loginCounterService.getNumberOfLogins(startDate, endDate, true, "open-xchange-appsuite");
+        Integer appsuite = appsuiteResults.get(LoginCounterService.SUM);
+        report.set(ns, "appsuite", appsuite.toString());
+
+    
     }
 
 }

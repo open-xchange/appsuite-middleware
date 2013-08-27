@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,31 @@
  *
  */
 
-package com.openexchange.messaging.facebook.services;
+package com.openexchange.drive.events.apn.internal;
 
-import com.openexchange.osgi.ServiceRegistry;
+
 
 /**
- * {@link FacebookMessagingServiceRegistry} - Container class for the service registry of <i>com.openexchange.messaging.facebook</i> bundle.
+ * {@link IOSDriveEventPublisher}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class FacebookMessagingServiceRegistry {
+public class IOSDriveEventPublisher extends APNDriveEventPublisher {
 
-    private static final ServiceRegistry SERVICE_REGISTRY = new ServiceRegistry(8);
+    private static final String SERIVCE_ID = "apn";
 
     /**
-     * Gets the service registry of <i>com.openexchange.messaging.facebook</i> bundle.
+     * Initializes a new {@link IOSDriveEventPublisher}.
      *
-     * @return The service registry
+     * @param access The apn access to use
      */
-    public static ServiceRegistry getServiceRegistry() {
-        return SERVICE_REGISTRY;
+    public IOSDriveEventPublisher(APNAccess access) {
+        super(access);
     }
 
-    /**
-     * Initializes a new {@link FacebookMessagingServiceRegistry}.
-     */
-    private FacebookMessagingServiceRegistry() {
-        super();
+    @Override
+    protected String getServiceID() {
+        return SERIVCE_ID;
     }
 
 }

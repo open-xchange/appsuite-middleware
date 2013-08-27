@@ -53,7 +53,7 @@ import org.osgi.framework.BundleActivator;
 import com.openexchange.osgi.CompositeBundleActivator;
 
 /**
- * {@link Activator}
+ * {@link Activator} - The main activator for OAuth bundle.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */

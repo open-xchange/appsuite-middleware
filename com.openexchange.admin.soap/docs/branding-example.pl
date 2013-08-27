@@ -9,7 +9,7 @@ use SOAP::Lite;
 use Data::Dumper;
 
 # basics
-my $baseURL     = "http://localhost/servlet/axis2/services/";
+my $baseURL     = "http://localhost/webservices/";
 my $nameSpace   = "http://soap.admin.openexchange.com";
 
 my $ctxadmin    = "oxadminmaster";

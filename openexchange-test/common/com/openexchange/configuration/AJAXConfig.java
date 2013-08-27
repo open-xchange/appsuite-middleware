@@ -116,6 +116,10 @@ public class AJAXConfig extends AbstractConfig {
          * Server host.
          */
         HOSTNAME("hostname"),
+        /**
+         * The host for RMI calls
+         */
+        RMI_HOST("rmihost"),
         /** Executor sleeps this amount of time after every request to prevent Apache problems */
         SLEEP("sleep"),
         /**

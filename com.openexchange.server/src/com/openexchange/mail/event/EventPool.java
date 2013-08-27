@@ -175,8 +175,10 @@ public final class EventPool implements Runnable {
      * Performs the shut-down.
      */
     private void shutdown() {
+        final ScheduledTimerTask timerTask = this.timerTask;
         if (null != timerTask) {
             timerTask.cancel(false);
+            this.timerTask = null;
             map.clear();
             queue.clear();
         }

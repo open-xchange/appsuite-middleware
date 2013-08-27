@@ -59,7 +59,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.parser.generated.Node;
 import org.apache.jsieve.parser.generated.ParseException;
@@ -75,6 +74,7 @@ import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.visitors.InternalVisitor;
 import com.openexchange.jsieve.visitors.Visitor;
 import com.openexchange.jsieve.visitors.Visitor.OwnType;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mailfilter.ajax.Credentials;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
 
@@ -889,12 +889,12 @@ public final class SieveTextFilter {
     }
 
     private ArrayList<String> stringToList(final String string) {
-        return new ArrayList<String>(Arrays.asList(string.split(CRLF)));
+        return new ArrayList<String>(Arrays.asList(string.split("\r?\n")));
     }
 
     private List<String> stringToListComment(final String string) {
         final ArrayList<String> retval = new ArrayList<String>();
-        final String[] split = string.split(CRLF);
+        final String[] split = string.split("\r?\n");
         for (final String line : split) {
             retval.add(COMMENT_TAG + line);
         }

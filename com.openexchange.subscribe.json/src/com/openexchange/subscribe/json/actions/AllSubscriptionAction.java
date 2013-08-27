@@ -53,14 +53,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
@@ -75,31 +72,28 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AllSubscriptionAction extends AbstractSubscribeAction {
 
-	/**
-	 * Initializes a new {@link AllSubscriptionAction}.
-	 * @param services
-	 */
-	public AllSubscriptionAction(ServiceLookup services) {
-		super();
-		this.services = services;
+    /**
+     * Initializes a new {@link AllSubscriptionAction}.
+     *
+     * @param services
+     */
+    public AllSubscriptionAction(ServiceLookup services) {
+        super(services);
+    }
 
-	}
-
-	@Override
-	public AJAXRequestResult perform(SubscribeRequest subscribeRequest)
-			throws OXException {
-		String folderId = null;
+    @Override
+    public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException, JSONException {
+        String folderId = null;
         boolean containsFolder = false;
+
         if (subscribeRequest.getRequestData().getParameter("folder") != null) {
             folderId = subscribeRequest.getRequestData().getParameter("folder");
             containsFolder = true;
         }
 
-        final Context context = subscribeRequest.getServerSession().getContext();
-
         List<Subscription> allSubscriptions = null;
         if (containsFolder) {
-        	SecretService secretService = services.getService(SecretService.class);
+            SecretService secretService = services.getService(SecretService.class);
             allSubscriptions = getSubscriptionsInFolder(subscribeRequest.getServerSession(), folderId, secretService.getSecret(subscribeRequest.getServerSession()));
         } else {
             allSubscriptions = getAllSubscriptions(subscribeRequest.getServerSession(), services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
@@ -107,21 +101,13 @@ public class AllSubscriptionAction extends AbstractSubscribeAction {
 
         JSONObject parameters = new JSONObject(subscribeRequest.getRequestData().getParameters());
         final String[] basicColumns = getBasicColumns(parameters);
-        Map<String, String[]> dynamicColumns;
-		try {
-			dynamicColumns = getDynamicColumns(parameters);
-			final List<String> dynamicColumnOrder = getDynamicColumnOrder(parameters);
-	        JSONArray jsonArray = (JSONArray) createResponse(allSubscriptions, basicColumns, dynamicColumns, dynamicColumnOrder, subscribeRequest.getTimeZone());
-	        return new AJAXRequestResult(jsonArray, "json");
-		} catch (JSONException e) {
-			throw new OXException(e);
-		}
+        Map<String, String[]> dynamicColumns = getDynamicColumns(parameters);
+        final List<String> dynamicColumnOrder = getDynamicColumnOrder(parameters);
+        JSONArray jsonArray = (JSONArray) createResponse(allSubscriptions, basicColumns, dynamicColumns, dynamicColumnOrder, subscribeRequest.getTimeZone());
+        return new AJAXRequestResult(jsonArray, "json");
+    }
 
-	}
-
-
-
-	private List<Subscription> getAllSubscriptions(final ServerSession session, final String secret) throws OXException {
+    private List<Subscription> getAllSubscriptions(final ServerSession session, final String secret) throws OXException {
         final List<SubscriptionSource> sources = getDiscovery(session).getSources();
         final List<Subscription> allSubscriptions = new ArrayList<Subscription>();
         for (final SubscriptionSource subscriptionSource : sources) {
@@ -129,7 +115,7 @@ public class AllSubscriptionAction extends AbstractSubscribeAction {
             final Collection<Subscription> subscriptions = subscribeService.loadSubscriptions(session.getContext(), session.getUserId(), secret);
             allSubscriptions.addAll(subscriptions);
         }
-
         return allSubscriptions;
     }
+
 }

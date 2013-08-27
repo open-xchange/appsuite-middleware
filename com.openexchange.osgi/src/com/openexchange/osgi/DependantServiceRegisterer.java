@@ -50,6 +50,7 @@
 package com.openexchange.osgi;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
@@ -77,10 +78,11 @@ public class DependantServiceRegisterer<S> implements ServiceTrackerCustomizer<O
     private final BundleContext context;
     private final Class<S> serviceType;
     private final Class<? extends S> serviceClass;
-    private final  Dictionary<String, ?> properties;
+    private final Dictionary<String, ?> properties;
     private final Class<?>[] neededServices;
     private final Object[] foundServices;
 
+    private S registeredService;
     private ServiceRegistration<?> registration;
 
     public DependantServiceRegisterer(BundleContext context, Class<S> serviceType, Class<? extends S> serviceClass, Dictionary<String, ?> properties, Class<?>... neededServices) {
@@ -117,9 +119,9 @@ public class DependantServiceRegisterer<S> implements ServiceTrackerCustomizer<O
         if (needsRegistration) {
             try {
                 Constructor<? extends S> constructor = serviceClass.getConstructor(neededServices);
-                final S service = constructor.newInstance(foundServices);
+                registeredService = constructor.newInstance(foundServices);
                 LOG.trace("Registering service " + serviceClass.getName());
-                registration = context.registerService(serviceType, service, properties);
+                registration = context.registerService(serviceType, registeredService, properties);
             } catch (Throwable t) {
                 LOG.error("Can not register " + serviceClass.getName(), t);
             }
@@ -155,6 +157,16 @@ public class DependantServiceRegisterer<S> implements ServiceTrackerCustomizer<O
         if (null != unregister) {
             LOG.trace("Unregistering service " + serviceClass.getName());
             unregister.unregister();
+            try {
+                Method method = serviceClass.getMethod("shutDown", new Class<?>[0]);
+                method.invoke(registeredService, new Object[0]);
+            } catch (SecurityException e) {
+                // Service does not have a shutDown() method.
+            } catch (NoSuchMethodException e) {
+                // Service does not have a shutDown() method.
+            } catch (Throwable t) {
+                LOG.error("Can not shut down " + serviceClass.getName(), t);
+            }
         }
         setState();
         context.ungetService(reference);

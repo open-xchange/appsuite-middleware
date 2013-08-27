@@ -157,6 +157,10 @@ public final class CacheFolderStorage implements FolderStorage {
         return INSTANCE;
     }
 
+    private static final String ROOT_ID = FolderStorage.ROOT_ID;
+
+    // ------------------------------------------------------------------------ //
+
     private final String realTreeId;
 
     private final CacheFolderStorageRegistry registry;
@@ -880,10 +884,10 @@ public final class CacheFolderStorage implements FolderStorage {
             /*
              * Refresh
              */
-            if (null != realParentId && !FolderStorage.ROOT_ID.equals(realParentId)) {
+            if (null != realParentId && !ROOT_ID.equals(realParentId)) {
                 removeFromCache(realParentId, treeId, storageParameters.getSession(), newPathPerformer(storageParameters));
             }
-            if (!FolderStorage.ROOT_ID.equals(parentId)) {
+            if (!ROOT_ID.equals(parentId)) {
                 removeFromCache(parentId, treeId, storageParameters.getSession(), newPathPerformer(storageParameters));
                 try {
                     final Folder parentFolder = loadFolder(treeId, parentId, StorageType.WORKING, true, storageParameters);
@@ -1295,7 +1299,7 @@ public final class CacheFolderStorage implements FolderStorage {
         acquire(lock);
         try {
             final Folder parent = getFolder(treeId, parentId, storageParameters);
-            final String[] subfolders = parent.getSubfolderIDs();
+            final String[] subfolders = ROOT_ID.equals(parentId) ? null : parent.getSubfolderIDs();
             final SortableId[] ret;
             if (null == subfolders) {
                 /*
@@ -1418,10 +1422,24 @@ public final class CacheFolderStorage implements FolderStorage {
                 final UpdatePerformer updatePerformer = new UpdatePerformer(storageParameters.getUser(), storageParameters.getContext(), storageParameters.getDecorator(), registry);
                 updatePerformer.setCheck4Duplicates(false);
                 updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
+
+                final Set<OXException> warnings = updatePerformer.getWarnings();
+                if (null != warnings) {
+                    for (final OXException warning : warnings) {
+                        storageParameters.addWarning(warning);
+                    }
+                }
             } else {
                 final UpdatePerformer updatePerformer = new UpdatePerformer(ServerSessionAdapter.valueOf(session), storageParameters.getDecorator(), registry);
                 updatePerformer.setCheck4Duplicates(false);
                 updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
+
+                final Set<OXException> warnings = updatePerformer.getWarnings();
+                if (null != warnings) {
+                    for (final OXException warning : warnings) {
+                        storageParameters.addWarning(warning);
+                    }
+                }
             }
             /*
              * Get folder from appropriate storage
@@ -1645,7 +1663,7 @@ public final class CacheFolderStorage implements FolderStorage {
         }
         final boolean started = startTransaction(readWrite ? Mode.WRITE_AFTER_READ : Mode.READ, storageParameters, storage);
         try {
-            final Folder folder = storage.getFolder(treeId, folderId, storageType, storageParameters);            
+            final Folder folder = storage.getFolder(treeId, folderId, storageType, storageParameters);
             if (started) {
                 storage.commitTransaction(storageParameters);
             }

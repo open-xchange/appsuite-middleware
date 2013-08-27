@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,62 +47,25 @@
  *
  */
 
-package com.openexchange.filemanagement.internal;
+package com.openexchange.drive.actions;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.server.Initialization;
-import com.openexchange.server.osgi.ServerActivator;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.drive.Action;
 
 /**
- * {@link ManagedFileInitialization} - Initialization for {@link ManagedFileManagement}.
+ * {@link SyncDirectoriesAction}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class ManagedFileInitialization implements Initialization {
+public class SyncDirectoriesAction extends AbstractDirectoryAction {
 
-    private final AtomicBoolean started;
-
-    private volatile ServiceRegistration<ManagedFileManagement> registerService;
-
-    /**
-     * Initializes a new {@link ManagedFileInitialization}
-     */
-    public ManagedFileInitialization() {
-        super();
-        started = new AtomicBoolean();
+    public SyncDirectoriesAction(boolean reset) {
+        super(null, null, null);
+        parameters.put(PARAMETER_RESET, Boolean.valueOf(reset));
     }
 
     @Override
-    public void start() {
-        if (!started.compareAndSet(false, true)) {
-            return;
-        }
-        // Simulate bundle registration
-        final ManagedFileManagementImpl fileManagement = ManagedFileManagementImpl.getInstance();
-        ServerServiceRegistry.getInstance().addService(ManagedFileManagement.class, fileManagement);
-        final BundleContext context = ServerActivator.getContext();
-        if (null != context) {
-            registerService = context.registerService(ManagedFileManagement.class, fileManagement, null);
-        }
-    }
-
-    @Override
-    public void stop() {
-        if (!started.compareAndSet(true, false)) {
-            return;
-        }
-        final ServiceRegistration<ManagedFileManagement> registerService = this.registerService;
-        if (null != registerService) {
-            registerService.unregister();
-            this.registerService = null;
-        }
-        // Simulate bundle shut-down
-        ServerServiceRegistry.getInstance().removeService(ManagedFileManagement.class);
-        ManagedFileManagementImpl.releaseInstance();
+    public Action getAction() {
+        return Action.SYNC;
     }
 
 }

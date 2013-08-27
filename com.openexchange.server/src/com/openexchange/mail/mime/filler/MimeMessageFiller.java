@@ -54,12 +54,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -140,6 +140,7 @@ import com.openexchange.mail.mime.utils.sourcedimage.SourcedImageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
@@ -468,12 +469,20 @@ public class MimeMessageFiller {
                     }
                 }
             }
-            final List<InternetAddress> aliases;
+            final Set<InternetAddress> aliases;
             final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
             final User user = userService.getUser(session.getUserId(), ctx);
-            aliases = new ArrayList<InternetAddress>();
+            aliases = new LinkedHashSet<InternetAddress>();
             for (final String alias : user.getAliases()) {
                 aliases.add(new QuotedInternetAddress(alias));
+            }
+            if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
+                MsisdnUtility.addMsisdnAddress(aliases, session);
+                final String address = from.getAddress();
+                final int pos = address.indexOf('/');
+                if (pos > 0) {
+                    from.setAddress(address.substring(0, pos));
+                }
             }
             /*
              * Taken from RFC 822 section 4.4.2: In particular, the "Sender" field MUST be present if it is NOT the same as the "From"
@@ -935,7 +944,7 @@ public class MimeMessageFiller {
                     final byte[] bbuf = new byte[BUF_SIZE];
                     for (int i = 0; i < size; i++) {
                         final MailPart enclosedMailPart = mail.getEnclosedMailPart(i);
-                        if (enclosedMailPart.getContentType().startsWith("message/rfc822")) {
+                        if (enclosedMailPart.getContentType().startsWith("message/rfc822") || (enclosedMailPart.getContentType().getNameParameter() != null && enclosedMailPart.getContentType().getNameParameter().endsWith(".eml"))) {
                             addNestedMessage(enclosedMailPart, primaryMultipart, sb, out, bbuf);
                         } else {
                             addMessageBodyPart(primaryMultipart, enclosedMailPart, false);
@@ -1097,7 +1106,7 @@ public class MimeMessageFiller {
                                     sb.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n");
                                     sb.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">\n");
                                     sb.append("<head>\n");
-                                    sb.append("    <meta content=\"text/html; charset=").append(charset).append("\" http-equiv=\"Content-Type\"/>\n");
+                                    sb.append("    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=").append(charset).append("\" />\n");
                                     sb.append("</head>\n");
                                     sb.append("<body>\n");
                                     sb.append(content);

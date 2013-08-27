@@ -54,6 +54,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +81,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
+import com.openexchange.java.ConcurrentEnumMap;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -109,7 +111,69 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     // ------------------------------------------------------------------------------------------------ //
 
+    private static interface PropertyHandler {
+
+        void handleProperty(String propValue, Set<Capability> capabilities) throws OXException;
+    }
+
+    /** The property handlers for special config-cascade properties */
+    private static final Map<String, PropertyHandler> PROPERTY_HANDLERS;
+
+    static {
+        final Map<String, PropertyHandler> map = new HashMap<String, PropertyHandler>(4);
+
+        map.put("com.openexchange.caldav.enabled", new PropertyHandler() {
+
+            @Override
+            public void handleProperty(final String propValue, final Set<Capability> capabilities) throws OXException {
+                if (Boolean.parseBoolean(propValue)) {
+                    capabilities.add(getCapability(Permission.CALDAV));
+                } else {
+                    capabilities.remove(getCapability(Permission.CALDAV));
+                }
+            }
+        });
+
+        map.put("com.openexchange.carddav.enabled", new PropertyHandler() {
+
+            @Override
+            public void handleProperty(final String propValue, final Set<Capability> capabilities) throws OXException {
+                if (Boolean.parseBoolean(propValue)) {
+                    capabilities.add(getCapability(Permission.CARDDAV));
+                } else {
+                    capabilities.remove(getCapability(Permission.CARDDAV));
+                }
+            }
+        });
+
+        PROPERTY_HANDLERS = Collections.unmodifiableMap(map);
+    }
+
+    // ------------------------------------------------------------------------------------------------ //
+
+    private static final ConcurrentEnumMap<Permission, Capability> p2capabilities = new ConcurrentEnumMap<Permission, Capability>(Permission.class);
     private static final ConcurrentMap<String, Capability> capabilities = new ConcurrentHashMap<String, Capability>(96);
+
+    /**
+     * Gets the singleton capability for given identifier
+     *
+     * @param permission The permission
+     * @return The singleton capability
+     */
+    public static Capability getCapability(final Permission permission) {
+        if (null == permission) {
+            return null;
+        }
+        Capability capability = p2capabilities.get(permission);
+        if (null == capability) {
+            final Capability newcapability = getCapability(toLowerCase(permission.name()));
+            capability = p2capabilities.putIfAbsent(permission, newcapability);
+            if (null == capability) {
+                capability = newcapability;
+            }
+        }
+        return capability;
+    }
 
     /**
      * Gets the singleton capability for given identifier
@@ -118,6 +182,9 @@ public abstract class AbstractCapabilityService implements CapabilityService {
      * @return The singleton capability
      */
     public static Capability getCapability(final String id) {
+        if (null == id) {
+            return null;
+        }
         Capability capability = capabilities.get(id);
         if (capability != null) {
             return capability;
@@ -183,9 +250,12 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             synchronized (this) {
                 tmp = autologin;
                 if (null == tmp) {
-                    tmp = Boolean.valueOf(services.getService(ConfigurationService.class).getBoolProperty(
-                        "com.openexchange.sessiond.autologin",
-                        false));
+                    final ConfigurationService configurationService = services.getService(ConfigurationService.class);
+                    if (null == configurationService) {
+                        // Return default value
+                        return false;
+                    }
+                    tmp = Boolean.valueOf(configurationService.getBoolProperty("com.openexchange.sessiond.autologin", false));
                     autologin = tmp;
                 }
             }
@@ -210,7 +280,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             final UserPermissionBits userPermissionBits = services.getService(UserPermissionService.class).getUserPermissionBits(serverSession.getUserId(), serverSession.getContext());
             // Capabilities by user permission bits
             for (final Permission p: Permission.byBits(userPermissionBits.getPermissionBits())) {
-                capabilities.add(getCapability(toLowerCase(p.name())));
+                capabilities.add(getCapability(p));
             }
             // Apply capabilities for non-transient sessions
             if (!serverSession.isTransient()) {
@@ -265,8 +335,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 } else {
                     capabilities.remove(getCapability("gab"));
                 }
-
-                // permission properties
+                // Permission properties
                 final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
                 if (configViews != null) {
                     final ConfigView view = configViews.getView(userId, contextId);
@@ -289,18 +358,26 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                         }
                     }
 
-                    Map<String, ComposedConfigProperty<String>> all = view.all();
+                    final Map<String, ComposedConfigProperty<String>> all = view.all();
                     for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
-                        if (entry.getKey().startsWith("com.openexchange.capability.")) {
+                        final String propName = entry.getKey();
+                        if (propName.startsWith("com.openexchange.capability.")) {
                             boolean value = Boolean.parseBoolean(entry.getValue().get());
-                            String name = entry.getKey().substring(28);
+                            String name = toLowerCase(propName.substring(28));
                             if (value) {
                                 capabilities.add(getCapability(name));
                             } else {
                                 capabilities.remove(getCapability(name));
                             }
+                        } else {
+                            // Check for a property handler
+                            final PropertyHandler handler = PROPERTY_HANDLERS.get(propName);
+                            if (null != handler) {
+                                handler.handleProperty(entry.getValue().get(), capabilities);
+                            }
                         }
                     }
+
                 }
             }
         }

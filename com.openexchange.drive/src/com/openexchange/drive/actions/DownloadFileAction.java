@@ -59,7 +59,7 @@ import com.openexchange.file.storage.File;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DownloadFileAction extends AbstractAction<FileVersion> {
+public class DownloadFileAction extends AbstractFileAction {
 
     public DownloadFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, long totalLength, String contentType, Long created, Long modified) {
         super(file, newFile, comparison);

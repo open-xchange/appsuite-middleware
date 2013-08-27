@@ -61,7 +61,7 @@ import com.openexchange.drive.comparison.ThreeWayComparison;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class UploadFileAction extends AbstractAction<FileVersion> {
+public class UploadFileAction extends AbstractFileAction {
 
     public UploadFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, long offset) {
         super(file, newFile, comparison);

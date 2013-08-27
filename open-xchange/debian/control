@@ -9,8 +9,7 @@ Build-Conflicts: ecj, libecj-java-gcj, ecj-gcj, libecj-java, gcj-4.3-base, libgc
 
 Package: open-xchange
 Architecture: all
-Depends: ${misc:Depends}, open-xchange-authentication, open-xchange-authorization, open-xchange-mailstore, open-xchange-smtp (>= @OXVERSION@), open-xchange-grizzly | open-xchange-httpservice, open-xchange-theme-default, open-xchange-cluster-discovery
-Suggests: open-xchange-cluster-discovery-static
+Depends: ${misc:Depends}, open-xchange-authentication, open-xchange-authorization, open-xchange-mailstore, open-xchange-smtp (>= @OXVERSION@), open-xchange-grizzly | open-xchange-httpservice, open-xchange-theme-default
 Description: The Open-Xchange backend
  This package provides the dependencies to install a working Open-Xchange backend system. By installing this package a minimal backend is
  installed. Additionally this package provides the init script for starting the backend on system boot.

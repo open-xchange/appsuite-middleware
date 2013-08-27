@@ -52,6 +52,8 @@ package com.openexchange.folderstorage.database.getfolder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.i18n.FolderStrings;
@@ -63,6 +65,8 @@ import com.openexchange.i18n.tools.StringHelper;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SystemRootFolder {
+
+    private static final boolean preload = true;
 
     /**
      * Initializes a new {@link SystemRootFolder}.
@@ -81,23 +85,24 @@ public final class SystemRootFolder {
         /*
          * The system root folder
          */
-        final FolderObject fo =
-            FolderObject.createVirtualFolderObject(
-                FolderObject.SYSTEM_ROOT_FOLDER_ID,
-                "root",
-                FolderObject.SYSTEM_MODULE,
-                true,
-                FolderObject.SYSTEM_TYPE);
+        final FolderObject fo = FolderObject.createVirtualFolderObject(FolderObject.SYSTEM_ROOT_FOLDER_ID, "root", FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
         final DatabaseFolder retval = new DatabaseFolder(fo);
         // Enforce getSubfolders() from storage
-        final List<String> list = new ArrayList<String>(4);
-        list.add(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
-        list.add(String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
-        list.add(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
-        list.add(String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
-        retval.setSubfolderIDs(list.toArray(new String[list.size()]));
+        if (preload) {
+            final List<String> list = new ArrayList<String>(4);
+            list.add(String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
+            list.add(String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
+            list.add(String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID));
+            list.add(String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
+            retval.setSubfolderIDs(list.toArray(new String[list.size()]));
+        } else {
+            retval.setSubfolderIDs(null);
+            retval.setSubscribedSubfolders(true);
+        }
         return retval;
     }
+
+    private static final ConcurrentMap<Locale, List<String[]>> CACHED_SUBFOLDERS = new ConcurrentHashMap<Locale, List<String[]>>(16);
 
     /**
      * Gets the subfolder identifiers of database folder representing system root folder for given user.
@@ -108,30 +113,20 @@ public final class SystemRootFolder {
         /*
          * The system root folder
          */
-        final StringHelper sh = StringHelper.valueOf(locale);
-        final List<String[]> list = new ArrayList<String[]>(4);
-        list.add(new String[] { String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_PRIVATE_FOLDER_NAME) });
-        list.add(new String[] { String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_PUBLIC_FOLDER_NAME) });
-        list.add(new String[] { String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_SHARED_FOLDER_NAME) });
-        list.add(new String[] { String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME) });
+        List<String[]> list = CACHED_SUBFOLDERS.get(locale);
+        if (null == list) {
+            final StringHelper sh = StringHelper.valueOf(locale);
+            final List<String[]> newList = new ArrayList<String[]>(4);
+            newList.add(new String[] { String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_PRIVATE_FOLDER_NAME) });
+            newList.add(new String[] { String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_PUBLIC_FOLDER_NAME) });
+            newList.add(new String[] { String.valueOf(FolderObject.SYSTEM_SHARED_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_SHARED_FOLDER_NAME) });
+            newList.add(new String[] { String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME) });
+            list = CACHED_SUBFOLDERS.putIfAbsent(locale, newList);
+            if (null == list) {
+                list = newList;
+            }
+        }
         return list;
-    }
-
-    /**
-     * Gets the subfolder identifiers of database folder representing system root folder for given user.
-     *
-     * @return The subfolder identifiers of database folder representing system root folder for given user
-     */
-    public static int[] getSystemRootFolderSubfolderAsInt() {
-        /*
-         * The system root folder
-         */
-        final int[] ret = new int[4];
-        ret[0] = FolderObject.SYSTEM_PRIVATE_FOLDER_ID;
-        ret[1] = FolderObject.SYSTEM_PUBLIC_FOLDER_ID;
-        ret[2] = FolderObject.SYSTEM_SHARED_FOLDER_ID;
-        ret[3] = FolderObject.SYSTEM_INFOSTORE_FOLDER_ID;
-        return ret;
     }
 
 }

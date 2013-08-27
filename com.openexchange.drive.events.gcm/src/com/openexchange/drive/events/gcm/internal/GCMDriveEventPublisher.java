@@ -90,7 +90,7 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
         List<Subscription> subscriptions = null;
         try {
             subscriptions = Services.getService(DriveSubscriptionStore.class, true).getSubscriptions(
-                event.getContextID(), SERIVCE_ID, event.getFolderIDs());
+                event.getContextID(), new String[] { SERIVCE_ID }, event.getFolderIDs());
         } catch (OXException e) {
             LOG.error("unable to get subscriptions for service " + SERIVCE_ID, e);
         }

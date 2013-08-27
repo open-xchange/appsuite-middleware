@@ -92,7 +92,7 @@ import com.openexchange.messaging.facebook.parser.page.FacebookFQLPageJsonParser
 import com.openexchange.messaging.facebook.parser.stream.FacebookFQLStreamJsonParser;
 import com.openexchange.messaging.facebook.parser.stream.FacebookFQLStreamParser;
 import com.openexchange.messaging.facebook.parser.user.FacebookFQLUserJsonParser;
-import com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry;
+import com.openexchange.messaging.facebook.services.Services;
 import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
 import com.openexchange.messaging.facebook.utility.FacebookGroup;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingMessage;
@@ -127,8 +127,11 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             synchronized (FacebookMessagingMessageAccess.class) {
                 tmp = ignoreFbInFeed;
                 if (null == tmp) {
-                    final ConfigurationService service = FacebookMessagingServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
-                    tmp = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.messaging.facebook.ignoreFbInFeed", true));
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
+                    if (null == service) {
+                        return true;
+                    }
+                    tmp = Boolean.valueOf(service.getBoolProperty("com.openexchange.messaging.facebook.ignoreFbInFeed", true));
                     ignoreFbInFeed = tmp;
                 }
             }
@@ -325,7 +328,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                         FacebookMessagingExceptionCodes.FQL_QUERY_RESULT_MISMATCH.create(
                             Integer.valueOf(size),
                             Integer.valueOf(messageIds.length));
-                    com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookMessagingMessageAccess.class)).warn(warning.getMessage(), warning);
+                    com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookMessagingMessageAccess.class)).debug(warning.getMessage(), warning);
                 }
                 final Iterator<JSONObject> iterator = results.iterator();
                 final Map<String, FacebookMessagingMessage> orderMap = new HashMap<String, FacebookMessagingMessage>(size);

@@ -52,7 +52,7 @@ package com.openexchange.messaging.facebook.session;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry;
+import com.openexchange.messaging.facebook.services.Services;
 import com.openexchange.sessiond.SessiondService;
 
 /**
@@ -140,7 +140,7 @@ public final class FacebookOAuthAccessRegistry {
      * @return <code>true</code> if a Facebook OAuth access for given user-context-pair was found and removed; otherwise <code>false</code>
      */
     public boolean removeSessionIfLast(final int contextId, final int userId) {
-        final SessiondService sessiondService = FacebookMessagingServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+        final SessiondService sessiondService = Services.getService(SessiondService.class);
         if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
             /*
              * No sessions left for user

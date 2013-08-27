@@ -84,8 +84,7 @@ public class SubscribeAction extends AbstractDriveAction {
          * add subscription
          */
         DriveSubscriptionStore subscriptionStore = Services.getService(DriveSubscriptionStore.class, true);
-        boolean removePrevious = "apn".equals(serviceID);
-        subscriptionStore.subscribe(session.getServerSession(), serviceID, token, session.getRootFolderID(), removePrevious);
+        subscriptionStore.subscribe(session.getServerSession(), serviceID, token, session.getRootFolderID());
         /*
          * return empty json object to indicate success
          */

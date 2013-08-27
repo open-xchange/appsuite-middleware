@@ -114,7 +114,8 @@ public final class GetAction extends AbstractMailAccountAction implements MailAc
                     Integer.valueOf(session.getContextId()));
             }
 
-            final JSONObject jsonAccount = MailAccountWriter.write(checkFullNames(mailAccount, storageService, session));
+            final JSONObject jsonAccount = MailAccountWriter.write(mailAccount);
+            // final JSONObject jsonAccount = MailAccountWriter.write(checkFullNames(mailAccount, storageService, session));
 
             {
                 final JSlobId jSlobId = new JSlobId(JSLOB_SERVICE_ID, Integer.toString(id), session.getUserId(), session.getContextId());

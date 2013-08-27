@@ -49,10 +49,11 @@
 
 package com.openexchange.mailaccount;
 
+import static com.openexchange.java.Strings.toLowerCase;
 import java.sql.Connection;
 import java.util.EnumSet;
 import java.util.Set;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -60,6 +61,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.json.actions.AbstractMailAccountAction;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -155,13 +157,13 @@ public final class Tools {
             return account;
         }
         final int contextId = session.getContextId();
-        final Connection rcon = Database.get(contextId, false);
+        final DatabaseService databaseService = ServerServiceRegistry.getServize(DatabaseService.class);
+        final Connection wcon = databaseService.getWritable(contextId);
         try {
-            return checkFullNames(account, storageService, session, rcon);
+            return checkFullNames(account, storageService, session, wcon);
         } finally {
-            Database.back(contextId, false, rcon);
+            databaseService.backWritable(contextId, wcon);
         }
-
     }
 
     /**
@@ -189,8 +191,13 @@ public final class Tools {
         /*
          * Variables
          */
-        final String mailServerURL = account.generateMailServerURL();
-        String prefix = null != mailServerURL && mailServerURL.startsWith("pop3") ? "" : null;
+        String prefix = null;
+        {
+            final String mailProtocol = account.getMailProtocol();
+            if (null != mailProtocol && toLowerCase(mailProtocol).startsWith("pop3")) {
+                prefix = "";
+            }
+        }
         StringBuilder tmp = null;
         MailAccount primaryAccount = null;
         /*
@@ -352,8 +359,20 @@ public final class Tools {
              * Update and return re-fetched account instance
              */
             if (null == con) {
-                storageService.updateMailAccount(mad, attributes, userId, contextId, serverSession);
-                return storageService.getMailAccount(accountId, userId, contextId);
+                final DatabaseService databaseService = ServerServiceRegistry.getServize(DatabaseService.class);
+                final Connection wcon = databaseService.getWritable(contextId);
+                try {
+                    storageService.updateMailAccount(mad, attributes, userId, contextId, serverSession, con, false);
+                    final MailAccount[] accounts = storageService.getUserMailAccounts(userId, contextId, con);
+                    for (final MailAccount macc : accounts) {
+                        if (macc.getId() == accountId) {
+                            return macc;
+                        }
+                    }
+                    return null;
+                } finally {
+                    databaseService.backWritable(contextId, wcon);
+                }
             }
             storageService.updateMailAccount(mad, attributes, userId, contextId, serverSession, con, false);
             final MailAccount[] accounts = storageService.getUserMailAccounts(userId, contextId, con);

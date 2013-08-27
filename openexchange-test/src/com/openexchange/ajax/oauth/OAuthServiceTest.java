@@ -102,7 +102,7 @@ public class OAuthServiceTest {
         com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
         user.setUserAttribute("config", "com.openechange.oauth.testservice.enabled", "false");
         Credentials credentials = new Credentials(AJAXConfig.getProperty(oxadmin.getLogin()), AJAXConfig.getProperty(oxadmin.getPassword()));
-        OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.HOSTNAME) + ":1099/" + OXUserInterface.RMI_NAME);
+        OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         iface.change(new Context(client2.getValues().getContextId()), user, credentials);
         client2.logout();
     }
@@ -114,7 +114,7 @@ public class OAuthServiceTest {
         com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
         user.setUserAttribute("config", "com.openechange.oauth.testservice.enabled", null);
         Credentials credentials = new Credentials(AJAXConfig.getProperty(oxadmin.getLogin()), AJAXConfig.getProperty(oxadmin.getPassword()));
-        OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.HOSTNAME) + ":1099/" + OXUserInterface.RMI_NAME);
+        OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         iface.change(new Context(client2.getValues().getContextId()), user, credentials);
         client2.logout();
     }
@@ -157,6 +157,7 @@ public class OAuthServiceTest {
 
     @Test
     public void testGetAllServicesWithoutPermission() throws Exception {
+        Thread.sleep(3000);
         AJAXClient client2 = null;
         try {
             client2 = new AJAXClient(AJAXClient.User.User2);
@@ -180,6 +181,7 @@ public class OAuthServiceTest {
 
     @Test
     public void testGetTestServiceWithoutPermission() throws Exception {
+        Thread.sleep(3000);
         AJAXClient client2 = null;
         try {
             client2 = new AJAXClient(AJAXClient.User.User2);

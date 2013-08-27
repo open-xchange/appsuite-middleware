@@ -150,24 +150,16 @@ ox_stop_daemon() {
     test -z "$name" && die "ox_stop_daemon: missing name argument (arg 1)"
     ox_system_type
     local type=$?
-    /opt/open-xchange/sbin/shutdown -w
-    if [ $type -eq $DEBIAN -o $type -eq $UCS ] ; then
-        start-stop-daemon --stop --oknodo --pidfile /var/run/${name}.pid
-        rm -f /var/run/${name}.pid
-    elif [ $(( $type & $LSB )) -eq $LSB ]; then
-        if [ ! -f /var/run/${name}.pid ]; then
-            return 0
-        fi
-        read PID < /var/run/${name}.pid
-        test -z "$PID" && { echo "unable to read pid"; return 1; }
-        if ! ps $PID > /dev/null; then
-            return 0
-        fi
-        kill -TERM $PID
-        rm -f /var/run/${name}.pid
-    else
-        die "Unable to handle unknown system type"
+
+    if [ ! -f /var/run/${name}.pid ]; then
+        return 0
     fi
+    read PID < /var/run/${name}.pid
+    test -z "$PID" && { echo "No process in pidfile '/var/run/${name}.pid' found running; none killed."; return 1; }
+    ps $PID > /dev/null && /opt/open-xchange/sbin/shutdown -w > /dev/null 2>&1
+    ps $PID > /dev/null && kill -QUIT $PID
+    ps $PID > /dev/null && kill -TERM $PID
+    rm -f /var/run/${name}.pid
 }
 
 ox_daemon_status() {
@@ -204,20 +196,20 @@ ox_set_property() {
     ox_system_type
     local type=$?
     if [ $type -eq $DEBIAN -o $type -eq $UCS ]; then
-	local origfile="${propfile}.dpkg-new"
-	if [ ! -e $origfile ]; then
-	    local origfile="${propfile}.dpkg-dist"
-	fi
+        local origfile="${propfile}.dpkg-new"
+        if [ ! -e $origfile ]; then
+            local origfile="${propfile}.dpkg-dist"
+        fi
     else
-	local origfile="${propfile}.rpmnew"
+        local origfile="${propfile}.rpmnew"
     fi
     if [ -n "$origfile" ] && [ -e "$origfile" ]; then
-	export origfile
-	export propfile
-	export prop
-	export val
+        export origfile
+        export propfile
+        export prop
+        export val
 
-	perl -e '
+        perl -e '
 use strict;
 
 open(IN,"$ENV{origfile}") || die "unable to open $ENV{origfile}: $!";
@@ -232,14 +224,14 @@ my $count = 0;
 my $back  = 1;
 my $out = "";
 foreach my $line (@LINES) {
-  if ( $line =~ /^$opt\s*[:=]/ ) {
-    $out = $line;
-    $out =~ s/^(.*?[:=]).*$/$1$val/;
-    while ( $LINES[$count-$back] =~ /^#/ ) {
-      $out = $LINES[$count-$back++].$out;
+    if ( $line =~ /^$opt\s*[:=]/ ) {
+      $out = $line;
+      $out =~ s/^(.*?[:=]).*$/$1$val/;
+      while ( $LINES[$count-$back] =~ /^#/ ) {
+          $out = $LINES[$count-$back++].$out;
+      }
     }
-  }
-  $count++;
+    $count++;
 }
 
 $back  = 0;
@@ -248,69 +240,70 @@ my $start = 0;
 my $end = 0;
 my $found = 0;
 foreach my $line (@OUTLINES) {
-  if ( $line =~ /^$opt\s*[:=]/ ) {
-    $found=1;
-    $end=$count;
-    while ( $OUTLINES[$count-++$back] =~ /^#/ ) {
+    if ( $line =~ /^$opt\s*[:=]/ ) {
+        $found=1;
+        $end=$count;
+        while ( $OUTLINES[$count-++$back] =~ /^#/ ) {
+        }
+        ;
+        if ( $count > 0 && $back > 1 ) {
+            $start=$count-$back+1;
+        } else {
+            $start=$end;
+        }
     }
-    ;
-    if ( $count > 0 && $back > 1 ) {
-       $start=$count-$back+1;
-    } else {
-       $start=$end;
-    }
-  }
-  $count++;
+    $count++;
 }
 
 if ( length($out) == 0 ) {
-   $out=$opt."=".$val."\n";
+    $out=$opt."=".$val."\n";
 }
 
 if ( $found ) {
-  for (my $i=0; $i<=$#OUTLINES; $i++) {
-    if ( $i < $start || $i > $end ) {
-        print $OUTLINES[$i];
-        print "\n" if( substr($OUTLINES[$i],-1) ne "\n" );
+    for (my $i=0; $i<=$#OUTLINES; $i++) {
+        if ( $i < $start || $i > $end ) {
+            print $OUTLINES[$i];
+            print "\n" if( substr($OUTLINES[$i],-1) ne "\n" );
+        }
+        if ( $i == $start ) {
+            print $out;
+            print "\n" if( substr($OUTLINES[$i],-1) ne "\n" );
+        }
     }
-    if ( $i == $start ) {
-      print $out;
-      print "\n" if( substr($out,-1) ne "\n" );
-    }
-  }
 } else {
-  print @OUTLINES;
-  print "\n" if( substr($OUTLINES[-1],-1) ne "\n" );
-  print $out;
-  print "\n" if( substr($out,-1) ne "\n" );
+    print @OUTLINES;
+    print "\n" if( substr($OUTLINES[-1],-1) ne "\n" );
+    print $out;
+    print "\n";
 }
 ' > $tmp
-	if [ $? -gt 0 ]; then
-	    rm -f $tmp
-	    die "ox_set_property: FATAL: error setting property $prop to \"$val\" in $propfile"
-	else
-	    mv $tmp $propfile
-	fi
-	unset origfile
-	unset propfile
-	unset prop
-	unset val
+        if [ $? -gt 0 ]; then
+            rm -f $tmp
+            die "ox_set_property: FATAL: error setting property $prop to \"$val\" in $propfile"
+        else
+            mv $tmp $propfile
+        fi
+        unset origfile
+        unset propfile
+        unset prop
+        unset val
     else
         # quote & in URLs to make sed happy
-	test -n "$val" && val="$(echo $val | sed 's/\&/\\\&/g')"
-	if grep -E "^$prop *[:=]" $propfile >/dev/null; then
-	    cat<<EOF | sed -f - $propfile > $tmp
+        test -n "$val" && val="$(echo $val | sed 's/\&/\\\&/g')"
+        if grep -E "^$prop *[:=]" $propfile >/dev/null; then
+            cat<<EOF | sed -f - $propfile > $tmp
 s;\(^$prop[[:space:]]*[:=]\).*$;\1${val};
 EOF
-	else
-	    echo "${prop}=$val" >> $tmp
-	fi
+        else
+            echo "${prop}=$val" >> $tmp
+            echo "" >> $tmp
+        fi
         if [ $? -gt 0 ]; then
-	    rm -f $tmp
-	    die "ox_set_property: FATAL: error setting property $prop to \"$val\" in $propfile"
-	else
-	    mv $tmp $propfile
-	fi
+            rm -f $tmp
+            die "ox_set_property: FATAL: error setting property $prop to \"$val\" in $propfile"
+        else
+            mv $tmp $propfile
+        fi
     fi
 }
 
@@ -405,27 +398,28 @@ my $back  = 1;
 my $start = 0;
 my $end = 0;
 foreach my $line (@LINES) {
-  if ( $line =~ /^$opt\s*[:=]/ ) {
-    $end=$count;
-    while ( $LINES[$count-$back++] =~ /^#/ ) {
+    if ( $line =~ /^$opt\s*[:=]/ ) {
+        $end=$count;
+        while ( $LINES[$count-$back++] =~ /^#/ ) {
+        }
+        $start=$count-$back;
     }
-    ;
-    $start=$count-$back;
-  }
-  $count++;
+    $count++;
 }
-
+if ( $LINES[$end+1] =~ /^\s*$/ ) {
+    $end++;
+}
 for (my $i=0; $i<=$#LINES; $i++) {
-  if ( $i <= $start+1 || $i > $end ) {
-    print $LINES[$i];
-  }
+    if ( $i <= $start+1 || $i > $end ) {
+        print $LINES[$i];
+    }
 }
 ' > $tmp
     if [ $? -gt 0 ]; then
- 	rm -f $tmp
- 	die "ox_remove_property: FATAL: error removing property $prop from $propfile"
+        rm -f $tmp
+        die "ox_remove_property: FATAL: error removing property $prop from $propfile"
     else
- 	mv $tmp $propfile
+        mv $tmp $propfile
     fi
     unset propfile
     unset prop
@@ -448,7 +442,7 @@ ox_comment(){
     local tmp=${propfile}.tmp$$
     cp -a --remove-destination $propfile $tmp
     if [ "$action" == "add" ]; then
-	sed "s/^$prop/# $prop/" < $propfile > $tmp;
+        sed "s/^$prop/# $prop/" < $propfile > $tmp;
         if [ $? -gt 0 ]; then
             rm -f $tmp
             die "ox_comment: FATAL: could not add comment in file $propfile to $prop"

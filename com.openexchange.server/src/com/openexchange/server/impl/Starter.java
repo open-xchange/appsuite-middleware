@@ -165,10 +165,6 @@ public class Starter implements Initialization {
      * Initializes the Link Attachment Listener
      */
     new com.openexchange.groupware.links.LinkInit(),
-    /**
-     * Managed file initialization
-     */
-    new com.openexchange.filemanagement.internal.ManagedFileInitialization(),
     new com.openexchange.mailaccount.internal.MailAccountStorageInit(),
     new com.openexchange.multiple.internal.MultipleHandlerInit(),
     new com.openexchange.groupware.impl.id.IDGeneratorInit() };

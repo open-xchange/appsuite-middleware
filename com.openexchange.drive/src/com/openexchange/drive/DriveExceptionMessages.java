@@ -79,6 +79,8 @@ public final class DriveExceptionMessages implements LocalizableStrings {
     public static final String INVALID_FILENAME_MSG = "The file name \"%1$s\" is invalid";
     public static final String IGNORED_FILENAME_MSG = "The file name \"%1$s\" is ignored";
     public static final String CONFLICTING_PATH_MSG = "The path \"%1$s\" is conflicting";
+    public static final String INVALID_FILEVERSION_MSG = "The file version \"%1$s\" with checksum \"%2$s\" is invalid";
+    public static final String INVALID_DIRECTORYVERSION_MSG = "The directory version \"%1$s\" with checksum \"%2$s\" is invalid";
 
     /**
      * Prevent instantiation.

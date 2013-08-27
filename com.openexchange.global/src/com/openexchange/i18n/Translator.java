@@ -56,13 +56,21 @@ package com.openexchange.i18n;
  */
 public interface Translator {
 
+    /** The empty translator */
     Translator EMPTY = new Translator() {
+
         @Override
         public String translate(final String toTranslate) {
             return toTranslate;
         }
     };
 
+    /**
+     * Translates specified string
+     *
+     * @param toTranslate The string to translate
+     * @return The translated string (if translation available) or the passed string
+     */
     String translate(String toTranslate);
 
 }

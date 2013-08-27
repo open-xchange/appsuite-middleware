@@ -59,13 +59,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import org.json.JSONValue;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -80,114 +81,107 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public abstract class AbstractSubscribeAction extends
-		AbstractSubscribeSourcesAction {
+public abstract class AbstractSubscribeAction extends AbstractSubscribeSourcesAction {
 
-	/**
-	 * Initializes a new {@link AbstractSubscribeAction}.
-	 */
-	public AbstractSubscribeAction() {
-		super();
-	}
+    /**
+     * Initializes a new {@link AbstractSubscribeAction}.
+     */
+    protected AbstractSubscribeAction(final ServiceLookup services) {
+        super(services);
+    }
 
-	static final Set<String> KNOWN_PARAMS = new HashSet<String>() {
+    /** The set of known parameter names */
+    protected static final Set<String> KNOWN_PARAMS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("folder", "columns", "session", "action")));
 
-        {
-            add("folder");
-            add("columns");
-            add("session");
-            add("action");
+    protected Subscription getSubscription(final AJAXRequestData requestData, final ServerSession session, final String secret) throws JSONException, OXException {
+        final JSONObject object = (JSONObject) requestData.requireData();
+        final Subscription subscription = new SubscriptionJSONParser(getDiscovery(session)).parse(object);
+        subscription.setContext(session.getContext());
+        subscription.setUserId(session.getUserId());
+        subscription.setSecret(secret);
+        return subscription;
+    }
+
+    protected SubscriptionSourceDiscoveryService getDiscovery(final ServerSession session) throws OXException {
+        return services.getService(SubscriptionSourceDiscoveryService.class).filter(session.getUserId(), session.getContextId());
+    }
+
+    protected List<Subscription> getSubscriptionsInFolder(final ServerSession session, final String folder, final String secret) throws OXException {
+        final List<SubscriptionSource> sources = getDiscovery(session).getSources();
+        final List<Subscription> allSubscriptions = new ArrayList<Subscription>(10);
+        for (final SubscriptionSource subscriptionSource : sources) {
+            final Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(
+                session.getContext(),
+                folder,
+                secret);
+            allSubscriptions.addAll(subscriptions);
         }
-    };
+        return allSubscriptions;
+    }
 
-	protected Subscription getSubscription(final AJAXRequestData requestData, final ServerSession session, final String secret)
-			throws JSONException, OXException {
-			    final JSONObject object = (JSONObject) requestData.requireData();
-			    final Subscription subscription = new SubscriptionJSONParser(getDiscovery(session)).parse(object);
-			    subscription.setContext(session.getContext());
-			    subscription.setUserId(session.getUserId());
-			    subscription.setSecret(secret);
-			    return subscription;
-			}
+    protected Map<String, String[]> getDynamicColumns(final JSONObject request) throws JSONException {
+        final List<String> identifiers = getDynamicColumnOrder(request);
+        final Map<String, String[]> dynamicColumns = new HashMap<String, String[]>();
+        for (final String identifier : identifiers) {
+            final String columns = request.optString(identifier);
+            if (columns != null && !columns.equals("")) {
+                dynamicColumns.put(identifier, Strings.splitByComma(columns));
+            }
+        }
+        return dynamicColumns;
+    }
 
-	protected SubscriptionSourceDiscoveryService getDiscovery(final ServerSession session) throws OXException {
-	    return services.getService(SubscriptionSourceDiscoveryService.class).filter(session.getUserId(), session.getContextId());
-	}
+    protected List<String> getDynamicColumnOrder(final JSONObject request) throws JSONException {
+        if (request.has("dynamicColumnPlugins")) {
+            return Arrays.asList(Strings.splitByComma(request.getString("dynamicColumnPlugins")));
+        }
 
-	protected List<Subscription> getSubscriptionsInFolder(final ServerSession session, final String folder,
-			final String secret) throws OXException {
-			    final List<SubscriptionSource> sources = getDiscovery(session).getSources();
-			    final List<Subscription> allSubscriptions = new ArrayList<Subscription>(10);
-			    for (final SubscriptionSource subscriptionSource : sources) {
-			        final Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(session.getContext(), folder, secret);
-			        allSubscriptions.addAll(subscriptions);
-			    }
-			    return allSubscriptions;
-			}
+        final List<String> dynamicColumnIdentifiers = new ArrayList<String>();
+        for (final String paramName : request.keySet()) {
+            if (!KNOWN_PARAMS.contains(paramName) && paramName.indexOf('.') >= 0) {
+                dynamicColumnIdentifiers.add(paramName);
+            }
+        }
+        final String order = request.optString("__query");
+        Collections.sort(dynamicColumnIdentifiers, new QueryStringPositionComparator(order));
+        return dynamicColumnIdentifiers;
+    }
 
-	protected Map<String, String[]> getDynamicColumns(final JSONObject request) throws JSONException {
-	    final List<String> identifiers = getDynamicColumnOrder(request);
-	    final Map<String, String[]> dynamicColumns = new HashMap<String, String[]>();
-	    for (final String identifier : identifiers) {
-	        final String columns = request.optString(identifier);
-	        if (columns != null && !columns.equals("")) {
-	            dynamicColumns.put(identifier, columns.split("\\s*,\\s*"));
-	        }
-	    }
-	    return dynamicColumns;
-	}
+    protected String[] getBasicColumns(final JSONObject request) {
+        final String columns = request.optString("columns");
+        if (columns == null || columns.equals("")) {
+            return new String[] { "id", "folder", "source", "displayName", "enabled" };
+        }
+        return Strings.splitByComma(columns);
+    }
 
-	protected List<String> getDynamicColumnOrder(final JSONObject request) throws JSONException {
-	    if (request.has("dynamicColumnPlugins")) {
-	        return Arrays.asList(request.getString("dynamicColumnPlugins").split("\\s*,\\s*"));
-	    }
+    protected JSONValue createResponse(final List<Subscription> allSubscriptions, final String[] basicColumns, final Map<String, String[]> dynamicColumns, final List<String> dynamicColumnOrder, TimeZone tz) throws OXException {
+        final JSONArray rows = new JSONArray();
+        final SubscriptionJSONWriter writer = new SubscriptionJSONWriter();
+        for (final Subscription subscription : allSubscriptions) {
+            final JSONArray row = writer.writeArray(
+                subscription,
+                basicColumns,
+                dynamicColumns,
+                dynamicColumnOrder,
+                subscription.getSource().getFormDescription(),
+                tz);
+            rows.put(row);
+        }
+        return rows;
+    }
 
-	    final List<String> dynamicColumnIdentifiers = new ArrayList<String>();
-	    for (final String paramName : request.keySet()) {
-	        if (!KNOWN_PARAMS.contains(paramName) && paramName.indexOf('.') >= 0) {
-	            dynamicColumnIdentifiers.add(paramName);
-	        }
-	    }
-	    final String order = request.optString("__query");
-	    Collections.sort(dynamicColumnIdentifiers, new QueryStringPositionComparator(order));
-	    return dynamicColumnIdentifiers;
-	}
-
-	protected String[] getBasicColumns(final JSONObject request) {
-	    final String columns = request.optString("columns");
-	    if (columns == null || columns.equals("")) {
-	        return new String[] { "id", "folder", "source", "displayName", "enabled" };
-	    }
-	    return columns.split("\\s*,\\s*");
-	}
-
-	protected Object createResponse(final List<Subscription> allSubscriptions, final String[] basicColumns, final Map<String, String[]> dynamicColumns,
-			final List<String> dynamicColumnOrder, TimeZone tz) throws OXException, JSONException {
-			    final JSONArray rows = new JSONArray();
-			    final SubscriptionJSONWriter writer = new SubscriptionJSONWriter();
-			    for (final Subscription subscription : allSubscriptions) {
-			        final JSONArray row = writer.writeArray(
-			            subscription,
-			            basicColumns,
-			            dynamicColumns,
-			            dynamicColumnOrder,
-			            subscription.getSource().getFormDescription(), tz);
-			        rows.put(row);
-			    }
-			    return rows;
-			}
-
-	protected Subscription loadSubscription(final int id, final ServerSession session, final String source, final String secret) throws OXException {
+    protected Subscription loadSubscription(final int id, final ServerSession session, final String source, final String secret) throws OXException {
         SubscribeService service = null;
         if (source != null && !source.equals("")) {
             final SubscriptionSource s = getDiscovery(session).getSource(source);
-            if(s == null) {
+            if (s == null) {
                 return null;
             }
             service = s.getSubscribeService();
         } else {
             final SubscriptionSource s = getDiscovery(session).getSource(session.getContext(), id);
-            if(s == null) {
+            if (s == null) {
                 return null;
             }
             service = s.getSubscribeService();

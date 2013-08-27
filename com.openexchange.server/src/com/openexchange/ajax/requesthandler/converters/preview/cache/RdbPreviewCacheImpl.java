@@ -57,6 +57,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -74,18 +76,18 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
- * {@link PreviewCacheImpl} - The database-backed preview cache implementation for documents.
+ * {@link RdbPreviewCacheImpl} - The database-backed preview cache implementation for documents.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PreviewCacheImpl implements PreviewCache, EventHandler {
+public final class RdbPreviewCacheImpl implements PreviewCache, EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(PreviewCacheImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbPreviewCacheImpl.class);
 
     /**
-     * Initializes a new {@link PreviewCacheImpl}.
+     * Initializes a new {@link RdbPreviewCacheImpl}.
      */
-    public PreviewCacheImpl() {
+    public RdbPreviewCacheImpl() {
         super();
     }
 
@@ -164,8 +166,7 @@ public final class PreviewCacheImpl implements PreviewCache, EventHandler {
                 /*
                  * Update
                  */
-                stmt = con.prepareStatement("UPDATE preview SET data = ?, size = ?, createdAt = ?, fileName = ?, fileType = ? WHERE cid = ? AND user = ? AND id = ?");
-                stmt.setBinaryStream(pos++, Streams.newByteArrayInputStream(bytes));
+                stmt = con.prepareStatement("UPDATE preview SET size = ?, createdAt = ?, fileName = ?, fileType = ? WHERE cid = ? AND user = ? AND id = ?");
                 stmt.setLong(pos++, bytes.length);
                 stmt.setLong(pos++, now);
                 if (null == optName) {
@@ -181,11 +182,21 @@ public final class PreviewCacheImpl implements PreviewCache, EventHandler {
                 stmt.setLong(pos++, contextId);
                 stmt.setLong(pos++, userId);
                 stmt.setString(pos++, id);
+                stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
+
+                pos = 1;
+                stmt = con.prepareStatement("UPDATE previewData SET data = ? WHERE cid = ? AND user = ? AND id = ?");
+                stmt.setBinaryStream(pos++, Streams.newByteArrayInputStream(bytes));
+                stmt.setLong(pos++, contextId);
+                stmt.setLong(pos++, userId);
+                stmt.setString(pos++, id);
+                stmt.executeUpdate();
             } else {
                 /*
                  * Insert
                  */
-                stmt = con.prepareStatement("INSERT INTO preview (cid, user, id, size, createdAt, data, fileName, fileType) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                stmt = con.prepareStatement("INSERT INTO preview (cid, user, id, size, createdAt, fileName, fileType) VALUES (?, ?, ?, ?, ?, ?, ?)");
                 stmt.setLong(pos++, contextId);
                 stmt.setLong(pos++, userId);
                 stmt.setString(pos++, id);
@@ -202,8 +213,17 @@ public final class PreviewCacheImpl implements PreviewCache, EventHandler {
                 } else {
                     stmt.setString(pos++, optType);
                 }
+                stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
+
+                pos = 1;
+                stmt = con.prepareStatement("INSERT INTO previewData (cid, user, id, data) VALUES (?, ?, ?, ?)");
+                stmt.setLong(pos++, contextId);
+                stmt.setLong(pos++, userId);
+                stmt.setString(pos++, id);
+                stmt.setBinaryStream(pos++, Streams.newByteArrayInputStream(bytes));
+                stmt.executeUpdate();
             }
-            stmt.executeUpdate();
             con.commit();
             committed = true;
             return true;
@@ -311,10 +331,35 @@ public final class PreviewCacheImpl implements PreviewCache, EventHandler {
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
             // Delete entry
+            stmt = con.prepareStatement("SELECT id FROM preview WHERE cid = ? AND createdAt <= ?");
+            stmt.setLong(1, contextId);
+            stmt.setLong(2, oldestStamp);
+            rs = stmt.executeQuery();
+            final Set<String> ids = new HashSet<String>(4);
+            while (rs.next()) {
+                ids.add(rs.getString(1));
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+
             stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND createdAt <= ?");
             stmt.setLong(1, contextId);
             stmt.setLong(2, oldestStamp);
             stmt.executeUpdate();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
+
+            if (!ids.isEmpty()) {
+                stmt = con.prepareStatement("DELETE FROM previewData WHERE cid = ? AND id = ?");
+                stmt.setLong(1, contextId);
+                for (final String id : ids) {
+                    stmt.setString(2, id);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
+            }
         } catch (final SQLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
@@ -350,6 +395,69 @@ public final class PreviewCacheImpl implements PreviewCache, EventHandler {
     }
 
     @Override
+    public void clearFor(final int contextId) throws OXException {
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        if (dbService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+        }
+        final Connection con = dbService.getWritable(contextId);
+        try {
+            clearFor(contextId, con);
+        } finally {
+            dbService.backWritable(contextId, con);
+        }
+    }
+
+    private void clearFor(final int contextId, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        boolean rollback = false;
+        try {
+            Databases.startTransaction(con);
+            rollback = true;
+
+            stmt = con.prepareStatement("SELECT id FROM preview WHERE cid=?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            final Set<String> ids = new HashSet<String>(4);
+            while (rs.next()) {
+                ids.add(rs.getString(1));
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+
+            stmt = con.prepareStatement("DELETE FROM preview WHERE cid=?");
+            stmt.setLong(1, contextId);
+            stmt.executeUpdate();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
+
+            if (!ids.isEmpty()) {
+                stmt = con.prepareStatement("DELETE FROM previewData WHERE cid=? AND id=?");
+                stmt.setLong(1, contextId);
+                for (final String id : ids) {
+                    stmt.setString(2, id);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
+            }
+
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    @Override
     public CachedPreview get(final String id, final int userId, final int contextId) throws OXException {
         if (null == id || contextId <= 0) {
             return null;
@@ -372,13 +480,13 @@ public final class PreviewCacheImpl implements PreviewCache, EventHandler {
         try {
             if (userId > 0) {
                 // A user-sensitive document
-                stmt = con.prepareStatement("SELECT data, fileName, fileType, size FROM preview WHERE cid = ? AND user = ? AND id = ?");
+                stmt = con.prepareStatement("SELECT fileName, fileType, size FROM preview WHERE cid = ? AND user = ? AND id = ?");
                 stmt.setLong(1, contextId);
                 stmt.setLong(2, userId);
                 stmt.setString(3, id);
             } else {
                 // A context-global document
-                stmt = con.prepareStatement("SELECT data, fileName, fileType, size FROM preview WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("SELECT fileName, fileType, size FROM preview WHERE cid = ? AND id = ?");
                 stmt.setLong(1, contextId);
                 stmt.setString(2, id);
             }
@@ -386,7 +494,30 @@ public final class PreviewCacheImpl implements PreviewCache, EventHandler {
             if (!rs.next()) {
                 return null;
             }
-            return new CachedPreview(Streams.stream2bytes(rs.getBinaryStream(1)), rs.getString(2), rs.getString(3), rs.getLong(4));
+            // Remember meta data
+            final String fileName = rs.getString(1);
+            final String fileType = rs.getString(2);
+            final long size = rs.getLong(3);
+            Databases.closeSQLStuff(rs, stmt);
+            // Load binary data
+            if (userId > 0) {
+                // A user-sensitive document
+                stmt = con.prepareStatement("SELECT data FROM previewData WHERE cid = ? AND user = ? AND id = ?");
+                stmt.setLong(1, contextId);
+                stmt.setLong(2, userId);
+                stmt.setString(3, id);
+            } else {
+                // A context-global document
+                stmt = con.prepareStatement("SELECT data FROM previewData WHERE cid = ? AND id = ?");
+                stmt.setLong(1, contextId);
+                stmt.setString(2, id);
+            }
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return null;
+            }
+            // Return CachedPreview instance
+            return new CachedPreview(Streams.stream2bytes(rs.getBinaryStream(1)), fileName, fileType, size);
         } catch (final SQLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -405,9 +536,27 @@ public final class PreviewCacheImpl implements PreviewCache, EventHandler {
         final Connection con = databaseService.getWritable(contextId);
         boolean committed = true;
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
             con.setAutoCommit(false);
             committed = false;
+            if (userId > 0) {
+                stmt = con.prepareStatement("SELECT id FROM preview WHERE cid=? AND user=?");
+                int pos = 1;
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos, userId);
+            } else {
+                stmt = con.prepareStatement("SELECT id FROM preview WHERE cid=?");
+                stmt.setInt(1, contextId);
+            }
+            rs = stmt.executeQuery();
+            final Set<String> ids = new HashSet<String>(16);
+            while (rs.next()) {
+                ids.add(rs.getString(1));
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+
             if (userId > 0) {
                 stmt = con.prepareStatement("DELETE FROM preview WHERE cid=? AND user=?");
                 int pos = 1;
@@ -418,6 +567,27 @@ public final class PreviewCacheImpl implements PreviewCache, EventHandler {
                 stmt.setInt(1, contextId);
             }
             stmt.executeUpdate();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
+
+            if (!ids.isEmpty()) {
+                int pos = 1;
+                if (userId > 0) {
+                    stmt = con.prepareStatement("DELETE FROM previewData WHERE cid=? AND user=? AND id=?");
+                    stmt.setInt(pos++, contextId);
+                    stmt.setInt(pos++, userId);
+                } else {
+                    stmt = con.prepareStatement("DELETE FROM previewData WHERE cid=? AND id=?");
+                    stmt.setInt(pos++, contextId);
+                }
+                for (final String id : ids) {
+                    stmt.setString(pos, id);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
+            }
             con.commit();
             committed = true;
         } catch (final DataTruncation e) {
@@ -428,7 +598,7 @@ public final class PreviewCacheImpl implements PreviewCache, EventHandler {
             if (!committed) {
                 Databases.rollback(con);
             }
-            Databases.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(rs, stmt);
             Databases.autocommit(con);
             databaseService.backWritable(contextId, con);
         }
@@ -446,15 +616,47 @@ public final class PreviewCacheImpl implements PreviewCache, EventHandler {
         final Connection con = databaseService.getWritable(contextId);
         boolean committed = true;
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
             con.setAutoCommit(false);
             committed = false;
-            stmt = con.prepareStatement("DELETE FROM preview WHERE cid=? AND user=? AND id LIKE ?");
+
+            stmt = con.prepareStatement("SELECT id FROM preview WHERE cid=? AND user=? AND id LIKE ?");
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.setString(pos, id + "%");
+            rs = stmt.executeQuery();
+            final Set<String> ids = new HashSet<String>(16);
+            while (rs.next()) {
+                ids.add(rs.getString(1));
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+
+            stmt = con.prepareStatement("DELETE FROM preview WHERE cid=? AND user=? AND id LIKE ?");
+            pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setString(pos, id + "%");
             stmt.executeUpdate();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
+
+            if (!ids.isEmpty()) {
+                stmt = con.prepareStatement("DELETE FROM previewData WHERE cid=? AND user=? AND id=?");
+                pos = 1;
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos++, userId);
+                for (final String ide : ids) {
+                    stmt.setString(pos, ide);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
+            }
+
             con.commit();
             committed = true;
         } catch (final DataTruncation e) {
@@ -465,7 +667,7 @@ public final class PreviewCacheImpl implements PreviewCache, EventHandler {
             if (!committed) {
                 Databases.rollback(con);
             }
-            Databases.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(rs, stmt);
             Databases.autocommit(con);
             databaseService.backWritable(contextId, con);
         }

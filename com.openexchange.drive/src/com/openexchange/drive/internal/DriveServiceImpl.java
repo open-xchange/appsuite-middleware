@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.drive.DirectoryMetadata;
 import com.openexchange.drive.DirectoryVersion;
@@ -77,6 +78,7 @@ import com.openexchange.drive.comparison.DirectoryVersionMapper;
 import com.openexchange.drive.comparison.FileVersionMapper;
 import com.openexchange.drive.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.comparison.ServerFileVersion;
+import com.openexchange.drive.internal.tracking.SyncTracker;
 import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.drive.storage.StorageOperation;
 import com.openexchange.drive.sync.DefaultSyncResult;
@@ -119,6 +121,8 @@ public class DriveServiceImpl implements DriveService {
     public SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions,
         List<DirectoryVersion> clientVersions) throws OXException {
         long start = System.currentTimeMillis();
+        DriveVersionValidator.validateDirectoryVersions(originalVersions);
+        DriveVersionValidator.validateDirectoryVersions(clientVersions);
         int retryCount = 0;
         while (true) {
             /*
@@ -127,6 +131,12 @@ public class DriveServiceImpl implements DriveService {
             final SyncSession driveSession = new SyncSession(session);
             IntermediateSyncResult<DirectoryVersion> syncResult = syncDirectories(
                 driveSession, originalVersions, clientVersions, getServerDirectories(driveSession));
+            /*
+             * track & check sync result for cycles
+             */
+            if (0 == retryCount) {
+                syncResult = new SyncTracker(driveSession).trackAndCheck(syncResult);
+            }
             try {
                 /*
                  * execute actions on server
@@ -166,6 +176,8 @@ public class DriveServiceImpl implements DriveService {
     @Override
     public SyncResult<FileVersion> syncFiles(DriveSession session, final String path, List<FileVersion> originalVersions, List<FileVersion> clientVersions) throws OXException {
         long start = System.currentTimeMillis();
+        DriveVersionValidator.validateFileVersions(originalVersions);
+        DriveVersionValidator.validateFileVersions(clientVersions);
         int retryCount = 0;
         while (true) {
             /*
@@ -175,6 +187,12 @@ public class DriveServiceImpl implements DriveService {
             driveSession.getStorage().createFolder(path);
             IntermediateSyncResult<FileVersion> syncResult = syncFiles(
                 driveSession, path, originalVersions, clientVersions, getServerFiles(driveSession, path));
+            /*
+             * track sync result
+             */
+            if (0 == retryCount) {
+                syncResult = new SyncTracker(driveSession).track(syncResult, path);
+            }
             try {
                 /*
                  * execute actions on server
@@ -213,6 +231,7 @@ public class DriveServiceImpl implements DriveService {
 
     @Override
     public IFileHolder download(DriveSession session, String path, FileVersion fileVersion, long offset, long length) throws OXException {
+        DriveVersionValidator.validateFileVersion(fileVersion);
         SyncSession driveSession = new SyncSession(session);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Handling download: file version: " + fileVersion + ", offset: " + offset + ", length: " + length);
@@ -224,6 +243,10 @@ public class DriveServiceImpl implements DriveService {
     @Override
     public SyncResult<FileVersion> upload(DriveSession session, String path, InputStream uploadStream, FileVersion originalVersion,
         FileVersion newVersion, String contentType, long offset, long totalLength, Date created, Date modified) throws OXException {
+        DriveVersionValidator.validateFileVersion(newVersion);
+        if (null != originalVersion) {
+            DriveVersionValidator.validateFileVersion(originalVersion);
+        }
         SyncSession driveSession = new SyncSession(session);
         if (driveSession.isTraceEnabled()) {
             driveSession.trace("Handling upload: original version: " + originalVersion + ", new version: " + newVersion +
@@ -288,6 +311,10 @@ public class DriveServiceImpl implements DriveService {
         if (driveSession.isTraceEnabled()) {
             driveSession.trace(syncResult);
         }
+        /*
+         * track & return sync result
+         */
+        syncResult = new SyncTracker(driveSession).track(syncResult, path);
         return new DefaultSyncResult<FileVersion>(syncResult.getActionsForClient(), driveSession.getDiagnosticsLog());
     }
 
@@ -486,6 +513,32 @@ public class DriveServiceImpl implements DriveService {
              */
             folderID = session.getStorage().deleteFolder(action.getVersion().getPath());
             session.getChecksumStore().removeDirectoryChecksum(new FolderID(folderID));
+            break;
+        case SYNC:
+            if (Boolean.TRUE.equals(action.getParameters().get(DriveAction.PARAMETER_RESET))) {
+                if (null == action.getVersion()) {
+                    /*
+                     * Clear all stored file- and directory-checksums of all folders
+                     */
+                    for (Entry<String, FileStorageFolder> entry : session.getStorage().getFolders().entrySet()) {
+                        FolderID id = new FolderID(entry.getValue().getId());
+                        session.getChecksumStore().removeDirectoryChecksum(id);
+                        session.getChecksumStore().removeFileChecksumsInFolder(id);
+                    }
+                } else {
+                    /*
+                     * Clear all stored file- and directory-checksums of referenced folder
+                     */
+                    FileStorageFolder folder = session.getStorage().optFolder(action.getVersion().getPath(), false);
+                    if (null != folder) {
+                        FolderID id = new FolderID(folder.getId());
+                        session.getChecksumStore().removeDirectoryChecksum(id);
+                        session.getChecksumStore().removeFileChecksumsInFolder(id);
+                    }
+                }
+            } else {
+                throw new IllegalStateException("Can't perform action " + action + " on server");
+            }
             break;
         default:
             throw new IllegalStateException("Can't perform action " + action + " on server");

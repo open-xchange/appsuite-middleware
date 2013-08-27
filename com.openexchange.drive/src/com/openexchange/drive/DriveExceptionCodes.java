@@ -118,6 +118,12 @@ public enum DriveExceptionCodes implements OXExceptionCode {
     /** The directory path \"%1$s\" is conflicting */
     CONFLICTING_PATH(DriveExceptionMessages.CONFLICTING_PATH_MSG, Category.CATEGORY_USER_INPUT, 19),
 
+    /** The file version \"%1$s\" with checksum \"%2$s\" is invalid */
+    INVALID_FILEVERSION(DriveExceptionMessages.INVALID_FILEVERSION_MSG, Category.CATEGORY_ERROR, 20),
+
+    /** The directory version \"%1$s\" with checksum \"%2$s\" is invalid */
+    INVALID_DIRECTORYVERSION(DriveExceptionMessages.INVALID_DIRECTORYVERSION_MSG, Category.CATEGORY_ERROR, 21),
+
     ;
 
     private static final String PREFIX = "DRV";

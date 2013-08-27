@@ -531,6 +531,10 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      * Folder %1$s must not be deleted in context %2$s.
      */
     DELETE_DENIED(OXFolderExceptionMessage.DELETE_DENIED_MSG, Category.CATEGORY_PERMISSION_DENIED, 90),
+    /**
+     * Owner %1$s of folder %2$s has been restored to keep the folder admin permission
+     */
+    CREATOR_STAYS_ADMIN(OXFolderExceptionMessage.CREATOR_STAYS_ADMIN_MSG, Category.CATEGORY_WARNING, 91),
 
     ;
 

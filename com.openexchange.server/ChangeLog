@@ -1,10 +1,96 @@
+* 2013-08-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28484: Don't signal reminder(s) for declined calendar events
+
+* 2013-08-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28490: Introduced CET- and CEST-aliases for use with iCal4j timezone registry  
+
+* 2013-08-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28448: Enhanced CapabilityService to consider relevant contextSets, too
+ - Fix for bug 28508: Proper URL-encoding for publication's site name
+
+* 2013-08-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28472: Give a meaningful error message to user if login to Google Mail fails
+ - Fix for bug 28428: Return up-to-date value for unread/unseen messages
+ - Fix for bug 28483: Try to recover from "Content-Type" header with empty parameters
+
+* 2013-08-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 27095: Don't replace spaces with pluses in servlet's path info
+ - Partial fix for 28472: Avoid update attempt for a non-existing subscription
+
+* 2013-08-21 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28420: Resolve hostnames before passing them into hazelcast configuration
+
+* 2013-08-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28110: User proper SQL statement for updating the transport settings on password transcription
+ - Fix for bug 28429: Also consider signaled content length (if available) when checking for a valid image
+ - Fix for bug 27413: Enabled to consider X-Forward-Headers to keep the information if a secure connection has been established by client
+ - Fix for bug 27428: Consider deferrer service when generating an OAuth call-back URL
+ - Fix for bug 28451: Register only enabled crawlers as per 'crawlers.properties' configuration file
+
+* 2013-08-20 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 26350: Many calendar deletes in a multiple request lead to database deadlocks.
+
+* 2013-08-20 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28163: Implicitly remove alpha channel when transforming to JPEG
+ - Fix for bug 27176: Don't query user service unless needed, don't evaluate global addressbook permissions repeatedly
+
+* 2013-08-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28368: Ignore possibly contained <p> tag in image's binary data
+ - Preparation to fix bug 28163: Don't perform any image transformation if not needed as signaled by URL parameters and/or image type
+ - Fix for bug 27009: Removed auto-correct attempt for special folders on read-only access operations
+
+* 2013-08-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24629: Preload folder names on root subfolder retrieval
+ - Fix for bug 28381: Display appropriate warning in case folder owner's admin permission is auto-restored
+ - Fix for bug 28397: Fixed possible ArrayIndexOutOfBoundsException while listing folders
+
+* 2013-08-16 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 28350: Check if another distribution list with same name already exists
+
+* 2013-08-16 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28317: Invalidate all other user sessions after password change
+
+* 2013-08-15 - marcus.klein@open-xchange.com
+
+ - Fix for bug 28283: Need to poll the system bundle to check if shutdown was successful and extended scripting for calling shutdown process
+   to reduce error output.
+
+* 2013-08-15 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28260: Restrict socket binding to local loopback address only by default. 
+
+* 2013-08-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28026: Allowing relative URL paths specified as a UWA widget's source URL
+
+* 2013-08-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 28272: Extended new graceful shutdown method with necessary checks prior to executing it.
+ - Fix for bug 23141: Terminate OSGi framework and backend gracefully allowing components to remove their temporary things.
+   Removing temporary files during startup because of maybe died JVM.
+
+* 2013-08-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26597: Apply default charset if multipart/form-data POST request misses mail-safe encoding for non-ascii words
+ - Fix for bug 26869: Added missing imports to RSS messaging bundle
+ - Fix for bug 24799: Refactored parsing of FB stream content to avoid strange empty messages
+
 * 2013-08-14 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 28260: Disable Hazelcast's REST and Memcache client request listener services by default 
-
-* 2013-08-13 - marcus.klein@open-xchange.com
-
- - Fix for bug 23141: Terminate OSGi framework and backend gracefully allowing components to remove their temporary things.
 
 * 2013-08-13 - thorben.betten@open-xchange.com
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.capabilities.osgi;
 
+import static com.openexchange.capabilities.internal.AbstractCapabilityService.getCapability;
 import java.io.ByteArrayInputStream;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.ServiceReference;
@@ -102,8 +103,8 @@ public class CapabilitiesActivator extends HousekeepingActivator {
         track(Capability.class, new SimpleRegistryListener<Capability>() {
 
             @Override
-            public void added(ServiceReference<Capability> ref, Capability service) {
-                capService.getCapability(service.getId()).learnFrom(service);
+            public void added(ServiceReference<Capability> ref, Capability capability) {
+                getCapability(capability.getId()).learnFrom(capability);
             }
 
             @Override

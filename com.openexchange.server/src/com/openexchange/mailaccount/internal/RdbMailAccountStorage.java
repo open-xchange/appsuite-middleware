@@ -219,6 +219,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         // Nothing to do
     }
 
+    @Override
+    public void invalidateMailAccounts(final int user, final int cid) throws OXException {
+        // Nothing to do
+    }
+
     /**
      * Gets the POP3 storage folders for specified session.
      *
@@ -465,24 +470,35 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 } while (rs.next());
                 // Add aliases, too
                 if (MailAccount.DEFAULT_ID == id) {
-                    final StringAllocator sb = new StringAllocator(128);
-                    sb.append(mailAccount.getPrimaryAddress());
-                    final Set<String> s = new HashSet<String>(4);
-                    s.add(mailAccount.getPrimaryAddress());
-                    for (final String alias : UserStorage.getStorageUser(user, cid).getAliases()) {
-                        if (s.add(alias)) {
-                            sb.append(", ").append(alias);
-                        }
-                    }
-                    properties.put("addresses", sb.toString());
+                    properties.put("addresses", getAliases(user, cid, mailAccount));
                 }
                 mailAccount.setProperties(properties);
             } else {
-                mailAccount.setProperties(Collections.<String, String> emptyMap());
+                // Add aliases, too
+                if (MailAccount.DEFAULT_ID == id) {
+                    Map<String, String> properties = new HashMap<String, String>(8, 1);
+                    properties.put("addresses", getAliases(user, cid, mailAccount));
+                    mailAccount.setProperties(properties);
+                } else {
+                    mailAccount.setProperties(Collections.<String, String> emptyMap());
+                }
             }
         } finally {
             closeSQLStuff(rs, stmt);
         }
+    }
+
+    private static String getAliases(int user, int cid, AbstractMailAccount mailAccount) {
+        StringAllocator sb = new StringAllocator(128);
+        sb.append(mailAccount.getPrimaryAddress());
+        Set<String> s = new HashSet<String>(4);
+        s.add(mailAccount.getPrimaryAddress());
+        for (String alias : UserStorage.getStorageUser(user, cid).getAliases()) {
+            if (s.add(alias)) {
+                sb.append(", ").append(alias);
+            }
+        }
+        return sb.toString();
     }
 
     /**
@@ -2125,8 +2141,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws OXException {
+    public void migratePasswords(final String oldSecret, final String newSecret, final Session session) throws OXException {
         // Clear possible cached MailAccess instances
+        final int cid = session.getContextId();
+        final int user = session.getUserId();
         cleanUp(user, cid);
         // Migrate password
         Connection con = null;
@@ -2149,14 +2167,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             final SecretEncryptionService<GenericProperty> encryptionService = ServerServiceRegistry.getInstance().getService(SecretEncryptionFactoryService.class).createService(STRATEGY);
             if (null == encryptionService) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SecretEncryptionService.class.getName());
-            }
-            final Session session;
-            {
-                final SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
-                if (null == sessiondService) {
-                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
-                }
-                session = sessiondService.getAnyActiveSessionForUser(user, cid);
             }
             final CustomMailAccount parser = new CustomMailAccount();
             // Iterate mail accounts
@@ -2230,7 +2240,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             final String transcribed = encryptionService.encrypt(session, decrypted);
                             // Add to batch update
                             if (null == updateStmt) {
-                                updateStmt = con.prepareStatement(UPDATE_PASSWORD1);
+                                updateStmt = con.prepareStatement(UPDATE_PASSWORD2);
                                 updateStmt.setInt(2, cid);
                                 updateStmt.setInt(4, user);
                             }
@@ -2266,7 +2276,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public void cleanUp(String secret, Session session) throws OXException {
+    public void cleanUp(final String secret, final Session session) throws OXException {
         final int user = session.getUserId();
         final int cid = session.getContextId();
         // Clear possible cached MailAccess instances
@@ -2381,7 +2391,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public void removeUnrecoverableItems(String secret, Session session) throws OXException {
+    public void removeUnrecoverableItems(final String secret, final Session session) throws OXException {
         final int user = session.getUserId();
         final int cid = session.getContextId();
         // Clear possible cached MailAccess instances

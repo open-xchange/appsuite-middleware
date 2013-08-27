@@ -57,43 +57,25 @@ package com.openexchange.drive.events.subscribe;
  */
 public class Subscription {
 
-    private String uuid;
     private String serviceID;
     private String token;
     private int contextID;
     private int userID;
     private String rootFolderID;
+    private long timestamp;
 
     public Subscription() {
         super();
     }
 
-    public Subscription(String uuid, int contextID, int userID, String serviceID, String token, String rootFolderID) {
+    public Subscription(int contextID, int userID, String serviceID, String token, String rootFolderID, long timestamp) {
         super();
-        this.uuid = uuid;
         this.serviceID = serviceID;
         this.token = token;
         this.contextID = contextID;
         this.userID = userID;
         this.rootFolderID = rootFolderID;
-    }
-
-    /**
-     * Gets the uuid
-     *
-     * @return The uuid
-     */
-    public String getUuid() {
-        return uuid;
-    }
-
-    /**
-     * Sets the uuid
-     *
-     * @param uuid The uuid to set
-     */
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+        this.timestamp = timestamp;
     }
 
     /**
@@ -184,6 +166,24 @@ public class Subscription {
      */
     public void setUserID(int userID) {
         this.userID = userID;
+    }
+
+    /**
+     * Gets the timestamp
+     *
+     * @return The timestamp
+     */
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    /**
+     * Sets the timestamp
+     *
+     * @param timestamp The timestamp to set
+     */
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 
 }

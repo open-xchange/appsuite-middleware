@@ -461,6 +461,8 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                                 final CacheKey key = cacheService.newCacheKey(contextId, userId.intValue());
                                 Cache cache = cacheService.getCache("User");
                                 cache.remove(key);
+                                cache = cacheService.getCache("UserPermissionBits");
+                                cache.remove(key);
                                 cache = cacheService.getCache("UserConfiguration");
                                 cache.remove(key);
                                 cache = cacheService.getCache("UserSettingMail");

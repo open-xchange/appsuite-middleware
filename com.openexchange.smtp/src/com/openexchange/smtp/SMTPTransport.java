@@ -54,6 +54,7 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -114,6 +115,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeHeaderNameChecker;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MimeMessageDataSource;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
@@ -527,6 +529,7 @@ public final class SMTPTransport extends MailTransport {
              * Set to
              */
             final Address[] recipients = new Address[] { dispNotification };
+            processAddressHeader(smtpMessage);
             checkRecipients(recipients);
             smtpMessage.addRecipients(RecipientType.TO, recipients);
             /*
@@ -642,6 +645,7 @@ public final class SMTPTransport extends MailTransport {
              * Check recipients
              */
             final Address[] recipients = allRecipients == null ? smtpMessage.getAllRecipients() : allRecipients;
+            processAddressHeader(smtpMessage);
             checkRecipients(recipients);
             try {
                 final long start = System.currentTimeMillis();
@@ -727,6 +731,7 @@ public final class SMTPTransport extends MailTransport {
                  * Check recipients
                  */
                 final Address[] recipients = allRecipients == null ? mimeMessage.getAllRecipients() : allRecipients;
+                processAddressHeader(mimeMessage);
                 checkRecipients(recipients);
                 try {
                     final long start = System.currentTimeMillis();
@@ -774,6 +779,7 @@ public final class SMTPTransport extends MailTransport {
                 }
                 checkRecipients(recipients);
                 smtpFiller.setSendHeaders(composedMail, smtpMessage);
+                processAddressHeader(smtpMessage);
                 /*
                  * Drop special "x-original-headers" header
                  */
@@ -922,6 +928,65 @@ public final class SMTPTransport extends MailTransport {
         SMTPCapabilityCache.init();
     }
 
+    private static void processAddressHeader(final MimeMessage mimeMessage) throws OXException, MessagingException {
+        {
+            final String str = mimeMessage.getHeader("From", null);
+            if (!isEmpty(str)) {
+                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
+                checkRecipients(addresses);
+                mimeMessage.setFrom(addresses[0]);
+            }
+        }
+        {
+            final String str = mimeMessage.getHeader("Sender", null);
+            if (!isEmpty(str)) {
+                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
+                checkRecipients(addresses);
+                mimeMessage.setSender(addresses[0]);
+            }
+        }
+        {
+            final String str = mimeMessage.getHeader("To", null);
+            if (!isEmpty(str)) {
+                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
+                checkRecipients(addresses);
+                mimeMessage.setRecipients(RecipientType.TO, addresses);
+            }
+        }
+        {
+            final String str = mimeMessage.getHeader("Cc", null);
+            if (!isEmpty(str)) {
+                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
+                checkRecipients(addresses);
+                mimeMessage.setRecipients(RecipientType.CC, addresses);
+            }
+        }
+        {
+            final String str = mimeMessage.getHeader("Bcc", null);
+            if (!isEmpty(str)) {
+                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
+                checkRecipients(addresses);
+                mimeMessage.setRecipients(RecipientType.BCC, addresses);
+            }
+        }
+        {
+            final String str = mimeMessage.getHeader("Reply-To", null);
+            if (!isEmpty(str)) {
+                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
+                checkRecipients(addresses);
+                mimeMessage.setReplyTo(addresses);
+            }
+        }
+        {
+            final String str = mimeMessage.getHeader("Disposition-Notification-To", null);
+            if (!isEmpty(str)) {
+                final InternetAddress[] addresses = QuotedInternetAddress.parse(str, false);
+                checkRecipients(addresses);
+                mimeMessage.setHeader("Disposition-Notification-To", addresses[0].toString());
+            }
+        }
+    }
+
     private static void checkRecipients(final Address[] recipients) throws OXException {
         if ((recipients == null) || (recipients.length == 0)) {
             throw SMTPExceptionCode.MISSING_RECIPIENTS.create();
@@ -943,9 +1008,16 @@ public final class SMTPTransport extends MailTransport {
             for (final Address address : recipients) {
                 internetAddress = (InternetAddress) address;
                 final String sAddress = internetAddress.getAddress();
-                if (MsisdnCheck.checkMsisdn(sAddress) && sAddress.indexOf('/') < 0) {
-                    // Detected a MSISDN address that misses "/TYPE=" appendix necessary for the MTA
-                    internetAddress.setAddress(sAddress + "/TYPE=PLMN");
+                if (MsisdnCheck.checkMsisdn(sAddress)) {
+                    if (sAddress.indexOf('/') < 0) {
+                        // Detected a MSISDN address that misses "/TYPE=" appendix necessary for the MTA
+                        internetAddress.setAddress(sAddress + "/TYPE=PLMN");
+                    }
+                    try {
+                        internetAddress.setPersonal("", "US-ASCII");
+                    } catch (final UnsupportedEncodingException e) {
+                        // Ignore as personal is cleared
+                    }
                 }
             }
         }

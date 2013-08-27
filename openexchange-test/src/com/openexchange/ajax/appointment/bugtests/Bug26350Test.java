@@ -57,6 +57,7 @@ import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.groupware.container.Appointment;
@@ -75,9 +76,9 @@ public class Bug26350Test extends AbstractAJAXSession {
 
     private CalendarTestManager ctm1;
 
-    private int cycles = 10;
+    private int cycles = 3;
 
-    private int chunkSize = 10;
+    private int chunkSize = 20;
 
     private List<List<Integer>> ids;
 
@@ -100,7 +101,7 @@ public class Bug26350Test extends AbstractAJAXSession {
         ctm1.setFailOnError(true);
         ftm = new FolderTestManager(client1);
         folder = ftm.generatePrivateFolder(
-            "Bug26350 Folder",
+            "Bug26350 Folder" + System.currentTimeMillis(),
             FolderObject.CALENDAR,
             client1.getValues().getPrivateAppointmentFolder(),
             client1.getValues().getUserId());
@@ -124,13 +125,16 @@ public class Bug26350Test extends AbstractAJAXSession {
         }
 
         for (List<Integer> chunkIds : ids) {
-            DeleteRequest[] requests = new DeleteRequest[ids.size()];
+            DeleteRequest[] requests = new DeleteRequest[chunkIds.size()];
 
-            for (int j = 0; j < ids.size(); j++) {
+            for (int j = 0; j < chunkIds.size(); j++) {
                 requests[j] = new DeleteRequest(chunkIds.get(j), folder.getObjectID(), new Date(Long.MAX_VALUE));
             }
 
-            MultipleResponse response = (MultipleResponse) client1.execute(MultipleRequest.create(requests));
+            MultipleResponse<CommonDeleteResponse> response = (MultipleResponse<CommonDeleteResponse>) client1.execute(MultipleRequest.create(requests));
+            for (CommonDeleteResponse deleteResponse : response) {
+                assertFalse("Delete Response should not have an error.", deleteResponse.hasError());
+            }
         }
 
     }

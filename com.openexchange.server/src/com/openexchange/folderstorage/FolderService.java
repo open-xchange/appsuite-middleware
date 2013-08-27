@@ -78,7 +78,7 @@ public interface FolderService {
      * @param context The context
      * @throws OXException If check fails
      */
-    void checkConsistency(String treeId, User user, Context context) throws OXException;
+    FolderResponse<Void> checkConsistency(String treeId, User user, Context context) throws OXException;
 
     /**
      * Checks the consistency of given tree.
@@ -87,7 +87,7 @@ public interface FolderService {
      * @param session The session
      * @throws OXException If check fails
      */
-    void checkConsistency(String treeId, Session session) throws OXException;
+    FolderResponse<Void> checkConsistency(String treeId, Session session) throws OXException;
 
     /**
      * Gets the folder identified by given folder identifier and tree identifier.
@@ -180,7 +180,7 @@ public interface FolderService {
      * @param session The session
      * @throws OXException If folder cannot be added
      */
-    void subscribeFolder(String sourceTreeId, String folderId, String targetTreeId, String optTargetParentId, User user, Context context) throws OXException;
+    FolderResponse<Void> subscribeFolder(String sourceTreeId, String folderId, String targetTreeId, String optTargetParentId, User user, Context context) throws OXException;
 
     /**
      * Subscribes an existing folder from specified source tree to specified (virtual) target tree below given parent.
@@ -194,7 +194,7 @@ public interface FolderService {
      * @param session The session
      * @throws OXException If folder cannot be added
      */
-    void subscribeFolder(String sourceTreeId, String folderId, String targetTreeId, String optTargetParentId, Session session) throws OXException;
+    FolderResponse<Void> subscribeFolder(String sourceTreeId, String folderId, String targetTreeId, String optTargetParentId, Session session) throws OXException;
 
     /**
      * Unsubscribes the specified folder in given (virtual) tree only.
@@ -207,7 +207,7 @@ public interface FolderService {
      * @param context The context
      * @throws OXException If folder cannot be deleted
      */
-    void unsubscribeFolder(String treeId, String folderId, User user, Context context) throws OXException;
+    FolderResponse<Void> unsubscribeFolder(String treeId, String folderId, User user, Context context) throws OXException;
 
     /**
      * Unsubscribes the specified folder in given (virtual) tree only.
@@ -219,7 +219,7 @@ public interface FolderService {
      * @param session The session
      * @throws OXException If folder cannot be deleted
      */
-    void unsubscribeFolder(String treeId, String folderId, Session session) throws OXException;
+    FolderResponse<Void> unsubscribeFolder(String treeId, String folderId, Session session) throws OXException;
 
     /**
      * Gets all visible folders of specified content type and folder type.
@@ -347,7 +347,7 @@ public interface FolderService {
      * @param context The context
      * @throws OXException If folder cannot be deleted
      */
-    void deleteFolder(String treeId, String folderId, Date timeStamp, User user, Context context) throws OXException;
+    FolderResponse<Void> deleteFolder(String treeId, String folderId, Date timeStamp, User user, Context context) throws OXException;
 
     /**
      * Deletes the specified folder in given tree.
@@ -360,7 +360,7 @@ public interface FolderService {
      * @param session The session
      * @throws OXException If folder cannot be deleted
      */
-    void deleteFolder(String treeId, String folderId, Date timeStamp, Session session) throws OXException;
+    FolderResponse<Void> deleteFolder(String treeId, String folderId, Date timeStamp, Session session) throws OXException;
 
     /**
      * Clears the content of specified folder in given tree.
@@ -371,7 +371,7 @@ public interface FolderService {
      * @param context The context
      * @throws OXException If folder cannot be cleared
      */
-    void clearFolder(String treeId, String folderId, User user, Context context) throws OXException;
+    FolderResponse<Void> clearFolder(String treeId, String folderId, User user, Context context) throws OXException;
 
     /**
      * Clears the content of specified folder in given tree.
@@ -381,7 +381,7 @@ public interface FolderService {
      * @param session The session
      * @throws OXException If folder cannot be cleared
      */
-    void clearFolder(String treeId, String folderId, Session session) throws OXException;
+    FolderResponse<Void> clearFolder(String treeId, String folderId, Session session) throws OXException;
 
     /**
      * Updates a folder identified through given folder object.
@@ -393,7 +393,7 @@ public interface FolderService {
      * @param decorator The folder service decorator or <code>null</code>
      * @throws OXException If update fails
      */
-    void updateFolder(Folder folder, Date timeStamp, User user, Context context, FolderServiceDecorator decorator) throws OXException;
+    FolderResponse<Void> updateFolder(Folder folder, Date timeStamp, User user, Context context, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Updates a folder identified through given folder object.
@@ -404,7 +404,7 @@ public interface FolderService {
      * @param decorator The folder service decorator or <code>null</code>
      * @throws OXException If update fails
      */
-    void updateFolder(Folder folder, Date timeStamp, Session session, FolderServiceDecorator decorator) throws OXException;
+    FolderResponse<Void> updateFolder(Folder folder, Date timeStamp, Session session, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Creates a new folder described by given folder object.

@@ -53,8 +53,13 @@ import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL_SOLE;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.html.HtmlService;
@@ -167,7 +172,7 @@ public final class HTMLURLReplacerHandler implements HtmlHandler {
      */
     private void addStartTag(final String tag, final Map<String, String> a, final boolean simple) {
         attrBuilder.setLength(0);
-        for (final Entry<String, String> e : a.entrySet()) {
+        for (final Entry<String, String> e : sortAttributes(tag, a.entrySet())) {
             final String val = e.getValue();
             final Matcher m = PATTERN_URL_SOLE.matcher(val);
             if (m.matches()) {
@@ -183,9 +188,37 @@ public final class HTMLURLReplacerHandler implements HtmlHandler {
         }
         htmlBuilder.append('<').append(tag).append(attrBuilder.toString());
         if (simple) {
+            htmlBuilder.append(' ');
             htmlBuilder.append('/');
         }
         htmlBuilder.append('>');
+    }
+    
+    // Bugfix 28337
+    private Iterable<Entry<String, String>> sortAttributes(String tag, Set<Entry<String, String>> entrySet) {
+        if (tag.equalsIgnoreCase("meta")) {
+            List<Entry<String, String>> attributes = new ArrayList<Entry<String, String>>(entrySet);
+            Collections.sort(attributes, new Comparator<Entry<String, String>>() {
+
+                @Override
+                public int compare(Entry<String, String> e1, Entry<String, String> e2) {
+                    if (e1.getKey().equals(e2.getKey())) {
+                        return 0;
+                    }
+                    if (e1.getKey().equalsIgnoreCase("http-equiv")) {
+                        return -1;
+                    }
+                    if (e2.getKey().equals("http-equiv")) {
+                        return 1;
+                    }
+                    return 0;
+                }
+                
+            });
+            return attributes;
+        } else {
+            return entrySet;
+        }
     }
 
     private static void replaceURL(final String url, final StringBuilder builder) {

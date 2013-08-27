@@ -52,7 +52,6 @@ package com.openexchange.groupware.userconfiguration;
 import java.util.HashSet;
 import com.openexchange.groupware.contexts.Context;
 
-
 /**
  * {@link AllowAllUserConfiguration}
  *
@@ -80,4 +79,10 @@ public class AllowAllUserConfiguration extends UserConfiguration {
     public boolean hasPermission(final String name) {
         return true;
     }
+
+    @Override
+    public int getPermissionBits() {
+        return Integer.MAX_VALUE & ~DENIED_PORTAL;
+    }
+
 }

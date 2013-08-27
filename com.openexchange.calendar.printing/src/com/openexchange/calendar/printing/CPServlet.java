@@ -113,7 +113,10 @@ public class CPServlet extends PermissionServlet {
     private static final String DAYS = "days";
 
     private static final String I18N = "i18n";
+    
     private static final String DOCUMENT_TITLE = "documentTitle";
+    
+    private static final String DATE_FORMATTER = "dateFormatter";
 
     private static TemplateService templates = null;
 
@@ -220,6 +223,7 @@ public class CPServlet extends PermissionServlet {
             variables.put(DAYS, perDayList);
             variables.put(I18N, new I18n(I18nServices.getInstance().getService(locale)));
             variables.put(DOCUMENT_TITLE, getDocumentTitle(session));
+            variables.put(DATE_FORMATTER, new DateFormatter(session.getUser().getLocale(), TimeZone.getTimeZone(session.getUser().getTimeZone())));
 
             for (final CPAppointment app : partitions.getAppointments()) {
                 debuggingItems.add(app.getTitle());

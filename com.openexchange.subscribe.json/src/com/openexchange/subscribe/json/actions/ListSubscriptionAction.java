@@ -55,6 +55,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -76,24 +77,18 @@ public class ListSubscriptionAction extends AbstractSubscribeAction {
 	 * @param services
 	 */
 	public ListSubscriptionAction(ServiceLookup services) {
-		super();
-		this.services = services;
-
+		super(services);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.openexchange.subscribe.json.actions.AbstractSubscribeSourcesAction#perform(com.openexchange.subscribe.json.actions.SubscribeRequest)
-	 */
 	@Override
-	public AJAXRequestResult perform(SubscribeRequest subscribeRequest)
-			throws OXException {
+	public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException, JSONException {
 		final JSONArray ids = (JSONArray) subscribeRequest.getRequestData().requireData();
 		final JSONObject parameters = new JSONObject(subscribeRequest.getRequestData().getParameters());
         final Context context = subscribeRequest.getServerSession().getContext();
         final List<Subscription> subscriptions = new ArrayList<Subscription>(ids.length());
         for (int i = 0, size = ids.length(); i < size; i++) {
             int id;
-			try {
+			{
 				id = ids.getInt(i);
 				final SubscriptionSource source = getDiscovery(subscribeRequest.getServerSession()).getSource(context, id);
 	            if(source != null) {
@@ -103,26 +98,15 @@ public class ListSubscriptionAction extends AbstractSubscribeAction {
 	                    subscriptions.add(subscription);
 	                }
 	            }
-			} catch (JSONException e) {
-				throw new OXException(e);
 			}
 
         }
-        final String[] basicColumns = getBasicColumns(parameters);
-        Map<String, String[]> dynamicColumns;
-		try {
-			dynamicColumns = getDynamicColumns(parameters);
+		{
+		    final String[] basicColumns = getBasicColumns(parameters);
+		    Map<String, String[]> dynamicColumns = getDynamicColumns(parameters);
 			final List<String> dynamicColumnOrder = getDynamicColumnOrder(parameters);
-			Object res = createResponse(subscriptions, basicColumns, dynamicColumns, dynamicColumnOrder, subscribeRequest.getTimeZone());
-	        if (res instanceof JSONObject) {
-                JSONObject json = (JSONObject) res;
-                return new AJAXRequestResult(json, "json");
-            } else {
-                JSONArray json = (JSONArray) res;
-                return new AJAXRequestResult(json, "json");
-            }
-		} catch (JSONException e) {
-			throw new OXException(e);
+			JSONValue res = createResponse(subscriptions, basicColumns, dynamicColumns, dynamicColumnOrder, subscribeRequest.getTimeZone());
+            return new AJAXRequestResult(res, "json");
 		}
 	}
 

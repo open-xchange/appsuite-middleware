@@ -51,6 +51,8 @@ package com.openexchange.server.ajax.ping;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
@@ -63,8 +65,11 @@ import com.openexchange.exception.OXException;
  */
 public class PingAJAXActionFactory implements AJAXActionServiceFactory {
     
-    private static final Collection<String> SUPPORTED_SERVICES = Arrays.asList("ping");
-    private static final PingAction ACTION = new PingAction();
+    private static final Collection<String> SUPPORTED_SERVICES = Arrays.asList("ping", "whoami");
+    private final Map<String, AJAXActionService> ACTIONS = new HashMap<String, AJAXActionService>() {{
+        put("ping", new PingAction());
+        put("whoami", new WhoAmIAction());
+    }};
     
     @Override
     public Collection<?> getSupportedServices() {
@@ -73,7 +78,7 @@ public class PingAJAXActionFactory implements AJAXActionServiceFactory {
 
     @Override
     public AJAXActionService createActionService(String action) throws OXException {
-        return ACTION;
+        return ACTIONS.get(action);
     }
 
 }

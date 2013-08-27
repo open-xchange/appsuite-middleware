@@ -124,6 +124,11 @@ public class DriveConstants {
     };
 
     /**
+     * Pattern to match valid MD5 checksums.
+     */
+    public static final Pattern CHECKSUM_VALIDATION_PATTERN = Pattern.compile("^[0-9a-f]{32}\\z");
+
+    /**
      * Pattern to match valid (Windows-) filenames, borrowed from http://stackoverflow.com/questions/6730009 , based on
      * http://msdn.microsoft.com/en-us/library/aa365247%28v=vs.85%29.aspx#file_and_directory_names
      */

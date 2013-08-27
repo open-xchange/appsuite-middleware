@@ -288,8 +288,8 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
      */
     public final static String PROTOCOL_ERROR_MSG = "Error in mail server protocol. Error message: %1$s";
 
-    // Protocol error in data sent to to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
-    public final static String PROTOCOL_ERROR_EXT_MSG = "Protocol error in data sent to to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s";
+    // Protocol error in data sent to the mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
+    public final static String PROTOCOL_ERROR_EXT_MSG = "Protocol error in data sent to the mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s";
 
     /**
      * Message could not be sent: %1$s

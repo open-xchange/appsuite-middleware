@@ -66,6 +66,10 @@ tr,th,td {
     border: 1px solid #000;
 }
 
+h1 {
+	text-align: center;
+}
+
 #calendarWeek {
     width: 100%;
 }
@@ -144,13 +148,14 @@ tr,th,td {
     background-color: #6cb8e1;
 }
 </style>
-<title>${documentTitle} - ${i18n.tr("Calendar")} - ${i18n.tr("Week")} ${days[0].format("w", days[0].time)}</title>
+<title>${documentTitle} ${i18n.tr("Calendar")}: ${dateFormatter.formatDate(days?first.time)} -  ${dateFormatter.formatDate(days?last.time)}</title>
 </head>
 <body onload="window.print()">
   <div id="layout" class="flexChilds">
     <div id="headArea">
     </div>
     <div id="contentArea">
+      <h1>${documentTitle} ${i18n.tr("Calendar")}: ${dateFormatter.formatDate(days?first.time)} -  ${dateFormatter.formatDate(days?last.time)}</h1>
       <table border="0" id="calendarWeek" class="calendar">
         <thead>
           <tr>

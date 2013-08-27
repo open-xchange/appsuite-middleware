@@ -16,5 +16,4 @@ Import-Package: com.openexchange.osgi,
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/junit-4.6.jar
-Export-Package: com.openexchange.test.osgi,
- org.junit
+Export-Package: com.openexchange.test.osgi

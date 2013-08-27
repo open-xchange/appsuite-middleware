@@ -81,12 +81,13 @@ import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.osgi.Activator;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link LinkedInServiceImpl}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
@@ -127,6 +128,9 @@ public class LinkedInServiceImpl implements LinkedInService {
         OAuthAccount account = null;
         try {
             final com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
+            if (null == oAuthService) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(com.openexchange.oauth.OAuthService.class.getName());
+            }
             account = oAuthService.getAccount(accountId, session, user, contextId);
         } catch (final OXException e) {
             LOG.error(e);

@@ -61,6 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -70,8 +71,10 @@ import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
+import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -170,8 +173,8 @@ public abstract class AbstractReminderAction implements AJAXActionService {
      *
      * @return <code>true</code> if a latest reminder was found.
      */
-    protected boolean getLatestRecurringReminder(final Session sessionObj, final TimeZone tz, final Date endRange, final ReminderObject reminder) throws OXException {
-        final AppointmentSQLInterface calendarSql = getService().createAppointmentSql(sessionObj);
+    protected boolean getLatestRecurringReminder(final Session session, final TimeZone tz, final Date endRange, final ReminderObject reminder) throws OXException {
+        final AppointmentSQLInterface calendarSql = getService().createAppointmentSql(session);
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         final Appointment calendarDataObject;
         try {
@@ -205,8 +208,15 @@ public abstract class AbstractReminderAction implements AJAXActionService {
         return retval;
     }
 
-    protected static boolean hasModulePermission(final ReminderObject reminderObj, final ServerSession session) {
-        switch (reminderObj.getModule()) {
+    /**
+     * Checks if session-associated user has appropriate module access granted.
+     *
+     * @param reminder The reminder
+     * @param session The associated session
+     * @return <code>true</code> if module permission is granted; otherwise <code>false</code>
+     */
+    protected static boolean hasModulePermission(final ReminderObject reminder, final ServerSession session) {
+        switch (reminder.getModule()) {
         case Types.APPOINTMENT:
             return session.getUserPermissionBits().hasCalendar();
         case Types.TASK:
@@ -216,8 +226,57 @@ public abstract class AbstractReminderAction implements AJAXActionService {
         }
     }
 
-    protected static final ReminderObject getNextRecurringReminder(final Session sessionObj, final TimeZone tz, final ReminderObject reminder) throws OXException {
-        final AppointmentSQLInterface calendarSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessionObj);
+    /**
+     * Checks if associated calendar event is still accepted by session-associated user.
+     *
+     * @param reminder The reminder
+     * @param session The associated session
+     * @return <code>true</code> if still accepted; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    protected static boolean stillAccepted(final ReminderObject reminder, final ServerSession session) throws OXException {
+        switch (reminder.getModule()) {
+        case Types.APPOINTMENT:
+            {
+                try {
+                    final AppointmentSqlFactoryService factoryService = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
+                    if (null != factoryService) {
+                        final UserParticipant[] userParticipants = factoryService.createAppointmentSql(session).getObjectById(reminder.getTargetId(), reminder.getFolder()).getUsers();
+                        if (null != userParticipants) {
+                            final int userId = session.getUserId();
+                            for (final UserParticipant userParticipant : userParticipants) {
+                                if (userParticipant.getIdentifier() == userId) {
+                                    return userParticipant.getConfirm() != Appointment.DECLINE;
+                                }
+                            }
+                        }
+                    }
+                } catch (final SQLException e) {
+                    throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
+                }
+            }
+            break;
+        case Types.TASK:
+            {
+                final UserParticipant[] userParticipants = new TasksSQLImpl(session).getTaskById(reminder.getTargetId(), reminder.getFolder()).getUsers();
+                if (null != userParticipants) {
+                    final int userId = session.getUserId();
+                    for (final UserParticipant userParticipant : userParticipants) {
+                        if (userParticipant.getIdentifier() == userId) {
+                            return userParticipant.getConfirm() != Appointment.DECLINE;
+                        }
+                    }
+                }
+            }
+            break;
+        default:
+            return true;
+        }
+        return true;
+    }
+
+    protected static final ReminderObject getNextRecurringReminder(final Session session, final TimeZone tz, final ReminderObject reminder) throws OXException {
+        final AppointmentSQLInterface calendarSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         final Appointment calendarDataObject;
 
@@ -237,7 +296,7 @@ public abstract class AbstractReminderAction implements AJAXActionService {
             recurringResults = recColl.calculateRecurring(calendarDataObject, reminder.getDate().getTime(), until.getTime(), 0);
         } catch (final OXException e) {
             LOG.error(
-                "Can't calculate next recurrence for appointment " + reminder.getTargetId() + " in context " + sessionObj.getContextId(),
+                "Can't calculate next recurrence for appointment " + reminder.getTargetId() + " in context " + session.getContextId(),
                 e);
             return null;
         }

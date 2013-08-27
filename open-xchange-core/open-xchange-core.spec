@@ -9,12 +9,12 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 7
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
-URL:           http://www.open-xchange.com/            
+URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The essential core of an Open-Xchange backend
 Requires:      open-xchange-osgi >= @OXVERSION@
@@ -139,6 +139,10 @@ Provides:      open-xchange-passwordchange-servlet = %{version}
 Obsoletes:     open-xchange-passwordchange-servlet <= %{version}
 Provides:      open-xchange-file-storage-webdav = %{version}
 Obsoletes:     open-xchange-file-storage-webdav <= %{version}
+Provides:      open-xchange-cluster-discovery-mdns = %{version}
+Obsoletes:     open-xchange-cluster-discovery-mdns <= %{version}
+Provides:      open-xchange-cluster-discovery-static = %{version}
+Obsoletes:     open-xchange-cluster-discovery-static <= %{version}
 
 %description
 This package installs all essential bundles that are necessary to get a working backend installation. This are the bundles for the main
@@ -176,6 +180,27 @@ find %{buildroot}/opt/open-xchange/etc \
         -printf "%%%config(noreplace) %p\n" > %{configfiles}
 perl -pi -e 's;%{buildroot};;' %{configfiles}
 perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
+
+%pre
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # SoftwareChange_Request-1564
+    VALUE="empty"
+    if [ -e /opt/open-xchange/bundles/com.openexchange.cluster.discovery.mdns.jar ]; then
+        VALUE="multicast"
+    elif [ -e /opt/open-xchange/bundles/com.openexchange.cluster.discovery.static.jar ]; then
+        VALUE="static"
+    fi
+    pfile=/opt/open-xchange/etc/hazelcast.properties
+    if [ -e $pfile ] && ! ox_exists_property com.openexchange.hazelcast.network.join $pfile; then
+        ox_set_property com.openexchange.hazelcast.network.join "$VALUE" $pfile
+    fi
+fi
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
@@ -683,6 +708,19 @@ if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $p
    ox_set_property com.openexchange.contactcollector.folder.deleteDenied false $pfile
 fi
 
+# SoftwareChange_Request-1529
+pfile=/opt/open-xchange/etc/server.properties
+if ! ox_exists_property com.openexchange.server.fullPrimaryKeySupport $pfile; then
+    ox_set_property com.openexchange.server.fullPrimaryKeySupport false $pfile
+fi
+
+# SoftwareChange_Request-1540
+pfile=/opt/open-xchange/etc/permissions.properties
+if ! grep "com.openexchange.capability.boring" >/dev/null $pfile; then
+    echo -e "\n# Mark this installation as boring, i.e. disable an easter egg\n" >> $pfile
+    echo "# com.openexchange.capability.boring=true" >> $pfile
+fi
+
 # SoftwareChange_Request-1556
 pfile=/opt/open-xchange/etc/excludedupdatetasks.properties
 if ! grep "com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask" >/dev/null $pfile; then
@@ -691,11 +729,56 @@ if ! grep "com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask" 
     echo "!com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask" >> $pfile
 fi
 
-# SoftwareChange_Request-1529
-pfile=/opt/open-xchange/etc/server.properties
-if ! ox_exists_property com.openexchange.server.fullPrimaryKeySupport $pfile; then
-    ox_set_property com.openexchange.server.fullPrimaryKeySupport false $pfile
+# SoftwareChange_Request-1558
+pfile=/opt/open-xchange/etc/import.properties
+if ! grep "com.openexchange.import.contacts.limit" >/dev/null $pfile; then
+    echo -e "\n# sets the limit on how many contacts can be imported at once\n" >> $pfile
+    echo "# -1 means unlimited, defaults to -1" >> $pfile
+    echo "# com.openexchange.import.contacts.limit=-1" >> $pfile
 fi
+
+# SoftwareChange_Request-1564
+[ -e /opt/open-xchange/etc/cluster.properties ] && VALUE=$(ox_read_property com.openexchange.cluster.name /opt/open-xchange/etc/cluster.properties)
+TOVALUE=$(ox_read_property com.openexchange.hazelcast.group.name /opt/open-xchange/etc/hazelcast.properties)
+if [ -n "$VALUE" -a -z "$TOVALUE" ]; then
+    ox_set_property com.openexchange.hazelcast.group.name "$VALUE" /opt/open-xchange/etc/hazelcast.properties
+fi
+rm -f /opt/open-xchange/etc/cluster.properties
+[ -e /opt/open-xchange/etc/static-cluster-discovery.properties ] && VALUE=$(ox_read_property com.openexchange.cluster.discovery.static.nodes /opt/open-xchange/etc/static-cluster-discovery.properties)
+TOVALUE=$(ox_read_property com.openexchange.hazelcast.network.join.static.nodes /opt/open-xchange/etc/hazelcast.properties)
+if [ -n "$VALUE" -a -z "$TOVALUE" ]; then
+    ox_set_property com.openexchange.hazelcast.network.join.static.nodes "$VALUE" /opt/open-xchange/etc/hazelcast.properties
+fi
+pfile=/opt/open-xchange/etc/hazelcast.properties
+OLDNAMES=( com.openexchange.hazelcast.interfaces com.openexchange.hazelcast.mergeFirstRunDelay com.openexchange.hazelcast.mergeRunDelay com.openexchange.hazelcast.networkConfig.port com.openexchange.hazelcast.networkConfig.portAutoIncrement com.openexchange.hazelcast.networkConfig.outboundPortDefinitions com.openexchange.hazelcast.enableIPv6Support )
+NEWNAMES=( com.openexchange.hazelcast.network.interfaces com.openexchange.hazelcast.merge.firstRunDelay com.openexchange.hazelcast.merge.runDelay com.openexchange.hazelcast.network.port com.openexchange.hazelcast.network.portAutoIncrement com.openexchange.hazelcast.network.outboundPortDefinitions com.openexchange.hazelcast.network.enableIPv6Support )
+DEFAULTS=( 127.0.0.1 120s 120s 5701 true "" false )
+for I in $(seq 1 ${#OLDNAMES[@]}); do
+    OLDNAME=${OLDNAMES[$I-1]}
+    NEWNAME=${NEWNAMES[$I-1]}
+    VALUE=$(ox_read_property $OLDNAME $pfile)
+    if ox_exists_property $OLDNAME $pfile; then
+        ox_remove_property $OLDNAME $pfile
+    fi
+    if [ -z "$VALUE" ]; then
+        VALUE="${DEFAULTS[$I-1]}"
+    fi
+    if ! ox_exists_property $NEWNAME $pfile; then
+        ox_set_property $NEWNAME "$VALUE" $pfile
+    fi
+done
+NEWPROPS=( com.openexchange.hazelcast.jmxDetailed com.openexchange.hazelcast.network.join.multicast.group com.openexchange.hazelcast.network.join.multicast.port com.openexchange.hazelcast.group.password com.openexchange.hazelcast.memcache.enabled com.openexchange.hazelcast.rest.enabled com.openexchange.hazelcast.socket.bindAny )
+DEFAULTS=( false 224.2.2.3 54327 'wtV6$VQk8#+3ds!a' false false false )
+for I in $(seq 1 ${#NEWPROPS[@]}); do
+    NEWPROP=${NEWPROPS[$I-1]}
+    DEFAULT=${DEFAULTS[$I-1]}
+    if ! ox_exists_property $NEWPROP $pfile; then
+        ox_set_property $NEWPROP "$DEFAULT" $pfile
+    fi
+done
+
+# SoftwareChange_Request-1601
+ox_set_property com.openexchange.server.considerXForwards "true" /opt/open-xchange/etc/server.properties
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT
@@ -740,6 +823,16 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Tue Aug 27 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Seventh candidate for 7.4.0 release
+* Fri Aug 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth candidate for 7.4.0 release
+* Tue Aug 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-08-19
+* Mon Aug 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-08-21
+* Mon Aug 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 7.4.0
 * Tue Aug 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth release candidate for 7.4.0
 * Tue Aug 06 2013 Marcus Klein <marcus.klein@open-xchange.com>

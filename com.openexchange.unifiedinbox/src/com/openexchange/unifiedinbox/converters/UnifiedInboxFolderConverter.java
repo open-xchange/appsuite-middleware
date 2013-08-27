@@ -49,14 +49,9 @@
 
 package com.openexchange.unifiedinbox.converters;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
@@ -68,13 +63,9 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.unifiedinbox.UnifiedInboxAccess;
 import com.openexchange.unifiedinbox.UnifiedInboxException;
 import com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry;
-import com.openexchange.unifiedinbox.utility.LoggingCallable;
-import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
-import com.openexchange.unifiedinbox.utility.UnifiedInboxCompletionService;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
 
 /**
@@ -155,27 +146,12 @@ public final class UnifiedInboxFolderConverter {
      *
      * @param unifiedInboxAccountId The account ID of the Unified Mail account
      * @param session The session
-     * @param fullName The folder's full name
+     * @param fullname The folder's full name
      * @param localizedName The localized name of the folder
      * @return The appropriately filled instance of {@link MailFolder}
      * @throws OXException If converting mail folder fails
      */
     public static MailFolder getUnifiedINBOXFolder(final int unifiedInboxAccountId, final Session session, final String fullname, final String localizedName) throws OXException {
-        return getUnifiedINBOXFolder(unifiedInboxAccountId, session, fullname, localizedName, null);
-    }
-
-    /**
-     * Gets the appropriately filled instance of {@link MailFolder}.
-     *
-     * @param unifiedInboxAccountId The account ID of the Unified Mail account
-     * @param session The session
-     * @param fullname The folder's full name
-     * @param localizedName The localized name of the folder
-     * @param executor The executor to use to concurrently load accounts' message counts
-     * @return The appropriately filled instance of {@link MailFolder}
-     * @throws OXException If converting mail folder fails
-     */
-    public static MailFolder getUnifiedINBOXFolder(final int unifiedInboxAccountId, final Session session, final String fullname, final String localizedName, final Executor executor) throws OXException {
         final MailFolder tmp = new MailFolder();
         // Subscription not supported by Unified Mail, so every folder is "subscribed"
         tmp.setSubscribed(true);
@@ -220,7 +196,7 @@ public final class UnifiedInboxFolderConverter {
             tmp.setDefaultFolderType(DefaultFolderType.NONE);
         }
         // Set message counts
-        final boolean hasAtLeastOneSuchFolder = setMessageCounts(fullname, unifiedInboxAccountId, session, tmp, executor);
+        final boolean hasAtLeastOneSuchFolder = setMessageCounts(unifiedInboxAccountId, session, tmp);
         if (hasAtLeastOneSuchFolder) {
             tmp.setSubfolders(true);
             tmp.setSubscribedSubfolders(true);
@@ -250,101 +226,25 @@ public final class UnifiedInboxFolderConverter {
         mailFolder.addPermission(permission);
     }
 
-    private static boolean setMessageCounts(final String fullname, final int unifiedInboxAccountId, final Session session, final MailFolder tmp, final Executor executor) throws UnifiedInboxException, OXException {
-        final MailAccount[] accounts;
+    private static boolean setMessageCounts(final int unifiedInboxAccountId, final Session session, final MailFolder tmp) throws UnifiedInboxException, OXException {
+        boolean retval = false;
         {
             final MailAccountStorageService storageService =
                 UnifiedInboxServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
             final MailAccount[] arr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
-            final List<MailAccount> l = new ArrayList<MailAccount>(arr.length);
-            for (final MailAccount mailAccount : arr) {
+            for (int i = 0; !retval && i < arr.length; i++) {
+                final MailAccount mailAccount = arr[i];
                 if (unifiedInboxAccountId != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
-                    l.add(mailAccount);
+                    retval = true;
                 }
             }
-            accounts = l.toArray(new MailAccount[l.size()]);
         }
-        // Create completion service for simultaneous access
-        final int length = accounts.length;
-        final Executor exec;
-        if (executor == null) {
-            exec = ThreadPools.getThreadPool().getExecutor();
-        } else {
-            exec = executor;
-        }
-        final TrackingCompletionService<int[]> completionService = new UnifiedInboxCompletionService<int[]>(exec);
-        final AtomicBoolean retval = new AtomicBoolean();
-        // Iterate
-        {
-            final StringBuilder sb = new StringBuilder(128);
-            for (final MailAccount mailAccount : accounts) {
-                sb.setLength(0);
-                completionService.submit(new LoggingCallable<int[]>(session) {
-
-                    @Override
-                    public int[] call() throws Exception {
-                        MailAccess<?, ?> mailAccess = null;
-                        try {
-                            mailAccess = MailAccess.getInstance(session, mailAccount.getId());
-                            mailAccess.connect();
-                            final String accountFullname = UnifiedInboxUtility.determineAccountFullname(mailAccess, fullname);
-                            // Check if account fullname is not null
-                            if (null == accountFullname) {
-                                return EMPTY_COUNTS;
-                            }
-                            // Get counts
-                            final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(accountFullname);
-                            final int[] counts =
-                                new int[] {
-                                    mailFolder.getMessageCount(), mailFolder.getUnreadMessageCount(), mailFolder.getDeletedMessageCount(),
-                                    mailFolder.getNewMessageCount() };
-                            retval.set(true);
-                            return counts;
-                        } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
-                            return EMPTY_COUNTS;
-                        } finally {
-                            if (null != mailAccess) {
-                                mailAccess.close(true);
-                            }
-                        }
-                    }
-                });
-            }
-        }
-        // Wait for completion of each submitted task
-        try {
-            // Init counts
-            int totaCount = 0;
-            int unreadCount = 0;
-            int deletedCount = 0;
-            int newCount = 0;
-            // Take completed tasks and apply their counts
-            for (int i = 0; i < length; i++) {
-                final int[] counts = completionService.take().get();
-                // Add counts
-                totaCount += counts[0];
-                unreadCount += counts[1];
-                deletedCount += counts[2];
-                newCount += counts[3];
-            }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder("Retrieving message counts of folder \"").append(fullname).append("\" took ").append(
-                    completionService.getDuration()).append("msec."));
-            }
-            // Apply counts
-            tmp.setMessageCount(totaCount);
-            tmp.setNewMessageCount(newCount);
-            tmp.setUnreadMessageCount(unreadCount);
-            tmp.setDeletedMessageCount(deletedCount);
-            return retval.get();
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw MailExceptionCode.INTERRUPT_ERROR.create(
-                e);
-        } catch (final ExecutionException e) {
-            throw ThreadPools.launderThrowable(e, OXException.class);
-        }
+        // Apply counts
+        tmp.setMessageCount(-1);
+        tmp.setNewMessageCount(-1);
+        tmp.setUnreadMessageCount(-1);
+        tmp.setDeletedMessageCount(-1);
+        return retval;
     }
 
     /**

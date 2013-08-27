@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
+<<<<<<< HEAD
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-osgi"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-log4j"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-xerces-sun"/>
@@ -12,8 +13,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-authentication-imap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-authentication-kerberos"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-authorization-standard"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-cluster-discovery-static"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-cluster-discovery-mdns"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-dav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-imap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-smtp"/>

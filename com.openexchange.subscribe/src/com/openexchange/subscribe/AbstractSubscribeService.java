@@ -162,7 +162,11 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     @Override
     public void update(final Subscription subscription) throws OXException {
-    	checkUpdate(loadSubscription(subscription.getContext(), subscription.getId(), null));
+        final Subscription loadedSubscription = loadSubscription(subscription.getContext(), subscription.getId(), null);
+        if (null == loadedSubscription) {
+            throw SubscriptionErrorMessage.SubscriptionNotFound.create();
+        }
+        checkUpdate(loadedSubscription);
         modifyIncoming(subscription);
         STORAGE.get().updateSubscription(subscription);
         modifyOutgoing(subscription);
@@ -198,13 +202,14 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     }
 
     public static void encrypt(final Session session, final Map<String, Object> map, final String... keys) throws OXException {
-        if (ENCRYPTION_FACTORY == null) {
+        final SecretEncryptionFactoryService encryptionFactoryService = ENCRYPTION_FACTORY.get();
+        if (encryptionFactoryService == null) {
             return;
         }
         if (session == null) {
             return;
         }
-        final SecretEncryptionService<EncryptedField> encryptionService = ENCRYPTION_FACTORY.get().createService(STORAGE.get());
+        final SecretEncryptionService<EncryptedField> encryptionService = encryptionFactoryService.createService(STORAGE.get());
         for (final String key : keys) {
             if (map.containsKey(key)) {
                 final String toEncrypt = (String) map.get(key);
@@ -215,13 +220,14 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     }
 
     public static void decrypt(final Subscription subscription, final Session session, final Map<String, Object> map, final String... keys) throws OXException {
-        if (ENCRYPTION_FACTORY == null) {
+        final SecretEncryptionFactoryService encryptionFactoryService = ENCRYPTION_FACTORY.get();
+        if (encryptionFactoryService == null) {
             return;
         }
         if (session == null) {
             return;
         }
-        final SecretEncryptionService<EncryptedField> encryptionService = ENCRYPTION_FACTORY.get().createService(STORAGE.get());
+        final SecretEncryptionService<EncryptedField> encryptionService = encryptionFactoryService.createService(STORAGE.get());
         for (final String key : keys) {
             if (map.containsKey(key)) {
                 final EncryptedField encryptedField = new EncryptedField(subscription, key);

@@ -125,6 +125,10 @@ public class UploadHelper {
                 checksum = ChecksumProvider.getChecksum(session, uploadFile).getChecksum();
             }
             if (false == checksum.equals(newVersion.getChecksum())) {
+                /*
+                 * checksum mismatch, clean up & throw error
+                 */
+                session.getStorage().deleteFile(uploadFile);
                 throw DriveExceptionCodes.UPLOADED_FILE_CHECKSUM_ERROR.create(checksum, newVersion.getName(), newVersion.getChecksum());
             }
             /*
@@ -158,10 +162,9 @@ public class UploadHelper {
                         file.setCreated(created);
                         fields.add(Field.CREATED);
                     }
-                    if (null != modified) {
-                        file.setLastModified(modified);
-                        fields.add(Field.LAST_MODIFIED);
-                    }
+                    Date now = new Date();
+                    file.setLastModified(null != modified && modified.before(now) ? modified : now);
+                    fields.add(Field.LAST_MODIFIED);
 
                     if (null != originalVersion) {
                         File originalFile = session.getStorage().findFileByName(path, originalVersion.getName());

@@ -104,7 +104,8 @@ public class RssActivator extends AJAXModuleActivator {
     }
 
     @Override
-    protected void stopBundle() {
+    protected void stopBundle() throws Exception {
         RssServices.LOOKUP.set(null);
+        super.stopBundle();
     }
 }
