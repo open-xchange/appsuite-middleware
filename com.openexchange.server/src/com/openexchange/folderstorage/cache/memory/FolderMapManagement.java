@@ -49,9 +49,9 @@
 
 package com.openexchange.folderstorage.cache.memory;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.session.Session;
 
 /**
@@ -81,7 +81,7 @@ public final class FolderMapManagement {
      */
     private FolderMapManagement() {
         super();
-        map = new NonBlockingHashMap<Integer, ConcurrentMap<Integer, FolderMap>>(64);
+        map = new ConcurrentHashMap<Integer, ConcurrentMap<Integer, FolderMap>>(64);
     }
 
     /**
@@ -146,7 +146,7 @@ public final class FolderMapManagement {
         final Integer cid = Integer.valueOf(session.getContextId());
         ConcurrentMap<Integer, FolderMap> contextMap = map.get(cid);
         if (null == contextMap) {
-            final ConcurrentMap<Integer, FolderMap> newMap = new NonBlockingHashMap<Integer, FolderMap>(256);
+            final ConcurrentMap<Integer, FolderMap> newMap = new ConcurrentHashMap<Integer, FolderMap>(256);
             contextMap = map.putIfAbsent(cid, newMap);
             if (null == contextMap) {
                 contextMap = newMap;

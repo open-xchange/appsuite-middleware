@@ -107,15 +107,13 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
      */
     private final AtomicBoolean started = new AtomicBoolean();
 
-    private PropertyListener propertyListener;
-
     private boolean enableDBGrouping = true;
 
     private boolean enableFolderCache = true;
 
     private boolean ignoreSharedAddressbook = false;
 
-    volatile boolean enableInternalUsersEdit = false;
+    volatile boolean enableInternalUsersEdit = true;
 
     private boolean enableSharedFolderCaching = true;
 
@@ -147,17 +145,6 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         if (!started.compareAndSet(true, false)) {
             LOG.error("Folder properties cannot be stopped since they have not been started before", new Throwable());
             return;
-        }
-        {
-            /*
-             * Remove listener from property
-             */
-            final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            if (configurationService != null) {
-                configurationService.removePropertyListener("ENABLE_INTERNAL_USER_EDIT", propertyListener);
-            } else if (LOG.isDebugEnabled()) {
-                LOG.debug("Cannot look-up configuration service to remove property listener.");
-            }
         }
         final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
         if (reg != null) {
@@ -196,11 +183,10 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 
     private void reset() {
         enableSharedFolderCaching = true;
-        propertyListener = null;
         enableDBGrouping = true;
         enableFolderCache = true;
         ignoreSharedAddressbook = false;
-        enableInternalUsersEdit = false;
+        enableInternalUsersEdit = true;
     }
 
     private void init() {
