@@ -86,9 +86,6 @@ public class TasksDowngrade extends DowngradeListener {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void downgradePerformed(final DowngradeEvent event)
         throws OXException {

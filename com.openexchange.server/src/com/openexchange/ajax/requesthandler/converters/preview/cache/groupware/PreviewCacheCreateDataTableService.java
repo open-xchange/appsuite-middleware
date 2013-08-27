@@ -47,42 +47,65 @@
  *
  */
 
-package com.openexchange.groupware.userconfiguration;
+package com.openexchange.ajax.requesthandler.converters.preview.cache.groupware;
 
-import java.util.HashSet;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.database.AbstractCreateTableImpl;
+
 
 /**
- * {@link AllowAllUserConfiguration}
+ * {@link PreviewCacheCreateDataTableService}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AllowAllUserConfiguration extends UserConfiguration {
+public final class PreviewCacheCreateDataTableService extends AbstractCreateTableImpl {
 
-    public AllowAllUserConfiguration(final int userId, final int[] groups, final Context ctx) {
-        super(new HashSet<String>(), userId, groups, ctx);
+    private static final String TABLE_PREVIEW_DATA = "previewData";
+
+    /**
+     * Gets the table names.
+     *
+     * @return The table names.
+     */
+    public static String[] getTablesToCreate() {
+        return new String[] { TABLE_PREVIEW_DATA };
     }
 
-    private static final long serialVersionUID = 1L;
+    /**
+     * Gets the CREATE-TABLE statements.
+     *
+     * @return The CREATE statements
+     */
+    public static String[] getCreateStmts() {
+        return new String[] { "CREATE TABLE "+TABLE_PREVIEW_DATA+" (" +
+            " cid INT4 unsigned NOT NULL," +
+            " user INT4 unsigned NOT NULL," +
+            " id VARCHAR(128) CHARACTER SET latin1 NOT NULL," +
+            " data BLOB," +
+            " PRIMARY KEY (cid, user, id)," +
+            " INDEX `globaldocument` (cid, id)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
+    }
 
-    @Override
-    public boolean hasPermission(final int permissionBit) {
-        return true;
+    /**
+     * Initializes a new {@link PreviewCacheCreateDataTableService}.
+     */
+    public PreviewCacheCreateDataTableService() {
+        super();
     }
 
     @Override
-    public boolean hasPermission(final Permission permission) {
-        return true;
+    public String[] requiredTables() {
+        return new String[] { "preview" };
     }
 
     @Override
-    public boolean hasPermission(final String name) {
-        return true;
+    public String[] tablesToCreate() {
+        return getTablesToCreate();
     }
 
     @Override
-    public int getPermissionBits() {
-        return Integer.MAX_VALUE & ~DENIED_PORTAL;
+    protected String[] getCreateStatements() {
+        return getCreateStmts();
     }
 
 }

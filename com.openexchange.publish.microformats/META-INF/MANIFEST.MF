@@ -6,7 +6,8 @@ Bundle-Version: 7.4.0
 Bundle-Activator: com.openexchange.publish.microformats.osgi.ServletActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.ajax.container,
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.container,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.responseRenderers,
  com.openexchange.api2,

@@ -116,6 +116,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         void handleProperty(String propValue, Set<Capability> capabilities) throws OXException;
     }
 
+    /** The property handlers for special config-cascade properties */
     private static final Map<String, PropertyHandler> PROPERTY_HANDLERS;
 
     static {

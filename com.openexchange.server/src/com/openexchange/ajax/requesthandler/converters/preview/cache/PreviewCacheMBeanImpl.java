@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,42 +47,47 @@
  *
  */
 
-package com.openexchange.groupware.userconfiguration;
+package com.openexchange.ajax.requesthandler.converters.preview.cache;
 
-import java.util.HashSet;
-import com.openexchange.groupware.contexts.Context;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.management.MBeanException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
+import org.apache.commons.logging.Log;
+import com.openexchange.preview.cache.PreviewCache;
+
 
 /**
- * {@link AllowAllUserConfiguration}
+ * {@link PreviewCacheMBeanImpl}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AllowAllUserConfiguration extends UserConfiguration {
+public final class PreviewCacheMBeanImpl extends StandardMBean implements PreviewCacheMBean {
 
-    public AllowAllUserConfiguration(final int userId, final int[] groups, final Context ctx) {
-        super(new HashSet<String>(), userId, groups, ctx);
-    }
+    /** The cache reference */
+    public static final AtomicReference<PreviewCache> CACHE_REF = new AtomicReference<PreviewCache>();
 
-    private static final long serialVersionUID = 1L;
-
-    @Override
-    public boolean hasPermission(final int permissionBit) {
-        return true;
-    }
-
-    @Override
-    public boolean hasPermission(final Permission permission) {
-        return true;
+    /**
+     * Initializes a new {@link PreviewCacheMBeanImpl}.
+     *
+     * @throws NotCompliantMBeanException
+     */
+    public PreviewCacheMBeanImpl() throws NotCompliantMBeanException {
+        super(PreviewCacheMBean.class);
     }
 
     @Override
-    public boolean hasPermission(final String name) {
-        return true;
-    }
-
-    @Override
-    public int getPermissionBits() {
-        return Integer.MAX_VALUE & ~DENIED_PORTAL;
+    public void clearFor(final int contextId) throws MBeanException {
+        final PreviewCache previewCache = CACHE_REF.get();
+        if (null != previewCache) {
+            try {
+                previewCache.clearFor(contextId);
+            } catch (final Exception e) {
+                final Log log = com.openexchange.log.Log.loggerFor(PreviewCacheMBeanImpl.class);
+                log.error(e.getMessage(), e);
+                throw new MBeanException(new Exception(e.getMessage()));
+            }
+        }
     }
 
 }

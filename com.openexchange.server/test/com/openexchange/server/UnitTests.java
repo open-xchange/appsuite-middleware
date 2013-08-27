@@ -52,23 +52,6 @@ package com.openexchange.server;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.ajax.LoginAddFragmentTest;
-import com.openexchange.ajax.MailAttachmentTest;
-import com.openexchange.ajax.ProcessUploadStaticTest;
-import com.openexchange.ajax.parser.ContactSearchtermSqlConverterTest;
-import com.openexchange.ajax.parser.TaskLastModifiedTest;
-import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest;
-import com.openexchange.groupware.ldap.UserAttributeDiffTest;
-import com.openexchange.groupware.notify.ParticipantNotifyTest;
-import com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTableTest;
-import com.openexchange.groupware.userconfiguration.UserConfigurationTest;
-import com.openexchange.i18n.tools.replacement.TaskEndDateReplacementTest;
-import com.openexchange.mail.mime.MimeSmilFixerTest;
-import com.openexchange.mail.mime.MimeStructureFixerTest;
-import com.openexchange.mail.utils.MsisdnUtilityTest;
-import com.openexchange.tools.collections.OXCollectionsTest;
-import com.openexchange.tools.iterator.SearchIteratorDelegatorTest;
-import com.openexchange.tools.net.URIParserTest;
 
 /**
  * {@link UnitTests}
@@ -77,24 +60,25 @@ import com.openexchange.tools.net.URIParserTest;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    ContactSearchtermSqlConverterTest.class,
-    TaskLastModifiedTest.class,
-    LoginAddFragmentTest.class,
-    UserAttributeDiffTest.class,
-    TaskEndDateReplacementTest.class,
-    OXCollectionsTest.class,
-    SearchIteratorDelegatorTest.class,
-    URIParserTest.class,
-    MsisdnUtilityTest.class,
-    MakeFolderIdPrimaryForDelContactsTableTest.class,
-    MailAttachmentTest.class,
-    ProcessUploadStaticTest.class,
-    FileResponseRendererTest.class,
-    MsisdnUtilityTest.class,
-    UserConfigurationTest.class,
-    MimeStructureFixerTest.class,
-    MimeSmilFixerTest.class,
-    ParticipantNotifyTest.class
+    com.openexchange.ajax.ProcessUploadStaticTest.class,
+    com.openexchange.ajax.parser.ContactSearchtermSqlConverterTest.class,
+    com.openexchange.ajax.parser.TaskLastModifiedTest.class,
+    com.openexchange.ajax.LoginAddFragmentTest.class,
+    com.openexchange.groupware.ldap.UserAttributeDiffTest.class,
+    com.openexchange.i18n.tools.replacement.TaskEndDateReplacementTest.class,
+    com.openexchange.tools.collections.OXCollectionsTest.class,
+    com.openexchange.tools.iterator.SearchIteratorDelegatorTest.class,
+    com.openexchange.tools.net.URIParserTest.class,
+    com.openexchange.mail.utils.MsisdnUtilityTest.class,
+    com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTableTest.class,
+    com.openexchange.ajax.MailAttachmentTest.class,
+    com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
+    com.openexchange.groupware.userconfiguration.AllowAllUserConfigurationTest.class,
+    com.openexchange.groupware.userconfiguration.UserConfigurationTest.class,
+    com.openexchange.mail.mime.MimeStructureFixerTest.class,
+    com.openexchange.mail.mime.MimeSmilFixerTest.class,
+    com.openexchange.groupware.notify.ParticipantNotifyTest.class
+
 })
 public class UnitTests {
 

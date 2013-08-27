@@ -62,6 +62,7 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.context.ContextService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
@@ -222,13 +223,11 @@ public class OXMFPublicationService extends AbstractPublicationService {
         publication.getConfiguration().put(URL, urlBuilder.toString());
     }
 
-    private static final Pattern P_REPLACE_SPACES = Pattern.compile("\\s+");
-
     private String saneSiteName(final String site) {
         if (isEmpty(site)) {
             return site;
         }
-        return P_REPLACE_SPACES.matcher(site).replaceAll("_");
+        return AJAXServlet.encodeUrl(site, true, true);
     }
 
     protected String normalizeSiteName(final String siteName) {

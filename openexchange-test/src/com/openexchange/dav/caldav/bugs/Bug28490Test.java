@@ -47,42 +47,52 @@
  *
  */
 
-package com.openexchange.groupware.userconfiguration;
+package com.openexchange.dav.caldav.bugs;
 
-import java.util.HashSet;
-import com.openexchange.groupware.contexts.Context;
+import java.util.TimeZone;
+import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.ICalResource;
+import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link AllowAllUserConfiguration}
+ * {@link Bug28490Test}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * Appointment on mobile shifted one hour
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AllowAllUserConfiguration extends UserConfiguration {
+public class Bug28490Test extends CalDAVTest {
 
-    public AllowAllUserConfiguration(final int userId, final int[] groups, final Context ctx) {
-        super(new HashSet<String>(), userId, groups, ctx);
-    }
+	public Bug28490Test(String name) {
+		super(name);
+	}
 
-    private static final long serialVersionUID = 1L;
-
-    @Override
-    public boolean hasPermission(final int permissionBit) {
-        return true;
-    }
-
-    @Override
-    public boolean hasPermission(final Permission permission) {
-        return true;
-    }
-
-    @Override
-    public boolean hasPermission(final String name) {
-        return true;
-    }
-
-    @Override
-    public int getPermissionBits() {
-        return Integer.MAX_VALUE & ~DENIED_PORTAL;
-    }
+	public void testTimeZoneCET() throws Exception {
+		/*
+		 * create appointment series on server
+		 */
+		String uid = randomUID();
+        Appointment appointment = new Appointment();
+        appointment.setUid(uid);
+        appointment.setTitle(getClass().getCanonicalName());
+        appointment.setIgnoreConflicts(true);
+        appointment.setStartDate(TimeTools.D("last january on friday at 16:00", TimeZone.getTimeZone("CET")));
+        appointment.setEndDate(TimeTools.D("last january on friday at 16:30", TimeZone.getTimeZone("CET")));
+        appointment.setRecurrenceType(Appointment.WEEKLY);
+        appointment.setDays(Appointment.FRIDAY);
+        appointment.setInterval(1);
+        appointment.setTimezone("CET");
+        super.create(appointment);
+        super.rememberForCleanUp(appointment);
+        /*
+         * verify appointment on client
+         */
+        ICalResource iCalResource = super.get(uid, null);
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
+        assertNotNull("No TZID attribute found in DTSTART property", iCalResource.getVEvent().getProperty("DTSTART").getAttribute("TZID"));
+        assertNotNull("No TZID attribute found in DTEND property", iCalResource.getVEvent().getProperty("DTEND").getAttribute("TZID"));
+	}
 
 }

@@ -81,6 +81,10 @@ public class CompositeFileStorageFactory implements FileStorageFactory, ServiceT
 
     @Override
     public FileStorage getFileStorage(URI uri) throws OXException {
+        if (null== uri) {
+            return null;
+        }
+
         FileStorageFactoryCandidate candidate = null;
         for (final FileStorageFactoryCandidate fac : facs) {
             if (fac.supports(uri) && (null == candidate || fac.getRanking() > candidate.getRanking())) {
@@ -94,6 +98,15 @@ public class CompositeFileStorageFactory implements FileStorageFactory, ServiceT
         /*
          * Fall back to default implementation
          */
+
+        return getInternalFileStorage(uri);
+    }
+
+    @Override
+    public FileStorage getInternalFileStorage(URI uri) {
+        if (null== uri) {
+            return null;
+        }
 
         final LocalFileStorage standardFS = new LocalFileStorage(uri);
         final HashingFileStorage hashedFS = new HashingFileStorage(new File(new File(uri), "hashed"));

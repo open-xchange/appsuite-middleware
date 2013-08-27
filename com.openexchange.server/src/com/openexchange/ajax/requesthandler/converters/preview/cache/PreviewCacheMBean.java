@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,42 +47,23 @@
  *
  */
 
-package com.openexchange.groupware.userconfiguration;
+package com.openexchange.ajax.requesthandler.converters.preview.cache;
 
-import java.util.HashSet;
-import com.openexchange.groupware.contexts.Context;
+import javax.management.MBeanException;
+
 
 /**
- * {@link AllowAllUserConfiguration}
+ * {@link PreviewCacheMBean} - The Mbean for preview cache.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AllowAllUserConfiguration extends UserConfiguration {
+public interface PreviewCacheMBean {
 
-    public AllowAllUserConfiguration(final int userId, final int[] groups, final Context ctx) {
-        super(new HashSet<String>(), userId, groups, ctx);
-    }
-
-    private static final long serialVersionUID = 1L;
-
-    @Override
-    public boolean hasPermission(final int permissionBit) {
-        return true;
-    }
-
-    @Override
-    public boolean hasPermission(final Permission permission) {
-        return true;
-    }
-
-    @Override
-    public boolean hasPermission(final String name) {
-        return true;
-    }
-
-    @Override
-    public int getPermissionBits() {
-        return Integer.MAX_VALUE & ~DENIED_PORTAL;
-    }
-
+    /**
+     * Clears all cache entries for given context.
+     *
+     * @param contextId The context identifier
+     * @throws MBeanException If operation fails
+     */
+    void clearFor(int contextId) throws MBeanException;
 }

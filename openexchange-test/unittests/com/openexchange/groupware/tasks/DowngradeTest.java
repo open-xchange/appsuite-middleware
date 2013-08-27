@@ -52,7 +52,6 @@ package com.openexchange.groupware.tasks;
 import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.util.Iterator;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import com.mysql.jdbc.AssertionFailedException;
@@ -69,7 +68,7 @@ import com.openexchange.groupware.folder.FolderToolkit;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserToolkit;
 import com.openexchange.groupware.userconfiguration.AllowAllUserConfiguration;
-import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.groupware.userconfiguration.AllowAllUserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.impl.DBPool;
@@ -205,13 +204,21 @@ public class DowngradeTest extends TestCase {
     private void downgradeDelegate() throws OXException, OXException {
 
         final UserConfiguration userConfig = new AllowAllUserConfiguration(user.getId(), user.getGroups(), ctx) {
-            @Override
-            public boolean hasPermission(int permissionBit) {
-                if (permissionBit == UserPermissionBits.DELEGATE_TASKS) {
-                    return false;
-                }
+            private static final long serialVersionUID = -6133954203762209965L;
 
-                return true;
+            @Override
+            public UserPermissionBits getUserPermissionBits() {
+                return new AllowAllUserPermissionBits(userId, groups, ctx.getContextId()) {
+                    private static final long serialVersionUID = 8557097436407742416L;
+
+                    @Override
+                    public boolean hasPermission(int permissionBit) {
+                        if (permissionBit == UserPermissionBits.DELEGATE_TASKS) {
+                            return false;
+                        }
+                        return true;
+                    }
+                };
             }
         };
 
@@ -226,13 +233,21 @@ public class DowngradeTest extends TestCase {
 
     private void downgradeNoTasks() throws OXException, OXException {
         final UserConfiguration userConfig = new AllowAllUserConfiguration(user.getId(), user.getGroups(), ctx) {
-            @Override
-            public boolean hasPermission(int permissionBit) {
-                if (permissionBit == UserPermissionBits.DELEGATE_TASKS || permissionBit == UserPermissionBits.TASKS) {
-                    return false;
-                }
+            private static final long serialVersionUID = 400233948268970280L;
 
-                return true;
+            @Override
+            public UserPermissionBits getUserPermissionBits() {
+                return new AllowAllUserPermissionBits(userId, groups, ctx.getContextId()) {
+                    private static final long serialVersionUID = -1380938924019873373L;
+
+                    @Override
+                    public boolean hasPermission(int permissionBit) {
+                        if (permissionBit == UserPermissionBits.DELEGATE_TASKS || permissionBit == UserPermissionBits.TASKS) {
+                            return false;
+                        }
+                        return true;
+                    }
+                };
             }
         };
         final Connection con = Database.get(ctx, true);

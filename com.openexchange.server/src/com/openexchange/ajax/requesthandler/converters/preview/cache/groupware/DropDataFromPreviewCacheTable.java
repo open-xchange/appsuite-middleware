@@ -47,42 +47,68 @@
  *
  */
 
-package com.openexchange.groupware.userconfiguration;
+package com.openexchange.ajax.requesthandler.converters.preview.cache.groupware;
 
-import java.util.HashSet;
-import com.openexchange.groupware.contexts.Context;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link AllowAllUserConfiguration}
+ * {@link DropDataFromPreviewCacheTable}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.0
  */
-public class AllowAllUserConfiguration extends UserConfiguration {
+public class DropDataFromPreviewCacheTable extends UpdateTaskAdapter {
 
-    public AllowAllUserConfiguration(final int userId, final int[] groups, final Context ctx) {
-        super(new HashSet<String>(), userId, groups, ctx);
-    }
-
-    private static final long serialVersionUID = 1L;
-
-    @Override
-    public boolean hasPermission(final int permissionBit) {
-        return true;
+    public DropDataFromPreviewCacheTable() {
+        super();
     }
 
     @Override
-    public boolean hasPermission(final Permission permission) {
-        return true;
+    public void perform(final PerformParameters params) throws OXException {
+        final int ctxId = params.getContextId();
+        final Connection con = Database.getNoTimeout(ctxId, true);
+        boolean rollback = false;
+        try {
+            startTransaction(con);
+            rollback = true;
+            if (Tools.columnExists(con, "preview", "data")) {
+                Statement stmt = null;
+                try {
+                    stmt = con.createStatement();
+                    stmt.execute("ALTER TABLE preview DROP COLUMN data");
+                } finally {
+                    closeSQLStuff(stmt);
+                }
+            }
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            Database.backNoTimeout(ctxId, true, con);
+        }
     }
 
     @Override
-    public boolean hasPermission(final String name) {
-        return true;
+    public String[] getDependencies() {
+        return new String[] { PreviewCacheCreateDataTableTask.class.getName() };
     }
-
-    @Override
-    public int getPermissionBits() {
-        return Integer.MAX_VALUE & ~DENIED_PORTAL;
-    }
-
 }

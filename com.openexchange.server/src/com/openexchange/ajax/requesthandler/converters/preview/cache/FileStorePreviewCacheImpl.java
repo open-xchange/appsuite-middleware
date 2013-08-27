@@ -52,12 +52,14 @@ package com.openexchange.ajax.requesthandler.converters.preview.cache;
 import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.logging.Log;
@@ -78,6 +80,7 @@ import com.openexchange.preview.cache.PreviewCache;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageCodes;
 
@@ -90,32 +93,53 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(FileStorePreviewCacheImpl.class);
 
-    private static final ConcurrentTIntObjectHashMap<QuotaFileStorage> FILE_STORE_CACHE = new ConcurrentTIntObjectHashMap<QuotaFileStorage>();
+    private static final ConcurrentTIntObjectHashMap<FileStorage> FILE_STORE_CACHE = new ConcurrentTIntObjectHashMap<FileStorage>();
 
-    private static QuotaFileStorage getFileStorage(final Context ctx) throws OXException {
+    private static FileStorage getFileStorage(final Context ctx, final boolean quotaAware) throws OXException {
         final int key = ctx.getContextId();
-        QuotaFileStorage qfs = FILE_STORE_CACHE.get(key);
-        if (null == qfs) {
-            final QuotaFileStorage quotaFileStorage = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
-            qfs = FILE_STORE_CACHE.putIfAbsent(key, quotaFileStorage);
-            if (null == qfs) {
-                qfs = quotaFileStorage;
+        FileStorage fs = FILE_STORE_CACHE.get(key);
+        if (null == fs) {
+            final URI uri = FilestoreStorage.createURI(ctx);
+            final FileStorage newFileStorage = quotaAware ? QuotaFileStorage.getInstance(uri, ctx) : FileStorage.getInstance(uri);
+            fs = FILE_STORE_CACHE.putIfAbsent(key, newFileStorage);
+            if (null == fs) {
+                fs = newFileStorage;
             }
         }
-        return qfs;
+        return fs;
     }
 
-    private static QuotaFileStorage getFileStorage(final int contextId) throws OXException {
-        return getFileStorage(ContextStorage.getStorageContext(contextId));
+    private static FileStorage getFileStorage(final int contextId, final boolean quotaAware) throws OXException {
+        return getFileStorage(ContextStorage.getStorageContext(contextId), quotaAware);
     }
 
     // ------------------------------------------------------------------------------- //
 
+    private final boolean quotaAware;
+
     /**
      * Initializes a new {@link FileStorePreviewCacheImpl}.
      */
-    public FileStorePreviewCacheImpl() {
+    public FileStorePreviewCacheImpl(final boolean quotaAware) {
         super();
+        this.quotaAware = quotaAware;
+    }
+
+    private void batchDeleteFiles(final Collection<String> ids, final FileStorage fileStorage) {
+        try {
+            fileStorage.deleteFiles(ids.toArray(new String[0]));
+        } catch (final Exception e) {
+            // Retry one-by-one
+            for (final String id : ids) {
+                if (null != id) {
+                    try {
+                        fileStorage.deleteFile(id);
+                    } catch (final Exception x) {
+                        // Ignore
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -181,11 +205,11 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
         }
 
         // Save file
-        final QuotaFileStorage fileStorage = getFileStorage(contextId);
+        final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         if (null != refId) {
             fileStorage.deleteFile(refId);
         }
-        refId = fileStorage.saveNewFile(Streams.newByteArrayInputStream(bytes), bytes.length);
+        refId = fileStorage.saveNewFile(Streams.newByteArrayInputStream(bytes));
 
         final Connection con = databaseService.getWritable(contextId);
         boolean committed = true;
@@ -268,13 +292,13 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
 
         final ConfigurationService confService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         if (null != confService) {
-            String property = confService.getProperty("com.openexchange.preview.cache.quota", "-1").trim();
+            String property = confService.getProperty("com.openexchange.preview.cache.quota", "10485760").trim();
             try {
                 quota = Long.parseLong(property);
             } catch (final NumberFormatException e) {
                 quota = -1L;
             }
-            property = confService.getProperty("com.openexchange.preview.cache.quotaPerDocument", "-1").trim();
+            property = confService.getProperty("com.openexchange.preview.cache.quotaPerDocument", "524288").trim();
             try {
                 quotaPerDocument = Long.parseLong(property);
             } catch (final NumberFormatException e) {
@@ -368,8 +392,8 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
                 stmt.executeUpdate();
 
                 // Remove from file storage
-                final QuotaFileStorage fileStorage = getFileStorage(contextId);
-                fileStorage.deleteFiles(map.values().toArray(new String[0]));
+                final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
+                batchDeleteFiles(map.values(), fileStorage);
             }
         } catch (final SQLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
@@ -403,6 +427,70 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
+    }
+
+    @Override
+    public void clearFor(final int contextId) throws OXException {
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        if (dbService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+        }
+        final Connection con = dbService.getWritable(contextId);
+        boolean changed = false;
+        try {
+            changed = clearFor(contextId, con);
+        } finally {
+            if (changed) {
+                dbService.backWritable(contextId, con);
+            } else {
+                dbService.backWritableAfterReading(contextId, con);
+            }
+        }
+    }
+
+    private boolean clearFor(final int contextId, final Connection con) throws OXException {
+        boolean changed = false;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        boolean rollback = false;
+        try {
+            Databases.startTransaction(con);
+            rollback = true;
+
+            stmt = con.prepareStatement("SELECT id, refId FROM preview WHERE cid=?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            final Map<String, String> map = new HashMap<String, String>(16);
+            while (rs.next()) {
+                map.put(rs.getString(1), rs.getString(2));
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            if (!map.isEmpty()) {
+                stmt = con.prepareStatement("DELETE FROM preview WHERE cid=?");
+                stmt.setInt(1, contextId);
+                stmt.executeUpdate();
+                changed = true;
+
+                // Remove from file storage
+                final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
+                batchDeleteFiles(map.values(), fileStorage);
+            }
+
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+            Databases.closeSQLStuff(rs, stmt);
+        }
+        return changed;
     }
 
     @Override
@@ -443,7 +531,7 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
                 return null;
             }
             final String refIf = rs.getString(1);
-            final QuotaFileStorage fileStorage = getFileStorage(contextId);
+            final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
             return new CachedPreview(fileStorage.getFile(refIf), rs.getString(2), rs.getString(3), rs.getLong(4));
         } catch (final SQLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
@@ -509,8 +597,8 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
                 rollback = false;
 
                 // Remove from file storage
-                final QuotaFileStorage fileStorage = getFileStorage(contextId);
-                fileStorage.deleteFiles(map.values().toArray(new String[0]));
+                final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
+                batchDeleteFiles(map.values(), fileStorage);
             }
 
         } catch (final DataTruncation e) {
@@ -587,8 +675,8 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
                 rollback = false;
 
                 // Remove from file storage
-                final QuotaFileStorage fileStorage = getFileStorage(contextId);
-                fileStorage.deleteFiles(map.values().toArray(new String[0]));
+                final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
+                batchDeleteFiles(map.values(), fileStorage);
             }
         } catch (final DataTruncation e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
@@ -664,13 +752,14 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
                 return null;
             }
             final String refId = rs.getString(1);
-            final QuotaFileStorage fileStorage = getFileStorage(contextId);
+            final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
             try {
                 Streams.close(fileStorage.getFile(refId));
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
                     throw e;
                 }
+                dropFromTable(id, userId, contextId);
                 return null;
             }
             return refId;
@@ -678,6 +767,37 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private void dropFromTable(final String id, final int userId, final int contextId) {
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        if (dbService != null) {
+            Connection con = null;
+            PreparedStatement stmt = null;
+            try {
+                con = dbService.getWritable(contextId);
+                if (userId > 0) {
+                    // A user-sensitive document
+                    stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND user = ? AND id = ?");
+                    stmt.setLong(1, contextId);
+                    stmt.setLong(2, userId);
+                    stmt.setString(3, id);
+                } else {
+                    // A context-global document
+                    stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND id = ?");
+                    stmt.setLong(1, contextId);
+                    stmt.setString(2, id);
+                }
+                stmt.executeUpdate();
+            } catch (final Exception e) {
+                // Ignore
+            } finally {
+                Databases.closeSQLStuff(stmt);
+                if (null != con) {
+                    dbService.backWritable(contextId, con);
+                }
+            }
         }
     }
 

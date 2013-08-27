@@ -52,6 +52,7 @@ package com.openexchange.aws.s3;
 import java.net.URI;
 import com.amazonaws.services.s3.AmazonS3;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
 
 /**
@@ -62,7 +63,6 @@ import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
 public class AWSS3FileStorageFactory implements FileStorageFactoryCandidate {
 
     private final AmazonS3 s3client;
-
     private final AWSS3Configuration config;
 
     /**
@@ -80,8 +80,13 @@ public class AWSS3FileStorageFactory implements FileStorageFactoryCandidate {
     }
 
     @Override
+    public FileStorage getInternalFileStorage(URI uri) throws OXException {
+        return getFileStorage(uri);
+    }
+
+    @Override
     public boolean supports(URI uri) {
-        return uri.getScheme().equalsIgnoreCase("s3");
+        return "s3".equalsIgnoreCase(uri.getScheme());
     }
 
     @Override
