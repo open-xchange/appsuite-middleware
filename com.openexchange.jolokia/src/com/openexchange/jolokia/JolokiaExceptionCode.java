@@ -1,4 +1,3 @@
-package com.openexchange.jolokia;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -48,13 +47,14 @@ package com.openexchange.jolokia;
  *
  */
 
+package com.openexchange.jolokia;
 
 
+import static com.openexchange.jolokia.JolokiaExceptionMessage.NEEDED_SERVICE_MISSING_MSG;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
-import static com.openexchange.jolokia.JolokiaExceptionMessage.*;
 
 
 /**
@@ -65,7 +65,8 @@ import static com.openexchange.jolokia.JolokiaExceptionMessage.*;
 public enum JolokiaExceptionCode implements OXExceptionCode {
 
     /** The following needed service is missing: "%1$s" */
-    NEEDED_SERVICE_MISSING(NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 1)
+    NEEDED_SERVICE_MISSING(NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 1),
+
     ;
 
     private final String message;
@@ -76,6 +77,17 @@ public enum JolokiaExceptionCode implements OXExceptionCode {
         this.message = message;
         number = detailNumber;
         this.category = category;
+    }
+
+    private static final String PREFIX = "JOLOKIA";
+
+    /**
+     * Gets the prefix for Jolokia errors.
+     *
+     * @return The prefix
+     */
+    public static String prefix() {
+        return PREFIX;
     }
 
     @Override
@@ -95,7 +107,7 @@ public enum JolokiaExceptionCode implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "GRIZZLY";
+        return PREFIX;
     }
 
     @Override

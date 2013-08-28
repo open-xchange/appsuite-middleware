@@ -64,20 +64,20 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link CustomJolokiaBundleActivator} - An OSGi {@link BundleActivator} that will start Jolokia.
- * 
+ *
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  */
 public class CustomJolokiaBundleActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(CustomJolokiaBundleActivator.class);
 
-    JolokiaConfig myConfig;
+    volatile JolokiaConfig myConfig;
 
     // HttpContext used for authorization
     private HttpContext jolokiaHttpContext;
 
-    private String usedServletName;
-    
+    private volatile String usedServletName;
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, HttpService.class };
@@ -88,11 +88,11 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
 
-        LOG.info("Starting Bundle");
+        LOG.info("Starting Bundle: com.openexchange.jolokia");
 
-        JolokiaConfig jolokiaConfig = JolokiaConfig.getInstance();
+        final JolokiaConfig jolokiaConfig = JolokiaConfig.getInstance();
         myConfig = jolokiaConfig;
-        myConfig.start();
+        jolokiaConfig.start();
 
         if (!jolokiaConfig.getJolokiaStart()) {
             LOG.info("Shutting down Bundle due to config setting");
@@ -112,27 +112,34 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator {
 
         try {
             LOG.info("Registering jolokia servlet.");
-            usedServletName = myConfig.getServletName();
-            httpService.registerServlet(usedServletName, jolServlet, myConfig.getJolokiaConfiguration(), getHttpContext());
-            
+            String usedServletName = jolokiaConfig.getServletName();
+            this.usedServletName = usedServletName;
+            httpService.registerServlet(usedServletName, jolServlet, jolokiaConfig.getJolokiaConfiguration(), getHttpContext());
+
         } catch (final ServletException e) {
             LOG.error("Registering jolokia servlet failed.", e);
         } catch (final NamespaceException e) {
             LOG.error("Registering jolokia servlet failed.", e);
         }
-        LOG.info("Starting Bundle finished: org.jolokia");
+        LOG.info("Starting Bundle finished: com.openexchange.jolokia");
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        if (myConfig != null) {
-            if (myConfig.getStarted().get()) {
-                myConfig.stop();
+        final JolokiaConfig jolokiaConfig = myConfig;
+        if (jolokiaConfig != null) {
+            if (jolokiaConfig.getStarted().get()) {
+                jolokiaConfig.stop();
             }
+            myConfig = null;
         }
-        HttpService httpService = getService(HttpService.class);
+        final HttpService httpService = getService(HttpService.class);
         if (null != httpService) {
-            httpService.unregister(usedServletName);
+            final String usedServletName = this.usedServletName;
+            if (null != usedServletName) {
+                httpService.unregister(usedServletName);
+                this.usedServletName = null;
+            }
         }
         cleanUp();
     }
@@ -140,7 +147,7 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator {
     /**
      * Get the security context for our servlet. Dependent on the configuration, this is either a no-op context or one which authenticates
      * with a given user
-     * 
+     *
      * @return the HttpContext with which the agent servlet gets registered.
      */
     public synchronized HttpContext getHttpContext() {
