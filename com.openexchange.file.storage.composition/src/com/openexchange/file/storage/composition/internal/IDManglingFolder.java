@@ -74,8 +74,8 @@ public class IDManglingFolder implements FileStorageFolder {
      * @return A folder with unique IDs
      */
     public static FileStorageFolder withUniqueID(FileStorageFolder delegate, String serviceID, String accountID) {
-        final String id = null == delegate.getId() ? null : new FolderID(serviceID, accountID, delegate.getId()).toUniqueID();
-        final String parentId = null == delegate.getParentId() ? null : new FolderID(serviceID, accountID, delegate.getParentId()).toUniqueID();
+        final String id = null != delegate.getId() ? new FolderID(serviceID, accountID, delegate.getId()).toUniqueID() : null;
+        final String parentId = null != delegate.getParentId() ? new FolderID(serviceID, accountID, delegate.getParentId()).toUniqueID() : null;
         return new IDManglingFolder(delegate, id, parentId);
     }
 
@@ -212,10 +212,9 @@ public class IDManglingFolder implements FileStorageFolder {
     public Map<String, Object> getProperties() {
         return delegate.getProperties();
     }
+    
+    
 
-
-
-    @Override
     public Map<String, Object> getMeta() {
         return delegate.getMeta();
     }
