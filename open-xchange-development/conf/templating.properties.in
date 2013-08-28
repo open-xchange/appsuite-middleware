@@ -1,2 +1,6 @@
 com.openexchange.templating.path : @oxgroupwaresysconfdir@/../templates/
 com.openexchange.templating.assets.path =  @oxgroupwaresysconfdir@/../templates/assets/
+
+# Define which kind of templates should be trusted.
+# Possible values are server, user, true and false.
+com.openexchange.templating.trusted = server

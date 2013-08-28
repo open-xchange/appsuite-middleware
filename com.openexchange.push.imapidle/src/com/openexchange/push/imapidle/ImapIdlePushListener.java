@@ -608,7 +608,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             dropSessionRef("MSG".equals(e.getPrefix()) && 1001 == e.getCode());
             LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errDelay + "ms", e);
             if (isDebugEnabled()) {
-                LOG.error(e);
+                LOG.error(e.getMessage(), e);
             }
             try {
                 Thread.sleep(errDelay);
@@ -622,7 +622,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             dropSessionRef(e instanceof javax.mail.AuthenticationFailedException);
             LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errDelay + "ms", e);
             if (isDebugEnabled()) {
-                LOG.error(e);
+                LOG.error(e.getMessage(), e);
             }
             try {
                 Thread.sleep(errDelay);
@@ -638,7 +638,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             dropSessionRef(false);
             LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errDelay + "ms", e);
             if (isDebugEnabled()) {
-                LOG.error(e);
+                LOG.error(e.getMessage(), e);
             }
             try {
                 Thread.sleep(errDelay);

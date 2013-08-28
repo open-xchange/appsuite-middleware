@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link ContactExceptionMessages}
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class ContactExceptionMessages implements LocalizableStrings {
@@ -125,8 +125,6 @@ public class ContactExceptionMessages implements LocalizableStrings {
     public static final String NO_CHANGE_PERMISSION_MSG = "You are not allowed to modify contact %1$d in context %2$d.";
 
     public static final String EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS_MSG = "An E-Mail address is mandatory for external distribution list members. Please add a valid E-Mail address.";
-    
-    public static final String DLIST_NAME_IN_USE_MSG = "The name you entered is already assigned to another distribution list. Please choose another display name. Context %1$d Object %2$d";
 
     public static final String LOAD_OBJECT_FAILED_MSG = "Unable to load objects. Context %1$d user %2$d";
 
@@ -149,7 +147,6 @@ public class ContactExceptionMessages implements LocalizableStrings {
     public static final String TOO_FEW_SEARCH_CHARS_MSG = "In order to accomplish the search, %1$d or more characters are required.";
 
     public static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred: %1$s";
-
 
     private ContactExceptionMessages() {
         super();

@@ -58,11 +58,11 @@ import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.property.Attendee;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link RequestParticipants}
@@ -88,7 +88,7 @@ public class RequestParticipants<T extends CalendarComponent, U extends Calendar
                 parameters.add(Rsvp.TRUE);
                 component.getProperties().add(attendee);
             } catch (final URISyntaxException e) {
-                LOG.error(e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }

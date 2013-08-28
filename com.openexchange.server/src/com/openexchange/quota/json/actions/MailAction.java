@@ -120,7 +120,7 @@ public final class MailAction extends AbstractQuotaAction {
                     mi.close(false);
                 }
             } catch (final OXException e) {
-                LOG.error(e);
+                // Ignore
             }
         }
     }

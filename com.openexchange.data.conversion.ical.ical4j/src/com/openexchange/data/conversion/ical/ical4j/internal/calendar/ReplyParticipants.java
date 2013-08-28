@@ -58,16 +58,16 @@ import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.property.Attendee;
 import net.fortuna.ical4j.model.property.Comment;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
-import com.openexchange.data.conversion.ical.itip.ITipContainer;
 import com.openexchange.data.conversion.ical.Mode;
+import com.openexchange.data.conversion.ical.itip.ITipContainer;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link ReplyParticipants}
@@ -116,7 +116,7 @@ public class ReplyParticipants<T extends CalendarComponent, U extends CalendarOb
 
             component.getProperties().add(attendee);
         } catch (final URISyntaxException e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
         }
 
         if (userParticipant.getConfirmMessage() != null && !userParticipant.getConfirmMessage().equals("")) {

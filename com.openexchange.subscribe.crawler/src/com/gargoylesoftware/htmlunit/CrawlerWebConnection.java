@@ -87,8 +87,8 @@ import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.util.EncodingUtil;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.apache.commons.logging.impl.SimpleLog;
+import com.openexchange.log.LogFactory;
 
 
 /**
@@ -164,7 +164,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
         }
         // this is done so the logfile is not cluttered with irrelevant data as per bug 16591
         catch (SSLProtocolException e){
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
             return null;
         }
         finally {

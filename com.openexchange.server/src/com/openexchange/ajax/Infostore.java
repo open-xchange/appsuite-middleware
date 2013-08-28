@@ -750,7 +750,7 @@ public class Infostore extends PermissionServlet {
                 sendErrorAsJSHTML(res, t.toString(), action);
                 LOG.error("Got non OXException", t);
             } catch (final IOException e) {
-                LOG.error(e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }

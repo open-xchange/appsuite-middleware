@@ -601,7 +601,7 @@ public abstract class SessionServlet extends AJAXServlet {
     public static ServerSession getSession(final CookieHashSource source, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService, final SessionSecretChecker optChecker) throws OXException {
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
-            if (INFO) {
+            if (INFO && !"unset".equals(sessionId)) {
                 LOG.info("There is no session associated with session identifier: " + sessionId);
             }
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);

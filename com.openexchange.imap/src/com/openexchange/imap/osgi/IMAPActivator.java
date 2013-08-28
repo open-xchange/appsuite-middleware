@@ -218,6 +218,24 @@ public final class IMAPActivator extends HousekeepingActivator {
                 },
                     serviceProperties);
             }
+            {
+                final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+                serviceProperties.put(EventConstants.EVENT_TOPIC, "com/openexchange/passwordchange");
+                registerService(EventHandler.class, new EventHandler() {
+
+                    @Override
+                    public void handleEvent(Event event) {
+                        final int contextId = ((Integer) event.getProperty("com.openexchange.passwordchange.contextId")).intValue();
+                        final int userId = ((Integer) event.getProperty("com.openexchange.passwordchange.userId")).intValue();
+                        final Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
+                        ListLsubCache.dropFor(session);
+                        IMAPStoreCache.getInstance().dropFor(userId, contextId);
+                        ThreadableCache.dropFor(session);
+                        IMAPAccess.dropValidity(userId, contextId);
+                    }
+
+                }, serviceProperties);
+            }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

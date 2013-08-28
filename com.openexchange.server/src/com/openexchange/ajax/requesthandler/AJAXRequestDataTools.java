@@ -199,44 +199,40 @@ public class AJAXRequestDataTools {
             retval.setUploadStreamProvider(new HTTPRequestInputStreamProvider(req));
         } else {
             /*
-             * Guess an appropriate body object (if the request indicates a body object)
+             * Guess an appropriate body object
              */
-            if (hasBody(req)) {
-                UnsynchronizedPushbackReader reader = null;
-                try {
-                    reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req));
-                    int read = reader.read();
-                    if (read < 0) {
-                        trySetDataByParameter(req, retval);
-                    } else {
-                        // Skip whitespaces
-                        while (isWhitespace((char) read)) {
-                            read = reader.read();
-                            if (read < 0) {
-                                trySetDataByParameter(req, retval);
-                                Streams.close(reader);
-                                reader = null;
-                                return retval;
-                            }
-                        }
-                        // Check first non-whitespace character
-                        final char c = (char) read;
-                        reader.unread(c);
-                        if ('[' == c || '{' == c) {
-                            try {
-                                retval.setData(JSONObject.parse(reader));
-                            } catch (JSONException e) {
-                                retval.setData(AJAXServlet.readFrom(reader));
-                            }
-                        } else {
-                            retval.setData(AJAXServlet.readFrom(reader));
+            UnsynchronizedPushbackReader reader = null;
+            try {
+                reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req));
+                int read = reader.read();
+                if (read < 0) {
+                    trySetDataByParameter(req, retval);
+                } else {
+                    // Skip whitespaces
+                    while (isWhitespace((char) read)) {
+                        read = reader.read();
+                        if (read < 0) {
+                            trySetDataByParameter(req, retval);
+                            Streams.close(reader);
+                            reader = null;
+                            return retval;
                         }
                     }
-                } finally {
-                    Streams.close(reader);
+                    // Check first non-whitespace character
+                    final char c = (char) read;
+                    reader.unread(c);
+                    if ('[' == c || '{' == c) {
+                        try {
+                            retval.setData(JSONObject.parse(reader));
+                        } catch (JSONException e) {
+                            retval.setData(AJAXServlet.readFrom(reader));
+                        }
+                    } else {
+                        retval.setData(AJAXServlet.readFrom(reader));
+                    }
                 }
-            } else {
-                trySetDataByParameter(req, retval);
+            } finally {
+                Streams.close(reader);
             }
         }
         return retval;

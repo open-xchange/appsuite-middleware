@@ -85,15 +85,17 @@ public class IDMangler {
      */
     public static String mangle(final String... components) {
         final com.openexchange.java.StringAllocator id = new com.openexchange.java.StringAllocator(50);
+        id.append(escape(components[0]));
         boolean first = true;
-        for (String component : components) {
-            component = escape(component);
-            id.append(component);
-            final String delim = first ? PRIMARY_DELIM : SECONDARY_DELIM;
-            id.append(delim);
-            first = false;
+        for (int i = 1; i < components.length; i++) {
+            if (first) {
+                id.append(PRIMARY_DELIM);
+                first = false;
+            } else {
+                id.append(CHAR_SECONDARY_DELIM);
+            }
+            id.append(escape(components[i]));
         }
-        id.setNewLength(id.length()-1);
         return id.toString();
     }
 
@@ -223,21 +225,23 @@ public class IDMangler {
         return list;
     }
 
-    private static final BitSet PRINTABLE_CHARS = new BitSet(256);
+    private static final BitSet PRINTABLE_CHARS;
     // Static initializer for printable chars collection
     static {
+        final BitSet bitSet = new BitSet(256);
         for (int i = '0'; i <= '9'; i++) {
-            PRINTABLE_CHARS.set(i);
+            bitSet.set(i);
         }
         for (int i = 'A'; i <= 'Z'; i++) {
-            PRINTABLE_CHARS.set(i);
+            bitSet.set(i);
         }
         for (int i = 'a'; i <= 'z'; i++) {
-            PRINTABLE_CHARS.set(i);
+            bitSet.set(i);
         }
-        PRINTABLE_CHARS.set('.');
-        PRINTABLE_CHARS.set('-');
-        PRINTABLE_CHARS.set('_');
+        bitSet.set('.');
+        bitSet.set('-');
+        bitSet.set('_');
+        PRINTABLE_CHARS = bitSet;
     }
 
     private static String encodeQP(final String string) {

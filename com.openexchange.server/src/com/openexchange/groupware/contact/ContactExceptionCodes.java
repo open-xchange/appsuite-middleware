@@ -56,7 +56,6 @@ import static com.openexchange.groupware.contact.ContactExceptionMessages.CONV_O
 import static com.openexchange.groupware.contact.ContactExceptionMessages.DATA_TRUNCATION_MSG;
 import static com.openexchange.groupware.contact.ContactExceptionMessages.DATE_CONVERSION_FAILED_MSG;
 import static com.openexchange.groupware.contact.ContactExceptionMessages.DISPLAY_NAME_IN_USE_MSG;
-import static com.openexchange.groupware.contact.ContactExceptionMessages.DLIST_NAME_IN_USE_MSG;
 import static com.openexchange.groupware.contact.ContactExceptionMessages.EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS_MSG;
 import static com.openexchange.groupware.contact.ContactExceptionMessages.FEATURE_DISABLED_MSG;
 import static com.openexchange.groupware.contact.ContactExceptionMessages.FIRST_NAME_MANDATORY_MSG;
@@ -250,12 +249,6 @@ public enum ContactExceptionCodes implements LogLevelAwareOXExceptionCode {
     EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS(
             EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS_MSG,
             Category.CATEGORY_USER_INPUT, 177),
-    /**
-     * The name you entered is already assigned to another distribution list. Please choose
-     * another display name. Context %1$d Object %2$d
-     */
-    DLIST_NAME_IN_USE(DLIST_NAME_IN_USE_MSG, Category.CATEGORY_TRY_AGAIN,
-                    178),
     /** Unable to load objects. Context %1$d User %2$d */
     LOAD_OBJECT_FAILED(LOAD_OBJECT_FAILED_MSG, Category.CATEGORY_ERROR, 252),
     /** User contacts can not be deleted. */

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import static com.openexchange.java.Strings.toUpperCase;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -1045,52 +1046,52 @@ public final class QuotedInternetAddress extends InternetAddress {
             }
         }
 
-        if (encodedPersonal != null && encodedPersonal.length() > 0) {
-            if (null == personal) {
-                try {
-                    personal = MimeUtility.decodeText(encodedPersonal);
-                } catch (final Exception ex) {
-                    // 1. ParseException: either its an unencoded string or
-                    // it can't be parsed
-                    // 2. UnsupportedEncodingException: can't decode it.
-                    personal = encodedPersonal;
+        if (encodedPersonal != null) {
+            if (encodedPersonal.length() > 0) {
+                if (null == personal) {
+                    try {
+                        personal = MimeUtility.decodeText(encodedPersonal);
+                    } catch (final Exception ex) {
+                        // 1. ParseException: either its an unencoded string or
+                        // it can't be parsed
+                        // 2. UnsupportedEncodingException: can't decode it.
+                        personal = encodedPersonal;
+                    }
                 }
-            }
 
-            if (quoted(personal)) {
-                if (checkQuotedPersonal(personal)) {
-                    return new com.openexchange.java.StringAllocator(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
+                if (quoted(personal)) {
+                    if (checkQuotedPersonal(personal)) {
+                        return new com.openexchange.java.StringAllocator(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
+                    }
+                    personal = personal.substring(1, personal.length() - 1);
+                    try {
+                        encodedPersonal = MimeUtility.encodeWord(personal, jcharset, null);
+                    } catch (final UnsupportedEncodingException ex) {
+                        LOG.error(ex.getMessage(), ex);
+                    }
                 }
-                personal = personal.substring(1, personal.length() - 1);
-                try {
-                    encodedPersonal = MimeUtility.encodeWord(personal, jcharset, null);
-                } catch (final UnsupportedEncodingException ex) {
-                    LOG.error(ex.getMessage(), ex);
-                }
-            }
 
-            if (needQuoting(personal, true)) {
-                try {
-                    encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
-                } catch (final UnsupportedEncodingException e) {
-                    LOG.error(e.getMessage(), e);
+                if (needQuoting(personal, true)) {
+                    try {
+                        encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
+                    } catch (final UnsupportedEncodingException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                } else if (!isAscii(personal)) {
+                    try {
+                        encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
+                    } catch (final UnsupportedEncodingException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
                 }
-            } else if (!isAscii(personal)) {
-                try {
-                    encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
-                } catch (final UnsupportedEncodingException e) {
-                    LOG.error(e.getMessage(), e);
-                }
+                return new com.openexchange.java.StringAllocator(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
+            } else if (toUpperCase(address).endsWith("/TYPE=PLMN")) {
+                return new com.openexchange.java.StringAllocator().append('<').append(address).append('>').toString();
+            } else if (isGroup() || isSimple()) {
+                return address;
+            } else {
+                return new com.openexchange.java.StringAllocator().append('<').append(address).append('>').toString();
             }
-            return new com.openexchange.java.StringAllocator(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
-
-            /*-
-             *
-            if (encodedPersonal.startsWith("=?", 0)) {
-                return new StringBuilder(32).append('"').append(encodedPersonal).append("\" <").append(address).append('>').toString();
-            }
-            return new StringBuilder(32).append(quotePhrase(encodedPersonal)).append(" <").append(address).append('>').toString();
-             */
         } else if (isGroup() || isSimple()) {
             return address;
         } else {
@@ -1106,11 +1107,19 @@ public final class QuotedInternetAddress extends InternetAddress {
     @Override
     public String toUnicodeString() {
         final String p = getPersonal();
-        if (p != null && p.length() > 0) {
-            if (quoted(p)) {
-                return new com.openexchange.java.StringAllocator(32).append(p).append(" <").append(toIDN(address)).append('>').toString();
+        if (p != null) {
+            if (p.length() > 0) {
+                if (quoted(p)) {
+                    return new com.openexchange.java.StringAllocator(32).append(p).append(" <").append(toIDN(address)).append('>').toString();
+                }
+                return new com.openexchange.java.StringAllocator(32).append(quotePhrase(p, true)).append(" <").append(toIDN(address)).append('>').toString();
+            } else if (toUpperCase(address).endsWith("/TYPE=PLMN")) {
+                return new com.openexchange.java.StringAllocator().append('<').append(address).append('>').toString();
+            } else if (isGroup() || isSimple()) {
+                return toIDN(address);
+            } else {
+                return new com.openexchange.java.StringAllocator(32).append('<').append(toIDN(address)).append('>').toString();
             }
-            return new com.openexchange.java.StringAllocator(32).append(quotePhrase(p, true)).append(" <").append(toIDN(address)).append('>').toString();
         } else if (isGroup() || isSimple()) {
             return toIDN(address);
         } else {

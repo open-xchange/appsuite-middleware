@@ -98,7 +98,14 @@ public class MsisdnCheck {
         if (isEmpty(number)) {
             return false;
         }
-        String num = cleanup(number);
+        String num = number;
+        {
+            final int pos = num.indexOf('/');
+            if (pos > 0) {
+                num = num.substring(0, pos);
+            }
+        }
+        num = cleanup(num);
         final int len = num.length();
         boolean isDigit = true;
         for (int i = 0; isDigit && i < len; i++) {

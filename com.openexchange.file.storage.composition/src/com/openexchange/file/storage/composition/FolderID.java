@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.composition;
 
 import java.util.List;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.tools.id.IDMangler;
 
 /**
@@ -59,6 +60,23 @@ import com.openexchange.tools.id.IDMangler;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FolderID {
+
+    private static final String PRIMARY_DELIM = IDMangler.PRIMARY_DELIM;
+
+    /**
+     * Checks if given folder identifier appears to be mangled.
+     *
+     * @param folderId The folder identifier to check
+     * @return <code>true</code> if mangled; otherwise <code>false</code>
+     */
+    public static boolean isMangled(final String folderId) {
+        if (null == folderId) {
+            return false;
+        }
+        return (folderId.indexOf(PRIMARY_DELIM) > 0) && (IDMangler.unmangle(folderId).size() > 1);
+    }
+
+    // -------------------------------------------------------------------------------------------- //
 
     private String service;
     private String accountId;
@@ -75,7 +93,14 @@ public class FolderID {
         super();
         this.service = service;
         this.accountId = accountId;
-        this.folderId = folderId;
+
+        // Check folder identifier
+        if (folderId.indexOf(PRIMARY_DELIM) > 0) {
+            final List<String> unmangled = IDMangler.unmangle(folderId);
+            this.folderId = unmangled.size() > 2 ? unmangled.get(2) : FileStorageFolder.ROOT_FULLNAME;
+        } else {
+            this.folderId = folderId;
+        }
     }
 
     /**
@@ -101,30 +126,66 @@ public class FolderID {
         }
     }
 
+    /**
+     * Gets the service identifier.
+     *
+     * @return The service identifier
+     */
     public String getService() {
         return service;
     }
 
+    /**
+     * Sets the service identifier.
+     *
+     * @param service The service identifier
+     */
     public void setService(String service) {
         this.service = service;
     }
 
+    /**
+     * Gets the account identifier
+     *
+     * @return The account identifier
+     */
     public String getAccountId() {
         return accountId;
     }
 
+    /**
+     * Sets the account identifier.
+     *
+     * @param accountId The account identifier
+     */
     public void setAccountId(String accountId) {
         this.accountId = accountId;
     }
 
+    /**
+     * Gets the folder identifier
+     *
+     * @return The folder identifier
+     */
     public String getFolderId() {
         return folderId;
     }
 
+    /**
+     * Sets the folder identifier
+     *
+     * @param folderId The folder identifier
+     */
     public void setFolderId(String folderId) {
         this.folderId = folderId;
     }
 
+    /**
+     * Gets the unique identifier generated from this folder ID e.g.<br>
+     * <code>(&lt;service-id&gt;)://(&lt;account-id&gt;)/(&lt;folder-id&gt;)</code>
+     *
+     * @return The unique identifier
+     */
     public String toUniqueID() {
         if (service.equals("com.openexchange.infostore") && accountId.equals("infostore")) {
             return folderId;

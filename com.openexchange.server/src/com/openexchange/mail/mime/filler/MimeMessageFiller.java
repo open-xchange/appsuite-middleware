@@ -54,12 +54,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -140,6 +140,7 @@ import com.openexchange.mail.mime.utils.sourcedimage.SourcedImageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
@@ -468,12 +469,20 @@ public class MimeMessageFiller {
                     }
                 }
             }
-            final List<InternetAddress> aliases;
+            final Set<InternetAddress> aliases;
             final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
             final User user = userService.getUser(session.getUserId(), ctx);
-            aliases = new ArrayList<InternetAddress>();
+            aliases = new LinkedHashSet<InternetAddress>();
             for (final String alias : user.getAliases()) {
                 aliases.add(new QuotedInternetAddress(alias));
+            }
+            if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
+                MsisdnUtility.addMsisdnAddress(aliases, session);
+                final String address = from.getAddress();
+                final int pos = address.indexOf('/');
+                if (pos > 0) {
+                    from.setAddress(address.substring(0, pos));
+                }
             }
             /*
              * Taken from RFC 822 section 4.4.2: In particular, the "Sender" field MUST be present if it is NOT the same as the "From"

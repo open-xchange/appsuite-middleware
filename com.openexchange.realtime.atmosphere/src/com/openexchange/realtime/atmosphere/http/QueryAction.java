@@ -214,7 +214,7 @@ public class QueryAction extends RTAction {
             RealtimeException re = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(e, e.getMessage());
             throw re;
         } catch (Throwable e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
             RealtimeException re = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(e, e.getMessage());
             throw re;
         } finally {

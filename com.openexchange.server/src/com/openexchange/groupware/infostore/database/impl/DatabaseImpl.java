@@ -1033,7 +1033,7 @@ public class DatabaseImpl extends DBService {
                 try {
                     stmt.close();
                 } catch (final SQLException e) {
-                    LOG.error(e);
+                    // Ignore
                 }
             }
             if (writeCon != null) {

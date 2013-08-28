@@ -1,6 +1,19 @@
+* 2013-08-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26716: Ensure possible double slashes are sanitized when reading "object_link" property
+
+* 2013-08-27 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 26957: Respond with HTTP 400 (Bad Request) when no VEVENTs could be parsed   
+
 * 2013-08-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 28484: Don't signal reminder(s) for declined calendar events
+ - Fix for bug 28538: Using sanitizing URL-encode routine in deferrer bundle (approved by it-sec)
+ - Fix for bug 28522: Deal with possibly non-numeric file identifier when handling file storage events in InfoStore module
+ - Fix for bug 28523: Unregister MBean with proper ObjectName instance
+ - Fix for bug 28459: Avoid duplicate mangling of file storage folder identifiers
+ - Fix for bug 28462: Orderly deal with temporary absent OAuthService (and thus avoid possible NPE)
 
 * 2013-08-26 - tobias.friedrich@open-xchange.com
 

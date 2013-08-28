@@ -80,8 +80,8 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.linkedin.osgi.Activator;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -103,37 +103,35 @@ public class LinkedInServiceImpl implements LinkedInService {
 
     private static final String IN_JSON = "?format=json";
 
-    private Activator activator;
+    private final ServiceLookup services;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkedInServiceImpl.class));
 
-    public LinkedInServiceImpl(final Activator activator) {
-        this.activator = activator;
-    }
-
-    public Activator getActivator() {
-        return activator;
-    }
-
-    public void setActivator(final Activator activator) {
-        this.activator = activator;
+    /**
+     * Initializes a new {@link LinkedInServiceImpl}.
+     *
+     * @param services The service look-up
+     */
+    public LinkedInServiceImpl(final ServiceLookup services) {
+        super();
+        this.services = services;
     }
 
     public Response performRequest(final Session session, final int user, final int contextId, final int accountId, final Verb method, final String url) throws OXException {
-        final OAuthServiceMetaData linkedInMetaData = new OAuthServiceMetaDataLinkedInImpl(activator);
+        final OAuthServiceMetaData linkedInMetaData = new OAuthServiceMetaDataLinkedInImpl(services);
 
         final OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(linkedInMetaData.getAPIKey(session)).apiSecret(
             linkedInMetaData.getAPISecret(session)).build();
 
         OAuthAccount account = null;
         try {
-            final com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
+            final com.openexchange.oauth.OAuthService oAuthService = services.getService(com.openexchange.oauth.OAuthService.class);
             if (null == oAuthService) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(com.openexchange.oauth.OAuthService.class.getName());
             }
             account = oAuthService.getAccount(accountId, session, user, contextId);
         } catch (final OXException e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
             return null;
         }
 
@@ -195,7 +193,7 @@ public class LinkedInServiceImpl implements LinkedInService {
             final JSONArray ids = json.getJSONArray("values");
             result = extractIds(ids);
         } catch (final JSONException e) {
-
+            LOG.error(e.getMessage(), e);
         }
         return result;
     }
@@ -207,7 +205,7 @@ public class LinkedInServiceImpl implements LinkedInService {
                 result.add(connections.getJSONObject(i).getString("id"));
             }
         } catch (final JSONException e) {
-
+            LOG.error(e.getMessage(), e);
         }
         return result;
     }
@@ -216,11 +214,14 @@ public class LinkedInServiceImpl implements LinkedInService {
     public String getAccountDisplayName(final Session session, final int user, final int contextId, final int accountId) {
         String displayName = "";
         try {
-            final com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
+            final com.openexchange.oauth.OAuthService oAuthService = services.getService(com.openexchange.oauth.OAuthService.class);
+            if (null == oAuthService) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(com.openexchange.oauth.OAuthService.class.getName());
+            }
             final OAuthAccount account = oAuthService.getAccount(accountId, session, user, contextId);
             displayName = account.getDisplayName();
         } catch (final OXException e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
         }
         return displayName;
     }
@@ -257,7 +258,7 @@ public class LinkedInServiceImpl implements LinkedInService {
         final String uri = "http://api.linkedin.com/v1/people/id=" + id + PERSONAL_FIELD_QUERY;
         final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
         if (response == null) {
-            return new JSONObject();
+            return new JSONObject(0);
         }
         return extractJson(response);
     }
@@ -267,10 +268,9 @@ public class LinkedInServiceImpl implements LinkedInService {
         final String uri = "http://api.linkedin.com/v1/people/id=" + id + ":(relation-to-viewer)";
         final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
         if (response == null) {
-            return new JSONObject();
+            return new JSONObject(0);
         }
-        final JSONObject relations = extractJson(response);
-        return relations;
+        return extractJson(response);
     }
 
     @Override
@@ -278,7 +278,7 @@ public class LinkedInServiceImpl implements LinkedInService {
         final String uri = "http://api.linkedin.com/v1/people/~/connections" + PERSONAL_FIELD_QUERY;
         final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
         if (response == null) {
-            return new JSONObject();
+            return new JSONObject(0);
         }
         return extractJson(response);
     }
@@ -297,10 +297,9 @@ public class LinkedInServiceImpl implements LinkedInService {
         final String uri = "http://api.linkedin.com/v1/people/id=" + id + ":(" + RELATION_TO_VIEWER + "," + PERSONAL_FIELDS + ")";
         final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
         if (response == null) {
-            return new JSONObject();
+            return new JSONObject(0);
         }
-        final JSONObject data = extractJson(response);
-        return data;
+        return extractJson(response);
     }
 
     @Override
@@ -320,10 +319,9 @@ public class LinkedInServiceImpl implements LinkedInService {
         }
         final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
         if (response == null) {
-            return new JSONObject();
+            return new JSONObject(0);
         }
-        final JSONObject data = extractJson(response);
-        return data;
+        return extractJson(response);
     }
 
     @Override
@@ -378,6 +376,7 @@ public class LinkedInServiceImpl implements LinkedInService {
                 return null;
             }
         } catch (UnsupportedEncodingException e) {
+            // Ignore
         }
         return null;
 
@@ -390,8 +389,7 @@ public class LinkedInServiceImpl implements LinkedInService {
         if (response == null) {
             return new JSONObject();
         }
-        final JSONObject data = extractJson(response);
-        return data;
+        return extractJson(response);
     }
 
     @Override
@@ -401,9 +399,7 @@ public class LinkedInServiceImpl implements LinkedInService {
         if (response == null) {
             return new JSONObject();
         }
-        final JSONObject data = extractJson(response);
-        // System.out.println(data);
-        return data;
+        return extractJson(response);
     }
 
 }

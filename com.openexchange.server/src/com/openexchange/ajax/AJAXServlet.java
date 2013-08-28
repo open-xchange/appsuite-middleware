@@ -959,7 +959,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             obj.put(STR_ERROR_PARAMS, Collections.emptyList());
 			w.write(substituteJS(obj.toString(), action));
         } catch (final JSONException e) {
-            LOG.error(e);
+            LOG.error(e.getMessage(), e);
         } finally {
             close(w);
         }
