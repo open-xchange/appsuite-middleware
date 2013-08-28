@@ -380,7 +380,7 @@ public class FolderTest extends AbstractAJAXTest {
     }
 
     public static boolean renameFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final int folderId, final String folderName, final String moduleStr, final int type, final long timestamp) throws JSONException, MalformedURLException, IOException, SAXException {
-        final JSONObject jsonFolder = new JSONObject();
+        final JSONObject jsonFolder = new JSONObject(6);
         jsonFolder.put("id", folderId);
         jsonFolder.put("title", folderName);
         jsonFolder.put("module", moduleStr);
@@ -397,11 +397,17 @@ public class FolderTest extends AbstractAJAXTest {
             bais,
             "text/javascript; charset=UTF-8");
         final WebResponse resp = conversation.getResponse(req);
-        final JSONObject respObj = new JSONObject(resp.getText());
-        if (respObj.has("error")) {
-            return false;
+        final String text = resp.getText();
+        try {
+            final JSONObject respObj = new JSONObject(text);
+            if (respObj.has("error")) {
+                return false;
+            }
+            return true;
+        } catch (JSONException e) {
+            // Response is no valid JSON
+            throw new JSONException("HTTP response cannot be parsed to JSON object:\n" + text, e);
         }
-        return true;
     }
 
     public static boolean updateFolder(final WebConversation conversation, final String hostname, final String sessionId, final String entityArg, final String secondEntityArg, final int folderId, final long timestamp, final boolean printOutput) throws JSONException, MalformedURLException, IOException, SAXException {
