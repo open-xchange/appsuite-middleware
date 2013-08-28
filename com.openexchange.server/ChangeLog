@@ -1,3 +1,7 @@
+* 2013-08-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26716: Ensure possible double slashes are sanitized when reading "object_link" property
+
 * 2013-08-27 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 26957: Respond with HTTP 400 (Bad Request) when no VEVENTs could be parsed   

@@ -53,6 +53,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 import com.openexchange.calendar.itip.ITipRole;
 import com.openexchange.calendar.itip.Messages;
 import com.openexchange.config.ConfigurationService;
@@ -73,6 +74,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class LabelHelper {
+
     private final NotificationMail mail;
     private final Context ctx;
     private final TypeWrapper wrapper;
@@ -83,6 +85,7 @@ public class LabelHelper {
 	private TimeZone timezone;
 	private DelegationState delegationState;
 	private final ServiceLookup services;
+	private final Pattern patternSlashFixer;
 
 	private static final String fallbackHostname;
 	static {
@@ -117,6 +120,8 @@ public class LabelHelper {
         } else {
         	delegationState = new OnNoOnesBehalf();
         }
+
+        patternSlashFixer = Pattern.compile("/+");
     }
 
 
@@ -237,7 +242,7 @@ public class LabelHelper {
     		return null;
     	}
     	final ConfigurationService config = services.getService(ConfigurationService.class);
-		final String template = config.getProperty("object_link", "https://[hostname]/[uiwebpath]#m=[module]&i=[object]&f=[folder]");
+		final String template = patternSlashFixer.matcher(config.getProperty("object_link", "https://[hostname]/[uiwebpath]#m=[module]&i=[object]&f=[folder]")).replaceAll("/");
 		String webpath = config.getProperty("com.openexchange.UIWebPath", "/ox6/index.html");
 		if (webpath.startsWith("/")) {
 		    webpath = webpath.substring(1, webpath.length());

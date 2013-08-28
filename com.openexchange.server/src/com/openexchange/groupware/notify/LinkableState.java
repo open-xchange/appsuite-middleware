@@ -51,8 +51,8 @@ package com.openexchange.groupware.notify;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.Types;
@@ -65,6 +65,7 @@ import com.openexchange.i18n.tools.Template;
 import com.openexchange.i18n.tools.TemplateToken;
 import com.openexchange.i18n.tools.replacement.ModuleReplacement;
 import com.openexchange.i18n.tools.replacement.StringReplacement;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -161,8 +162,9 @@ public abstract class LinkableState implements State {
      */
     public void loadTemplate() {
         synchronized (LinkableState.class) {
-            object_link_template = new StringTemplate(NotificationConfig.getProperty(NotificationProperty.OBJECT_LINK,
-                    ""));
+            final Pattern patternSlashFixer = Pattern.compile("/+");
+            final String property = patternSlashFixer.matcher(NotificationConfig.getProperty(NotificationProperty.OBJECT_LINK, "")).replaceAll("/");
+            object_link_template = new StringTemplate(property);
         }
     }
 }
