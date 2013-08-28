@@ -49,12 +49,10 @@
 
 package com.openexchange.folderstorage.filestorage;
 
-import static com.openexchange.java.Strings.isEmpty;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.tools.id.IDMangler;
 
 /**
@@ -65,8 +63,7 @@ import com.openexchange.tools.id.IDMangler;
  */
 public final class FileStorageFolderIdentifier {
 
-    private static final String ROOT_FULLNAME = FileStorageFolder.ROOT_FULLNAME;
-    private static final String DELIM = IDMangler.PRIMARY_DELIM;
+    private static final String DELIM = "://";
 
     /**
      * Gets the fully qualified name:<br>
@@ -77,29 +74,22 @@ public final class FileStorageFolderIdentifier {
      * @param folderId The folder identifier
      * @return The fully qualified name
      */
-    public static String getFQN(final String serviceId, final String accountId, final String folderId) {
-        if (serviceId == null && accountId == null) {
+    public static String getFQN(final String serviceId, final String accountId, String folderId) {
+        if(serviceId == null && accountId == null) {
             // Looks like a global and regular OX folder id.
             return folderId;
         }
-        if (serviceId == null) {
-            throw new NullPointerException("In plugin supplied folder IDs, the service must not be null");
+        if(serviceId == null) {
+            throw new NullPointerException("In plugin supplied folder IDs, the service may not be null");
         }
-        if (accountId == null) {
-            throw new NullPointerException("In plugin supplied folder IDs, the acccountId must not be null");
+        if(accountId == null) {
+            throw new NullPointerException("In plugin supplied folder IDs, the acccountId should not be null");
         }
-        if (folderId == null) {
+        if(folderId == null) {
             // Assume some kind of root folder
-            return IDMangler.mangle(serviceId, accountId, ROOT_FULLNAME);
+            folderId = "";
         }
-        final String fid;
-        if ((folderId.indexOf(DELIM) > 0) && FolderID.isMangled(folderId)) {
-            final List<String> unmangled = IDMangler.unmangle(folderId);
-            fid = unmangled.size() > 2 ? unmangled.get(2) : ROOT_FULLNAME;
-        } else {
-            fid = folderId;
-        }
-        return IDMangler.mangle(serviceId, accountId, fid);
+        return IDMangler.mangle(serviceId, accountId, folderId);
     }
 
     /**
@@ -147,19 +137,21 @@ public final class FileStorageFolderIdentifier {
         }
     }
 
-    // ---------------------------------------------------------------------------- //
-
     private final String serviceId;
+
     private final String accountId;
+
     private final String folderId;
+
     private final int hash;
+
     private final String fqn;
 
     /**
      * Initializes a new {@link FileStorageFolderIdentifier}.
      *
      * @param identifier The identifier according to pattern:<br>
-     *            <code>(&lt;service-id&gt;)://(&lt;account-id&gt;)/(&lt;folder-id&gt;)</code>
+     *            <code>(&lt;service-id&gt;)://(&lt;account-id&gt;)/(&lt;fullname&gt;)</code>
      * @throws OXException If identifier is <code>null</code> or invalid
      */
     public FileStorageFolderIdentifier(final String identifier) throws OXException {
@@ -185,7 +177,7 @@ public final class FileStorageFolderIdentifier {
             if (isEmpty(accountId)) {
                 throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(identifier);
             }
-            folderId = ROOT_FULLNAME;
+            folderId = MessagingFolder.ROOT_FULLNAME;
 
             fqn = IDMangler.mangle(serviceId, accountId, folderId);
         } else {
@@ -193,13 +185,7 @@ public final class FileStorageFolderIdentifier {
             if (isEmpty(accountId)) {
                 throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(identifier);
             }
-            final String folderId = components.get(2);
-            if ((folderId.indexOf(DELIM) > 0) && FolderID.isMangled(folderId)) {
-                final List<String> unmangled = IDMangler.unmangle(folderId);
-                this.folderId = unmangled.size() > 2 ? unmangled.get(2) : ROOT_FULLNAME;
-            } else {
-                this.folderId = folderId;
-            }
+            folderId = components.get(2);
 
             fqn = identifier;
         }
@@ -219,29 +205,23 @@ public final class FileStorageFolderIdentifier {
      *
      * @param serviceId The service identifier
      * @param accountId The account identifier
-     * @param folderId The folder identifier
+     * @param folderId The folder fullname
      */
     public FileStorageFolderIdentifier(final String serviceId, final String accountId, final String folderId) {
         super();
         this.serviceId = serviceId;
         this.accountId = accountId;
-        // Check folder identifier
-        if ((folderId.indexOf(DELIM) > 0) && FolderID.isMangled(folderId)) {
-            final List<String> unmangled = IDMangler.unmangle(folderId);
-            this.folderId = unmangled.size() > 2 ? unmangled.get(2) : ROOT_FULLNAME;
-        } else {
-            this.folderId = folderId;
-        }
+        this.folderId = folderId;
         // Parseable identifier
-        fqn = IDMangler.mangle(this.serviceId, this.accountId, this.folderId);
+        fqn = IDMangler.mangle(serviceId, accountId, folderId);
         /*
          * Hash code
          */
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((this.accountId == null) ? 0 : this.accountId.hashCode());
-        result = prime * result + ((this.folderId == null) ? 0 : this.folderId.hashCode());
-        result = prime * result + ((this.serviceId == null) ? 0 : this.serviceId.hashCode());
+        result = prime * result + ((accountId == null) ? 0 : accountId.hashCode());
+        result = prime * result + ((folderId == null) ? 0 : folderId.hashCode());
+        result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
         hash = result;
     }
 
@@ -314,4 +294,17 @@ public final class FileStorageFolderIdentifier {
         }
         return true;
     }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
 }

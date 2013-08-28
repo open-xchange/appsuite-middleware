@@ -50,7 +50,6 @@
 package com.openexchange.file.storage.composition;
 
 import java.util.List;
-import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.tools.id.IDMangler;
 
 /**
@@ -97,7 +96,7 @@ public class FolderID {
         // Check folder identifier
         if (folderId.indexOf(PRIMARY_DELIM) > 0) {
             final List<String> unmangled = IDMangler.unmangle(folderId);
-            this.folderId = unmangled.size() > 2 ? unmangled.get(2) : FileStorageFolder.ROOT_FULLNAME;
+            this.folderId = unmangled.size() > 2 ? unmangled.get(2) : "";
         } else {
             this.folderId = folderId;
         }
@@ -126,66 +125,30 @@ public class FolderID {
         }
     }
 
-    /**
-     * Gets the service identifier.
-     *
-     * @return The service identifier
-     */
     public String getService() {
         return service;
     }
 
-    /**
-     * Sets the service identifier.
-     *
-     * @param service The service identifier
-     */
     public void setService(String service) {
         this.service = service;
     }
 
-    /**
-     * Gets the account identifier
-     *
-     * @return The account identifier
-     */
     public String getAccountId() {
         return accountId;
     }
 
-    /**
-     * Sets the account identifier.
-     *
-     * @param accountId The account identifier
-     */
     public void setAccountId(String accountId) {
         this.accountId = accountId;
     }
 
-    /**
-     * Gets the folder identifier
-     *
-     * @return The folder identifier
-     */
     public String getFolderId() {
         return folderId;
     }
 
-    /**
-     * Sets the folder identifier
-     *
-     * @param folderId The folder identifier
-     */
     public void setFolderId(String folderId) {
         this.folderId = folderId;
     }
 
-    /**
-     * Gets the unique identifier generated from this folder ID e.g.<br>
-     * <code>(&lt;service-id&gt;)://(&lt;account-id&gt;)/(&lt;folder-id&gt;)</code>
-     *
-     * @return The unique identifier
-     */
     public String toUniqueID() {
         if (service.equals("com.openexchange.infostore") && accountId.equals("infostore")) {
             return folderId;
