@@ -103,16 +103,12 @@ public final class FileStorageFolderImpl extends AbstractFolder {
      * Subfolder identifiers and tree identifier are not set within this constructor.
      *
      * @param fsFolder The underlying file storage folder
-     * @param accountId The account identifier
-     * @param serviceId The service identifier
      */
-    public FileStorageFolderImpl(final FileStorageFolder fsFolder, final String accountId, final String serviceId) {
+    public FileStorageFolderImpl(final FileStorageFolder fsFolder) {
         super();
-        final String fullname = fsFolder.getId();
-        id = FileStorageFolderIdentifier.isFQN(fullname) ? fullname : FileStorageFolderIdentifier.getFQN(serviceId, accountId, fullname);
+        id = fsFolder.getId();
         name = fsFolder.getName();
-        final boolean isRootFolder = fsFolder.isRootFolder();
-        if (isRootFolder) { // Root folder
+        if (fsFolder.isRootFolder()) {
             parent = PRIVATE_FOLDER_ID;
         } else {
             String parentId = null;
@@ -124,7 +120,7 @@ public final class FileStorageFolderImpl extends AbstractFolder {
                     parentId = INFOSTORE_PUBLIC;
                 }
             }
-            parent = null == parentId ? FileStorageFolderIdentifier.getFQN(serviceId, accountId, fsFolder.getParentId()) : parentId;
+            parent = null != parentId ? parentId : fsFolder.getParentId();
         }
         {
             final List<FileStoragePermission> fsPermissions = fsFolder.getPermissions();

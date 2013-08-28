@@ -1,3 +1,7 @@
+* 2013-08-28 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28459: Removed obsolete file storage identifiers in favor of ID based folder access    
+
 * 2013-08-28 - marcus.klein@open-xchange.com
 
  - Fix for bug 27858: Increased the default connection timeout for JMX connections from 2 to 15 seconds. Added additionally a command line

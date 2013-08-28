@@ -83,6 +83,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.folderstorage.AfterReadAwareFolderStorage;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -108,7 +109,6 @@ import com.openexchange.folderstorage.database.getfolder.SystemPublicFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemRootFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemSharedFolder;
 import com.openexchange.folderstorage.database.getfolder.VirtualListFolder;
-import com.openexchange.folderstorage.filestorage.FileStorageFolderIdentifier;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -1369,11 +1369,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                         defaultFileStorageAccess.connect();
                         try {
                             final FileStorageFolder personalFolder = defaultFileStorageAccess.getFolderAccess().getPersonalFolder();
-                            final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(
-                                fileStorageService.getId(),
-                                defaultAccount.getId(),
-                                personalFolder.getId());
-                            return new SortableId[] { new DatabaseId(fsfi.toString(), 0, personalFolder.getName()) };
+                            FolderID folderID = new FolderID(fileStorageService.getId(), defaultAccount.getId(), personalFolder.getId());
+                            return new SortableId[] { new DatabaseId(folderID.toUniqueID(), 0, personalFolder.getName()) };
                             // TODO: Shared?
                         } finally {
                             defaultFileStorageAccess.close();
@@ -1398,8 +1395,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                             final String accountId = defaultAccount.getId();
                             for (int i = 0; i < publicFolders.length; i++) {
                                 final FileStorageFolder folder = publicFolders[i];
-                                final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(serviceId, accountId, folder.getId());
-                                ret[i] = new DatabaseId(fsfi.toString(), i, folder.getName());
+                                FolderID folderID = new FolderID(serviceId, accountId, folder.getId());
+                                ret[i] = new DatabaseId(folderID.toUniqueID(), i, folder.getName());
                             }
                             return ret;
                         } finally {
