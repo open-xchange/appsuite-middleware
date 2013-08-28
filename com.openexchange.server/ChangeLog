@@ -10,6 +10,7 @@
 * 2013-08-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 26716: Ensure possible double slashes are sanitized when reading "object_link" property
+ - Fix for bug 28463: Enable XING crawler by default
 
 * 2013-08-27 - tobias.friedrich@open-xchange.com
 
