@@ -71,7 +71,7 @@ public class CLIIllegalOptionValueException extends CLIOptionException {
 
     public CLIIllegalOptionValueException(final CLIOption opt, final String value, final Throwable cause) {
         super(MessageFormat.format(
-            "Illegal value ``{0}'' for option {1}--{2}",
+            "Illegal value \"{0}\" for option {1}--{2}",
             value,
             (opt.shortForm() == null ? "" : "-" + opt.shortForm() + "/"),
             opt.longForm()), cause);

@@ -1,3 +1,8 @@
+* 2013-08-28 - marcus.klein@open-xchange.com
+
+ - Fix for bug 27858: Increased the default connection timeout for JMX connections from 2 to 15 seconds. Added additionally a command line
+   tool option to be able to provide even higher connection timeouts.
+
 * 2013-08-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 26716: Ensure possible double slashes are sanitized when reading "object_link" property
