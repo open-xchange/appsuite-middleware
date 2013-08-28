@@ -625,6 +625,9 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      */
     public void setPermissionsNoClone(final List<OCLPermission> permissions) {
         this.permissions = new ArrayList<OCLPermission>(permissions);
+        for (final OCLPermission oclPermission : this.permissions) {
+            oclPermission.setFuid(objectId);
+        }
         b_permissions = true;
     }
 
@@ -639,7 +642,9 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         final int size = permissions.size();
         this.permissions = new ArrayList<OCLPermission>(size);
         for (final OCLPermission permission : permissions) {
-            this.permissions.add(permission.deepClone());
+            final OCLPermission p = permission.deepClone();
+            p.setFuid(objectId);
+            this.permissions.add(p);
         }
         b_permissions = true;
     }
@@ -658,7 +663,9 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             this.permissions.clear();
         }
         for (final OCLPermission permission : permissions) {
-            this.permissions.add(permission.deepClone());
+            final OCLPermission p = permission.deepClone();
+            p.setFuid(objectId);
+            this.permissions.add(p);
         }
         b_permissions = true;
     }
@@ -676,7 +683,9 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             this.permissions = new ArrayList<OCLPermission>(4);
         }
         b_permissions = true;
-        this.permissions.add(permission.deepClone());
+        final OCLPermission p = permission.deepClone();
+        p.setFuid(objectId);
+        this.permissions.add(p);
     }
 
     /**

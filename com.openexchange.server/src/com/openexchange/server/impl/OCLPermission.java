@@ -52,7 +52,9 @@ package com.openexchange.server.impl;
 import java.io.Serializable;
 import java.security.acl.Permission;
 import com.openexchange.group.GroupStorage;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.OXCloneable;
+import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
  * {@link OCLPermission}
@@ -100,6 +102,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
      * permission orp = object read permission owp = object write permission odp
      * = object delete permission
      */
+
+    private static final int SYSTEM_LDAP_FOLDER_ID = FolderObject.SYSTEM_LDAP_FOLDER_ID;
 
     private static final String STR_USER = "User";
 
@@ -436,7 +440,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
      * @return The write permission
      */
     public int getWritePermission() {
-        return owp;
+        return SYSTEM_LDAP_FOLDER_ID == fuid ? (OXFolderProperties.isEnableInternalUsersEdit() ? WRITE_OWN_OBJECTS : NO_PERMISSIONS) : owp;
     }
 
     /**

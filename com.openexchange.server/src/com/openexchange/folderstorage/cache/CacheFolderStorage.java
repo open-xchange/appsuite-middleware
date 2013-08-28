@@ -187,6 +187,20 @@ public final class CacheFolderStorage implements FolderStorage {
         FolderMapManagement.getInstance().clear();
     }
 
+    /**
+     * Removes denoted folder from global cache.
+     *
+     * @param folderId The folder identifier
+     * @param treeId The tree identifier
+     * @param contextId The context identifier
+     */
+    public void removeFromGlobalCache(final String folderId, final String treeId, final int contextId) {
+        final Cache cache = globalCache;
+        if (null != cache) {
+            cache.removeFromGroup(newCacheKey(folderId, treeId), Integer.toString(contextId));
+        }
+    }
+
     @Override
     public void clearCache(final int userId, final int contextId) {
         if (contextId <= 0) {
