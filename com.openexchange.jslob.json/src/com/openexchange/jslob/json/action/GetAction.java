@@ -126,7 +126,7 @@ public final class GetAction extends JSlobAction {
 
         final String id = jslobRequest.checkParameter("id");
         JSlob jslob;
-        if ("io.ox/shared".equals(id)) {
+        if (id.startsWith("io.ox/shared")) {
             jslob = jslobService.getShared(id);
         } else {
             jslob = jslobService.get(id, jslobRequest.getSession());
