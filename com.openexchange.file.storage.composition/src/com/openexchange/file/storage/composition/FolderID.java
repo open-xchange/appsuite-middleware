@@ -60,8 +60,6 @@ import com.openexchange.tools.id.IDMangler;
  */
 public class FolderID {
 
-    private static final String PRIMARY_DELIM = IDMangler.PRIMARY_DELIM;
-
     /**
      * Checks if given folder identifier appears to be mangled.
      *
@@ -72,7 +70,7 @@ public class FolderID {
         if (null == folderId) {
             return false;
         }
-        return (folderId.indexOf(PRIMARY_DELIM) > 0) && (IDMangler.unmangle(folderId).size() > 1);
+        return (folderId.indexOf("://") > 0) && (IDMangler.unmangle(folderId).size() > 1);
     }
 
     // -------------------------------------------------------------------------------------------- //
@@ -94,7 +92,7 @@ public class FolderID {
         this.accountId = accountId;
 
         // Check folder identifier
-        if (folderId.indexOf(PRIMARY_DELIM) > 0) {
+        if (folderId.indexOf("://") > 0) {
             final List<String> unmangled = IDMangler.unmangle(folderId);
             this.folderId = unmangled.size() > 2 ? unmangled.get(2) : "";
         } else {
