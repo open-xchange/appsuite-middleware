@@ -61,7 +61,6 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.oauth.linkedin.LinkedInServiceImpl;
-import com.openexchange.oauth.linkedin.MockOAuthService;
 import com.openexchange.oauth.linkedin.OAuthServiceMetaDataLinkedInImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
