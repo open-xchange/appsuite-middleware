@@ -61,8 +61,8 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSONPathElement;
+import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.json.JSlobRequest;
 import com.openexchange.server.ServiceLookup;
@@ -125,7 +125,12 @@ public final class GetAction extends JSlobAction {
         final JSlobService jslobService = getJSlobService(serviceId);
 
         final String id = jslobRequest.checkParameter("id");
-        final JSlob jslob = jslobService.get(id, jslobRequest.getSession());
+        JSlob jslob;
+        if ("io.ox/shared".equals(id)) {
+            jslob = jslobService.getShared(id);
+        } else {
+            jslob = jslobService.get(id, jslobRequest.getSession());
+        }
 
         final String serlvetRequestURI = jslobRequest.getRequestData().getSerlvetRequestURI();
         if (!isEmpty(serlvetRequestURI)) {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,61 +47,74 @@
  *
  */
 
-package com.openexchange.jslob.json.action;
+package com.openexchange.server.services;
 
-import java.util.Collection;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.exception.OXException;
+import org.json.JSONObject;
+import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlob;
-import com.openexchange.jslob.JSlobService;
-import com.openexchange.jslob.json.JSlobRequest;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.jslob.JSlobId;
+import com.openexchange.jslob.shared.SharedJSlobService;
+
 
 /**
- * {@link AllAction}
+ * {@link SharedInfostoreJSlob}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-@Action(
-    name = "all"
-    , description = "Gets all JSlobs associated with the current user and context."
-    , method = RequestMethod.GET
-    , parameters = {
-        @Parameter(name = "serviceId", description = "Optional identifier for the JSlob. Default is <tt>com.openexchange.jslob.config</tt>", optional=true)
-    }
-)
-public final class AllAction extends JSlobAction {
+public class SharedInfostoreJSlob implements SharedJSlobService {
+    
+    private final String serviceId;
+    
+    private final DefaultJSlob jslob;
 
     /**
-     * Initializes a new {@link AllAction}.
-     *
-     * @param services The service look-up
+     * Initializes a new {@link SharedInfostoreJSlob}.
      */
-    public AllAction(final ServiceLookup services, final Map<String, JSlobAction> actions) {
-        super(services, actions);
+    public SharedInfostoreJSlob(JSONObject jsonObject) {
+        super();
+        serviceId = "com.openexchange.jslob.config";
+        jslob = new DefaultJSlob(jsonObject);
+        jslob.setId(new JSlobId(serviceId, "io.ox/shared/infostore", 0, 0));
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.jslob.shared.SharedJSlobService#getServiceId()
+     */
     @Override
-    protected AJAXRequestResult perform(final JSlobRequest jslobRequest) throws OXException {
-        String serviceId = jslobRequest.getParameter("serviceId", String.class);
-        if (null == serviceId) {
-            serviceId = DEFAULT_SERVICE_ID;
-        }
-        final JSlobService jslobService = getJSlobService(serviceId);
-
-        final Collection<JSlob> jslobs = jslobService.get(jslobRequest.getSession());
-        jslobs.addAll(jslobService.getShared());
-        return new AJAXRequestResult(jslobs, "jslob");
+    public String getServiceId() {
+        return serviceId;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.jslob.shared.SharedJSlobService#getJSlob()
+     */
     @Override
-    public String getAction() {
-        return "all";
+    public JSlob getJSlob() {
+        return jslob;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.jslob.shared.SharedJSlobService#getId()
+     */
+    @Override
+    public String getId() {
+        return jslob.getId().getId();
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.jslob.shared.SharedJSlobService#setJSONObject(org.json.JSONObject)
+     */
+    @Override
+    public void setJSONObject(JSONObject jsonObject) {
+        jslob.setJsonObject(jsonObject);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.jslob.shared.SharedJSlobService#setMetaObject(org.json.JSONObject)
+     */
+    @Override
+    public void setMetaObject(JSONObject metaObject) {
+        jslob.setMetaObject(metaObject);
     }
 
 }

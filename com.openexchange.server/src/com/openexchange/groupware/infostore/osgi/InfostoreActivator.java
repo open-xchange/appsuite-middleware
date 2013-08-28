@@ -57,6 +57,8 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -65,6 +67,7 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.file.storage.FileStorageEventConstants;
@@ -80,6 +83,8 @@ import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.jslob.shared.SharedJSlobService;
+import com.openexchange.server.services.SharedInfostoreJSlob;
 
 /**
  * {@link InfostoreActivator}
@@ -97,6 +102,10 @@ public class InfostoreActivator implements BundleActivator {
 
     private volatile Queue<ServiceRegistration<?>> registrations;
     private volatile ServiceTracker<FileStorageServiceRegistry, FileStorageServiceRegistry> tracker;
+
+    private ServiceTracker<FullPrimaryKeySupportService, FullPrimaryKeySupportService> primaryKeyTracker;
+
+    private ServiceTracker<ConfigurationService, ConfigurationService> configTracker;
 
     @Override
     public void start(final BundleContext context) throws Exception {
@@ -146,7 +155,7 @@ public class InfostoreActivator implements BundleActivator {
             final AvailableTracker tracker = new AvailableTracker(context);
             tracker.open();
             this.tracker = tracker;
-            ServiceTracker<FullPrimaryKeySupportService, FullPrimaryKeySupportService> primaryKeyTracker = new ServiceTracker<FullPrimaryKeySupportService, FullPrimaryKeySupportService>(context, FullPrimaryKeySupportService.class, new ServiceTrackerCustomizer<FullPrimaryKeySupportService, FullPrimaryKeySupportService>() {
+            primaryKeyTracker = new ServiceTracker<FullPrimaryKeySupportService, FullPrimaryKeySupportService>(context, FullPrimaryKeySupportService.class, new ServiceTrackerCustomizer<FullPrimaryKeySupportService, FullPrimaryKeySupportService>() {
 
                 @Override
                 public FullPrimaryKeySupportService addingService(ServiceReference<FullPrimaryKeySupportService> arg0) {
@@ -173,6 +182,45 @@ public class InfostoreActivator implements BundleActivator {
                 }
             });
             primaryKeyTracker.open();
+            
+            configTracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new ServiceTrackerCustomizer<ConfigurationService, ConfigurationService>() {
+                
+                /* 
+                 * Register MAX_UPLOAD_SIZE & infostore quota as SharedJSLob
+                 */                
+                ServiceRegistration<SharedJSlobService> registration;
+
+                @Override
+                public ConfigurationService addingService(ServiceReference<ConfigurationService> arg0) {
+                    
+                    ConfigurationService configService = context.getService(arg0);
+                    try {
+                        int maxUploadSize = configService.getIntProperty("MAX_UPLOAD_SIZE", 10485760);
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("maxUploadSize", maxUploadSize);
+                        int quota = configService.getIntProperty("com.openexchange.quota.infostore", -1);
+                        jsonObject.put("infostoreQuota", quota);
+                        SharedJSlobService infostoreJSlob = new SharedInfostoreJSlob(jsonObject);
+                        registration = context.registerService(SharedJSlobService.class, infostoreJSlob, null);
+                    } catch (JSONException e) {
+                        //should not happen
+                    }
+                    return configService;
+                }
+
+                @Override
+                public void modifiedService(ServiceReference<ConfigurationService> arg0, ConfigurationService arg1) {
+                    //nothing to do
+                }
+
+                @Override
+                public void removedService(ServiceReference<ConfigurationService> arg0, ConfigurationService arg1) {
+                    registration.unregister();
+                    context.ungetService(arg0);
+                }
+            });
+            configTracker.open();
+            
         } catch (final Exception e) {
             final Log logger = com.openexchange.log.Log.loggerFor(InfostoreActivator.class);
             logger.error("Starting InfostoreActivator failed.", e);
@@ -188,6 +236,8 @@ public class InfostoreActivator implements BundleActivator {
                 tracker.close();
                 this.tracker = null;
             }
+            primaryKeyTracker.close();
+            configTracker.close();
             final Queue<ServiceRegistration<?>> registrations = this.registrations;
             if (null != registrations) {
                 ServiceRegistration<?> polled;
