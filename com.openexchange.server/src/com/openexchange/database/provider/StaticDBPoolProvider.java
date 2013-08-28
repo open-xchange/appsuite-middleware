@@ -52,34 +52,33 @@ package com.openexchange.database.provider;
 import java.sql.Connection;
 import com.openexchange.groupware.contexts.Context;
 
-public class StaticDBPoolProvider implements DBProvider{
+public class StaticDBPoolProvider implements DBProvider {
 
-	private final Connection writeCon;
+    private final Connection writeCon;
 
+    public StaticDBPoolProvider(final Connection writeCon) {
+        super();
+        this.writeCon = writeCon;
+    }
 
-
-	public StaticDBPoolProvider(final Connection writeCon) {
-		super();
-		this.writeCon = writeCon;
-	}
-
-	@Override
+    @Override
     public Connection getReadConnection(final Context ctx) {
-		return writeCon;
-	}
+        return writeCon;
+    }
 
-	@Override
+    @Override
     public void releaseReadConnection(final Context ctx, final Connection con) {
-	}
+        // Nothing to do
+    }
 
-	@Override
+    @Override
     public Connection getWriteConnection(final Context ctx) {
-		return writeCon;
-	}
+        return writeCon;
+    }
 
-	@Override
+    @Override
     public void releaseWriteConnection(final Context ctx, final Connection con) {
-
-	}
+        // Nothing to do
+    }
 
 }
