@@ -240,7 +240,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             /*
              * Convert file to SMB representation
              */
-            final SmbFile smbFile = getSmbFile(folderId + id);
+            SmbFile smbFile = getSmbFile(folderId + id);
             /*
              * Create if non-existent
              */
@@ -267,6 +267,14 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 } finally {
                     outputStream.close();
                 }
+            }
+            /*
+             * Check for filename
+             */
+            if (set.contains(Field.FILENAME) && false == isEmpty(file.getFileName()) && false == file.getFileName().equals(smbFile.getName())) {
+                SmbFile renamedFile = getSmbFile(folderId + file.getFileName());
+                smbFile.renameTo(renamedFile);
+                smbFile = renamedFile;
             }
             /*
              * Invalidate
