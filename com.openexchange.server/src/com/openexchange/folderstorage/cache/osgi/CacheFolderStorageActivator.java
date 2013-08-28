@@ -68,6 +68,8 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageEventConstants;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
@@ -342,6 +344,31 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             };
             final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
             dict.put(EventConstants.EVENT_TOPIC, "com/openexchange/cache/remote/invalidate");
+            registrations.add(context.registerService(EventHandler.class, eventHandler, dict));
+        }
+        {
+            /*
+             * Attach handler for file storage folder events
+             */
+            final EventHandler eventHandler = new EventHandler() {
+
+                @Override
+                public void handleEvent(final Event event) {
+                    String serviceID = (String)event.getProperty(FileStorageEventConstants.SERVICE);
+                    String accountID = (String)event.getProperty(FileStorageEventConstants.ACCOUNT_ID);
+                    String folderID = (String)event.getProperty(FileStorageEventConstants.FOLDER_ID);
+                    Session session = (Session)event.getProperty(FileStorageEventConstants.SESSION);
+                    try {
+                        String uniqueID = new FolderID(serviceID, accountID, folderID).toUniqueID();
+                        tmp.removeFromGlobalCache(uniqueID, FolderStorage.REAL_TREE_ID, session.getContextId());
+                        tmp.removeFromCache(uniqueID, FolderStorage.REAL_TREE_ID, false, session);
+                    } catch (OXException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+            };
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+            dict.put(EventConstants.EVENT_TOPIC, FileStorageEventConstants.ALL_FOLDER_TOPICS);
             registrations.add(context.registerService(EventHandler.class, eventHandler, dict));
         }
     }
