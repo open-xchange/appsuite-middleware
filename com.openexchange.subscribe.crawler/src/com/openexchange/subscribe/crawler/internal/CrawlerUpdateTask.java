@@ -63,9 +63,9 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.ho.yaml.Yaml;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
 import com.openexchange.subscribe.crawler.osgi.Activator;
 
@@ -131,9 +131,9 @@ public class CrawlerUpdateTask implements Runnable {
                 }
 
             } catch (MalformedURLException e) {
-                LOG.error(e);
+                LOG.error(e.getMessage(), e);
             } catch (IOException e) {
-                LOG.error(e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }
