@@ -63,6 +63,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.InfostoreFilenameReservation;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogFactory;
 
@@ -127,47 +128,46 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
     }
 
     public boolean reserve() throws SQLException, OXException {
-        if(reserved) {
+        if (reserved) {
             return true;
         }
         if (!mustReserveName()) {
             return true;
         }
         boolean free = false;
+        boolean rollback = false;
         try {
             startTransaction();
+            rollback = true;
             lockFolder();
             free = checkFree();
             if (free) {
                 reserveFilename();
             }
             commit();
+            rollback = false;
         } catch (final SQLException x) {
-            rollback();
             throw x;
         } finally {
+            if (rollback) {
+                rollback();
+            }
             finishTransaction();
         }
         return reserved = free;
     }
 
     protected boolean mustReserveName() {
-        if (null == fileName) {
-            return false;
-        }
-        if ("".equals(fileName.trim())) {
-            return false;
-        }
-        return true;
+        return !Strings.isEmpty(fileName);
     }
 
-    private void finishTransaction() throws SQLException {
-        con.setAutoCommit(true);
+    private void finishTransaction() {
+        Databases.autocommit(con);
         releaseConnection();
     }
 
-    private void rollback() throws SQLException {
-        con.rollback();
+    private void rollback() {
+        Databases.rollback(con);
     }
 
     private void commit() throws SQLException {
@@ -260,7 +260,7 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
 
     private void startTransaction() throws OXException, SQLException {
         openConnection();
-        con.setAutoCommit(false);
+        Databases.startTransaction(con);
     }
 
 
