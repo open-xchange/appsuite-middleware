@@ -523,6 +523,18 @@ public final class Tools {
 	}
 
 	/**
+     * Sets the 'file as' attribute to the contact's display name if needed, i.e. the 'display name'-property is set, while the
+     * 'file as'-property isn't.
+     *
+     * @param contact The contact to set the 'file as' for
+     */
+    public static void setFileAsIfNeeded(final Contact contact) {
+        if (contact.containsDisplayName() && (false == contact.containsFileAs() || Tools.isEmpty(contact.getFileAs()))) {
+            contact.setFileAs(contact.getDisplayName());
+        }
+    }
+
+	/**
 	 * Creates a new {@link ContactSearchObject} containing only the relevant 
 	 * parts of the supplied search object, extending the contained patterns 
 	 * with implicit wildcards as needed. 

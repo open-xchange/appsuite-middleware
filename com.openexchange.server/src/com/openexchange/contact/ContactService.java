@@ -372,6 +372,20 @@ public interface ContactService {
     void updateContact(Session session, String folderId, String id, Contact contact, Date lastRead) throws OXException;
 
     /**
+     * Updates a user's contact data, ignoring the folder permissions of the
+     * global address book folder. Required to update user data in environments
+     * where access to the global address book is restricted.
+     *
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @param id the object ID
+     * @param contact the contact to update
+     * @param lastRead the time the object was last read from the storage
+     * @throws OXException
+     */
+    void updateUser(Session session, String folderId, String id, Contact contact, Date lastRead) throws OXException;
+
+    /**
      * Deletes a contact.
      * 
      * @param session the session

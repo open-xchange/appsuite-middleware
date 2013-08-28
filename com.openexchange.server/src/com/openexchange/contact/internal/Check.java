@@ -62,6 +62,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm;
@@ -244,6 +245,72 @@ public final class Check {
 	        }
 		}
 	}
+
+	/**
+     * Checks the supplied delta contact for possible changes to read-only fields. If read-only are about to be modified to a value
+     * different from the currently stored value, an appropriate exception is thrown. If they're going to be set to the property's
+     * default value, the properties are removed from the delta reference.
+     *
+     * @param userID The ID of the user performing the update
+     * @param storedContact The stored contact
+     * @param delta The delta holding the changes to be applied
+     * @throws OXException
+     */
+    public static void readOnlyFields(int userID, Contact storedContact, Contact delta) throws OXException {
+        if (delta.containsContextId()) {
+            if (0 == delta.getContextId() || delta.getContextId() == storedContact.getContextId()) {
+                delta.removeContextID();
+            } else {
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(
+                    Integer.valueOf(storedContact.getObjectID()), Integer.valueOf(storedContact.getContextId()));
+            }
+        }
+        if (delta.containsObjectID()) {
+            if (0 == delta.getObjectID() || delta.getObjectID() == storedContact.getObjectID()) {
+                delta.removeObjectID();
+            } else {
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(
+                    Integer.valueOf(storedContact.getObjectID()), Integer.valueOf(storedContact.getContextId()));
+            }
+        }
+        if (delta.containsInternalUserId()) {
+            if (0 == delta.getInternalUserId() || delta.getInternalUserId() == storedContact.getInternalUserId()) {
+                delta.removeInternalUserId();
+            } else {
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(
+                    Integer.valueOf(storedContact.getObjectID()), Integer.valueOf(storedContact.getContextId()));
+            }
+        }
+        if (delta.containsUid() && false == Strings.isEmpty(storedContact.getUid())) {
+            if (Strings.isEmpty(delta.getUid()) || delta.getUid().equals(storedContact.getUid())) {
+                delta.removeUid();
+            } else {
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(
+                    Integer.valueOf(storedContact.getObjectID()), Integer.valueOf(storedContact.getContextId()));
+            }
+        }
+        if (delta.containsCreatedBy()) {
+            if (0 == delta.getCreatedBy() || delta.getCreatedBy() == storedContact.getCreatedBy()) {
+                delta.removeCreatedBy();
+            } else {
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(
+                    Integer.valueOf(storedContact.getObjectID()), Integer.valueOf(storedContact.getContextId()));
+            }
+        }
+        if (delta.containsCreationDate()) {
+            if (null == delta.getCreationDate() || delta.getCreationDate().equals(storedContact.getCreationDate())
+                || 0 == delta.getCreationDate().getTime()) {
+                delta.removeCreationDate();
+            } else {
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(
+                    Integer.valueOf(storedContact.getObjectID()), Integer.valueOf(storedContact.getContextId()));
+            }
+        }
+        if (delta.containsPrivateFlag() && delta.getPrivateFlag() && storedContact.getCreatedBy() != userID) {
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(
+                Integer.valueOf(storedContact.getObjectID()), Integer.valueOf(storedContact.getContextId()));
+        }
+    }
 
 	private Check() {
 		// prevent instantiation
