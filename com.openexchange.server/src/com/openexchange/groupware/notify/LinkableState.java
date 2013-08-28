@@ -162,7 +162,7 @@ public abstract class LinkableState implements State {
      */
     public void loadTemplate() {
         synchronized (LinkableState.class) {
-            final Pattern patternSlashFixer = Pattern.compile("/+");
+            final Pattern patternSlashFixer = Pattern.compile("^//+|[^:]//+");
             final String property = patternSlashFixer.matcher(NotificationConfig.getProperty(NotificationProperty.OBJECT_LINK, "")).replaceAll("/");
             object_link_template = new StringTemplate(property);
         }

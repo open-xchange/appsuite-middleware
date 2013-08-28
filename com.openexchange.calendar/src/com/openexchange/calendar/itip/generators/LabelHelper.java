@@ -121,7 +121,7 @@ public class LabelHelper {
         	delegationState = new OnNoOnesBehalf();
         }
 
-        patternSlashFixer = Pattern.compile("/+");
+        patternSlashFixer = Pattern.compile("^//+|[^:]//+");
     }
 
 
