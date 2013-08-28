@@ -65,6 +65,11 @@ public interface SharedJSlobService {
     public static final String EVENT_ADDED = "com/openexchange/jslob/sharedJSlob/added";
 
     public static final String EVENT_REMOVED = "com/openexchange/jslob/sharedJSlob/removed";
+    
+    /**
+     * Default id for shared jslobs
+     */
+    public static final String DEFAULT_ID = "io.ox/shared";
 
     /**
      * Returns the jslob service id

@@ -294,8 +294,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     @Override
     public Collection<JSlob> getShared() {
-        // return sharedJSlobs;
-        return null;
+        return sharedJSlobs.values();
     }
 
     @Override
@@ -380,7 +379,6 @@ public final class ConfigJSlobService implements JSlobService {
 
     @Override
     public JSlob getShared(final String id) {
-        // final Set<String> keySet = sharedJSlobs.keySet();
         return sharedJSlobs.get(id);
     }
 
