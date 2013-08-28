@@ -61,6 +61,7 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.oauth.linkedin.LinkedInServiceImpl;
+import com.openexchange.oauth.linkedin.MockOAuthService;
 import com.openexchange.oauth.linkedin.OAuthServiceMetaDataLinkedInImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
@@ -70,17 +71,10 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public class Activator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
-
-    private OAuthService oauthService;
+    private OAuthService oauthService = null;
 
     public Activator() {
         super();
-    }
-
-    public void registerServices() {
-        if (null != oauthService) {
-
-        }
     }
 
     @Override
@@ -89,11 +83,10 @@ public class Activator extends HousekeepingActivator {
     }
 
     public OAuthService getOauthService() {
-        return oauthService;
-    }
-
-    public void setOauthService(final OAuthService oauthService) {
-        this.oauthService = oauthService;
+        if (oauthService != null) {
+            return oauthService;
+        }
+        return getService(OAuthService.class);
     }
 
     @Override
@@ -135,6 +128,10 @@ public class Activator extends HousekeepingActivator {
     protected void stopBundle() {
         closeTrackers();
         cleanUp();
+    }
+
+    public void setOauthService(OAuthService service) {
+        this.oauthService = service;
     }
 
 
