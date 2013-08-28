@@ -82,7 +82,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class CSVContactExporter implements Exporter {
 
@@ -212,6 +212,9 @@ public class CSVContactExporter implements Exporter {
                 Contact current;
                 try {
                     current = conIter.next();
+                    if (current.containsDistributionLists()) {
+                    	continue;
+                    }
                     ret.append(convertToLine(convertToList(current, cols)));
                 } catch (final SearchIteratorException e) {
                     LOG.error("Could not retrieve contact from folder " + folder + " using a FolderIterator, exception was: ", e);
@@ -250,7 +253,9 @@ public class CSVContactExporter implements Exporter {
 
         final StringBuilder ret = new StringBuilder();
         ret.append(convertToLine(com.openexchange.importexport.formats.csv.CSVLibrary.convertToList(cols)));
-        ret.append(convertToLine(convertToList(conObj, cols)));
+        if (conObj.containsDistributionLists()) {
+        	ret.append(convertToLine(convertToList(conObj, cols)));
+        }
 
         final byte[] bytes = Charsets.getBytes(ret.toString(), Charsets.UTF_8);
         return new SizedInputStream(new ByteArrayInputStream(bytes), bytes.length, Format.CSV);

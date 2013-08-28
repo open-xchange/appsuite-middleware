@@ -46,35 +46,56 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-
 package com.openexchange.ajax.importexport;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.io.IOException;
+import java.util.List;
 
-/**
- * This suite is meant to be used with a running OX.
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
- */
-public final class ImportExportServerSuite {
+import org.json.JSONException;
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTest(ICalTestSuite.suite());
+import com.openexchange.ajax.contact.AbstractManagedContactTest;
+import com.openexchange.ajax.importexport.actions.CSVExportRequest;
+import com.openexchange.ajax.importexport.actions.CSVExportResponse;
+import com.openexchange.ajax.importexport.actions.VCardExportRequest;
+import com.openexchange.ajax.importexport.actions.VCardExportResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DistributionListEntryObject;
+import com.openexchange.groupware.importexport.csv.CSVParser;
 
-		//VCARD
-        tests.addTest(VCardTestSuite.suite());
-		tests.addTestSuite(Bug9475Test.class);
-		tests.addTestSuite(VCardImportLosingAddressInfoTest.class);
+public class DistributionListExportTest extends AbstractManagedContactTest {
 
-		//CSV
-		tests.addTestSuite(CSVImportExportServletTest.class);
-		tests.addTestSuite(Bug18482Test_ByteOrderMarkOnUtf8.class);
-        tests.addTestSuite(Bug20516Test.class);
-
-		// Overall bug tests.
-		tests.addTestSuite(Bug9209Test.class);
-		tests.addTestSuite(DistributionListExportTest.class);
-		return tests;
+	public DistributionListExportTest(String name) {
+		super(name);
 	}
+	
+	public void testCsvDistributionListsAreNotExported () throws OXException, IOException, JSONException {
+		Contact list = generateContact("Distribution list");
+		list.setDistributionList( new DistributionListEntryObject[]{
+				new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
+		});
+		manager.newAction(list);
+		CSVExportResponse csvExportResponse = client.execute(new CSVExportRequest(folderID));
+		String csvStr = (String) csvExportResponse.getData();
+		
+		CSVParser csvParser = new CSVParser(csvStr);
+		List<List<String>> csv = csvParser.parse();
+		assertEquals("Should only contain the header line but no content", 1, csv.size() );
+	}
+	
+	public void testVCardDistributionListsAreNotExported () throws OXException, IOException, JSONException {
+		Contact list = generateContact("Distribution list is not present");
+		list.setDistributionList( new DistributionListEntryObject[]{
+				new DistributionListEntryObject("my displayname", "myemail@adress.invalid", 0)
+		});
+		manager.newAction(list);
+		VCardExportResponse vcardExportResponse = client.execute(new VCardExportRequest(folderID, false));
+		String vcard = (String) vcardExportResponse.getData();
+		
+		assertFalse("Should not contain name of contact in list", vcard.contains("my displayname"));
+		assertFalse("Should not contain e-mail of contact in list", vcard.contains("myemail@adress.invalid"));
+		assertFalse("Should not contain name of distribution list", vcard.contains("Distribution list is not present"));
+		
+	}
+
 }

@@ -368,6 +368,9 @@ public class VCardExporter implements Exporter {
     }
 
     protected void exportContact(final OXContainerConverter oxContainerConverter, final VersitDefinition versitDef, final VersitDefinition.Writer writer, final Contact contactObj) throws ConverterException, IOException {
+    	if (contactObj.containsDistributionLists() || contactObj.containsMarkAsDistributionlist()) {
+    		return;
+    	}
         final VersitObject versitObject = oxContainerConverter.convertContact(contactObj, "3.0");
         versitDef.write(writer, versitObject);
         writer.flush();
