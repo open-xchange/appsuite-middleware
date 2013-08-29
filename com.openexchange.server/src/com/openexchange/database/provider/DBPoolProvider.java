@@ -91,4 +91,13 @@ public class DBPoolProvider implements DBProvider {
         autocommit(con);
         DBPool.closeWriterSilent(ctx,con);
     }
+
+    @Override
+    public void releaseWriteConnectionAfterReading(final Context ctx, final Connection con) {
+        if (con == null) {
+            return;
+        }
+        autocommit(con);
+        DBPool.closeWriterAfterReading(ctx, con);
+    }
 }

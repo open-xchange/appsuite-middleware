@@ -303,6 +303,14 @@ public class RequestDBProvider implements DBProvider {
         }
     }
 
+    @Override
+    public void releaseWriteConnectionAfterReading(final Context ctx, final Connection con) {
+        final DBTransaction tx = getActiveTransaction();
+        if(tx == null) {
+            getProvider().releaseWriteConnectionAfterReading(ctx, con);
+        }
+    }
+
     public void finish() throws OXException {
         final DBTransaction tx = getActiveTransaction();
         if(tx == null) {

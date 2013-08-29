@@ -53,8 +53,16 @@ import java.sql.Connection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
+/**
+ * {@link DBProvider} - Provides connections for database access.
+ *
+ * @author <a href="mailto:info@open-xchange.com">Open-Xchange Engineering</a>
+ */
 public interface DBProvider {
 
+    /**
+     * The dummy provider.
+     */
     static final DBProvider DUMMY = new DBProvider() {
         @Override
         public Connection getReadConnection(final Context ctx) {
@@ -72,13 +80,52 @@ public interface DBProvider {
         public void releaseWriteConnection(final Context ctx, final Connection con) {
             throw new UnsupportedOperationException();
         }
+        @Override
+        public void releaseWriteConnectionAfterReading(Context ctx, Connection con) {
+            throw new UnsupportedOperationException();
+        }
     };
 
+    /**
+     * Gets a read-only connection for <code>SELECT</code> statements.
+     *
+     * @param ctx The associated context
+     * @return A read-only connection
+     * @throws OXException If connection cannot be returned
+     */
     Connection getReadConnection(Context ctx) throws OXException;
 
+    /**
+     * Releases specified read-only connection.
+     *
+     * @param ctx The associated context
+     * @param con The connection to release
+     */
     void releaseReadConnection(Context ctx, Connection con);
 
+    /**
+     * Gets a read-write connection for <code>INSERT</code>, <code>UPDATE</code>, and/or <code>DELETE</code> statements.
+     *
+     * @param ctx The associated context
+     * @return A read-write connection
+     * @throws OXException If connection cannot be returned
+     */
     Connection getWriteConnection(Context ctx) throws OXException;
 
+    /**
+     * Releases specified read-write connection.
+     *
+     * @param ctx The associated context
+     * @param con The connection to release
+     */
     void releaseWriteConnection(Context ctx, Connection con);
+
+    /**
+     * Releases specified read-write connection that was <b>only</b> used for read accesses.
+     *
+     * @param ctx The associated context
+     * @param con The connection to release
+     */
+    void releaseWriteConnectionAfterReading(Context ctx, Connection con);
+
 }
