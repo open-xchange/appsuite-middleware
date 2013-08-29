@@ -55,6 +55,7 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Locale;
 import org.glassfish.grizzly.http.Cookie;
+import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.grizzly.http.util.CharChunk;
 import org.glassfish.grizzly.http.util.Header;
 import org.glassfish.grizzly.http.util.HttpRequestURIDecoder;

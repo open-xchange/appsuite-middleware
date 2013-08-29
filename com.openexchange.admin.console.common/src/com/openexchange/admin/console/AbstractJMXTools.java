@@ -66,7 +66,6 @@ import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
-import javax.management.Query;
 import javax.management.ReflectionException;
 import javax.management.RuntimeMBeanException;
 import javax.management.openmbean.CompositeDataSupport;
@@ -89,6 +88,9 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
     protected static final char OPT_HOST_SHORT = 'H';
     protected static final String OPT_HOST_LONG = "host";
 
+    protected static final char OPT_TIMEOUT_SHORT = 'T';
+    protected static final String OPT_TIMEOUT_LONG = "timeout";
+
     protected static final char OPT_JMX_AUTH_PASSWORD_SHORT = 'P';
     protected static final String OPT_JMX_AUTH_PASSWORD_LONG = "jmxauthpassword";
 
@@ -98,9 +100,11 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
     protected static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     private CLIOption hostOption = null;
+    private CLIOption timeoutOption = null;
     protected CLIOption jmxpass = null;
     protected CLIOption jmxuser = null;
     protected String hostname = "localhost";
+    protected int timeout = 15000;
     private JMXConnector c = null;
 
     protected AbstractJMXTools() {
@@ -196,7 +200,6 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
 
     protected MBeanServerConnection initConnection(final Map<String, String[]> env) throws InterruptedException, IOException {
         // Set timeout here, it is given in ms
-        final long timeout = 2000;
         final JMXServiceURL serviceurl = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + hostname + ':' + JMX_SERVER_PORT + "/server");
         final IOException[] exc = new IOException[1];
         final RuntimeException[] excr = new RuntimeException[1];
@@ -230,6 +233,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
 
     protected void setOptions(final AdminParser parser) {
         this.hostOption = setShortLongOpt(parser, OPT_HOST_SHORT, OPT_HOST_LONG, "host", "specifies the host", false);
+        this.timeoutOption = setShortLongOpt(parser, OPT_TIMEOUT_SHORT, OPT_TIMEOUT_LONG, "timeout in seconds for the connection creation to the backend (default 15s)", true, NeededQuadState.notneeded);
         this.jmxuser = setShortLongOpt(parser, OPT_JMX_AUTH_USER_SHORT, OPT_JMX_AUTH_USER_LONG, "jmx username (required when jmx authentication enabled)", true, NeededQuadState.notneeded);
         this.jmxpass = setShortLongOpt(parser, OPT_JMX_AUTH_PASSWORD_SHORT, OPT_JMX_AUTH_PASSWORD_LONG, "jmx username (required when jmx authentication enabled)", true, NeededQuadState.notneeded);
         setFurtherOptions(parser);
@@ -280,10 +284,18 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         return null;
     }
 
-    protected void readAndSetHost(final AdminParser parser) {
-        final String host = (String) parser.getOptionValue(this.hostOption);
-        if (null != host) {
-            hostname = host;
+    protected void readAndApplyOptions(final AdminParser parser) throws CLIIllegalOptionValueException {
+        String value = (String) parser.getOptionValue(this.hostOption);
+        if (null != value) {
+            hostname = value;
+        }
+        value = (String) parser.getOptionValue(this.timeoutOption);
+        if (null != value) {
+            try {
+                timeout = Integer.parseInt(value) * 1000;
+            } catch (NumberFormatException e) {
+                throw new CLIIllegalOptionValueException(timeoutOption, value, e);
+            }
         }
     }
 
@@ -297,7 +309,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
 
             Map<String, String[]> env = setCreds(parser);
 
-            readAndSetHost(parser);
+            readAndApplyOptions(parser);
 
             furtherOptionsHandling(parser, env);
         } catch (final CLIParseException e) {

@@ -85,17 +85,15 @@ public class IDMangler {
      */
     public static String mangle(final String... components) {
         final com.openexchange.java.StringAllocator id = new com.openexchange.java.StringAllocator(50);
-        id.append(escape(components[0]));
         boolean first = true;
-        for (int i = 1; i < components.length; i++) {
-            if (first) {
-                id.append(PRIMARY_DELIM);
-                first = false;
-            } else {
-                id.append(CHAR_SECONDARY_DELIM);
-            }
-            id.append(escape(components[i]));
+        for (String component : components) {
+            component = escape(component);
+            id.append(component);
+            final String delim = first ? PRIMARY_DELIM : SECONDARY_DELIM;
+            id.append(delim);
+            first = false;
         }
+        id.setNewLength(id.length()-1);
         return id.toString();
     }
 

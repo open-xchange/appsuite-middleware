@@ -1,4 +1,3 @@
-package com.openexchange.jolokia;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -48,18 +47,18 @@ package com.openexchange.jolokia;
  *
  */
 
-
+package com.openexchange.jolokia;
 
 import com.openexchange.i18n.LocalizableStrings;
-
 
 /**
  * {@link JolokiaExceptionMessage}
  *
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  */
-public class JolokiaExceptionMessage implements LocalizableStrings{
-    /** The following needed service is missing: \"%1$s\" */
+public class JolokiaExceptionMessage implements LocalizableStrings {
+
+    // The following needed service is missing: "%1$s"
     public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
 
 }

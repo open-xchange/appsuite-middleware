@@ -141,7 +141,7 @@ public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
     }
 
     public void testOnlyUpdateIfThereAreNewerUpdates(){
-        activator.setLAST_TIME_CHECKED(Calendar.getInstance().getTimeInMillis());
+        activator.setLastTimeChecked(Calendar.getInstance().getTimeInMillis());
         final CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
         copyFileFromRepository("Facebook_higherPriority_sameApi.yml", availableUpdatesPath);
         update.run();

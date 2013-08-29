@@ -71,6 +71,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.WarningsAware;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.folderstorage.ContentType;
@@ -184,12 +185,8 @@ public final class FileStorageFolderStorage implements FolderStorage {
     @Override
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
         final IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
-
-        final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(folder.getParentID());
-
         final DefaultFileStorageFolder fsFolder = new DefaultFileStorageFolder();
         fsFolder.setExists(false);
-        final String parentId = fsfi.getFolderId();
         fsFolder.setParentId(folder.getParentID());
         // Other
         fsFolder.setName(folder.getName());
@@ -216,7 +213,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
             }
             fsFolder.setPermissions(fsPermissions);
         } else {
-            if (FileStorageFolder.ROOT_FULLNAME.equals(parentId)) {
+            if (FileStorageFolder.ROOT_FULLNAME.equals(folder.getParentID())) {
                 final FileStoragePermission[] messagingPermissions = new FileStoragePermission[1];
                 {
                     final FileStoragePermission fsPerm = DefaultFileStoragePermission.newInstance();
@@ -274,9 +271,8 @@ public final class FileStorageFolderStorage implements FolderStorage {
         if (!(contentType instanceof FileStorageContentType)) {
             throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(contentType.toString());
         }
-
         // TODO: Return primary InfoStore's default folder
-        return FileStorageFolderIdentifier.getFQN(null, null, null);
+        return INFOSTORE;
     }
 
     @Override
@@ -289,11 +285,11 @@ public final class FileStorageFolderStorage implements FolderStorage {
         final IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
 
         if (!folderAccess.exists(folderId)) {
-            final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(folderId);
+            FolderID folderID = new FolderID(folderId);
             throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(
-                fsfi.getFolderId(),
-                Integer.valueOf(fsfi.getAccountId()),
-                fsfi.getServiceId(),
+                folderID.getFolderId(),
+                Integer.valueOf(folderID.getAccountId()),
+                folderID.getService(),
                 Integer.valueOf(storageParameters.getUserId()),
                 Integer.valueOf(storageParameters.getContextId()));
         }
@@ -343,8 +339,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
         final boolean hasSubfolders;
         {
             final FileStorageFolder fsFolder = folderAccess.getFolder(folderId);
-            final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(folderId);
-            retval = new FileStorageFolderImpl(fsFolder, fsfi.getAccountId(), fsfi.getServiceId());
+            retval = new FileStorageFolderImpl(fsFolder);
             hasSubfolders = fsFolder.hasSubfolders();
         }
         retval.setTreeID(treeId);
@@ -501,25 +496,14 @@ public final class FileStorageFolderStorage implements FolderStorage {
     @Override
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
         final IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
-
-        final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(folder.getID());
-        final String serviceId = fsfi.getServiceId();
-        final String accountId = fsfi.getAccountId();
-        String id = fsfi.getFolderId();
-
         final DefaultFileStorageFolder fsFolder = new DefaultFileStorageFolder();
         fsFolder.setExists(true);
         // Identifier
-        fsFolder.setId(id);
+        fsFolder.setId(folder.getID());
         // TODO: fsFolder.setAccountId(accountId);
         // Parent
-        final FileStorageFolderIdentifier pfi;
         if (null != folder.getParentID()) {
-            pfi = new FileStorageFolderIdentifier(folder.getParentID());
-            fsFolder.setParentId(pfi.getFolderId());
-            // TODO: fsFolder.setParentAccountId(parentArg.getAccountId());
-        } else {
-            pfi = null;
+            fsFolder.setParentId(folder.getParentID());
         }
         // Name
         if (null != folder.getName()) {
@@ -559,7 +543,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
         final String oldParent;
         final String oldName;
         {
-            final FileStorageFolder storageVersion = folderAccess.getFolder(id);
+            final FileStorageFolder storageVersion = folderAccess.getFolder(folder.getID());
             oldParent = storageVersion.getParentId();
             oldName = storageVersion.getName();
         }
@@ -576,8 +560,9 @@ public final class FileStorageFolderStorage implements FolderStorage {
              */
             final String newParent = fsFolder.getParentId();
             if (newParent != null) {
-                final String parentAccountID = pfi.getAccountId();
-                if (accountId.equals(parentAccountID)) {
+                FolderID newParentID = new FolderID(newParent);
+                FolderID folderID = new FolderID(folder.getID());
+                if (folderID.getAccountId().equals(newParentID.getAccountId())) {
                     /*
                      * Move to another parent in the same account
                      */
@@ -590,14 +575,15 @@ public final class FileStorageFolderStorage implements FolderStorage {
                         /*
                          * Perform move operation
                          */
-                        String movedFolder = folderAccess.moveFolder(id, newParent);
+                        String movedFolder = folderAccess.moveFolder(fsFolder.getId(), newParent);
                         if (rename) {
                             /*
                              * Perform rename
                              */
                             movedFolder = folderAccess.renameFolder(movedFolder, newName);
                         }
-                        folder.setID(FileStorageFolderIdentifier.getFQN(serviceId, accountId, movedFolder));
+                        folder.setID(movedFolder);
+                        fsFolder.setId(movedFolder);
                         movePerformed = true;
                     }
                 } else {
@@ -614,14 +600,15 @@ public final class FileStorageFolderStorage implements FolderStorage {
                     // Copy
                     final String destFullname = fullCopy(
                         folderAccess,
-                        id,
+                        folder.getID(),
                         newParent,
                         storageParameters.getUserId(),
                         p.getCapabilities().contains(FileStorageFolder.CAPABILITY_PERMISSIONS));
                     // Delete source
-                    folderAccess.deleteFolder(id, true);
+                    folderAccess.deleteFolder(folder.getID(), true);
                     // Perform other updates
-                    folderAccess.updateFolder(destFullname, fsFolder);
+                    String updatedId = folderAccess.updateFolder(destFullname, fsFolder);
+                    fsFolder.setId(updatedId);
                 }
             }
         }
@@ -629,22 +616,23 @@ public final class FileStorageFolderStorage implements FolderStorage {
          * Check if a rename shall be performed
          */
         if (!movePerformed && newName != null && !newName.equals(oldName)) {
-            id = folderAccess.renameFolder(id, newName);
-            folder.setID(FileStorageFolderIdentifier.getFQN(serviceId, accountId, id));
+            String updatedId = folderAccess.renameFolder(fsFolder.getId(), newName);
+            folder.setID(updatedId);
+            fsFolder.setId(updatedId);
         }
         /*
          * Handle update of permission or subscription
          */
-        folderAccess.updateFolder(id, fsFolder);
+        folderAccess.updateFolder(fsFolder.getId(), fsFolder);
         /*
          * Is hand-down?
          */
         if ((null != fsPermissions) && StorageParametersUtility.isHandDownPermissions(storageParameters)) {
-            handDown(accountId, id, fsPermissions, folderAccess);
+            handDown(fsFolder.getId(), fsPermissions, folderAccess);
         }
     }
 
-    private static void handDown(final String accountId, final String parentId, final FileStoragePermission[] fsPermissions, final IDBasedFolderAccess folderAccess) throws OXException {
+    private static void handDown(final String parentId, final FileStoragePermission[] fsPermissions, final IDBasedFolderAccess folderAccess) throws OXException {
         final FileStorageFolder[] subfolders = folderAccess.getSubfolders(parentId, true);
         for (final FileStorageFolder subfolder : subfolders) {
             final DefaultFileStorageFolder fsFolder = new DefaultFileStorageFolder();
@@ -655,7 +643,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
             fsFolder.setPermissions(Arrays.asList(fsPermissions));
             folderAccess.updateFolder(id, fsFolder);
             // Recursive
-            handDown(accountId, id, fsPermissions, folderAccess);
+            handDown(id, fsPermissions, folderAccess);
         }
     }
 

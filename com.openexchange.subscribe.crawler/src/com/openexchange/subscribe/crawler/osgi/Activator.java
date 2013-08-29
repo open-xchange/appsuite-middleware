@@ -55,6 +55,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.ho.yaml.Yaml;
 import org.osgi.framework.BundleActivator;
@@ -100,9 +102,9 @@ public class Activator implements BundleActivator {
     public static final int CRAWLER_API_VERSION = 620;
 
     // This assures that every time the server/bundle is restarted it will check for updates
-    private Long LAST_TIME_CHECKED = new Long("0");
+    private final AtomicLong lastTimeChecked = new AtomicLong(0L);
 
-    private ICalParser iCalParser = null;
+    private final AtomicReference<ICalParser> iCalParserRef = new AtomicReference<ICalParser>(null);
 
     @Override
     public void start(final BundleContext context) throws Exception {
@@ -245,12 +247,12 @@ public class Activator implements BundleActivator {
         }
     }
 
-    public Long getLAST_TIME_CHECKED() {
-        return LAST_TIME_CHECKED;
+    public long getLastTimeChecked() {
+        return lastTimeChecked.get();
     }
 
-    public void setLAST_TIME_CHECKED(final Long last_time_checked) {
-        LAST_TIME_CHECKED = last_time_checked;
+    public void setLastTimeChecked(final long stamp) {
+        lastTimeChecked.set(stamp);
     }
 
     public static int getCRAWLER_API_VERSION() {
@@ -258,11 +260,11 @@ public class Activator implements BundleActivator {
     }
 
     public void setICalParser(final ICalParser iCalParser) {
-        this.iCalParser = iCalParser;
+        iCalParserRef.set(iCalParser);
     }
 
     public ICalParser getICalParser() {
-        return iCalParser;
+        return iCalParserRef.get();
     }
 
     // THESE METHODS SHOULD ONLY BE USED FOR TESTING

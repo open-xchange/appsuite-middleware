@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.composition.internal;
 
-import static com.openexchange.file.storage.composition.FolderID.isMangled;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -75,8 +74,8 @@ public class IDManglingFolder implements FileStorageFolder {
      * @return A folder with unique IDs
      */
     public static FileStorageFolder withUniqueID(FileStorageFolder delegate, String serviceID, String accountID) {
-        final String id = null == delegate.getId() ? null : (isMangled(delegate.getId()) ? delegate.getId() : new FolderID(serviceID, accountID, delegate.getId()).toUniqueID());
-        final String parentId = null == delegate.getParentId() ? null : (isMangled(delegate.getParentId()) ? delegate.getParentId() : new FolderID(serviceID, accountID, delegate.getParentId()).toUniqueID());
+        final String id = null != delegate.getId() ? new FolderID(serviceID, accountID, delegate.getId()).toUniqueID() : null;
+        final String parentId = null != delegate.getParentId() ? new FolderID(serviceID, accountID, delegate.getParentId()).toUniqueID() : null;
         return new IDManglingFolder(delegate, id, parentId);
     }
 
@@ -213,10 +212,9 @@ public class IDManglingFolder implements FileStorageFolder {
     public Map<String, Object> getProperties() {
         return delegate.getProperties();
     }
+    
+    
 
-
-
-    @Override
     public Map<String, Object> getMeta() {
         return delegate.getMeta();
     }
