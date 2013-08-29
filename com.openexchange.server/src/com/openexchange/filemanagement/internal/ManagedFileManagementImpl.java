@@ -557,8 +557,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
     }
 
     private DistributedFileManagement getDistributed() {
-        final DistributedFileManagement service = ServerServiceRegistry.getInstance().getService(DistributedFileManagement.class);
-        return service;
+        return ServerServiceRegistry.getInstance().getService(DistributedFileManagement.class);
     }
 
     /** Check for an empty string */
