@@ -433,15 +433,16 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
             if (!distributedFileManagement.exists(id)) {
                 return null;
             }
-
+            // Get remote file
+            final ManagedFile managedFile = createManagedFile(id, distributedFileManagement.get(id));
             // Safe touch
             try {
                 distributedFileManagement.touch(id);
             } catch (final Exception e) {
                 // Ignore
             }
-
-            return createManagedFile(id, distributedFileManagement.get(id));
+            // Return
+            return managedFile;
         } catch (final OXException e) {
             return null;
         }
