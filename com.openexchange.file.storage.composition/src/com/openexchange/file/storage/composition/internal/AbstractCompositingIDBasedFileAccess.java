@@ -91,6 +91,7 @@ import com.openexchange.file.storage.composition.FileStreamHandlerRegistry;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 import com.openexchange.file.storage.composition.IDBasedSequenceNumberProvider;
+import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
@@ -110,6 +111,11 @@ import com.openexchange.tx.TransactionException;
  * {@link AbstractCompositingIDBasedFileAccess}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+/**
+ * {@link AbstractCompositingIDBasedFileAccess}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractCompositingIDBasedFileAccess extends AbstractService<Transaction> implements IDBasedRandomFileAccess, IDBasedSequenceNumberProvider {
 
@@ -132,6 +138,15 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     public static FileStreamHandlerRegistry getStreamHandlerRegistry() {
         return HANDLER_REGISTRY.get();
     }
+
+    /**
+     * The service identifier for InfoStore.
+     */
+    protected static final String INFOSTORE_SERVICE_ID = "com.openexchange.infostore";
+
+    private static final AtomicReference<FileStorageService> INFOSTORE_SERVICE_REF = new AtomicReference<FileStorageService>();
+
+    // ------------------------------------------------------------------------------------------------- //
 
     /** The associated session */
     protected Session session;
@@ -898,6 +913,12 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
      * @throws OXException If an error occurs
      */
     protected FileStorageFileAccess getFileAccess(final String serviceId, final String accountId) throws OXException {
+        // Special handling for InfoStore
+        if (INFOSTORE_SERVICE_ID.equals(serviceId)) {
+            return getInfoStoreService().getAccountAccess(accountId, session).getFileAccess();
+        }
+
+        // Others...
         final Map<String, FileStorageAccountAccess> connectedAccounts = this.connectedAccounts.get();
         final FileStorageAccountAccess cached = connectedAccounts.get(new StringAllocator(serviceId).append('/').append(accountId).toString());
         if (cached != null) {
@@ -919,6 +940,12 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
      * @throws OXException If an error occurs
      */
     protected FileStorageFolderAccess getFolderAccess(final String serviceId, final String accountId) throws OXException {
+        // Special handling for InfoStore
+        if (INFOSTORE_SERVICE_ID.equals(serviceId)) {
+            return getInfoStoreService().getAccountAccess(accountId, session).getFolderAccess();
+        }
+
+        // Others...
         final FileStorageAccountAccess cached = connectedAccounts.get().get(serviceId + "/" + accountId);
         if (cached != null) {
             return cached.getFolderAccess();
@@ -959,6 +986,21 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             }
         }
         return retval;
+    }
+
+    /**
+     * Gets the special InfoStore service.
+     *
+     * @return The special InfoStore service
+     * @throws OXException If special InfoStore cannot be returned
+     */
+    protected FileStorageService getInfoStoreService() throws OXException {
+        FileStorageService infstoreService = INFOSTORE_SERVICE_REF.get();
+        if (null == infstoreService) {
+            infstoreService = Services.getService(FileStorageServiceRegistry.class).getFileStorageService(INFOSTORE_SERVICE_ID);
+            INFOSTORE_SERVICE_REF.set(infstoreService);
+        }
+        return infstoreService;
     }
 
     protected abstract FileStorageService getFileStorageService(String serviceId) throws OXException;
