@@ -1,6 +1,10 @@
+* 2013-08-29 - marcus.klein@open-xchange.com
+
+ - Fix for bug 28008: Implemented Debian distribution specific dependencies to depend on the supported JDK.
+
 * 2013-08-28 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 28459: Removed obsolete file storage identifiers in favor of ID based folder access    
+ - Fix for bug 28459: Removed obsolete file storage identifiers in favor of ID based folder access
 
 * 2013-08-28 - marcus.klein@open-xchange.com
 
@@ -14,7 +18,7 @@
 
 * 2013-08-27 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 26957: Respond with HTTP 400 (Bad Request) when no VEVENTs could be parsed   
+ - Fix for bug 26957: Respond with HTTP 400 (Bad Request) when no VEVENTs could be parsed
 
 * 2013-08-27 - thorben.betten@open-xchange.com
 
