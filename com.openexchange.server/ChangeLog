@@ -1,3 +1,7 @@
+* 2013-08-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28414: No need for remote touch attempt if file is locally available
+
 * 2013-08-29 - marcus.klein@open-xchange.com
 
  - Fix for bug 28008: Implemented Debian distribution specific dependencies to depend on the supported JDK.

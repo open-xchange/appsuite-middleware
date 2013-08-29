@@ -405,16 +405,19 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
     @Override
     public ManagedFile getByID(final String id) throws OXException {
         ManagedFile mf = files.get(id);
-        if (mf == null) {
-            mf = getByIDDistributed(id);
-        }
-        if (null == mf || mf.isDeleted()) {
-            throw ManagedFileExceptionErrorMessage.NOT_FOUND.create(id);
+        if (null != mf) {
+            // Locally available
+            if (mf.isDeleted()) {
+                throw ManagedFileExceptionErrorMessage.NOT_FOUND.create(id);
+            }
+            mf.touch();
+            return mf;
         }
 
-        final DistributedFileManagement distributedFileManagement = getDistributed();
-        if (distributedFileManagement != null && distributedFileManagement.exists(id)) {
-            distributedFileManagement.touch(id);
+        // Do remote look-up
+        mf = getByIDDistributed(id);
+        if (null == mf || mf.isDeleted()) {
+            throw ManagedFileExceptionErrorMessage.NOT_FOUND.create(id);
         }
         mf.touch();
         return mf;
@@ -429,6 +432,13 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         try {
             if (!distributedFileManagement.exists(id)) {
                 return null;
+            }
+
+            // Safe touch
+            try {
+                distributedFileManagement.touch(id);
+            } catch (final Exception e) {
+                // Ignore
             }
 
             return createManagedFile(id, distributedFileManagement.get(id));
