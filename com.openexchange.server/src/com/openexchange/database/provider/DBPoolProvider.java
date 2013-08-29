@@ -52,9 +52,9 @@ package com.openexchange.database.provider;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import java.sql.Connection;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 
 public class DBPoolProvider implements DBProvider {
@@ -64,8 +64,7 @@ public class DBPoolProvider implements DBProvider {
     @Override
     public Connection getReadConnection(final Context ctx) throws OXException {
         try {
-            final Connection readCon = DBPool.pickup(ctx);
-            return readCon;
+            return DBPool.pickup(ctx);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -81,12 +80,7 @@ public class DBPoolProvider implements DBProvider {
 
     @Override
     public Connection getWriteConnection(final Context ctx) throws OXException {
-        try {
-            final Connection writeCon = DBPool.pickupWriteable(ctx);
-            return writeCon;
-        } catch (final OXException e) {
-            throw e;
-        }
+        return DBPool.pickupWriteable(ctx);
     }
 
     @Override
