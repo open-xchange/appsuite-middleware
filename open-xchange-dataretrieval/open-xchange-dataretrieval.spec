@@ -52,6 +52,8 @@ Seventh candidate for 7.4.0 release
 Sixth candidate for 7.4.0 release
 * Thu Aug 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-22
+* Thu Aug 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-08-22
 * Tue Aug 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-19
 * Mon Aug 19 2013 Marcus Klein <marcus.klein@open-xchange.com>

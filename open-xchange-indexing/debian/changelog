@@ -175,9 +175,9 @@ open-xchange-indexing (6.21.0-5) unstable; urgency=low
 open-xchange-indexing (6.21.0-4) unstable; urgency=low
 
   * Build for Rev. 4
-  
+
  -- Steffen Templin <steffen.templin@open-xchange.com>  Fri, 11 May 2012 12:00:00 +0100
-  
+
 open-xchange-indexing (6.21.0-3) unstable; urgency=low
 
   * Build for Rev. 3
