@@ -1,3 +1,7 @@
+* 2013-08-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28602: Don't close ThresholdFileHolder instance
+
 * 2013-08-07 - martin.herfurth@open-xchange.com
 
  - Fix for bug 26475: Bad calculation of recurrence date position of a change exception on delete.

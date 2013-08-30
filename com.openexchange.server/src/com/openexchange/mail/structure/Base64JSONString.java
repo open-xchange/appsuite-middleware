@@ -93,8 +93,11 @@ public final class Base64JSONString implements JSONString {
              */
             final ThresholdFileHolder tfh = new ThresholdFileHolder();
             this.tfh = tfh;
-            /*
+            /*-
              * Write encoded to threshold file holder
+             * 
+             * 
+             * Don't close 'out' as we're going to read from it later on
              */
             out = new Base64OutputStream(new JSONStringOutputStream(tfh.asOutputStream()), true, -1, null);
             final int buflen = 2048;
@@ -108,7 +111,7 @@ public final class Base64JSONString implements JSONString {
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            Streams.close(in, out);
+            Streams.close(in);
         }
     }
 
