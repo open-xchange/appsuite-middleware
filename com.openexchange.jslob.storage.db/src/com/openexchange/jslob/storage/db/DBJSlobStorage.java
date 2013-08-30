@@ -630,6 +630,29 @@ public final class DBJSlobStorage implements JSlobStorage {
         }
     }
 
+    /**
+     * Checks if such an entry exists.
+     *
+     * @param id The identifier
+     * @return <code>true</code> if exists; otherwise <code>false</code>
+     * @throws OXException If an error occurs
+     */
+    public boolean exists(final JSlobId id) throws OXException {
+        rlock.lock();
+        try {
+            final DatabaseService databaseService = getDatabaseService();
+            final int contextId = id.getContext();
+            final Connection con = databaseService.getReadOnly(contextId);
+            try {
+                return exists(id, contextId, con);
+            } finally {
+                databaseService.backReadOnly(contextId, con);
+            }
+        } finally {
+            rlock.unlock();
+        }
+    }
+
     private boolean exists(final JSlobId id, final int contextId, final Connection con) throws OXException {
         if (false && checkLocked(id, false, con)) {
             throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id);
