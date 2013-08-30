@@ -1,3 +1,7 @@
+* 2013-08-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28602: Don't close ThresholdFileHolder instance
+
 * 2013-08-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 28414: No need for remote touch attempt if file is locally available
