@@ -998,6 +998,9 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         FileStorageService infstoreService = INFOSTORE_SERVICE_REF.get();
         if (null == infstoreService) {
             infstoreService = Services.getService(FileStorageServiceRegistry.class).getFileStorageService(INFOSTORE_SERVICE_ID);
+            if (null == infstoreService) {
+                throw FileStorageExceptionCodes.UNKNOWN_FILE_STORAGE_SERVICE.create(INFOSTORE_SERVICE_ID);
+            }
             INFOSTORE_SERVICE_REF.set(infstoreService);
         }
         return infstoreService;
