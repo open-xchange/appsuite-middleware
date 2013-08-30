@@ -380,16 +380,14 @@ public class FolderTest extends AbstractAJAXTest {
     }
 
     public static boolean renameFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final int folderId, final String folderName, final String moduleStr, final int type, final long timestamp) throws JSONException, MalformedURLException, IOException, SAXException {
-        final JSONObject jsonFolder = new JSONObject(6);
-        jsonFolder.put("id", folderId);
+        final JSONObject jsonFolder = new JSONObject();
         jsonFolder.put("title", folderName);
-        jsonFolder.put("module", moduleStr);
-        jsonFolder.put("type", type);
         final URLParameter urlParam = new URLParameter();
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE);
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         urlParam.setParameter(AJAXServlet.PARAMETER_ID, Integer.toString(folderId));
         urlParam.setParameter("timestamp", String.valueOf(timestamp));
+        urlParam.setParameter(FolderFields.TREE, Integer.toString(1)); //TODO need to get this out of the rensponse
         final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         final WebRequest req = new PutMethodWebRequest(
