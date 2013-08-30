@@ -57,6 +57,16 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 
 
 public class Node1077Test extends CalendarSqlTest {
+    
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        
+        folders.unsharePrivateFolder(session, ctx);
+        folders.unsharePrivateFolder(session2, ctx);
+        folders.unsharePrivateFolder(session3, ctx);
+        folders.unsharePrivateFolder(session4, ctx);
+    }
 
     // Node 1077
     public void testShouldSupplyConflictingUserParticipants() throws SQLException, OXException {
@@ -132,7 +142,7 @@ public class Node1077Test extends CalendarSqlTest {
         appointments.save(appointment);
         clean.add(appointment);
 
-        appointments.switchUser(thirdUser);
+        appointments.switchUser(secondUser);
 
         final CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(participant1, participant3);
         conflictingAppointment.setIgnoreConflicts(false);

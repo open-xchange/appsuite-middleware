@@ -81,4 +81,9 @@ public class StaticDBPoolProvider implements DBProvider {
         // Nothing to do
     }
 
+    @Override
+    public void releaseWriteConnectionAfterReading(final Context ctx, final Connection con) {
+        // Nothing to release.
+    }
+
 }

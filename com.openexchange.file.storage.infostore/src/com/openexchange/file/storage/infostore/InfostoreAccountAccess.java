@@ -111,12 +111,12 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess {
 
     @Override
     public void close() {
-
+        // Nope
     }
 
     @Override
     public void connect() throws OXException {
-
+        // Bypassed...
     }
 
     @Override

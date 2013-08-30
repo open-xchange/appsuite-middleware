@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,50 @@
  *
  */
 
-package com.openexchange.database.provider;
+package com.openexchange.tx;
 
-import java.sql.Connection;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+/**
+ * {@link TransactionAwares} - Utility class for {@code TransactionAware}.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class TransactionAwares {
 
-public class AlwaysWriteConnectionProvider implements DBProvider {
-
-    private final DBProvider delegate;
-
-    public AlwaysWriteConnectionProvider(final DBProvider delegate) {
-        this.delegate = delegate;
+    /**
+     * Initializes a new {@link TransactionAwares}.
+     */
+    private TransactionAwares() {
+        super();
     }
 
-    @Override
-    public Connection getReadConnection(final Context ctx) throws OXException {
-        return delegate.getWriteConnection(ctx);
+    /**
+     * Finishes specified transaction.
+     *
+     * @param transaction The transaction to finish
+     */
+    public static void finishSafe(final TransactionAware transaction) {
+        if (null != transaction) {
+            try {
+                transaction.finish();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
     }
 
-    @Override
-    public Connection getWriteConnection(final Context ctx) throws OXException {
-        return delegate.getWriteConnection(ctx);
-    }
-
-    @Override
-    public void releaseReadConnection(final Context ctx, final Connection con) {
-        delegate.releaseWriteConnection(ctx, con);
-    }
-
-    @Override
-    public void releaseWriteConnection(final Context ctx, final Connection con) {
-        delegate.releaseWriteConnection(ctx, con);
-    }
-
-    @Override
-    public void releaseWriteConnectionAfterReading(final Context ctx, final Connection con) {
-        delegate.releaseWriteConnectionAfterReading(ctx, con);
+    /**
+     * Rolls-back specified transaction.
+     *
+     * @param transaction The transaction to roll back
+     */
+    public static void rollbackSafe(final TransactionAware transaction) {
+        if (null != transaction) {
+            try {
+                transaction.rollback();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
     }
 
 }

@@ -211,11 +211,7 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
             }
         }
 
-        return !hasResult(
-            "SELECT 1 FROM infostoreReservedPaths WHERE cid = ? AND folder = ? AND name = ?",
-            ctx.getContextId(),
-            folderId,
-            fileName);
+        return !hasResult("SELECT 1 FROM infostoreReservedPaths WHERE cid = ? AND folder = ? AND name = ?", ctx.getContextId(), folderId, fileName);
     }
 
     private void lockFolder() throws SQLException {

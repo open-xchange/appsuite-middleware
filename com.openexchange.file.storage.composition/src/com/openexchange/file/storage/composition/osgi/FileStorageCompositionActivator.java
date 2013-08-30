@@ -134,6 +134,7 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
             return getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
         }
 
+        @Override
         protected List<FileStorageService> getAllFileStorageServices() throws OXException {
             return getService(FileStorageServiceRegistry.class).getAllServices();
         }
