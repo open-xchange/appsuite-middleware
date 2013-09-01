@@ -105,6 +105,7 @@ import com.openexchange.tools.iterator.MergingSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tx.AbstractService;
+import com.openexchange.tx.TransactionAwares;
 import com.openexchange.tx.TransactionException;
 
 /**
@@ -359,14 +360,29 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     @Override
     public void lock(final String id, final long diff) throws OXException {
         final FileID fileID = new FileID(id);
-        getFileAccess(fileID.getService(), fileID.getAccountId()).lock(fileID.getFolderId(), fileID.getFileId(), diff);
+        final TransactionAwareFileAccessDelegation<Void> lockDelegation = new TransactionAwareFileAccessDelegation<Void>() {
+
+            @Override
+            protected Void callInTransaction(FileStorageFileAccess access) throws OXException {
+                access.lock(fileID.getFolderId(), fileID.getFileId(), diff);
+                return null;
+            }
+        };
+        lockDelegation.call(getFileAccess(fileID.getService(), fileID.getAccountId()));
     }
 
     @Override
     public void removeDocument(final String folderId, final long sequenceNumber) throws OXException {
         final FolderID id = new FolderID(folderId);
+        final TransactionAwareFileAccessDelegation<Void> removeDocumentDelegation = new TransactionAwareFileAccessDelegation<Void>() {
 
-        getFileAccess(id.getService(), id.getAccountId()).removeDocument(id.getFolderId(), sequenceNumber);
+            @Override
+            protected Void callInTransaction(FileStorageFileAccess access) throws OXException {
+                access.removeDocument(id.getFolderId(), sequenceNumber);
+                return null;
+            }
+        };
+        removeDocumentDelegation.call(getFileAccess(id.getService(), id.getAccountId()));
         // TODO: Does this method really make sense? Skipping possible delete event.
     }
 
@@ -408,7 +424,14 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             /*
              * delete
              */
-            final List<IDTuple> conflicted = access.removeDocument(toDelete, sequenceNumber);
+            final TransactionAwareFileAccessDelegation<List<IDTuple>> removeDocumentDelegation = new TransactionAwareFileAccessDelegation<List<IDTuple>>() {
+
+                @Override
+                protected List<IDTuple> callInTransaction(FileStorageFileAccess access) throws OXException {
+                    return access.removeDocument(toDelete, sequenceNumber);
+                }
+            };
+            final List<IDTuple> conflicted = removeDocumentDelegation.call(access);
             for (final IDTuple tuple : conflicted) {
                 final FileStorageAccountAccess accountAccess = access.getAccountAccess();
                 notDeleted.add(new FileID(
@@ -444,9 +467,16 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public String[] removeVersion(final String id, final String[] versions) throws OXException {
-        FileID fileID = new FileID(id);
-        FileStorageFileAccess access = getFileAccess(fileID.getService(), fileID.getAccountId());
-        String[] notRemoved = access.removeVersion(fileID.getFolderId(), fileID.getFileId(), versions);
+        final FileID fileID = new FileID(id);
+        final FileStorageFileAccess access = getFileAccess(fileID.getService(), fileID.getAccountId());
+        final TransactionAwareFileAccessDelegation<String[]> removeVersionDelegation = new TransactionAwareFileAccessDelegation<String[]>() {
+
+            @Override
+            protected String[] callInTransaction(FileStorageFileAccess access) throws OXException {
+                return access.removeVersion(fileID.getFolderId(), fileID.getFileId(), versions);
+            }
+        };
+        final String[] notRemoved = removeVersionDelegation.call(access);
 
         String serviceId = access.getAccountAccess().getService().getId();
         String accountId = access.getAccountAccess().getAccountId();
@@ -478,20 +508,66 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         return notRemoved;
     }
 
-    private static interface FileAccessDelegation {
+    private static interface FileAccessDelegation<V> {
 
-        public void call(FileStorageFileAccess access) throws OXException;
+        /**
+         * Invokes this delegation.
+         *
+         * @param access The file access
+         * @return The resulting object
+         * @throws OXException If operation fails
+         */
+        public V call(FileStorageFileAccess access) throws OXException;
 
     }
 
-    protected void save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final FileAccessDelegation delegation) throws OXException {
+    private static abstract class TransactionAwareFileAccessDelegation<V> implements FileAccessDelegation<V> {
+
+        public TransactionAwareFileAccessDelegation() {
+            super();
+        }
+
+        @Override
+        public final V call(final FileStorageFileAccess access) throws OXException {
+            boolean rollback = false;
+            try {
+                // Start transaction
+                access.startTransaction();
+                rollback = true;
+                // Invoke
+                final V retval = callInTransaction(access);
+                // Commit
+                access.commit();
+                rollback = false;
+                // Return result
+                return retval;
+            } finally {
+                if (rollback) {
+                    TransactionAwares.rollbackSafe(access);
+                }
+                TransactionAwares.finishSafe(access);
+            }
+        }
+
+        /**
+         * Invokes this delegation while it is in transaction state
+         *
+         * @param access The file access
+         * @return The resulting object
+         * @throws OXException If operation fails
+         */
+        protected abstract V callInTransaction(FileStorageFileAccess access) throws OXException;
+
+    }
+
+    protected void save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final FileAccessDelegation<Void> saveDelegation) throws OXException {
         if (FileStorageFileAccess.NEW == document.getId()) {
             /*
              * create new file
              */
             FolderID targetFolderID = new FolderID(document.getFolderId());
             document.setFolderId(targetFolderID.getFolderId());
-            delegation.call(getFileAccess(targetFolderID.getService(), targetFolderID.getAccountId()));
+            saveDelegation.call(getFileAccess(targetFolderID.getService(), targetFolderID.getAccountId()));
             FileID newID = new FileID(
                 targetFolderID.getService(), targetFolderID.getAccountId(), targetFolderID.getFolderId(), document.getId());
             document.setId(newID.toUniqueID());
@@ -503,7 +579,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
              * update existing file
              */
             FileID sourceFileID = new FileID(document.getId());
-            FolderID targetFolderID;
+            final FolderID targetFolderID;
             if (null == document.getFolderId()) {
                 targetFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceFileID.getFolderId());
             } else {
@@ -521,13 +597,21 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                 /*
                  * special handling for move to different folder
                  */
-                FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceFileID.getFolderId());
-                IDTuple sourceID = new IDTuple(sourceFileID.getFolderId(), sourceFileID.getFileId());
+                final FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceFileID.getFolderId());
+                final IDTuple sourceID = new IDTuple(sourceFileID.getFolderId(), sourceFileID.getFileId());
                 document.setFolderId(sourceID.getFolder());
                 document.setId(sourceID.getId());
-                IDTuple newID = getFileAccess(sourceFileID.getService(), sourceFileID.getAccountId())
-                    .move(sourceID, targetFolderID.getFolderId(), sequenceNumber, document, modifiedColumns);
-                FileID newFileID = new FileID(sourceFileID.getService(), sourceFileID.getAccountId(), newID.getFolder(), newID.getId());
+
+                final TransactionAwareFileAccessDelegation<IDTuple> moveDelegation = new TransactionAwareFileAccessDelegation<IDTuple>() {
+
+                    @Override
+                    protected IDTuple callInTransaction(final FileStorageFileAccess access) throws OXException {
+                        return access.move(sourceID, targetFolderID.getFolderId(), sequenceNumber, document, modifiedColumns);
+                    }
+                };
+                final IDTuple newID = moveDelegation.call(getFileAccess(sourceFileID.getService(), sourceFileID.getAccountId()));
+
+                final FileID newFileID = new FileID(sourceFileID.getService(), sourceFileID.getAccountId(), newID.getFolder(), newID.getId());
                 postEvent(FileStorageEventHelper.buildDeleteEvent(session, sourceFileID.getService(), sourceFileID.getAccountId(),
                     sourceFolderID.toUniqueID(), sourceFileID.toUniqueID(), document.getFileName(), null));
                 postEvent(FileStorageEventHelper.buildCreateEvent(session, newFileID.getService(), newFileID.getAccountId(),
@@ -538,7 +622,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
                  */
                 document.setFolderId(targetFolderID.getFolderId());
                 document.setId(sourceFileID.getFileId());
-                delegation.call(getFileAccess(targetFolderID.getService(), targetFolderID.getAccountId()));
+                saveDelegation.call(getFileAccess(targetFolderID.getService(), targetFolderID.getAccountId()));
                 FileID newID = new FileID(
                     targetFolderID.getService(), targetFolderID.getAccountId(), targetFolderID.getFolderId(), document.getId());
                 document.setId(newID.toUniqueID());
@@ -554,15 +638,13 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         final FolderID folderId = new FolderID(document.getFolderId()); // signifies the destination
 
         final boolean partialUpdate = modifiedColumns != null && !modifiedColumns.isEmpty();
-        final boolean hasUpload = data != null;
-
         final FileStorageFileAccess destAccess = getFileAccess(folderId.getService(), folderId.getAccountId());
         final FileStorageFileAccess sourceAccess = getFileAccess(id.getService(), id.getAccountId());
 
         document.setId(FileStorageFileAccess.NEW);
         document.setFolderId(folderId.getFolderId());
 
-        if (!hasUpload) {
+        if (data == null) {
             data = sourceAccess.getDocument(id.getFolderId(), id.getFileId(), FileStorageFileAccess.CURRENT_VERSION);
         }
 
@@ -580,12 +662,35 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
         }
 
-        destAccess.saveDocument(document, data, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+        {
+            final InputStream in = data;
+            final TransactionAwareFileAccessDelegation<Void> saveDocumentDelegation = new TransactionAwareFileAccessDelegation<Void>() {
+
+                @Override
+                protected Void callInTransaction(final FileStorageFileAccess access) throws OXException {
+                    access.saveDocument(document, in, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+                    return null;
+                }
+
+            };
+            saveDocumentDelegation.call(destAccess);
+        }
+
         FileID newId = new FileID(folderId.getService(), folderId.getAccountId(), document.getFolderId(), document.getId());
         document.setId(newId.toUniqueID());
         document.setFolderId(new FolderID(folderId.getService(), folderId.getAccountId(), document.getFolderId()).toUniqueID());
 
-        sourceAccess.removeDocument(Arrays.asList(new FileStorageFileAccess.IDTuple(id.getFolderId(), id.getFileId())), sequenceNumber);
+        {
+            final TransactionAwareFileAccessDelegation<Void> removeDocumentDelegation = new TransactionAwareFileAccessDelegation<Void>() {
+
+                @Override
+                protected Void callInTransaction(FileStorageFileAccess access) throws OXException {
+                    access.removeDocument(Arrays.asList(new FileStorageFileAccess.IDTuple(id.getFolderId(), id.getFileId())), sequenceNumber);
+                    return null;
+                }
+            };
+            removeDocumentDelegation.call(sourceAccess);
+        }
 
         Event deleteEvent = FileStorageEventHelper.buildDeleteEvent(session, id.getService(), id.getAccountId(), new FolderID(id.getService(), id.getAccountId(), id.getFolderId()).toUniqueID(), id.toUniqueID(), document.getFileName(), null);
         Event createEvent = FileStorageEventHelper.buildCreateEvent(session, folderId.getService(), folderId.getAccountId(), folderId.toUniqueID(), newId.toUniqueID(), document.getFileName());
@@ -595,11 +700,12 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public void saveDocument(final File document, final InputStream data, final long sequenceNumber) throws OXException {
-        save(document, data, sequenceNumber, null, new FileAccessDelegation() {
+        save(document, data, sequenceNumber, null, new TransactionAwareFileAccessDelegation<Void>() {
 
             @Override
-            public void call(final FileStorageFileAccess access) throws OXException {
+            protected Void callInTransaction(final FileStorageFileAccess access) throws OXException {
                 access.saveDocument(document, data, sequenceNumber);
+                return null;
             }
 
         });
@@ -607,11 +713,12 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public void saveDocument(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns) throws OXException {
-        save(document, data, sequenceNumber, modifiedColumns, new FileAccessDelegation() {
+        save(document, data, sequenceNumber, modifiedColumns, new TransactionAwareFileAccessDelegation<Void>() {
 
             @Override
-            public void call(final FileStorageFileAccess access) throws OXException {
+            protected Void callInTransaction(final FileStorageFileAccess access) throws OXException {
                 access.saveDocument(document, data, sequenceNumber, modifiedColumns);
+                return null;
             }
 
         });
@@ -619,15 +726,16 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public void saveDocument(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final boolean ignoreVersion) throws OXException {
-        save(document, data, sequenceNumber, modifiedColumns, new FileAccessDelegation() {
+        save(document, data, sequenceNumber, modifiedColumns, new TransactionAwareFileAccessDelegation<Void>() {
 
             @Override
-            public void call(final FileStorageFileAccess access) throws OXException {
+            protected Void callInTransaction(final FileStorageFileAccess access) throws OXException {
                 if (access instanceof FileStorageIgnorableVersionFileAccess) {
                     ((FileStorageIgnorableVersionFileAccess) access).saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion);
                 } else {
                     access.saveDocument(document, data, sequenceNumber, modifiedColumns);
                 }
+                return null;
             }
 
         });
@@ -646,14 +754,15 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     @Override
     public void saveDocument(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns,
         final long offset) throws OXException {
-        save(document, data, sequenceNumber, modifiedColumns, new FileAccessDelegation() {
+        save(document, data, sequenceNumber, modifiedColumns, new TransactionAwareFileAccessDelegation<Void>() {
 
             @Override
-            public void call(FileStorageFileAccess fileAccess) throws OXException {
+            protected Void callInTransaction(FileStorageFileAccess fileAccess) throws OXException {
                 if (false == FileStorageRandomFileAccess.class.isInstance(fileAccess)) {
                     throw new UnsupportedOperationException("FileStorageRandomFileAccess required");
                 }
                 ((FileStorageRandomFileAccess)fileAccess).saveDocument(document, data, sequenceNumber, modifiedColumns, offset);
+                return null;
             }
 
         });
@@ -671,11 +780,12 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public void saveFileMetadata(final File document, final long sequenceNumber) throws OXException {
-        save(document, null, sequenceNumber, null, new FileAccessDelegation() {
+        save(document, null, sequenceNumber, null, new TransactionAwareFileAccessDelegation<Void>() {
 
             @Override
-            public void call(final FileStorageFileAccess access) throws OXException {
+            protected Void callInTransaction(final FileStorageFileAccess access) throws OXException {
                 access.saveFileMetadata(document, sequenceNumber);
+                return null;
             }
 
         });
@@ -683,11 +793,12 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     @Override
     public void saveFileMetadata(final File document, final long sequenceNumber, final List<Field> modifiedColumns) throws OXException {
-        save(document, null, sequenceNumber, modifiedColumns, new FileAccessDelegation() {
+        save(document, null, sequenceNumber, modifiedColumns, new TransactionAwareFileAccessDelegation<Void>() {
 
             @Override
-            public void call(final FileStorageFileAccess access) throws OXException {
+            protected Void callInTransaction(final FileStorageFileAccess access) throws OXException {
                 access.saveFileMetadata(document, sequenceNumber, modifiedColumns);
+                return null;
             }
 
         });
@@ -841,8 +952,20 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     @Override
     public void touch(final String id) throws OXException {
         final FileID fileID = new FileID(id);
-        FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
-        fileAccess.touch(fileID.getFolderId(), fileID.getFileId());
+        final FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
+
+        /*
+         * Touch
+         */
+        final TransactionAwareFileAccessDelegation<Void> touchDelegation = new TransactionAwareFileAccessDelegation<Void>() {
+
+            @Override
+            protected Void callInTransaction(FileStorageFileAccess access) throws OXException {
+                access.touch(fileID.getFolderId(), fileID.getFileId());
+                return null;
+            }
+        };
+        touchDelegation.call(fileAccess);
 
         /*
          * Post event
@@ -874,7 +997,15 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     @Override
     public void unlock(final String id) throws OXException {
         final FileID fileID = new FileID(id);
-        getFileAccess(fileID.getService(), fileID.getAccountId()).unlock(fileID.getFolderId(), fileID.getFileId());
+        final TransactionAwareFileAccessDelegation<Void> unlockDelegation = new TransactionAwareFileAccessDelegation<Void>() {
+
+            @Override
+            protected Void callInTransaction(FileStorageFileAccess access) throws OXException {
+                access.unlock(fileID.getFolderId(), fileID.getFileId());
+                return null;
+            }
+        };
+        unlockDelegation.call(getFileAccess(fileID.getService(), fileID.getAccountId()));
     }
 
     protected List<File.Field> addIDColumns(List<File.Field> columns) {
