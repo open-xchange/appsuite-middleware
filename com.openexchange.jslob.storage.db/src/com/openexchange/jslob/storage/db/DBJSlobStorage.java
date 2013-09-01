@@ -49,6 +49,9 @@
 
 package com.openexchange.jslob.storage.db;
 
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -744,8 +747,145 @@ public final class DBJSlobStorage implements JSlobStorage {
         }
     }
 
+    /**
+     * Stores multiple JSlobs to database.
+     *
+     * @param ids The identifiers
+     * @param jslobs The JSlobs to store
+     * @throws OXException If store operation fails
+     */
+    public void storeMultiple(final List<JSlobId> ids, final List<JSlob> jslobs) throws OXException {
+        if ((null == ids || ids.isEmpty()) || (null == jslobs || jslobs.isEmpty())) {
+            return;
+        }
+        wlock.lock();
+        try {
+            final TIntObjectMap<ListPair> pairs = new TIntObjectHashMap<ListPair>(32);
+
+            {
+                final int size = ids.size();
+                for (int i = 0; i < size; i++) {
+                    final JSlobId jSlobId = ids.get(i);
+                    final int contextId = jSlobId.getContext();
+                    ListPair listPair = pairs.get(contextId);
+                    if (null == listPair) {
+                        listPair = new ListPair();
+                        pairs.put(contextId, listPair);
+                    }
+                    listPair.ids.add(jSlobId);
+                    listPair.jslobs.add(jslobs.get(i));
+                }
+            }
+
+            final int pairsSize = pairs.size();
+            if (1 == pairsSize) {
+                storeMultiple(ids.get(0).getContext(), ids, jslobs);
+            } else {
+                final TIntObjectIterator<ListPair> iterator = pairs.iterator();
+                for (int i = pairsSize; i-- > 0;) {
+                    iterator.advance();
+                    final ListPair listPair = iterator.value();
+                    storeMultiple(iterator.key(), listPair.ids, listPair.jslobs);
+                }
+            }
+
+        } finally {
+            wlock.unlock();
+        }
+    }
+
+    /**
+     * Stores multiple JSlobs to database that share the same context.
+     */
+    private void storeMultiple(final int contextId, final List<JSlobId> ids, final List<JSlob> jslobs) throws OXException {
+        final DatabaseService databaseService = getDatabaseService();
+        final Connection con = databaseService.getWritable(contextId);
+        boolean rollback = false;
+
+        PreparedStatement insertStmt = null;
+        PreparedStatement updateStmt = null;
+
+        try {
+            /*
+             * Load
+             */
+            con.setAutoCommit(false);
+            rollback = true;
+            /*
+             * Iterate...
+             */
+            int i = 0;
+            for (final JSlobId id : ids) {
+                final JSlob jslob = jslobs.get(i++);
+                if (exists(id, contextId, con)) {
+                    /*
+                     * Update
+                     */
+                    if (null == updateStmt) {
+                        updateStmt = con.prepareStatement(SQL_UPDATE);
+                    }
+                    updateStmt.setBinaryStream(1, new JSONInputStream(jslob.getJsonObject(), "US-ASCII"));
+                    updateStmt.setLong(2, contextId);
+                    updateStmt.setLong(3, id.getUser());
+                    updateStmt.setString(4, id.getServiceId());
+                    updateStmt.setString(5, id.getId());
+                    updateStmt.addBatch();
+                } else {
+                    /*
+                     * Insert
+                     */
+                    if (null == insertStmt) {
+                        insertStmt = con.prepareStatement(SQL_INSERT);
+                    }
+                    insertStmt.setLong(1, contextId);
+                    insertStmt.setLong(2, id.getUser());
+                    insertStmt.setString(3, id.getServiceId());
+                    insertStmt.setString(4, id.getId());
+                    insertStmt.setBinaryStream(5, new JSONInputStream(jslob.getJsonObject(), "US-ASCII"));
+                    insertStmt.addBatch();
+                }
+            }
+            if (null != insertStmt) {
+                insertStmt.executeBatch();
+            }
+            if (null != updateStmt) {
+                updateStmt.executeBatch();
+            }
+            /*
+             * Commit
+             */
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.closeSQLStuff(insertStmt);
+            Databases.closeSQLStuff(updateStmt);
+            Databases.autocommit(con);
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
     private DatabaseService getDatabaseService() {
         return services.getService(DatabaseService.class);
     }
+
+    private static final class ListPair {
+
+        /** The list of identifiers */
+        final List<JSlobId> ids;
+
+        /** The list of JSlobs */
+        final List<JSlob> jslobs;
+
+        ListPair() {
+            super();
+            this.ids = new LinkedList<JSlobId>();
+            this.jslobs = new LinkedList<JSlob>();
+        }
+    } // End of class ListPair
 
 }

@@ -274,20 +274,9 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
                 // Drain more if available
                 delayedStoreOps.drainTo(objects);
                 final Cache cache = optCache();
-                if (null != cache) {
-                    for (final DelayedStoreOp delayedStoreOp : objects) {
-                        if (POISON == delayedStoreOp) {
-                            // Reached poison element
-                            return;
-                        }
-                        if (delayedStoreOp != null) {
-                            try {
-                                write2DB(delayedStoreOp, cache);
-                            } catch (final Exception e) {
-                                LOG.error("JSlobs could not be flushed to database", e);
-                            }
-                        }
-                    }
+                if (null != cache && writeMultiple2DB(objects, cache)) {
+                    // Reached poison element
+                    return;
                 }
             } catch (final Exception e) {
                 LOG.error("Checking for delayed JSlobs failed", e);
@@ -304,6 +293,36 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
             // Propagate among remote caches
             cache.putInGroup(delayedStoreOp.id, delayedStoreOp.group, t.setId(delayedStoreOp.jSlobId), true);
         }
+    }
+
+    private boolean writeMultiple2DB(final List<DelayedStoreOp> delayedStoreOps, final Cache cache) throws OXException {
+        boolean getOut = false;
+        // Collect valid delayed store operations
+        int size = delayedStoreOps.size();
+        final List<JSlobId> ids = new ArrayList<JSlobId>(size);
+        final List<JSlob> jslobs = new ArrayList<JSlob>(size);
+        for (int i = 0; i < size; i++) {
+            final DelayedStoreOp delayedStoreOp = delayedStoreOps.get(i);
+            if (POISON == delayedStoreOp) {
+                getOut = true;
+            } else if (delayedStoreOp != null) {
+                final Object obj = cache.getFromGroup(delayedStoreOp.id, delayedStoreOp.group);
+                if (obj instanceof JSlob) {
+                    ids.add(delayedStoreOp.jSlobId);
+                    jslobs.add((JSlob) obj);
+                }
+            }
+        }
+        // Store them
+        delegate.storeMultiple(ids, jslobs);
+        // Invalidate remote caches
+        size = ids.size();
+        for (int i = 0; i < size; i++) {
+            // Propagate among remote caches
+            final JSlobId id = ids.get(i);
+            cache.putInGroup(id.getId(), groupName(id), jslobs.get(i).setId(id), true);
+        }
+        return getOut;
     }
 
     /**
