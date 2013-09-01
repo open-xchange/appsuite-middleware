@@ -221,6 +221,20 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
             return poison ? -1L : (unit.convert(delayMsec() - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS));
         }
 
+        @Override
+        public String toString() {
+            final StringBuilder builder = new StringBuilder(64);
+            builder.append("DelayedStoreOp [");
+            if (id != null) {
+                builder.append("id=").append(id).append(", ");
+            }
+            if (group != null) {
+                builder.append("group=").append(group);
+            }
+            builder.append("]");
+            return builder.toString();
+        }
+
     }
 
     /** The poison element */
