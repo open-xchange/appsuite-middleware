@@ -157,12 +157,14 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
         final String id;
         final String group;
         final JSlobId jSlobId;
+        private final boolean poison;
         private final long stamp;
         private final int hash;
 
         DelayedStoreOp(final String id, final String group, final JSlobId jSlobId, final boolean poison) {
             super();
             stamp = poison ? 0L : System.currentTimeMillis();
+            this.poison = poison;
             this.id = id;
             this.group = group;
             this.jSlobId = jSlobId;
@@ -206,6 +208,9 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
 
         @Override
         public int compareTo(final Delayed o) {
+            if (poison) {
+                return -1;
+            }
             final long thisStamp = stamp;
             final long otherStamp = ((DelayedStoreOp) o).stamp;
             return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
@@ -213,7 +218,7 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
 
         @Override
         public long getDelay(final TimeUnit unit) {
-            return unit.convert(delayMsec() - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS);
+            return poison ? -1L : (unit.convert(delayMsec() - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS));
         }
 
     }
