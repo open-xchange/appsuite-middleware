@@ -154,6 +154,7 @@ public final class SessiondActivator extends HousekeepingActivator {
                 public ContextService addingService(final ServiceReference<ContextService> reference) {
                     final ContextService service = context.getService(reference);
                     addService(ContextService.class, service);
+                    getServiceRegistry().addService(ContextService.class, service);
                     return service;
                 }
 
@@ -165,6 +166,7 @@ public final class SessiondActivator extends HousekeepingActivator {
                 @Override
                 public void removedService(final ServiceReference<ContextService> reference, final ContextService service) {
                     removeService(ContextService.class);
+                    getServiceRegistry().removeService(ContextService.class);
                     context.ungetService(reference);
                 }
             });
