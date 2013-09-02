@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.osgi;
 
+import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,6 +61,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessiondService;
@@ -70,7 +72,6 @@ import com.openexchange.sessiond.impl.SessionImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
 import com.openexchange.sessiond.impl.SessiondSessionSpecificRetrievalService;
-import com.openexchange.sessiond.services.Services;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -99,10 +100,37 @@ public final class SessiondActivator extends HousekeepingActivator {
     }
 
     @Override
+    protected void handleUnavailability(final Class<?> clazz) {
+        // Don't stop the sessiond
+        if (LOG.isWarnEnabled()) {
+            LOG.warn("Absent service: " + clazz.getName());
+        }
+        getServiceRegistry().removeService(clazz);
+    }
+
+    @Override
+    protected void handleAvailability(final Class<?> clazz) {
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Re-available service: " + clazz.getName());
+        }
+        getServiceRegistry().addService(clazz, getService(clazz));
+    }
+
+    @Override
     protected void startBundle() throws Exception {
         try {
             // (Re-)Initialize service registry with available services
-            Services.setServiceLookup(this);
+            {
+                final ServiceRegistry registry = getServiceRegistry();
+                registry.clearRegistry();
+                final Class<?>[] classes = getNeededServices();
+                for (final Class<?> classe : classes) {
+                    final Object service = getService(classe);
+                    if (null != service) {
+                        registry.addService(classe, service);
+                    }
+                }
+            }
             if (LOG.isInfoEnabled()) {
                 LOG.info("starting bundle: com.openexchange.sessiond");
             }
@@ -115,7 +143,6 @@ public final class SessiondActivator extends HousekeepingActivator {
             track(ManagementService.class, new ManagementRegisterer(context));
             track(ThreadPoolService.class, new ThreadPoolTracker(context));
             track(TimerService.class, new TimerServiceTracker(context));
-            trackService(SessionStorageService.class);
             track(SessionStorageService.class, new SessionStorageServiceTracker(context));
             openTrackers();
 
@@ -139,7 +166,7 @@ public final class SessiondActivator extends HousekeepingActivator {
             LOG.info("stopping bundle: com.openexchange.sessiond");
         }
         try {
-            final SessionStorageService storageService = getService(SessionStorageService.class);
+            final SessionStorageService storageService = getServiceRegistry().getOptionalService(SessionStorageService.class);
             final ServiceRegistration<EventHandler> eventHandlerRegistration = this.eventHandlerRegistration;
             if (null != eventHandlerRegistration) {
                 eventHandlerRegistration.unregister();
@@ -151,7 +178,7 @@ public final class SessiondActivator extends HousekeepingActivator {
             final List<SessionControl> sessions = SessionHandler.getSessions();
             if (null != storageService) {
                 try {
-                    final EventAdmin eventAdmin = getService(EventAdmin.class);
+                    final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
                     for (final SessionControl sessionControl : sessions) {
                         if (null != sessionControl) {
                             final SessionImpl session = sessionControl.getSession();
@@ -173,11 +200,11 @@ public final class SessiondActivator extends HousekeepingActivator {
             }
             // Stop sessiond
             SessiondInit.getInstance().stop();
+            // Clear service registry
+            getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
             LOG.error("SessiondActivator: stop: ", e);
             throw e;
-        } finally {
-            Services.setServiceLookup(null);
         }
     }
 }
