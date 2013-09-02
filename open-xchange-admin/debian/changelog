@@ -1,3 +1,9 @@
+open-xchange-admin (7.4.0-8) stable; urgency=low
+
+  * Eighth candidate for 7.4.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 02 Sep 2013 12:18:05 +0200
+
 open-xchange-admin (7.4.0-7) stable; urgency=low
 
   * Seventh candidate for 7.4.0 release

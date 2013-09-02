@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 7
+%define        ox_release 8
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -134,6 +134,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Mon Sep 02 2013 Marc Arens <marc.arens@open-xchange.com>
+Eighth candidate for 7.4.0 release
 * Tue Aug 27 2013 Marc Arens <marc.arens@open-xchange.com>
 Seventh candidate for 7.4.0 release
 * Fri Aug 23 2013 Marc Arens <marc.arens@open-xchange.com>
@@ -184,6 +186,8 @@ Second feature freeze for 7.2.2 release
 Feature freeze for 7.2.2 release
 * Tue Jun 11 2013 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2013-06-13
+* Mon Jun 10 2013 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2013-06-11
 * Fri Jun 07 2013 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2013-06-20
 * Mon Jun 03 2013 Marc Arens <marc.arens@open-xchange.com>
