@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,72 @@
  *
  */
 
-package com.openexchange.jslob;
+package com.openexchange.jslob.storage.db.util;
 
-import java.io.Serializable;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.jslob.JSlobId;
+import com.openexchange.jslob.storage.db.Services;
 
 /**
- * {@link JSlobId} - The JSlob identifier.
+ * {@link DelayedStoreOp} - A delayed store operation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class JSlobId implements Serializable {
-
-    private static final long serialVersionUID = -1733920133244012391L;
-
-    private final int user;
-    private final int context;
-    private final String serviceId;
-    private final String id;
-    private final int hashCode;
+public final class DelayedStoreOp implements Delayed {
 
     /**
-     * Initializes a new {@link JSlobId}.
-     *
-     * @param serviceId The JSlob service identifier
-     * @param id The JSlob identifier
-     * @param user The user identifier
-     * @param context The context identifier
+     * The delay for pooled messages: <code>30sec</code>
      */
-    public JSlobId(final String serviceId, final String id, final int user, final int context) {
+    private static volatile Long delayMsec;
+
+    private static long delayMsec() {
+        Long tmp = delayMsec;
+        if (null == tmp) {
+            synchronized (DelayedStoreOp.class) {
+                tmp = delayMsec;
+                if (null == tmp) {
+                    final ConfigurationService cs = Services.getService(ConfigurationService.class);
+                    if (null == cs) {
+                        return 30000L;
+                    }
+                    tmp = Long.valueOf(cs.getProperty("com.openexchange.jslob.storage.delayMsec", "30000").trim());
+                    delayMsec = tmp;
+                }
+            }
+        }
+        return tmp.longValue();
+    }
+
+    // --------------------------------------------------------------------------------- //
+
+    public final String id;
+    public final String group;
+    public final JSlobId jSlobId;
+    private final boolean poison;
+    private final long stamp;
+    private final int hash;
+
+    /**
+     * Initializes a new {@link DelayedStoreOp}.
+     */
+    public DelayedStoreOp(final String id, final String group, final JSlobId jSlobId, final boolean poison) {
         super();
+        stamp = poison ? 0L : System.currentTimeMillis();
+        this.poison = poison;
         this.id = id;
-        this.serviceId = serviceId;
-        this.user = user;
-        this.context = context;
-        // Hash code
+        this.group = group;
+        this.jSlobId = jSlobId;
         final int prime = 31;
         int result = 1;
-        result = prime * result + context;
-        result = prime * result + user;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
-        hashCode = result;
+        result = prime * result + ((jSlobId == null) ? 0 : jSlobId.hashCode());
+        hash = result;
     }
 
     @Override
     public int hashCode() {
-        return hashCode;
+        return hash;
     }
 
     @Override
@@ -100,80 +120,46 @@ public final class JSlobId implements Serializable {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof JSlobId)) {
+        if (!(obj instanceof DelayedStoreOp)) {
             return false;
         }
-        final JSlobId other = (JSlobId) obj;
-        if (context != other.context) {
-            return false;
-        }
-        if (user != other.user) {
-            return false;
-        }
-        if (id == null) {
-            if (other.id != null) {
+        final DelayedStoreOp other = (DelayedStoreOp) obj;
+        if (jSlobId == null) {
+            if (other.jSlobId != null) {
                 return false;
             }
-        } else if (!id.equals(other.id)) {
-            return false;
-        }
-        if (serviceId == null) {
-            if (other.serviceId != null) {
-                return false;
-            }
-        } else if (!serviceId.equals(other.serviceId)) {
+        } else if (!jSlobId.equals(other.jSlobId)) {
             return false;
         }
         return true;
     }
 
-    /**
-     * Gets the user identifier.
-     *
-     * @return The user identifier
-     */
-    public int getUser() {
-        return user;
+    @Override
+    public int compareTo(final Delayed o) {
+        if (poison) {
+            return -1;
+        }
+        final long thisStamp = stamp;
+        final long otherStamp = ((DelayedStoreOp) o).stamp;
+        return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
     }
 
-    /**
-     * Gets the context identifier.
-     *
-     * @return The context identifier
-     */
-    public int getContext() {
-        return context;
-    }
-
-    /**
-     * Gets the JSlob service identifier.
-     *
-     * @return The JSlob service identifier
-     */
-    public String getServiceId() {
-        return serviceId;
-    }
-
-    /**
-     * Gets the JSlob identifier.
-     *
-     * @return The JSlob identifier
-     */
-    public String getId() {
-        return id;
+    @Override
+    public long getDelay(final TimeUnit unit) {
+        return poison ? -1L : (unit.convert(delayMsec() - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS));
     }
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("JSlobId {user=").append(user).append(", context=").append(context).append(", ");
-        if (serviceId != null) {
-            builder.append("serviceId=").append(serviceId).append(", ");
-        }
+        final StringBuilder builder = new StringBuilder(64);
+        builder.append("DelayedStoreOp [");
         if (id != null) {
             builder.append("id=").append(id).append(", ");
         }
-        builder.append('}');
+        if (group != null) {
+            builder.append("group=").append(group);
+        }
+        builder.append("]");
         return builder.toString();
     }
 

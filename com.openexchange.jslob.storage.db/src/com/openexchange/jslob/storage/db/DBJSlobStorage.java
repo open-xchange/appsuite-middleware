@@ -64,6 +64,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -750,22 +751,21 @@ public final class DBJSlobStorage implements JSlobStorage {
     /**
      * Stores multiple JSlobs to database.
      *
-     * @param ids The identifiers
      * @param jslobs The JSlobs to store
      * @throws OXException If store operation fails
      */
-    public void storeMultiple(final List<JSlobId> ids, final List<JSlob> jslobs) throws OXException {
-        if ((null == ids || ids.isEmpty()) || (null == jslobs || jslobs.isEmpty())) {
+    public void storeMultiple(final Map<JSlobId, JSlob> jslobs) throws OXException {
+        if (null == jslobs || jslobs.isEmpty()) {
             return;
         }
         wlock.lock();
         try {
-            final TIntObjectMap<ListPair> pairs = new TIntObjectHashMap<ListPair>(32);
+            final TIntObjectMap<ListPair> pairs = new TIntObjectHashMap<ListPair>(8);
 
             {
-                final int size = ids.size();
-                for (int i = 0; i < size; i++) {
-                    final JSlobId jSlobId = ids.get(i);
+
+                for (final Entry<JSlobId, JSlob> entry : jslobs.entrySet()) {
+                    final JSlobId jSlobId = entry.getKey();
                     final int contextId = jSlobId.getContext();
                     ListPair listPair = pairs.get(contextId);
                     if (null == listPair) {
@@ -773,20 +773,15 @@ public final class DBJSlobStorage implements JSlobStorage {
                         pairs.put(contextId, listPair);
                     }
                     listPair.ids.add(jSlobId);
-                    listPair.jslobs.add(jslobs.get(i));
+                    listPair.jslobs.add(entry.getValue());
                 }
             }
 
-            final int pairsSize = pairs.size();
-            if (1 == pairsSize) {
-                storeMultiple(ids.get(0).getContext(), ids, jslobs);
-            } else {
-                final TIntObjectIterator<ListPair> iterator = pairs.iterator();
-                for (int i = pairsSize; i-- > 0;) {
-                    iterator.advance();
-                    final ListPair listPair = iterator.value();
-                    storeMultiple(iterator.key(), listPair.ids, listPair.jslobs);
-                }
+            final TIntObjectIterator<ListPair> iterator = pairs.iterator();
+            for (int i = pairs.size(); i-- > 0;) {
+                iterator.advance();
+                final ListPair listPair = iterator.value();
+                storeMultiple(iterator.key(), listPair.ids, listPair.jslobs);
             }
 
         } finally {
