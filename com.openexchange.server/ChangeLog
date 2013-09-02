@@ -1,6 +1,8 @@
 * 2013-09-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 28176: Return non-zero exit code in case an exception occurred
+ - Fix for bug 28176: Return non-zero exit code in case an exception occurred
+ - Fix for bug 28610: Track optional ContextService separately, but not as needed service
 
 * 2013-08-30 - thorben.betten@open-xchange.com
 
