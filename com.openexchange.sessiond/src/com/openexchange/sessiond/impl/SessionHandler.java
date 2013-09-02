@@ -75,6 +75,7 @@ import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.session.Session;
@@ -235,6 +236,27 @@ public final class SessionHandler {
      * @param contextId The context ID
      */
     public static void removeContextSessions(final int contextId) {
+        /*
+         * Check context existence
+         */
+        {
+            final ContextService cs = getServiceRegistry().getService(ContextService.class);
+            if (null != cs) {
+                try {
+                    cs.loadContext(contextId);
+                } catch (final OXException e) {
+                    if (2 == e.getCode() && "CTX".equals(e.getPrefix())) { // See com.openexchange.groupware.contexts.impl.ContextExceptionCodes.NOT_FOUND
+                        if (INFO) {
+                            LOG.info(new StringAllocator(64).append("No such context ").append(contextId).toString());
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+        /*
+         * Continue...
+         */
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
