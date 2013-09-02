@@ -1,3 +1,7 @@
+* 2013-09-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28176: Return non-zero exit code in case an exception occurred
+
 * 2013-08-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 28602: Don't close ThresholdFileHolder instance
