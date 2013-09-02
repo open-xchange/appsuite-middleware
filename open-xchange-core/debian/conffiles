@@ -49,6 +49,7 @@ opt/open-xchange/etc/secret.properties
 opt/open-xchange/etc/secrets
 opt/open-xchange/etc/server.properties
 opt/open-xchange/etc/sessiond.properties
+opt/open-xchange/etc/subscribe.properties
 opt/open-xchange/etc/system.properties
 opt/open-xchange/etc/templating.properties
 opt/open-xchange/etc/transport.properties
