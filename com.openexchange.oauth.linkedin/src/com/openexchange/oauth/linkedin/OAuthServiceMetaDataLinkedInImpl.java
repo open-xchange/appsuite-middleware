@@ -79,7 +79,7 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
 
     @Override
     public String getId() {
-        return "com.openexchange.socialplugin.linkedin";
+        return LinkedInService.SERVICE_ID;
     }
 
     @Override

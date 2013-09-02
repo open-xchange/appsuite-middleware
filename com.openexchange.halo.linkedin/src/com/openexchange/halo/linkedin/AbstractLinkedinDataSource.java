@@ -101,7 +101,11 @@ public abstract class AbstractLinkedinDataSource implements HaloContactDataSourc
     public boolean isAvailable(final ServerSession session) throws OXException {
         final int uid = session.getUserId();
         final int cid = session.getContextId();
-        return !getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", session, uid, cid).isEmpty();
+        if (getOauthService().getMetaDataRegistry().containsService(LinkedInService.SERVICE_ID, uid, cid)) {
+            return !getOauthService().getAccounts(LinkedInService.SERVICE_ID, session, uid, cid).isEmpty();
+        }
+
+        return false;
     }
 
     @Override
