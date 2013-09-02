@@ -13,6 +13,7 @@
  - Fix for bug 28610: Track optional ContextService separately, but not as needed service
  - Fix for bug 28612: Orderly check for already collected JSlob store operation to avoid DB conflict on batch insert attempt
  - Fix for bug 28614: Use a memory-efficient java.util.concurrent.DelayQueue instead of a map data structure
+ - Fix for bug 28642: Apply sanitizing to text/xml MIME types, too
 
 * 2013-08-30 - thorben.betten@open-xchange.com
 
