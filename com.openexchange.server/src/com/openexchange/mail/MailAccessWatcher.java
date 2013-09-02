@@ -49,16 +49,13 @@
 
 package com.openexchange.mail;
 
-import static com.openexchange.java.Autoboxing.l;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import com.openexchange.log.Log;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.watcher.MailAccessDelayElement;
+import com.openexchange.mail.watcher.MailAccessDelayQueue;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -73,7 +70,7 @@ public final class MailAccessWatcher {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccessWatcher.class));
 
-    private static final ConcurrentMap<MailAccess<?, ?>, Long> MAIL_ACCESSES = new ConcurrentHashMap<MailAccess<?, ?>, Long>();
+    private static final MailAccessDelayQueue MAIL_ACCESSES = new MailAccessDelayQueue();
 
     private static boolean initialized = false;
 
@@ -145,7 +142,7 @@ public final class MailAccessWatcher {
         /*
          * Insert or update time stamp
          */
-        MAIL_ACCESSES.put(mailAccess, Long.valueOf(System.currentTimeMillis()));
+        MAIL_ACCESSES.put(new MailAccessDelayElement(mailAccess, System.currentTimeMillis()));
     }
 
     /**
@@ -154,7 +151,7 @@ public final class MailAccessWatcher {
      * @param mailAccess The mail access to remove
      */
     public static void removeMailAccess(final MailAccess<?, ?> mailAccess) {
-        MAIL_ACCESSES.remove(mailAccess);
+        MAIL_ACCESSES.remove(new MailAccessDelayElement(mailAccess, 0L));
     }
 
     /**
@@ -173,7 +170,8 @@ public final class MailAccessWatcher {
      */
     public static int getNumberOfIdlingMailAccesses() {
         int count = 0;
-        for (final MailAccess<?, ?> mailAccess : MAIL_ACCESSES.keySet()) {
+        for (final MailAccessDelayElement element : MAIL_ACCESSES) {
+            final MailAccess<?, ?> mailAccess = element.mailAccess;
             if (mailAccess.isConnectedUnsafe() && mailAccess.isWaiting()) {
                 count++;
             }
@@ -186,87 +184,97 @@ public final class MailAccessWatcher {
      */
     private static class WatcherTask implements Runnable {
 
-        private final ConcurrentMap<MailAccess<?, ?>, Long> map;
+        private final MailAccessDelayQueue queue;
         private final org.apache.commons.logging.Log logger;
-        private final boolean traceEnabled;
         private final String lineSeparator;
+        private final MailAccessDelayQueue.ElementFilter filter;
 
-        public WatcherTask(final ConcurrentMap<MailAccess<?, ?>, Long> mailAccesses, final org.apache.commons.logging.Log logger) {
+        public WatcherTask(final MailAccessDelayQueue mailAccesses, final org.apache.commons.logging.Log logger) {
             super();
-            map = mailAccesses;
+            queue = mailAccesses;
             this.logger = logger;
-            traceEnabled = logger.isTraceEnabled();
-            lineSeparator = System.getProperty("line.separator");
+            final String lineSeparator = System.getProperty("line.separator");
+            this.lineSeparator = lineSeparator;
+            // Specify filter expression
+            final boolean traceEnabled = logger.isTraceEnabled();
+            filter = new MailAccessDelayQueue.ElementFilter() {
+
+                @Override
+                public boolean accept(MailAccessDelayElement element) {
+                    final MailAccess<?, ?> mailAccess = element.mailAccess;
+                    if (!mailAccess.isConnected()) {
+                        return true;
+                    }
+                    if (mailAccess.isWaiting()) {
+                        if (traceEnabled) {
+                            logger.trace(new com.openexchange.java.StringAllocator("Idling/waiting mail connection:").append(lineSeparator).append(mailAccess.getTrace()).toString());
+                        }
+                        return false;
+                    }
+                    // Connected and not idle...
+                    return true;
+                }
+            };
         }
 
         @Override
         public void run() {
             try {
-                if (map.isEmpty()) {
-                    /*
-                     * Nothing to trace...
-                     */
+                MailAccessDelayElement expired = queue.poll(filter);
+                if (null == expired) {
+                    // nothing
                     return;
                 }
                 final StringBuilder sb = new StringBuilder(512);
-                final List<MailAccess<?, ?>> exceededAcesses = new LinkedList<MailAccess<?, ?>>();
-                final int watcherTime = MailProperties.getInstance().getWatcherTime();
                 final long now = System.currentTimeMillis();
-                for (final Iterator<Entry<MailAccess<?, ?>, Long>> iter = map.entrySet().iterator(); iter.hasNext();) {
-                    final Entry<MailAccess<?, ?>, Long> e = iter.next();
-                    final MailAccess<?, ?> mailAccess = e.getKey();
-                    if (mailAccess.isConnected()) {
-                        if (mailAccess.isWaiting()) {
-                            if (traceEnabled) {
-                                logger.trace(new com.openexchange.java.StringAllocator("Idling/waiting mail connection:").append(lineSeparator).append(mailAccess.getTrace()).toString());
-                            }
-                        } else {
-                            final Long val = e.getValue();
-                            if (null != val) {
-                                final long duration = (now - l(val));
-                                if (duration > watcherTime) {
-                                    sb.setLength(0);
-                                    sb.append("UNCLOSED MAIL CONNECTION AFTER ");
-                                    sb.append(duration).append("msec:");
-                                    if (Log.appendTraceToMessage()) {
-                                        sb.append(lineSeparator);
-                                        sb.append(mailAccess.getTrace());
-                                        logger.info(sb.toString());
-                                    } else {
-                                        mailAccess.logTrace(sb, logger);
-                                    }
-                                    exceededAcesses.add(mailAccess);
-                                }
-                            }
-                        }
-                    } else {
-                        /*
-                         * Remove closed connection from watcher
-                         */
-                        iter.remove();
-                    }
-                }
-                /*
-                 * Remove/Close exceeded accesses if allowed to
-                 */
-                if (!exceededAcesses.isEmpty()) {
-                    if (MailProperties.getInstance().isWatcherShallClose()) {
-                        for (final MailAccess<?, ?> mailAccess : exceededAcesses) {
-                            try {
-                                sb.setLength(0);
-                                sb.append("CLOSING MAIL CONNECTION BY WATCHER:").append(lineSeparator).append(mailAccess.toString());
-                                mailAccess.close(false);
-                                sb.append(lineSeparator).append("    DONE");
+                if (MailProperties.getInstance().isWatcherShallClose()) {
+                    final List<MailAccess<?, ?>> exceededAcesses = new LinkedList<MailAccess<?, ?>>();
+                    do {
+                        final MailAccess<?, ?> mailAccess = expired.mailAccess;
+                        if (mailAccess.isConnected()) {
+                            final long val = expired.stamp;
+                            final long duration = (now - val);
+                            sb.setLength(0);
+                            sb.append("UNCLOSED MAIL CONNECTION AFTER ");
+                            sb.append(duration).append("msec:");
+                            if (Log.appendTraceToMessage()) {
+                                sb.append(lineSeparator);
+                                sb.append(mailAccess.getTrace());
                                 logger.info(sb.toString());
-                            } finally {
-                                map.remove(mailAccess);
+                            } else {
+                                mailAccess.logTrace(sb, logger);
+                            }
+                            exceededAcesses.add(mailAccess);
+                        }
+                    } while ((expired = queue.poll(filter)) != null);
+                    /*
+                     * Close exceeded accesses if allowed to
+                     */
+                    for (final MailAccess<?, ?> mailAccess : exceededAcesses) {
+                        sb.setLength(0);
+                        sb.append("CLOSING MAIL CONNECTION BY WATCHER:").append(lineSeparator).append(mailAccess.toString());
+                        mailAccess.close(false);
+                        sb.append(lineSeparator).append("    DONE");
+                        logger.info(sb.toString());
+                    }
+                } else {
+                    do {
+                        final MailAccess<?, ?> mailAccess = expired.mailAccess;
+                        if (mailAccess.isConnected()) {
+                            final long val = expired.stamp;
+                            final long duration = (now - val);
+                            sb.setLength(0);
+                            sb.append("UNCLOSED MAIL CONNECTION AFTER ");
+                            sb.append(duration).append("msec:");
+                            if (Log.appendTraceToMessage()) {
+                                sb.append(lineSeparator);
+                                sb.append(mailAccess.getTrace());
+                                logger.info(sb.toString());
+                            } else {
+                                mailAccess.logTrace(sb, logger);
                             }
                         }
-                    } else {
-                        for (final MailAccess<?, ?> mailAccess : exceededAcesses) {
-                            map.remove(mailAccess);
-                        }
-                    }
+                    } while ((expired = queue.poll(filter)) != null);
                 }
             } catch (final Exception e) {
                 logger.error(e.getMessage(), e);
