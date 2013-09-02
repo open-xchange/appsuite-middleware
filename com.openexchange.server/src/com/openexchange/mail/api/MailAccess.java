@@ -116,7 +116,11 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     protected final Collection<OXException> warnings;
 
+    /** Whether this access is cacheable */
     protected volatile boolean cacheable;
+
+    /** Whether this access is trackable by {@link MailAccessWatcher} */
+    protected volatile boolean trackable;
 
     /**
      * Indicates if <tt>MailAccess</tt> is currently held in {@link SingletonMailAccessCache}.
@@ -160,6 +164,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         this.session = session;
         this.accountId = accountId;
         cacheable = true;
+        trackable = true;
     }
 
     /**
@@ -635,7 +640,9 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 checkDefaultFolderOnConnect();
             }
         }
-        MailAccessWatcher.addMailAccess(this);
+        if (isTrackable()) {
+            MailAccessWatcher.addMailAccess(this);
+        }
     }
 
     private void checkDefaultFolderOnConnect() throws OXException {
@@ -748,7 +755,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Logs the trace of the thread that lastly obtained this access.
-     * 
+     *
      */
     public void logTrace(final StringBuilder sBuilder, final org.apache.commons.logging.Log log) {
         {
@@ -801,7 +808,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 final Throwable thr = new Throwable();
                 thr.setStackTrace(trace);
                 log.info(sBuilder.toString(), thr);
-            }            
+            }
         }
     }
 
@@ -934,6 +941,24 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 throw MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.create(Integer.valueOf(ctx.getContextId()));
             }
         }
+    }
+
+    /**
+     * Indicates if this mail access is trackable by {@link MailAccessWatcher}.
+     *
+     * @return <code>true</code> if this mail access is trackable; otherwise <code>false</code>
+     */
+    public boolean isTrackable() {
+        return trackable;
+    }
+
+    /**
+     * Sets if this mail access is trackable by {@link MailAccessWatcher}.
+     *
+     * @param trackable <code>true</code> if this mail access is trackable; otherwise <code>false</code>
+     */
+    public void setTrackable(boolean trackable) {
+        this.trackable = trackable;
     }
 
     /**

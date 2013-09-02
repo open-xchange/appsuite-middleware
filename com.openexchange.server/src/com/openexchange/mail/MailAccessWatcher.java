@@ -54,8 +54,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.log.Log;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
@@ -73,7 +73,7 @@ public final class MailAccessWatcher {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccessWatcher.class));
 
-    private static final ConcurrentMap<MailAccess<?, ?>, Long> MAIL_ACCESSES = new NonBlockingHashMap<MailAccess<?, ?>, Long>();
+    private static final ConcurrentMap<MailAccess<?, ?>, Long> MAIL_ACCESSES = new ConcurrentHashMap<MailAccess<?, ?>, Long>();
 
     private static boolean initialized = false;
 
