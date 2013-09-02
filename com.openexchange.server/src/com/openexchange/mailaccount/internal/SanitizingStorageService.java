@@ -95,6 +95,11 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
+    public void invalidateMailAccounts(final int user, final int cid) throws OXException {
+        storageService.invalidateMailAccounts(user, cid);
+    }
+
+    @Override
     public MailAccount getMailAccount(final int id, final int user, final int cid) throws OXException {
         try {
             return storageService.getMailAccount(id, user, cid);
@@ -217,17 +222,17 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
-    public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws OXException {
-        storageService.migratePasswords(user, cid, oldSecret, newSecret);
+    public void migratePasswords(final String oldSecret, final String newSecret, final Session session) throws OXException {
+        storageService.migratePasswords(oldSecret, newSecret, session);
     }
 
     @Override
     public void cleanUp(final String secret, final Session session) throws OXException {
         storageService.cleanUp(secret, session);
     }
-    
+
     @Override
-    public void removeUnrecoverableItems(String secret, Session session) throws OXException {
+    public void removeUnrecoverableItems(final String secret, final Session session) throws OXException {
         storageService.removeUnrecoverableItems(secret, session);
     }
 

@@ -1,3 +1,15 @@
+open-xchange-soap-cxf (7.2.2-14) stable; urgency=low
+
+  * Build for patch 2013-08-30
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 30 Aug 2013 10:55:41 +0200
+
+open-xchange-soap-cxf (7.2.2-13) stable; urgency=low
+
+  * Build for patch 2013-08-22
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 22 Aug 2013 14:49:23 +0200
+
 open-xchange-soap-cxf (7.2.2-12) stable; urgency=low
 
   * Build for patch 2013-08-19

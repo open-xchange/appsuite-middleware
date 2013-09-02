@@ -57,7 +57,6 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MailAccountStorageService} - The storage service for mail accounts.
@@ -75,6 +74,15 @@ public interface MailAccountStorageService {
      * @throws OXException If invalidation fails
      */
     public void invalidateMailAccount(int id, int user, int cid) throws OXException;
+
+    /**
+     * Invalidates user mail accounts.
+     *
+     * @param user The user ID
+     * @param cid The context ID
+     * @throws OXException If invalidation fails
+     */
+    public void invalidateMailAccounts(int user, int cid) throws OXException;
 
     /**
      * Gets the mail account identified by specified ID.
@@ -283,13 +291,12 @@ public interface MailAccountStorageService {
     /**
      * Decodes stored encrypted strings using the old secret and encode them again using the new secret.
      *
-     * @param user The user ID
-     * @param cid The context ID
      * @param oldSecret The secret used for decrypting the stored passwords
      * @param newSecret The secret to use for encrypting the passwords again
-     * @throws OXException
+     * @param session The session
+     * @throws OXException If migrate attempt fails
      */
-    public void migratePasswords(int user, int cid, String oldSecret, String newSecret) throws OXException;
+    public void migratePasswords(String oldSecret, String newSecret, Session session) throws OXException;
 
     /**
      * Finds out whether the user has items that are encrypted
