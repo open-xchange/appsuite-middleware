@@ -110,8 +110,10 @@ public final class MailAccessWatcher {
             return;
         }
         if (MailProperties.getInstance().isWatcherEnabled()) {
+            final ScheduledTimerTask watcherTask = MailAccessWatcher.watcherTask;
             if (null != watcherTask) {
                 watcherTask.cancel(false);
+                MailAccessWatcher.watcherTask = null;
                 final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
                 if (null != timer) {
                     timer.purge();
