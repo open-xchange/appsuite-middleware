@@ -2991,13 +2991,8 @@ msgid ""
 "An error occurred inside the Open-Xchange server which prevented it from "
 "fulfilling the request."
 msgstr ""
-<<<<<<< HEAD
-"Open-Xchange servera darbībā ir radusies kļūda, kura neļauj izpildīt šo "
-"pieprasījumu."
-=======
 "Open-Xchange servera darbībā ir radusies kļūda, kuras dēļ pieprasījums nevar "
 "tikt izpildīts."
->>>>>>> release-7.4.0
 
 #. The default message displayed to user when a re-try is recommended
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:69
@@ -3005,13 +3000,8 @@ msgid ""
 "A temporary error occurred inside the Open-Xchange server which prevented it "
 "from fulfilling the request.. Please try again later."
 msgstr ""
-<<<<<<< HEAD
-"Open-Xchange servera darbībā ir radušās īslaicīgas problēmas, kuras neļauj "
-"izpildīt šo pieprasījumu. Lūdzu mēģiniet vēlāk vēlreiz."
-=======
 "Open-Xchange servera darbībā ir radusies īslaicīga kļūda, kuras dēļ "
 "pieprasījums nevar tikt izpildīts. Lūdzu mēģiniet vēlāk vēlreiz."
->>>>>>> release-7.4.0
 
 #. The general message for a conflicting update operation.
 #. The object has been changed in the meantime.
