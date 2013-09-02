@@ -49,7 +49,6 @@
 
 package com.openexchange.sessiond.impl;
 
-import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
@@ -57,6 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.Initialization;
 import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.services.Services;
 
 /**
  * {@link SessiondInit} - Initializes sessiond service
@@ -88,7 +88,7 @@ public class SessiondInit implements Initialization {
             LOG.info("Parse Sessiond properties");
         }
 
-        final ConfigurationService conf = getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService conf = Services.getService(ConfigurationService.class);
         if (conf != null) {
             config = new SessiondConfigImpl(conf);
             if (LOG.isInfoEnabled()) {
