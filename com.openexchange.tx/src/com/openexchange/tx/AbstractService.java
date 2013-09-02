@@ -67,15 +67,17 @@ public abstract class AbstractService<T> implements TransactionAware {
     public void startTransaction() throws TransactionException {
         final long id = Thread.currentThread().getId();
 
-        if(txIds.containsKey(id)){
+        if (txIds.containsKey(id)) {
             throw new TransactionException("There is already a transaction active at this moment", startedTx.get(id));
         }
 
         final T txId = createTransaction();
 
-        txIds.put(id,txId);
-        if(rememberStacks) {
-            startedTx.put(id,Thread.currentThread().getStackTrace());
+        txIds.put(id, txId);
+        if (rememberStacks) {
+            // startedTx.put(id,Thread.currentThread().getStackTrace());
+            // Using new Throwable().getStackTrace() is faster
+            startedTx.put(id, new Throwable().getStackTrace());
         }
     }
 

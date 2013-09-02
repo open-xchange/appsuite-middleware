@@ -898,6 +898,23 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     }
 
     /**
+     * Open this folder in the given mode, but w/o retrieving mailbox information (total, recent, ...).
+     */
+    public synchronized void openFast() throws MessagingException {
+        checkClosed(); // insure that we are not already open
+        // Request store for our own protocol connection.
+        protocol = ((IMAPStore)store).getProtocol(this);
+        opened = true;
+        reallyClosed = false;
+        exists = true;      // if we opened it, it must exist
+        attributes = null;  // but we don't yet know its attributes
+        type = HOLDS_MESSAGES;  // lacking more info, we know at least this much
+
+        // notify listeners
+        notifyConnectionListeners(ConnectionEvent.OPENED);
+    }
+
+    /**
      * Open this folder in the given mode.
      */
     public synchronized void open(int mode) throws MessagingException {

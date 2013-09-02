@@ -162,7 +162,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     private final PropertyListener propertyListener;
 
-    private ScheduledTimerTask timerTask;
+    private volatile ScheduledTimerTask timerTask;
 
     private final AtomicReference<File> tmpDirReference;
 
@@ -518,8 +518,10 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         if (complete && propertyListener != null) {
             cs.removePropertyListener("UPLOAD_DIRECTORY", propertyListener);
         }
+        final ScheduledTimerTask timerTask = this.timerTask;
         if (timerTask != null) {
             timerTask.cancel(true);
+            this.timerTask = null;
             timer.purge();
         }
         tmpDirReference.set(null);
@@ -527,8 +529,11 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
     }
 
     void startUp() {
-        timerTask.cancel(true);
-        timerTask = timer.scheduleWithFixedDelay(
+        final ScheduledTimerTask timerTask = this.timerTask;
+        if (timerTask != null) {
+            timerTask.cancel(true);
+        }
+        this.timerTask = timer.scheduleWithFixedDelay(
             new FileManagementTask(files, TIME_TO_LIVE, LOG),
             INITIAL_DELAY,
             DELAY,
@@ -557,8 +562,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
     }
 
     private DistributedFileManagement getDistributed() {
-        final DistributedFileManagement service = ServerServiceRegistry.getInstance().getService(DistributedFileManagement.class);
-        return service;
+        return ServerServiceRegistry.getInstance().getService(DistributedFileManagement.class);
     }
 
     /** Check for an empty string */

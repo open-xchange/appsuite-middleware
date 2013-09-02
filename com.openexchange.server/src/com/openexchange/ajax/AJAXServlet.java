@@ -815,7 +815,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n|\r|(?:%0[aA])?%0[dD]|%0[aA]");
-    private static final Pattern PATTERN_DSLASH = Pattern.compile("(?:/|%2[fF]){2}");
+    private static final Pattern PATTERN_DSLASH = Pattern.compile("(?://+)");
 
     /**
      * URL encodes given string.

@@ -379,8 +379,7 @@ public class FolderTest extends AbstractAJAXTest {
     }
 
     public static boolean renameFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final int folderId, final String folderName, final String moduleStr, final int type, final long timestamp) throws JSONException, MalformedURLException, IOException, SAXException {
-        final JSONObject jsonFolder = new JSONObject(6);
-        jsonFolder.put("id", folderId);
+        final JSONObject jsonFolder = new JSONObject();
         jsonFolder.put("title", folderName);
         final URLParameter urlParam = new URLParameter();
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE);

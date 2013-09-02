@@ -49,12 +49,12 @@
 
 package com.openexchange.sessiond.impl;
 
-import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import com.openexchange.exception.OXException;
 import com.openexchange.sessiond.SessiondMBean;
+import com.openexchange.sessiond.services.Services;
 import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
@@ -99,7 +99,7 @@ public final class SessiondMBeanImpl extends StandardMBean implements SessiondMB
 
     @Override
     public void clearSessionStorage() throws MBeanException {
-        SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
+        SessionStorageService storageService = Services.getService(SessionStorageService.class);
         try {
             storageService.cleanUp();
         } catch (OXException e) {

@@ -134,40 +134,28 @@ public final class UpdateAction extends JSlobAction {
                  * Update...
                  */
                 jslobService.update(id, jsonUpdate, jslobRequest.getSession());
-                /*
-                 * ... and write back
-                 */
-                jslob = jslobService.get(id, jslobRequest.getSession());
-            } else {
-                /*
-                 * Update by JSON data
-                 */
-                final JSONObject jsonData = (JSONObject) data;
-                if (null != jsonData && jsonData.hasAndNotNull("path")) {
-                    final JSONUpdate jsonUpdate = new JSONUpdate(jsonData.getString("path"), jsonData.get("value"));
-                    /*
-                     * Update...
-                     */
-                    jslobService.update(id, jsonUpdate, jslobRequest.getSession());
-                    /*
-                     * ... and write back
-                     */
-                    jslob = jslobService.get(id, jslobRequest.getSession());
-                } else {
-                    /*
-                     * Perform merge
-                     */
-                    final JSONObject merged = JSONUtil.merge(jslobService.get(id, jslobRequest.getSession()).getJsonObject(), jsonData);
-                    jslob = new DefaultJSlob(merged);
-                    jslobService.set(id, jslob, jslobRequest.getSession());
-                    /*
-                     * ... and write back
-                     */
-                    jslob = jslobService.get(id, jslobRequest.getSession());
-                }
+                return new AJAXRequestResult();
             }
+            /*
+             * Update by JSON data
+             */
+            final JSONObject jsonData = (JSONObject) data;
+            if (null != jsonData && jsonData.hasAndNotNull("path")) {
+                final JSONUpdate jsonUpdate = new JSONUpdate(jsonData.getString("path"), jsonData.get("value"));
+                /*
+                 * Update...
+                 */
+                jslobService.update(id, jsonUpdate, jslobRequest.getSession());
+                return new AJAXRequestResult();
+            }
+            /*
+             * Perform merge
+             */
+            final JSONObject merged = JSONUtil.merge(jslobService.get(id, jslobRequest.getSession()).getJsonObject(), jsonData);
+            jslob = new DefaultJSlob(merged);
+            jslobService.set(id, jslob, jslobRequest.getSession());
+            return new AJAXRequestResult();
         }
-        return new AJAXRequestResult(jslob, "jslob");
     }
 
     @Override

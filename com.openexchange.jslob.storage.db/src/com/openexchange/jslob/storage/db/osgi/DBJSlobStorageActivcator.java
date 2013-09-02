@@ -66,12 +66,14 @@ import com.openexchange.java.Streams;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.jslob.storage.db.DBJSlobStorage;
+import com.openexchange.jslob.storage.db.Services;
 import com.openexchange.jslob.storage.db.cache.CachingJSlobStorage;
 import com.openexchange.jslob.storage.db.cache.Constants;
 import com.openexchange.jslob.storage.db.groupware.DBJSlobCreateTableService;
 import com.openexchange.jslob.storage.db.groupware.DBJSlobCreateTableTask;
 import com.openexchange.jslob.storage.db.groupware.JSlobDBDeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link DBJSlobStorageActivcator}
@@ -96,6 +98,7 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: com.openexchange.jslob.storage.db");
         try {
+            Services.setServices(this);
             final DBJSlobStorage dbJSlobStorage = new DBJSlobStorage(this);
             registerService(JSlobStorage.class, CachingJSlobStorage.initialize(dbJSlobStorage));
             /*
@@ -223,12 +226,14 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
         } catch (final Exception e) {
             LOG.error("Stopping bundle \"com.openexchange.jslob.storage.db\" failed: " + e.getMessage());
             throw e;
+        } finally {
+            Services.setServices(null);
         }
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ConfigurationService.class };
+        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, ThreadPoolService.class };
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,73 @@
  *
  */
 
-package com.openexchange.sessiond.osgi;
+package com.openexchange.jslob.storage.db;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.sessiond.impl.SessionControl;
-import com.openexchange.sessiond.impl.SessionHandler;
-import com.openexchange.sessiond.impl.SessionImpl;
-import com.openexchange.sessionstorage.SessionStorageService;
+import java.util.concurrent.atomic.AtomicReference;
+
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link SessionStorageServiceTracker}
+ * {@link Services} - Provides static access to {@link ServiceLookup} reference.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SessionStorageServiceTracker implements ServiceTrackerCustomizer<SessionStorageService, SessionStorageService> {
+public final class Services {
 
-    private final BundleContext context;
+    private static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
     /**
-     * Initializes a new {@link SessionStorageServiceTracker}.
+     * Initializes a new {@link Services}.
      */
-    public SessionStorageServiceTracker(final BundleContext context) {
+    private Services() {
         super();
-        this.context = context;
     }
 
-    @Override
-    public SessionStorageService addingService(final ServiceReference<SessionStorageService> reference) {
-        final SessionStorageService service = context.getService(reference);
-        final List<SessionControl> sessionControls = SessionHandler.getSessions();
-        if (!sessionControls.isEmpty()) {
-            final List<SessionImpl> sessions = new ArrayList<SessionImpl>(sessionControls.size());
-            for (final SessionControl sessionControl : sessionControls) {
-                sessions.add(sessionControl.getSession());
-            }
-            SessionHandler.storeSessions(sessions, service);
+    /**
+     * Sets the {@link ServiceLookup} reference.
+     *
+     * @param services The reference
+     */
+    public static void setServices(final ServiceLookup services) {
+        SERVICES.set(services);
+    }
+
+    /**
+     * Gets the {@link ServiceLookup} reference.
+     *
+     * @return The reference
+     */
+    public static ServiceLookup getServices() {
+        return SERVICES.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("ServiceLookup is absent. Check bundle activator.");
         }
-        return service;
+        return serviceLookup.getService(clazz);
     }
 
-    @Override
-    public void modifiedService(final ServiceReference<SessionStorageService> reference, final SessionStorageService service) {
-        // nothing to do
-    }
-
-    @Override
-    public void removedService(final ServiceReference<SessionStorageService> reference, final SessionStorageService service) {
-        context.ungetService(reference);
+    /**
+     * Gets the optional service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     */
+    public static <S extends Object> S getOptionalService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            return null;
+        }
+        return serviceLookup.getOptionalService(clazz);
     }
 
 }

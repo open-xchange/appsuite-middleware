@@ -79,7 +79,7 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
             return url;
         }
         // Return deferred URL
-        return deferrerURL + PREFIX.get().getPrefix() + "defer?redirect=" + encodeUrl(url, true, true);
+        return deferrerURL + PREFIX.get().getPrefix() + "defer?redirect=" + encodeUrl(url, false, false);
     }
 
     /**
