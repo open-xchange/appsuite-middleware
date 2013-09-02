@@ -8,6 +8,7 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.googlecode.concurrentlinkedhashmap,
  com.openexchange.caching,
+ com.openexchange.caching.events,
  com.openexchange.config.cascade,
  com.openexchange.context,
  com.openexchange.exception,
@@ -30,4 +31,5 @@ Import-Package: com.googlecode.concurrentlinkedhashmap,
  org.cliffc.high_scale_lib,
  org.osgi.framework,
  org.osgi.service.event,
+ org.osgi.util.tracker,
  sun.misc
