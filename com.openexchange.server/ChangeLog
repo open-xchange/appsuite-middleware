@@ -1,7 +1,6 @@
 * 2013-09-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 28176: Return non-zero exit code in case an exception occurred
- - Fix for bug 28177: Added check for context existence and log appropriate message if it appears to not exist
 
 * 2013-08-30 - thorben.betten@open-xchange.com
 

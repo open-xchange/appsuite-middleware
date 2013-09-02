@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.impl;
 
+import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -59,7 +60,6 @@ import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.services.Services;
 import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
@@ -364,7 +364,7 @@ public final class SessionImpl implements PutIfAbsent {
     public void setLocalIp(final String localIp, final boolean propagate) throws OXException {
         this.localIp = localIp;
         if (propagate) {
-            final SessionStorageService sessionStorageService = Services.getService(SessionStorageService.class);
+            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
             if (sessionStorageService != null) {
                 sessionStorageService.setLocalIp(sessionId, localIp);
             }
@@ -434,7 +434,7 @@ public final class SessionImpl implements PutIfAbsent {
     public void setHash(final String hash, final boolean propagate) throws OXException {
         this.hash = hash;
         if (propagate) {
-            final SessionStorageService sessionStorageService = Services.getService(SessionStorageService.class);
+            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
             if (sessionStorageService != null) {
                 sessionStorageService.setHash(sessionId, hash);
             }
@@ -479,7 +479,7 @@ public final class SessionImpl implements PutIfAbsent {
     public void setClient(final String client, final boolean propagate) throws OXException {
         this.client = client;
         if (propagate) {
-            final SessionStorageService sessionStorageService = Services.getService(SessionStorageService.class);
+            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
             if (sessionStorageService != null) {
                 sessionStorageService.setClient(sessionId, client);
             }
