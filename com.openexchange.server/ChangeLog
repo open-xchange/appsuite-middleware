@@ -1,3 +1,7 @@
+* 2013-09-02 - marcus.klein@open-xchange.com
+
+ - Fix for bug 28627: Fixed a typo in post installation scripts of open-xchange-subscribe package.
+
 * 2013-09-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 28176: Return non-zero exit code in case an exception occurred
