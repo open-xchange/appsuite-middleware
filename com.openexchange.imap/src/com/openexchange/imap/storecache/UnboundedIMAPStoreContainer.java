@@ -59,7 +59,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.mail.MessagingException;
-import com.openexchange.imap.IMAPValidity;
 import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.imap.IMAPStore;
 
@@ -112,7 +111,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     }
 
     @Override
-    public IMAPStore getStore(final javax.mail.Session imapSession, final IMAPValidity validity) throws MessagingException, InterruptedException {
+    public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
         /*
          * Retrieve and remove the head of this queue
          */
@@ -120,7 +119,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         IMAPStore imapStore = null == imapStoreWrapper ? null : imapStoreWrapper.imapStore;
         if (null == imapStore) {
             try {
-                imapStore = newStore(server, port, login, pw, imapSession, validity);
+                imapStore = newStore(server, port, login, pw, imapSession);
             } catch (final MessagingException e) {
                 if (!(e.getNextException() instanceof ConnectQuotaExceededException)) {
                     throw e;
@@ -138,14 +137,8 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     }
 
     @Override
-    public void backStore(final IMAPStore imapStore, final IMAPValidity validity) {
-        final long currentValidity = validity.getCurrentValidity();
-        if (currentValidity > 0 && imapStore.getValidity() < currentValidity) {
-            validity.clearCachedConnections();
-            closeSafe(imapStore);
-        } else {
-            backStoreNoValidityCheck(imapStore);
-        }
+    public void backStore(final IMAPStore imapStore) {
+        backStoreNoValidityCheck(imapStore);
     }
 
     protected void backStoreNoValidityCheck(final IMAPStore imapStore) {

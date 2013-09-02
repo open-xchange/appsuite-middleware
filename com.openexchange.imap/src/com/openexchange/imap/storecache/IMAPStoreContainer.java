@@ -51,7 +51,6 @@ package com.openexchange.imap.storecache;
 
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPProvider;
-import com.openexchange.imap.IMAPValidity;
 import com.sun.mail.imap.IMAPStore;
 
 
@@ -75,14 +74,14 @@ public interface IMAPStoreContainer {
      * @throws MessagingException If returning a connected IMAP store fails
      * @throws InterruptedException If thread is interrupted when possibly waiting for free resources
      */
-    IMAPStore getStore(javax.mail.Session imapSession, IMAPValidity validity) throws MessagingException, InterruptedException;
+    IMAPStore getStore(javax.mail.Session imapSession) throws MessagingException, InterruptedException;
 
     /**
      * Returns specified IMAP store to container.
      *
      * @param imapStore The IMAP store to return
      */
-    void backStore(IMAPStore imapStore, IMAPValidity validity);
+    void backStore(IMAPStore imapStore);
 
     /**
      * Close elapsed {@link IMAPStore} instances.

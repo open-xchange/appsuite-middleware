@@ -63,7 +63,6 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.config.IMAPProperties;
@@ -207,7 +206,6 @@ public final class IMAPActivator extends HousekeepingActivator {
                                 ListLsubCache.dropFor(session);
                                 IMAPStoreCache.getInstance().dropFor(session.getUserId(), session.getContextId());
                                 ThreadableCache.dropFor(session);
-                                IMAPAccess.dropValidity(session.getUserId(), session.getContextId());
                             }
                         } catch (final Exception e) {
                             // Failed handling session
@@ -231,7 +229,6 @@ public final class IMAPActivator extends HousekeepingActivator {
                         ListLsubCache.dropFor(session);
                         IMAPStoreCache.getInstance().dropFor(userId, contextId);
                         ThreadableCache.dropFor(session);
-                        IMAPAccess.dropValidity(userId, contextId);
                     }
 
                 }, serviceProperties);

@@ -52,7 +52,6 @@ package com.openexchange.imap.storecache;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import org.apache.commons.logging.Log;
-import com.openexchange.imap.IMAPValidity;
 import com.openexchange.log.LogFactory;
 import com.sun.mail.imap.IMAPStore;
 
@@ -89,7 +88,7 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
      * @return The newly created & connected {@link IMAPStore} instance
      * @throws MessagingException If operation fails
      */
-    protected IMAPStore newStore(final String server, final int port, final String login, final String pw, final javax.mail.Session imapSession, final IMAPValidity validity) throws MessagingException {
+    protected IMAPStore newStore(final String server, final int port, final String login, final String pw, final javax.mail.Session imapSession) throws MessagingException {
         /*
          * Get new store...
          */
@@ -107,7 +106,6 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
             imapStore = (IMAPStore) imapSession.getStore(name);
             imapStore.connect(server, port, login, pw);
         }
-        imapStore.setValidity(validity.getCurrentValidity());
         return imapStore;
     }
 
