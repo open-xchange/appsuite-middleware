@@ -1,7 +1,7 @@
 * 2013-09-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 28176: Return non-zero exit code in case an exception occurred
- - Fix for bug 28176: Return non-zero exit code in case an exception occurred
+ - Fix for bug 28177: Added check for context existence and log appropriate message if it appears to not exist
  - Fix for bug 28610: Track optional ContextService separately, but not as needed service
  - Fix for bug 28612: Orderly check for already collected JSlob store operation to avoid DB conflict on batch insert attempt
 
