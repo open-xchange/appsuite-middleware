@@ -1629,11 +1629,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 Future<List<MailMessage>> messagesFromSentFolder = null;
                 if (mergeWithSent) {
                     final IMAPFolder zentFolder = sentFolder;
+                    final FetchProfile clonedFetchProfile = cloneFetchProfile(fetchProfile);
                     messagesFromSentFolder = ThreadPools.getThreadPool().submit(new AbstractTask<List<MailMessage>>() {
 
                         @Override
                         public List<MailMessage> call() throws Exception {
-                            return Conversations.messagesFor(zentFolder, limit, fetchProfile, byEnvelope);
+                            return Conversations.messagesFor(zentFolder, limit, clonedFetchProfile, byEnvelope);
                         }
                     });
                 }
@@ -4119,6 +4120,20 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
         }
         return list;
+    }
+
+    private static FetchProfile cloneFetchProfile(final FetchProfile fetchProfile) {
+        if (null == fetchProfile) {
+            return null;
+        }
+        final FetchProfile newFetchProfile = new FetchProfile();
+        for (final Item item : fetchProfile.getItems()) {
+            newFetchProfile.add(item);
+        }
+        for (final String headerName : fetchProfile.getHeaderNames()) {
+            newFetchProfile.add(headerName);
+        }
+        return newFetchProfile;
     }
 
 }
