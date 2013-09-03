@@ -99,7 +99,6 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
-import com.openexchange.java.Strings;
 import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
@@ -755,7 +754,7 @@ public final class HtmlServiceImpl implements HtmlService {
         return PATTERN_BLOCKQUOTE_END.matcher(PATTERN_BLOCKQUOTE_START.matcher(html).replaceAll("$1"+BLOCKQUOTE_MARKER)).replaceAll("$1"+BLOCKQUOTE_MARKER_END);
     }
 
-    private static final String HTML_BR = "<br>" + Strings.getLineSeparator();
+    private static final String HTML_BR = "<br>"; // + Strings.getLineSeparator();
     private static final String HTML_NBSP = "&nbsp;";
 
     private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n");
