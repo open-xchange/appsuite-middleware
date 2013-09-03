@@ -129,7 +129,7 @@ public class RTJSONActivator extends AJAXModuleActivator {
         converter.declarePreferredFormat(Presence.PRIORITY_PATH, Byte.class.getSimpleName());
         converter.declarePreferredFormat(Stanza.ERROR_PATH, RealtimeException.class.getSimpleName());
         
-        registerModule(new RealtimeActions(this, handler.getStateManager(), handler.getProtocolHandler()), "rt");
+        registerModule(new RealtimeActions(this, handler.getStateManager(), handler.getProtocolHandler(), handler.getProtocol()), "rt");
 
         getService(CapabilityService.class).declareCapability("rt");
 

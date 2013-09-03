@@ -49,17 +49,25 @@
 
 package com.openexchange.realtime.json.actions;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.logging.Log;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.ResourceDirectory;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import com.openexchange.realtime.json.impl.StateEntry;
 import com.openexchange.realtime.json.impl.StateManager;
+import com.openexchange.realtime.json.impl.stanza.writer.StanzaWriter;
 import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
+import com.openexchange.realtime.json.protocol.NextSequence;
+import com.openexchange.realtime.json.protocol.RTProtocol;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -72,27 +80,39 @@ public class EnrolAction extends RTAction {
     private final static Log LOG = com.openexchange.log.Log.loggerFor(EnrolAction.class);
 
     private final StateManager stateManager;
-    private final ServiceLookup serviceLookup;
+    private final RTProtocol protocol;
 
-    public EnrolAction(ServiceLookup serviceLookup, StateManager stateManager) {
-        this.serviceLookup = serviceLookup;
+    public EnrolAction(StateManager stateManager, RTProtocol protocol) {
         this.stateManager = stateManager;
+        this.protocol = protocol;
     }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        final Map<String, Object> enrolActionResults = new HashMap<String, Object>();
         ID constructedId = constructID(requestData, session);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Enroling ID: " + constructedId);
         }
-        stateManager.retrieveState(constructedId);
+        StateEntry retrievedState = stateManager.retrieveState(constructedId);
         ResourceDirectory resourceDirectory = JSONServiceRegistry.getInstance().getService(ResourceDirectory.class);
         try {
             resourceDirectory.set(constructedId, new DefaultResource());
         } catch (OXException e) {
-            throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
+            RealtimeException enrolException = RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
+            enrolActionResults.put(ERROR, enrolException);
+            LOG.error(enrolException.getMessage(), enrolException);
         }
-        return new AJAXRequestResult();
+        if(retrievedState.created) { //we didn't have a state yet
+            NextSequence nextSequence = new NextSequence(constructedId, constructedId, 0);
+            JSONObject answerJSON = new StanzaWriter().write(nextSequence);
+            enrolActionResults.put(STANZAS, Collections.singletonList(answerJSON));
+        } else {
+            //state for client exists? reset all the things, gate, stanzasToSend, sequences
+            //protocol.nextSequence(constructedId, 0, gate);
+        }
+
+        return new AJAXRequestResult(enrolActionResults, "native");
     }
 
 }

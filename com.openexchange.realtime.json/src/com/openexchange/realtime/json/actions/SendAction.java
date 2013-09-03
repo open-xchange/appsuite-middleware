@@ -61,11 +61,13 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.json.impl.JSONProtocolHandler;
 import com.openexchange.realtime.json.impl.StateEntry;
 import com.openexchange.realtime.json.impl.StateManager;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -122,6 +124,7 @@ import com.openexchange.tools.session.ServerSession;
  * </li>
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class SendAction extends RTAction  {
 
@@ -137,13 +140,17 @@ public class SendAction extends RTAction  {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        Object data = request.requireData();
-
         ID id = constructID(request, session);
-//        if(!stateManager.isConnected(id)) {
-//            throw RealtimeExceptionCodes.STATE_MISSING.create();
-//        }
+        if(!stateManager.isConnected(id)) {
+            Map<String, Object> errorMap = new HashMap<String, Object>();
+            RealtimeException stateMissingException = RealtimeExceptionCodes.STATE_MISSING.create();
+            errorMap.put(ERROR, stateMissingException);
+            LOG.error(stateMissingException.getMessage(), stateMissingException);
+            return new AJAXRequestResult(errorMap, "native");
+        }
+        StateEntry entry = stateManager.retrieveState(id);
 
+        Object data = request.requireData();
         final List<JSONObject> objects;
         if (data instanceof JSONArray) {
             JSONArray array = (JSONArray) data;
@@ -158,21 +165,31 @@ public class SendAction extends RTAction  {
         } else if (data instanceof JSONObject) {
             objects = Arrays.asList((JSONObject) data);
         } else {
-            throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create("Missing request body");
+            Map<String, Object> errorMap = new HashMap<String, Object>();
+            RealtimeException wrongBodyException = RealtimeExceptionCodes.UNEXPECTED_ERROR.create("Missing request body");;
+            LOG.error(wrongBodyException.getMessage(), wrongBodyException);
+            errorMap.put(ERROR, wrongBodyException);
+            List<Stanza> stanzas = pollStanzas(entry.state);
+            errorMap.put(STANZAS, stanzas);
+            return new AJAXRequestResult(errorMap, "native");
         }
-
         LOG.debug("Messages arrived in SendAction: " + objects.toString());
 
-        StateEntry entry = stateManager.retrieveState(id);
 
+        //handle incoming messages
         List<Long> acknowledgements = new ArrayList<Long>(objects.size());
-
         protocolHandler.handleIncomingMessages(id, session, entry, objects, acknowledgements);
 
-        Map<String, Object> r = new HashMap<String, Object>();
-        r.put("acknowledgements", acknowledgements);
+        //add resulting acks to response
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(ACKS, acknowledgements);
 
-        return new AJAXRequestResult(r, "native");
+        //additionally check for Stanza that are addressed to the client and add them to the response
+        StateEntry stateEntry = stateManager.retrieveState(id);
+        List<Stanza> stanzas = pollStanzas(stateEntry.state);
+        resultMap.put(STANZAS, stanzas);
+
+        return new AJAXRequestResult(resultMap, "native");
     }
 
 

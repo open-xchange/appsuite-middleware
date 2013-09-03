@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.json.impl.JSONProtocolHandler;
 import com.openexchange.realtime.json.impl.StateManager;
+import com.openexchange.realtime.json.protocol.RTProtocol;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -74,11 +75,11 @@ public class RealtimeActions implements AJAXActionServiceFactory {
 
     private AJAXActionService SEND = null;
 
-    public RealtimeActions(ServiceLookup services, StateManager stateManager, JSONProtocolHandler protocolHandler) {
-        SEND = new SendAction(services, stateManager, protocolHandler);
-        QUERY = new QueryAction(services, protocolHandler.getGate(), stateManager);
+    public RealtimeActions(ServiceLookup services, StateManager stateManager, JSONProtocolHandler protocolHandler, RTProtocol protocol) {
+        ENROL = new EnrolAction(stateManager, protocol);
         POLL = new PollAction(stateManager);
-        ENROL = new EnrolAction(services, stateManager);
+        QUERY = new QueryAction(services, protocolHandler.getGate(), stateManager);
+        SEND = new SendAction(services, stateManager, protocolHandler);
     }
 
     @Override

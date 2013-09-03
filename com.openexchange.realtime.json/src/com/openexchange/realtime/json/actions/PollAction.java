@@ -59,14 +59,16 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.json.impl.StateEntry;
 import com.openexchange.realtime.json.impl.StateManager;
-import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link PollAction} - Action to poll the server for new messages directed to the client. Response: data: { stanzas: [stanza1, stanza2,
- * stanza3] }
+ * {@link PollAction} - Action to poll the server for new messages directed to the client.
+ * Response:
+ * <pre>
+ * data: { stanzas: [{stanza0}, {stanza1}, {stanza2}] }
+ * </pre>
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -85,43 +87,18 @@ public class PollAction extends RTAction {
         if(LOG.isDebugEnabled()) {
             LOG.debug("Executing PollAction");
         }
+        Map<String, Object> resultMap = new HashMap<String, Object>();
         ID id = constructID(requestData, session);
         if(!stateManager.isConnected(id)) {
-            throw RealtimeExceptionCodes.STATE_MISSING.create();
+            resultMap.put(ERROR, RealtimeExceptionCodes.STATE_MISSING.create());
+            return new AJAXRequestResult(resultMap, "native");
         }
+
+        //check for Stanza that are addressed to the client and add them to the response
         StateEntry stateEntry = stateManager.retrieveState(id);
         List<Stanza> stanzas = pollStanzas(stateEntry.state);
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Got " + stanzas.size() + " Stanzas to send for client: " + id);
-        }
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-        resultMap.put("stanzas", stanzas);
+        resultMap.put(STANZAS, stanzas);
         return new AJAXRequestResult(resultMap, "native");
-    }
-
-    /**
-     * Get buffered messages addressed to the client
-     * 
-     * @param state The client state
-     * @return The list of Stanzas that are addressed to the client, may be empty
-     */
-    public List<Stanza> pollStanzas(RTClientState state) {
-        try {
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Locking RTClientState for ID: " + state.getId());
-            }
-            state.lock();
-            state.touch();
-            List<Stanza> stanzasToSend = state.getStanzasToSend();
-            return stanzasToSend;
-        } finally {
-            // Increment TTL count even after failure as offending stanza might cause sending to fail. Incrementing will get rid of it.
-            state.purge();
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Unlocking RTClientState for ID: " + state.getId());
-            }
-            state.unlock();
-        }
     }
 
 }

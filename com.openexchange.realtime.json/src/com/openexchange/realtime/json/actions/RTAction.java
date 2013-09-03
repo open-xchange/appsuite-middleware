@@ -49,22 +49,71 @@
 
 package com.openexchange.realtime.json.actions;
 
+import java.util.List;
+import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.json.Utils;
+import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link RTAction}
- *
+ * {@link RTAction} - RTActions implement the functionality of the realtime http api.
+ * The response has the form: 
+ * <pre>
+ * data: {
+ *   acks: [0,1] 
+ *   result:{}
+ *   stanzas: [{stanza0},{stanza1},{stanza2}]
+ *   error: {.., code: "theCode", ...}
+ * }
+ * </pre>
+ * where the not all data fields will be returned for every {@link RTAction}.  
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public abstract class RTAction implements AJAXActionService {
+
+    private final static Log LOG = com.openexchange.log.Log.loggerFor(PollAction.class);
     
+    protected final String ACKS="acks";
+    protected final String RESULT="result";
+    protected final String STANZAS="stanzas";
+    protected final String ERROR="error";
+
     protected ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
         return Utils.constructID(request, session);
+    }
+
+    /**
+     * Get buffered messages addressed to the client
+     * 
+     * @param state The client state
+     * @return The list of Stanzas that are addressed to the client, may be empty
+     */
+    protected List<Stanza> pollStanzas(RTClientState state) {
+        try {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Locking RTClientState for ID: " + state.getId());
+            }
+            state.lock();
+            state.touch();
+            List<Stanza> stanzasToSend = state.getStanzasToSend();
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Got " + stanzasToSend.size() + " Stanzas to send for client: " + state.getId());
+            }
+            return stanzasToSend;
+        } finally {
+            // Increment TTL count even after failure as offending stanza might cause sending to fail. Incrementing will get rid of it.
+            state.purge();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Unlocking RTClientState for ID: " + state.getId());
+            }
+            state.unlock();
+        }
     }
 }
