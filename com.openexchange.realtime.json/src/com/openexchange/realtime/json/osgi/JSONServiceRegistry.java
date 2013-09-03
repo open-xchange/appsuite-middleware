@@ -47,85 +47,43 @@
  *
  */
 
-package com.openexchange.realtime.events.json;
+package com.openexchange.realtime.json.osgi;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.RTEventManagerService;
-import com.openexchange.realtime.json.Utils;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
-
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * The {@link EventsRequest} wraps the incoming request.
+ * {@link AtmospherePresenceServiceRegistry} - Singleton that acts as central accesspoint for classes of the Atmosphere bundle.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class EventsRequest {
+public class JSONServiceRegistry implements ServiceLookup {
 
-    private AJAXRequestData req;
-    private ServerSession session;
-    private RTEventManagerService manager;
+    private static final JSONServiceRegistry INSTANCE = new JSONServiceRegistry();
+    public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
-    public EventsRequest(AJAXRequestData requestData, ServerSession session, RTEventManagerService manager) {
-        super();
-        this.req = requestData;
-        this.session = session;
-        this.manager = manager;
-    }
-    
     /**
-     * Retrieve the RTEventManager instance
+     * Encapsulated constructor.
      */
-    public RTEventManagerService getManager() {
-        return manager;
-    }
-    
-    /**
-     * Calculate the ID from the session and the selector as passed as a parameter
-     */
-    public ID getID() throws OXException {
-        return Utils.constructID(req, session);
-    }
-    
-    /**
-     * Retrieve the 'selector' parameter
-     */
-    public String getSelector() throws OXException {
-        req.require("selector");
-        return req.getParameter("selector");
+    private JSONServiceRegistry() {
     }
 
     /**
-     * Retrieve the 'event' parameter
+     * Get the Registry singleton.
+     *
+     * @return the Registry singleton
      */
-    public String getEvent() throws OXException {
-        req.require("event");
-        return req.getParameter("event");
-    }
-    
-    /**
-     * Find out, whether an 'event' parameter was sent from the client
-     */
-    public boolean hasEvent() {
-        return req.isSet("event");
+    public static JSONServiceRegistry getInstance() {
+        return INSTANCE;
     }
 
-    /**
-     * Retrieve the session
-     */
-    public ServerSession getSession() {
-        return session;
-    }
-    
-    /**
-     * Retrieve a copy of all parameters
-     */
-    public Map<String, String> getParameterMap() {
-        return new HashMap<String, String>(req.getParameters());
+    @Override
+    public <S> S getService(Class<? extends S> clazz) {
+        return SERVICES.get().getService(clazz);
     }
 
+    @Override
+    public <S> S getOptionalService(Class<? extends S> clazz) {
+        return SERVICES.get().getOptionalService(clazz);
+    }
 }

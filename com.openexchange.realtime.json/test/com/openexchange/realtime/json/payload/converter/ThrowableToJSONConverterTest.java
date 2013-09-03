@@ -47,85 +47,64 @@
  *
  */
 
-package com.openexchange.realtime.events.json;
+package com.openexchange.realtime.json.payload.converter;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.RTEventManagerService;
-import com.openexchange.realtime.json.Utils;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.realtime.json.payload.converter.StackTraceElementToJSONConverter;
+import com.openexchange.realtime.json.payload.converter.ThrowableToJSONConverter;
+import com.openexchange.realtime.json.payload.converter.sim.SimpleConverterSim;
 
 
 /**
- * The {@link EventsRequest} wraps the incoming request.
+ * {@link ThrowableToJSONConverterTest}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class EventsRequest {
+public class ThrowableToJSONConverterTest {
 
-    private AJAXRequestData req;
-    private ServerSession session;
-    private RTEventManagerService manager;
+    ThrowableToJSONConverter converter = null;
+    SimpleConverterSim simpleConverter = null;
+    Throwable throwable = null;
 
-    public EventsRequest(AJAXRequestData requestData, ServerSession session, RTEventManagerService manager) {
-        super();
-        this.req = requestData;
-        this.session = session;
-        this.manager = manager;
-    }
-    
-    /**
-     * Retrieve the RTEventManager instance
-     */
-    public RTEventManagerService getManager() {
-        return manager;
-    }
-    
-    /**
-     * Calculate the ID from the session and the selector as passed as a parameter
-     */
-    public ID getID() throws OXException {
-        return Utils.constructID(req, session);
-    }
-    
-    /**
-     * Retrieve the 'selector' parameter
-     */
-    public String getSelector() throws OXException {
-        req.require("selector");
-        return req.getParameter("selector");
+    @Before
+    public void setUp() throws Exception {
+        converter = new ThrowableToJSONConverter();
+        simpleConverter = new SimpleConverterSim();
+        simpleConverter.registerConverter(new StackTraceElementToJSONConverter());
+        throwable = new Throwable("First throwable");
     }
 
-    /**
-     * Retrieve the 'event' parameter
-     */
-    public String getEvent() throws OXException {
-        req.require("event");
-        return req.getParameter("event");
+    @Test
+    public void testGetInputFormat() {
+        assertEquals(Throwable.class.getSimpleName(), converter.getInputFormat());
     }
     
-    /**
-     * Find out, whether an 'event' parameter was sent from the client
-     */
-    public boolean hasEvent() {
-        return req.isSet("event");
+    @Test
+    public void testConvert() throws OXException, JSONException {
+        Object object = converter.convert(throwable, null, simpleConverter);
+        assertNotNull(object);
+        assertTrue(object instanceof JSONObject);
+        JSONObject throwableJSON = JSONObject.class.cast(object);
+        assertEquals(throwableJSON.optString("message"), "First throwable");
+        JSONArray jsonArray = throwableJSON.getJSONArray("stackTrace");
+        JSONObject stackTraceElement = JSONObject.class.cast(jsonArray.get(0));
+        assertEquals("ThrowableToJSONConverterTest.java", stackTraceElement.getString("fileName"));
+        assertEquals("80", stackTraceElement.getString("lineNumber"));
+        assertEquals("com.openexchange.realtime.atmosphere.payload.converter.ThrowableToJSONConverterTest", stackTraceElement.getString("className"));
+        assertEquals("setUp", stackTraceElement.getString("methodName"));
     }
 
-    /**
-     * Retrieve the session
-     */
-    public ServerSession getSession() {
-        return session;
-    }
-    
-    /**
-     * Retrieve a copy of all parameters
-     */
-    public Map<String, String> getParameterMap() {
-        return new HashMap<String, String>(req.getParameters());
+    @Test
+    public void testGetOutputFormat() {
+        assertEquals("json", converter.getOutputFormat());
     }
 
 }

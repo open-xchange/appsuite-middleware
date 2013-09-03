@@ -47,85 +47,59 @@
  *
  */
 
-package com.openexchange.realtime.events.json;
+package com.openexchange.realtime.json.impl.stanza.builder;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.RTEventManagerService;
-import com.openexchange.realtime.json.Utils;
+import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import com.openexchange.realtime.json.JSONExceptionMessage;
+import com.openexchange.realtime.json.stanza.StanzaBuilder;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * The {@link EventsRequest} wraps the incoming request.
+ * {@link StanzaBuilderSelector} - Select and instantiate a new StanzaBuilder matching the client's message.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class EventsRequest {
-
-    private AJAXRequestData req;
-    private ServerSession session;
-    private RTEventManagerService manager;
-
-    public EventsRequest(AJAXRequestData requestData, ServerSession session, RTEventManagerService manager) {
-        super();
-        this.req = requestData;
-        this.session = session;
-        this.manager = manager;
-    }
-    
-    /**
-     * Retrieve the RTEventManager instance
-     */
-    public RTEventManagerService getManager() {
-        return manager;
-    }
-    
-    /**
-     * Calculate the ID from the session and the selector as passed as a parameter
-     */
-    public ID getID() throws OXException {
-        return Utils.constructID(req, session);
-    }
-    
-    /**
-     * Retrieve the 'selector' parameter
-     */
-    public String getSelector() throws OXException {
-        req.require("selector");
-        return req.getParameter("selector");
-    }
+public class StanzaBuilderSelector {
 
     /**
-     * Retrieve the 'event' parameter
+     * Get a parser that is adequate for he JSONObject that has to be parsed.
+     * Incoming JSONObjects must contain an <code>element</code> key that let's us determine the needed StanzaBuilder.
+     *
+     * <pre>
+     * {
+     *  element: 'presence'
+     *  ...
+     * };
+     * </pre>
+     * @param session 
+     *
+     * @param json the JSONObject that has to be parsed.
+     * @return a Builder adequate for the JSONObject that has to be transformed
+     * @throws IllegalArgumentException if the JSONObject is null
+     * @throws OXException if the JSONObject doesn't contain a <code>element</code> key specifying the Stanza or no adequate
+     *             StanzaBuilder can be found
      */
-    public String getEvent() throws OXException {
-        req.require("event");
-        return req.getParameter("event");
+    public static StanzaBuilder<? extends Stanza> getBuilder(ID from, ServerSession session, JSONObject json) throws RealtimeException {
+        if (json == null) {
+            throw new IllegalArgumentException();
+        }
+        String element = json.optString("element");
+        if (element == null) {
+            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(JSONExceptionMessage.MISSING_KEY_MSG);
+        }
+        if (element.equalsIgnoreCase("iq")) {
+            return new IQBuilder(from, json, session);
+        } else if (element.equalsIgnoreCase("message")) {
+            return new MessageBuilder(from, json, session);
+        } else if (element.equalsIgnoreCase("presence")) {
+            return new PresenceBuilder(from, json, session);
+        } else {
+            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(JSONExceptionMessage.MISSING_BUILDER_FOR_ELEMENT_MSG);
+        }
     }
-    
-    /**
-     * Find out, whether an 'event' parameter was sent from the client
-     */
-    public boolean hasEvent() {
-        return req.isSet("event");
-    }
-
-    /**
-     * Retrieve the session
-     */
-    public ServerSession getSession() {
-        return session;
-    }
-    
-    /**
-     * Retrieve a copy of all parameters
-     */
-    public Map<String, String> getParameterMap() {
-        return new HashMap<String, String>(req.getParameters());
-    }
-
 }

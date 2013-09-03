@@ -47,85 +47,43 @@
  *
  */
 
-package com.openexchange.realtime.events.json;
+package com.openexchange.realtime.json.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.RTEventManagerService;
-import com.openexchange.realtime.json.Utils;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+import com.openexchange.realtime.json.impl.EnqueuedStanza;
+import com.openexchange.realtime.packet.Message;
 
 
 /**
- * The {@link EventsRequest} wraps the incoming request.
+ * {@link EnqueuedStanzaTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class EventsRequest {
+public class EnqueuedStanzaTest extends EnqueuedStanza {
 
-    private AJAXRequestData req;
-    private ServerSession session;
-    private RTEventManagerService manager;
-
-    public EventsRequest(AJAXRequestData requestData, ServerSession session, RTEventManagerService manager) {
+    public EnqueuedStanzaTest() {
         super();
-        this.req = requestData;
-        this.session = session;
-        this.manager = manager;
-    }
-    
-    /**
-     * Retrieve the RTEventManager instance
-     */
-    public RTEventManagerService getManager() {
-        return manager;
-    }
-    
-    /**
-     * Calculate the ID from the session and the selector as passed as a parameter
-     */
-    public ID getID() throws OXException {
-        return Utils.constructID(req, session);
-    }
-    
-    /**
-     * Retrieve the 'selector' parameter
-     */
-    public String getSelector() throws OXException {
-        req.require("selector");
-        return req.getParameter("selector");
     }
 
-    /**
-     * Retrieve the 'event' parameter
-     */
-    public String getEvent() throws OXException {
-        req.require("event");
-        return req.getParameter("event");
-    }
-    
-    /**
-     * Find out, whether an 'event' parameter was sent from the client
-     */
-    public boolean hasEvent() {
-        return req.isSet("event");
+    @Test
+    public void incCounterShouldReturnTrueTheFirstOneHundredTimesAndFalseAfterThat() {
+        sequenceNumber = 23L;
+        count = 0;
+        stanza = new Message();
+
+        for(int i = 0; i < getInfinity() + 1; i++) {
+            if (i < getInfinity()) {
+                assertTrue(incCounter());
+            } else {
+                assertFalse(incCounter());
+            }
+        }
     }
 
-    /**
-     * Retrieve the session
-     */
-    public ServerSession getSession() {
-        return session;
+    @Override
+    protected int getInfinity() {
+        return 100;
     }
-    
-    /**
-     * Retrieve a copy of all parameters
-     */
-    public Map<String, String> getParameterMap() {
-        return new HashMap<String, String>(req.getParameters());
-    }
-
 }

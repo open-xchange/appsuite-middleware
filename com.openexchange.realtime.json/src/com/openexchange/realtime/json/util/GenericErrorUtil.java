@@ -47,85 +47,44 @@
  *
  */
 
-package com.openexchange.realtime.events.json;
+package com.openexchange.realtime.json.util;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.RTEventManagerService;
-import com.openexchange.realtime.json.Utils;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.json.impl.stanza.writer.StanzaWriter;
+import com.openexchange.realtime.packet.GenericError;
+import com.openexchange.realtime.packet.Stanza;
 
 
 /**
- * The {@link EventsRequest} wraps the incoming request.
+ * {@link GenericErrorUtil}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class EventsRequest {
-
-    private AJAXRequestData req;
-    private ServerSession session;
-    private RTEventManagerService manager;
-
-    public EventsRequest(AJAXRequestData requestData, ServerSession session, RTEventManagerService manager) {
-        super();
-        this.req = requestData;
-        this.session = session;
-        this.manager = manager;
+public class GenericErrorUtil {
+    
+    /**
+     * Create a JSON representation of a generic error stanza.
+     * @param exception the exception that occured and should be transported to the client
+     * @return the JSON representation of the generic error stanza
+     * @throws OXException if the generic error stanza couldn't be created
+     */
+    public static JSONObject getGenericErrorStanza(RealtimeException exception) throws OXException {
+        GenericError genericError = new GenericError(exception);
+        return writeErrorStanzaToJSON(genericError);
     }
     
     /**
-     * Retrieve the RTEventManager instance
+     * Transform a Stanza into a JSONObject
+     * @param stanza the Stanza to be transformed
+     * @return the transformed Stanza
+     * @throws OXException if the Stanza couldn't be tranformed
      */
-    public RTEventManagerService getManager() {
-        return manager;
-    }
-    
-    /**
-     * Calculate the ID from the session and the selector as passed as a parameter
-     */
-    public ID getID() throws OXException {
-        return Utils.constructID(req, session);
-    }
-    
-    /**
-     * Retrieve the 'selector' parameter
-     */
-    public String getSelector() throws OXException {
-        req.require("selector");
-        return req.getParameter("selector");
-    }
-
-    /**
-     * Retrieve the 'event' parameter
-     */
-    public String getEvent() throws OXException {
-        req.require("event");
-        return req.getParameter("event");
-    }
-    
-    /**
-     * Find out, whether an 'event' parameter was sent from the client
-     */
-    public boolean hasEvent() {
-        return req.isSet("event");
-    }
-
-    /**
-     * Retrieve the session
-     */
-    public ServerSession getSession() {
-        return session;
-    }
-    
-    /**
-     * Retrieve a copy of all parameters
-     */
-    public Map<String, String> getParameterMap() {
-        return new HashMap<String, String>(req.getParameters());
+    public static JSONObject writeErrorStanzaToJSON(Stanza stanza) throws OXException {
+        StanzaWriter stanzaWriter = new StanzaWriter();
+        stanza.transformPayloads("json");
+        return stanzaWriter.write(stanza);
     }
 
 }

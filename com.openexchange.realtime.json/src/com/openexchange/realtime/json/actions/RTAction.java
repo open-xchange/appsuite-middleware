@@ -47,85 +47,24 @@
  *
  */
 
-package com.openexchange.realtime.events.json;
+package com.openexchange.realtime.json.actions;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.RTEventManagerService;
 import com.openexchange.realtime.json.Utils;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * The {@link EventsRequest} wraps the incoming request.
+ * {@link RTAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class EventsRequest {
-
-    private AJAXRequestData req;
-    private ServerSession session;
-    private RTEventManagerService manager;
-
-    public EventsRequest(AJAXRequestData requestData, ServerSession session, RTEventManagerService manager) {
-        super();
-        this.req = requestData;
-        this.session = session;
-        this.manager = manager;
-    }
+public abstract class RTAction implements AJAXActionService {
     
-    /**
-     * Retrieve the RTEventManager instance
-     */
-    public RTEventManagerService getManager() {
-        return manager;
+    protected ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
+        return Utils.constructID(request, session);
     }
-    
-    /**
-     * Calculate the ID from the session and the selector as passed as a parameter
-     */
-    public ID getID() throws OXException {
-        return Utils.constructID(req, session);
-    }
-    
-    /**
-     * Retrieve the 'selector' parameter
-     */
-    public String getSelector() throws OXException {
-        req.require("selector");
-        return req.getParameter("selector");
-    }
-
-    /**
-     * Retrieve the 'event' parameter
-     */
-    public String getEvent() throws OXException {
-        req.require("event");
-        return req.getParameter("event");
-    }
-    
-    /**
-     * Find out, whether an 'event' parameter was sent from the client
-     */
-    public boolean hasEvent() {
-        return req.isSet("event");
-    }
-
-    /**
-     * Retrieve the session
-     */
-    public ServerSession getSession() {
-        return session;
-    }
-    
-    /**
-     * Retrieve a copy of all parameters
-     */
-    public Map<String, String> getParameterMap() {
-        return new HashMap<String, String>(req.getParameters());
-    }
-
 }

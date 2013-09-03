@@ -47,85 +47,55 @@
  *
  */
 
-package com.openexchange.realtime.events.json;
+package com.openexchange.realtime.json.payload.converter;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import com.openexchange.conversion.DataExceptionCodes;
+import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.RTEventManagerService;
-import com.openexchange.realtime.json.Utils;
-import com.openexchange.realtime.packet.ID;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * The {@link EventsRequest} wraps the incoming request.
+ * {@link JSONToThrowableConverter}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class EventsRequest {
+public class JSONToThrowableConverter extends AbstractJSONConverter {
 
-    private AJAXRequestData req;
-    private ServerSession session;
-    private RTEventManagerService manager;
-
-    public EventsRequest(AJAXRequestData requestData, ServerSession session, RTEventManagerService manager) {
-        super();
-        this.req = requestData;
-        this.session = session;
-        this.manager = manager;
-    }
-    
-    /**
-     * Retrieve the RTEventManager instance
-     */
-    public RTEventManagerService getManager() {
-        return manager;
-    }
-    
-    /**
-     * Calculate the ID from the session and the selector as passed as a parameter
-     */
-    public ID getID() throws OXException {
-        return Utils.constructID(req, session);
-    }
-    
-    /**
-     * Retrieve the 'selector' parameter
-     */
-    public String getSelector() throws OXException {
-        req.require("selector");
-        return req.getParameter("selector");
+    @Override
+    public String getOutputFormat() {
+        return Throwable.class.getSimpleName();
     }
 
-    /**
-     * Retrieve the 'event' parameter
-     */
-    public String getEvent() throws OXException {
-        req.require("event");
-        return req.getParameter("event");
-    }
-    
-    /**
-     * Find out, whether an 'event' parameter was sent from the client
-     */
-    public boolean hasEvent() {
-        return req.isSet("event");
+    @Override
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        try {
+            JSONObject throwableJSON = (JSONObject) data;
+            
+            String message = throwableJSON.getString("message");
+            JSONArray traceElements = (JSONArray) throwableJSON.get("stackTrace");
+            Throwable throwable = new Throwable(message);
+            throwable.setStackTrace(jsonToStackTraceElementArray(traceElements, converter));
+            return throwable;
+        } catch (Exception e) {
+            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(data.toString(), e);
+        }
     }
 
-    /**
-     * Retrieve the session
-     */
-    public ServerSession getSession() {
-        return session;
-    }
-    
-    /**
-     * Retrieve a copy of all parameters
-     */
-    public Map<String, String> getParameterMap() {
-        return new HashMap<String, String>(req.getParameters());
+    private StackTraceElement[] jsonToStackTraceElementArray(JSONArray stackTrace, SimpleConverter converter) throws OXException {
+        List<StackTraceElement> stacktraceList = new ArrayList<StackTraceElement>();
+        
+        Iterator<Object> iterator = stackTrace.iterator();
+        while(iterator.hasNext()) {
+            Object converted = converter.convert("json", StackTraceElement.class.getSimpleName(), iterator.next(), null);
+            stacktraceList.add(StackTraceElement.class.cast(converted));
+        }
+        return stacktraceList.toArray(new StackTraceElement[stacktraceList.size()]);
     }
 
 }

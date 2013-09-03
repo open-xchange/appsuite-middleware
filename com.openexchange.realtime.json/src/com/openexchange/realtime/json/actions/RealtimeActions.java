@@ -47,85 +47,61 @@
  *
  */
 
-package com.openexchange.realtime.events.json;
+package com.openexchange.realtime.json.actions;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import java.util.Arrays;
+import java.util.Collection;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.RTEventManagerService;
-import com.openexchange.realtime.json.Utils;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.realtime.json.impl.JSONProtocolHandler;
+import com.openexchange.realtime.json.impl.StateManager;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * The {@link EventsRequest} wraps the incoming request.
- *
+ * {@link RealtimeActions} AJAXActionServiceFactory for the realtime subset of our http api.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class EventsRequest {
+public class RealtimeActions implements AJAXActionServiceFactory {
 
-    private AJAXRequestData req;
-    private ServerSession session;
-    private RTEventManagerService manager;
+    private AJAXActionService ENROL = null;
 
-    public EventsRequest(AJAXRequestData requestData, ServerSession session, RTEventManagerService manager) {
-        super();
-        this.req = requestData;
-        this.session = session;
-        this.manager = manager;
-    }
-    
-    /**
-     * Retrieve the RTEventManager instance
-     */
-    public RTEventManagerService getManager() {
-        return manager;
-    }
-    
-    /**
-     * Calculate the ID from the session and the selector as passed as a parameter
-     */
-    public ID getID() throws OXException {
-        return Utils.constructID(req, session);
-    }
-    
-    /**
-     * Retrieve the 'selector' parameter
-     */
-    public String getSelector() throws OXException {
-        req.require("selector");
-        return req.getParameter("selector");
+    private AJAXActionService POLL = null;
+
+    private AJAXActionService QUERY = null;
+
+    private AJAXActionService SEND = null;
+
+    public RealtimeActions(ServiceLookup services, StateManager stateManager, JSONProtocolHandler protocolHandler) {
+        SEND = new SendAction(services, stateManager, protocolHandler);
+        QUERY = new QueryAction(services, protocolHandler.getGate());
+        POLL = new PollAction(stateManager);
+        ENROL = new EnrolAction(stateManager);
     }
 
-    /**
-     * Retrieve the 'event' parameter
-     */
-    public String getEvent() throws OXException {
-        req.require("event");
-        return req.getParameter("event");
-    }
-    
-    /**
-     * Find out, whether an 'event' parameter was sent from the client
-     */
-    public boolean hasEvent() {
-        return req.isSet("event");
+    @Override
+    public Collection<?> getSupportedServices() {
+        return Arrays.asList("enrol", "poll", "query", "send");
     }
 
-    /**
-     * Retrieve the session
-     */
-    public ServerSession getSession() {
-        return session;
-    }
-    
-    /**
-     * Retrieve a copy of all parameters
-     */
-    public Map<String, String> getParameterMap() {
-        return new HashMap<String, String>(req.getParameters());
+    @Override
+    public AJAXActionService createActionService(String action) throws OXException {
+        if ("enrol".equals(action)) {
+            return ENROL;
+        }
+
+        if ("poll".equals(action)) {
+            return POLL;
+        }
+
+        if ("query".equals(action)) {
+            return QUERY;
+        }
+
+        return SEND;
+
     }
 
 }

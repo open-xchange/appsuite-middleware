@@ -47,85 +47,72 @@
  *
  */
 
-package com.openexchange.realtime.events.json;
+package com.openexchange.realtime.json.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.RTEventManagerService;
-import com.openexchange.realtime.json.Utils;
+import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.ElementPath;
 
 /**
- * The {@link EventsRequest} wraps the incoming request.
+ * {@link JSONChannel}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class EventsRequest {
+public class JSONChannel implements Channel {
 
-    private AJAXRequestData req;
-    private ServerSession session;
-    private RTEventManagerService manager;
+    public static final String PROTOCOL = "ox";
 
-    public EventsRequest(AJAXRequestData requestData, ServerSession session, RTEventManagerService manager) {
-        super();
-        this.req = requestData;
-        this.session = session;
-        this.manager = manager;
-    }
-    
-    /**
-     * Retrieve the RTEventManager instance
-     */
-    public RTEventManagerService getManager() {
-        return manager;
-    }
-    
-    /**
-     * Calculate the ID from the session and the selector as passed as a parameter
-     */
-    public ID getID() throws OXException {
-        return Utils.constructID(req, session);
-    }
-    
-    /**
-     * Retrieve the 'selector' parameter
-     */
-    public String getSelector() throws OXException {
-        req.require("selector");
-        return req.getParameter("selector");
+    private final RTJSONHandler handler;
+
+
+    public JSONChannel(RTJSONHandler handler) {
+        this.handler = handler;
     }
 
-    /**
-     * Retrieve the 'event' parameter
-     */
-    public String getEvent() throws OXException {
-        req.require("event");
-        return req.getParameter("event");
-    }
-    
-    /**
-     * Find out, whether an 'event' parameter was sent from the client
-     */
-    public boolean hasEvent() {
-        return req.isSet("event");
+    @Override
+    public String getProtocol() {
+        return "ox";
     }
 
-    /**
-     * Retrieve the session
-     */
-    public ServerSession getSession() {
-        return session;
-    }
-    
-    /**
-     * Retrieve a copy of all parameters
-     */
-    public Map<String, String> getParameterMap() {
-        return new HashMap<String, String>(req.getParameters());
+    @Override
+    public boolean canHandle(Set<ElementPath> elementPaths, ID recipient) {
+        if (!isConnected(recipient)) {
+            return false;
+        }
+
+        if (!hasCapability(recipient, elementPaths)) {
+            return false;
+        }
+
+        return true;
     }
 
+    public boolean hasCapability(ID recipient, Set<ElementPath> namespaces) {
+        return true; // TODO: Implement Capability Model
+    }
+
+    @Override
+    public int getPriority() {
+        return 10000;
+    }
+
+    @Override
+    public boolean isConnected(ID id) {
+        return handler.isConnected(id);
+    }
+
+    @Override
+    public void send(Stanza stanza, ID recipient) throws OXException {
+        stanza.trace("RTAtmosphereChannel send");
+        stanza.transformPayloads("json");
+        handler.send(stanza, recipient);
+    }
+
+    @Override
+    public boolean conjure(ID id) throws OXException {
+        return false;
+    }
 }

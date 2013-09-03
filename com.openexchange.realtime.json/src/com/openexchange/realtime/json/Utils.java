@@ -47,85 +47,33 @@
  *
  */
 
-package com.openexchange.realtime.events.json;
+package com.openexchange.realtime.json;
 
-import java.util.HashMap;
-import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.RTEventManagerService;
-import com.openexchange.realtime.json.Utils;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import com.openexchange.realtime.json.impl.JSONChannel;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * The {@link EventsRequest} wraps the incoming request.
+ * {@link Utils}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class EventsRequest {
-
-    private AJAXRequestData req;
-    private ServerSession session;
-    private RTEventManagerService manager;
-
-    public EventsRequest(AJAXRequestData requestData, ServerSession session, RTEventManagerService manager) {
-        super();
-        this.req = requestData;
-        this.session = session;
-        this.manager = manager;
-    }
+public class Utils {
     
-    /**
-     * Retrieve the RTEventManager instance
-     */
-    public RTEventManagerService getManager() {
-        return manager;
-    }
-    
-    /**
-     * Calculate the ID from the session and the selector as passed as a parameter
-     */
-    public ID getID() throws OXException {
-        return Utils.constructID(req, session);
-    }
-    
-    /**
-     * Retrieve the 'selector' parameter
-     */
-    public String getSelector() throws OXException {
-        req.require("selector");
-        return req.getParameter("selector");
-    }
+    public static ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
+        String userLogin = session.getUserlogin();
+        String contextName = session.getContext().getName();
 
-    /**
-     * Retrieve the 'event' parameter
-     */
-    public String getEvent() throws OXException {
-        req.require("event");
-        return req.getParameter("event");
-    }
-    
-    /**
-     * Find out, whether an 'event' parameter was sent from the client
-     */
-    public boolean hasEvent() {
-        return req.isSet("event");
-    }
+        String resource = request.getParameter("resource");
 
-    /**
-     * Retrieve the session
-     */
-    public ServerSession getSession() {
-        return session;
+        if (resource == null) {
+            throw RealtimeExceptionCodes.INVALID_ID.create();
+        }
+        
+        return new ID(JSONChannel.PROTOCOL, null, userLogin, contextName, resource);
     }
-    
-    /**
-     * Retrieve a copy of all parameters
-     */
-    public Map<String, String> getParameterMap() {
-        return new HashMap<String, String>(req.getParameters());
-    }
-
 }

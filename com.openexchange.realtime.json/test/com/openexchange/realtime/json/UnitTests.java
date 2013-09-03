@@ -46,86 +46,32 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.realtime.json;
 
-package com.openexchange.realtime.events.json;
-
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.RTEventManagerService;
-import com.openexchange.realtime.json.Utils;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.realtime.json.impl.EnqueuedStanzaTest;
+import com.openexchange.realtime.json.impl.ProtocolHandlerTest;
+import com.openexchange.realtime.json.impl.RTClientStateTest;
+import com.openexchange.realtime.json.impl.stanza.PresenceBuilderTest;
+import com.openexchange.realtime.json.presence.converter.JSONToPresenceStateTest;
+import com.openexchange.realtime.json.protocol.RTProtocolTest;
 
 /**
- * The {@link EventsRequest} wraps the incoming request.
+ * {@link UnitTests}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class EventsRequest {
-
-    private AJAXRequestData req;
-    private ServerSession session;
-    private RTEventManagerService manager;
-
-    public EventsRequest(AJAXRequestData requestData, ServerSession session, RTEventManagerService manager) {
-        super();
-        this.req = requestData;
-        this.session = session;
-        this.manager = manager;
-    }
-    
-    /**
-     * Retrieve the RTEventManager instance
-     */
-    public RTEventManagerService getManager() {
-        return manager;
-    }
-    
-    /**
-     * Calculate the ID from the session and the selector as passed as a parameter
-     */
-    public ID getID() throws OXException {
-        return Utils.constructID(req, session);
-    }
-    
-    /**
-     * Retrieve the 'selector' parameter
-     */
-    public String getSelector() throws OXException {
-        req.require("selector");
-        return req.getParameter("selector");
-    }
-
-    /**
-     * Retrieve the 'event' parameter
-     */
-    public String getEvent() throws OXException {
-        req.require("event");
-        return req.getParameter("event");
-    }
-    
-    /**
-     * Find out, whether an 'event' parameter was sent from the client
-     */
-    public boolean hasEvent() {
-        return req.isSet("event");
-    }
-
-    /**
-     * Retrieve the session
-     */
-    public ServerSession getSession() {
-        return session;
-    }
-    
-    /**
-     * Retrieve a copy of all parameters
-     */
-    public Map<String, String> getParameterMap() {
-        return new HashMap<String, String>(req.getParameters());
-    }
+@RunWith(Suite.class)
+@SuiteClasses({
+    PresenceBuilderTest.class,
+    JSONToPresenceStateTest.class,
+    EnqueuedStanzaTest.class,
+    RTClientStateTest.class,
+    RTProtocolTest.class,
+    ProtocolHandlerTest.class
+})
+public class UnitTests {
 
 }

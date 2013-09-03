@@ -47,85 +47,60 @@
  *
  */
 
-package com.openexchange.realtime.events.json;
+package com.openexchange.realtime.json.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.RTEventManagerService;
-import com.openexchange.realtime.json.Utils;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.realtime.packet.Stanza;
 
 
 /**
- * The {@link EventsRequest} wraps the incoming request.
+ * {@link EnqueuedStanza}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class EventsRequest {
+public class EnqueuedStanza implements Comparable<EnqueuedStanza>{
 
-    private AJAXRequestData req;
-    private ServerSession session;
-    private RTEventManagerService manager;
+    private static final int INFINITY = Integer.MAX_VALUE;
 
-    public EventsRequest(AJAXRequestData requestData, ServerSession session, RTEventManagerService manager) {
+    protected Stanza stanza;
+    protected long sequenceNumber;
+    protected int count;
+
+    protected EnqueuedStanza() {
         super();
-        this.req = requestData;
-        this.session = session;
-        this.manager = manager;
     }
-    
-    /**
-     * Retrieve the RTEventManager instance
-     */
-    public RTEventManagerService getManager() {
-        return manager;
-    }
-    
-    /**
-     * Calculate the ID from the session and the selector as passed as a parameter
-     */
-    public ID getID() throws OXException {
-        return Utils.constructID(req, session);
-    }
-    
-    /**
-     * Retrieve the 'selector' parameter
-     */
-    public String getSelector() throws OXException {
-        req.require("selector");
-        return req.getParameter("selector");
+
+    public EnqueuedStanza(Stanza stanza) {
+        super();
+        this.stanza = stanza;
+        this.sequenceNumber = stanza.getSequenceNumber();
+        this.count = 0;
     }
 
     /**
-     * Retrieve the 'event' parameter
+     * Increment the counter of this enqueued Stanza until the configured maximum count was reached.
+     * @return true if the counter could be incremented, false if incrementing the counter would exceed the configured limit.
      */
-    public String getEvent() throws OXException {
-        req.require("event");
-        return req.getParameter("event");
-    }
-    
-    /**
-     * Find out, whether an 'event' parameter was sent from the client
-     */
-    public boolean hasEvent() {
-        return req.isSet("event");
-    }
-
-    /**
-     * Retrieve the session
-     */
-    public ServerSession getSession() {
-        return session;
-    }
-    
-    /**
-     * Retrieve a copy of all parameters
-     */
-    public Map<String, String> getParameterMap() {
-        return new HashMap<String, String>(req.getParameters());
+    public boolean incCounter() {
+        synchronized(stanza) {
+            count++;
+            if (count > getInfinity()) {
+                return false;
+            }
+            return true;
+        }
     }
 
+    @Override
+    public int compareTo(EnqueuedStanza o) {
+        return (int) (sequenceNumber - o.sequenceNumber);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return ((EnqueuedStanza)obj).sequenceNumber == sequenceNumber;
+    }
+
+    protected int getInfinity() {
+        return INFINITY;
+    }
 }

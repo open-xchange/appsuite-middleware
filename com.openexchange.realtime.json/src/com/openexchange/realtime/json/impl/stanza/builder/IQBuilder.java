@@ -47,85 +47,66 @@
  *
  */
 
-package com.openexchange.realtime.events.json;
+package com.openexchange.realtime.json.impl.stanza.builder;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.RTEventManagerService;
-import com.openexchange.realtime.json.Utils;
+import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import com.openexchange.realtime.json.JSONExceptionMessage;
+import com.openexchange.realtime.json.stanza.StanzaBuilder;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.IQ;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * The {@link EventsRequest} wraps the incoming request.
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link IQBuilder} - Parse an atmosphere client's IQ message and build a IQ Stanza from it by adding the recipients ID.
+ * 
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class EventsRequest {
+public class IQBuilder extends StanzaBuilder<IQ> {
 
-    private AJAXRequestData req;
-    private ServerSession session;
-    private RTEventManagerService manager;
+    /**
+     * Create a new IQBuilder Initializes a new {@link IQBuilder}.
+     * 
+     * @param from the sender's ID, must not be null
+     * @param json the sender's message, must not be null
+     * @throws IllegalArgumentException if from or json are null
+     */
+    public IQBuilder(ID from, JSONObject json, ServerSession session) {
+        super(session);
+        if (from == null || json == null) {
+            throw new IllegalArgumentException();
+        }
+        this.from = from;
+        this.json = json;
+        this.stanza = new IQ();
+    }
 
-    public EventsRequest(AJAXRequestData requestData, ServerSession session, RTEventManagerService manager) {
-        super();
-        this.req = requestData;
-        this.session = session;
-        this.manager = manager;
-    }
-    
-    /**
-     * Retrieve the RTEventManager instance
-     */
-    public RTEventManagerService getManager() {
-        return manager;
-    }
-    
-    /**
-     * Calculate the ID from the session and the selector as passed as a parameter
-     */
-    public ID getID() throws OXException {
-        return Utils.constructID(req, session);
-    }
-    
-    /**
-     * Retrieve the 'selector' parameter
-     */
-    public String getSelector() throws OXException {
-        req.require("selector");
-        return req.getParameter("selector");
+    @Override
+    public IQ build() throws RealtimeException {
+        basics();
+        type();
+        return stanza;
     }
 
     /**
-     * Retrieve the 'event' parameter
+     * Check for the obligatory type key of IQ Stanzas in the received json and set the value in the Stanza
+     * 
+     * @throws OXException if the type key is missing
      */
-    public String getEvent() throws OXException {
-        req.require("event");
-        return req.getParameter("event");
-    }
-    
-    /**
-     * Find out, whether an 'event' parameter was sent from the client
-     */
-    public boolean hasEvent() {
-        return req.isSet("event");
-    }
-
-    /**
-     * Retrieve the session
-     */
-    public ServerSession getSession() {
-        return session;
-    }
-    
-    /**
-     * Retrieve a copy of all parameters
-     */
-    public Map<String, String> getParameterMap() {
-        return new HashMap<String, String>(req.getParameters());
+    private void type() throws RealtimeException {
+        String type = json.optString("type");
+        if (type == null || type.trim().equals("")) {
+            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(String.format(JSONExceptionMessage.MISSING_KEY_MSG, "type"));
+        }
+        try {
+            IQ.Type.valueOf(type.toUpperCase());
+        } catch (IllegalArgumentException iae) {
+            throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(String.format(
+                JSONExceptionMessage.IQ_DATA_ELEMENT_MALFORMED_MSG,
+                "type"));
+        }
     }
 
 }

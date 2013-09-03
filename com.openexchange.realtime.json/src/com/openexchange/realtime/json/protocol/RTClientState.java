@@ -47,85 +47,63 @@
  *
  */
 
-package com.openexchange.realtime.events.json;
+package com.openexchange.realtime.json.protocol;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.RTEventManagerService;
-import com.openexchange.realtime.json.Utils;
+import java.util.List;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.realtime.packet.Stanza;
 
 /**
- * The {@link EventsRequest} wraps the incoming request.
+ * {@link RTClientState} - 
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class EventsRequest {
-
-    private AJAXRequestData req;
-    private ServerSession session;
-    private RTEventManagerService manager;
-
-    public EventsRequest(AJAXRequestData requestData, ServerSession session, RTEventManagerService manager) {
-        super();
-        this.req = requestData;
-        this.session = session;
-        this.manager = manager;
-    }
-    
-    /**
-     * Retrieve the RTEventManager instance
-     */
-    public RTEventManagerService getManager() {
-        return manager;
-    }
-    
-    /**
-     * Calculate the ID from the session and the selector as passed as a parameter
-     */
-    public ID getID() throws OXException {
-        return Utils.constructID(req, session);
-    }
-    
-    /**
-     * Retrieve the 'selector' parameter
-     */
-    public String getSelector() throws OXException {
-        req.require("selector");
-        return req.getParameter("selector");
-    }
+public interface RTClientState {
 
     /**
-     * Retrieve the 'event' parameter
+     * Called when the client sent an acknowledgement for a stanza
+     * @param sequenceNumber
      */
-    public String getEvent() throws OXException {
-        req.require("event");
-        return req.getParameter("event");
-    }
-    
-    /**
-     * Find out, whether an 'event' parameter was sent from the client
-     */
-    public boolean hasEvent() {
-        return req.isSet("event");
-    }
+    public abstract void acknowledgementReceived(long sequenceNumber);
 
     /**
-     * Retrieve the session
+     * Enqueues a stanza. If it contains a sequence number, it is enqueued in the resendBuffer, otherwise in the nonsequenceStanzas
+     * @param stanza
      */
-    public ServerSession getSession() {
-        return session;
-    }
-    
+    public abstract void enqueue(Stanza stanza);
+
     /**
-     * Retrieve a copy of all parameters
+     * Retrieves a list of stanzas that are still to be transmitted to the client
+     * @return
      */
-    public Map<String, String> getParameterMap() {
-        return new HashMap<String, String>(req.getParameters());
-    }
+    public abstract List<Stanza> getStanzasToSend();
+
+    /**
+     * A purge run removes all unsequenced stanzas from the state and increases the TTL counter of sequenced stanzas.
+     */
+    public abstract void purge();
+
+    public abstract ID getId();
+
+    public abstract void lock();
+
+    public abstract void unlock();
+
+    /**
+     * Touch sets the last-seen timestamp for this state entry
+     */
+    public abstract void touch();
+
+    /**
+     * Retrieves the timestamp for when this user was last seen
+     */
+    public abstract long getLastSeen();
+
+    /**
+     * Checks whether this state should be considered timed out relative to the given timestamp
+     * @param timestamp - The timestamp to check the timeout status for
+     * @return true if the timestamp is more than two minutes ahead of the lastSeen timestamp, false otherwise
+     */
+    public abstract boolean isTimedOut(long timestamp);
 
 }

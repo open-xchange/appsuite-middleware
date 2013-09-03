@@ -47,85 +47,63 @@
  *
  */
 
-package com.openexchange.realtime.events.json;
+package com.openexchange.realtime.json.impl.stanza.builder;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.events.RTEventManagerService;
-import com.openexchange.realtime.json.Utils;
+import org.json.JSONObject;
+import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.json.stanza.StanzaBuilder;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.Presence.Type;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * The {@link EventsRequest} wraps the incoming request.
+ * {@link PresenceBuilder} - Parse an atmosphere request and build a Presence Stanza from it by adding the recipients ID.
+ * Building includes transformation from JSON to POJO and Initialization from the PayloadTree.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class EventsRequest {
-
-    private AJAXRequestData req;
-    private ServerSession session;
-    private RTEventManagerService manager;
-
-    public EventsRequest(AJAXRequestData requestData, ServerSession session, RTEventManagerService manager) {
-        super();
-        this.req = requestData;
-        this.session = session;
-        this.manager = manager;
-    }
-    
-    /**
-     * Retrieve the RTEventManager instance
-     */
-    public RTEventManagerService getManager() {
-        return manager;
-    }
-    
-    /**
-     * Calculate the ID from the session and the selector as passed as a parameter
-     */
-    public ID getID() throws OXException {
-        return Utils.constructID(req, session);
-    }
-    
-    /**
-     * Retrieve the 'selector' parameter
-     */
-    public String getSelector() throws OXException {
-        req.require("selector");
-        return req.getParameter("selector");
-    }
+public class PresenceBuilder extends StanzaBuilder<Presence> {
 
     /**
-     * Retrieve the 'event' parameter
+     * Create a new PresenceBuilder Initializes a new {@link PresenceBuilder}.
+     *
+     * @param from The sender's ID, must not be null
+     * @param json The sender's message, must not be null
+     * @param session 
+     * @param serverSession The ServerSession associated with the incoming Stanza/Sender
+     * @throws IllegalArgumentException if from or json are null
      */
-    public String getEvent() throws OXException {
-        req.require("event");
-        return req.getParameter("event");
-    }
-    
-    /**
-     * Find out, whether an 'event' parameter was sent from the client
-     */
-    public boolean hasEvent() {
-        return req.isSet("event");
+    public PresenceBuilder(ID from, JSONObject json, ServerSession session) {
+        super(session);
+        if (from == null || json == null) {
+            throw new IllegalArgumentException();
+        }
+        this.from = from;
+        this.json = json;
+        this.stanza = new Presence();
     }
 
-    /**
-     * Retrieve the session
-     */
-    public ServerSession getSession() {
-        return session;
+    @Override
+    public Presence build() throws RealtimeException {
+        basics();
+        type();
+        return stanza;
+
     }
-    
-    /**
-     * Retrieve a copy of all parameters
-     */
-    public Map<String, String> getParameterMap() {
-        return new HashMap<String, String>(req.getParameters());
+
+    private void type() {
+        if (json.has("type")) {
+            String type = json.optString("type");
+            for (Presence.Type t : Presence.Type.values()) {
+                if (t.name().equalsIgnoreCase(type)) {
+                    stanza.setType(t);
+                    break;
+                }
+            }
+        } else {
+            stanza.setType(Type.NONE);
+        }
     }
 
 }
