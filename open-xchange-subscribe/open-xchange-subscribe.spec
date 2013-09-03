@@ -92,6 +92,17 @@ if [ ${1:-0} -eq 2 ]; then
         ox_set_property com.openexchange.subscribe.crawler.gmx.com true $pfile
     fi
 
+    # SoftwareChange_Request-1501
+    FILES=( crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties facebooksubscribe.properties linkedinsubscribe.properties microformatSubscription.properties microformatSubscription.properties msnsubscribe.properties yahoosubscribe.properties )
+    NEWPROPS=( com.openexchange.subscribe.crawler.googlemail.autorunInterval com.openexchange.subscribe.xing.autorunInterval com.openexchange.subscribe.crawler.webde.autorunInterval com.openexchange.subscribe.crawler.google.calendar.autorunInterval com.openexchange.subscribe.crawler.gmx.autorunInterval com.openexchange.subscribe.crawler.t-online.de.autorunInterval com.openexchange.subscribe.crawler.gmx.com.autorunInterval com.openexchange.subscribe.crawler.msn.de.autorunInterval com.openexchange.subscribe.crawler.suncontacts.autorunInterval com.openexchange.subscribe.crawler.suncalendar.autorunInterval com.openexchange.subscribe.crawler.suntasks.autorunInterval com.openexchange.subscribe.socialplugin.facebook.autorunInterval com.openexchange.subscribe.socialplugin.linkedin.autorunInterval com.openexchange.subscribe.microformats.contacts.http.autorunInterval com.openexchange.subscribe.microformats.infostore.http.autorunInterval com.openexchange.subscribe.socialplugin.msn.autorunInterval com.openexchange.subscribe.socialplugin.yahoo.autorunInterval )
+    for I in $(seq 1 ${#NEWPROPS[@]}); do
+        NEWPROP=${NEWPROPS[$I-1]}
+        PFILE=/opt/open-xchange/etc/${FILES[$I-1]}
+        if ! ox_exists_property $NEWPROP $PFILE; then
+            ox_set_property $NEWPROP 1d $PFILE
+        fi
+    done
+
     find /opt/open-xchange/etc/crawlers -name "*.yml" -print0 | while read -d $'\0' i; do
         ox_update_permissions "$i" open-xchange:root 644
     done
@@ -114,7 +125,7 @@ fi
 %doc docs/
 
 %changelog
-* Sun Sep 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
+* Mon Sep 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Eighth candidate for 7.4.0 release
 * Tue Aug 27 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Seventh candidate for 7.4.0 release

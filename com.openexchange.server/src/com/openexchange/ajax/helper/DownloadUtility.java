@@ -156,7 +156,7 @@ public final class DownloadUtility {
             String fn = fileName;
             byte[] bytes;
             // Check by Content-Type and file name
-            if (contentType.startsWith("text/htm")) {
+            if (contentType.startsWithAny("text/htm", "text/xhtm", "text/xml")) {
                 /*
                  * HTML content requested for download...
                  */

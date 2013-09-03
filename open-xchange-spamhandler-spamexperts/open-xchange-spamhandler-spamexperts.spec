@@ -56,7 +56,7 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc settin
 %doc com.openexchange.spamhandler.spamexperts/ChangeLog
 
 %changelog
-* Sun Sep 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
+* Mon Sep 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Eighth candidate for 7.4.0 release
 * Tue Aug 27 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Seventh candidate for 7.4.0 release

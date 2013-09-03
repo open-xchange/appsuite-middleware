@@ -53,9 +53,12 @@ import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServ
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventHandler;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
@@ -96,7 +99,7 @@ public final class SessiondActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, EventAdmin.class, CryptoService.class, ThreadPoolService.class, ContextService.class };
+        return new Class<?>[] { ConfigurationService.class, EventAdmin.class, CryptoService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -134,6 +137,7 @@ public final class SessiondActivator extends HousekeepingActivator {
             if (LOG.isInfoEnabled()) {
                 LOG.info("starting bundle: com.openexchange.sessiond");
             }
+            final BundleContext context = this.context;
             SessiondInit.getInstance().start();
             final SessiondService serviceImpl = /*new InvalidatedAwareSessiondService*/(new SessiondServiceImpl());
             SessiondService.SERVICE_REFERENCE.set(serviceImpl);
@@ -144,6 +148,28 @@ public final class SessiondActivator extends HousekeepingActivator {
             track(ThreadPoolService.class, new ThreadPoolTracker(context));
             track(TimerService.class, new TimerServiceTracker(context));
             track(SessionStorageService.class, new SessionStorageServiceTracker(context));
+            track(ContextService.class, new ServiceTrackerCustomizer<ContextService, ContextService>() {
+
+                @Override
+                public ContextService addingService(final ServiceReference<ContextService> reference) {
+                    final ContextService service = context.getService(reference);
+                    addService(ContextService.class, service);
+                    getServiceRegistry().addService(ContextService.class, service);
+                    return service;
+                }
+
+                @Override
+                public void modifiedService(final ServiceReference<ContextService> reference, final ContextService service) {
+                    // Nothing to do
+                }
+
+                @Override
+                public void removedService(final ServiceReference<ContextService> reference, final ContextService service) {
+                    removeService(ContextService.class);
+                    getServiceRegistry().removeService(ContextService.class);
+                    context.ungetService(reference);
+                }
+            });
             openTrackers();
 
             final SessiondSessionSpecificRetrievalService retrievalService = new SessiondSessionSpecificRetrievalService();
@@ -186,7 +212,7 @@ public final class SessiondActivator extends HousekeepingActivator {
                                 if (storageService.addSessionIfAbsent(session)) {
                                     SessionHandler.postSessionStored(session, eventAdmin);
                                 }
-                            } catch (Exception e) {
+                            } catch (final Exception e) {
                                 LOG.warn("Active session " + session.getSessionID() + " could not be put into session storage.", e);
                             }
                         }
@@ -207,4 +233,15 @@ public final class SessiondActivator extends HousekeepingActivator {
             throw e;
         }
     }
+
+    @Override
+    public <S> boolean addService(final Class<S> clazz, final S service) {
+        return super.addService(clazz, service);
+    }
+
+    @Override
+    public <S> boolean removeService(final Class<? extends S> clazz) {
+        return super.removeService(clazz);
+    }
+
 }

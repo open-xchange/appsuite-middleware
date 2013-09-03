@@ -67,7 +67,7 @@ fi
 
 
 %changelog
-* Sun Sep 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
+* Mon Sep 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Eighth candidate for 7.4.0 release
 * Tue Aug 27 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Seventh candidate for 7.4.0 release

@@ -59,13 +59,11 @@ import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPProvider;
-import com.openexchange.imap.IMAPValidity;
 import com.openexchange.imap.services.Services;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -311,16 +309,16 @@ public final class IMAPStoreCache {
      * @throws MessagingException If connecting IMAP store fails
      * @throws OXException If a mail error occurs
      */
-    public IMAPStore borrowIMAPStore(final int accountId, final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final Session session, final IMAPValidity validity) throws MessagingException, OXException {
+    public IMAPStore borrowIMAPStore(final int accountId, final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final Session session) throws MessagingException, OXException {
         /*
          * Return connected IMAP store
          */
         try {
             if (!DEBUG) {
-                return getContainer(accountId, server, port, login, pw, session).getStore(imapSession, validity);
+                return getContainer(accountId, server, port, login, pw, session).getStore(imapSession);
             }
             final long st = System.currentTimeMillis();
-            final IMAPStore store = getContainer(accountId, server, port, login, pw, session).getStore(imapSession, validity);
+            final IMAPStore store = getContainer(accountId, server, port, login, pw, session).getStore(imapSession);
             final long dur = System.currentTimeMillis() - st;
             LOG.debug("IMAPStoreCache.borrowIMAPStore() took " + dur + "msec.");
             return store;
@@ -346,7 +344,7 @@ public final class IMAPStoreCache {
      * @param port The port
      * @param login The login/user name
      */
-    public void returnIMAPStore(final IMAPStore imapStore, final int accountId, final String server, final int port, final String login, final IMAPValidity validity) {
+    public void returnIMAPStore(final IMAPStore imapStore, final int accountId, final String server, final int port, final String login) {
         if (null == imapStore) {
             // Nothing to close
             return;
@@ -359,7 +357,7 @@ public final class IMAPStoreCache {
             closeSafe(imapStore);
             return;
         }
-        container.backStore(imapStore, validity);
+        container.backStore(imapStore);
     }
 
     private static void closeSafe(final IMAPStore imapStore) {

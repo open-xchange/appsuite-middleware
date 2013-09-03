@@ -49,28 +49,28 @@
 
 package com.openexchange.jslob.storage.db.cache;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.DelayQueue;
-import java.util.concurrent.Delayed;
-import java.util.concurrent.TimeUnit;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.jslob.JSlob;
+import com.openexchange.jslob.JSlobExceptionCodes;
 import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.jslob.storage.db.DBJSlobStorage;
-import com.openexchange.jslob.storage.db.Services;
 import com.openexchange.jslob.storage.db.osgi.DBJSlobStorageActivcator;
+import com.openexchange.jslob.storage.db.util.DelayedStoreOp;
+import com.openexchange.jslob.storage.db.util.DelayedStoreOpDelayQueue;
 import com.openexchange.threadpool.ThreadPools;
 
 /**
@@ -130,113 +130,6 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
         }
     }
 
-    /**
-     * The delay for pooled messages: <code>30sec</code>
-     */
-    private static volatile Long delayMsec;
-    static long delayMsec() {
-        Long tmp = delayMsec;
-        if (null == tmp) {
-            synchronized (CachingJSlobStorage.class) {
-                tmp = delayMsec;
-                if (null == tmp) {
-                    final ConfigurationService cs = Services.getService(ConfigurationService.class);
-                    if (null == cs) {
-                        return 30000L;
-                    }
-                    tmp = Long.valueOf(cs.getProperty("com.openexchange.jslob.storage.delayMsec", "30000").trim());
-                    delayMsec = tmp;
-                }
-            }
-        }
-        return tmp.longValue();
-    }
-
-    private static final class DelayedStoreOp implements Delayed {
-
-        final String id;
-        final String group;
-        final JSlobId jSlobId;
-        private final boolean poison;
-        private final long stamp;
-        private final int hash;
-
-        DelayedStoreOp(final String id, final String group, final JSlobId jSlobId, final boolean poison) {
-            super();
-            stamp = poison ? 0L : System.currentTimeMillis();
-            this.poison = poison;
-            this.id = id;
-            this.group = group;
-            this.jSlobId = jSlobId;
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((id == null) ? 0 : id.hashCode());
-            result = prime * result + ((group == null) ? 0 : group.hashCode());
-            hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof DelayedStoreOp)) {
-                return false;
-            }
-            DelayedStoreOp other = (DelayedStoreOp) obj;
-            if (group == null) {
-                if (other.group != null) {
-                    return false;
-                }
-            } else if (!group.equals(other.group)) {
-                return false;
-            }
-            if (id == null) {
-                if (other.id != null) {
-                    return false;
-                }
-            } else if (!id.equals(other.id)) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public int compareTo(final Delayed o) {
-            if (poison) {
-                return -1;
-            }
-            final long thisStamp = stamp;
-            final long otherStamp = ((DelayedStoreOp) o).stamp;
-            return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
-        }
-
-        @Override
-        public long getDelay(final TimeUnit unit) {
-            return poison ? -1L : (unit.convert(delayMsec() - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS));
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder builder = new StringBuilder(64);
-            builder.append("DelayedStoreOp [");
-            if (id != null) {
-                builder.append("id=").append(id).append(", ");
-            }
-            if (group != null) {
-                builder.append("group=").append(group);
-            }
-            builder.append("]");
-            return builder.toString();
-        }
-
-    }
-
     /** The poison element */
     private static final DelayedStoreOp POISON = new DelayedStoreOp(null, null, null, true);
 
@@ -244,7 +137,7 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
     private final DBJSlobStorage delegate;
 
     /** The queue for delayed store operations */
-    private final DelayQueue<DelayedStoreOp> delayedStoreOps;
+    private final DelayedStoreOpDelayQueue delayedStoreOps;
 
     /** The keep-going flag */
     private final AtomicBoolean keepgoing;
@@ -255,13 +148,13 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
     private CachingJSlobStorage(final DBJSlobStorage delegate) {
         super();
         this.delegate = delegate;
-        delayedStoreOps = new DelayQueue<DelayedStoreOp>();
+        delayedStoreOps = new DelayedStoreOpDelayQueue();
         keepgoing = new AtomicBoolean(true);
     }
 
     @Override
     public void run() {
-        final List<DelayedStoreOp> objects = new ArrayList<CachingJSlobStorage.DelayedStoreOp>(16);
+        final List<DelayedStoreOp> objects = new ArrayList<DelayedStoreOp>(16);
         while (keepgoing.get()) {
             try {
                 objects.clear();
@@ -274,9 +167,34 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
                 // Drain more if available
                 delayedStoreOps.drainTo(objects);
                 final Cache cache = optCache();
-                if (null != cache && writeMultiple2DB(objects, cache)) {
-                    // Reached poison element
-                    return;
+                if (null != cache) {
+                    try {
+                        if (writeMultiple2DB(objects, cache)) {
+                            // Reached poison element
+                            return;
+                        }
+                    } catch (final OXException e) {
+                        // Multiple store failed
+                        if (!JSlobExceptionCodes.UNEXPECTED_ERROR.equals(e) || !SQLException.class.isInstance(e.getCause())) {
+                            throw e;
+                        }
+                        boolean leave = false;
+                        for (final DelayedStoreOp delayedStoreOp : objects) {
+                            if (POISON == delayedStoreOp) {
+                                // Reached poison element
+                                leave = true;
+                            } else if (delayedStoreOp != null) {
+                                try {
+                                    write2DB(delayedStoreOp, cache);
+                                } catch (final Exception x) {
+                                    LOG.error("JSlobs could not be flushed to database", x);
+                                }
+                            }
+                        }
+                        if (leave) {
+                            return;
+                        }
+                    }
                 }
             } catch (final Exception e) {
                 LOG.error("Checking for delayed JSlobs failed", e);
@@ -296,33 +214,29 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
     }
 
     private boolean writeMultiple2DB(final List<DelayedStoreOp> delayedStoreOps, final Cache cache) throws OXException {
-        boolean getOut = false;
+        boolean leave = false;
         // Collect valid delayed store operations
         int size = delayedStoreOps.size();
-        final List<JSlobId> ids = new ArrayList<JSlobId>(size);
-        final List<JSlob> jslobs = new ArrayList<JSlob>(size);
+        final Map<JSlobId, JSlob> jslobs = new HashMap<JSlobId, JSlob>(size);
         for (int i = 0; i < size; i++) {
             final DelayedStoreOp delayedStoreOp = delayedStoreOps.get(i);
             if (POISON == delayedStoreOp) {
-                getOut = true;
+                leave = true;
             } else if (delayedStoreOp != null) {
                 final Object obj = cache.getFromGroup(delayedStoreOp.id, delayedStoreOp.group);
                 if (obj instanceof JSlob) {
-                    ids.add(delayedStoreOp.jSlobId);
-                    jslobs.add((JSlob) obj);
+                    jslobs.put(delayedStoreOp.jSlobId, (JSlob) obj);
                 }
             }
         }
         // Store them
-        delegate.storeMultiple(ids, jslobs);
+        delegate.storeMultiple(jslobs);
         // Invalidate remote caches
-        size = ids.size();
-        for (int i = 0; i < size; i++) {
-            // Propagate among remote caches
-            final JSlobId id = ids.get(i);
-            cache.putInGroup(id.getId(), groupName(id), jslobs.get(i).setId(id), true);
+        for (final Entry<JSlobId, JSlob> entry : jslobs.entrySet()) {
+            final JSlobId id = entry.getKey();
+            cache.putInGroup(id.getId(), groupName(id), entry.getValue().setId(id), true);
         }
-        return getOut;
+        return leave;
     }
 
     /**
@@ -380,7 +294,7 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
         return null;
     }
 
-    String groupName(final JSlobId id) {
+    private String groupName(final JSlobId id) {
         return new StringAllocator(id.getServiceId()).append('@').append(id.getUser()).append('@').append(id.getContext()).toString();
     }
 
@@ -398,7 +312,7 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
 
         // Delay store operation
         if (delayedStoreOps.offer(new DelayedStoreOp(id.getId(), groupName(id), id, false))) {
-            // Added to delay queue
+            // Added to delay queue -- put current to cache
             cache.putInGroup(id.getId(), groupName(id), t.setId(id), false);
             return true;
         }

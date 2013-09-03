@@ -67,7 +67,7 @@ exit 0
 %config(noreplace) /etc/munin/plugin-conf.d/*
 
 %changelog
-* Sun Sep 01 2013 Carsten Hoeger <choeger@open-xchange.com>
+* Mon Sep 02 2013 Carsten Hoeger <choeger@open-xchange.com>
 Eighth candidate for 7.4.0 release
 * Tue Aug 27 2013 Carsten Hoeger <choeger@open-xchange.com>
 Seventh candidate for 7.4.0 release

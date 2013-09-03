@@ -84,9 +84,9 @@ public final class JSlobId implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + context;
+        result = prime * result + user;
         result = prime * result + ((id == null) ? 0 : id.hashCode());
         result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
-        result = prime * result + user;
         hashCode = result;
     }
 
@@ -107,6 +107,9 @@ public final class JSlobId implements Serializable {
         if (context != other.context) {
             return false;
         }
+        if (user != other.user) {
+            return false;
+        }
         if (id == null) {
             if (other.id != null) {
                 return false;
@@ -119,9 +122,6 @@ public final class JSlobId implements Serializable {
                 return false;
             }
         } else if (!serviceId.equals(other.serviceId)) {
-            return false;
-        }
-        if (user != other.user) {
             return false;
         }
         return true;

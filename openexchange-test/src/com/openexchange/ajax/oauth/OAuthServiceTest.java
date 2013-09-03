@@ -96,7 +96,7 @@ public class OAuthServiceTest {
     }
 
     @BeforeClass
-    public static void before() throws Exception {
+    public static void beforeClass() throws Exception {
         User oxadmin = AJAXClient.User.OXAdmin;
         AJAXClient client2 = new AJAXClient(AJAXClient.User.User2);
         com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
@@ -157,7 +157,6 @@ public class OAuthServiceTest {
 
     @Test
     public void testGetAllServicesWithoutPermission() throws Exception {
-        Thread.sleep(3000);
         AJAXClient client2 = null;
         try {
             client2 = new AJAXClient(AJAXClient.User.User2);
@@ -181,7 +180,6 @@ public class OAuthServiceTest {
 
     @Test
     public void testGetTestServiceWithoutPermission() throws Exception {
-        Thread.sleep(3000);
         AJAXClient client2 = null;
         try {
             client2 = new AJAXClient(AJAXClient.User.User2);

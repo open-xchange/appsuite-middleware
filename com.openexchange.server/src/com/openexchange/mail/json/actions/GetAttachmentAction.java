@@ -257,7 +257,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 if (isEmpty(mailPart.getFileName())) {
                     mailPart.setFileName(generateFilename(sequenceId, mailPart.getContentType().getBaseType()));
                 }
-                if (filter && !saveToDisk && mailPart.getContentType().startsWith("text/htm")) {
+                if (filter && !saveToDisk && mailPart.getContentType().startsWithAny("text/htm", "text/xhtm", "text/xml")) {
                     /*
                      * Apply filter
                      */

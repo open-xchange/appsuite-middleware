@@ -63,6 +63,8 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.tools.chunk.ChunkPerformer;
+import com.openexchange.groupware.tools.chunk.Performable;
 import com.openexchange.index.FacetParameters;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
@@ -82,7 +84,7 @@ import com.openexchange.solr.SolrCoreIdentifier;
 
 /**
  * {@link SolrMailIndexAccess}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
@@ -146,15 +148,38 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
         IndexResult<MailMessage> indexResult = query(parameters, fields);
         List<IndexDocument<MailMessage>> documents = indexResult.getResults();
-        Set<String> uuids = new HashSet<String>(documents.size());
+        final List<String> uuids = new ArrayList<String>(documents.size());
         for (IndexDocument<MailMessage> document : documents) {
             uuids.add(MailUUID.newUUID(contextId, userId, document.getObject()).toString());
         }
 
-        String deleteQuery = buildQueryStringWithOr(fieldConfig.getUUIDField(), uuids);
-        if (deleteQuery != null) {
-            deleteDocumentsByQuery(deleteQuery);
-        }
+        ChunkPerformer.perform(new Performable() {
+            @Override
+            public int perform(int off, int len) throws OXException {
+                List<String> sublist = uuids.subList(off, len);
+                Set<String> toDelete = new HashSet<String>(sublist);
+                String deleteQuery = buildQueryStringWithOr(fieldConfig.getUUIDField(), toDelete);
+                if (deleteQuery != null) {
+                    deleteDocumentsByQuery(deleteQuery);
+                }
+                return sublist.size();
+            }
+
+            @Override
+            public int getLength() {
+                return uuids.size();
+            }
+
+            @Override
+            public int getInitialOffset() {
+                return 0;
+            }
+
+            @Override
+            public int getChunkSize() {
+                return 200;
+            }
+        });
     }
 
     @Override
@@ -168,7 +193,7 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         } else {
             modifiedFields = new HashSet<IndexField>(fields);
         }
-        
+
         QueryParameters newParameters = parameters;
         if (sortField != null) {
             modifiedFields.add(sortField);

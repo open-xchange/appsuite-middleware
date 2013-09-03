@@ -104,31 +104,34 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * ############### MEMBERS ###############
      */
 
-    /**
-     * Line separator string. This is the value of the line.separator
-     * property at the moment that the MailAccess was created.
-     */
+    /** Line separator string. This is the value of the line.separator property at the moment that the MailAccess was created. */
     protected final String lineSeparator;
 
+    /** The associated session */
     protected final transient Session session;
 
+    /** The account identifier */
     protected final int accountId;
 
+    /** A collection of wanrings */
     protected final Collection<OXException> warnings;
 
+    /** Whether this access is cacheable */
     protected volatile boolean cacheable;
 
-    /**
-     * Indicates if <tt>MailAccess</tt> is currently held in {@link SingletonMailAccessCache}.
-     */
+    /** Whether this access is trackable by {@link MailAccessWatcher} */
+    protected volatile boolean trackable;
+
+    /** Indicates if <tt>MailAccess</tt> is currently held in {@link SingletonMailAccessCache}. */
     protected volatile boolean cached;
 
-    /**
-     * A flag to check if this <tt>MailAccess</tt> is connected, but in IDLE mode, waiting for any server notifications.
-     */
+    /** A flag to check if this <tt>MailAccess</tt> is connected, but in IDLE mode, waiting for any server notifications. */
     protected volatile boolean waiting;
 
+    /** The associated mail provider */
     protected MailProvider provider;
+
+    private volatile boolean tracked;
 
     private transient MailConfig mailConfig;
 
@@ -160,6 +163,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         this.session = session;
         this.accountId = accountId;
         cacheable = true;
+        trackable = true;
     }
 
     /**
@@ -635,7 +639,10 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 checkDefaultFolderOnConnect();
             }
         }
-        MailAccessWatcher.addMailAccess(this);
+        if (isTrackable()) {
+            MailAccessWatcher.addMailAccess(this);
+            tracked = true;
+        }
     }
 
     private void checkDefaultFolderOnConnect() throws OXException {
@@ -714,7 +721,10 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             /*
              * Remove from watcher no matter if cached or closed
              */
-            MailAccessWatcher.removeMailAccess(this);
+            if (tracked) {
+                MailAccessWatcher.removeMailAccess(this);
+                tracked = false;
+            }
             cleanUp();
         }
     }
@@ -748,7 +758,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Logs the trace of the thread that lastly obtained this access.
-     * 
+     *
      */
     public void logTrace(final StringBuilder sBuilder, final org.apache.commons.logging.Log log) {
         {
@@ -801,7 +811,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 final Throwable thr = new Throwable();
                 thr.setStackTrace(trace);
                 log.info(sBuilder.toString(), thr);
-            }            
+            }
         }
     }
 
@@ -934,6 +944,24 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 throw MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.create(Integer.valueOf(ctx.getContextId()));
             }
         }
+    }
+
+    /**
+     * Indicates if this mail access is trackable by {@link MailAccessWatcher}.
+     *
+     * @return <code>true</code> if this mail access is trackable; otherwise <code>false</code>
+     */
+    public boolean isTrackable() {
+        return trackable;
+    }
+
+    /**
+     * Sets if this mail access is trackable by {@link MailAccessWatcher}.
+     *
+     * @param trackable <code>true</code> if this mail access is trackable; otherwise <code>false</code>
+     */
+    public void setTrackable(boolean trackable) {
+        this.trackable = trackable;
     }
 
     /**

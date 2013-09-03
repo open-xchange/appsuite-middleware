@@ -56,6 +56,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -98,7 +99,7 @@ public final class DeleteAction extends AbstractMailAction {
             /*
              * Read in parameters
              */
-            final boolean hardDelete = "1".equals(req.getParameter(AJAXServlet.PARAMETER_HARDDELETE));
+            final boolean hardDelete = AJAXRequestDataTools.parseBoolParameter(req.getParameter(AJAXServlet.PARAMETER_HARDDELETE));
             final JSONArray jsonIDs = (JSONArray) req.getRequest().requireData();
             /*
              * Get mail interface

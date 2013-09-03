@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,26 +47,66 @@
  *
  */
 
-package com.openexchange.imap;
+package com.openexchange.mail.watcher;
+
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.config.MailProperties;
 
 
 /**
- * {@link IMAPValidity} - Provides current validity value.
+ * {@link MailAccessDelayElement} - A simple wrapper for {@link MailAccess} that implements {@link Delayed} interface.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IMAPValidity {
+public final class MailAccessDelayElement implements Delayed {
 
-    /**
-     * Gets the current validity.
-     *
-     * @return The current validity
-     */
-    long getCurrentValidity();
+    private static final int WATCHER_TIME = MailProperties.getInstance().getWatcherTime();
 
-    /**
-     * Clears cached IMAP connections.
-     */
-    void clearCachedConnections();
+    public final MailAccess<?, ?> mailAccess;
+    public final long stamp;
+
+    public MailAccessDelayElement(final MailAccess<?, ?> mailAccess, final long stamp) {
+        super();
+        this.mailAccess = mailAccess;
+        this.stamp = stamp;
+    }
+
+    @Override
+    public int compareTo(final Delayed o) {
+        final long thisStamp = stamp;
+        final long otherStamp = ((MailAccessDelayElement) o).stamp;
+        return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
+    }
+
+    @Override
+    public long getDelay(final TimeUnit unit) {
+        return (unit.convert(WATCHER_TIME - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS));
+    }
+
+    @Override
+    public int hashCode() {
+        return mailAccess.hashCode();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof MailAccessDelayElement)) {
+            return false;
+        }
+        final MailAccessDelayElement other = (MailAccessDelayElement) obj;
+        if (mailAccess == null) {
+            if (other.mailAccess != null) {
+                return false;
+            }
+        } else if (!mailAccess.equals(other.mailAccess)) {
+            return false;
+        }
+        return true;
+    }
 
 }
