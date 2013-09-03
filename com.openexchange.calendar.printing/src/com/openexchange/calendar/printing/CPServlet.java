@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -81,8 +82,11 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.html.HtmlService;
+import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
@@ -113,24 +117,44 @@ public class CPServlet extends PermissionServlet {
     private static final String DAYS = "days";
 
     private static final String I18N = "i18n";
+
     private static final String DOCUMENT_TITLE = "documentTitle";
 
-    private static TemplateService templates = null;
+    private static final String DATE_FORMATTER = "dateFormatter";
 
-    public static void setTemplateService(final TemplateService service) {
-        templates = service;
+    private static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service look-up.
+     *
+     * @param services The service look-up to set
+     */
+    public static void setServiceLookup(final ServiceLookup services) {
+        SERVICES.set(services);
     }
 
-    private static AppointmentSqlFactoryService appointmentSqlFactory = null;
-
-    public static void setAppointmentSqlFactoryService(final AppointmentSqlFactoryService service) {
-        appointmentSqlFactory = service;
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    private static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("ServiceLookup is absent. Check bundle activator.");
+        }
+        return serviceLookup.getService(clazz);
     }
 
-    private static CalendarCollectionService calendarTools = null;
+    // --------------------------------------------------------------------------------------- //
 
-    public static void setCalendarTools(final CalendarCollectionService service) {
-        calendarTools = service;
+    /**
+     * Initializes a new {@link CPServlet}.
+     */
+    public CPServlet() {
+        super();
     }
 
     @Override
@@ -169,12 +193,12 @@ public class CPServlet extends PermissionServlet {
 
             OXTemplate template;
             if(params.hasUserTemplate()) {
-                template = templates.loadTemplate(params.getUserTemplate(), params.getTemplate(), session);
+                template = getService(TemplateService.class).loadTemplate(params.getUserTemplate(), params.getTemplate(), session);
             } else {
-                template = templates.loadTemplate(params.getTemplate());
+                template = getService(TemplateService.class).loadTemplate(params.getTemplate());
             }
 
-            final AppointmentSQLInterface appointmentSql = appointmentSqlFactory.createAppointmentSql(session);
+            final AppointmentSQLInterface appointmentSql = getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
             SearchIterator<Appointment> iterator;
             if (params.hasFolder()) {
                 iterator = appointmentSql.getAppointmentsBetweenInFolder(params.getFolder(), new int[] {
@@ -189,6 +213,7 @@ public class CPServlet extends PermissionServlet {
             final CPCalendar cal = CPCalendar.getCalendar(zone, locale);
             modifyCalendar(cal, params);
 
+            final CalendarCollectionService calendarTools = getService(CalendarCollectionService.class);
             final Partitioner partitioner = new Partitioner(params, cal, session.getContext(), appointmentSql, calendarTools);
             final List<Day> perDayList = partitioner.partition(idList);
 
@@ -226,10 +251,14 @@ public class CPServlet extends PermissionServlet {
             for (final CPFormattingInformation info : partitions.getFormattingInformation()) {
                 debuggingItems.add(info.toString());
             }
-
-            template.process(variables, resp.getWriter());
-        } catch (final Throwable t) {
-            writeException(resp, t);
+            final AllocatingStringWriter htmlWriter = new AllocatingStringWriter();
+            template.process(variables, htmlWriter);
+            final String html = getService(HtmlService.class).sanitize(htmlWriter.toString(), null, false, null, null);
+            final PrintWriter writer = resp.getWriter();
+            writer.write(html);
+            writer.flush();
+        } catch (final Exception x) {
+            writeException(resp, x);
         }
     }
 
