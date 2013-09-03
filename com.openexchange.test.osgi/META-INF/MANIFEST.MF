@@ -12,8 +12,8 @@ Import-Package: com.openexchange.osgi,
  javax.xml.parsers,
  org.osgi.framework,
  org.osgi.util.tracker,
- org.w3c.dom
+ org.w3c.dom,
+ org.junit
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: .,
- lib/junit-4.6.jar
+Bundle-ClassPath: .
 Export-Package: com.openexchange.test.osgi
