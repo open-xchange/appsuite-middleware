@@ -87,7 +87,7 @@ public class SharedJSlobServiceTracker implements ServiceTrackerCustomizer<Share
     public SharedJSlobService addingService(ServiceReference<SharedJSlobService> reference) {
         SharedJSlobService service = context.getService(reference);
         try {
-            jslobService.setShared(service.getId(), service.getJSlob());
+            jslobService.setShared(service.getId(), service);
             EventAdmin eventAdmin = jslobService.getServices().getOptionalService(EventAdmin.class);
             if (null != eventAdmin) {
                 Map<String, Object> properties = new HashMap<String, Object>(1);

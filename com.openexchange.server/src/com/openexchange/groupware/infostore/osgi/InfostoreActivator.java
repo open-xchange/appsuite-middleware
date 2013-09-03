@@ -57,8 +57,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -194,17 +192,9 @@ public class InfostoreActivator implements BundleActivator {
                 public ConfigurationService addingService(ServiceReference<ConfigurationService> arg0) {
                     
                     ConfigurationService configService = context.getService(arg0);
-                    try {
-                        int maxUploadSize = configService.getIntProperty("MAX_UPLOAD_SIZE", 10485760);
-                        JSONObject jsonObject = new JSONObject();
-                        jsonObject.put("maxUploadSize", maxUploadSize);
-                        int quota = configService.getIntProperty("com.openexchange.quota.infostore", -1);
-                        jsonObject.put("infostoreQuota", quota);
-                        SharedJSlobService infostoreJSlob = new SharedInfostoreJSlob(jsonObject);
-                        registration = context.registerService(SharedJSlobService.class, infostoreJSlob, null);
-                    } catch (JSONException e) {
-                        //should not happen
-                    }
+                    int maxUploadSize = configService.getIntProperty("MAX_UPLOAD_SIZE", 10485760);
+                    SharedJSlobService infostoreJSlob = new SharedInfostoreJSlob(maxUploadSize);
+                    registration = context.registerService(SharedJSlobService.class, infostoreJSlob, null);
                     return configService;
                 }
 

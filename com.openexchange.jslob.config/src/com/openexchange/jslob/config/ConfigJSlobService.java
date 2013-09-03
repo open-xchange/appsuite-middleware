@@ -92,6 +92,7 @@ import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobExceptionCodes;
 import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.JSlobService;
+import com.openexchange.jslob.shared.SharedJSlobService;
 import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
 import com.openexchange.log.LogFactory;
@@ -133,7 +134,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     private final int LOB2CONFIG = 1;
 
-    private final Map<String, JSlob> sharedJSlobs;
+    private final Map<String, SharedJSlobService> sharedJSlobs;
 
     /**
      * Initializes a new {@link ConfigJSlobService}.
@@ -154,7 +155,7 @@ public final class ConfigJSlobService implements JSlobService {
             readPerfMap(file, configTreeEquivalents);
         }
 
-        sharedJSlobs = new ConcurrentHashMap<String, JSlob>();
+        sharedJSlobs = new ConcurrentHashMap<String, SharedJSlobService>();
     }
 
     /**
@@ -293,8 +294,12 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     @Override
-    public Collection<JSlob> getShared() {
-        return sharedJSlobs.values();
+    public Collection<JSlob> getShared(Session session) throws OXException {
+        List<JSlob> retval = new LinkedList<JSlob>();
+        for (SharedJSlobService service : sharedJSlobs.values()) {
+            retval.add(service.getJSlob(session));
+        }
+        return retval;
     }
 
     @Override
@@ -314,6 +319,23 @@ public final class ConfigJSlobService implements JSlobService {
                 jsonJSlob = new DefaultJSlob(opt);
             }
         }
+        
+        // Search for shared JSlobs
+        JSlob sharedJSlob = getShared(id, session);
+        if (null != sharedJSlob) {
+            JSONObject jsonObject = jsonJSlob.getJsonObject();
+            JSONObject sharedObject = sharedJSlob.getJsonObject();
+            for (String key : sharedObject.keySet()) {
+                if (sharedObject.hasAndNotNull(key)) {
+                    try {
+                        jsonObject.put(key, sharedObject.get(key));
+                    } catch (JSONException e) {
+                        // should not happen
+                    }
+                }
+            }
+        }
+        
         /*
          * Fill with config cascade settings
          */
@@ -378,8 +400,12 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     @Override
-    public JSlob getShared(final String id) {
-        return sharedJSlobs.get(id);
+    public JSlob getShared(final String id, Session session) throws OXException {
+        SharedJSlobService service = sharedJSlobs.get(id);
+        if (null != service) {
+            return sharedJSlobs.get(id).getJSlob(session);
+        }
+        return null;
     }
 
     /**
@@ -560,16 +586,11 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     @Override
-    public void setShared(final String id, final JSlob jsonJSlob) {
-        if (null == jsonJSlob) {
+    public void setShared(final String id, final SharedJSlobService service) {
+        if (null == service) {
             sharedJSlobs.remove(id);
         } else {
-            final JSONObject jObject = jsonJSlob.getJsonObject();
-            if (null == jObject) {
-                sharedJSlobs.remove(id);
-                return;
-            }
-            sharedJSlobs.put(id, jsonJSlob);
+            sharedJSlobs.put(id, service);
         }
     }
 

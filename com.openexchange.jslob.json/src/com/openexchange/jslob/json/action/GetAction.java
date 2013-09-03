@@ -125,12 +125,7 @@ public final class GetAction extends JSlobAction {
         final JSlobService jslobService = getJSlobService(serviceId);
 
         final String id = jslobRequest.checkParameter("id");
-        JSlob jslob;
-        if (id.startsWith("io.ox/shared")) {
-            jslob = jslobService.getShared(id);
-        } else {
-            jslob = jslobService.get(id, jslobRequest.getSession());
-        }
+        final JSlob jslob = jslobService.get(id, jslobRequest.getSession());
 
         final String serlvetRequestURI = jslobRequest.getRequestData().getSerlvetRequestURI();
         if (!isEmpty(serlvetRequestURI)) {
