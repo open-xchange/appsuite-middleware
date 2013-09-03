@@ -1,3 +1,7 @@
+* 2013-09-03 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 28658: Removed special handling
+
 * 2013-08-16 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 28260: Restrict socket binding to local loopback address only by default, disable Hazelcast's REST and Memcache client 
