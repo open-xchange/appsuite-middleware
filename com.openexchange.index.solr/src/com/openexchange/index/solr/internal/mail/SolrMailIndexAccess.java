@@ -64,7 +64,7 @@ import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.tools.chunk.ChunkPerformer;
-import com.openexchange.groupware.tools.chunk.Performable;
+import com.openexchange.groupware.tools.chunk.ListPerformable;
 import com.openexchange.index.FacetParameters;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
@@ -153,31 +153,14 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
             uuids.add(MailUUID.newUUID(contextId, userId, document.getObject()).toString());
         }
 
-        ChunkPerformer.perform(new Performable() {
+        ChunkPerformer.perform(uuids, 0, 200, new ListPerformable<String>() {
             @Override
-            public int perform(int off, int len) throws OXException {
-                List<String> sublist = uuids.subList(off, len);
-                Set<String> toDelete = new HashSet<String>(sublist);
+            public void perform(List<String> subList) throws OXException {
+                Set<String> toDelete = new HashSet<String>(subList);
                 String deleteQuery = buildQueryStringWithOr(fieldConfig.getUUIDField(), toDelete);
                 if (deleteQuery != null) {
                     deleteDocumentsByQuery(deleteQuery);
                 }
-                return sublist.size();
-            }
-
-            @Override
-            public int getLength() {
-                return uuids.size();
-            }
-
-            @Override
-            public int getInitialOffset() {
-                return 0;
-            }
-
-            @Override
-            public int getChunkSize() {
-                return 200;
             }
         });
     }
