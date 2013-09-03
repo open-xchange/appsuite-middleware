@@ -1,6 +1,7 @@
 * 2013-09-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 28635: Sanitize HTML content from calendar printing
+ - Fix for bug 28668: Avoid trailing "\n" after <br> tag on text2html conversion
 
 * 2013-05-28 - thorben.betten@open-xchange.com
 
