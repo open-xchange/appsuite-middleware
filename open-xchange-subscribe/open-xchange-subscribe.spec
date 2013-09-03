@@ -97,7 +97,7 @@ if [ ${1:-0} -eq 2 ]; then
     NEWPROPS=( com.openexchange.subscribe.crawler.googlemail.autorunInterval com.openexchange.subscribe.xing.autorunInterval com.openexchange.subscribe.crawler.webde.autorunInterval com.openexchange.subscribe.crawler.google.calendar.autorunInterval com.openexchange.subscribe.crawler.gmx.autorunInterval com.openexchange.subscribe.crawler.t-online.de.autorunInterval com.openexchange.subscribe.crawler.gmx.com.autorunInterval com.openexchange.subscribe.crawler.msn.de.autorunInterval com.openexchange.subscribe.crawler.suncontacts.autorunInterval com.openexchange.subscribe.crawler.suncalendar.autorunInterval com.openexchange.subscribe.crawler.suntasks.autorunInterval com.openexchange.subscribe.socialplugin.facebook.autorunInterval com.openexchange.subscribe.socialplugin.linkedin.autorunInterval com.openexchange.subscribe.microformats.contacts.http.autorunInterval com.openexchange.subscribe.microformats.infostore.http.autorunInterval com.openexchange.subscribe.socialplugin.msn.autorunInterval com.openexchange.subscribe.socialplugin.yahoo.autorunInterval )
     for I in $(seq 1 ${#NEWPROPS[@]}); do
         NEWPROP=${NEWPROPS[$I-1]}
-        PFILE=/opt/open-xchange/etc/${FILES[$I-1}
+        PFILE=/opt/open-xchange/etc/${FILES[$I-1]}
         if ! ox_exists_property $NEWPROP $PFILE; then
             ox_set_property $NEWPROP 1d $PFILE
         fi
@@ -127,6 +127,8 @@ fi
 %changelog
 * Mon Sep 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Eighth candidate for 7.4.0 release
+* Wed Aug 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-09-03
 * Tue Aug 27 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Seventh candidate for 7.4.0 release
 * Fri Aug 23 2013 Marcus Klein <marcus.klein@open-xchange.com>

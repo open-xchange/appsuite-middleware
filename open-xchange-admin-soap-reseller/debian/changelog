@@ -562,6 +562,12 @@ open-xchange-admin-soap-reseller (6.22.1-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 10:03:52 +0200
 
+open-xchange-admin-soap-reseller (6.22.0-13) stable; urgency=low
+
+  * Build for patch 2013-09-03
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 28 Aug 2013 17:08:56 +0200
+
 open-xchange-admin-soap-reseller (6.22.0-12) unstable; urgency=low
 
   * Build for patch 2013-06-13

@@ -97,6 +97,15 @@ public class CalendarPrintingActivator extends AbstractSessionServletActivator {
         capabilityService.declareCapability("printing");
     }
 
+    @Override
+    protected void stopBundle() throws Exception {
+        try {
+            super.stopBundle();
+        } finally {
+            CPServlet.setServiceLookup(null);
+        }
+    }
+
     private void register() {
         final TemplateService templates = getService(TemplateService.class);
         final AppointmentSqlFactoryService appointmentSqlFactory = getService(AppointmentSqlFactoryService.class);
@@ -106,9 +115,7 @@ public class CalendarPrintingActivator extends AbstractSessionServletActivator {
             return;
         }
 
-        CPServlet.setTemplateService(templates);
-        CPServlet.setAppointmentSqlFactoryService(appointmentSqlFactory);
-        CPServlet.setCalendarTools(collectionService);
+        CPServlet.setServiceLookup(this);
 
         registerSessionServlet(getService(DispatcherPrefixService.class).getPrefix()+"printCalendar", new CPServlet());
     }

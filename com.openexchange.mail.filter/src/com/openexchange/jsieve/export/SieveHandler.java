@@ -323,7 +323,7 @@ public class SieveHandler {
              */
             final String implementation = capa.getImplementation();
 
-            if (implementation.matches(config.getProperty(MailFilterProperties.Values.NON_RFC_COMPLIANT_TLS_REGEX.property)) || implementation.startsWith("NEMESIS")) {
+            if (implementation.matches(config.getProperty(MailFilterProperties.Values.NON_RFC_COMPLIANT_TLS_REGEX.property))) {
 	            measureStart();
 	            bos_sieve.write(commandBuilder.append("CAPABILITY").append(CRLF).toString().getBytes(com.openexchange.java.Charsets.UTF_8));
 	            bos_sieve.flush();

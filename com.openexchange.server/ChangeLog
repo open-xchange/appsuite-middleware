@@ -1,9 +1,25 @@
+* 2013-09-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28622: Add missing column to CREATE TABLE statement
+ - Fix for bug 28637: Orderly perform html2text conversion for plain-text-only messages
+ - Fix for bug 28635: Sanitize HTML content from calendar printing
+
+* 2013-09-02 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 28230: User fromSource as organizer mail address when sending imip messages.
+
+* 2013-09-02 - marcus.klein@open-xchange.com
+
+ - Fix for bug 28627: Fixed a typo in post installation scripts of open-xchange-subscribe package.
+
 * 2013-09-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 28176: Return non-zero exit code in case an exception occurred
  - Fix for bug 28177: Added check for context existence and log appropriate message if it appears to not exist
  - Fix for bug 28610: Track optional ContextService separately, but not as needed service
  - Fix for bug 28612: Orderly check for already collected JSlob store operation to avoid DB conflict on batch insert attempt
+ - Fix for bug 28614: Use a memory-efficient java.util.concurrent.DelayQueue instead of a map data structure
+ - Fix for bug 28642: Apply sanitizing to text/xml MIME types, too
 
 * 2013-08-30 - thorben.betten@open-xchange.com
 

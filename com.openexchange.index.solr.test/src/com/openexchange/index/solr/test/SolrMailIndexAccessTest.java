@@ -53,9 +53,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -66,6 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
@@ -372,6 +375,32 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
         result = indexAccess.query(retreiveQuery, fields);
         assertTrue("Wrong result size.", result.getNumFound() == 3);
         assertTrue("Wrong number of documents.", result.getResults().size() == 3);
+    }
+
+    @Test
+    public void testDeleteByQuery() throws Exception {
+        assertNotNull("IndexFacadeService was null.", indexFacade);
+        IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, user.getId(), context.getId());
+        List<IndexDocument<MailMessage>> mails = new ArrayList<IndexDocument<MailMessage>>();
+        for (int i = 0; i < 2000; i++) {
+            MailMessage m = TestMails.toMailMessage(TestMails.MAIL1);
+            m.setMailId(String.valueOf(i));
+            m.setFolder("INBOX");
+            m.setAccountId(0);
+            mails.add(new StandardIndexDocument<MailMessage>(m));
+        }
+        indexAccess.addDocuments(mails);
+
+        final Set<MailIndexField> fields = EnumSet.noneOf(MailIndexField.class);
+        Collections.addAll(fields, MailIndexField.ID);
+        QueryParameters allQuery = buildAllQuery(0, "INBOX");
+        IndexResult<MailMessage> result = indexAccess.query(allQuery, fields);
+        assertEquals("Wrong number of documents", 2000, result.getResults().size());
+
+        indexAccess.deleteByQuery(allQuery);
+
+        result = indexAccess.query(allQuery, fields);
+        assertEquals("Wrong number of documents", 0, result.getResults().size());
     }
 
     private void checkResult(MailMessage expected, MailMessage actual) {

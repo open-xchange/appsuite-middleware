@@ -49,6 +49,10 @@
 
 package com.openexchange.java;
 
+import static com.openexchange.java.Strings.isEmpty;
+import static com.openexchange.java.Strings.toLowerCase;
+import static com.openexchange.java.Strings.toUpperCase;
+
 /**
  * {@link HTMLDetector} - Detects HTML tags in a byte sequence.
  *
@@ -73,29 +77,88 @@ public final class HTMLDetector {
         if (sequence == null) {
             throw new NullPointerException();
         }
-        if (containsHTMLTag(sequence, "html")) {
+        final String lc = toLowerCase(sequence);
+        if ((lc.indexOf("<html>") >= 0)) {
             return true;
         }
-        if (containsHTMLTag(sequence, "head")) {
+        if ((lc.indexOf("<head>") >= 0)) {
             return true;
         }
-        if (containsHTMLTag(sequence, "body")) {
+        if ((lc.indexOf("<body>") >= 0)) {
             return true;
         }
-        if (containsHTMLTag(sequence, "script")) {
+        if ((lc.indexOf("<script>") >= 0)) {
             return true;
         }
-        if (containsIgnoreCase(sequence, "javascript")) {
+        if ((lc.indexOf("javascript") >= 0)) {
             return true;
         }
-        if (containsIgnoreCase(sequence, "<img")) {
+        if ((lc.indexOf("<img") >= 0)) {
             return true;
         }
-        if (containsIgnoreCase(sequence, "<object")) {
+        if ((lc.indexOf("<object") >= 0)) {
             return true;
         }
-        if (containsIgnoreCase(sequence, "<embed")) {
+        if ((lc.indexOf("<embed") >= 0)) {
             return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if given String contains common HTML tags.
+     *
+     * @param sequence The String to check
+     * @param strict <code>true</code> for strict checking; otherwise <code>false</code>
+     * @return <code>true</code> if given String contains common HTML tags; otherwise <code>false</code>
+     */
+    public static boolean containsHTMLTags(final String sequence, final boolean strict) {
+        return strict ? containsHTMLTags(sequence, "<br", "<p>") : containsHTMLTags(sequence);
+    }
+
+    /**
+     * Checks if given String contains common HTML tags.
+     *
+     * @param sequence The String to check
+     * @param tags Additional tags to look for
+     * @return <code>true</code> if given String contains common HTML tags; otherwise <code>false</code>
+     */
+    public static boolean containsHTMLTags(final String sequence, final String... tags) {
+        if (sequence == null) {
+            throw new NullPointerException();
+        }
+        final String lc = toLowerCase(sequence);
+        if ((lc.indexOf("<html>") >= 0)) {
+            return true;
+        }
+        if ((lc.indexOf("<head>") >= 0)) {
+            return true;
+        }
+        if ((lc.indexOf("<body>") >= 0)) {
+            return true;
+        }
+        if ((lc.indexOf("<script>") >= 0)) {
+            return true;
+        }
+        if ((lc.indexOf("javascript") >= 0)) {
+            return true;
+        }
+        if ((lc.indexOf("<img") >= 0)) {
+            return true;
+        }
+        if ((lc.indexOf("<object") >= 0)) {
+            return true;
+        }
+        if ((lc.indexOf("<embed") >= 0)) {
+            return true;
+        }
+        if (null != tags) {
+            for (int i = tags.length; i-- > 0;) {
+                final String tag = tags[i];
+                if (!Strings.isEmpty(tag) && (lc.indexOf(tag) >= 0)) {
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -124,6 +187,8 @@ public final class HTMLDetector {
     private static boolean containsIgnoreCase(final String sequence, final String str) {
         return (toLowerCase(sequence).indexOf(toLowerCase(str)) >= 0);
     }
+
+    // ----------------------------------------------------------------------------------------- //
 
     /**
      * Checks if given byte sequence contains common HTML tags.
@@ -158,6 +223,39 @@ public final class HTMLDetector {
         }
         if (containsIgnoreCase(sequence, "<embed")) {
             return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if given byte sequence contains common HTML tags.
+     *
+     * @param sequence The byte sequence to check
+     * @param strict <code>true</code> for strict checking; otherwise <code>false</code>
+     * @return <code>true</code> if given byte sequence contains common HTML tags; otherwise <code>false</code>
+     */
+    public static boolean containsHTMLTags(final byte[] sequence, final boolean strict) {
+        return strict ? containsHTMLTags(sequence, "<br", "<p>") : containsHTMLTags(sequence);
+    }
+
+    /**
+     * Checks if given byte sequence contains common HTML tags.
+     *
+     * @param sequence The byte sequence to check
+     * @param tags Additional tags to look for
+     * @return <code>true</code> if given byte sequence contains common HTML tags; otherwise <code>false</code>
+     */
+    public static boolean containsHTMLTags(final byte[] sequence, final String... tags) {
+        if (containsHTMLTags(sequence)) {
+            return true;
+        }
+        if (null != tags) {
+            for (int i = tags.length; i-- > 0;) {
+                final String tag = tags[i];
+                if (!isEmpty(tag) && containsIgnoreCase(sequence, tag)) {
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -340,31 +438,4 @@ public final class HTMLDetector {
         return failure;
     }
 
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
-    /** ASCII-wise to upper-case */
-    private static String toUpperCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
-        }
-        return builder.toString();
-    }
 }

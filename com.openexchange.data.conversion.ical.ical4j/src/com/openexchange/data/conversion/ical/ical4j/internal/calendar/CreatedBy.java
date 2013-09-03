@@ -58,17 +58,15 @@ import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.Organizer;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.notify.NotificationConfig;
-import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.log.LogFactory;
 
 /**
  * Test implementation to write the organizer.
@@ -85,20 +83,7 @@ public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> ex
     public void emit(final Mode mode, final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         final Organizer organizer = new Organizer();
         try {
-            final String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
-            String address;
-            if (calendar.containsOrganizer()) {
-                address = calendar.getOrganizer();
-            } else if ("defaultSenderAddress".equals(senderSource)) {
-                try {
-                    address = UserSettingMailStorage.getInstance().loadUserSettingMail(calendar.getCreatedBy(), ctx).getSendAddr();
-                } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
-                    address = userResolver.loadUser(calendar.getCreatedBy(), ctx).getMail();
-                }
-            } else {
-                address = userResolver.loadUser(calendar.getCreatedBy(), ctx).getMail();
-            }
+            String address = EmitterTools.getFrom(calendar.getCreatedBy(), ctx);
             address = IDNA.toACE(address);
             organizer.setValue("mailto:" + address);
         } catch (final URISyntaxException e) {

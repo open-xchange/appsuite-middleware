@@ -59,15 +59,13 @@ import com.openexchange.database.AbstractCreateTableImpl;
  */
 public final class PreviewCacheCreateDataTableService extends AbstractCreateTableImpl {
 
-    private static final String TABLE_PREVIEW_DATA = "previewData";
-
     /**
      * Gets the table names.
      *
      * @return The table names.
      */
     public static String[] getTablesToCreate() {
-        return new String[] { TABLE_PREVIEW_DATA };
+        return new String[] { "previewData" };
     }
 
     /**
@@ -76,7 +74,7 @@ public final class PreviewCacheCreateDataTableService extends AbstractCreateTabl
      * @return The CREATE statements
      */
     public static String[] getCreateStmts() {
-        return new String[] { "CREATE TABLE "+TABLE_PREVIEW_DATA+" (" +
+        return new String[] { "CREATE TABLE "+"previewData"+" (" +
             " cid INT4 unsigned NOT NULL," +
             " user INT4 unsigned NOT NULL," +
             " id VARCHAR(128) CHARACTER SET latin1 NOT NULL," +
