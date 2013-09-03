@@ -2,6 +2,7 @@
 
  - Fix for bug 28622: Add missing column to CREATE TABLE statement
  - Fix for bug 28637: Orderly perform html2text conversion for plain-text-only messages
+ - Fix for bug 28635: Sanitize HTML content from calendar printing
 
 * 2013-09-02 - martin.herfurth@open-xchange.com
 
