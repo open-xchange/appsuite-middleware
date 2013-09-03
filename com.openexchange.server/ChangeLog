@@ -1,3 +1,7 @@
+* 2013-09-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28635: Sanitize HTML content from calendar printing
+
 * 2013-05-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 26815: Don't interrupt appender task if not finished
