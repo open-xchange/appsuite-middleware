@@ -718,7 +718,7 @@ public final class HtmlServiceImpl implements HtmlService {
         return PATTERN_BLOCKQUOTE_END.matcher(PATTERN_BLOCKQUOTE_START.matcher(html).replaceAll("$1"+BLOCKQUOTE_MARKER)).replaceAll("$1"+BLOCKQUOTE_MARKER_END);
     }
 
-    private static final String HTML_BR = "<br />";
+    private static final String HTML_BR = "<br>";
 
     private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n");
 
