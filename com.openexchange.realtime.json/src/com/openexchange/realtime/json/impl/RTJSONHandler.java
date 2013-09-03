@@ -53,12 +53,6 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.atmosphere.cpr.AtmosphereHandler;
-import org.atmosphere.cpr.AtmosphereRequest;
-import org.atmosphere.cpr.AtmosphereResource;
-import org.atmosphere.cpr.AtmosphereResourceEvent;
-import org.atmosphere.cpr.AtmosphereResponse;
-import org.atmosphere.websocket.WebSocketEventListenerAdapter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -210,28 +204,28 @@ public class RTJSONHandler implements StanzaSender {
         protocol.send(stanza, entry.state, entry.transmitter);
     }
 
-    /**
-     * Build an unique {@link ID} <code>{"ox", userLogin, context, resource}</code> from the infos given by the AtmosphereResource and
-     * ServerSession.
-     *
-     * @param atmosphereResource the current AtmosphereResource
-     * @param serverSession the associated serverSession
-     * @return the constructed unique ID
-     */
-    private ID constructId(AtmosphereResource atmosphereResource, ServerSession serverSession) throws OXException {
-        String userLogin = serverSession.getUserlogin();
-        String contextName = serverSession.getContext().getName();
-
-        AtmosphereRequest request = atmosphereResource.getRequest();
-        String resource = request.getHeader("resource");
-        if (resource == null) {
-            resource = request.getParameter("resource");
-        }
-        if (resource == null) {
-            throw RealtimeExceptionCodes.INVALID_ID.create();
-        }
-        return new ID(JSONChannel.PROTOCOL, null, userLogin, contextName, resource);
-    }
+//    /**
+//     * Build an unique {@link ID} <code>{"ox", userLogin, context, resource}</code> from the infos given by the AtmosphereResource and
+//     * ServerSession.
+//     *
+//     * @param atmosphereResource the current AtmosphereResource
+//     * @param serverSession the associated serverSession
+//     * @return the constructed unique ID
+//     */
+//    private ID constructId(AtmosphereResource atmosphereResource, ServerSession serverSession) throws OXException {
+//        String userLogin = serverSession.getUserlogin();
+//        String contextName = serverSession.getContext().getName();
+//
+//        AtmosphereRequest request = atmosphereResource.getRequest();
+//        String resource = request.getHeader("resource");
+//        if (resource == null) {
+//            resource = request.getParameter("resource");
+//        }
+//        if (resource == null) {
+//            throw RealtimeExceptionCodes.INVALID_ID.create();
+//        }
+//        return new ID(JSONChannel.PROTOCOL, null, userLogin, contextName, resource);
+//    }
 
     public boolean isConnected(ID id) {
         return stateManager.isConnected(id);

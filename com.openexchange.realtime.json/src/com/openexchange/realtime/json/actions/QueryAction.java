@@ -63,6 +63,7 @@ import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import com.openexchange.realtime.json.impl.StateManager;
 import com.openexchange.realtime.json.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.json.impl.stanza.writer.StanzaWriter;
 import com.openexchange.realtime.json.stanza.StanzaBuilder;
@@ -120,6 +121,7 @@ public class QueryAction extends RTAction {
     private final static Log LOG = com.openexchange.log.Log.loggerFor(QueryAction.class);
     private final ServiceLookup services;
     private final StanzaSequenceGate gate;
+    private final StateManager stateManager;
     //how long to wait until: EITHER a stanza was answered synchronously OR a valid sequence was constructed from incoming Stanzas
     private final long TIMEOUT = 50;
 
@@ -127,15 +129,20 @@ public class QueryAction extends RTAction {
      * Initializes a new {@link QueryAction}.
      * @param services
      */
-    public QueryAction(ServiceLookup services, StanzaSequenceGate gate) {
+    public QueryAction(ServiceLookup services, StanzaSequenceGate gate, StateManager stateManager) {
         super();
         this.services = services;
         this.gate = gate;
+        this.stateManager = stateManager;
     }
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, ServerSession session) throws OXException {
         ID id = constructID(request, session);
+
+//        if(!stateManager.isConnected(id)) {
+//            throw RealtimeExceptionCodes.STATE_MISSING.create();
+//        }
 
         StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(id, session, (JSONObject) request.requireData());
 

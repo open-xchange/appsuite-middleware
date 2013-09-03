@@ -76,9 +76,9 @@ public class RealtimeActions implements AJAXActionServiceFactory {
 
     public RealtimeActions(ServiceLookup services, StateManager stateManager, JSONProtocolHandler protocolHandler) {
         SEND = new SendAction(services, stateManager, protocolHandler);
-        QUERY = new QueryAction(services, protocolHandler.getGate());
+        QUERY = new QueryAction(services, protocolHandler.getGate(), stateManager);
         POLL = new PollAction(stateManager);
-        ENROL = new EnrolAction(stateManager);
+        ENROL = new EnrolAction(services, stateManager);
     }
 
     @Override

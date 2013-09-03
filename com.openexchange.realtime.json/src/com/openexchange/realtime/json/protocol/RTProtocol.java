@@ -50,9 +50,7 @@
 package com.openexchange.realtime.json.protocol;
 
 import java.util.List;
-import org.atmosphere.cpr.AtmosphereResource;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.packet.GenericError;
 import com.openexchange.realtime.packet.ID;
@@ -123,17 +121,6 @@ public interface RTProtocol {
      * @param stanza The stanza that caused the exception. This helps the client to relate the error to one of his actions. May be null
      */
     public abstract void handleRealtimeException(ID recipient, RealtimeException exception, Stanza stanza);
-
-    /**
-     * Handle RealtimeExceptions directly. If an error happens before we can send error Stanzas to a recipient via our
-     * {@link MessageDispatcher} (e.q. the client couldn't authenticate properly) we have to inform the client about the error situation by
-     * sending the error infos directly via the {@link AtmosphereResource} he used when trying to communicate with us. If a StanzaTransmitter
-     * or State was already created you have to manually clean up for this resource.
-     * 
-     * @param exception The exception that occurred
-     * @param resource The resource used for sending the infos to the client
-     */
-    void handleRealtimeExceptionDirectly(RealtimeException exception, AtmosphereResource resource);
 
     /**
      * The client wishes to reset its sequence numbering

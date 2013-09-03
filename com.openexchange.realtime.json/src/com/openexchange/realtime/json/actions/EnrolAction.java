@@ -56,12 +56,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.json.impl.AtmosphereStanzaTransmitter;
-import com.openexchange.realtime.json.impl.NOPStanzaTransmitter;
-import com.openexchange.realtime.json.impl.StateEntry;
 import com.openexchange.realtime.json.impl.StateManager;
 import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -74,8 +72,10 @@ public class EnrolAction extends RTAction {
     private final static Log LOG = com.openexchange.log.Log.loggerFor(EnrolAction.class);
 
     private final StateManager stateManager;
+    private final ServiceLookup serviceLookup;
 
-    public EnrolAction(StateManager stateManager) {
+    public EnrolAction(ServiceLookup serviceLookup, StateManager stateManager) {
+        this.serviceLookup = serviceLookup;
         this.stateManager = stateManager;
     }
 

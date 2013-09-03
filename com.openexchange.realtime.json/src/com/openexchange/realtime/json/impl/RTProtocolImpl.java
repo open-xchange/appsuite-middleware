@@ -52,8 +52,6 @@ package com.openexchange.realtime.json.impl;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
-import org.atmosphere.cpr.AtmosphereResource;
-import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeException;
@@ -62,7 +60,6 @@ import com.openexchange.realtime.json.protocol.NextSequence;
 import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.json.protocol.RTProtocol;
 import com.openexchange.realtime.json.protocol.StanzaTransmitter;
-import com.openexchange.realtime.json.util.GenericErrorUtil;
 import com.openexchange.realtime.packet.GenericError;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Message;
@@ -281,17 +278,6 @@ public class RTProtocolImpl implements RTProtocol {
 
         }
         LOG.error(exception.getMessage(), exception);
-    }
-
-    @Override
-    public void handleRealtimeExceptionDirectly(RealtimeException exception, AtmosphereResource resource) {
-        try {
-            JSONObject genericErrorStanza = GenericErrorUtil.getGenericErrorStanza(exception);
-            resource.getResponse().write(genericErrorStanza.toString());
-            resource.resume();
-        } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
-        }
     }
 
 }

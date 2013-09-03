@@ -139,6 +139,11 @@ public class SendAction extends RTAction  {
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         Object data = request.requireData();
 
+        ID id = constructID(request, session);
+//        if(!stateManager.isConnected(id)) {
+//            throw RealtimeExceptionCodes.STATE_MISSING.create();
+//        }
+
         final List<JSONObject> objects;
         if (data instanceof JSONArray) {
             JSONArray array = (JSONArray) data;
@@ -157,7 +162,6 @@ public class SendAction extends RTAction  {
         }
 
         LOG.debug("Messages arrived in SendAction: " + objects.toString());
-        ID id = constructID(request, session);
 
         StateEntry entry = stateManager.retrieveState(id);
 
