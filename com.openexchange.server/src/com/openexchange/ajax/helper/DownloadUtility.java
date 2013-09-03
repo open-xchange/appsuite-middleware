@@ -157,7 +157,7 @@ public final class DownloadUtility {
             String fn = fileName;
             byte[] bytes;
             // Check by Content-Type and file name
-            if (contentType.startsWithAny("text/htm", "text/xhtm", "text/xml")) {
+            if (contentType.startsWithAny("text/htm", "text/xhtm")) {
                 /*
                  * HTML content requested for download...
                  */
@@ -179,6 +179,33 @@ public final class DownloadUtility {
                     String htmlContent = baos.toString(cs);
                     htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
                     final byte[] tmp = htmlContent.getBytes(Charsets.forName(cs));
+                    sz = tmp.length;
+                    in = Streams.newByteArrayInputStream(tmp);
+                }
+            } else if (contentType.startsWith("text/xml")) {
+                /*
+                 * XML content requested for download...
+                 */
+                if (null == sContentDisposition) {
+                    sContentDisposition = "attachment";
+                } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
+                    /*
+                     * Escaping of XML content needed
+                     */
+                    final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                    final ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(in);
+                    String cs = contentType.getCharsetParameter();
+                    if (!CharsetDetector.isValid(cs)) {
+                        cs = CharsetDetector.detectCharset(Streams.asInputStream(baos));
+                        if ("US-ASCII".equalsIgnoreCase(cs)) {
+                            cs = "ISO-8859-1";
+                        }
+                        contentType.setCharsetParameter(cs);
+                    }
+                    String xmlContent = baos.toString(cs);
+                    xmlContent = htmlService.htmlFormat(xmlContent);
+                    contentType.setPrimaryType("text").setSubType("html");
+                    final byte[] tmp = xmlContent.getBytes(Charsets.forName(cs));
                     sz = tmp.length;
                     in = Streams.newByteArrayInputStream(tmp);
                 }
