@@ -447,15 +447,16 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
-%package sv-sv
-Group:      Applications/Productivity
-Summary:    Package containing Open-Xchange backend localization for sv_SV
+%package sv-se
+Group:          Applications/Productivity
+Summary:        Package containing Open-Xchange backend localization for sv_SE
 Provides:       open-xchange-lang-community-sv-sv = %{version}
 Obsoletes:      open-xchange-lang-community-sv-sv <= %{version}
+Provides:       open-xchange-l10n-sv-sv = %{version}
+Obsoletes:      open-xchange-l10n-sv-sv <= %{version}
 
-%description sv-sv
-Package containing Open-Xchange backend localization for sv_SV
-This localization package are driven by the community.
+%description sv-se
+Package containing Open-Xchange backend localization for sv_SE
 
 Authors:
 --------
@@ -546,7 +547,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-for LANG in ca_ES cs_CZ da_DK de_CH de_DE el_GR en_US es_ES es_MX eu_ES fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nl_NL pl_PL pt_BR pt_PT ro_RO ru_RU sk_SK sv_SV tr_TR zh_CN zh_TW en_GB; do \
+for LANG in ca_ES cs_CZ da_DK de_CH de_DE el_GR en_US es_ES es_MX eu_ES fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nl_NL pl_PL pt_BR pt_PT ro_RO ru_RU sk_SK sv_SE tr_TR zh_CN zh_TW en_GB; do \
     PACKAGE_EXTENSION=$(echo ${LANG} | tr '[:upper:]_' '[:lower:]-'); \
     ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -Dlanguage=${LANG} -f build/build.xml clean build; \
 done
@@ -677,10 +678,10 @@ done
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*sk_SK*
 
-%files sv-sv
+%files sv-se
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
-/opt/open-xchange/i18n/*sv_SV*
+/opt/open-xchange/i18n/*sv_SE*
 
 %files tr-tr
 %defattr(-,root,root)

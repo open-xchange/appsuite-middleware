@@ -1,3 +1,7 @@
+* 2013-09-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 28649: Corrected packaging for Swedish language.
+
 * 2013-09-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 28622: Add missing column to CREATE TABLE statement
