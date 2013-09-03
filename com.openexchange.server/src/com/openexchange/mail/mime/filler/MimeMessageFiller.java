@@ -1115,7 +1115,7 @@ public class MimeMessageFiller {
                                     text = sb.toString();
                                 }
                             } else {
-                                isHtml = false;
+                                isHtml = true;
                                 text = content;
                             }
                         } else {
