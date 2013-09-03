@@ -62,7 +62,7 @@ import com.openexchange.groupware.attach.index.ORTerm;
 import com.openexchange.groupware.attach.index.ObjectIdTerm;
 import com.openexchange.groupware.attach.index.SearchTerm;
 import com.openexchange.groupware.tools.chunk.ChunkPerformer;
-import com.openexchange.groupware.tools.chunk.Performable;
+import com.openexchange.groupware.tools.chunk.ListPerformable;
 import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
@@ -105,14 +105,13 @@ public abstract class AbstractMailJob implements IndexingJob {
         }
 
         final MailMessageParser parser = new MailMessageParser();
-        ChunkPerformer.perform(new Performable() {
+        ChunkPerformer.perform(idsToAdd, 0, CHUNK_SIZE, new ListPerformable<String>() {
             @Override
-            public int perform(int off, int len) throws OXException {
+            public void perform(List<String> subList) throws OXException {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Adding a chunk of mails of folder " + info.folder + ": " + info.toString());
                 }
 
-                List<String> subList = idsToAdd.subList(off, len);
                 List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>();
                 List<IndexDocument<Attachment>> attachments = new ArrayList<IndexDocument<Attachment>>();
                 MailMessage[] messages = messageStorage.getMessages(
@@ -160,23 +159,6 @@ public abstract class AbstractMailJob implements IndexingJob {
                 if (!attachments.isEmpty()) {
                     attachmentIndex.addDocuments(attachments);
                 }
-
-                return subList.size();
-            }
-
-            @Override
-            public int getChunkSize() {
-                return CHUNK_SIZE;
-            }
-
-            @Override
-            public int getLength() {
-                return idsToAdd.size();
-            }
-
-            @Override
-            public int getInitialOffset() {
-                return 0;
             }
         });
     }
@@ -186,14 +168,13 @@ public abstract class AbstractMailJob implements IndexingJob {
             return;
         }
 
-        ChunkPerformer.perform(new Performable() {
+        ChunkPerformer.perform(idsToDelete, 0, CHUNK_SIZE, new ListPerformable<String>() {
             @Override
-            public int perform(int off, int len) throws OXException {
+            public void perform(List<String> subList) throws OXException {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Deleting a chunk of mails in folder " + info.folder + ": " + info.toString());
                 }
 
-                List<String> subList = idsToDelete.subList(off, len);
                 SearchTerm<?>[] idTerms = new SearchTerm<?>[subList.size()];
                 Set<String> mailUuids = new HashSet<String>(subList.size());
                 int i = 0;
@@ -218,23 +199,6 @@ public abstract class AbstractMailJob implements IndexingJob {
                     .setAccountFolders(Collections.singleton(accountFolders))
                     .build();
                 attachmentIndex.deleteByQuery(deleteAttachmentsQuery);
-
-                return subList.size();
-            }
-
-            @Override
-            public int getChunkSize() {
-                return CHUNK_SIZE;
-            }
-
-            @Override
-            public int getLength() {
-                return idsToDelete.size();
-            }
-
-            @Override
-            public int getInitialOffset() {
-                return 0;
             }
         });
     }
@@ -244,14 +208,13 @@ public abstract class AbstractMailJob implements IndexingJob {
             return;
         }
 
-        ChunkPerformer.perform(new Performable() {
+        ChunkPerformer.perform(changedMails, 0, CHUNK_SIZE, new ListPerformable<String>() {
             @Override
-            public int perform(int off, int len) throws OXException {
+            public void perform(List<String> subList) throws OXException {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Adding a chunk of mails of folder " + info.folder + ": " + info.toString());
                 }
 
-                List<String> subList = changedMails.subList(off, len);
                 List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>();
                 MailMessage[]  messages = messageStorage.getMessages(
                     info.folder,
@@ -278,23 +241,6 @@ public abstract class AbstractMailJob implements IndexingJob {
                 if (!documents.isEmpty()) {
                     mailIndex.addDocuments(documents);
                 }
-
-                return subList.size();
-            }
-
-            @Override
-            public int getChunkSize() {
-                return CHUNK_SIZE;
-            }
-
-            @Override
-            public int getLength() {
-                return changedMails.size();
-            }
-
-            @Override
-            public int getInitialOffset() {
-                return 0;
             }
         });
     }

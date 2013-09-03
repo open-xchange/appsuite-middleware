@@ -66,6 +66,7 @@ import com.openexchange.groupware.attach.index.ORTerm;
 import com.openexchange.groupware.attach.index.ObjectIdTerm;
 import com.openexchange.groupware.attach.index.SearchTerm;
 import com.openexchange.groupware.tools.chunk.ChunkPerformer;
+import com.openexchange.groupware.tools.chunk.ListPerformable;
 import com.openexchange.groupware.tools.chunk.Performable;
 import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexAccess;
@@ -128,14 +129,13 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
                     }
 
                     final List<MailUUID> idsToDelete = new ArrayList<MailUUID>(allUUIDs);
-                    ChunkPerformer.perform(new Performable() {
+                    ChunkPerformer.perform(idsToDelete, 0, CHUNK_SIZE, new ListPerformable<MailUUID>() {
                         @Override
-                        public int perform(int off, int len) throws OXException {
+                        public void perform(List<MailUUID> subList) throws OXException {
                             if (LOG.isTraceEnabled()) {
                                 LOG.trace("Deleting a chunk of mails in folder " + info.folder + ": " + info.toString());
                             }
 
-                            List<MailUUID> subList = idsToDelete.subList(off, len);
                             Set<String> uuidStrings = new HashSet<String>();
                             Map<String, List<String>> deletedFullNames = new HashMap<String, List<String>>();
                             for (MailUUID uuid : subList) {
@@ -176,23 +176,6 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
                                     .build();
                                 attachmentIndex.deleteByQuery(deleteAttachmentsQuery);
                             }
-
-                            return subList.size();
-                        }
-
-                        @Override
-                        public int getChunkSize() {
-                            return CHUNK_SIZE;
-                        }
-
-                        @Override
-                        public int getLength() {
-                            return idsToDelete.size();
-                        }
-
-                        @Override
-                        public int getInitialOffset() {
-                            return 0;
                         }
                     });
                 }
