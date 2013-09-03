@@ -84,7 +84,7 @@ public final class PreviewCacheCreateTableService extends AbstractCreateTableImp
             " createdAt BIGINT(64) NOT NULL," +
             " fileName VARCHAR(128) COLLATE utf8_unicode_ci DEFAULT NULL," +
             " fileType VARCHAR(32) CHARACTER SET latin1 DEFAULT NULL," +
-            " data BLOB," +
+            " refId VARCHAR(255) CHARACTER SET latin1 DEFAULT NULL," +
             " PRIMARY KEY (cid, user, id)," +
             " INDEX `globaldocument` (cid, id)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
