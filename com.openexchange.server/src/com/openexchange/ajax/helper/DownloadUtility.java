@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.mime.ContentType;
@@ -255,7 +256,7 @@ public final class DownloadUtility {
                         /*
                          * Check for HTML since no corresponding file extension is known
                          */
-                        if (HTMLDetector.containsHTMLTags(sequence)) {
+                        if (HTMLDetector.containsHTMLTags(sequence, true)) {
                             return asAttachment(inputStream, preparedFileName, sz);
                         }
                     } else {
@@ -269,7 +270,7 @@ public final class DownloadUtility {
                                 /*
                                  * No content type known
                                  */
-                                if (HTMLDetector.containsHTMLTags(sequence)) {
+                                if (HTMLDetector.containsHTMLTags(sequence, true)) {
                                     return asAttachment(inputStream, preparedFileName, sz);
                                 }
                             } else {
@@ -289,7 +290,7 @@ public final class DownloadUtility {
                             /*
                              * Unknown magic bytes. Check for HTML.
                              */
-                            if (HTMLDetector.containsHTMLTags(sequence)) {
+                            if (HTMLDetector.containsHTMLTags(sequence, true)) {
                                 return asAttachment(inputStream, preparedFileName, sz);
                             }
                         } else if (!contentType.isMimeType(detectedCT)) {
@@ -304,7 +305,7 @@ public final class DownloadUtility {
                      */
                     in = new CombinedInputStream(sequence, in);
                 }
-            } else if (fileNameImpliesHtml(fileName) && HTMLDetector.containsHTMLTags((bytes = Streams.stream2bytes(in)))) {
+            } else if (fileNameImpliesHtml(fileName) && HTMLDetector.containsHTMLTags((bytes = Streams.stream2bytes(in)), true)) {
                 /*
                  * HTML content requested for download...
                  */

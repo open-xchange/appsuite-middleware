@@ -69,7 +69,6 @@ import com.openexchange.groupware.settings.impl.AbstractSetting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.html.HtmlService;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
@@ -244,7 +243,7 @@ public final class PUTAction extends AbstractConfigAction {
                     for (int i = 0; i < length; i++) {
                         final JSONObject jSignature = jSignatures.getJSONObject(i);
                         String content = jSignature.optString("signature_text", null);
-                        if (null != content && HTMLDetector.containsHTMLTags(content.getBytes(Charsets.ISO_8859_1))) {
+                        if (null != content && HTMLDetector.containsHTMLTags(content, true)) {
                             content = htmlService.sanitize(content, null, false, null, null);
                             content = P_TAG_BODY.matcher(content).replaceAll("");
                             jSignature.put("signature_text", content);
@@ -252,7 +251,7 @@ public final class PUTAction extends AbstractConfigAction {
                         }
                     }
                 }
-                
+
             }
             if (saveBack) {
                 setting.setSingleValue(jConfig.toString());
