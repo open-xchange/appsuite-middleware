@@ -123,5 +123,21 @@ public class SubscriptionSecretHandling implements EncryptedItemDetectorService,
             }
         }
     }
+    
+    @Override
+    public void removeUnrecoverableItems(String secret, ServerSession session) throws OXException {
+        final List<SubscriptionSource> sources = discovery.getSources();
+        for (final SubscriptionSource subscriptionSource : sources) {
+            final Set<String> passwordFields = subscriptionSource.getPasswordFields();
+            if(passwordFields.isEmpty()) {
+                continue;
+            }
+
+            final SubscribeService subscribeService = subscriptionSource.getSubscribeService();
+            if (null != subscribeService) {
+                subscribeService.removeUnrecoverableItems(secret, session);
+            }
+        }
+    }
 
 }

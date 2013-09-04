@@ -64,6 +64,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -134,6 +135,29 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
             folderMap.remove(MailFolder.DEFAULT_FOLDER_ID + id, FolderStorage.REAL_TREE_ID);
             folderMap.remove(MailFolder.DEFAULT_FOLDER_ID + id, OutlookFolderStorage.OUTLOOK_TREE_ID);
         }
+    }
+
+    @Override
+    public void invalidateMailAccounts(final int user, final int cid) throws OXException {
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (null != cacheService) {
+            final DatabaseService db = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+            final Connection con = db.getWritable(cid);
+            final int[] ids;
+            try {
+                ids = delegate.getUserMailAccountIDs(user, cid, con);
+            } finally {
+                db.backWritableAfterReading(cid, con);
+            }
+
+            for (final int id : ids) {
+                final Cache cache = cacheService.getCache(REGION_NAME);
+                cache.remove(newCacheKey(cacheService, id, user, cid));
+                cache.invalidateGroup(Integer.toString(cid));
+            }
+        }
+
+        FolderMapManagement.getInstance().dropFor(user, cid);
     }
 
     @Override
@@ -391,12 +415,9 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws OXException {
-        delegate.migratePasswords(user, cid, oldSecret, newSecret);
-        final int[] ids = delegate.getUserMailAccountIDs(user, cid);
-        for (final int id : ids) {
-            invalidateMailAccount(id, user, cid);
-        }
+    public void migratePasswords(final String oldSecret, final String newSecret, final Session session) throws OXException {
+        delegate.migratePasswords(oldSecret, newSecret, session);
+        invalidateMailAccounts(session.getUserId(), session.getContextId());
     }
 
     @Override
@@ -407,6 +428,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     @Override
     public void cleanUp(final String secret, final Session session) throws OXException {
         delegate.cleanUp(secret, session);
+    }
+
+    @Override
+    public void removeUnrecoverableItems(final String secret, final Session session) throws OXException {
+        delegate.removeUnrecoverableItems(secret, session);
     }
 
     private static volatile Integer maxWaitMillis;

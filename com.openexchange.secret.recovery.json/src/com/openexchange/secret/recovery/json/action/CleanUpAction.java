@@ -49,12 +49,13 @@
 
 package com.openexchange.secret.recovery.json.action;
 
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.SecretService;
-import com.openexchange.secret.recovery.SecretCleanUpService;
+import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.json.SecretRecoveryAJAXRequest;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -66,13 +67,17 @@ import com.openexchange.server.ServiceLookup;
  */
 public final class CleanUpAction extends AbstractSecretRecoveryAction {
 
+    private Set<EncryptedItemCleanUpService> cleanUpServices;
+
     /**
      * Initializes a new {@link CleanUpAction}.
      *
      * @param services
+     * @param cleanUpServices 
      */
-    public CleanUpAction(final ServiceLookup services) {
+    public CleanUpAction(final ServiceLookup services, Set<EncryptedItemCleanUpService> cleanUpServices) {
         super(services);
+        this.cleanUpServices = cleanUpServices;
     }
 
     @Override
@@ -81,14 +86,12 @@ public final class CleanUpAction extends AbstractSecretRecoveryAction {
         if (null == secretService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SecretService.class.getName());
         }
-        final SecretCleanUpService secretCleanUpService = getService(SecretCleanUpService.class);
-        if (null == secretCleanUpService) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SecretCleanUpService.class.getName());
-        }
         // Get the secret string
         final String secret = secretService.getSecret(req.getSession());
         // Do the clean-up
-        secretCleanUpService.cleanUp(secret, req.getSession());
+        for(EncryptedItemCleanUpService cleanUp: cleanUpServices) {
+            cleanUp.cleanUpEncryptedItems(secret, req.getSession());
+        }
         // Prepare response
         final JSONObject object = new JSONObject(1);
         object.put("clean_up", true);

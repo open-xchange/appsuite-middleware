@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,open-xchange-aws"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,open-xchange-chat"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,open-xchange-file-storage-cmis"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,open-xchange-freebusy-ews"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,open-xchange-indexing"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,open-xchange-preview"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-aws"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-chat"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-file-storage-cmis"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-freebusy-ews"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-indexing"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-preview"/>
 </provider>
 </psf>

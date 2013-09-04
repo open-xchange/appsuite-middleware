@@ -242,6 +242,11 @@ Replaces: open-xchange-lang-zh-tw (<< 6.21.0-0)
 Conflicts: open-xchange-lang-zh-tw (<< 6.21.0-0)
 Description: Package containing Open-Xchange backend localization for zh_TW
 
+Package: open-xchange-l10n-en-gb
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Description: Package containing Open-Xchange backend localization for en_GB
+
 ##### http://wiki.debian.org/Renaming_a_Package #####
 
 Package: open-xchange-lang-community-ca-es

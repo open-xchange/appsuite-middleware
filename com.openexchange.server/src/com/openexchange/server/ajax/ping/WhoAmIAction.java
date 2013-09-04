@@ -47,56 +47,36 @@
  *
  */
 
-package com.openexchange.secret.recovery.osgi;
+package com.openexchange.server.ajax.ping;
 
-import java.util.Collection;
-import org.apache.commons.logging.Log;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.exception.OXException;
-import com.openexchange.secret.recovery.SecretMigrator;
-import com.openexchange.secret.recovery.impl.FastSecretInconsistencyDetector;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link WhiteboardSecretMigrator}
+ * {@link WhoAmIAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class WhiteboardSecretMigrator extends ServiceTracker<SecretMigrator, SecretMigrator> implements SecretMigrator {
-
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(WhiteboardSecretMigrator.class);
-
-    public WhiteboardSecretMigrator(final BundleContext context) {
-        super(context, SecretMigrator.class, null);
-    }
+public class WhoAmIAction implements AJAXActionService {
 
     @Override
-    public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
-        final Collection<SecretMigrator> services = getTracked().values();
-        OXException exception = null;
-        FastSecretInconsistencyDetector special = null;
-        for (final SecretMigrator migrator : services) {
-            if (migrator == this) {
-                continue;
-            }
-            try {
-                if (migrator instanceof FastSecretInconsistencyDetector) {
-                    special = (FastSecretInconsistencyDetector) migrator;
-                } else {
-                    migrator.migrate(oldSecret, newSecret, session);
-                }
-            } catch (final OXException x) {
-                exception = x;
-                LOG.error(x.getMessage(), x);
-            }
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        JSONObject json = new JSONObject();
+        try {
+            LoginWriter.write(session, json);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         }
-        if (exception != null) {
-            throw exception;
-        }
-        if (null != special) {
-            special.migrate(oldSecret, newSecret, session);
-        }
+
+        return new AJAXRequestResult(json, "json");
     }
+
 }

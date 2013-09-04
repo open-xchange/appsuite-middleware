@@ -62,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.utils.MessageUtility;
 
 /**
@@ -151,7 +152,7 @@ public class MimeFilter {
             handlePart((Multipart) mimeMessage.getContent(), newMultipart);
             MessageUtility.setContent(newMultipart, mimeMessage);
             // mimeMessage.setContent(newMultipart);
-            mimeMessage.saveChanges();
+            MimeMessageConverter.saveChanges(mimeMessage);
             // Restore original Message-Id header
             if (null == messageId) {
                 mimeMessage.removeHeader(MESSAGE_ID);

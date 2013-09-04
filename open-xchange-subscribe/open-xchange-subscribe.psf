@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.subscribe.crawler"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.subscribe.facebook"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.subscribe.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.subscribe.linkedin"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.subscribe.microformats"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.subscribe.msn"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.subscribe.yahoo"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.2.0,com.openexchange.subscribe.crawler"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.2.0,com.openexchange.subscribe.facebook"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.2.0,com.openexchange.subscribe.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.2.0,com.openexchange.subscribe.linkedin"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.2.0,com.openexchange.subscribe.microformats"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.2.0,com.openexchange.subscribe.msn"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.2.0,com.openexchange.subscribe.yahoo"/>
 </provider>
 </psf>

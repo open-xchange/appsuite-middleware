@@ -130,5 +130,10 @@ public final class EmptySMSAccountManager implements MessagingAccountManager {
     public void cleanUp(String secret, Session session) throws OXException {
         // Nope
     }
+    
+    @Override
+    public void removeUnrecoverableItems(String secret, Session session) {
+        // Nope
+    }
 
 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.update.tools;
 
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
@@ -65,7 +64,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -78,6 +76,7 @@ import com.openexchange.groupware.update.internal.DynamicList;
 import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
 import com.openexchange.groupware.update.internal.UpdateExecutor;
 import com.openexchange.groupware.update.internal.UpdateProcess;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -215,7 +214,7 @@ public final class UpdateTaskToolkit {
                     contextIds = new HashSet<Integer>();
                     schemasAndContexts.put(schemaName, contextIds);
                 }
-                contextIds.add(I(contextId));
+                contextIds.add(Integer.valueOf(contextId));
             }
             return schemasAndContexts;
         } catch (final SQLException e) {
@@ -260,7 +259,7 @@ public final class UpdateTaskToolkit {
             final Schema schema = getSchema(contextId);
             // Check version number
             if (schema.getDBVersion() <= versionNumber) {
-                throw UpdateExceptionCodes.ONLY_REDUCE.create(I(schema.getDBVersion()), I(versionNumber));
+                throw UpdateExceptionCodes.ONLY_REDUCE.create(Integer.valueOf(schema.getDBVersion()), Integer.valueOf(versionNumber));
             }
             if (schema.getDBVersion() == Schema.FINAL_VERSION) {
                 throw UpdateExceptionCodes.RESET_FORBIDDEN.create(schema.getSchema());
@@ -330,7 +329,7 @@ public final class UpdateTaskToolkit {
                 stmt.setInt(1, versionNumber);
                 if (stmt.executeUpdate() == 0) {
                     // Schema could not be unlocked
-                    throw SchemaExceptionCodes.WRONG_ROW_COUNT.create(I(1), I(0));
+                    throw SchemaExceptionCodes.WRONG_ROW_COUNT.create(Integer.valueOf(1), Integer.valueOf(0));
                 }
                 // Everything went fine. Schema is marked as unlocked
                 con.commit();

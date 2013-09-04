@@ -52,10 +52,14 @@ package com.openexchange.unifiedinbox;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.FullnameArgument;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.session.Session;
+import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
 
 
 /**
@@ -91,8 +95,53 @@ public final class UnifiedInboxLogicTools extends MailLogicTools {
             if (1 == accountIds.size()) {
                 mail.setAccountId(accountIds.get(0));
             }
+
+            final MailPath msgref = mail.getMsgref();
+            if (null != msgref) {
+                uid.setUIDString(msgref.toString());
+                final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(uid.getFullName());
+                mail.setMsgref(new MailPath(fa.getAccountId(), fa.getFullname(), uid.getId()));
+            }
+
+            {
+                final int count = mail.getEnclosedCount();
+                for (int i = 0; i < count; i++) {
+                    final MailPart mp = mail.getEnclosedMailPart(i);
+                    Object content = mp.getContent();
+                    if (content instanceof MailMessage) {
+                        final MailMessage nestedMail = (MailMessage) content;
+                        final MailPath msgref2 = nestedMail.getMsgref();
+                        if (null != msgref2) {
+                            uid.setUIDString(msgref2.toString());
+                            final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(uid.getFullName());
+                            nestedMail.setMsgref(new MailPath(fa.getAccountId(), fa.getFullname(), uid.getId()));
+                        }
+                    }
+                }
+            }
         } catch (final Exception e) {
             // Ignore
+            final MailPath msgref = mail.getMsgref();
+            if (null != msgref) {
+                final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(msgref.getFolder());
+                mail.setMsgref(new MailPath(fa.getAccountId(), fa.getFullname(), msgref.getMailID()));
+            }
+
+            {
+                final int count = mail.getEnclosedCount();
+                for (int i = 0; i < count; i++) {
+                    final MailPart mp = mail.getEnclosedMailPart(i);
+                    Object content = mp.getContent();
+                    if (content instanceof MailMessage) {
+                        final MailMessage nestedMail = (MailMessage) content;
+                        final MailPath msgref2 = nestedMail.getMsgref();
+                        if (null != msgref2) {
+                            final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(msgref2.getFolder());
+                            nestedMail.setMsgref(new MailPath(fa.getAccountId(), fa.getFullname(), msgref2.getMailID()));
+                        }
+                    }
+                }
+            }
         }
         return mail;
     }
@@ -113,8 +162,53 @@ public final class UnifiedInboxLogicTools extends MailLogicTools {
             if (1 == accountIds.size()) {
                 mail.setAccountId(accountIds.get(0));
             }
+
+            final MailPath msgref = mail.getMsgref();
+            if (null != msgref) {
+                uid.setUIDString(msgref.toString());
+                final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(uid.getFullName());
+                mail.setMsgref(new MailPath(fa.getAccountId(), fa.getFullname(), uid.getId()));
+            }
+
+            {
+                final int count = mail.getEnclosedCount();
+                for (int i = 0; i < count; i++) {
+                    final MailPart mp = mail.getEnclosedMailPart(i);
+                    Object content = mp.getContent();
+                    if (content instanceof MailMessage) {
+                        final MailMessage nestedMail = (MailMessage) content;
+                        final MailPath msgref2 = nestedMail.getMsgref();
+                        if (null != msgref2) {
+                            uid.setUIDString(msgref2.toString());
+                            final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(uid.getFullName());
+                            nestedMail.setMsgref(new MailPath(fa.getAccountId(), fa.getFullname(), uid.getId()));
+                        }
+                    }
+                }
+            }
         } catch (final Exception e) {
             // Ignore
+            final MailPath msgref = mail.getMsgref();
+            if (null != msgref) {
+                final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(msgref.getFolder());
+                mail.setMsgref(new MailPath(fa.getAccountId(), fa.getFullname(), msgref.getMailID()));
+            }
+
+            {
+                final int count = mail.getEnclosedCount();
+                for (int i = 0; i < count; i++) {
+                    final MailPart mp = mail.getEnclosedMailPart(i);
+                    Object content = mp.getContent();
+                    if (content instanceof MailMessage) {
+                        final MailMessage nestedMail = (MailMessage) content;
+                        final MailPath msgref2 = nestedMail.getMsgref();
+                        if (null != msgref2) {
+                            final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(msgref2.getFolder());
+                            nestedMail.setMsgref(new MailPath(fa.getAccountId(), fa.getFullname(), msgref2.getMailID()));
+                        }
+                    }
+                }
+            }
         }
         return mail;
     }
@@ -125,8 +219,20 @@ public final class UnifiedInboxLogicTools extends MailLogicTools {
         try {
             final UnifiedInboxUID uid = new UnifiedInboxUID(originalMail.getMailId());
             mail.setAccountId(uid.getAccountId());
+
+            final MailPath msgref = mail.getMsgref();
+            if (null != msgref) {
+                uid.setUIDString(msgref.toString());
+                final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(uid.getFullName());
+                mail.setMsgref(new MailPath(fa.getAccountId(), fa.getFullname(), uid.getId()));
+            }
         } catch (final Exception e) {
             // Ignore
+            final MailPath msgref = mail.getMsgref();
+            if (null != msgref) {
+                final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(msgref.getFolder());
+                mail.setMsgref(new MailPath(fa.getAccountId(), fa.getFullname(), msgref.getMailID()));
+            }
         }
         return mail;
     }
@@ -137,8 +243,20 @@ public final class UnifiedInboxLogicTools extends MailLogicTools {
         try {
             final UnifiedInboxUID uid = new UnifiedInboxUID(originalMail.getMailId());
             mail.setAccountId(uid.getAccountId());
+
+            final MailPath msgref = mail.getMsgref();
+            if (null != msgref) {
+                uid.setUIDString(msgref.toString());
+                final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(uid.getFullName());
+                mail.setMsgref(new MailPath(fa.getAccountId(), fa.getFullname(), uid.getId()));
+            }
         } catch (final Exception e) {
             // Ignore
+            final MailPath msgref = mail.getMsgref();
+            if (null != msgref) {
+                final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(msgref.getFolder());
+                mail.setMsgref(new MailPath(fa.getAccountId(), fa.getFullname(), msgref.getMailID()));
+            }
         }
         return mail;
     }

@@ -47,40 +47,27 @@
  *
  */
 
-package com.openexchange.secret.recovery.osgi;
+package com.openexchange.server.ajax.ping;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.exception.OXException;
-import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
-import com.openexchange.secret.recovery.SecretCleanUpService;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link WhiteboardEncryptedCleanUpService}
+ * {@link PingAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class WhiteboardEncryptedCleanUpService extends ServiceTracker<EncryptedItemCleanUpService, EncryptedItemCleanUpService> implements SecretCleanUpService {
-
-    /**
-     * Initializes a new {@link WhiteboardEncryptedCleanUpService}.
-     *
-     * @param context The bundle context
-     */
-    public WhiteboardEncryptedCleanUpService(final BundleContext context) {
-        super(context, EncryptedItemCleanUpService.class, null);
-    }
+@DispatcherNotes(noSession = true)
+public class PingAction implements AJAXActionService {
 
     @Override
-    public void cleanUp(final String secret, final ServerSession session) throws OXException {
-        for (final EncryptedItemCleanUpService cleaner : getTracked().values()) {
-            if (cleaner == this) {
-                continue;
-            }
-            cleaner.cleanUpEncryptedItems(secret, session);
-        }
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        return new AJAXRequestResult(Boolean.TRUE, "json");
     }
 
 }

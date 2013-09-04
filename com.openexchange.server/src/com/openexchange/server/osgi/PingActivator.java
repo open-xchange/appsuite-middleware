@@ -47,24 +47,29 @@
  *
  */
 
-package com.openexchange.secret.recovery;
+package com.openexchange.server.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import org.osgi.framework.BundleActivator;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.server.ajax.ping.PingAJAXActionFactory;
+
 
 /**
- * {@link SecretCleanUpService} - Cleans-up non-working encrypted items.
+ * {@link PingActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface SecretCleanUpService {
+public class PingActivator extends AJAXModuleActivator implements BundleActivator {
 
-    /**
-     * Cleans-up non-working encrypted items.
-     *
-     * @param secret The current secret
-     * @param session The session providing needed user information
-     * @throws OXException If check for encrypted items fails
-     */
-    public void cleanUp(String secret, ServerSession session) throws OXException;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return null;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        registerModule(new PingAJAXActionFactory(), "system");
+    }
+
 }

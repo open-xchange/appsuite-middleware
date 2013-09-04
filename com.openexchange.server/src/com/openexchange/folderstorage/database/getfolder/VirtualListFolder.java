@@ -117,7 +117,7 @@ public final class VirtualListFolder {
      * @param altNames <code>true</code> to use alternative names for former InfoStore folders; otherwise <code>false</code>
      * @return The database folder representing given virtual folder
      */
-    public static DatabaseFolder getVirtualListFolder(final int folderId, final boolean altNames, final boolean translate) {
+    public static DatabaseFolder getVirtualListFolder(final int folderId, final boolean altNames) {
         /*
          * A virtual database folder
          */
@@ -163,7 +163,7 @@ public final class VirtualListFolder {
                     FolderObject.SYSTEM_TYPE);
             fo.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
         }
-        final DatabaseFolder retval = translate ? new LocalizedDatabaseFolder(fo) : new DatabaseFolder(fo);
+        final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
         retval.setSubfolderIDs(null);
         retval.setSubscribedSubfolders(true);
         retval.setGlobal(true);

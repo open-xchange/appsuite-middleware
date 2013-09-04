@@ -52,7 +52,6 @@ package com.openexchange.secret.recovery.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.apache.commons.logging.Log;
-import org.osgi.framework.Constants;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -60,15 +59,17 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceSet;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.SecretUsesPasswordChecker;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
-import com.openexchange.secret.recovery.SecretCleanUpService;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.secret.recovery.impl.FastSecretInconsistencyDetector;
 import com.openexchange.session.Session;
+import com.openexchange.session.SetableSession;
+import com.openexchange.session.SetableSessionFactory;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
@@ -80,10 +81,8 @@ import com.openexchange.user.UserService;
  */
 public class SecretRecoveryActivator extends HousekeepingActivator {
 
-    private volatile WhiteboardSecretMigrator migrator;
     private volatile WhiteboardEncryptedItemDetector whiteboardEncryptedItemDetector;
     private volatile WhiteboardSecretService whiteboardSecretService;
-    private volatile WhiteboardEncryptedCleanUpService whiteboardCleanUpService;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -105,10 +104,7 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
              *
              * Initialize whiteboard services
              */
-            final WhiteboardSecretMigrator migrator = this.migrator = new WhiteboardSecretMigrator(context);
             final WhiteboardEncryptedItemDetector whiteboardEncryptedItemDetector = this.whiteboardEncryptedItemDetector = new WhiteboardEncryptedItemDetector(context);
-            final WhiteboardEncryptedCleanUpService whiteboardCleanUpService = new WhiteboardEncryptedCleanUpService(context);
-            this.whiteboardCleanUpService = whiteboardCleanUpService;
             /*
              * Register SecretInconsistencyDetector
              */
@@ -118,25 +114,19 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
             final FastSecretInconsistencyDetector detector = new FastSecretInconsistencyDetector(secretService, cryptoService, userService, whiteboardEncryptedItemDetector);
             registerService(SecretInconsistencyDetector.class, detector);
             registerService(EncryptedItemCleanUpService.class, detector);
+
             /*
              * Register SecretMigrator
              */
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(1000));
-            registerService(SecretMigrator.class, migrator, properties);
             registerService(SecretMigrator.class, detector); // Needs Migration as well
-            /*
-             * Register EncryptedCleanUpService
-             */
-            properties = new Hashtable<String, Object>(1);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(1000));
-            registerService(SecretCleanUpService.class, whiteboardCleanUpService, properties);
-            /*
-             * Open whiteboard services
-             */
-            migrator.open();
+
             whiteboardEncryptedItemDetector.open();
-            whiteboardCleanUpService.open();
+
+            final ServiceSet<SecretMigrator> secretMigrators = new ServiceSet<SecretMigrator>();
+            track(SecretMigrator.class, secretMigrators);
+
+            openTrackers();
+
             /*
              * Register appropriate event handler
              */
@@ -147,13 +137,23 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
                     @Override
                     public void handleEvent(final Event event) {
                         final String oldPassword = (String) event.getProperty("com.openexchange.passwordchange.oldPassword");
-                        // final String newPassword = (String) event.getProperty("com.openexchange.passwordchange.newPassword");
-                        final Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
-                        // Current secret
-                        final String secret = whiteboardSecretService.getSecret(session);
-                        // Try to migrate
+                        final String newPassword = (String) event.getProperty("com.openexchange.passwordchange.newPassword");
+                        final SetableSession setableSession = SetableSessionFactory.getFactory().setableSessionFor((Session) event.getProperty("com.openexchange.passwordchange.session"));
+
+                        // Old secret
+                        setableSession.setPassword(oldPassword);
+                        final String oldSecret = whiteboardSecretService.getSecret(setableSession);
+
+                        // New secret
+                        setableSession.setPassword(newPassword);
+                        final String newSecret = whiteboardSecretService.getSecret(setableSession);
+
+                        // Try to migrate with new password applied to session
                         try {
-                            migrator.migrate(oldPassword, secret, ServerSessionAdapter.valueOf(session));
+                            final ServerSession serverSession = ServerSessionAdapter.valueOf(setableSession);
+                            for (final SecretMigrator migrator : secretMigrators) {
+                                migrator.migrate(oldSecret, newSecret, serverSession);
+                            }
                         } catch (final Exception e) {
                             log.warn("Password change event could not be handled.", e);
                         }
@@ -184,11 +184,6 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
-        final WhiteboardSecretMigrator migr = migrator;
-        if (null != migr) {
-            migr.close();
-            migrator = null;
-        }
         final WhiteboardEncryptedItemDetector detector = whiteboardEncryptedItemDetector;
         if (null != detector) {
             detector.close();
@@ -198,11 +193,6 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
         if (whiteboardSecretService != null) {
             whiteboardSecretService.close();
             this.whiteboardSecretService = null;
-        }
-        final WhiteboardEncryptedCleanUpService whiteboardEncryptedCleanUpService = this.whiteboardCleanUpService;
-        if (null != whiteboardEncryptedCleanUpService) {
-            whiteboardEncryptedCleanUpService.close();
-            this.whiteboardCleanUpService = null;
         }
     }
 

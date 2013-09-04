@@ -50,13 +50,11 @@
 package com.openexchange.folder.json.actions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
+import java.util.Map;
 import org.json.JSONArray;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -66,6 +64,7 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.Constants;
+import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
@@ -74,6 +73,7 @@ import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -103,7 +103,7 @@ public final class ListAction extends AbstractFolderAction {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    protected AJAXRequestResult doPerform(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*
          * Parse parameters
          */
@@ -118,7 +118,23 @@ public final class ListAction extends AbstractFolderAction {
         if (null == parentId) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("parent");
         }
-        final int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
+        int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
+
+        // Ensure ID is contained
+        {
+            boolean found = false;
+            final int idCol = FolderField.ID.getColumn();
+            for (int i = 0; !found && i < columns.length; i++) {
+                found = (idCol == columns[i]);
+            }
+            if (!found) {
+                final int[] tmp = columns;
+                columns = new int[tmp.length + 1];
+                System.arraycopy(tmp, 0, columns, 1, tmp.length);
+                columns[0] = idCol;
+            }
+        }
+
         final boolean all;
         {
             final String parameter = request.getParameter(AJAXServlet.PARAMETER_ALL);
@@ -126,9 +142,9 @@ public final class ListAction extends AbstractFolderAction {
         }
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
         final java.util.List<ContentType> allowedContentTypes = parseOptionalContentTypeArrayParameter("allowed_modules", request);
-        boolean errorOnDuplicateName = parseBoolean(request.getParameter("errorOnDuplicateName"), false);
-        if (!errorOnDuplicateName) {
-            errorOnDuplicateName = parseBoolean(request.getParameter("errOnDuplName"), false);
+        boolean filterDuplicateNames = parseBoolean(request.getParameter("errorOnDuplicateName"), false);
+        if (!filterDuplicateNames) {
+            filterDuplicateNames = parseBoolean(request.getParameter("errOnDuplName"), false);
         }
         /*
          * Request subfolders from folder service
@@ -140,7 +156,7 @@ public final class ListAction extends AbstractFolderAction {
                 parentId,
                 all,
                 session,
-                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put("ignoreTranslation", request.getParameter("ignoreTranslation")));
+                new FolderServiceDecorator().setTimeZone(Tools.getTimeZone(timeZoneId)).setAllowedContentTypes(allowedContentTypes).put("altNames", request.getParameter("altNames")).put(PARAM_IGNORE_TRANSLATION, request.getParameter(PARAM_IGNORE_TRANSLATION)));
         /*
          * Determine max. last-modified time stamp
          */
@@ -157,56 +173,70 @@ public final class ListAction extends AbstractFolderAction {
         /*
          * length > 0
          */
-        if (errorOnDuplicateName) {
-            final Set<String> names = new HashSet<String>(length);
-            final List<UserizedFolder> ret = new ArrayList<UserizedFolder>();
+        final boolean ignoreTranslation = parseBoolean(request.getParameter(PARAM_IGNORE_TRANSLATION), false);
+        // Align to client identifier
+        if (filterDuplicateNames) {
+            // Filter equally named folder
+            final Map<String, UserizedFolder> name2folder = new HashMap<String, UserizedFolder>(length);
+            final Map<String, UserizedFolder> id2folder = new HashMap<String, UserizedFolder>(length);
             for (int i = 0; i < length; i++) {
                 final UserizedFolder userizedFolder = subfolders[i];
                 Locale locale = userizedFolder.getLocale();
                 if (null == locale) {
                     locale = FolderWriter.DEFAULT_LOCALE;
                 }
-                if (!names.add(userizedFolder.getLocalizedName(locale))) {
-                    // Duplicate name
-                    //final String parentName = folderService.getFolder(treeId, parentId, session, null).getLocalizedName(locale);
-                    //throw FolderExceptionErrorMessage.DUPLICATE_NAME.create(userizedFolder.getLocalizedName(locale), parentName);
+                final String name = ignoreTranslation ? userizedFolder.getLocalizedName(locale) : userizedFolder.getName();
+                final UserizedFolder prev = name2folder.get(name);
+                if (null == prev) {
+                    name2folder.put(name, userizedFolder);
+                    id2folder.put(userizedFolder.getID(), userizedFolder);
                 } else {
-                    // Name did not occur before
-                    ret.add(userizedFolder);
-                    final Date modified = userizedFolder.getLastModifiedUTC();
-                    if (modified != null) {
-                        final long time = modified.getTime();
-                        lastModified = ((lastModified >= time) ? lastModified : time);
+                    // Decide which folder to keep in list:
+                    // First come, first serve; unless duplicate one is a default folder
+                    if (userizedFolder.isDefault() && !prev.isDefault()) {
+                        // Replace
+                        id2folder.remove(prev.getID());
+                        name2folder.put(name, userizedFolder);
+                        id2folder.put(userizedFolder.getID(), userizedFolder);
                     }
                 }
             }
-            subfolders = ret.toArray(new UserizedFolder[0]);
-        } else {
-            for (int i = length - 1; i >= 0; i--) {
-                final Date modified = subfolders[i].getLastModifiedUTC();
-                if (modified != null) {
-                    final long time = modified.getTime();
-                    lastModified = ((lastModified >= time) ? lastModified : time);
+
+            final List<UserizedFolder> ret = new ArrayList<UserizedFolder>(length);
+            for (int i = 0; i < length; i++) {
+                final String id = subfolders[i].getID();
+                final UserizedFolder userizedFolder = id2folder.get(id);
+                if (null != userizedFolder) {
+                    ret.add(userizedFolder);
                 }
+            }
+            subfolders = ret.toArray(new UserizedFolder[0]);
+        }
+
+        // Determine last-modified time stamp
+        for (int i = length - 1; i >= 0; i--) {
+            final Date modified = subfolders[i].getLastModifiedUTC();
+            if (modified != null) {
+                final long time = modified.getTime();
+                lastModified = ((lastModified >= time) ? lastModified : time);
             }
         }
         /*
          * Write subfolders as JSON arrays to JSON array
          */
-        final JSONArray jsonArray = FolderWriter.writeMultiple2Array(columns, subfolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
+        final JSONArray jsonArray = FolderWriter.writeMultiple2Array(columns, subfolders, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST, ignoreTranslation ? parametersFor(PARAM_IGNORE_TRANSLATION, Boolean.TRUE) : null);
         /*
          * Return appropriate result
          */
         return new AJAXRequestResult(jsonArray, 0 == lastModified ? null : new Date(lastModified)).addWarnings(subfoldersResponse.getWarnings());
     }
 
-    private static Set<String> TRUES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true", "yes", "on", "1")));
-
-    private static boolean parseBoolean(final String string, final boolean defaultValue) {
-        if (null == string) {
-            return defaultValue;
+    private boolean isUsmEas(final String clientId) {
+        if (Strings.isEmpty(clientId)) {
+            return false;
         }
-        return TRUES.contains(string.toLowerCase(Locale.ENGLISH).trim());
+        final String uc = Strings.toUpperCase(clientId);
+        return uc.startsWith("USM-EAS") || uc.startsWith("USM-JSON");
     }
 
 }

@@ -1,3 +1,8 @@
+* 2013-07-03 - choeger@open-xchange.com
+
+ - Fixed bug #27047: POA antispam shows errors when service user and primary email address not match
+   use user login (LoginInfo) instead of email address to identify user in POA as this is what POA also does
+
 * 2013-07-02 - choeger@open-xchange.com
 
  - Fixed bug #27337: Customer name in exception

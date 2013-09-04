@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 7
+%define        ox_release 17
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -647,6 +647,35 @@ if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $p
    ox_set_property com.openexchange.contactcollector.folder.deleteDenied false $pfile
 fi
 
+# Patch_Request-1593
+pfile=/opt/open-xchange/etc/hazelcast.properties
+OLDNAMES=( com.openexchange.hazelcast.interfaces )
+NEWNAMES=( com.openexchange.hazelcast.network.interfaces )
+DEFAULTS=( 127.0.0.1 )
+for I in $(seq 1 ${#OLDNAMES[@]}); do
+    OLDNAME=${OLDNAMES[$I-1]}
+    NEWNAME=${NEWNAMES[$I-1]}
+    VALUE=$(ox_read_property $OLDNAME $pfile)
+    if ox_exists_property $OLDNAME $pfile; then
+        ox_remove_property $OLDNAME $pfile
+    fi
+    if [ -z "$VALUE" ]; then
+        VALUE="${DEFAULTS[$I-1]}"
+    fi
+    if ! ox_exists_property $NEWNAME $pfile; then
+        ox_set_property $NEWNAME "$VALUE" $pfile
+    fi
+done
+NEWPROPS=( com.openexchange.hazelcast.group.password com.openexchange.hazelcast.memcache.enabled com.openexchange.hazelcast.rest.enabled com.openexchange.hazelcast.socket.bindAny )
+DEFAULTS=( 'wtV6$VQk8#+3ds!a' false false false )
+for I in $(seq 1 ${#NEWPROPS[@]}); do
+    NEWPROP=${NEWPROPS[$I-1]}
+    DEFAULT=${DEFAULTS[$I-1]}
+    if ! ox_exists_property $NEWPROP $pfile; then
+        ox_set_property $NEWPROP "$DEFAULT" $pfile
+    fi
+done
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT
 do
@@ -690,12 +719,40 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Fri Aug 30 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-08-30
+* Thu Aug 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-08-22
+* Tue Aug 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-08-19
+* Mon Aug 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-08-21
+* Mon Aug 05 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-08-09
+* Fri Aug 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-08-02
+* Fri Jul 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-07-26
+* Wed Jul 24 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-08-02
+* Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second build for patch  2013-07-18
+* Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-07-18
+* Fri Jul 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-07-18
+* Thu Jul 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-07-10
 * Mon Jul 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Third candidate for 7.2.2 release
 * Fri Jun 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.2.2 release
 * Wed Jun 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Release candidate for 7.2.2 release
+* Tue Jun 25 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-07-05
+* Mon Jun 24 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-06-21
 * Fri Jun 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second feature freeze for 7.2.2 release
 * Mon Jun 17 2013 Marcus Klein <marcus.klein@open-xchange.com>

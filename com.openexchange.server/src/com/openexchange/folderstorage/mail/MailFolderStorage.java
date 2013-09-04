@@ -706,8 +706,7 @@ public final class MailFolderStorage implements FolderStorage {
         if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
             if (MailAccount.DEFAULT_ID == accountId) {
                 final MailFolder rootFolder = mailAccess.getRootFolder();
-                final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
-                retval = new MailFolderImpl(rootFolder, accountId, mailAccess.getMailConfig(), storageParameters, null, translate);
+                retval = new MailFolderImpl(rootFolder, accountId, mailAccess.getMailConfig(), storageParameters, null);
                 addWarnings(mailAccess, storageParameters);
                 hasSubfolders = rootFolder.hasSubfolders();
                 /*
@@ -736,8 +735,7 @@ public final class MailFolderStorage implements FolderStorage {
              * Generate mail folder from loaded one
              */
             {
-                final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
-                final MailFolderImpl mailFolderImpl = new MailFolderImpl(mailFolder, accountId, mailAccess.getMailConfig(), storageParameters, new MailAccessFullnameProvider(mailAccess), translate);
+                final MailFolderImpl mailFolderImpl = new MailFolderImpl(mailFolder, accountId, mailAccess.getMailConfig(), storageParameters, new MailAccessFullnameProvider(mailAccess));
                 if (MailAccount.DEFAULT_ID == accountId || IGNORABLES.contains(mailAccount.getMailProtocol())) {
                     retval = mailFolderImpl;
                 } else {

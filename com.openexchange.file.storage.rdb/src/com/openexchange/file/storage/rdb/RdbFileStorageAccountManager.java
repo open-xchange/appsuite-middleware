@@ -153,5 +153,10 @@ public class RdbFileStorageAccountManager implements FileStorageAccountManager {
     public void cleanUp(final String secret, final Session session) throws OXException {
         CACHE.cleanUp(service, secret, session);
     }
+    
+    @Override
+    public void removeUnrecoverableItems(String secret, Session session) throws OXException {
+        CACHE.removeUnrecoverableItems(service, secret, session);        
+    }
 
 }

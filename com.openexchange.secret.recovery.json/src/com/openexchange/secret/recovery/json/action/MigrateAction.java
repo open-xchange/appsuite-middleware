@@ -49,6 +49,7 @@
 
 package com.openexchange.secret.recovery.json.action;
 
+import java.util.Set;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -57,6 +58,9 @@ import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.secret.recovery.json.SecretRecoveryAJAXRequest;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.SetableSession;
+import com.openexchange.session.SetableSessionFactory;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MigrateAction}
@@ -65,13 +69,17 @@ import com.openexchange.server.ServiceLookup;
  */
 public final class MigrateAction extends AbstractSecretRecoveryAction {
 
+    private final Set<SecretMigrator> secretMigrators;
+
     /**
      * Initializes a new {@link MigrateAction}.
      *
      * @param services
+     * @param secretMigrators
      */
-    public MigrateAction(final ServiceLookup services) {
+    public MigrateAction(final ServiceLookup services, Set<SecretMigrator> secretMigrators) {
         super(services);
+        this.secretMigrators = secretMigrators;
     }
 
     @Override
@@ -82,14 +90,19 @@ public final class MigrateAction extends AbstractSecretRecoveryAction {
         }
 
         final String password = req.getParameter("password");
-        final String secret = secretService.getSecret(req.getSession());
+        final ServerSession session = req.getSession();
+        final SetableSession setableSession = SetableSessionFactory.getFactory().setableSessionFor(session);
 
-        final SecretMigrator secretMigrator = getService(SecretMigrator.class);
-        if (null == secretMigrator) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SecretMigrator.class.getName());
+        // Old secret
+        setableSession.setPassword(password);
+        final String oldSecret = secretService.getSecret(setableSession);
+
+        // New secret
+        final String secret = secretService.getSecret(session);
+
+        for (SecretMigrator migrator : secretMigrators) {
+            migrator.migrate(oldSecret, secret, session);
         }
-
-        secretMigrator.migrate(password, secret, req.getSession());
 
         return new AJAXRequestResult(Integer.valueOf(1), "int");
     }

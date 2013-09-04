@@ -52,6 +52,7 @@ package com.openexchange.report.console;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -68,7 +69,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.report.Constants;
 import com.openexchange.report.internal.LoginCounterMBean;
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -86,7 +86,7 @@ public final class LoginCounterTool {
 
     /**
      * Main method for starting from console.
-     * 
+     *
      * @param args program arguments
      */
     public static void main(String[] args) {
@@ -147,7 +147,7 @@ public final class LoginCounterTool {
                     System.exit(0);
                 }
             }
-            
+
             // Invoke MBean
             JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9999/server");
             JMXConnector jmxConnector = JMXConnectorFactory.connect(url, null);
@@ -177,7 +177,7 @@ public final class LoginCounterTool {
         if (regex != null) {
             withRegex += "\nfor expression\n    '" + regex + "'";
         }
-        
+
         String andAggregated = "\n";
         if (aggregate) {
             andAggregated += "with total logins aggregated by users\n";
@@ -187,14 +187,14 @@ public final class LoginCounterTool {
             LoginCounterMBean loginCounterProxy = loginCounterProxy(mbsc);
             Map<String, Integer> logins = loginCounterProxy.getNumberOfLogins(startDate, endDate, aggregate, regex);
 
-            System.out.println("Number of logins between\n    " + 
-                startDate.toString() + 
-            "\nand\n    " + 
-                endDate.toString() + 
+            System.out.println("Number of logins between\n    " +
+                startDate.toString() +
+            "\nand\n    " +
+                endDate.toString() +
             withRegex +
             andAggregated);
-            
-            
+
+
             for (String client : logins.keySet()) {
                 if (client.equals(LoginCounterMBean.SUM)) {
                     continue;
@@ -202,7 +202,7 @@ public final class LoginCounterTool {
                 Integer number = logins.get(client);
                 System.out.println(client + ": " + number);
             }
-            
+
             Integer sum = logins.get(LoginCounterMBean.SUM);
             System.out.println("Total: " + sum);
         } catch (Exception e) {
@@ -239,9 +239,35 @@ public final class LoginCounterTool {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
+            isWhitespace = isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    /**
+     * High speed test for whitespace! Faster than the java one (from some testing).
+     *
+     * @return <code>true</code> if the indicated character is whitespace; otherwise <code>false</code>
+     */
+    private static boolean isWhitespace(final char c) {
+        switch (c) {
+        case 9: // 'unicode: 0009
+        case 10: // 'unicode: 000A'
+        case 11: // 'unicode: 000B'
+        case 12: // 'unicode: 000C'
+        case 13: // 'unicode: 000D'
+        case 28: // 'unicode: 001C'
+        case 29: // 'unicode: 001D'
+        case 30: // 'unicode: 001E'
+        case 31: // 'unicode: 001F'
+        case ' ': // Space
+            // case Character.SPACE_SEPARATOR:
+            // case Character.LINE_SEPARATOR:
+        case Character.PARAGRAPH_SEPARATOR:
+            return true;
+        default:
+            return false;
+        }
     }
 
     private static LoginCounterMBean loginCounterProxy(MBeanServerConnection mbsc) {
