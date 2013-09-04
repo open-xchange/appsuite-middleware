@@ -63,6 +63,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -78,7 +79,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "tree", description = "(Preliminary) The identifier of the folder tree. If missing '0' (primary folder tree) is assumed."),
     @Parameter(name = "allowed_modules", description = "(Preliminary) An array of modules (either numbers or strings; e.g. \"tasks,calendar,contacts,mail\") supported by requesting client. If missing, all available modules are considered.")
 }, requestBody = "An array with object IDs of the folders that shall be deleted.",
-responseDescription = "An array with object IDs of folders that were NOT deleted. There may be a lot of different causes for a not deleted folder: A folder has been modified in the mean time, the user does not have the permission to delete it or those permissions have just been removed, the folder does not exist, etc.")
+    responseDescription = "An array with object IDs of folders that were NOT deleted. There may be a lot of different causes for a not deleted folder: A folder has been modified in the mean time, the user does not have the permission to delete it or those permissions have just been removed, the folder does not exist, etc.")
 public final class DeleteAction extends AbstractFolderAction {
 
     public static final String ACTION = AJAXServlet.ACTION_DELETE;
@@ -123,25 +124,29 @@ public final class DeleteAction extends AbstractFolderAction {
         /*
          * Delete
          */
-        final JSONArray responseArray = new JSONArray();
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        final List<OXException> warnings = new LinkedList<OXException>();
+        final List<String> foldersWithError = new LinkedList<String>();
         for (int i = 0; i < len; i++) {
             final String folderId = jsonArray.getString(i);
             try {
                 folderService.deleteFolder(treeId, folderId, timestamp, session);
-            } catch (final OXException e) {
+            } catch (final OXException oxException) {
                 final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DeleteAction.class));
-                log.error(e.getMessage(), e);
-                e.setCategory(Category.CATEGORY_WARNING);
-                warnings.add(e);
-                responseArray.put(folderId);
+                oxException.setCategory(Category.CATEGORY_ERROR);
+                log.error(oxException.getMessage(), oxException);
+
+                foldersWithError.add(folderId);
             }
         }
-        /*
-         * Return appropriate result
-         */
-        return new AJAXRequestResult(responseArray).addWarnings(warnings);
+
+        if (!foldersWithError.isEmpty()) {
+            throw FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE.create(
+                foldersWithError.toString(),
+                Integer.valueOf(session.getUserId()),
+                Integer.valueOf(session.getContextId()));
+        }
+
+        return new AJAXRequestResult();
     }
 
 }
