@@ -135,7 +135,7 @@ public class Bug23610Test extends CalDAVTest {
                 break;
             }
         }
-        iCalResource.getVEvent().setTransp(Appointment.DECLINE == confirmationStatus ? "TRANSPARENT" : "OPAQUE");
+        //iCalResource.getVEvent().setTransp(Appointment.DECLINE == confirmationStatus ? "TRANSPARENT" : "OPAQUE");
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICalUpdate(iCalResource));
         /*
          * verify appointment on server
