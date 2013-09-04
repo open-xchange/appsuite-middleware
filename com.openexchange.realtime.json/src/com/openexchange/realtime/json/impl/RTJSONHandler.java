@@ -269,8 +269,4 @@ public class RTJSONHandler implements StanzaSender {
         return protocolHandler;
     }
 
-    public RTProtocol getProtocol() {
-        return protocol;
-    }
-
 }
