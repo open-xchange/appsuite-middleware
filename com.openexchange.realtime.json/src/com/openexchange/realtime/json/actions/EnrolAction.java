@@ -61,12 +61,9 @@ import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
-import com.openexchange.realtime.json.impl.StateEntry;
 import com.openexchange.realtime.json.impl.StateManager;
-import com.openexchange.realtime.json.impl.stanza.writer.StanzaWriter;
 import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
 import com.openexchange.realtime.json.protocol.NextSequence;
-import com.openexchange.realtime.json.protocol.RTProtocol;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.tools.session.ServerSession;
 
@@ -80,11 +77,9 @@ public class EnrolAction extends RTAction {
     private final static Log LOG = com.openexchange.log.Log.loggerFor(EnrolAction.class);
 
     private final StateManager stateManager;
-    private final RTProtocol protocol;
 
-    public EnrolAction(StateManager stateManager, RTProtocol protocol) {
+    public EnrolAction(StateManager stateManager) {
         this.stateManager = stateManager;
-        this.protocol = protocol;
     }
 
     @Override
@@ -94,22 +89,18 @@ public class EnrolAction extends RTAction {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Enroling ID: " + constructedId);
         }
-        StateEntry retrievedState = stateManager.retrieveState(constructedId);
+        stateManager.retrieveState(constructedId);
+        NextSequence nextSequence = new NextSequence(constructedId, constructedId, 0);
+        JSONObject answerJSON = stanzaToJSON(nextSequence);
+        enrolActionResults.put(STANZAS, Collections.singletonList(answerJSON));
+
         ResourceDirectory resourceDirectory = JSONServiceRegistry.getInstance().getService(ResourceDirectory.class);
         try {
             resourceDirectory.set(constructedId, new DefaultResource());
         } catch (OXException e) {
             RealtimeException enrolException = RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
-            enrolActionResults.put(ERROR, enrolException);
             LOG.error(enrolException.getMessage(), enrolException);
-        }
-        if(retrievedState.created) { //we didn't have a state yet
-            NextSequence nextSequence = new NextSequence(constructedId, constructedId, 0);
-            JSONObject answerJSON = new StanzaWriter().write(nextSequence);
-            enrolActionResults.put(STANZAS, Collections.singletonList(answerJSON));
-        } else {
-            //state for client exists? reset all the things, gate, stanzasToSend, sequences
-            //protocol.nextSequence(constructedId, 0, gate);
+            enrolActionResults.put(ERROR, exceptionToJSON(enrolException, session));
         }
 
         return new AJAXRequestResult(enrolActionResults, "native");
