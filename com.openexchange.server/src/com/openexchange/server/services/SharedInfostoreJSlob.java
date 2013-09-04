@@ -49,35 +49,46 @@
 
 package com.openexchange.server.services;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.shared.SharedJSlobService;
-
+import com.openexchange.session.Session;
+import com.openexchange.tools.file.QuotaFileStorage;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link SharedInfostoreJSlob}
- *
+ * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class SharedInfostoreJSlob implements SharedJSlobService {
-    
+
     private final String serviceId;
-    
+
     private final DefaultJSlob jslob;
+
+    private final int maxUploadSize;
 
     /**
      * Initializes a new {@link SharedInfostoreJSlob}.
      */
-    public SharedInfostoreJSlob(JSONObject jsonObject) {
+    public SharedInfostoreJSlob(int maxUploadSize) {
         super();
         serviceId = "com.openexchange.jslob.config";
-        jslob = new DefaultJSlob(jsonObject);
-        jslob.setId(new JSlobId(serviceId, "io.ox/shared/infostore", 0, 0));
+        this.maxUploadSize = maxUploadSize;
+        jslob = new DefaultJSlob();
+        jslob.setId(new JSlobId(serviceId, "io.ox/core/properties", 0, 0));
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.jslob.shared.SharedJSlobService#getServiceId()
      */
     @Override
@@ -85,15 +96,31 @@ public class SharedInfostoreJSlob implements SharedJSlobService {
         return serviceId;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.jslob.shared.SharedJSlobService#getJSlob()
      */
     @Override
-    public JSlob getJSlob() {
-        return jslob;
+    public JSlob getJSlob(Session session) throws OXException {
+        try {
+            jslob.setId(new JSlobId(serviceId, "io.ox/core/properties", session.getUserId(), session.getContextId()));
+            JSONObject json = new JSONObject();
+            json.put("maxUploadSize", maxUploadSize);
+            Context ctx = ContextStorage.getStorageContext(session);
+            QuotaFileStorage fs = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
+            long quota = fs.getQuota();
+            long usage = fs.getUsage();
+            json.put("quota", quota);
+            json.put("usage", usage);
+            jslob.setJsonObject(json);
+            return jslob;
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
+        }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.jslob.shared.SharedJSlobService#getId()
      */
     @Override
@@ -101,7 +128,8 @@ public class SharedInfostoreJSlob implements SharedJSlobService {
         return jslob.getId().getId();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.jslob.shared.SharedJSlobService#setJSONObject(org.json.JSONObject)
      */
     @Override
@@ -109,7 +137,8 @@ public class SharedInfostoreJSlob implements SharedJSlobService {
         jslob.setJsonObject(jsonObject);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
      * @see com.openexchange.jslob.shared.SharedJSlobService#setMetaObject(org.json.JSONObject)
      */
     @Override

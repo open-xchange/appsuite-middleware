@@ -79,7 +79,6 @@ import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
-import com.openexchange.ajax.helper.HTMLDetector;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -88,6 +87,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
@@ -306,7 +306,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                             documentData = Streams.asInputStream(baos);
                             cts = tika.detect(Streams.asInputStream(baos));
                             if ("text/plain".equals(cts)) {
-                                cts = HTMLDetector.containsHTMLTags(baos.toByteArray()) ? "text/html" : cts;
+                                cts = HTMLDetector.containsHTMLTags(baos.toByteArray(), true) ? "text/html" : cts;
                             }
                         } else {
                             cts = contentTypeByFileName;
@@ -323,7 +323,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                             cts = detectMimeType(temp.getStream());
                             if ("text/plain".equals(cts)) {
                                 final byte[] bytes = Streams.stream2bytes(temp.getStream());
-                                cts = HTMLDetector.containsHTMLTags(bytes) ? "text/html" : cts;
+                                cts = HTMLDetector.containsHTMLTags(bytes, true) ? "text/html" : cts;
                             }
                         } else {
                             cts = fileContentType;
@@ -407,7 +407,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                         preferredContentType = detectMimeType(temp.getStream());
                         if ("text/plain".equals(preferredContentType)) {
                             final byte[] bytes = Streams.stream2bytes(temp.getStream());
-                            preferredContentType = HTMLDetector.containsHTMLTags(bytes) ? "text/html" : preferredContentType;
+                            preferredContentType = HTMLDetector.containsHTMLTags(bytes, true) ? "text/html" : preferredContentType;
                         }
                         // One more time...
                         if (equalPrimaryTypes(preferredContentType, contentType)) {

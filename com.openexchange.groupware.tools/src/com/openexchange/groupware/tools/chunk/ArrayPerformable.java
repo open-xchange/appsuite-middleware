@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,63 +47,24 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.converters.preview.cache.groupware;
+package com.openexchange.groupware.tools.chunk;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link PreviewCacheCreateDataTableService}
+ * {@link ArrayPerformable}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class PreviewCacheCreateDataTableService extends AbstractCreateTableImpl {
+public interface ArrayPerformable<T> {
 
     /**
-     * Gets the table names.
+     * Will be called for every chunk.
      *
-     * @return The table names.
+     * @param subArray An array based on the original one that only contains the elements of the current chunk.
+     * @throws OXException in cases of errors.
      */
-    public static String[] getTablesToCreate() {
-        return new String[] { "previewData" };
-    }
-
-    /**
-     * Gets the CREATE-TABLE statements.
-     *
-     * @return The CREATE statements
-     */
-    public static String[] getCreateStmts() {
-        return new String[] { "CREATE TABLE "+"previewData"+" (" +
-            " cid INT4 unsigned NOT NULL," +
-            " user INT4 unsigned NOT NULL," +
-            " id VARCHAR(128) CHARACTER SET latin1 NOT NULL," +
-            " data BLOB," +
-            " PRIMARY KEY (cid, user, id)," +
-            " INDEX `globaldocument` (cid, id)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
-    }
-
-    /**
-     * Initializes a new {@link PreviewCacheCreateDataTableService}.
-     */
-    public PreviewCacheCreateDataTableService() {
-        super();
-    }
-
-    @Override
-    public String[] requiredTables() {
-        return new String[] { "preview" };
-    }
-
-    @Override
-    public String[] tablesToCreate() {
-        return getTablesToCreate();
-    }
-
-    @Override
-    protected String[] getCreateStatements() {
-        return getCreateStmts();
-    }
+    void perform(final T[] subArray) throws OXException;
 
 }

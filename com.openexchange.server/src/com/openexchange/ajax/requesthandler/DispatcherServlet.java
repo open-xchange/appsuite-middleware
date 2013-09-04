@@ -373,16 +373,26 @@ public class DispatcherServlet extends SessionServlet {
             /*
              * A common result
              */
+            OXException exception = result.getException();
+            if (exception != null) {
+                if (exception.isLoggable(LogLevel.DEBUG)) {
+                    logException(exception, LogLevel.DEBUG);
+                } else {
+                    logException(exception, LogLevel.TRACE);
+                }
+            }
             sendResponse(requestData, result, httpRequest, httpResponse);
         } catch (final OXException e) {
             if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
                 httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+                logException(e, LogLevel.DEBUG);
                 return;
             }
             if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
                 final Object[] logArgs = e.getLogArgs();
                 final Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
                 httpResponse.sendError(((Integer) logArgs[0]).intValue(), null == statusMsg ? null : statusMsg.toString());
+                logException(e, LogLevel.DEBUG);
                 return;
             }
             // Handle other OXExceptions
@@ -395,6 +405,10 @@ public class DispatcherServlet extends SessionServlet {
                 } else {
                     logException(e);
                 }
+            } else if (e.isLoggable(LogLevel.DEBUG)){
+                logException(e, LogLevel.DEBUG);
+            } else {
+                logException(e, LogLevel.TRACE);
             }
             final String action = httpRequest.getParameter(PARAMETER_ACTION);
             APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? toUpperCase(httpRequest.getMethod()) : action, httpRequest, httpResponse);

@@ -50,7 +50,9 @@
 package com.openexchange.jslob.shared;
 
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSlob;
+import com.openexchange.session.Session;
 
 /**
  * {@link SharedJSlobService} - Service for adding shared JSlobs to JSlobService
@@ -83,7 +85,7 @@ public interface SharedJSlobService {
      *
      * @return The shared jslob
      */
-    JSlob getJSlob();
+    JSlob getJSlob(Session session) throws OXException;
 
     /**
      * Returns the jslob's id

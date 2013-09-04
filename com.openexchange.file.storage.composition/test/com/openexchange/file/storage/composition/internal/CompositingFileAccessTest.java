@@ -55,7 +55,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -292,7 +291,10 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
 
     @Test
     public void testLock() throws OXException {
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("lock", fileId.getFolderId(), fileId.getFileId(), 1337L);
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
         lock(fileId.toUniqueID(), 1337);
 
@@ -301,7 +303,10 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
 
     @Test
     public void testUnlock() throws OXException {
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("unlock", fileId.getFolderId(), fileId.getFileId());
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
         unlock(fileId.toUniqueID());
 
@@ -310,16 +315,22 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
 
     @Test
     public void testTouch() throws OXException {
-        fileAccess.expectCall("lock", fileId.getFolderId(), fileId.getFileId(), 1337L);
+        fileAccess.expectCall("startTransaction");
+        fileAccess.expectCall("touch", fileId.getFolderId(), fileId.getFileId());
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
-        lock(fileId.toUniqueID(), 1337);
+        touch(fileId.toUniqueID());
 
         fileAccess.assertAllWereCalled();
     }
 
     @Test
     public void testRemoveDocument() throws OXException {
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("removeDocument", folderId.getFolderId(), 12L);
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
         removeDocument(folderId.toUniqueID(), 12);
 
@@ -333,10 +344,14 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         final FileStorageFileAccess.IDTuple tuple2 = new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId());
         fileAccess.expectCall("hashCode").andReturn(1); // Look if it's there
         fileAccess.expectCall("hashCode").andReturn(1); // Store it
-        fileAccess.expectCall("hashCode").andReturn(1); 
+        fileAccess.expectCall("hashCode").andReturn(1);
         fileAccess.expectCall("getDocuments", Arrays.asList(tuple, tuple2), Arrays.asList(new Field[] { Field.ID, Field.FOLDER_ID }));
 
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("removeDocument", Arrays.asList(tuple, tuple2), 12L).andReturn(Arrays.asList(tuple));
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
+
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         fileAccess.expectCall("getAccountAccess").andReturn(this);
@@ -357,7 +372,10 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
     public void testRemoveVersions() throws OXException {
         final String[] versions = new String[] { "1", "2", "3" };
 
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("removeVersion", fileId.getFolderId(), fileId.getFileId(), versions).andReturn(new String[0]);
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         removeVersion(fileId.toUniqueID(), versions);
@@ -416,7 +434,10 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(folderId.toUniqueID());
 
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER).andDo(setId);
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
         saveDocument(file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
 
@@ -432,7 +453,10 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(folderId.toUniqueID());
 
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE)).andDo(setId);
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
         saveDocument(file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
 
@@ -448,7 +472,10 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(folderId.toUniqueID());
 
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("saveFileMetadata", file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE)).andDo(setId);
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
         saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
 
@@ -464,7 +491,10 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(folderId.toUniqueID());
 
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("saveFileMetadata", file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE)).andDo(setId);
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
         saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
 
@@ -482,7 +512,10 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
 
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
         saveDocument(file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
 
@@ -498,7 +531,10 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
 
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
         saveDocument(file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
 
@@ -514,7 +550,10 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
 
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("saveFileMetadata", file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
         saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
 
@@ -530,7 +569,10 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         file.setId(fileId.toUniqueID());
         file.setFolderId(folderId.toUniqueID());
 
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("saveFileMetadata", file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
         saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
 
@@ -553,11 +595,17 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         destinationFile.setId(FileStorageFileAccess.NEW);
         destinationFile.setFolderId(folderId.getFolderId());
 
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER).andDo(setId);
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
         // Secondly the original must be deleted
 
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L);
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
         move(file, EMPTY_INPUT_STREAM, 1337, null);
 
@@ -588,11 +636,17 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         destinationFile.setId(FileStorageFileAccess.NEW);
         destinationFile.setFolderId(folderId.getFolderId());
 
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER).andDo(setId);
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
         // And lastly the original must be deleted
 
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L);
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
         move(file, EMPTY_INPUT_STREAM, 1337, Arrays.asList(File.Field.TITLE, File.Field.FOLDER_ID)); // Title and FolderID have been changed
 
@@ -621,11 +675,17 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         destinationFile.setId(FileStorageFileAccess.NEW);
         destinationFile.setFolderId(folderId.getFolderId());
 
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER).andDo(setId);
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
         // Lastly the original must be deleted
 
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L);
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
         move(file, null, 1337, null);
 
@@ -656,11 +716,17 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         destinationFile.setId(FileStorageFileAccess.NEW);
         destinationFile.setFolderId(folderId.getFolderId());
 
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER).andDo(setId);
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
         // And lastly the original must be deleted
 
+        fileAccess.expectCall("startTransaction");
         fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337L);
+        fileAccess.expectCall("commit");
+        fileAccess.expectCall("finish");
 
         move(file, null, 1337, Arrays.asList(File.Field.TITLE, File.Field.FOLDER_ID)); // Title and FolderID have been changed
 
@@ -935,7 +1001,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
     public void cleanUp(String secret, Session session) throws OXException {
         // noop
     }
-    
+
     @Override
     public void removeUnrecoverableItems(String secret, Session session) throws OXException {
         // noop

@@ -1,3 +1,14 @@
+* 2013-09-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 28649: Corrected packaging for Swedish language.
+
+* 2013-09-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28622: Add missing column to CREATE TABLE statement
+ - Fix for bug 28637: Orderly perform html2text conversion for plain-text-only messages
+ - Fix for bug 28635: Sanitize HTML content from calendar printing
+ - Fix for bug 28668: Avoid trailing "\n" after <br> tag on text2html conversion
+
 * 2013-09-02 - martin.herfurth@open-xchange.com
 
  - Fix for bug 28230: User fromSource as organizer mail address when sending imip messages.

@@ -83,7 +83,14 @@ public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> ex
     public void emit(final Mode mode, final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         final Organizer organizer = new Organizer();
         try {
-            String address = EmitterTools.getFrom(calendar.getCreatedBy(), ctx);
+            String address;
+            if (calendar.getOrganizerId() > 0) {
+                address = EmitterTools.getFrom(calendar.getOrganizerId(), ctx);
+            } else if (calendar.getCreatedBy() > 0) {
+                address = EmitterTools.getFrom(calendar.getCreatedBy(), ctx);
+            } else {
+                address = calendar.getOrganizer();
+            }
             address = IDNA.toACE(address);
             organizer.setValue("mailto:" + address);
         } catch (final URISyntaxException e) {

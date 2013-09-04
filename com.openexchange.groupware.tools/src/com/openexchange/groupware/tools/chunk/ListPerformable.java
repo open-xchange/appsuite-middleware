@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,25 @@
  *
  */
 
-package com.openexchange.ajax.helper;
+package com.openexchange.groupware.tools.chunk;
+
+import java.util.List;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link HTMLDetector} - Detects HTML tags in a byte sequence.
+ * {@link ListPerformable}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public final class HTMLDetector {
+public interface ListPerformable<T> {
 
     /**
-     * Initializes a new {@link HTMLDetector}.
-     */
-    private HTMLDetector() {
-        super();
-    }
-
-    /**
-     * Checks if given String contains common HTML tags.
+     * Will be called for every chunk.
      *
-     * @param sequence The String to check
-     * @return <code>true</code> if given String contains common HTML tags; otherwise <code>false</code>
+     * @param subList A sublist based on the original one that only contains the elements of the current chunk.
+     * @throws OXException in cases of errors.
      */
-    public static boolean containsHTMLTags(final String sequence) {
-        return com.openexchange.java.HTMLDetector.containsHTMLTags(sequence);
-    }
-
-    /**
-     * Checks if given byte sequence contains common HTML tags.
-     *
-     * @param sequence The byte sequence to check
-     * @return <code>true</code> if given byte sequence contains common HTML tags; otherwise <code>false</code>
-     */
-    public static boolean containsHTMLTags(final byte[] sequence) {
-        return com.openexchange.java.HTMLDetector.containsHTMLTags(sequence);
-    }
-
-    /**
-     * Checks if given byte sequence contains specified HTML tag.
-     *
-     * @param sequence The byte sequence to check
-     * @param tag The HTML tag; e.g. <code>"body"</code>
-     * @return <code>true</code> if given byte sequence contains specified HTML tag; otherwise <code>false</code>
-     */
-    public static boolean containsHTMLTag(final byte[] sequence, final String tag) {
-        return com.openexchange.java.HTMLDetector.containsHTMLTag(sequence, tag);
-    }
+    void perform(final List<T> subList) throws OXException;
 
 }

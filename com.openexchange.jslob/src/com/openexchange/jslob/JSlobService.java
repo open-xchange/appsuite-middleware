@@ -52,6 +52,7 @@ package com.openexchange.jslob;
 import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.jslob.shared.SharedJSlobService;
 import com.openexchange.session.Session;
 
 /**
@@ -99,10 +100,11 @@ public interface JSlobService {
      * Gets the shared JSlob.
      *
      * @param id The identifier of the JSlob
+     * @param session An active session
      * @return The JSlob
      * @throws OXException If JSlob cannot be returned
      */
-    JSlob getShared(String id) throws OXException;
+    JSlob getShared(String id, Session session) throws OXException;
 
     /**
      * Gets the JSlobs associated with given user in given context.
@@ -116,10 +118,11 @@ public interface JSlobService {
     /**
      * Gets the shared JSlobs.
      *
+     * @param session An active session
      * @return The JSlobs
      * @throws OXException If JSlobs cannot be returned
      */
-    Collection<JSlob> getShared() throws OXException;
+    Collection<JSlob> getShared(Session session) throws OXException;
 
     /**
      * Sets the JSlob associated with given user in given context.
@@ -139,10 +142,10 @@ public interface JSlobService {
      * If passed JSlob is <code>null</code>, a delete is performed.
      *
      * @param id The path of the JSlob
-     * @param jsonJSlob The JSlob or <code>null</code> for deletion
+     * @param service The shared jslob service
      * @throws OXException If JSlob cannot be set
      */
-    void setShared(String id, JSlob jsonJSlob) throws OXException;
+    void setShared(String id, SharedJSlobService service) throws OXException;
 
     /**
      * Updates the JSlob associated with given user in given context.
