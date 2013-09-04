@@ -48,7 +48,6 @@
 
 package com.openexchange.realtime.json.actions;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -72,10 +71,7 @@ import com.openexchange.realtime.json.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.json.impl.stanza.writer.StanzaWriter;
 import com.openexchange.realtime.json.stanza.StanzaBuilder;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.payload.PayloadTree;
-import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.CustomGateAction;
 import com.openexchange.realtime.util.StanzaSequenceGate;
 import com.openexchange.server.ServiceLookup;
@@ -148,7 +144,12 @@ public class QueryAction extends RTAction {
         ID id = constructID(request, session);
 
         if(!stateManager.isConnected(id)) {
-            throw RealtimeExceptionCodes.STATE_MISSING.create();
+            RealtimeException stateMissingException = RealtimeExceptionCodes.STATE_MISSING.create();
+            if(LOG.isDebugEnabled()) {
+                LOG.debug(stateMissingException.getMessage(), stateMissingException);
+            }
+            Map<String, Object> errorMap = getErrorMap(stateMissingException, session);
+            return new AJAXRequestResult(errorMap, "native");
         }
         StateEntry stateEntry = stateManager.retrieveState(id);
 
@@ -246,16 +247,15 @@ public class QueryAction extends RTAction {
             RealtimeException noResponseException = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create("Request didn't yield any response.");
             LOG.error(noResponseException.getMessage(), noResponseException);
             stanza.trace(noResponseException.getMessage(), noResponseException);
-            queryActionResults.put(ERROR, noResponseException);
+            queryActionResults.put(ERROR, exceptionToJSON(noResponseException, session));
         } else {
             Stanza answerStanza = (Stanza)answer;
             //Set the recipient to the client that originally sent the request
             answerStanza.setTo(id);
-            JSONObject answerJSON = new StanzaWriter().write(answerStanza);
-            queryActionResults.put(RESULT, answerJSON);
+            queryActionResults.put(RESULT, stanzaToJSON(answerStanza));
         }
 
-        //additionally check for Stanza that are addressed to the client and add them to the response
+        //additionally check for Stanzas that are addressed to the client and add them to the response
         List<JSONObject> stanzas = pollStanzas(stateEntry.state);
         queryActionResults.put(STANZAS, stanzas);
 

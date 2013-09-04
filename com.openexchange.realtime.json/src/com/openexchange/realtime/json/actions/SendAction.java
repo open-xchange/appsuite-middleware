@@ -66,8 +66,8 @@ import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.json.impl.JSONProtocolHandler;
 import com.openexchange.realtime.json.impl.StateEntry;
 import com.openexchange.realtime.json.impl.StateManager;
+import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -142,13 +142,15 @@ public class SendAction extends RTAction  {
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         ID id = constructID(request, session);
         if(!stateManager.isConnected(id)) {
-            Map<String, Object> errorMap = new HashMap<String, Object>();
             RealtimeException stateMissingException = RealtimeExceptionCodes.STATE_MISSING.create();
-            errorMap.put(ERROR, stateMissingException);
-            LOG.error(stateMissingException.getMessage(), stateMissingException);
+            if(LOG.isDebugEnabled()) {
+                LOG.debug(stateMissingException.getMessage(), stateMissingException);
+            }
+            Map<String, Object> errorMap = getErrorMap(stateMissingException, session);
             return new AJAXRequestResult(errorMap, "native");
         }
-        StateEntry entry = stateManager.retrieveState(id);
+        StateEntry stateEntry = stateManager.retrieveState(id);
+        RTClientState clientState = stateEntry.state;
 
         Object data = request.requireData();
         final List<JSONObject> objects;
@@ -159,34 +161,33 @@ public class SendAction extends RTAction  {
                 try {
                     objects.add(array.getJSONObject(i));
                 } catch (JSONException e) {
-                    throw new OXException(e);
+                    RealtimeException malformedBodyException = RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(e.getMessage());
+                    LOG.error(malformedBodyException.getMessage(), malformedBodyException);
+                    Map<String, Object> errorAndStanzasMap = getErrorAndStanzasMap(malformedBodyException, session, clientState);
+                    return new AJAXRequestResult(errorAndStanzasMap, "native");
                 }
             }
         } else if (data instanceof JSONObject) {
             objects = Arrays.asList((JSONObject) data);
         } else {
-            Map<String, Object> errorMap = new HashMap<String, Object>();
-            RealtimeException wrongBodyException = RealtimeExceptionCodes.UNEXPECTED_ERROR.create("Missing request body");;
-            LOG.error(wrongBodyException.getMessage(), wrongBodyException);
-            errorMap.put(ERROR, wrongBodyException);
-            List<JSONObject> stanzas = pollStanzas(entry.state);
-            errorMap.put(STANZAS, stanzas);
-            return new AJAXRequestResult(errorMap, "native");
+            RealtimeException malformedBodyException = RealtimeExceptionCodes.STANZA_BAD_REQUEST.create("Request body must be JSON");
+            LOG.error(malformedBodyException.getMessage(), malformedBodyException);
+            Map<String, Object> errorAndStanzasMap = getErrorAndStanzasMap(malformedBodyException, session, clientState);
+            return new AJAXRequestResult(errorAndStanzasMap, "native");
         }
         LOG.debug("Messages arrived in SendAction: " + objects.toString());
 
 
         //handle incoming messages
         List<Long> acknowledgements = new ArrayList<Long>(objects.size());
-        protocolHandler.handleIncomingMessages(id, session, entry, objects, acknowledgements);
+        protocolHandler.handleIncomingMessages(id, session, stateEntry, objects, acknowledgements);
 
         //add resulting acks to response
         Map<String, Object> resultMap = new HashMap<String, Object>();
         resultMap.put(ACKS, acknowledgements);
 
         //additionally check for Stanza that are addressed to the client and add them to the response
-        StateEntry stateEntry = stateManager.retrieveState(id);
-        List<JSONObject> stanzas = pollStanzas(stateEntry.state);
+        List<JSONObject> stanzas = pollStanzas(clientState);
         resultMap.put(STANZAS, stanzas);
 
         return new AJAXRequestResult(resultMap, "native");

@@ -57,11 +57,11 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.json.impl.StateEntry;
 import com.openexchange.realtime.json.impl.StateManager;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -85,20 +85,21 @@ public class PollAction extends RTAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Executing PollAction");
-        }
-        Map<String, Object> resultMap = new HashMap<String, Object>();
         ID id = constructID(requestData, session);
         if(!stateManager.isConnected(id)) {
-            resultMap.put(ERROR, RealtimeExceptionCodes.STATE_MISSING.create());
-            return new AJAXRequestResult(resultMap, "native");
+            RealtimeException stateMissingException = RealtimeExceptionCodes.STATE_MISSING.create();
+            if(LOG.isDebugEnabled()) {
+                LOG.debug(stateMissingException.getMessage(), stateMissingException);
+            }
+            Map<String, Object> errorMap = getErrorMap(stateMissingException, session);
+            return new AJAXRequestResult(errorMap, "native");
         }
 
         //check for Stanza that are addressed to the client and add them to the response
         StateEntry stateEntry = stateManager.retrieveState(id);
         List<JSONObject> stanzas = pollStanzas(stateEntry.state);
         
+        Map<String, Object> resultMap = new HashMap<String, Object>();
         resultMap.put(STANZAS, stanzas);
         return new AJAXRequestResult(resultMap, "native");
     }
