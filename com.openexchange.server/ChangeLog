@@ -1,3 +1,7 @@
+* 2013-09-04 - martin.schneider@open-xchange.com
+
+ - Fix for bug 28274: Return error if folder deletion fails.
+
 * 2013-09-03 - marcus.klein@open-xchange.com
 
  - Fix for bug 28649: Corrected packaging for Swedish language.
@@ -38,6 +42,10 @@
 
  - Fix for bug 28008: Implemented Debian distribution specific dependencies to depend on the supported JDK.
 
+* 2013-08-28 - martin.schneider@open-xchange.com
+
+ - Fix for bug 27862: Publication of pictures is possible with template 'infostore_gallery.tmpl'.
+
 * 2013-08-28 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 28459: Removed obsolete file storage identifiers in favor of ID based folder access
@@ -73,6 +81,10 @@
  - Fix for bug 28448: Enhanced CapabilityService to consider relevant contextSets, too
  - Fix for bug 28508: Proper URL-encoding for publication's site name
 
+* 2013-08-23 - martin.schneider@open-xchange.com
+
+ - Fix for bug 28308: Fixed template for 'appointment canceled' mail
+
 * 2013-08-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 28472: Give a meaningful error message to user if login to Google Mail fails
@@ -84,6 +96,11 @@
  - Fix for bug 27095: Don't replace spaces with pluses in servlet's path info
  - Partial fix for 28472: Avoid update attempt for a non-existing subscription
 
+* 2013-08-21 - martin.schneider@open-xchange.com
+
+ - Fix for bug 27188: No try to start fragment bundles. 
+ - Fix for bug 28276: Remove external participant from task triggers sending an email. 
+ 
 * 2013-08-21 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 28420: Resolve hostnames before passing them into hazelcast configuration
@@ -125,6 +142,11 @@
 
  - Fix for bug 28317: Invalidate all other user sessions after password change
 
+* 2013-08-15 - martin.schneider@open-xchange.com
+
+ - Fix for bug 24884: Set recurrence to save changed appointment correctly.
+ - Fix for bug 27967: Fixed typos
+ 
 * 2013-08-15 - marcus.klein@open-xchange.com
 
  - Fix for bug 28283: Need to poll the system bundle to check if shutdown was successful and extended scripting for calling shutdown process
@@ -137,6 +159,10 @@
 * 2013-08-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 28026: Allowing relative URL paths specified as a UWA widget's source URL
+
+* 2013-08-14 - martin.schneider@open-xchange.com
+
+ - Fix for bug 28194: Set correct state for to send invitation mail for afterwards added external participants.
 
 * 2013-08-14 - marcus.klein@open-xchange.com
 
@@ -217,6 +243,10 @@
  - Fix for bug 27849: Add an option to specify characters that are not allowed to be contained in a mailbox name
  - Fix for bug 28070: Retry with "MS932" charset if "Shift-JIS" charset yields \ufffd
  - Fix for bug 28087: Properly resolve "Unified Mail"-encoded message path
+
+* 2013-08-02 - martin.schneider@open-xchange.com
+
+ - Fix for bug 26829: Provide frontend correct capabilities for publications and subscriptions.
 
 * 2013-08-05 - thorben.betten@open-xchange.com
 
@@ -335,11 +365,19 @@
  - Fix for bug 27604: Fixed multiple problems occurring in customer environment
  - Fix for bug 27671: Allow an "insecure" XML parser implementation needed for Apache CXF v2.6.8
 
+* 2013-07-19 - martin.schneider@open-xchange.com
+
+ - Fix for bug 27518: Prevent access to null object when modifying series pattern.
+
 * 2013-07-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 27539: Sanitize Content-Type header if 'javax.mail.internet.MimeMessage.saveChanges()' fails
  - Fix for bug 27645: Chunk-wise copy/move of messages from one account to another
  - Fix for bug 27639: Ignore trailing non-LDH characters on IDN-to-ACE conversion
+
+* 2013-07-18 - martin.schneider@open-xchange.com
+
+ - Fix for bug 27515: Enable TestServlet to answer requests fast.
 
 * 2013-07-18 - thorben.betten@open-xchange.com
 
@@ -508,6 +546,10 @@
  - Fix for bug 27142: Fixed possible NPE on map clear() invocation
  - Fix for bug 27116: Added null guards for passed arguments to "java.lang.Runtime.exec(String[])"
 
+* 2013-06-18 - martin.schneider@open-xchange.com
+
+ - Fix for bug 25804: Return permissions independent from availability of services
+
 * 2013-06-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 26381: Handle possible RuntimeExceptions more gracefully
@@ -553,6 +595,10 @@
  - Fix for bug 26988: Removed JSON pooling
  - Fix for bug 26995: Honor "delivery" parameter on attachment download
  - Fix for bug 26984: Accept optional parameter "ignoreTranslation" to signal no translation of folder names
+
+* 2013-06-11 - martin.schneider@open-xchange.com
+
+ - Fix for bug 27034: Retrieve service before trying to get isFullPrimaryKeySupported.
 
 * 2013-06-11 - tobias.friedrich@open-xchange.com
 
