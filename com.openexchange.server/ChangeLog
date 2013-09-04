@@ -5,6 +5,7 @@
 * 2013-09-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 28673: Removed the warning on password change that rather acts as information message
+ - Fix for bug 28614: Improved IMAP connection cache
 
 * 2013-09-03 - marcus.klein@open-xchange.com
 
