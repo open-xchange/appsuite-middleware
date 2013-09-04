@@ -21,6 +21,7 @@ public class RealtimeExceptionToJSONConverter extends AbstractPOJOConverter {
     @Override
     public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
         RealtimeException incoming = (RealtimeException) data;
+        String prefix = incoming.getPrefix();
         int code = incoming.getCode();
         String plainLogMessage = incoming.getPlainLogMessage();
         String localizedMessage = incoming.getLocalizedMessage();
@@ -30,6 +31,7 @@ public class RealtimeExceptionToJSONConverter extends AbstractPOJOConverter {
 
         JSONObject jsonException = new JSONObject();
         try {
+            jsonException.put("prefix", prefix);
             jsonException.put("code", code);
             jsonException.put("plainLogMessage", plainLogMessage);
             JSONArray logArgArray = new JSONArray();

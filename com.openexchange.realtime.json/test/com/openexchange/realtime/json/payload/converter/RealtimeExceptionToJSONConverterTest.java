@@ -136,6 +136,7 @@ public class RealtimeExceptionToJSONConverterTest {
         assertNotNull(object);
         assertTrue(object instanceof JSONObject);
         JSONObject realtimeExceptionJSON = JSONObject.class.cast(object);
+        assertEquals("RT_STANZA", realtimeExceptionJSON.getString("prefix"));
         assertEquals(1005, realtimeExceptionJSON.getInt("code"));
         assertTrue(realtimeExceptionJSON.getString("localizedMessage").startsWith(
             "RT_STANZA-1005 Categories=ERROR Message='Your session is invalid.' exceptionID="));
@@ -183,6 +184,7 @@ public class RealtimeExceptionToJSONConverterTest {
         assertNotNull(object);
         assertTrue(object instanceof JSONObject);
         JSONObject realtimeExceptionJSON = JSONObject.class.cast(object);
+        assertEquals("RT_STANZA", realtimeExceptionJSON.getString("prefix"));
         assertEquals(1005, realtimeExceptionJSON.getInt("code"));
         assertTrue(realtimeExceptionJSON.getString("localizedMessage").startsWith(
             "RT_STANZA-1005 Categories=ERROR Message='Your session is invalid.' exceptionID="));
