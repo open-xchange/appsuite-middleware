@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<<<<<<< HEAD
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-osgi"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-log4j"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-xerces-sun"/>
