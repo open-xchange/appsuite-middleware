@@ -75,7 +75,7 @@ public class JSONToStackTraceElementConverterTest {
     @Before
     public void setUp() throws Exception {
          stackTraceElementJSON = new JSONObject("{'fileName':'ZipBundleFile.java','lineNumber':87,'className':'org.eclipse.osgi.baseadaptor.bundlefile.ZipBundleFile','methodName':'basicOpen'}");
-         stackTraceElementMissingFileNameJSON = new JSONObject("{'lineNumber':87,'className':'org.eclipse.osgi.baseadaptor.bundlefile.ZipBundleFile','methodName':'basicOpen'}");
+         stackTraceElementMissingFileNameJSON = new JSONObject("{'className':'org.eclipse.osgi.baseadaptor.bundlefile.ZipBundleFile','methodName':'basicOpen'}");
     }
 
     @Test

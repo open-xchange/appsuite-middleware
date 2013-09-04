@@ -98,7 +98,7 @@ public class StackTraceElementToJSONConverterTest {
         assertNotNull(converted);
         assertTrue(converted instanceof JSONObject);
         JSONObject convertedJSON = (JSONObject) converted;
-        assertNull(convertedJSON.optString("fileName"));
+        assertEquals("", convertedJSON.optString("fileName"));
         assertEquals("org.eclipse.osgi.baseadaptor.bundlefile.ZipBundleFile", convertedJSON.getString("className"));
         assertEquals("basicOpen",convertedJSON.getString("methodName"));
         assertEquals(87,convertedJSON.getInt("lineNumber"));
@@ -106,7 +106,7 @@ public class StackTraceElementToJSONConverterTest {
 
     @Test
     public void testGetOutputFormat() {
-        assertEquals("json", converter.getInputFormat());
+        assertEquals("json", converter.getOutputFormat());
     }
 
 }
