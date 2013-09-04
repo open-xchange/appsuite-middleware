@@ -133,7 +133,7 @@ public final class MailSaveDraftTest extends AbstractMailTest {
                 /*
                  * Check content again
                  */
-                final String expected = "The first line<br>And the second line";
+                final String expected = "The first line\r\nAnd the second line";
                 content = mail.getContent().toString();
                 if (!expected.equals(content)) {
                     final StringBuilder sb = new StringBuilder(1024);
