@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -96,7 +97,8 @@ public class PollAction extends RTAction {
 
         //check for Stanza that are addressed to the client and add them to the response
         StateEntry stateEntry = stateManager.retrieveState(id);
-        List<Stanza> stanzas = pollStanzas(stateEntry.state);
+        List<JSONObject> stanzas = pollStanzas(stateEntry.state);
+        
         resultMap.put(STANZAS, stanzas);
         return new AJAXRequestResult(resultMap, "native");
     }

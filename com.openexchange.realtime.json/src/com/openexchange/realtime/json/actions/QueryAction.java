@@ -256,7 +256,7 @@ public class QueryAction extends RTAction {
         }
 
         //additionally check for Stanza that are addressed to the client and add them to the response
-        List<Stanza> stanzas = pollStanzas(stateEntry.state);
+        List<JSONObject> stanzas = pollStanzas(stateEntry.state);
         queryActionResults.put(STANZAS, stanzas);
 
         return new AJAXRequestResult(queryActionResults, "native");
