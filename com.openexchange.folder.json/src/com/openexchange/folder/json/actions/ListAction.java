@@ -162,7 +162,7 @@ public final class ListAction extends AbstractFolderAction {
          */
         long lastModified = 0;
         UserizedFolder[] subfolders = subfoldersResponse.getResponse();
-        final int length = subfolders.length;
+        int length = subfolders.length;
         if (length <= 0) {
             /*
              * Return appropriate result
@@ -211,6 +211,7 @@ public final class ListAction extends AbstractFolderAction {
                 }
             }
             subfolders = ret.toArray(new UserizedFolder[0]);
+            length = subfolders.length;
         }
 
         // Determine last-modified time stamp
@@ -221,6 +222,7 @@ public final class ListAction extends AbstractFolderAction {
                 lastModified = ((lastModified >= time) ? lastModified : time);
             }
         }
+
         /*
          * Write subfolders as JSON arrays to JSON array
          */

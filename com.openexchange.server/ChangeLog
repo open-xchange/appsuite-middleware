@@ -1,3 +1,8 @@
+* 2013-08-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28602: Don't close ThresholdFileHolder instance
+ - Fix for bug 27866: Handle possible null return value from iCal parse attempt
+
 * 2013-08-16 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 28260: Restrict socket binding to local loopback address only by default, disable Hazelcast's REST and Memcache client 
