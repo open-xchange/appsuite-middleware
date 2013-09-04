@@ -2,6 +2,10 @@
 
  - Fix for bug 28274: Return error if folder deletion fails.
 
+* 2013-09-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28673: Removed the warning on password change that rather acts as information message
+
 * 2013-09-03 - marcus.klein@open-xchange.com
 
  - Fix for bug 28649: Corrected packaging for Swedish language.
