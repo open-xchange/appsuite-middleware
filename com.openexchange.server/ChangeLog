@@ -8,6 +8,7 @@
  - Fix for bug 28614: Improved IMAP connection cache
  - Fix for bug 28692: Changed category for error code "CTX-0010", thus it is displayed to user
  - Change for bug 28694: Adapted log output to be a WARNING, but not an ERROR message
+ - Fix for bug 28696: Swallow possible unknown setting path if associated module is absent
 
 * 2013-09-03 - marcus.klein@open-xchange.com
 

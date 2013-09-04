@@ -179,7 +179,7 @@ public final class PUTAction extends AbstractConfigAction {
     private void saveSettingWithSubs(final SettingStorage storage, final Setting setting) throws OXException, JSONException {
         if (setting.isLeaf()) {
             final String path = setting.getPath();
-            if (!ignorees.contains(path) && path.indexOf("/io.ox/core") < 0) {
+            if (!ignorees.contains(path) && (path.indexOf("/io.ox/core") < 0)) {
                 final String value = (String) setting.getSingleValue();
                 if (!isEmpty(value)) {
                     if ('[' == value.charAt(0)) {
@@ -204,14 +204,23 @@ public final class PUTAction extends AbstractConfigAction {
             final StringBuilder sb = new StringBuilder(setting.getPath()).append(AbstractSetting.SEPARATOR);
             final int reset = sb.length();
             OXException exc = null;
-            while (iter.hasNext()) {
+            Next: while (iter.hasNext()) {
                 final String key = iter.next();
                 if (sb.length() > reset) {
                     sb.setLength(reset);
                 }
                 final String path = sb.append(key).toString();
-                if (!ignorees.contains(path) && path.indexOf("/io.ox/core") < 0) {
-                    final Setting sub = ConfigTree.getSettingByPath(setting, new String[] { key });
+                if (!ignorees.contains(path) && (path.indexOf("/io.ox/core") < 0)) {
+                    Setting sub;
+                    try {
+                        sub = ConfigTree.getSettingByPath(setting, new String[] { key });
+                    } catch (final OXException e) {
+                        if (path.indexOf("/io.ox/") < 0) {
+                            throw e;
+                        }
+                        // Swallow
+                        continue Next;
+                    }
                     sub.setSingleValue(json.getString(key));
                     try {
                         // Catch single exceptions if GUI writes not writable fields.
