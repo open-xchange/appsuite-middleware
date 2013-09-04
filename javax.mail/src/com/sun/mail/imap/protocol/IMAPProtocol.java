@@ -103,7 +103,7 @@ public class IMAPProtocol extends Protocol {
     private boolean rev1 = false;	// REV1 server ?
     private boolean noauthdebug = true;	// hide auth info in debug output
     private boolean authenticated;	// authenticated?
-    private boolean logoutSignaled;  // logout signaled?
+    private boolean logoutSignaled = false;  // logout signaled?
     // WARNING: authenticated may be set to true in superclass
     //		constructor, don't initialize it here.
 
@@ -428,21 +428,19 @@ public class IMAPProtocol extends Protocol {
      * @see "RFC2060, section 6.1.3"
      */
     public synchronized void logout() throws ProtocolException {
-    boolean notified = false;
-	try {
-	    authenticatedStatusChanging(false, null, null);
-	    logoutSignaled = true;
-
-	    final Response[] r = command("LOGOUT", null);
-
-	    authenticated = false;
-	    notified = true;
-	    // dispatch any unsolicited responses.
-	    //  NOTE that the BYE response is dispatched here as well
-	    notifyResponseHandlers(r);
-	} finally {
-	    disconnect();
-	}
+        boolean notified = false;
+    	try {
+    	    final Response[] r = command("LOGOUT", null);
+    	    authenticated = false;
+    	    notified = true;
+    	    // dispatch any unsolicited responses.
+    	    //  NOTE that the BYE response is dispatched here as well
+    	    notifyResponseHandlers(r);
+    	    authenticatedStatusChanging(false, null, null);
+    	    logoutSignaled = true;
+    	} finally {
+    	    disconnect();
+    	}
     }
 
     /**

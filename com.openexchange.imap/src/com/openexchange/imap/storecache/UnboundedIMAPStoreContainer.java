@@ -70,7 +70,7 @@ import com.sun.mail.imap.IMAPStore;
  */
 public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
-    private final InheritedPriorityBlockingQueue queue;
+    private final InheritedPriorityBlockingQueue availableQueue;
 
     protected final String server;
     protected final int port;
@@ -82,23 +82,11 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
      */
     public UnboundedIMAPStoreContainer(final String server, final int port, final String login, final String pw) {
         super();
-        queue = new InheritedPriorityBlockingQueue();
+        availableQueue = new InheritedPriorityBlockingQueue();
         this.login = login;
         this.port = port;
         this.pw = pw;
         this.server = server;
-    }
-
-    /**
-     * Initializes an empty {@link UnboundedIMAPStoreContainer}.
-     */
-    protected UnboundedIMAPStoreContainer() {
-        super();
-        queue = null;
-        this.login = null;
-        this.port = 0;
-        this.pw = null;
-        this.server = null;
     }
 
     /**
@@ -107,31 +95,42 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
      * @return The queue
      */
     protected BlockingQueue<IMAPStoreWrapper> getQueue() {
-        return queue;
+        return availableQueue;
     }
 
     @Override
     public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
-        /*
-         * Retrieve and remove the head of this queue
-         */
-        final IMAPStoreWrapper imapStoreWrapper = queue.poll();
-        IMAPStore imapStore = null == imapStoreWrapper ? null : imapStoreWrapper.imapStore;
-        if (null == imapStore) {
-            try {
-                imapStore = newStore(server, port, login, pw, imapSession);
-            } catch (final MessagingException e) {
-                if (!(e.getNextException() instanceof ConnectQuotaExceededException)) {
-                    throw e;
+        IMAPStore imapStore = null;
+        while (null == imapStore) {
+            /*
+             * Select a not-in-use element
+             */
+            final IMAPStoreWrapper imapStoreWrapper = availableQueue.poll();
+            if (null == imapStoreWrapper) {
+                try {
+                    imapStore = newStore(server, port, login, pw, imapSession);
+                    // System.out.println("IMAPStoreContainer.getStore(): Returning newly established IMAPStore instance." + imapStore.toString() + "-" + imapStore.hashCode());
+                    if (DEBUG) {
+                        LOG.debug("IMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. " + imapStore.toString() + " -- " + imapStore.hashCode());
+                    }
+                } catch (final MessagingException e) {
+                    if (!(e.getNextException() instanceof ConnectQuotaExceededException)) {
+                        throw e;
+                    }
+                    // None available -- await
+                    availableQueue.awaitNotEmpty();
+                    // System.out.println("IMAPStoreContainer.getStore(): Retry obtaining IMAPStore instance.");
+                    if (DEBUG) {
+                        LOG.debug("IMAPStoreContainer.getStore(): Retry obtaining IMAPStore instance." );
+                    }
                 }
-                // Await until available
-                return queue.take().imapStore;
+            } else {
+                imapStore = imapStoreWrapper.imapStore;
+                // System.out.println("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance." + imapStore.toString() + "-" + imapStore.hashCode());
+                if (DEBUG) {
+                    LOG.debug("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance. " + imapStore.toString() + " -- " + imapStore.hashCode());
+                }
             }
-            if (DEBUG) {
-                LOG.debug("IMAPStoreContainer.getStore(): Returning newly established IMAPStore instance.");
-            }
-        } else if (DEBUG) {
-            LOG.debug("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance.");
         }
         return imapStore;
     }
@@ -142,29 +141,33 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     }
 
     protected void backStoreNoValidityCheck(final IMAPStore imapStore) {
-        if (!queue.offer(new IMAPStoreWrapper(imapStore))) {
+        if (!availableQueue.offer(new IMAPStoreWrapper(imapStore))) {
             closeSafe(imapStore);
-        } else if (DEBUG) {
-            LOG.debug("IMAPStoreContainer.backStore(): Added IMAPStore instance to cache.");
+        } else {
+            // System.out.println("IMAPStoreContainer.backStore(): Added IMAPStore instance to cache." + imapStore.toString() + " -- " + imapStore.hashCode());
+            if (DEBUG) {
+                LOG.debug("IMAPStoreContainer.backStore(): Added IMAPStore instance to cache. " + imapStore.toString() + " -- " + imapStore.hashCode());
+            }
         }
     }
 
     @Override
     public void closeElapsed(final long stamp, final StringBuilder debugBuilder) {
         if (DEBUG) {
-            LOG.debug("IMAPStoreContainer.closeElapsed(): " + queue.size() + " IMAPStore instances in queue for " + login + "@" + server + ":" + port);
+            LOG.debug("IMAPStoreContainer.closeElapsed(): " + availableQueue.size() + " IMAPStore instances in queue for " + login + "@" + server + ":" + port);
         }
         IMAPStoreWrapper imapStoreWrapper;
         do {
-            imapStoreWrapper = queue.pollIfElapsed(stamp);
+            imapStoreWrapper = availableQueue.pollIfElapsed(stamp);
             if (null == imapStoreWrapper) {
-                break;
+                return;
             }
             try {
                 if (null == debugBuilder) {
+                    // System.out.println("IMAPStoreContainer.closeElapsed(): Closing elapsed IMAP store: " + imapStoreWrapper.imapStore.toString() + "-" + imapStoreWrapper.imapStore.hashCode());
                     closeSafe(imapStoreWrapper.imapStore);
                 } else {
-                    final String info = imapStoreWrapper.imapStore.toString();
+                    final String info = imapStoreWrapper.imapStore.toString() + " -- " + imapStoreWrapper.imapStore.hashCode();
                     closeSafe(imapStoreWrapper.imapStore);
                     debugBuilder.setLength(0);
                     LOG.debug(debugBuilder.append("IMAPStoreContainer.closeElapsed(): Closed elapsed IMAP store: ").append(info).toString());
@@ -177,11 +180,11 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
     @Override
     public void clear() {
-        if (null == queue) {
+        if (null == availableQueue) {
             return;
         }
         IMAPStoreWrapper wrapper;
-        while ((wrapper = queue.poll()) != null) {
+        while ((wrapper = availableQueue.poll()) != null) {
             closeSafe(wrapper.imapStore);
         }
     }
@@ -191,9 +194,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         private static final long serialVersionUID = 1337510919245408276L;
 
         final transient PriorityQueue<IMAPStoreWrapper> q;
-
         final ReentrantLock lock;
-
         private final Condition notEmpty;
 
         /**
@@ -284,6 +285,28 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
                 final IMAPStoreWrapper x = q.poll();
                 assert x != null;
                 return x;
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        /**
+         * Awaits until an element arrives in queue.
+         *
+         * @throws InterruptedException If interrupted while waiting
+         */
+        public void awaitNotEmpty() throws InterruptedException {
+            final ReentrantLock lock = this.lock;
+            lock.lockInterruptibly();
+            try {
+                try {
+                    while (q.size() == 0) {
+                        notEmpty.await();
+                    }
+                } catch (final InterruptedException ie) {
+                    notEmpty.signal(); // propagate to non-interrupted thread
+                    throw ie;
+                }
             } finally {
                 lock.unlock();
             }

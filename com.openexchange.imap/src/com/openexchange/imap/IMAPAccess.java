@@ -55,6 +55,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -93,6 +94,8 @@ import com.openexchange.imap.storecache.IMAPStoreContainer;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.Log;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -287,7 +290,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         protocol = IMAPProvider.PROTOCOL_IMAP;
     }
 
-    private int getMaxCount() throws OXException {
+    /**
+     * Gets the max. count for this IMAP access.
+     *
+     * @return The max. count
+     * @throws OXException If an exception occurs
+     */
+    protected int getMaxCount() throws OXException {
         final ConcurrentMap<String, Integer> cache = maxCountCache;
         if (null == cache) {
             return protocol.getMaxCount(server, MailAccount.DEFAULT_ID == accountId);
@@ -830,69 +839,99 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             imapSession.getProperties().put("mail.imap.authTimeout", Long.toString(authTimeout));
         }
         /*
-         * Get store either from store cache or newly created
+         * Set log properties
          */
-        if (useIMAPStoreCache()) {
+        final Set<LogProperties.Name> toRemove = EnumSet.noneOf(LogProperties.Name.class);
+        final Props props = LogProperties.getLogProperties();
+        {
+            if (!props.put(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.valueOf(accountId))) {
+                toRemove.add(LogProperties.Name.MAIL_ACCOUNT_ID);
+            }
+            if (!props.put(LogProperties.Name.MAIL_HOST, server + ":" + port)) {
+                toRemove.add(LogProperties.Name.MAIL_HOST);
+            }
+            if (!props.put(LogProperties.Name.MAIL_LOGIN, login)) {
+                toRemove.add(LogProperties.Name.MAIL_LOGIN);
+            }
+        }
+        /*
+         * Get connected IMAP store
+         */
+        try {
+            /*
+             * Get store either from store cache or newly created
+             */
+            if (useIMAPStoreCache()) {
+                /*
+                 * Possible connect limitation
+                 */
+                if (maxCount > 0) {
+                    final Properties properties = imapSession.getProperties();
+                    properties.put("mail.imap.maxNumAuthenticated", Integer.toString(maxCount));
+                    properties.put("mail.imap.authNoWait", "true");
+                    // properties.put("mail.imap.authTimeoutMillis", "90000");
+                    properties.put("mail.imap.accountId", Integer.toString(accountId));
+                }
+                return borrowIMAPStore(imapSession, server, port, login, pw);
+            }
             /*
              * Possible connect limitation
              */
             if (maxCount > 0) {
                 imapSession.getProperties().put("mail.imap.maxNumAuthenticated", Integer.toString(maxCount));
-                imapSession.getProperties().put("mail.imap.authAwait", "true");
+                imapSession.getProperties().put("mail.imap.authNoWait", "true");
                 imapSession.getProperties().put("mail.imap.accountId", Integer.toString(accountId));
             }
-            return borrowIMAPStore(imapSession, server, port, login, pw);
-        }
-        /*
-         * Possible connect limitation
-         */
-        if (maxCount > 0) {
-            imapSession.getProperties().put("mail.imap.maxNumAuthenticated", Integer.toString(maxCount));
-            imapSession.getProperties().put("mail.imap.authTimeoutMillis", "10000");
-            imapSession.getProperties().put("mail.imap.accountId", Integer.toString(accountId));
-        }
-        /*
-         * Retry loop...
-         */
-        final int maxRetryCount = 3;
-        int retryCount = 0;
-        while (retryCount++ < maxRetryCount) {
-            try {
-                /*
-                 * Establish a new one...
-                 */
-                IMAPStore imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
-                /*
-                 * ... and connect it
-                 */
+            /*
+             * Retry loop...
+             */
+            final int maxRetryCount = 3;
+            int retryCount = 0;
+            while (retryCount++ < maxRetryCount) {
                 try {
-                    imapStore.connect(server, port, login, pw);
-                } catch (final AuthenticationFailedException e) {
                     /*
-                     * Retry connect with AUTH=PLAIN disabled
+                     * Establish a new one...
                      */
-                    imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
-                    imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
-                    imapStore.connect(server, port, login, pw);
+                    IMAPStore imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
+                    /*
+                     * ... and connect it
+                     */
+                    try {
+                        imapStore.connect(server, port, login, pw);
+                    } catch (final AuthenticationFailedException e) {
+                        /*
+                         * Retry connect with AUTH=PLAIN disabled
+                         */
+                        imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
+                        imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
+                        imapStore.connect(server, port, login, pw);
+                    }
+                    /*
+                     * Done
+                     */
+                    if (DEBUG) {
+                        final long dur = System.currentTimeMillis() - st;
+                        LOG.debug("IMAPAccess.connectIMAPStore() took " + dur + "msec.");
+                    }
+                    return imapStore;
+                } catch (final MessagingException e) {
+                    if (!(e.getNextException() instanceof ConnectQuotaExceededException)) {
+                        throw e;
+                    }
+                    if (retryCount >= maxRetryCount) {
+                        throw e;
+                    }
                 }
-                /*
-                 * Done
-                 */
-                if (DEBUG) {
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("IMAPAccess.connectIMAPStore() took " + dur + "msec.");
-                }
-                return imapStore;
-            } catch (final MessagingException e) {
-                if (!(e.getNextException() instanceof ConnectQuotaExceededException)) {
-                    throw e;
-                }
-                if (retryCount >= maxRetryCount) {
-                    throw e;
+            }
+            throw new MessagingException("Unable to connect to IMAP store: " + new URLName("imap", server, port, null, login, "xxxx"));
+        } finally {
+            // Unset log properties
+            if (!toRemove.isEmpty()) {
+                for (final LogProperties.Name name : toRemove) {
+                    props.remove(name);
                 }
             }
         }
-        throw new MessagingException("Unable to connect to IMAP store: " + new URLName("imap", server, port, null, login, "xxxx"));
     }
 
     private IMAPStore borrowIMAPStore(final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw) throws MessagingException, OXException {
