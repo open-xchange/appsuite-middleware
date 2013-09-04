@@ -49,12 +49,15 @@
 
 package com.openexchange.realtime.json.actions;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.json.Utils;
+import com.openexchange.realtime.json.impl.stanza.writer.StanzaWriter;
 import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
@@ -84,6 +87,8 @@ public abstract class RTAction implements AJAXActionService {
     protected final String RESULT="result";
     protected final String STANZAS="stanzas";
     protected final String ERROR="error";
+    
+    protected final StanzaWriter writer = new StanzaWriter();
 
     protected ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
         return Utils.constructID(request, session);
@@ -94,8 +99,9 @@ public abstract class RTAction implements AJAXActionService {
      * 
      * @param state The client state
      * @return The list of Stanzas that are addressed to the client, may be empty
+     * @throws OXException 
      */
-    protected List<Stanza> pollStanzas(RTClientState state) {
+    protected List<JSONObject> pollStanzas(RTClientState state) throws OXException {
         try {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Locking RTClientState for ID: " + state.getId());
@@ -103,10 +109,14 @@ public abstract class RTAction implements AJAXActionService {
             state.lock();
             state.touch();
             List<Stanza> stanzasToSend = state.getStanzasToSend();
+            List<JSONObject> stanzas = new ArrayList<JSONObject>(stanzasToSend.size());
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Got " + stanzasToSend.size() + " Stanzas to send for client: " + state.getId());
             }
-            return stanzasToSend;
+            for(Stanza s: stanzasToSend) {
+                stanzas.add(writer.write(s));
+            }
+            return stanzas;
         } finally {
             // Increment TTL count even after failure as offending stanza might cause sending to fail. Incrementing will get rid of it.
             state.purge();
