@@ -1,3 +1,7 @@
+* 2013-09-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28673: Removed the warning on password change that rather acts as information message
+
 * 2013-08-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 28602: Don't close ThresholdFileHolder instance
