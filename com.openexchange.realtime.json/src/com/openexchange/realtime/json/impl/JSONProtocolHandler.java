@@ -98,7 +98,7 @@ public class JSONProtocolHandler {
                 String type = json.optString("type");
                 
                 if (type.equals("nextSequence")) {
-                    protocol.nextSequence(constructedId, json.optInt("seq"), gate);
+                    protocol.nextSequence(constructedId, json.optInt("seq"), gate, entry.state);
                     return;
                 }
                 

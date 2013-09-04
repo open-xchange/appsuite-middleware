@@ -57,17 +57,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.apache.commons.logging.Log;
+import com.openexchange.realtime.json.actions.SendAction;
 import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 
 
 /**
- * The {@link RTClientStateImpl} encapsulates the state of a connected client.
+ * The {@link RTClientStateImpl} encapsulates the state of a connected client by keeping track of the sequenced and unsequenced Stanzas that
+ * still have to be delivered to the client.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class RTClientStateImpl implements RTClientState {
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SendAction.class);
     
     private ID id;
     private Map<Long, EnqueuedStanza> resendBuffer = new HashMap<Long, EnqueuedStanza>();
@@ -166,7 +172,21 @@ public class RTClientStateImpl implements RTClientState {
             unlock();
         }
     }
-    
+
+    @Override
+    public void reset() {
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Removing all sequenced and unsequenced Stanzas.");
+        }
+        try {
+            lock();
+            nonsequenceStanzas.clear();
+            resendBuffer.clear();
+        } finally {
+            unlock();
+        }
+    }
+
     @Override
     public ID getId() {
         return id;
@@ -200,4 +220,5 @@ public class RTClientStateImpl implements RTClientState {
     public void setLastSeen(long lastSeen) {
         this.lastSeen = lastSeen;
     }
+    
 }

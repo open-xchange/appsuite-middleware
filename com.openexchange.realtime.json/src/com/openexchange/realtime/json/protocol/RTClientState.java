@@ -106,4 +106,10 @@ public interface RTClientState {
      */
     public abstract boolean isTimedOut(long timestamp);
 
+    /**
+     * Resets the state by clearing out sequenced and unsequenced stanzas. This is needed when a client wants to trigger a reset e.g. via
+     * resetting the sequence number in use.
+     */
+    public abstract void reset();
+
 }

@@ -123,8 +123,13 @@ public interface RTProtocol {
     public abstract void handleRealtimeException(ID recipient, RealtimeException exception, Stanza stanza);
 
     /**
-     * The client wishes to reset its sequence numbering
+     * The client wishes to reset its sequence numbering. This causes the states that are associated with the client to be reset.
+     * 
+     * @param id The ID of the client
+     * @param newSequence The new Sequence the clients would like to use.
+     * @param gate The StanzaSequenceGate that has to be reset
+     * @param clientState The RTClientState that has to be reset
      */
-    void nextSequence(ID constructedId, int newSequence, StanzaSequenceGate gate);
+    void nextSequence(ID id, int newSequence, StanzaSequenceGate gate, RTClientState clientState);
 
 }

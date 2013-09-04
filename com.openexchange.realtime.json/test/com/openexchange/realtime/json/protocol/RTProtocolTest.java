@@ -315,7 +315,7 @@ public class RTProtocolTest {
      */
     @Test
     public void clientsCanResetTheirSequenceNumbering() {
-        protocol.nextSequence(new ID("test://user1@1") , 12, gate);
+        protocol.nextSequence(new ID("test://user1@1") , 12, gate, state);
         assertEquals(12, nextSequence);
     }
     
