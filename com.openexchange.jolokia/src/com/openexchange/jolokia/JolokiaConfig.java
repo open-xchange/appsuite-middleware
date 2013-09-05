@@ -58,6 +58,7 @@ import org.apache.commons.logging.Log;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.restrictor.RestrictorFactory;
+import org.jolokia.restrictor.RestrictorFactoryForLocalhost;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.jolokia.osgi.Services;
@@ -142,7 +143,7 @@ public class JolokiaConfig implements Initialization {
                 LOG.warn("Error loading configuration from file " + xmlConfigFile.getAbsolutePath(), e);
             }
         } else if (restrictToLocalhost) {
-            restrictor = null; /*RestrictorFactoryForLocalhost.createPolicyRestrictor();*/
+            restrictor = RestrictorFactoryForLocalhost.createPolicyRestrictor();
         }
 
 
