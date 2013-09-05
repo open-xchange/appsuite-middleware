@@ -217,11 +217,12 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
          * @param cid The context identifier
          * @param fileName The name of the MySQL dump file
          * @param optConfigDbName The optional name of the ConfigDB schema
+         * @param schema TODO
          * @return The information object for parsed MySQL dump file
          * @throws IOException If an I/O error occurs
          * @throws OXContextRestoreException If a context restore error occurs
          */
-        public PoolIdSchemaAndVersionInfo start(final int cid, final String fileName, final String optConfigDbName) throws IOException, OXContextRestoreException {
+        public PoolIdSchemaAndVersionInfo start(final int cid, final String fileName, final String optConfigDbName, String schema) throws IOException, OXContextRestoreException {
             int c;
             int state = 0;
             int oldstate = 0;
@@ -233,7 +234,6 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             boolean searchcontext = false;
             // boolean searchdbpool = false;
             int poolId = -1;
-            String schema = null;
             VersionInformation versionInformation = null;
             UpdateTaskInformation updateTaskInformation = null;
 
@@ -703,11 +703,12 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             VersionInformation versionInfo = null;
             UpdateTaskInformation updateTaskInfo = null;
             PoolIdSchemaAndVersionInfo result = null;
+            String schema = null;
             for (final String fileName : fileNames) {
-                final PoolIdSchemaAndVersionInfo infoObject = parser.start(ctx.getId().intValue(), fileName, optConfigDbName);
+                final PoolIdSchemaAndVersionInfo infoObject = parser.start(ctx.getId().intValue(), fileName, optConfigDbName, schema);
                 final VersionInformation versionInformation = infoObject.getVersionInformation();
                 final UpdateTaskInformation updateTaskInformation = infoObject.getUpdateTaskInformation();
-                final String schema = infoObject.getSchema();
+                schema = infoObject.getSchema();
                 final int pool_id = infoObject.getPoolId();
                 if (null != versionInformation) {
                     versionInfo = versionInformation;
