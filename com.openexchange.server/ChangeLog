@@ -5,6 +5,7 @@
 * 2013-09-05 - martin.herfurth@open-xchange.com
 
  - Fix for bug 28690: Detect outdated imip mails.
+ - Fix for bug 28702: Guessing mail configuration enhanced.
 
 * 2013-09-04 - thorben.betten@open-xchange.com
 
