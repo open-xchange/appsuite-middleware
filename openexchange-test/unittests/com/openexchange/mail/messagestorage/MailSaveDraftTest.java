@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.messagestorage;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -134,8 +137,9 @@ public final class MailSaveDraftTest extends AbstractMailTest {
                  * Check content again
                  */
                 final String expected = "The first line<br>And the second line";
+                final Set<String> expectees = new HashSet<String>(Arrays.asList("The first line<br>And the second line", "The first line\nAnd the second line", "The first line\r\nAnd the second line"));
                 content = mail.getContent().toString();
-                if (!expected.equals(content)) {
+                if (!expectees.contains(content)) {
                     final StringBuilder sb = new StringBuilder(1024);
                     sb.append("Expected value:\n");
                     char[] chars = expected.toCharArray();
