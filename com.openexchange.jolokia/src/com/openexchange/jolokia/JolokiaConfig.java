@@ -56,7 +56,6 @@ import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.restrictor.PolicyRestrictor;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.restrictor.RestrictorFactory;
 import org.jolokia.restrictor.RestrictorFactoryForLocalhost;
@@ -145,11 +144,9 @@ public class JolokiaConfig implements Initialization {
             }
         } else if (restrictToLocalhost) {
             restrictor = RestrictorFactoryForLocalhost.createPolicyRestrictor();
-//                RestrictorFactoryForLocalhost.createPolicyRestrictor();
         }
         
 
-        // Map<String,String> pConfig = new HashMap<String, String>();
         pConfig.put(ConfigKey.MAX_OBJECTS.getKeyValue(), configService.getProperty("com.openexchange.jolokia.maxObjects", "0"));
         pConfig.put(ConfigKey.MAX_DEPTH.getKeyValue(), configService.getProperty("com.openexchange.jolokia.maxDepth", "0"));
 
