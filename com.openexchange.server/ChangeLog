@@ -1,3 +1,7 @@
+* 2013-09-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28672: Allow escaped colons even when vCard 3.0 is indicated by the client
+
 * 2013-09-05 - martin.herfurth@open-xchange.com
 
  - Fix for bug 28690: Detect outdated imip mails.

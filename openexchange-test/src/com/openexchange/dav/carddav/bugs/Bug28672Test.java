@@ -47,72 +47,62 @@
  *
  */
 
-package com.openexchange.tools.versit.valuedefinitions.rfc2445;
+package com.openexchange.dav.carddav.bugs;
 
-import java.io.IOException;
-import com.openexchange.tools.versit.Property;
-import com.openexchange.tools.versit.StringScanner;
-import com.openexchange.tools.versit.ValueDefinition;
-import com.openexchange.tools.versit.VersitException;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.dav.StatusCodes;
+import com.openexchange.dav.carddav.CardDAVTest;
+import com.openexchange.dav.carddav.VCardResource;
+import com.openexchange.groupware.container.Contact;
 
-public class TextValueDefinition extends ValueDefinition {
+/**
+ * {@link Bug28672Test}
+ *
+ * card contacts imported in MAC addressbook do not sync with App Suite addressbook.
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class Bug28672Test extends CardDAVTest {
 
-    public static final ValueDefinition Default = new TextValueDefinition();
+	public Bug28672Test(String name) {
+		super(name);
+	}
 
-    @Override
-    public Object createValue(final StringScanner s, final Property property) throws IOException {
-        final StringBuilder sb = new StringBuilder();
-        while (s.peek >= 0 && s.peek != ',' && s.peek != ';') {
-            if (s.peek == '\\') {
-                s.read();
-                switch (s.peek) {
-                case '\\':
-                case ';':
-                case ',':
-                case ':':
-                    sb.append((char) s.read());
-                    break;
-                case 'n':
-                case 'N':
-                    s.read();
-                    sb.append('\n');
-                    break;
-                default:
-                    throw new VersitException(s, "Invalid ecape sequence");
-                }
-            } else {
-                sb.append((char) s.read());
-            }
-        }
-        return sb.length() == 0 ? null : sb.toString();
-    }
-
-    @Override
-    public String writeValue(final Object value) {
-        final String str = (String) value;
-        final int length = str.length();
-        final StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = str.charAt(i);
-            switch (c) {
-            case '\r':
-                if (i+1 < length && str.charAt(i + 1) == '\n') {
-                    i++;
-                }
-                // no break;
-            case '\n':
-                sb.append("\\n");
-                break;
-            case '\\':
-            case ';':
-            case ',':
-                sb.append('\\');
-                // no break;
-            default:
-                sb.append(c);
-            }
-        }
-        return sb.toString();
-    }
+	public void testImportVCard() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        String syncToken = super.fetchSyncToken();
+        /*
+         * create contact
+         */
+        String uid = randomUID() + "-ABSPlugin";
+        String vCard = "BEGIN:VCARD" + "\r\n" +
+            "VERSION:3.0" + "\r\n" +
+            "N:sdfsd;sdfsdf;;kulesh;" + "\r\n" +
+            "FN:kulesh sdfsdf sdfsd" + "\r\n" +
+            "EMAIL;type=INTERNET;type=WORK;type=pref:sdf@gmail.com" + "\r\n" +
+            "NOTE:X-OPEN-XCHANGE-CTYPE\\: contact" + "\r\n" +
+            "X-ABUID:4D863654-A664-4196-AFAF-0C3F93F07F12\\:ABPerson" + "\r\n" +
+            "UID:" + uid + "\r\n" +
+            "REV:2013-09-03T06:01:39Z" + "\r\n" +
+            "END:VCARD" + "\r\n"
+        ;
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCard(uid, vCard));
+        /*
+         * verify contact on server
+         */
+        Contact contact = super.getContact(uid);
+        super.rememberForCleanUp(contact);
+        assertEquals("uid wrong", uid, contact.getUid());
+        /*
+         * verify contact on client
+         */
+        Map<String, String> eTags = super.syncCollection(syncToken);
+        assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
+        List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
+        assertContains(uid, addressData);
+	}
 
 }
