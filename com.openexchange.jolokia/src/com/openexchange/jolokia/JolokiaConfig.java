@@ -49,14 +49,17 @@
 
 package com.openexchange.jolokia;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.jolokia.config.ConfigKey;
-import org.jolokia.config.Configuration;
+import org.jolokia.restrictor.PolicyRestrictor;
+import org.jolokia.restrictor.Restrictor;
+import org.jolokia.restrictor.RestrictorFactory;
+import org.jolokia.restrictor.RestrictorFactoryForLocalhost;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.jolokia.osgi.Services;
@@ -93,9 +96,14 @@ public class JolokiaConfig implements Initialization {
     /** The password for authentication */
     private String password;
 
-    //internal Jolokia options
-    private Dictionary<String,String> pConfig = new Hashtable<String,String>();
+    /** if Jolokia is restricted to localhost */
+    private boolean restrictToLocalhost;
+
+    // internal Jolokia options
+    private Dictionary<String, String> pConfig = new Hashtable<String, String>();
     
+    private Restrictor restrictor = null;
+
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
@@ -124,10 +132,27 @@ public class JolokiaConfig implements Initialization {
         this.jolokiaStart = configService.getBoolProperty("com.openexchange.jolokia.start", false);
         this.user = configService.getProperty("com.openexchange.jolokia.user");
         this.password = configService.getProperty("com.openexchange.jolokia.password", "secret");
+        this.restrictToLocalhost = configService.getBoolProperty("com.openexchange.jolokia.restrict.to.localhost", true);
+        
+        File xmlConfigFile = configService.getFileByName("jolokia-access.xml");
+        if (null != xmlConfigFile) {
+            try {
+                restrictor =  RestrictorFactory.lookupPolicyRestrictor(xmlConfigFile.toURI().toURL().toString());
+            } catch (RuntimeException e) {
+                LOG.warn("Error loading configuration from file " + xmlConfigFile.getAbsolutePath(), e);
+            } catch (IOException e) {
+                LOG.warn("Error loading configuration from file " + xmlConfigFile.getAbsolutePath(), e);
+            }
+        } else if (restrictToLocalhost) {
+            restrictor = RestrictorFactoryForLocalhost.createPolicyRestrictor();
+//                RestrictorFactoryForLocalhost.createPolicyRestrictor();
+        }
+        
 
         // Map<String,String> pConfig = new HashMap<String, String>();
         pConfig.put(ConfigKey.MAX_OBJECTS.getKeyValue(), configService.getProperty("com.openexchange.jolokia.maxObjects", "0"));
         pConfig.put(ConfigKey.MAX_DEPTH.getKeyValue(), configService.getProperty("com.openexchange.jolokia.maxDepth", "0"));
+
     }
 
     /**
@@ -166,7 +191,18 @@ public class JolokiaConfig implements Initialization {
     }
 
     // Customizer for registering servlet at a HttpService
-    public Dictionary<String,String> getJolokiaConfiguration() {
+    public Dictionary<String, String> getJolokiaConfiguration() {
         return pConfig;
     }
+
+    /**
+     * Loads a Jolokia Security configuration from a file named <code>jolokia-access.xml</code> if present.
+     * 
+     * @return The loaded jolokia config, or <code>null</code> if no such file exists or can't be loaded
+     * @throws OXException
+     */
+    public Restrictor getRestrictor() throws OXException {
+        return restrictor;
+    }
+
 }

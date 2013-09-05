@@ -8,3 +8,6 @@ org.jolokia.osgi.JolokiaAuthenticatedHttpContext.java
 	
 org.jolokia.osgi.JolokiaHttpContext
 	- visibility changed to public
+	
+PolicyRestrictor.java
+	- cunstructor added, which restricts to localhost
