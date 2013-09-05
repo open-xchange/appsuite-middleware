@@ -2,10 +2,6 @@
 
  - Fix for bug 28690: Detect outdated imip mails.
 
-* 2013-09-04 - martin.schneider@open-xchange.com
-
- - Fix for bug 28274: Return error if folder deletion fails.
-
 * 2013-09-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 28673: Removed the warning on password change that rather acts as information message
