@@ -90,7 +90,7 @@ public enum ContextExceptionCodes implements OXExceptionCode {
     /**
      * Cannot find context "%s".
      */
-    NO_MAPPING(ContextExceptionMessage.NO_MAPPING_MSG, Category.CATEGORY_ERROR, 10);
+    NO_MAPPING(ContextExceptionMessage.NO_MAPPING_MSG, Category.CATEGORY_USER_INPUT, 10);
 
     /**
      * Message of the exception.

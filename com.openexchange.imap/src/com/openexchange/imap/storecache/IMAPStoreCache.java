@@ -181,8 +181,6 @@ public final class IMAPStoreCache {
 
     private final RefusedExecutionBehavior<Object> behavior;
 
-    private final BoundedIMAPStoreContainer.ImplType implType;
-
     /**
      * Initializes a new {@link IMAPStoreCache}.
      */
@@ -193,10 +191,6 @@ public final class IMAPStoreCache {
         protocol = IMAPProvider.PROTOCOL_IMAP;
         map = new NonBlockingHashMap<Key, IMAPStoreContainer>();
         keys = new NonBlockingHashMap<IMAPStoreCache.User, Queue<Key>>();
-
-        final ConfigurationService service = Services.getService(ConfigurationService.class);
-        final BoundedIMAPStoreContainer.ImplType it = null == service ? BoundedIMAPStoreContainer.ImplType.SEMAPHORE : BoundedIMAPStoreContainer.ImplType.valueOf(service.getProperty("com.openexchange.imap.cacheImplType", "SEMAPHORE"));
-        implType = null == it ? BoundedIMAPStoreContainer.ImplType.SEMAPHORE : it;
     }
 
     private void init() {

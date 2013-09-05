@@ -4056,10 +4056,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     }
 
-    private static void closeSafe(final IMAPFolder sentFolder) {
-        if (null != sentFolder) {
+    private static void closeSafe(final IMAPFolder imapFolder) {
+        if (null != imapFolder) {
             try {
-                sentFolder.close(false);
+                imapFolder.close(false);
             } catch (final Exception e) {
                 // Ignore
             }

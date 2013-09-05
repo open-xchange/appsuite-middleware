@@ -221,9 +221,12 @@ public class JavaIMAPProtocol extends IMAPProtocol {
     private void releasePermits() {
         final Semaphore semaphore = this.semaphore;
         if (null != semaphore) {
-            semaphore.release(permitCount.getAndSet(0));
-            if (logger.isLoggable(Level.FINE)) {
-                logger.fine("JavaIMAPProtocol.logout: released login semaphore -- " + semaphore);
+            final int permits = permitCount.getAndSet(0);
+            if (permits > 0) {
+                semaphore.release(permits);
+                if (logger.isLoggable(Level.FINE)) {
+                    logger.fine("JavaIMAPProtocol.logout: released login semaphore -- " + semaphore);
+                }
             }
             this.semaphore = null;
         }

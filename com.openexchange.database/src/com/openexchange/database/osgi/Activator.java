@@ -50,10 +50,12 @@
 package com.openexchange.database.osgi;
 
 import java.util.Stack;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
+
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
@@ -74,6 +76,7 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) {
+    	try {
         createTableRegistration = context.registerService(CreateTableService.class, new CreateReplicationTable(), null);
         trackers.push(new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new DatabaseServiceRegisterer(context)));
         trackers.push(new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ManagementServiceCustomizer(context)));
@@ -82,6 +85,12 @@ public class Activator implements BundleActivator {
         for (final ServiceTracker<?, ?> tracker : trackers) {
             tracker.open();
         }
+    	} catch (Throwable ex) {
+    		// logging seems not be use able during bootstrap of OSGI environment yet ...
+    		System.err.println (ex.getMessage());
+    		ex.printStackTrace();
+            throw new RuntimeException(ex);
+    	}
     }
 
     @Override

@@ -54,6 +54,7 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.StringTokenizer;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -146,6 +147,11 @@ public class JavaIMAPStore extends IMAPStore {
     @Override
     protected IMAPProtocol newIMAPProtocol(String host, int port) throws IOException, ProtocolException {
         return new JavaIMAPProtocol(name, host, port, session.getProperties(), isSSL, logger);
+    }
+
+    @Override
+    protected IMAPProtocol newIMAPProtocol(String host, int port, Properties props) throws IOException, ProtocolException {
+        return new JavaIMAPProtocol(name, host, port, props, isSSL, logger);
     }
 
     @Override

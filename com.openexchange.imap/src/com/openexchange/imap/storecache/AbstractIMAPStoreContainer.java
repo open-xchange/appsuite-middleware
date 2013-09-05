@@ -128,13 +128,19 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
      * Tiny wrapper class
      */
     protected static class IMAPStoreWrapper implements Comparable<IMAPStoreWrapper> {
+
         protected final IMAPStore imapStore;
         protected final long lastAccessed;
+        private final int hash;
 
         protected IMAPStoreWrapper(final IMAPStore imapStore) {
             super();
             this.imapStore = imapStore;
             lastAccessed = System.currentTimeMillis();
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((imapStore == null) ? 0 : imapStore.hashCode());
+            hash = result;
         }
 
         @Override
@@ -142,6 +148,30 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
             final long thisVal = this.lastAccessed;
             final long anotherVal = other.lastAccessed;
             return (thisVal<anotherVal ? -1 : (thisVal==anotherVal ? 0 : 1));
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof IMAPStoreWrapper)) {
+                return false;
+            }
+            final IMAPStoreWrapper other = (IMAPStoreWrapper) obj;
+            if (imapStore == null) {
+                if (other.imapStore != null) {
+                    return false;
+                }
+            } else if (imapStore != other.imapStore) {
+                return false;
+            }
+            return true;
         }
     }
 
