@@ -368,7 +368,7 @@ public class ICalImporter extends AbstractImporter {
 			errorMap.put(error.getIndex(), error);
 		}
 		if (null == appointments || 0 == appointments.size()) {
-		    return; // nothing to import
+		    appointments = Collections.emptyList();
 		}
 
 		sortSeriesMastersFirst(appointments);
