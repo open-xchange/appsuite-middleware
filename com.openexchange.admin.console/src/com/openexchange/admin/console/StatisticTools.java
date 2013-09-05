@@ -50,7 +50,6 @@
 package com.openexchange.admin.console;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
@@ -79,7 +78,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
  * Implements the CLT showruntimestats.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class StatisticTools extends AbstractJMXTools {
@@ -118,6 +117,9 @@ public class StatisticTools extends AbstractJMXTools {
     private static final char OPT_MEMORY_THREADS_FULL_STATS_SHORT = 'M';
     private static final String OPT_MEMORY_THREADS_FULL_STATS_LONG = "Memory";
 
+    private static final char OPT_DOCUMENTCONVERTER_STATS_SHORT = 'y';
+    private static final String OPT_DOCUMENTCONVERTER_STATS_LONG = "documentconverterstats";
+
     private CLIOption xchangestats = null;
     private CLIOption threadpoolstats = null;
     private CLIOption runtimestats = null;
@@ -132,6 +134,7 @@ public class StatisticTools extends AbstractJMXTools {
     private CLIOption usmSessionStats = null;
     private CLIOption clusterStats = null;
     private CLIOption grizzlyStats = null;
+    private CLIOption documentconverterstats = null;
 
     /**
      * Option for garbage collection statistics
@@ -219,6 +222,10 @@ public class StatisticTools extends AbstractJMXTools {
         }
         if (null != parser.getOptionValue(this.memorythreadstatsfull) && 0 == count) {
             System.out.print(showThreadMemory(mbc, true));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.documentconverterstats) && 0 == count) {
+            System.out.print(showDocumentConverterData(mbc));
             count++;
         }
         if (0 == count) {
@@ -433,6 +440,13 @@ public class StatisticTools extends AbstractJMXTools {
             "shows memory usage of threads including stack traces",
             false,
             NeededQuadState.notneeded);
+        this.documentconverterstats = setShortLongOpt(
+            parser,
+            OPT_DOCUMENTCONVERTER_STATS_SHORT,
+            OPT_DOCUMENTCONVERTER_STATS_LONG,
+            "shows the documentconverter stats",
+            false,
+            NeededQuadState.notneeded);
     }
 
     static String showMemoryPoolData(MBeanServerConnection con) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
@@ -541,7 +555,7 @@ public class StatisticTools extends AbstractJMXTools {
 
     /**
      * Print Grizzly related management info to given PrintStream if Grizzly's MBeans can be found.
-     * 
+     *
      * @param mbeanServerConnection The MBeanServerConnection to be used for querying MBeans.
      * @param out the {@link PrintStream} to write the output to.
      * @throws IOException
@@ -574,6 +588,10 @@ public class StatisticTools extends AbstractJMXTools {
             }
         }
         return sb.toString();
+    }
+
+    static String showDocumentConverterData(final MBeanServerConnection mbeanServerConnection) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
+        return getStats(mbeanServerConnection, "com.openexchange.documentconverter:name=DocumentConverterInformation").toString();
     }
 
     /**
