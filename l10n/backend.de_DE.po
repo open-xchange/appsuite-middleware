@@ -54,7 +54,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-11-13 15:15+0100\n"
-"PO-Revision-Date: 2013-08-15 10:49+0200\n"
+"PO-Revision-Date: 2013-09-05 15:00+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -1942,6 +1942,15 @@ msgstr "Der Dateiname \"%1$s\" wird ignoriert."
 msgid "The path \"%1$s\" is conflicting"
 msgstr "Konflikt für Pfad \"%1$s\""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:82
+msgid "The file version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr "Die Dateiversion \"%1$s\" mit der Prüfsumme \"%2$s\" ist ungültig."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:83
+msgid "The directory version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr ""
+"Die Verzeichnis-Version \"%1$s\" mit der Prüfsumme \"%2$s\" ist ungültig."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:63
 msgid "An error occurred for action: %1$s"
 msgstr "Es trat ein Fehler für folgende Aktion auf: %1$s"
@@ -2869,8 +2878,8 @@ msgid ""
 "parameter. Please use a string identifying the client software."
 msgstr ""
 "Der Wert des User-Agent Header darf nicht als Wert für den Client-Parameter  "
-"verwendet werden. Bitte verwenden Sie einen Wert, der die die Client-Software "
-"identifiziert."
+"verwendet werden. Bitte verwenden Sie einen Wert, der die die Client-"
+"Software identifiziert."
 
 #. *
 #. * A put into the cache failed.
@@ -3284,8 +3293,10 @@ msgid "The grizzly server could not be started"
 msgstr "Der grizzly-Server konnte nicht gestartet werden"
 
 #. * The following needed service is missing: \"%1$s\"
+#. The following needed service is missing: "%1$s"
+#. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
@@ -3342,7 +3353,7 @@ msgstr ""
 
 #. The argument contains the filename of the .po file that could not be read.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.i18n/src/com/openexchange/i18n/parsing/I18NErrorStrings.java:74
-msgid "An I/O error ocurred reading .po file %s."
+msgid "An I/O error occurred reading .po file %s."
 msgstr "E/A-Fehler beim Lesen der .po-Datei %s."
 
 #. Help //
@@ -5166,8 +5177,8 @@ msgstr "Die %2$s-Anfrage enthält eine nicht unterstützte Aktion: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.servlet/src/com/openexchange/passwordchange/servlet/PasswordChangeServletExceptionMessage.java:81
 msgid "Password changed successfully. Please logout and login back again."
 msgstr ""
-"Das Passwort wurde erfolgreich geändert. Bitte melden Sie sich ab und "
-"wieder an."
+"Das Passwort wurde erfolgreich geändert. Bitte melden Sie sich ab und wieder "
+"an."
 
 #. *
 #. * No write access to POP3 folder %1$s
@@ -5885,9 +5896,9 @@ msgstr "Presence-Daten sind nicht wohlgeformt"
 msgid "Malformed Message Data"
 msgstr "Fehlerhafte Nachrichten-Daten"
 
-#. * Malformed Iq Data
+#. * Malformed IQ Data
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:84
-msgid "Malformed Iq Data"
+msgid "Malformed IQ Data"
 msgstr "Fehlerhafte Iq-Daten"
 
 #. * Malformed Presence Element: \"%1$s\"
@@ -11059,10 +11070,10 @@ msgstr ""
 msgid "Error in mail server protocol. Error message: %1$s"
 msgstr "Fehler im Mailserver-Protokoll. Fehlermeldung: %1$s"
 
-#. Protocol error in data sent to to mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
+#. Protocol error in data sent to the mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:292
 msgid ""
-"Protocol error in data sent to to mail server %1$s with login %2$s (user="
+"Protocol error in data sent to the mail server %1$s with login %2$s (user="
 "%3$s, context=%4$s). Error message: %5$s"
 msgstr ""
 "Die an den Mailserver %1$s gesendeten Daten enthalten einen Protokollfehler. "
@@ -12430,6 +12441,15 @@ msgstr "Der Vorgang kann nur für den Kontext-Admin ausgeführt werden."
 msgid "Folder %1$s must not be deleted in context %2$s."
 msgstr "Der Ordner %1$s darf im Kontext %2$s nicht gelöscht werden."
 
+#. Owner %1$s of folder %2$s has been restored to keep the folder admin permission
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:539
+msgid ""
+"Owner %1$s of folder %2$s has been restored to keep the folder admin "
+"permission"
+msgstr ""
+"Der Eigentümer %1$s des Ordners %2$s wurde wiederhergestellt, um die "
+"Adminrechte für den Ordner zu behalten."
+
 #. Unknown AJAX action: %s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:70
 msgid "Unknown AJAX action: %s."
@@ -12559,10 +12579,10 @@ msgstr "Nicht unterstütztes Format: %1$s"
 msgid "Missing cookie: %1$s"
 msgstr "Fehlendes Cookie: %1$s"
 
-#. Cookie "%1$s" cannot be found because requests does not have any cookies.
+#. Cookie "%1$s" cannot be found because requests do not have any cookies.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:149
 msgid ""
-"Cookie \"%1$s\" cannot be found because requests does not have any cookies."
+"Cookie \"%1$s\" cannot be found because requests do not have any cookies."
 msgstr ""
 "Cookie \"%1$s\" konnte nicht gefunden werden. Anfragen haben keine Cookies."
 
@@ -13328,6 +13348,11 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:129
 msgid "An unexpected error occurred: %1$s."
 msgstr "Es trat ein unerwarteter Fehler auf: %1$s"
+
+#. Please specify your full E-Mail address as login name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:132
+msgid "Please specify your full E-Mail address as login name."
+msgstr "Bitte geben Sie als Login-Namen Ihre komplette E-Mail-Adresse an."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "Verify file system and templates."
