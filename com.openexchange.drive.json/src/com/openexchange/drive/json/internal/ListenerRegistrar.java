@@ -51,6 +51,8 @@ package com.openexchange.drive.json.internal;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -62,9 +64,14 @@ import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
+import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
-import com.openexchange.session.Session;
+import com.openexchange.drive.json.LongPollingListener;
+import com.openexchange.drive.json.LongPollingListenerFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link ListenerRegistrar}
@@ -83,28 +90,38 @@ public class ListenerRegistrar implements DriveEventPublisher  {
     }
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(ListenerRegistrar.class);
+    private static final int EXPIRY_TIME = 300;
     private static final ListenerRegistrar INSTANCE = new ListenerRegistrar();
 
+    /** Maps contextID:rootFolderID to sessionID[]  */
     private final ListMultimap<String, String> listenersPerFolder;
+
+    /** Maps sessionID to listener */
     private final Cache<String, LongPollingListener> listeners;
+
+    private final SortedSet<LongPollingListenerFactory> listenerFactories;
 
     private ListenerRegistrar() {
         super();
         ArrayListMultimap<String, String> multimap = ArrayListMultimap.create(1024, 4);
         this.listenersPerFolder = Multimaps.synchronizedListMultimap(multimap);
-        this.listeners = CacheBuilder.newBuilder().expireAfterAccess(300, TimeUnit.SECONDS)
+        this.listeners = CacheBuilder.newBuilder().expireAfterAccess(EXPIRY_TIME, TimeUnit.SECONDS)
             .removalListener(new RemovalListener<String, LongPollingListener>() {
 
                 @Override
                 public void onRemoval(RemovalNotification<String, LongPollingListener> notification) {
+                    /*
+                     * remove from session id <=> root folder mapping, too
+                     */
                     LongPollingListener listener = notification.getValue();
-                    listenersPerFolder.remove(listener.getRootFolderID(), notification.getKey());
+                    listenersPerFolder.remove(getFolderKey(listener.getSession()), notification.getKey());
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Unregistered listener: " + listener);
                     }
                 }
             })
             .build();
+        this.listenerFactories = new TreeSet<LongPollingListenerFactory>(LongPollingListenerFactory.PRIORITY_COMPARATOR);
     }
 
     /**
@@ -115,20 +132,40 @@ public class ListenerRegistrar implements DriveEventPublisher  {
      * @return The listener
      * @throws ExecutionException
      */
-    public LongPollingListener getOrCreate(final Session session, final String rootFolderID) throws ExecutionException {
-        final String sessionID = session.getSessionID();
+    public LongPollingListener getOrCreate(final DriveSession session) throws ExecutionException {
+        final String sessionID = session.getServerSession().getSessionID();
         return listeners.get(sessionID, new Callable<LongPollingListener>() {
 
             @Override
             public LongPollingListener call() throws Exception {
-                LongPollingListener listener = new LongPollingListener(session, rootFolderID);
-                listenersPerFolder.put(rootFolderID, sessionID);
+                LongPollingListener listener = createListener(session);
+                listenersPerFolder.put(getFolderKey(session), sessionID);
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Registered new listener: " + listener);
                 }
                 return listener;
             }
         });
+    }
+
+    /**
+     * Adds a listener factory.
+     *
+     * @param listenerFactory The listener factory to add
+     * @return <code>true</code> if the factory was not yet known, <code>false</code>, otherwise
+     */
+    public boolean addFactory(LongPollingListenerFactory listenerFactory) {
+        return listenerFactories.add(listenerFactory);
+    }
+
+    /**
+     * Removes a listener factory.
+     *
+     * @param listenerFactory The listener factory to remove
+     * @return <code>true</code> if a factory was removed, <code>false</code>, otherwise
+     */
+    public boolean removeFactory(LongPollingListenerFactory listenerFactory) {
+        return listenerFactories.remove(listenerFactory);
     }
 
     @Override
@@ -140,11 +177,30 @@ public class ListenerRegistrar implements DriveEventPublisher  {
     public void publish(DriveEvent event) {
         Set<String> listenerSessionIDs = new HashSet<String>();
         for (String folderID : event.getFolderIDs()) {
-            listenerSessionIDs.addAll(listenersPerFolder.get(folderID));
+            listenerSessionIDs.addAll(listenersPerFolder.get(getFolderKey(folderID, event.getContextID())));
         }
         for (LongPollingListener listener : listeners.getAllPresent(listenerSessionIDs).values()) {
             listener.onEvent(event);
         }
+    }
+
+    private LongPollingListener createListener(DriveSession session) throws OXException {
+        if (false == listenerFactories.isEmpty()) {
+            LongPollingListenerFactory listenerFactory = listenerFactories.first();
+            if (null != listenerFactory) {
+                return listenerFactory.create(session);
+            }
+        }
+        throw DriveExceptionCodes.LONG_POLLING_NOT_AVAILABLE.create(
+            ServiceExceptionCode.SERVICE_UNAVAILABLE.create(LongPollingListenerFactory.class.getName()));
+    }
+
+    private static String getFolderKey(String folderID, int contextID) {
+        return String.valueOf(contextID) + ':' + folderID;
+    }
+
+    private static String getFolderKey(DriveSession session) {
+        return getFolderKey(session.getRootFolderID(), session.getServerSession().getContextId());
     }
 
 }

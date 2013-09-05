@@ -195,6 +195,7 @@ public class DriveStorage {
             session.trace(this.toString() + "cp " + combine(getPath(sourceFile.getFolderId()), sourceFile.getFileName()) + " " +
                 combine(getPath(copiedFile.getFolderId()), copiedFile.getFileName()));
         }
+        //TODO: use targetFile.getSequenceNumber()?
         getFileAccess().saveDocument(copiedFile, getDocument(sourceFile), copiedFile.getSequenceNumber());
         return copiedFile;
     }

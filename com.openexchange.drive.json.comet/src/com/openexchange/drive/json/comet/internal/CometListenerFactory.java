@@ -47,91 +47,45 @@
  *
  */
 
-package com.openexchange.drive.json.internal;
+package com.openexchange.drive.json.comet.internal;
 
-import java.util.Locale;
+import org.apache.commons.logging.Log;
+import org.glassfish.grizzly.comet.CometContext;
 import com.openexchange.drive.DriveSession;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.json.LongPollingListener;
+import com.openexchange.drive.json.LongPollingListenerFactory;
+
 
 /**
- * {@link DefaultDriveSession}
+ * {@link CometListenerFactory}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DefaultDriveSession implements DriveSession {
+public class CometListenerFactory implements LongPollingListenerFactory {
 
-    private final String rootFolderID;
-    private final ServerSession session;
-    private String deviceName;
-    private Boolean diagnostics;
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CometListenerFactory.class);
+    private static final int PRIORITY = 10;
+
+    private final CometContext<DriveEvent> cometContext;
 
     /**
-     * Initializes a new {@link DefaultDriveSession}.
-     *
-     * @param session The session
-     * @param rootFolderID The root folder ID
+     * Initializes a new {@link CometListenerFactory}.
      */
-    public DefaultDriveSession(ServerSession session, String rootFolderID) {
+    public CometListenerFactory(CometContext<DriveEvent> cometContext) {
         super();
-        this.session = session;
-        this.rootFolderID = rootFolderID;
-    }
-
-    /**
-     * Sets the diagnostics
-     *
-     * @param diagnostics The diagnostics to set
-     */
-    public void setDiagnostics(Boolean diagnostics) {
-        this.diagnostics = diagnostics;
-    }
-
-    /**
-     * Sets the deviceName
-     *
-     * @param deviceName The deviceName to set
-     */
-    public void setDeviceName(String deviceName) {
-        this.deviceName = deviceName;
+        this.cometContext = cometContext;
+        LOG.info("CometListenerFactory initialized, using comet context @ topic \"" + cometContext.getTopic() + "\".");
     }
 
     @Override
-    public String getRootFolderID() {
-        return rootFolderID;
+    public LongPollingListener create(DriveSession session) {
+        return new CometListener(session, cometContext);
     }
 
     @Override
-    public ServerSession getServerSession() {
-        return session;
-    }
-
-    @Override
-    public String getDeviceName() {
-        return deviceName;
-    }
-
-    @Override
-    public Boolean isDiagnostics() {
-        return diagnostics;
-    }
-
-    @Override
-    public Locale getLocale() {
-        Locale locale = null;
-        if (null != session) {
-            User user = session.getUser();
-            if (null != user) {
-                locale = user.getLocale();
-            }
-        }
-        return null != locale ? locale : Locale.US;
-    }
-
-    @Override
-    public String toString() {
-        return "DriveSession [sessionID=" + session.getSessionID() + ", rootFolderID=" + rootFolderID + ", contextID=" +
-            session.getContextId() + ", deviceName=" + deviceName + ", diagnostics=" + diagnostics + "]";
+    public int getPriority() {
+        return PRIORITY;
     }
 
 }

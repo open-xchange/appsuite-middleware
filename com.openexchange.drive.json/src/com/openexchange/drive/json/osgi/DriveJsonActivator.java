@@ -50,15 +50,19 @@
 package com.openexchange.drive.json.osgi;
 
 import org.apache.commons.logging.Log;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
+import com.openexchange.drive.json.LongPollingListenerFactory;
 import com.openexchange.drive.json.action.DriveActionFactory;
 import com.openexchange.drive.json.internal.ListenerRegistrar;
 import com.openexchange.drive.json.internal.Services;
+import com.openexchange.drive.json.listener.BlockingListenerFactory;
 
 /**
  * {@link DriveJsonActivator}
@@ -85,15 +89,52 @@ public class DriveJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
+        LOG.info("starting bundle: \"com.openexchange.drive.json\"");
         Services.set(this);
         registerModule(new DriveActionFactory(), "drive");
         getService(DriveEventService.class).registerPublisher(ListenerRegistrar.getInstance());
+        track(LongPollingListenerFactory.class, new ServiceTrackerCustomizer<LongPollingListenerFactory, LongPollingListenerFactory>() {
+
+            @Override
+            public LongPollingListenerFactory addingService(ServiceReference<LongPollingListenerFactory> serviceReference) {
+                LongPollingListenerFactory service = context.getService(serviceReference);
+                if (ListenerRegistrar.getInstance().addFactory(service)) {
+                    return service;
+                } else {
+                    // already known
+                    context.ungetService(serviceReference);
+                    return null;
+                }
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<LongPollingListenerFactory> serviceReference, LongPollingListenerFactory service) {
+                // nothing to do
+            }
+
+            @Override
+            public void removedService(ServiceReference<LongPollingListenerFactory> serviceReference, LongPollingListenerFactory service) {
+                try {
+                    ListenerRegistrar.getInstance().removeFactory(service);
+                } finally {
+                    context.ungetService(serviceReference);
+                }
+            }
+        });
+        openTrackers();
+        /*
+         * register blocking long polling listener factory if allowed by configuration
+         *
+         */
+        if (getService(ConfigurationService.class).getBoolProperty("com.openexchange.drive.events.blockingLongPolling.enabled", false)) {
+            LOG.info("Registering blocking long polling listener factory...");
+            registerService(LongPollingListenerFactory.class, new BlockingListenerFactory());
+        }
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
+        LOG.info("stopping bundle: \"com.openexchange.drive.json\"");
         getService(DriveEventService.class).unregisterPublisher(ListenerRegistrar.getInstance());
         Services.set(null);
         super.stopBundle();

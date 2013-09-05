@@ -47,91 +47,59 @@
  *
  */
 
-package com.openexchange.drive.json.internal;
+package com.openexchange.drive.json;
 
-import java.util.Locale;
+import java.util.Comparator;
 import com.openexchange.drive.DriveSession;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link DefaultDriveSession}
+ * {@link LongPollingListenerFactory}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DefaultDriveSession implements DriveSession {
-
-    private final String rootFolderID;
-    private final ServerSession session;
-    private String deviceName;
-    private Boolean diagnostics;
+public interface LongPollingListenerFactory {
 
     /**
-     * Initializes a new {@link DefaultDriveSession}.
+     * Creates a new {@link LongPollingListener} for the supplied drive session.
      *
-     * @param session The session
-     * @param rootFolderID The root folder ID
+     * @param session The drive session
+     * @return A new long polling listener instance
      */
-    public DefaultDriveSession(ServerSession session, String rootFolderID) {
-        super();
-        this.session = session;
-        this.rootFolderID = rootFolderID;
-    }
+    LongPollingListener create(DriveSession session);
 
     /**
-     * Sets the diagnostics
+     * Gets the priority of the factory. With multiple factories being present, the factory with the highest priority is chosen when
+     * creating new long polling listeners.
      *
-     * @param diagnostics The diagnostics to set
+     * @return The priority
      */
-    public void setDiagnostics(Boolean diagnostics) {
-        this.diagnostics = diagnostics;
-    }
+    int getPriority();
 
     /**
-     * Sets the deviceName
-     *
-     * @param deviceName The deviceName to set
+     * Comparator for the priority of listener factories - "highest priority first".
      */
-    public void setDeviceName(String deviceName) {
-        this.deviceName = deviceName;
-    }
+    static final Comparator<LongPollingListenerFactory> PRIORITY_COMPARATOR = new Comparator<LongPollingListenerFactory>() {
 
-    @Override
-    public String getRootFolderID() {
-        return rootFolderID;
-    }
-
-    @Override
-    public ServerSession getServerSession() {
-        return session;
-    }
-
-    @Override
-    public String getDeviceName() {
-        return deviceName;
-    }
-
-    @Override
-    public Boolean isDiagnostics() {
-        return diagnostics;
-    }
-
-    @Override
-    public Locale getLocale() {
-        Locale locale = null;
-        if (null != session) {
-            User user = session.getUser();
-            if (null != user) {
-                locale = user.getLocale();
+        /**
+         * Returns a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
+         * @param factory1
+         * @param factory2
+         * @return
+         */
+        @Override
+        public int compare(LongPollingListenerFactory factory1, LongPollingListenerFactory factory2) {
+            if (factory1 == factory2) {
+                return 0;
             }
+            if (null == factory1) {
+                return 1;
+            }
+            if (null == factory2) {
+                return -1;
+            }
+            return factory2.getPriority() - factory1.getPriority();
         }
-        return null != locale ? locale : Locale.US;
-    }
-
-    @Override
-    public String toString() {
-        return "DriveSession [sessionID=" + session.getSessionID() + ", rootFolderID=" + rootFolderID + ", contextID=" +
-            session.getContextId() + ", deviceName=" + deviceName + ", diagnostics=" + diagnostics + "]";
-    }
+    };
 
 }

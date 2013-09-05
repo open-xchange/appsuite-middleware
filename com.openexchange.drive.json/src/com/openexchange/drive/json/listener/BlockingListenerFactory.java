@@ -47,91 +47,27 @@
  *
  */
 
-package com.openexchange.drive.json.internal;
+package com.openexchange.drive.json.listener;
 
-import java.util.Locale;
 import com.openexchange.drive.DriveSession;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.drive.json.LongPollingListener;
+import com.openexchange.drive.json.LongPollingListenerFactory;
 
 /**
- * {@link DefaultDriveSession}
+ * {@link BlockingListenerFactory}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DefaultDriveSession implements DriveSession {
+public class BlockingListenerFactory implements LongPollingListenerFactory {
 
-    private final String rootFolderID;
-    private final ServerSession session;
-    private String deviceName;
-    private Boolean diagnostics;
-
-    /**
-     * Initializes a new {@link DefaultDriveSession}.
-     *
-     * @param session The session
-     * @param rootFolderID The root folder ID
-     */
-    public DefaultDriveSession(ServerSession session, String rootFolderID) {
-        super();
-        this.session = session;
-        this.rootFolderID = rootFolderID;
-    }
-
-    /**
-     * Sets the diagnostics
-     *
-     * @param diagnostics The diagnostics to set
-     */
-    public void setDiagnostics(Boolean diagnostics) {
-        this.diagnostics = diagnostics;
-    }
-
-    /**
-     * Sets the deviceName
-     *
-     * @param deviceName The deviceName to set
-     */
-    public void setDeviceName(String deviceName) {
-        this.deviceName = deviceName;
+    @Override
+    public LongPollingListener create(DriveSession session) {
+        return new BlockingListener(session);
     }
 
     @Override
-    public String getRootFolderID() {
-        return rootFolderID;
-    }
-
-    @Override
-    public ServerSession getServerSession() {
-        return session;
-    }
-
-    @Override
-    public String getDeviceName() {
-        return deviceName;
-    }
-
-    @Override
-    public Boolean isDiagnostics() {
-        return diagnostics;
-    }
-
-    @Override
-    public Locale getLocale() {
-        Locale locale = null;
-        if (null != session) {
-            User user = session.getUser();
-            if (null != user) {
-                locale = user.getLocale();
-            }
-        }
-        return null != locale ? locale : Locale.US;
-    }
-
-    @Override
-    public String toString() {
-        return "DriveSession [sessionID=" + session.getSessionID() + ", rootFolderID=" + rootFolderID + ", contextID=" +
-            session.getContextId() + ", deviceName=" + deviceName + ", diagnostics=" + diagnostics + "]";
+    public int getPriority() {
+        return 0;
     }
 
 }

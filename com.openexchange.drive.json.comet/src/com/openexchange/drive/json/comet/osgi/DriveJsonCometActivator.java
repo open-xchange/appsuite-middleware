@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,91 +47,60 @@
  *
  */
 
-package com.openexchange.drive.json.internal;
+package com.openexchange.drive.json.comet.osgi;
 
-import java.util.Locale;
-import com.openexchange.drive.DriveSession;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.tools.session.ServerSession;
+import org.apache.commons.logging.Log;
+import org.glassfish.grizzly.comet.CometContext;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.json.LongPollingListenerFactory;
+import com.openexchange.drive.json.comet.internal.CometListenerFactory;
+import com.openexchange.http.grizzly.service.comet.CometContextService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link DefaultDriveSession}
+ * {@link DriveJsonCometActivator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DefaultDriveSession implements DriveSession {
+public class DriveJsonCometActivator extends HousekeepingActivator {
 
-    private final String rootFolderID;
-    private final ServerSession session;
-    private String deviceName;
-    private Boolean diagnostics;
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveJsonCometActivator.class);
+    private static final String TOPIC = "/drive/listen";
 
     /**
-     * Initializes a new {@link DefaultDriveSession}.
-     *
-     * @param session The session
-     * @param rootFolderID The root folder ID
+     * Initializes a new {@link DriveJsonCometActivator}.
      */
-    public DefaultDriveSession(ServerSession session, String rootFolderID) {
+    public DriveJsonCometActivator() {
         super();
-        this.session = session;
-        this.rootFolderID = rootFolderID;
-    }
-
-    /**
-     * Sets the diagnostics
-     *
-     * @param diagnostics The diagnostics to set
-     */
-    public void setDiagnostics(Boolean diagnostics) {
-        this.diagnostics = diagnostics;
-    }
-
-    /**
-     * Sets the deviceName
-     *
-     * @param deviceName The deviceName to set
-     */
-    public void setDeviceName(String deviceName) {
-        this.deviceName = deviceName;
     }
 
     @Override
-    public String getRootFolderID() {
-        return rootFolderID;
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class, CometContextService.class };
     }
 
     @Override
-    public ServerSession getServerSession() {
-        return session;
+    protected void startBundle() throws Exception {
+        LOG.info("starting bundle: com.openexchange.drive.json.comet");
+        long expirationDelay = getService(ConfigurationService.class).getIntProperty("com.openexchange.drive.listenTimeout", 90 * 1000);
+        CometContext<DriveEvent> cometContext = getService(CometContextService.class).register(TOPIC);
+        cometContext.setExpirationDelay(expirationDelay);
+        registerService(LongPollingListenerFactory.class, new CometListenerFactory(cometContext));
     }
 
     @Override
-    public String getDeviceName() {
-        return deviceName;
-    }
-
-    @Override
-    public Boolean isDiagnostics() {
-        return diagnostics;
-    }
-
-    @Override
-    public Locale getLocale() {
-        Locale locale = null;
-        if (null != session) {
-            User user = session.getUser();
-            if (null != user) {
-                locale = user.getLocale();
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle: com.openexchange.drive.json.comet");
+        try {
+            CometContextService cometContextService = getService(CometContextService.class);
+            if (null != cometContextService) {
+                cometContextService.deregister(TOPIC);
             }
+        } catch (RuntimeException e) {
+            LOG.warn("Error unregistering comet context", e);
         }
-        return null != locale ? locale : Locale.US;
-    }
-
-    @Override
-    public String toString() {
-        return "DriveSession [sessionID=" + session.getSessionID() + ", rootFolderID=" + rootFolderID + ", contextID=" +
-            session.getContextId() + ", deviceName=" + deviceName + ", diagnostics=" + diagnostics + "]";
+        super.stopBundle();
     }
 
 }

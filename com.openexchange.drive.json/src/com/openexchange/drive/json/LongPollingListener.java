@@ -47,91 +47,41 @@
  *
  */
 
-package com.openexchange.drive.json.internal;
+package com.openexchange.drive.json;
 
-import java.util.Locale;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveSession;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link DefaultDriveSession}
+ * {@link LongPollingListener}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DefaultDriveSession implements DriveSession {
-
-    private final String rootFolderID;
-    private final ServerSession session;
-    private String deviceName;
-    private Boolean diagnostics;
+public interface LongPollingListener {
 
     /**
-     * Initializes a new {@link DefaultDriveSession}.
+     * Waits for a result carrying the drive actions resulting from an occurred event for the polling client.
      *
-     * @param session The session
-     * @param rootFolderID The root folder ID
+     * @param timeout The maximum timeout in milliseconds to wait for the result
+     * @return The result
+     * @throws OXException
      */
-    public DefaultDriveSession(ServerSession session, String rootFolderID) {
-        super();
-        this.session = session;
-        this.rootFolderID = rootFolderID;
-    }
+    AJAXRequestResult await(long timeout) throws OXException;
 
     /**
-     * Sets the diagnostics
+     * Notifies the listener about an incoming drive event.
      *
-     * @param diagnostics The diagnostics to set
+     * @param event The drive event
      */
-    public void setDiagnostics(Boolean diagnostics) {
-        this.diagnostics = diagnostics;
-    }
+    void onEvent(DriveEvent event);
 
     /**
-     * Sets the deviceName
+     * Gets the drive session associated with this listener.
      *
-     * @param deviceName The deviceName to set
+     * @return The drive session
      */
-    public void setDeviceName(String deviceName) {
-        this.deviceName = deviceName;
-    }
-
-    @Override
-    public String getRootFolderID() {
-        return rootFolderID;
-    }
-
-    @Override
-    public ServerSession getServerSession() {
-        return session;
-    }
-
-    @Override
-    public String getDeviceName() {
-        return deviceName;
-    }
-
-    @Override
-    public Boolean isDiagnostics() {
-        return diagnostics;
-    }
-
-    @Override
-    public Locale getLocale() {
-        Locale locale = null;
-        if (null != session) {
-            User user = session.getUser();
-            if (null != user) {
-                locale = user.getLocale();
-            }
-        }
-        return null != locale ? locale : Locale.US;
-    }
-
-    @Override
-    public String toString() {
-        return "DriveSession [sessionID=" + session.getSessionID() + ", rootFolderID=" + rootFolderID + ", contextID=" +
-            session.getContextId() + ", deviceName=" + deviceName + ", diagnostics=" + diagnostics + "]";
-    }
+    DriveSession getSession();
 
 }

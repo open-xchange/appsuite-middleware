@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,96 +47,116 @@
  *
  */
 
-package com.openexchange.drive.json.action;
+package com.openexchange.drive.json.listener;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+import org.apache.commons.logging.Log;
 import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveVersion;
+import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.json.LongPollingListener;
-import com.openexchange.drive.json.internal.ListenerRegistrar;
-import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.JsonDriveAction;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
-
 /**
- * {@link ListenAction}
+ * {@link BlockingListener}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ListenAction extends AbstractDriveAction {
+public class BlockingListener implements LongPollingListener {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(BlockingListener.class);
+
+    private final DriveSession session;
+    private final ReentrantLock lock;
+    private final Condition hasEvent;
+
+    private DriveEvent event;
+
+    /**
+     * Initializes a new {@link BlockingListener}.
+     *
+     * @param session The session
+     * @param rootFolderID The root folder ID
+     */
+    public BlockingListener(DriveSession session) {
+        super();
+        this.session = session;
+        this.lock = new ReentrantLock();
+        this.hasEvent = this.lock.newCondition();
+    }
 
     @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, DriveSession session) throws OXException {
-        /*
-         * get request data
-         */
-        long timeout;
-        String timeoutValue = requestData.getParameter("timeout");
-        if (false == Strings.isEmpty(timeoutValue)) {
-            try {
-                timeout = Long.valueOf(timeoutValue).longValue();
-            } catch (NumberFormatException e) {
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "timeout", timeoutValue);
-            }
-        } else {
-            timeout = getDefaultTimeout();
-        }
-        /*
-         * get or create a polling listener for this session and await result
-         */
-        AJAXRequestResult result = null;
+    public DriveSession getSession() {
+        return session;
+    }
+
+    @Override
+    public AJAXRequestResult await(long timeout) throws OXException {
+        DriveEvent data = null;
+        lock.lock();
         try {
-            LongPollingListener listener = ListenerRegistrar.getInstance().getOrCreate(session);
-            result = listener.await(timeout);
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause();
-            if (null != cause && OXException.class.isInstance(e.getCause())) {
-                throw (OXException)cause;
+            if (null == this.event) {
+                LOG.debug("Awaiting events for max. " + timeout + "ms...");
+                hasEvent.await(timeout, TimeUnit.MILLISECONDS);
+            } else {
+                LOG.debug("Stored event available, no need to wait.");
             }
+            data = this.event;
+            this.event = null;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            lock.unlock();
         }
-        /*
-         * create and return result if available
-         */
-        if (null != result) {
-            return result;
+        if (null == data) {
+            LOG.debug("No event available.");
         } else {
-            /*
-             * use empty actions as fallback
-             */
-            List<DriveAction<? extends DriveVersion>> actions = new ArrayList<DriveAction<? extends DriveVersion>>(0);
-            try {
-                return new AJAXRequestResult(JsonDriveAction.serialize(actions, session.getLocale()), "json");
-            } catch (JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-            }
+            LOG.debug("Available event: " + data);
+        }
+        return createResult(data);
+    }
+
+    private AJAXRequestResult createResult(DriveEvent event) throws OXException {
+        /*
+         * create and return resulting actions if available
+         */
+        List<DriveAction<? extends DriveVersion>> actions = null != event ? event.getActions() :
+            new ArrayList<DriveAction<? extends DriveVersion>>(0);
+        try {
+            return new AJAXRequestResult(JsonDriveAction.serialize(actions, Locale.US), "json");
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private static long getDefaultTimeout() {
-        ConfigurationService configurationService = Services.getService(ConfigurationService.class);
-        if (null != configurationService) {
-            String value = configurationService.getProperty("com.openexchange.drive.listenTimeout");
-            if (false == Strings.isEmpty(value)) {
-                try {
-                    return Long.valueOf(value).longValue();
-                } catch (NumberFormatException e) {
-                    com.openexchange.log.Log.loggerFor(ListenAction.class).error(
-                        "Invalid configuration value for \"com.openexchange.drive.listenTimeout\"", e);
-                }
-            }
+    @Override
+    public void onEvent(DriveEvent event) {
+        if (false == isInteresting(event)) {
+            LOG.debug("Skipping uninteresting event: " + event);
+            return;
         }
-        return 90 * 1000;
+        lock.lock();
+        try {
+            this.event = event;
+            this.hasEvent.signalAll();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private boolean isInteresting(DriveEvent event) {
+        return null != event && null != event.getFolderIDs() && event.getFolderIDs().contains(session.getRootFolderID());
     }
 
 }
