@@ -29,6 +29,10 @@
  - Change for bug 28694: Adapted log output to be a WARNING, but not an ERROR message
  - Fix for bug 28696: Swallow possible unknown setting path if associated module is absent
 
+* 2013-09-03 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 28658: Removed special handling
+
 * 2013-09-03 - marcus.klein@open-xchange.com
 
  - Fix for bug 28649: Corrected packaging for Swedish language.
