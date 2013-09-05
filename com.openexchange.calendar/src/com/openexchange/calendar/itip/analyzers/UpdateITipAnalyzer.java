@@ -52,6 +52,7 @@ package com.openexchange.calendar.itip.analyzers;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -274,7 +275,20 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         if (original.containsSequence() && update.containsSequence() && original.getSequence() > update.getSequence()) {
             return true;
         }
-        if (original.containsLastModified() && update.containsLastModified() && original.getLastModified().compareTo(update.getLastModified()) > 0) {
+        Date originalLastTouched = null;
+        if (original.containsLastModified()) {
+            originalLastTouched = original.getLastModified();
+        } else if (original.containsCreationDate()) {
+            originalLastTouched = original.getCreationDate();
+        }
+        Date updateLastTouched = null;
+        if (update.containsLastModified()) {
+            updateLastTouched = update.getLastModified();
+        } else if (original.containsCreationDate()) {
+            updateLastTouched = update.getCreationDate();
+        }
+        
+        if (originalLastTouched != null && updateLastTouched != null && originalLastTouched.compareTo(updateLastTouched) > 0) {
             return true;
         }
         return false;
