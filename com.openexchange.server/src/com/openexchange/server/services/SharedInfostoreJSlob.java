@@ -84,7 +84,7 @@ public class SharedInfostoreJSlob implements SharedJSlobService {
         serviceId = "com.openexchange.jslob.config";
         this.maxUploadSize = maxUploadSize;
         jslob = new DefaultJSlob();
-        jslob.setId(new JSlobId(serviceId, "io.ox/core", 0, 0));
+        jslob.setId(new JSlobId(serviceId, "io.ox/core/properties", 0, 0));
     }
 
     /*
