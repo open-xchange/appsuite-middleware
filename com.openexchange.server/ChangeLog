@@ -10,6 +10,7 @@
 
  - Fix for bug 28676: Consider X-Forwards and known proxies in AJP servlet container
  - Fix for bug 28713: Handle possible 'NumberFormatException's gracefully
+ - Fix for bug 28172: Fixed incorrect output for "deletepublication" command-line tool
 
 * 2013-09-05 - tobias.friedrich@open-xchange.com
 
