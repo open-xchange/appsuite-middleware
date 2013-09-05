@@ -32,6 +32,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-dataretrieval"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-dav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-drive"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-drive-comet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-eas-provisioning"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-eas-provisioning-mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,open-xchange-eas-provisioning-sms"/>

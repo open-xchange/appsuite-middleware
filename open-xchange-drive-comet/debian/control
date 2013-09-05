@@ -1,0 +1,15 @@
+Source: open-xchange-drive-comet
+Section: web
+Priority: optional
+Maintainer: Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-drive (>= @OXVERSION@), open-xchange-grizzly (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-drive-comet
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}, open-xchange-drive (>= @OXVERSION@), open-xchange-grizzly (>= @OXVERSION@)
+Description: Drive push implementation using Comet and using less system resources
+ This package should be installed if a real push implementation for the drive synchronization is wanted. This push implementation uses less
+ system resources by using the Grizzly application server which allows freeing threads although the request is still active.
