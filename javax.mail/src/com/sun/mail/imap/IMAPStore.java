@@ -987,7 +987,7 @@ public class IMAPStore extends Store
                 try {
 		    if (forcePasswordRefresh)
 			refreshPassword();
-		            // Going to establish a second connection -- await possible in-use primary connections
+		            // Going to establish a second connection -- await possible in-use store connections
 		            if (PropUtil.getBooleanProperty(session.getProperties(), "mail.imap.authNoWait", false)) {
 		                final Properties props = new Properties(session.getProperties());
 		                props.put("mail.imap.authNoWait", "false");
