@@ -76,7 +76,7 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
 
 	@Override
     public void folderCreated(final FolderObject folderObj, final Session sessionObj) {
-
+        // Nothing to do
 	}
 
 	@Override
@@ -99,37 +99,33 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
 
 	@Override
     public void folderModified(final FolderObject folderObj, final Session sessionObj) {
-
+	    // Nothing to do
 	}
 
     @Override
     public void handleEvent(Event event) {
-        if (FileStorageEventHelper.isInfostoreEvent(event)) {
-            if (FileStorageEventHelper.isUpdateEvent(event)) {
-                ServerSession session = null;
-                int id = 0;
+        if (FileStorageEventHelper.isInfostoreEvent(event) && FileStorageEventHelper.isUpdateEvent(event)) {
+            try {
+                ServerSession session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
+                int id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
+                infoProperties.startTransaction();
+                infoProperties.removeAll(id, session.getContext());
+                infoProperties.commit();
+            } catch (OXException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (NumberFormatException e) {
+                // Obviously no numeric identifier; therefore not related to InfoStore file storage
+                LOG.debug(e.getMessage(), e);
+            } finally {
                 try {
-                    session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
-                    id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
-                    infoProperties.startTransaction();
-                    infoProperties.removeAll(id, session.getContext());
-                    infoProperties.commit();
-                } catch (OXException e) {
+                    infoProperties.finish();
+                } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
-                } catch (NumberFormatException e) {
-                    // Obviously no numeric identifier; therefore not related to InfoStore file storage
-                    LOG.debug(e.getMessage(), e);
-                } finally {
-                    try {
-                        infoProperties.finish();
-                    } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
                 }
+            }
 
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(FileStorageEventHelper.createDebugMessage("UpdateEvent", event));
-                }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(FileStorageEventHelper.createDebugMessage("UpdateEvent", event));
             }
         }
     }

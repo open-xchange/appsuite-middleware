@@ -137,13 +137,10 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
     public void handleEvent(Event event) {
         if (FileStorageEventHelper.isInfostoreEvent(event)) {
             if (FileStorageEventHelper.isUpdateEvent(event)) {
-                ServerSession session;
-                int id;
-                int folderId;
                 try {
-                    session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
-                    id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
-                    folderId = Integer.parseInt(FileStorageEventHelper.extractFolderId(event));
+                    int id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
+                    int folderId = Integer.parseInt(FileStorageEventHelper.extractFolderId(event));
+                    ServerSession session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
                     updateLink(id, Types.INFOSTORE, folderId, session);
                 } catch (OXException e) {
                     LOG.error(e.getMessage(), e);
@@ -155,13 +152,10 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                     LOG.debug(FileStorageEventHelper.createDebugMessage("UpdateEvent", event));
                 }
             } else if (FileStorageEventHelper.isDeleteEvent(event)) {
-                ServerSession session;
-                int id;
-                int folderId;
                 try {
-                    session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
-                    id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
-                    folderId = Integer.parseInt(FileStorageEventHelper.extractFolderId(event));
+                    int id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
+                    int folderId = Integer.parseInt(FileStorageEventHelper.extractFolderId(event));
+                    ServerSession session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
                     deleteLink(id, Types.INFOSTORE, folderId, session);
                 } catch (OXException e) {
                     LOG.error(e.getMessage(), e);

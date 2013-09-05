@@ -9,6 +9,7 @@
 * 2013-09-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 28676: Consider X-Forwards and known proxies in AJP servlet container
+ - Fix for bug 28713: Handle possible 'NumberFormatException's gracefully
 
 * 2013-09-05 - tobias.friedrich@open-xchange.com
 
