@@ -1,5 +1,9 @@
 * 2013-09-05 - dennis.sieben@open-xchange.com
 
+ - Fix for bug 28710: Adjusted regex to handle new uuid column in updateTask table
+
+* 2013-09-05 - dennis.sieben@open-xchange.com
+
  - Fix for bug 27203: If two files are given, the scheme must be passed to the second run
 
 * 2013-09-05 - thorben.betten@open-xchange.com

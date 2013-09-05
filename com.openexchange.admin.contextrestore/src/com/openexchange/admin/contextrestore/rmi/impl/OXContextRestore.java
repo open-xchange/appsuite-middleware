@@ -195,7 +195,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
 
         }
 
-        private final static Pattern database = Pattern.compile("^.*?Current Database:\\s+`?([^` ]*)`?.*$");
+        private final static Pattern database = Pattern.compile("^.*?(?:Current )?Database:\\s+`?([^` ]*)`?.*$");
 
         private final static Pattern table = Pattern.compile("^Table\\s+structure\\s+for\\s+table\\s+`([^`]*)`.*$");
 
@@ -422,7 +422,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
 
         private final static String REGEX_VALUE = "([^\\),]*)";
         private final static Pattern insertIntoUpdateTaskValues =
-            Pattern.compile("\\((?:" + REGEX_VALUE + ",)(?:" + REGEX_VALUE + ",)(?:" + REGEX_VALUE + ",)" + REGEX_VALUE + "\\)");
+            Pattern.compile("\\((?:" + REGEX_VALUE + ",)(?:" + REGEX_VALUE + ",)(?:" + REGEX_VALUE + ",)(?:" + REGEX_VALUE + ",)" + ".*?\\)");
 
         private UpdateTaskInformation searchAndCheckUpdateTask(final BufferedReader in, final int contextId) throws IOException {
             final UpdateTaskInformation retval = new UpdateTaskInformation();
