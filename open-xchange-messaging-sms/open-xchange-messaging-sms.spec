@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-messaging >= @OXVERSION@
 BuildRequires: java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 15
+%define         ox_release 16
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -51,6 +51,8 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 %doc com.openexchange.messaging.sms/ChangeLog
 
 %changelog
+* Thu Sep 05 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-09-05
 * Mon Sep 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-09-26
 * Fri Aug 30 2013 Marcus Klein <marcus.klein@open-xchange.com>
