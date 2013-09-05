@@ -126,7 +126,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         boolean differ = true;
 
         if (original != null) {
-            if (original.containsSequence() && update.containsSequence() && original.getSequence() > update.getSequence()) {
+            if (isOutdated(update, original)) {
                 analysis.addAnnotation(new ITipAnnotation(Messages.OLD_UPDATE, locale));
                 analysis.recommendAction(ITipAction.IGNORE);
                 return analysis;
@@ -268,6 +268,16 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
 
         }
         return analysis;
+    }
+
+    private boolean isOutdated(CalendarDataObject update, CalendarDataObject original) {
+        if (original.containsSequence() && update.containsSequence() && original.getSequence() > update.getSequence()) {
+            return true;
+        }
+        if (original.containsLastModified() && update.containsLastModified() && original.getLastModified().compareTo(update.getLastModified()) > 0) {
+            return true;
+        }
+        return false;
     }
 
     private boolean updateOrNew(final ITipAnalysis analysis) {
