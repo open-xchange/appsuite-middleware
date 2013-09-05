@@ -58,7 +58,6 @@ import org.apache.commons.logging.Log;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.restrictor.RestrictorFactory;
-import org.jolokia.restrictor.RestrictorFactoryForLocalhost;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.jolokia.osgi.Services;
@@ -66,7 +65,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link JolokiaConfig} Collects and exposes configuration parameters needed by Jolokia
- * 
+ *
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  */
 public class JolokiaConfig implements Initialization {
@@ -99,8 +98,8 @@ public class JolokiaConfig implements Initialization {
     private boolean restrictToLocalhost;
 
     // internal Jolokia options
-    private Dictionary<String, String> pConfig = new Hashtable<String, String>();
-    
+    private final Dictionary<String, String> pConfig = new Hashtable<String, String>();
+
     private Restrictor restrictor = null;
 
     @Override
@@ -132,7 +131,7 @@ public class JolokiaConfig implements Initialization {
         this.user = configService.getProperty("com.openexchange.jolokia.user");
         this.password = configService.getProperty("com.openexchange.jolokia.password", "secret");
         this.restrictToLocalhost = configService.getBoolProperty("com.openexchange.jolokia.restrict.to.localhost", true);
-        
+
         File xmlConfigFile = configService.getFileByName("jolokia-access.xml");
         if (null != xmlConfigFile) {
             try {
@@ -143,9 +142,9 @@ public class JolokiaConfig implements Initialization {
                 LOG.warn("Error loading configuration from file " + xmlConfigFile.getAbsolutePath(), e);
             }
         } else if (restrictToLocalhost) {
-            restrictor = RestrictorFactoryForLocalhost.createPolicyRestrictor();
+            restrictor = null; /*RestrictorFactoryForLocalhost.createPolicyRestrictor();*/
         }
-        
+
 
         pConfig.put(ConfigKey.MAX_OBJECTS.getKeyValue(), configService.getProperty("com.openexchange.jolokia.maxObjects", "0"));
         pConfig.put(ConfigKey.MAX_DEPTH.getKeyValue(), configService.getProperty("com.openexchange.jolokia.maxDepth", "0"));
@@ -154,7 +153,7 @@ public class JolokiaConfig implements Initialization {
 
     /**
      * Gets the started
-     * 
+     *
      * @return The started
      */
     public AtomicBoolean getStarted() {
@@ -163,7 +162,7 @@ public class JolokiaConfig implements Initialization {
 
     /**
      * Gets the servletName
-     * 
+     *
      * @return The servlteName
      */
     public String getServletName() {
@@ -172,7 +171,7 @@ public class JolokiaConfig implements Initialization {
 
     /**
      * Gets the boolean, if jolokia will be run or not
-     * 
+     *
      * @return true if jolokia will start and false if not
      */
     public boolean getJolokiaStart() {
@@ -194,7 +193,7 @@ public class JolokiaConfig implements Initialization {
 
     /**
      * Loads a Jolokia Security configuration from a file named <code>jolokia-access.xml</code> if present.
-     * 
+     *
      * @return The loaded jolokia config, or <code>null</code> if no such file exists or can't be loaded
      * @throws OXException
      */
