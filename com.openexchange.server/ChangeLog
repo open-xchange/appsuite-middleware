@@ -1,3 +1,7 @@
+* 2013-09-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28676: Consider X-Forwards and known proxies in AJP servlet container
+
 * 2013-09-05 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 28703: Default to METHOD:PUBLISH when exporting appointments
