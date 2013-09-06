@@ -76,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
  *   acks: [0,1] 
  *   result:{}
  *   stanzas: [{stanza0},{stanza1},{stanza2}]
- *   error: {.., code: "theCode", ...}
+ *   error: {prefix: "thePrefix", code: theCode, ...}
  * }
  * </pre>
  * 
