@@ -464,6 +464,10 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             } finally {
                 outputStream.close();
             }
+            /*
+             * Set proper identifier
+             */
+            file.setId(newSmbFile.getName());
         } catch (final SmbException e) {
             throw CIFSExceptionCodes.forSmbException(e);
         } catch (final IOException e) {
