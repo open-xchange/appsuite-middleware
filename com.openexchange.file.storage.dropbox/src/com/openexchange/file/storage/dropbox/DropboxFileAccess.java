@@ -250,9 +250,10 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
         try {
             final long fileSize = file.getFileSize();
             final long length = fileSize > 0 ? fileSize : -1L;
+            final Entry entry;
             if (isEmpty(id) || !exists(null, id, CURRENT_VERSION)) {
                 // Create
-                dropboxAPI.putFile(
+                entry = dropboxAPI.putFile(
                     new StringAllocator(file.getFolderId()).append('/').append(file.getFileName()).toString(),
                     data,
                     length,
@@ -260,8 +261,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements FileStor
                     null);
             } else {
                 // Update
-                dropboxAPI.putFileOverwrite(id, data, length, null);
+                entry = dropboxAPI.putFileOverwrite(id, data, length, null);
             }
+            file.setId(entry.path);
         } catch (final DropboxServerException e) {
             if (404 == e.error) {
                 throw DropboxExceptionCodes.NOT_FOUND.create(e, id);
