@@ -55,7 +55,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -64,6 +63,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.Collections;
 
 /**
@@ -102,34 +102,41 @@ final class Reminder {
         reminder.insertReminder(remind);
     }
 
-    static void fixAlarm(final Context ctx, final Task task,
-        final Set<TaskParticipant> removed, final Set<Folder> folders)
-        throws OXException {
+    static void fixAlarm(Context ctx, Task task, Set<TaskParticipant> removed, Set<TaskParticipant> participants, Set<Folder> folders) throws OXException {
         final ReminderService reminder = new ReminderHandler(ctx);
         final int taskId = task.getObjectID();
-        for (final InternalParticipant participant : ParticipantStorage
-            .extractInternal(removed)) {
+        for (InternalParticipant participant : ParticipantStorage.extractInternal(removed)) {
             final int userId = participant.getIdentifier();
             if (reminder.existsReminder(taskId, userId, Types.TASK)) {
                 reminder.deleteReminder(taskId, userId, Types.TASK);
             }
         }
-        for (final Folder folder : folders) {
-            final int userId = folder.getUser();
+        for (InternalParticipant participant : ParticipantStorage.extractInternal(participants)) {
+            final int userId = participant.getIdentifier();
             if (reminder.existsReminder(taskId, userId, Types.TASK)) {
-                final ReminderObject remind = reminder.loadReminder(taskId,
-                    folder.getUser(), Types.TASK);
-                final int folderId = folder.getIdentifier();
+                final ReminderObject remind = reminder.loadReminder(taskId, userId, Types.TASK);
+                final int folderId = getFolderId(participant, folders);
                 try {
                     if (remind.getFolder() != folderId) {
                         remind.setFolder(folderId);
                         reminder.updateReminder(remind);
                     }
-                } catch (final NumberFormatException nfe) {
+                } catch (NumberFormatException nfe) {
                     LOG.error("Parsing reminder folder identifier failed.", nfe);
                 }
             }
         }
+    }
+
+    private static int getFolderId(InternalParticipant participant, Set<Folder> folders) {
+        if (-1 == participant.getFolderId()) {
+            // task in public folder
+            if (1 != folders.size()) {
+                return -1;
+            }
+            return folders.iterator().next().getIdentifier();
+        }
+        return participant.getFolderId();
     }
 
     /**
