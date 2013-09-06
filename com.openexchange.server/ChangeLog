@@ -8,6 +8,10 @@
  - Fix for bug 23491: Removed FOREIGN KEY specifications from initial CREATE TABLE statements, too
  - Fix for bug 28624: Fixed possible NPE when putting preview image into cache
 
+* 2013-09-06 - martin.schneider@open-xchange.com
+
+ - Fix for bug 28152: Return correct error messages for 'deletepublication' and 'getpublication' command-line tool 
+
 * 2013-09-05 - dennis.sieben@open-xchange.com
 
  - Fix for bug 28710: Adjusted regex to handle new uuid column in updateTask table

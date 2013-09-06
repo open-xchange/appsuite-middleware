@@ -86,7 +86,7 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
             }
             final boolean success = publicationInterface.deletePublication(new com.openexchange.admin.rmi.dataobjects.Context(Integer.valueOf(contextid)), parameters.getUrl(), soap2Credentials(parameters.getAuth()));
             if (!success) {
-                throw new RemoteException("Failed deleting publication with URL \""+parameters.getUrl()+"\" for any reason.");
+                throw new RemoteException("Failed to delete publication with URL \"" + parameters.getUrl() + "\" for any reason.");
             }
         } catch (final RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
@@ -299,13 +299,13 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
                     for (int j = 1; j <= 3; j++) {
                         switch (j) {
                         case 1:
-                            {
-                                final String schema = matcher.group(1);
-                                if (null != schema) {
-                                    sb.append(schema);
-                                }
+                        {
+                            final String schema = matcher.group(1);
+                            if (null != schema) {
+                                sb.append(schema);
                             }
-                            break;
+                        }
+                        break;
                         case 2:
                             sb.append(matcher.group(2));
                             break;

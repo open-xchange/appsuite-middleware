@@ -63,6 +63,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
+import com.openexchange.admin.rmi.exceptions.NoSuchPublicationException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -162,6 +163,8 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
             createMessageForStderr(id, ctxid, "could not be deleted: ", parser);
         } else if (getClass().getName().matches("^.*\\.\\w*(?i)list\\w*$")) {
             createMessageForStderr(id, ctxid, "could not be listed: ", parser);
+        } else if (getClass().getName().matches("^.*\\.\\w*(?i)get\\w*$")) {
+            createMessageForStderr(id, ctxid, "could not be retrieved: ", parser);
         }
     }
 
@@ -248,6 +251,9 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
         } else if (e instanceof NoSuchResourceException) {
             printServerException(id, ctxid, e, parser);
             sysexit(SYSEXIT_NO_SUCH_RESOURCE);
+        } else if (e instanceof NoSuchPublicationException) {
+            printServerException(id, ctxid, e, parser);
+            sysexit(SYSEXIT_NO_SUCH_PUBLICATION);
         } else if (e instanceof DuplicateExtensionException) {
             final DuplicateExtensionException exc = (DuplicateExtensionException) e;
             printServerException(id, ctxid, exc, parser);
