@@ -103,6 +103,7 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
     private final UserPermissionBits userPermissions;
     private final ServerSession sessionObj;
     private final FileStorageAccountAccess accountAccess;
+    private final int hash;
 
     /**
      * Initializes a new {@link InfostoreAdapterFileAccess}.
@@ -121,6 +122,51 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
         this.infostore = infostore;
         this.search = search;
         this.accountAccess = accountAccess;
+
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((accountAccess == null) ? 0 : accountAccess.getAccountId().hashCode());
+        result = prime * result + ((ctx == null) ? 0 : ctx.getContextId());
+        result = prime * result + ((user == null) ? 0 : user.getId());
+        hash = result;
+    }
+
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof InfostoreAdapterFileAccess)) {
+            return false;
+        }
+        InfostoreAdapterFileAccess other = (InfostoreAdapterFileAccess) obj;
+        if (accountAccess == null) {
+            if (other.accountAccess != null) {
+                return false;
+            }
+        } else if (!accountAccess.getAccountId().equals(other.accountAccess.getAccountId())) {
+            return false;
+        }
+        if (ctx == null) {
+            if (other.ctx != null) {
+                return false;
+            }
+        } else if (ctx.getContextId() != other.ctx.getContextId()) {
+            return false;
+        }
+        if (user == null) {
+            if (other.user != null) {
+                return false;
+            }
+        } else if (user.getId() != other.user.getId()) {
+            return false;
+        }
+        return true;
     }
 
     @Override
