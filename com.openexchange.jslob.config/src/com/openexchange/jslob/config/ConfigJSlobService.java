@@ -417,6 +417,28 @@ public final class ConfigJSlobService implements JSlobService {
 
             ret.add(jsonJSlob);
         }
+        
+        for (JSlob jslob : ret) {
+            String id = jslob.getId().getId();
+            // Search for shared jslobs and merge them if neccessary
+            for (String sharedId : sharedJSlobs.keySet()) {
+                if (sharedId.startsWith(id)) {
+                    JSlob sharedJSlob = sharedJSlobs.get(sharedId).getJSlob(session);
+                    String newId = sharedId.substring(id.length() + 1, sharedId.length());
+                    JSONObject jsonObject = jslob.getJsonObject();
+                    JSONObject sharedObject = sharedJSlob.getJsonObject();
+                    for (String key : sharedObject.keySet()) {
+                        if (sharedObject.hasAndNotNull(key)) {
+                            try {
+                                jsonObject.put(newId, sharedObject);
+                            } catch (JSONException e) {
+                                // should not happen
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         return ret;
     }
