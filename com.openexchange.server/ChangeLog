@@ -1,3 +1,7 @@
+* 2013-09-06 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 28736: Now using File.createTempFile for temp files
+
 * 2013-09-05 - martin.herfurth@open-xchange.com
 
  - Fix for bug 28715: Bad conflict handling on recurrence exception creation.

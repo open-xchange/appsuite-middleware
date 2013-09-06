@@ -109,11 +109,6 @@ public class OXContextRestoreException extends Exception {
         NO_USER_DATA_DB_FOUND("None of the files contained a userdata database dump, but this is essential for the restore process"),
 
         /**
-         * One of the given filenames cannot be found
-         */
-        FILE_NOT_FOUND("One of the given filenames cannot be found"),
-
-        /**
          * An IO Exception has occurred, see the log files for details
          */
         IO_EXCEPTION("An IO Exception has occurred, see the log files for details"),
@@ -143,6 +138,16 @@ public class OXContextRestoreException extends Exception {
          */
         UNEXPECTED_ERROR("An unexpected error occurred: %s"),
 
+        /**
+         * One of the given filenames cannot be found
+         */
+        USERDB_FILE_NOT_FOUND("Temp file for user database values cannot be found"),
+
+        /**
+         * One of the given filenames cannot be found
+         */
+        CONFIGDB_FILE_NOT_FOUND("Temp file for confidb values cannot be found"),
+        
         ;
 
         private final String text;
