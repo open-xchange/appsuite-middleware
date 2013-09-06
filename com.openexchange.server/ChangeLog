@@ -1,3 +1,7 @@
+* 2013-09-06 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 28430: Start a second parser run if the first one doesn't deliver the user database part
+
 * 2013-09-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 28718: Sanitize possible passwords from logged SOAP payloads
