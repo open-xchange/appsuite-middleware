@@ -110,7 +110,6 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
         + "confirmed_ham_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "PRIMARY KEY (cid, id, user),"
         + "INDEX (cid, user),"
-        + "FOREIGN KEY (cid, user) REFERENCES user (cid, id)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
 
         "CREATE TABLE user_mail_account_properties ("
@@ -120,7 +119,6 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
         + "name VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "value VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "PRIMARY KEY (cid, id, user, name),"
-        + "FOREIGN KEY (cid, id, user) REFERENCES user_mail_account (cid, id, user)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
 
         "CREATE TABLE user_transport_account ("
@@ -138,7 +136,6 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
         + "unified_inbox TINYINT UNSIGNED DEFAULT 0,"
         + "PRIMARY KEY (cid, id, user),"
         + "INDEX (cid, user),"
-        + "FOREIGN KEY (cid, user) REFERENCES user (cid, id)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
 
         "CREATE TABLE user_transport_account_properties ("
@@ -148,7 +145,6 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
         + "name VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "value VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "PRIMARY KEY (cid, id, user, name),"
-        + "FOREIGN KEY (cid, id, user) REFERENCES user_transport_account (cid, id, user)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
 
         "CREATE TABLE pop3_storage_ids ("
@@ -159,8 +155,6 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
         + "fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "uid VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "PRIMARY KEY (cid, user, id, uidl),"
-        + "FOREIGN KEY (cid, user) REFERENCES user (cid, id),"
-        + "FOREIGN KEY (cid, user, id) REFERENCES user_mail_account (cid, user, id)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
 
         "CREATE TABLE pop3_storage_deleted ("
@@ -169,8 +163,6 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
         + "id INT4 UNSIGNED NOT NULL,"
         + "uidl VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "PRIMARY KEY (cid, user, id, uidl),"
-        + "FOREIGN KEY (cid, user) REFERENCES user (cid, id),"
-        + "FOREIGN KEY (cid, user, id) REFERENCES user_mail_account (cid, user, id)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
     };
 }
