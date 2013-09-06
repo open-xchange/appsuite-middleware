@@ -613,7 +613,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             try {
                 Thread.sleep(errDelay);
             } catch (final InterruptedException e1) {
-                ThreadPools.unexpectedlyInterrupted(Thread.currentThread());
+                Thread.currentThread().interrupt();
                 if (isDebugEnabled()) {
                     LOG.error("ERROR in IDLE'ing: " + e1.getMessage(), e1);
                 }
@@ -627,7 +627,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             try {
                 Thread.sleep(errDelay);
             } catch (final InterruptedException e1) {
-                ThreadPools.unexpectedlyInterrupted(Thread.currentThread());
+                Thread.currentThread().interrupt();
                 if (isDebugEnabled()) {
                     LOG.error("ERROR in IDLE'ing: " + e1.getMessage(), e1);
                 }
@@ -643,7 +643,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             try {
                 Thread.sleep(errDelay);
             } catch (final InterruptedException e1) {
-                ThreadPools.unexpectedlyInterrupted(Thread.currentThread());
+                Thread.currentThread().interrupt();
                 if (isDebugEnabled()) {
                     LOG.error("ERROR in IDLE'ing: " + e1.getMessage(), e1);
                 }

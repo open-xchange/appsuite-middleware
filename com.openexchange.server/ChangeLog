@@ -13,6 +13,8 @@
  - Fix for bug 28624: Fixed possible NPE when putting preview image into cache
  - Fix for bug 28729: More robust handling of upload event
  - Fix for bug 28737: Assume default sort field if null is passed
+ - Fix for bug 28726: Removed error-prone custom handling of interrupted threads
+                      (acquiring stack trace from an interrupted thread seems to stall the caller)
 
 * 2013-09-06 - martin.schneider@open-xchange.com
 
