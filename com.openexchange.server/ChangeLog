@@ -1,3 +1,7 @@
+* 2013-09-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28718: Sanitize possible passwords from logged SOAP payloads
+
 * 2013-09-05 - dennis.sieben@open-xchange.com
 
  - Fix for bug 28710: Adjusted regex to handle new uuid column in updateTask table
