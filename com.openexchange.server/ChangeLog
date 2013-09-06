@@ -2,6 +2,7 @@
 
  - Fix for bug 28718: Sanitize possible passwords from logged SOAP payloads
  - Fix for bug 23491: Removed FOREIGN KEY specifications from initial CREATE TABLE statements, too
+ - Fix for bug 28624: Fixed possible NPE when putting preview image into cache
 
 * 2013-09-05 - dennis.sieben@open-xchange.com
 
