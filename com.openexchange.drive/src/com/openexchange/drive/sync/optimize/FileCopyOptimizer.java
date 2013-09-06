@@ -251,7 +251,7 @@ public class FileCopyOptimizer extends FileActionOptimizer {
             return null == file;
         } else if (null != file) {
             return checksum.getSequenceNumber() == file.getSequenceNumber() &&
-                null == checksum.getVersion() ? null == file.getVersion() : checksum.getVersion().equals(file.getVersion());
+                (null == checksum.getVersion() ? null == file.getVersion() : checksum.getVersion().equals(file.getVersion()));
         }
         return false;
     }

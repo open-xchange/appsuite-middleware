@@ -60,6 +60,7 @@ public abstract class DeleteCore extends PublicationAbstraction {
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
         setOptions(parser);
 
+        boolean error = true;
         String successtext = null;
         try {
             parser.ownparse(args);
@@ -74,15 +75,19 @@ public abstract class DeleteCore extends PublicationAbstraction {
 
             boolean success = oxpub.deletePublication(publication.getContext(), publication.getUrl(), auth);
             if (success) {
-                successtext = "Publication successfully deleted";
+                successtext = "Publication with URL \"" + publication.getUrl() + "\" successfully deleted from context " + publication.getContext().getId();
+                error = false;
             } else {
-                successtext = "Failed deleting publication";
+                successtext = "Failed to delete publication with URL \"" + publication.getUrl() + "\" from context " + publication.getContext().getId();
+                error = true;
             }
-            
-            displayDeletedMessage(successtext, null, parser);
-            sysexit(0);
+            System.out.println(successtext);
         } catch (final Exception e) {
             printErrors(successtext, null, e, parser);
+        } finally {
+            if (error) {
+                sysexit(SYSEXIT_UNKNOWN_OPTION);
+            }
         }
     }
 

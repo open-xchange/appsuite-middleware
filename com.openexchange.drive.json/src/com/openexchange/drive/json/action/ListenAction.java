@@ -59,9 +59,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveVersion;
-import com.openexchange.drive.events.DriveEvent;
+import com.openexchange.drive.json.LongPollingListener;
 import com.openexchange.drive.json.internal.ListenerRegistrar;
-import com.openexchange.drive.json.internal.LongPollingListener;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.JsonDriveAction;
 import com.openexchange.exception.OXException;
@@ -93,27 +92,34 @@ public class ListenAction extends AbstractDriveAction {
             timeout = getDefaultTimeout();
         }
         /*
-         * get or create a polling listener for this session and await event
+         * get or create a polling listener for this session and await result
          */
-        DriveEvent event = null;
+        AJAXRequestResult result = null;
         try {
-            LongPollingListener listener = ListenerRegistrar.getInstance().getOrCreate(session.getServerSession(), session.getRootFolderID());
-            event = listener.await(timeout);
+            LongPollingListener listener = ListenerRegistrar.getInstance().getOrCreate(session);
+            result = listener.await(timeout);
         } catch (ExecutionException e) {
-            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            Throwable cause = e.getCause();
+            if (null != cause && OXException.class.isInstance(e.getCause())) {
+                throw (OXException)cause;
+            }
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
         /*
-         * create and return resulting actions if available
+         * create and return result if available
          */
-        List<DriveAction<? extends DriveVersion>> actions = null != event ? event.getActions() :
-            new ArrayList<DriveAction<? extends DriveVersion>>(0);
-        try {
-            return new AJAXRequestResult(JsonDriveAction.serialize(actions, getLocale(session.getServerSession())), "json");
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        if (null != result) {
+            return result;
+        } else {
+            /*
+             * use empty actions as fallback
+             */
+            List<DriveAction<? extends DriveVersion>> actions = new ArrayList<DriveAction<? extends DriveVersion>>(0);
+            try {
+                return new AJAXRequestResult(JsonDriveAction.serialize(actions, session.getLocale()), "json");
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            }
         }
     }
 

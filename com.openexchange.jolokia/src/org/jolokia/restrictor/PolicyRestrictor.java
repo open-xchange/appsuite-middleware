@@ -2,16 +2,15 @@ package org.jolokia.restrictor;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.jolokia.restrictor.policy.*;
 import org.jolokia.util.HttpMethod;
 import org.jolokia.util.RequestType;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 /*
@@ -80,6 +79,37 @@ public class PolicyRestrictor implements Restrictor {
 
         if (exp != null) {
             throw new SecurityException("Cannot parse policy file: " + exp,exp);
+        }
+    }
+
+    /**
+     * Construct a policy restrictor from an document
+     *
+     * @param pInput stream from where to fetch the policy data
+     */
+    public PolicyRestrictor() {
+        Exception exp = null;
+        try {
+            Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            
+            Element host = document.createElement("host");
+            host.setTextContent("localhost");
+            Element remote = document.createElement("remote");
+            remote.appendChild(host);
+            Element restrict = document.createElement("restrict");
+            restrict.appendChild(remote);
+            document.appendChild(restrict);
+            requestTypeChecker = new RequestTypeChecker(document);
+            httpChecker = new HttpMethodChecker(document);
+            networkChecker = new NetworkChecker(document);
+            mbeanAccessChecker = new MBeanAccessChecker(document);
+            corsChecker = new CorsChecker(document);
+        }
+        catch (MalformedObjectNameException e) { exp = e; } 
+        catch (ParserConfigurationException e) { exp = e; } 
+
+        if (exp != null) {
+            throw new SecurityException("Cannot parse document: " + exp,exp);
         }
     }
 

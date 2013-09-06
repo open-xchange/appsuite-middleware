@@ -265,6 +265,25 @@ public final class ConfigJSlobService implements JSlobService {
         final List<JSlob> ret = new ArrayList<JSlob>(list.size() << 1);
         boolean coreIncluded = false;
         for (final JSlob jSlob : list) {
+            
+            String id = jSlob.getId().getId();
+            for (String sharedId : sharedJSlobs.keySet()) {
+                if (sharedId.startsWith(id)) {
+                    JSlob sharedJSlob = sharedJSlobs.get(sharedId).getJSlob(session);
+                    String newId = sharedId.substring(id.length() + 1, sharedId.length());
+                    JSONObject jsonObject = jSlob.getJsonObject();
+                    JSONObject sharedObject = sharedJSlob.getJsonObject();
+                    for (String key : sharedObject.keySet()) {
+                        if (sharedObject.hasAndNotNull(key)) {
+                            try {
+                                jsonObject.put(newId, sharedObject);
+                            } catch (JSONException e) {
+                                // should not happen
+                            }
+                        }
+                    }
+                }
+            }
 
             addConfigTreeToJslob(session, new DefaultJSlob(jSlob));
             ret.add(get(jSlob.getId().getId(), session));
@@ -320,17 +339,20 @@ public final class ConfigJSlobService implements JSlobService {
             }
         }
         
-        // Search for shared JSlobs
-        JSlob sharedJSlob = getShared(id, session);
-        if (null != sharedJSlob) {
-            JSONObject jsonObject = jsonJSlob.getJsonObject();
-            JSONObject sharedObject = sharedJSlob.getJsonObject();
-            for (String key : sharedObject.keySet()) {
-                if (sharedObject.hasAndNotNull(key)) {
-                    try {
-                        jsonObject.put(key, sharedObject.get(key));
-                    } catch (JSONException e) {
-                        // should not happen
+        // Search for shared jslobs and merge them if neccessary
+        for (String sharedId : sharedJSlobs.keySet()) {
+            if (sharedId.startsWith(id)) {
+                JSlob sharedJSlob = sharedJSlobs.get(sharedId).getJSlob(session);
+                String newId = sharedId.substring(id.length() + 1, sharedId.length());
+                JSONObject jsonObject = jsonJSlob.getJsonObject();
+                JSONObject sharedObject = sharedJSlob.getJsonObject();
+                for (String key : sharedObject.keySet()) {
+                    if (sharedObject.hasAndNotNull(key)) {
+                        try {
+                            jsonObject.put(newId, sharedObject);
+                        } catch (JSONException e) {
+                            // should not happen
+                        }
                     }
                 }
             }

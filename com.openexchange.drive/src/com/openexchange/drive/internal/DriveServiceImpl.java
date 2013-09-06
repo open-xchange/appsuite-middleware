@@ -606,6 +606,15 @@ public class DriveServiceImpl implements DriveService {
              */
             ServerFileVersion sourceVersion = (ServerFileVersion)action.getParameters().get("sourceVersion");
             File sourceFile = sourceVersion.getFile();
+            if (null == sourceFile.getVersion()) {
+                /*
+                 * no versioning support, re-check sequence number within this transaction
+                 */
+                File reloadedSourceFile = session.getStorage().getFile(sourceFile.getId(), sourceFile.getVersion());
+                if (null == reloadedSourceFile || sourceFile.getSequenceNumber() != reloadedSourceFile.getSequenceNumber()) {
+                    throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(sourceVersion.getName(), sourceVersion.getChecksum(), path);
+                }
+            }
             boolean isFromTemp = session.hasTempFolder() &&
                 sourceFile.getFolderId().equals(session.getStorage().getFolderID(DriveConstants.TEMP_PATH));
             File targetFile = null;
@@ -759,7 +768,8 @@ public class DriveServiceImpl implements DriveService {
         return
             Category.CATEGORY_TRY_AGAIN.equals(e.getCategory()) ||
             Category.CATEGORY_CONFLICT.equals(e.getCategory()) ||
-            "FLD-0008".equals(e.getErrorCode()) // 'Folder 123 does not exist in context 1'
+            "FLD-0008".equals(e.getErrorCode()) || // 'Folder 123 does not exist in context 1'
+            "DRV-0007".equals(e.getErrorCode()) // The file "123.txt" with checksum "8fc1a2f5e9a2dbd1d5f4f9e330bd1563" was not found at "/"
         ;
     }
 

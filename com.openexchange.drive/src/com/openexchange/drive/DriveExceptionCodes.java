@@ -124,6 +124,9 @@ public enum DriveExceptionCodes implements OXExceptionCode {
     /** The directory version \"%1$s\" with checksum \"%2$s\" is invalid */
     INVALID_DIRECTORYVERSION(DriveExceptionMessages.INVALID_DIRECTORYVERSION_MSG, Category.CATEGORY_ERROR, 21),
 
+    /** Push via long polling is not available */
+    LONG_POLLING_NOT_AVAILABLE(DriveExceptionMessages.LONG_POLLING_NOT_AVAILABLE_MSG, Category.CATEGORY_ERROR, 22),
+
     ;
 
     private static final String PREFIX = "DRV";

@@ -87,36 +87,30 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
 
 	@Override
     public void folderCreated(final FolderObject folderObj, final Session sessionObj) {
-
+	    // Nothing to do
 	}
 
 	@Override
     public void folderModified(final FolderObject folderObj, final Session sessionObj) {
-
+	    // Nothing to do
 	}
 
     @Override
     public void handleEvent(Event event) {
-        if (FileStorageEventHelper.isInfostoreEvent(event)) {
-            if (FileStorageEventHelper.isUpdateEvent(event)) {
-                ServerSession session = null;
-                int id = 0;
-                try {
-                    session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
-                    id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
-                    infoLockManager.removeAll(
-                        id,
-                        session.getContext(),
-                        UserStorage.getStorageUser(session.getUserId(), session.getContext()));
-                } catch (OXException e) {
-                    LOG.fatal("Couldn't remove locks from infoitem. Run the consistency tool.", e);
-                } catch (NumberFormatException e) {
-                    LOG.fatal("Couldn't remove locks from infoitem. Run the consistency tool.", e);
-                }
+        if (FileStorageEventHelper.isInfostoreEvent(event) && FileStorageEventHelper.isUpdateEvent(event)) {
+            try {
+                int id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
+                ServerSession session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
+                infoLockManager.removeAll(id, session.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()));
+            } catch (OXException e) {
+                LOG.fatal("Couldn't remove locks from infoitem. Run the consistency tool.", e);
+            } catch (NumberFormatException e) {
+                // Obviously no numeric identifier; therefore not related to InfoStore file storage
+                LOG.debug(e.getMessage(), e);
+            }
 
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(FileStorageEventHelper.createDebugMessage("UpdateEvent", event));
-                }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(FileStorageEventHelper.createDebugMessage("UpdateEvent", event));
             }
         }
     }

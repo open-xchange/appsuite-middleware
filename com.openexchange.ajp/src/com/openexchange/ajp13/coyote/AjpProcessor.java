@@ -91,6 +91,7 @@ import com.openexchange.ajp13.exception.AJPv13MaxPackgeSizeException;
 import com.openexchange.ajp13.servlet.http.HttpErrorServlet;
 import com.openexchange.ajp13.servlet.http.HttpServletManager;
 import com.openexchange.ajp13.servlet.http.HttpSessionManagement;
+import com.openexchange.ajp13.util.IPTools;
 import com.openexchange.ajp13.watcher.AJPv13TaskMonitor;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -353,6 +354,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     private boolean restrictLongRunning;
 
     /**
+     * Whether to consider X-Forwards header.
+     */
+    private final boolean isConsiderXForwards;
+
+    /**
      * Direct buffer used for sending right away a pong message.
      */
     private static final byte[] pongMessageArray;
@@ -423,6 +429,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      */
     public AjpProcessor(final int packetSize, final AJPv13TaskMonitor listenerMonitor, final boolean forceHttps) {
         super();
+        isConsiderXForwards = AJPv13Config.isConsiderXForwards();
         restrictLongRunning = false;
         this.forceHttps = forceHttps;
         bodyBytes = MessageBytes.newInstance();
@@ -913,8 +920,34 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         error = true;
                     } else {
                        /*
-                        * Call Servlet's service() method
+                        * Check for special X-Forwards if enabled
                         */
+                        if (isConsiderXForwards) {
+                            // Scheme
+                            String protocol = request.getHeader(AJPv13Config.getProtocolHeader());
+                            if(!isValidProtocol(protocol)) {
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("Could not detect a valid protocol header value in " + protocol + ", falling back to default");
+                                }
+                                 protocol = request.getScheme();
+                            }
+                            // Remote address
+                            String forHeaderValue = request.getHeader(AJPv13Config.getForHeader());
+                            String remoteIP = IPTools.getRemoteIP(forHeaderValue, AJPv13Config.getKnownProxies());
+                            if (remoteIP.isEmpty()) {
+                                if (LOG.isDebugEnabled()) {
+                                    forHeaderValue = forHeaderValue == null ? "" : forHeaderValue;
+                                    LOG.debug("Could not detect a valid remote ip in " + AJPv13Config.getForHeader() + ": [" + forHeaderValue + "], falling back to default");
+                                }
+                                remoteIP = request.getRemoteAddr();
+                            }
+                            // Apply values
+                            request.setScheme(protocol);
+                            request.setRemoteAddr(remoteIP);
+                        }
+                        /*
+                         * Call Servlet's service() method
+                         */
                         servlet.service(request, response);
                         if (!started) {
                             // Stopped in the meantime
@@ -1095,7 +1128,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     if (finished || (max <= 0) || (!isProcessing() || ((System.currentTimeMillis() - getLastWriteAccess()) <= max))) {
                         return;
                     }
-                    boolean doReadMessage = true;
+                    final boolean doReadMessage = true;
                     if (response.isCommitted()) {
                         /*
                          * Write empty SEND-BODY-CHUNK package
@@ -1231,6 +1264,14 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      */
     public HttpServlet getServlet() {
         return servlet;
+    }
+
+    private final static String HTTP_SCHEME = "http";
+
+    private final static String HTTPS_SCHEME = "https";
+
+    private boolean isValidProtocol(final String protocolHeaderValue) {
+        return HTTP_SCHEME.equals(protocolHeaderValue) || HTTPS_SCHEME.equals(protocolHeaderValue);
     }
 
     private static final String JSESSIONID_URI = AJPv13RequestHandler.JSESSIONID_URI;

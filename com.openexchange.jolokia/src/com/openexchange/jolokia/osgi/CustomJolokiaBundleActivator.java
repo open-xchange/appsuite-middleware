@@ -54,6 +54,7 @@ import org.apache.commons.logging.Log;
 import org.jolokia.osgi.JolokiaAuthenticatedHttpContext;
 import org.jolokia.osgi.JolokiaHttpContext;
 import org.jolokia.osgi.servlet.JolokiaServlet;
+import org.jolokia.restrictor.Restrictor;
 import org.osgi.framework.BundleActivator;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -64,7 +65,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link CustomJolokiaBundleActivator} - An OSGi {@link BundleActivator} that will start Jolokia.
- *
+ * 
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  */
 public class CustomJolokiaBundleActivator extends HousekeepingActivator {
@@ -77,6 +78,8 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator {
     private HttpContext jolokiaHttpContext;
 
     private volatile String usedServletName;
+
+    private Restrictor restrictor = null;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -100,7 +103,9 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator {
             return;
         }
 
-        JolokiaServlet jolServlet = new JolokiaServlet(context);
+        restrictor = jolokiaConfig.getRestrictor();
+        
+        JolokiaServlet jolServlet = new JolokiaServlet(context,restrictor);
 
         HttpService httpService = getService(HttpService.class);
 
@@ -147,7 +152,7 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator {
     /**
      * Get the security context for our servlet. Dependent on the configuration, this is either a no-op context or one which authenticates
      * with a given user
-     *
+     * 
      * @return the HttpContext with which the agent servlet gets registered.
      */
     public synchronized HttpContext getHttpContext() {

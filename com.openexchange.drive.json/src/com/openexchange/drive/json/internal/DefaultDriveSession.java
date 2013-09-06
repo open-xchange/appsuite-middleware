@@ -49,7 +49,9 @@
 
 package com.openexchange.drive.json.internal;
 
+import java.util.Locale;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -112,6 +114,18 @@ public class DefaultDriveSession implements DriveSession {
     @Override
     public Boolean isDiagnostics() {
         return diagnostics;
+    }
+
+    @Override
+    public Locale getLocale() {
+        Locale locale = null;
+        if (null != session) {
+            User user = session.getUser();
+            if (null != user) {
+                locale = user.getLocale();
+            }
+        }
+        return null != locale ? locale : Locale.US;
     }
 
     @Override

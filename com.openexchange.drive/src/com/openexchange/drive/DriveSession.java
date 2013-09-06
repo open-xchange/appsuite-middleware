@@ -49,6 +49,7 @@
 
 package com.openexchange.drive;
 
+import java.util.Locale;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -86,5 +87,11 @@ public interface DriveSession {
      */
     Boolean isDiagnostics();
 
+    /**
+     * Gets the locale of the session's user.
+     *
+     * @return The locale
+     */
+    Locale getLocale();
 }
 

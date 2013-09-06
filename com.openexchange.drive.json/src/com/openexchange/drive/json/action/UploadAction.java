@@ -160,10 +160,10 @@ public class UploadAction extends AbstractDriveAction {
             if (null != session.isDiagnostics()) {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("diagnostics", syncResult.getDiagnostics());
-                jsonObject.put("actions", JsonFileAction.serialize(syncResult.getActionsForClient(), getLocale(session.getServerSession())));
+                jsonObject.put("actions", JsonFileAction.serialize(syncResult.getActionsForClient(), session.getLocale()));
                 return new AJAXRequestResult(jsonObject, "json");
             }
-            return new AJAXRequestResult(JsonFileAction.serialize(syncResult.getActionsForClient(), getLocale(session.getServerSession())), "json");
+            return new AJAXRequestResult(JsonFileAction.serialize(syncResult.getActionsForClient(), session.getLocale()), "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

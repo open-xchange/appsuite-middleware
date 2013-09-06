@@ -1,10 +1,26 @@
+* 2013-09-05 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 28710: Adjusted regex to handle new uuid column in updateTask table
+
+* 2013-09-05 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 27203: If two files are given, the scheme must be passed to the second run
+
+* 2013-09-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28676: Consider X-Forwards and known proxies in AJP servlet container
+ - Fix for bug 28713: Handle possible 'NumberFormatException's gracefully
+ - Fix for bug 28172: Fixed incorrect output for "deletepublication" command-line tool
+
+* 2013-09-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28703: Default to METHOD:PUBLISH when exporting appointments
+ - Fix for bug 28672: Allow escaped colons even when vCard 3.0 is indicated by the client
+
 * 2013-09-05 - martin.herfurth@open-xchange.com
 
  - Fix for bug 28690: Detect outdated imip mails.
-
-* 2013-09-04 - martin.schneider@open-xchange.com
-
- - Fix for bug 28274: Return error if folder deletion fails.
+ - Fix for bug 28702: Guessing mail configuration enhanced.
 
 * 2013-09-04 - thorben.betten@open-xchange.com
 
@@ -13,6 +29,10 @@
  - Fix for bug 28692: Changed category for error code "CTX-0010", thus it is displayed to user
  - Change for bug 28694: Adapted log output to be a WARNING, but not an ERROR message
  - Fix for bug 28696: Swallow possible unknown setting path if associated module is absent
+
+* 2013-09-03 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 28658: Removed special handling
 
 * 2013-09-03 - marcus.klein@open-xchange.com
 

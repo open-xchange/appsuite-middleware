@@ -147,4 +147,10 @@ public class ICal4JITipEmitter extends ICal4JEmitter implements ITipEmitter {
         }
     }
 
+    @Override
+    protected void initCalendar(final Calendar calendar) {
+        super.initCalendar(calendar);
+        calendar.getProperties().add(Method.REQUEST); // default to REQUEST for iTIP
+    }
+
 }

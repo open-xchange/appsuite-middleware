@@ -35,4 +35,7 @@ Import-Package: com.google.common.cache,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,
- org.osgi.service.event
+ org.osgi.service.event,
+ org.osgi.util.tracker;version="1.5.1"
+Export-Package: com.openexchange.drive.json,
+ com.openexchange.drive.json.json
