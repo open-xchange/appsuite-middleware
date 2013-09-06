@@ -52,11 +52,13 @@ package com.openexchange.drive.internal;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryMetadata;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveAction;
@@ -67,6 +69,8 @@ import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.FileMetadata;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
+import com.openexchange.drive.actions.AbstractAction;
+import com.openexchange.drive.actions.AbstractFileAction;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
 import com.openexchange.drive.actions.DownloadFileAction;
 import com.openexchange.drive.actions.EditFileAction;
@@ -236,8 +240,26 @@ public class DriveServiceImpl implements DriveService {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Handling download: file version: " + fileVersion + ", offset: " + offset + ", length: " + length);
         }
-        DownloadHelper downloadHelper = new DownloadHelper(driveSession);
-        return downloadHelper.perform(path, fileVersion, offset, length);
+        IFileHolder fileHolder = new DownloadHelper(driveSession).perform(path, fileVersion, offset, length);
+        /*
+         * track sync result to represent the download as performed by client
+         */
+        AbstractAction<FileVersion> action = new AbstractFileAction(null, fileVersion, null) {
+
+            @Override
+            public Action getAction() {
+                return Action.DOWNLOAD;
+            }
+        };
+        action.getParameters().put(DriveAction.PARAMETER_OFFSET, Long.valueOf(offset));
+        action.getParameters().put(DriveAction.PARAMETER_LENGTH, Long.valueOf(length));
+        List<AbstractAction<FileVersion>> actionsForServer = Collections.emptyList();
+        List<AbstractAction<FileVersion>> actionsForClient = Collections.singletonList(action);
+        new SyncTracker(driveSession).track(new IntermediateSyncResult<FileVersion>(actionsForServer, actionsForClient), path);
+        /*
+         * return file holder for download
+         */
+        return fileHolder;
     }
 
     @Override

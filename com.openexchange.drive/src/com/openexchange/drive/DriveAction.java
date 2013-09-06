@@ -71,10 +71,11 @@ public interface DriveAction<T extends DriveVersion> extends Comparable<DriveAct
     static final String PARAMETER_ERROR = "error";
     static final String PARAMETER_QUARANTINE = "quarantine";
     static final String PARAMETER_RESET = "reset";
+    static final String PARAMETER_LENGTH = "length";
 
     static final Set<String> PARAMETER_NAMES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] {
         PARAMETER_PATH, PARAMETER_TOTAL_LENGTH, PARAMETER_OFFSET, PARAMETER_CONTENT_TYPE, PARAMETER_ERROR, PARAMETER_QUARANTINE,
-        PARAMETER_MODIFIED, PARAMETER_CREATED, PARAMETER_RESET
+        PARAMETER_MODIFIED, PARAMETER_CREATED, PARAMETER_RESET, PARAMETER_LENGTH
     })));
 
     /**
