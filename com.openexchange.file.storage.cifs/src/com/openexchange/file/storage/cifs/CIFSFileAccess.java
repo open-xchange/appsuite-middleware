@@ -277,6 +277,10 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                 smbFile = renamedFile;
             }
             /*
+             * Update identifier
+             */
+            file.setId(smbFile.getName());
+            /*
              * Invalidate
              */
             SmbFileMapManagement.getInstance().dropFor(session);
