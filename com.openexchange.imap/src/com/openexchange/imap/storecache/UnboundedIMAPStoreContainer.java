@@ -62,7 +62,6 @@ import javax.mail.MessagingException;
 import com.sun.mail.iap.ConnectQuotaExceededException;
 import com.sun.mail.imap.IMAPStore;
 
-
 /**
  * {@link UnboundedIMAPStoreContainer} - The unbounded {@link IMAPStoreContainer}.
  *
@@ -109,7 +108,8 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
             if (null == imapStoreWrapper) {
                 try {
                     imapStore = newStore(server, port, login, pw, imapSession);
-                    // System.out.println("IMAPStoreContainer.getStore(): Returning newly established IMAPStore instance." + imapStore.toString() + "-" + imapStore.hashCode());
+                    // System.out.println("IMAPStoreContainer.getStore(): Returning newly established IMAPStore instance." +
+                    // imapStore.toString() + "-" + imapStore.hashCode());
                     if (DEBUG) {
                         LOG.debug("IMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. " + imapStore.toString() + " -- " + imapStore.hashCode());
                     }
@@ -118,15 +118,16 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
                         throw e;
                     }
                     // None available -- await
-                    availableQueue.awaitNotEmpty();
+                    availableQueue.awaitNotEmpty(45L, TimeUnit.SECONDS);
                     // System.out.println("IMAPStoreContainer.getStore(): Retry obtaining IMAPStore instance.");
                     if (DEBUG) {
-                        LOG.debug("IMAPStoreContainer.getStore(): Retry obtaining IMAPStore instance." );
+                        LOG.debug("IMAPStoreContainer.getStore(): Retry obtaining IMAPStore instance.");
                     }
                 }
             } else {
                 imapStore = imapStoreWrapper.imapStore;
-                // System.out.println("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance." + imapStore.toString() + "-" + imapStore.hashCode());
+                // System.out.println("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance." + imapStore.toString() + "-" +
+                // imapStore.hashCode());
                 if (DEBUG) {
                     LOG.debug("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance. " + imapStore.toString() + " -- " + imapStore.hashCode());
                 }
@@ -144,7 +145,8 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         if (!availableQueue.offer(new IMAPStoreWrapper(imapStore))) {
             closeSafe(imapStore);
         } else {
-            // System.out.println("IMAPStoreContainer.backStore(): Added IMAPStore instance to cache." + imapStore.toString() + " -- " + imapStore.hashCode());
+            // System.out.println("IMAPStoreContainer.backStore(): Added IMAPStore instance to cache." + imapStore.toString() + " -- " +
+            // imapStore.hashCode());
             if (DEBUG) {
                 LOG.debug("IMAPStoreContainer.backStore(): Added IMAPStore instance to cache. " + imapStore.toString() + " -- " + imapStore.hashCode());
             }
@@ -164,7 +166,8 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
             }
             try {
                 if (null == debugBuilder) {
-                    // System.out.println("IMAPStoreContainer.closeElapsed(): Closing elapsed IMAP store: " + imapStoreWrapper.imapStore.toString() + "-" + imapStoreWrapper.imapStore.hashCode());
+                    // System.out.println("IMAPStoreContainer.closeElapsed(): Closing elapsed IMAP store: " +
+                    // imapStoreWrapper.imapStore.toString() + "-" + imapStoreWrapper.imapStore.hashCode());
                     closeSafe(imapStoreWrapper.imapStore);
                 } else {
                     final String info = imapStoreWrapper.imapStore.toString() + " -- " + imapStoreWrapper.imapStore.hashCode();
@@ -198,8 +201,8 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         private final Condition notEmpty;
 
         /**
-         * Creates a <tt>InheritedPriorityBlockingQueue</tt> with the default initial capacity (11) that orders its elements according to their
-         * {@linkplain Comparable natural ordering}.
+         * Creates a <tt>InheritedPriorityBlockingQueue</tt> with the default initial capacity (11) that orders its elements according to
+         * their {@linkplain Comparable natural ordering}.
          */
         protected InheritedPriorityBlockingQueue() {
             super();
@@ -291,25 +294,34 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         }
 
         /**
-         * Awaits until an element arrives in queue.
+         * Awaits until an element arrives in queue, waiting up to the specified wait time if necessary for an element to become available.
          *
+         * @param timeout How long to wait before giving up, in units of <tt>unit</tt>
+         * @param unit A <tt>TimeUnit</tt> determining how to interpret the <tt>timeout</tt> parameter
+         * @return <code>true</code> if an element arrived in queue before time elapsed; otherwise <code>false</code> to signal time out
          * @throws InterruptedException If interrupted while waiting
          */
-        public void awaitNotEmpty() throws InterruptedException {
+        public boolean awaitNotEmpty(final long timeout, final TimeUnit unit) throws InterruptedException {
+            long nanos = unit.toNanos(timeout);
             final ReentrantLock lock = this.lock;
             lock.lockInterruptibly();
             try {
-                try {
-                    while (q.size() == 0) {
-                        notEmpty.await();
+                while (q.size() == 0) {
+                    try {
+                        nanos = notEmpty.awaitNanos(nanos);
+                    } catch (final InterruptedException ie) {
+                        notEmpty.signal(); // propagate to non-interrupted thread
+                        throw ie;
                     }
-                } catch (final InterruptedException ie) {
-                    notEmpty.signal(); // propagate to non-interrupted thread
-                    throw ie;
+                    if (nanos <= 0L) {
+                        // A value less than or equal to zero indicates that no time remains.
+                        return false;
+                    }
                 }
             } finally {
                 lock.unlock();
             }
+            return true;
         }
 
         @Override
