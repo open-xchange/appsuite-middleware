@@ -67,9 +67,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 
-
 /**
- * {@link Bug27840Test}
+ * Verifies that the issue described in bug 27840 does not appear again.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
