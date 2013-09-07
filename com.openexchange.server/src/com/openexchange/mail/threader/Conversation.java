@@ -50,6 +50,7 @@
 package com.openexchange.mail.threader;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -177,6 +178,28 @@ public final class Conversation {
     }
 
     /**
+     * Checks if this conversation references OR is referenced by given message
+     *
+     * @param message The message
+     * @return <code>true</code> if references or referenced-by; otherwise <code>false</code>
+     */
+    public boolean referencesOrIsReferencedBy(final MailMessage message) {
+        if (!this.references.isEmpty()) {
+            final String messageId = message.getMessageId();
+            if (null != messageId && this.references.contains(messageId)) {
+                return true;
+            }
+        }
+        if (!this.messageIds.isEmpty()) {
+            final String[] sReferences = message.getReferences();
+            if (null != sReferences && containsAny(this.messageIds, Arrays.asList(sReferences))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Checks if this conversation references OR is referenced by given conversation
      *
      * @param other The other conversation
@@ -209,13 +232,14 @@ public final class Conversation {
     /**
      * Checks if at least one element is in both collections.
      *
-     * @param set1 The first collection, must not be <code>null</code>
-     * @param set2 The second collection, must not be <code>null</code>
+     * @param set The first collection, must not be <code>null</code>
+     * @param col The second collection, must not be <code>null</code>
      * @return <code>true</code> if the intersection of the collections is non-empty
      */
-    private static boolean containsAny(final Set<String> set1, final Set<String> set2) {
-        for (final Iterator<String> it = set2.iterator(); it.hasNext();) {
-            if (set1.contains(it.next())) {
+    private static boolean containsAny(final Set<String> set, final Collection<String> col) {
+        final Iterator<String> it = col.iterator();
+        for (int i = col.size(); i-- > 0;) {
+            if (set.contains(it.next())) {
                 return true;
             }
         }

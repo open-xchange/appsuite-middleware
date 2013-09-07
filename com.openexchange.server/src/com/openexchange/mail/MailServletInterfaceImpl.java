@@ -166,6 +166,7 @@ import com.openexchange.push.PushEventConstants;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.AbstractTrackableTask;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -810,8 +811,32 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * Sort by references
          */
         final String sentFolder = mailAccess.getFolderStorage().getSentFolder();
-        final Future<ThreadableMapping> submittedTask = mergeWithSent ? getThreadableMapping(sentFolder, (int) max, mailFields, messageStorage) : null;
+        final Future<List<MailMessage>> messagesFromSentFolder;
+        if (mergeWithSent) {
+            messagesFromSentFolder = ThreadPools.getThreadPool().submit(new AbstractTask<List<MailMessage>>() {
+
+                @Override
+                public List<MailMessage> call() throws Exception {
+                    return Conversations.messagesFor(sentFolder, (int) max, mailFields, messageStorage);
+                }
+            });
+        } else {
+            messagesFromSentFolder = null;
+        }
+        // For actual folder
         final List<Conversation> conversations = Conversations.conversationsFor(fullName, (int) max, mailFields, messageStorage);
+        // Retrieve from sent folder
+        if (null != messagesFromSentFolder) {
+            final List<MailMessage> sentMessages = getFrom(messagesFromSentFolder);
+            for (final Conversation conversation : conversations) {
+                for (final MailMessage sentMessage : sentMessages) {
+                    if (conversation.referencesOrIsReferencedBy(sentMessage)) {
+                        conversation.addMessage(sentMessage);
+                    }
+                }
+            }
+        }
+        // Fold it
         Conversations.fold(conversations);
         // Comparator
         final MailMessageComparator threadComparator = COMPARATOR_DESC;
@@ -827,16 +852,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             final Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, OrderDirection.getOrderDirection(order), getUserLocale());
             Collections.sort(list, listComparator);
         }
-        // Check for available mapping indicating that sent folder results have to be merged
-        if (null != submittedTask) {
-            final ThreadableMapping threadableMapping = getFrom(submittedTask);
-            for (final List<MailMessage> thread : list) {
-                if (threadableMapping.checkFor(new ArrayList<MailMessage>(thread), thread)) { // Iterate over copy
-                    // Re-Sort thread
-                    Collections.sort(thread, threadComparator);
-                }
-            }
-        }
+        // Check for index range
         IndexRange indexRange = null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]);
         if (null != indexRange) {
             final int fromIndex = indexRange.start;
