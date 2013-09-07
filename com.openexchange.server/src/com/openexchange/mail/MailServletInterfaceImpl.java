@@ -810,9 +810,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Sort by references
          */
-        final String sentFolder = mailAccess.getFolderStorage().getSentFolder();
         final Future<List<MailMessage>> messagesFromSentFolder;
         if (mergeWithSent) {
+            final String sentFolder = mailAccess.getFolderStorage().getSentFolder();
             messagesFromSentFolder = ThreadPools.getThreadPool().submit(new AbstractTask<List<MailMessage>>() {
 
                 @Override
