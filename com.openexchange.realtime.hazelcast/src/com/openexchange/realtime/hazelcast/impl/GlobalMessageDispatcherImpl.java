@@ -73,10 +73,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
-import com.openexchange.realtime.dispatch.DispatchExceptionCode;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
-import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.hazelcast.Services;
 import com.openexchange.realtime.hazelcast.Utils;
@@ -137,6 +135,8 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
         }
 
         if (recipients.isEmpty()) {
+            LOG.debug("Received empty map of recipients, giving up.");
+            stanza.trace("Received empty map of recipients, giving up.");
             return Collections.emptyMap();
         }
 
@@ -207,6 +207,13 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
         return exceptions;
     }
     
+    /**
+     * The Stanza wasn't delivered locally/remotely. If the addressed Resource isn't available anylonger we remove it from the ResourceDirectory and
+     * try to send the Stanza again. This will succeed if the Channel can conjure the Resource.
+     * 
+     * @param stanza The Stanza to resend
+     * @throws OXException
+     */
     private void resend(Stanza stanza) throws OXException {
         directory.remove(stanza.getTo());
         send(stanza);
