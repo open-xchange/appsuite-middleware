@@ -85,7 +85,7 @@ public class ResponseChannel implements Channel{
     }
 
     /**
-     * Set up/prepare the channel for sending a Stanza. This includes replacing the from ID with an channel specific internal ID
+     * Set up/prepare the channel for sending a Stanza. This includes replacing the from ID with a channel specific internal ID
      * @param uuid the unique id to use for sending this Stanza
      * @param stanza the Stanza to send
      * @throws OXException
@@ -164,9 +164,13 @@ public class ResponseChannel implements Channel{
         return condition.containsKey(id);
     }
 
+    /*
+     * Recipients are one-time UUIDs that are created before sending a message on behalf of some client and removed either after Stanza
+     * retrieval or the given timeout. Recipients can't be conjured for this channel.
+     */
     @Override
     public boolean conjure(ID id) throws OXException {
-        return id.getProtocol().equals(getProtocol());
+        return false;
     }
 
     /**
