@@ -413,13 +413,9 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     fileAccess.finish();
                 }
             }
-        } catch (final OXException e) {
-            throw e;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
