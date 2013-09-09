@@ -418,7 +418,7 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      */
     NO_SHARED_FOLDER_UPDATE(OXFolderExceptionMessage.NO_SHARED_FOLDER_UPDATE_MSG, Category.CATEGORY_PERMISSION_DENIED, 63),
     /**
-     * The attribute %1$s contains too much characters. Current length %3$s is more than allowed length of %2$s characters.
+     * The value for attribute %1$s contains more than the allowed number of %2$d characters.
      */
     TRUNCATED(OXFolderExceptionMessage.TRUNCATED_MSG, Category.CATEGORY_TRUNCATED, 64),
     /**

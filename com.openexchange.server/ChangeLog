@@ -1,6 +1,7 @@
 * 2013-09-09 - martin.schneider@open-xchange.com
 
  - Fix for bug 28261: Command line tool 'createcontext' returns proper information if 'user' parameter is set inadequate.
+ - Fix for bug 26693: Return clear error message when folder name is too long.
 
 * 2013-09-09 - thorben.betten@open-xchange.com
 
