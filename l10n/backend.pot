@@ -10845,12 +10845,12 @@ msgid "Shared folder %1$s must not be updated in context %2$s"
 msgstr ""
 
 #. *
-#. * The value for attribute %1$s contains more than the allowed number of %2$d characters.
+#. * The value for attribute %1$s contains more than the allowed number of %2$d characters. Current length: %3$d characters.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:428
 msgid ""
 "The value for attribute %1$s contains more than the allowed number of %2$d "
-"characters."
+"characters. Current length: %3$d characters."
 msgstr ""
 
 #. *
