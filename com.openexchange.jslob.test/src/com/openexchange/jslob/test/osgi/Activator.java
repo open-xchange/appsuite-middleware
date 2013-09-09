@@ -76,6 +76,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        // Register event handler
         EventHandler eventHandler = new EventHandler() {
 
             @Override
@@ -91,7 +92,6 @@ public class Activator extends HousekeepingActivator {
         jsonObject.put("test1", true);
         jsonObject.put("test2", -1);
         registerService(SharedJSlobService.class, new SimSharedJSlobService(jsonObject));
-        // Register event handler
     }
 
 }
