@@ -67,6 +67,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -197,11 +198,12 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 
     @Override
     public UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx) throws OXException {
+        final int[] grps = null != groups && 0 != groups.length ? groups : UserStorage.getStorageUser(userId, ctx).getGroups();
         final Cache cache = this.cache;
         if (cache == null) {
-            return getFallback().getUserConfiguration(userId, groups, ctx);
+            return getFallback().getUserConfiguration(userId, grps, ctx);
         }
-        return getUserConfigurations(cache, ctx, new int[]{userId}, new int[][]{groups})[0];
+        return getUserConfigurations(cache, ctx, new int[] { userId }, new int[][] { grps })[0];
     }
 
     @Override
