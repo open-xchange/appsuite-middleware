@@ -93,12 +93,17 @@ public class SyncTracker {
      * The sequence when the synchronization is idle, i.e. client and server are in-sync.
      */
     private static final List<HistoryEntry> IDLE_SEQUENCE = Arrays.asList(new HistoryEntry(new IntermediateSyncResult<DirectoryVersion>(
-        new ArrayList<AbstractAction<DirectoryVersion>>(), new ArrayList<AbstractAction<DirectoryVersion>>()), null).compact());
+        new ArrayList<AbstractAction<DirectoryVersion>>(0), new ArrayList<AbstractAction<DirectoryVersion>>(0)), null).compact());
 
     /**
      * The maximum number of tracked sync results in the history.
      */
-    private static final int MAX_HISTORY_SIZE = 20;
+    private static final int MAX_HISTORY_SIZE = 50;
+
+    /**
+     * The maximum number of actions to be stored per history entry; others will be compacted implicitly.
+     */
+    private static final int MAX_HISTORY_ENTRY_LENGTH = 10;
 
     /**
      * Enable this after the first server bug :)
@@ -194,7 +199,7 @@ public class SyncTracker {
     private HistoryEntry insert(IntermediateSyncResult<? extends DriveVersion> syncResult, String path) {
         HistoryEntry entry = new HistoryEntry(syncResult, path);
         ArrayList<HistoryEntry> history = getResultHistory();
-        history.add(session.isTraceEnabled() ? entry : entry.compact());
+        history.add(session.isTraceEnabled() && MAX_HISTORY_ENTRY_LENGTH >= syncResult.length() ? entry : entry.compact());
         if (MAX_HISTORY_SIZE < history.size()) {
             history.remove(0);
         }

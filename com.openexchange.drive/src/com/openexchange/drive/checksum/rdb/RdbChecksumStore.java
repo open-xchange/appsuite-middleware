@@ -85,6 +85,7 @@ public class RdbChecksumStore implements ChecksumStore {
 
     private static final int DELETE_CHUNK_SIZE = 50;
     private static final int INSERT_CHUNK_SIZE = 50;
+    private static final int SELECT_WHERE_IN_CHUNK_SIZE = 500;
 
     private final int contextID;
     private final DatabaseService databaseService;
@@ -312,9 +313,17 @@ public class RdbChecksumStore implements ChecksumStore {
         if (null == checksums) {
             return Collections.emptyMap();
         }
+        Map<String, List<FileChecksum>> matchingChecksums = new HashMap<String, List<FileChecksum>>();
         Connection connection = databaseService.getReadOnly(contextID);
         try {
-            return selectMatchingFileChecksums(connection, contextID, checksums);
+            /*
+             * select chunk-wise
+             */
+            for (int i = 0; i < checksums.size(); i += SELECT_WHERE_IN_CHUNK_SIZE) {
+                int length = Math.min(checksums.size(), i + SELECT_WHERE_IN_CHUNK_SIZE) - i;
+                matchingChecksums.putAll(selectMatchingFileChecksums(connection, contextID, checksums.subList(i, i + length)));
+            }
+            return matchingChecksums;
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {

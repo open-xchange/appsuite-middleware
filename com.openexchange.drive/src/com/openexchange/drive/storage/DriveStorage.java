@@ -153,7 +153,7 @@ public class DriveStorage {
     }
 
     /**
-     * Copies an existing file the supplied locations.
+     * Copies an existing file to the supplied locations.
      *
      * @param sourceFile The source file to copy
      * @param targetFileName The target filename

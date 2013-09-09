@@ -637,7 +637,7 @@ public class DriveServiceImpl implements DriveService {
                     throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(sourceVersion.getName(), sourceVersion.getChecksum(), path);
                 }
             }
-            boolean isFromTemp = session.hasTempFolder() &&
+            boolean moveFromTemp = null != sourceFile.getVersion() && sourceFile.isCurrentVersion() && session.hasTempFolder() &&
                 sourceFile.getFolderId().equals(session.getStorage().getFolderID(DriveConstants.TEMP_PATH));
             File targetFile = null;
             if (null != action.getVersion()) {
@@ -659,7 +659,7 @@ public class DriveServiceImpl implements DriveService {
                 session.getChecksumStore().removeFileChecksum(
                     fileID, targetFile.getVersion(), targetFile.getSequenceNumber());
             }
-            if (isFromTemp) {
+            if (moveFromTemp) {
                 /*
                  * move file, update stored checksum
                  */
