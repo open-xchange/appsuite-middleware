@@ -352,9 +352,6 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
             final IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
             boolean performRollback = false;
-            JSONObject fileData = new JSONObject();
-            fileData.put("mailFolder", folderPath);
-            fileData.put("mailUID", uid);
             try {
                 if (!session.getUserPermissionBits().hasInfostore()) {
                     throw MailExceptionCode.NO_MAIL_ACCESS.create();
@@ -397,20 +394,25 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 performRollback = true;
                 fileAccess.saveDocument(file, mailPart.getInputStream(), System.currentTimeMillis(), fields);
                 fileAccess.commit();
-                fileData.put("id", file.getId());
-                fileData.put("folder_id", file.getFolderId());
-                fileData.put("filename", file.getFileName());
-            } catch (final Exception e) {
-                if (performRollback) {
-                    fileAccess.rollback();
-                }
-                throw e;
+                performRollback = false;
+                /*
+                 * JSON response object
+                 */
+                final JSONObject jFileData = new JSONObject(8);
+                jFileData.put("mailFolder", folderPath);
+                jFileData.put("mailUID", uid);
+                jFileData.put("id", file.getId());
+                jFileData.put("folder_id", file.getFolderId());
+                jFileData.put("filename", file.getFileName());
+                return new AJAXRequestResult(jFileData, "json");
             } finally {
                 if (fileAccess != null) {
+                    if (performRollback) {
+                        fileAccess.rollback();
+                    }
                     fileAccess.finish();
                 }
             }
-            return new AJAXRequestResult(fileData, "json");
         } catch (final OXException e) {
             throw e;
         } catch (final JSONException e) {
