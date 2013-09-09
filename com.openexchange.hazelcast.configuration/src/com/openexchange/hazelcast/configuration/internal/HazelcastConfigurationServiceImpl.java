@@ -73,7 +73,20 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             LOG.warn("\n\tThe configuration value for \"com.openexchange.cluster.name\" has not been changed from it's default " +
                     "value \"ox\". Please do so to make this warning disappear.\n");
         }
-        config.getGroupConfig().setName(groupName).setPassword("YXV0b2JhaG4=");
+        String groupPassword = configService.getProperty("com.openexchange.hazelcast.group.password");
+        if (false == Strings.isEmpty(groupPassword)) {
+            if ("wtV6$VQk8#+3ds!a".equalsIgnoreCase(groupPassword)) {
+                LOG.warn("The value 'wtV6$VQk8#+3ds!a' for 'com.openexchange.hazelcast.group.password' has not been changed from it's " +
+                    "default. Please do so to restrict access to your cluster.");
+            }
+            config.getGroupConfig().setPassword(groupPassword);
+        }
+        config.setProperty(GroupProperties.PROP_MEMCACHE_ENABLED,
+            configService.getProperty("com.openexchange.hazelcast.memcache.enabled", "false"));
+        config.setProperty(GroupProperties.PROP_REST_ENABLED,
+            configService.getProperty("com.openexchange.hazelcast.rest.enabled", "false"));
+        config.setProperty(GroupProperties.PROP_SOCKET_BIND_ANY, String.valueOf(
+            configService.getBoolProperty("com.openexchange.hazelcast.socket.bindAny", false)));
         /*
          * JMX
          */
@@ -103,7 +116,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         /*
          * set interfaces
          */
-        String interfaces = configService.getProperty("com.openexchange.hazelcast.interfaces");
+        String interfaces = configService.getProperty("com.openexchange.hazelcast.network.interfaces");
         if (false == isEmpty(interfaces)) {
             String[] ips = Strings.splitByComma(interfaces);
             if (null != ips && 0 < ips.length) {

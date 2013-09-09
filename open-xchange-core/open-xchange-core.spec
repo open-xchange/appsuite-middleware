@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 14
+%define        ox_release 15
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -544,6 +544,35 @@ if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $p
    ox_set_property com.openexchange.contactcollector.folder.deleteDenied false $pfile
 fi
 
+# Patch_Request-1593
+pfile=/opt/open-xchange/etc/hazelcast.properties
+OLDNAMES=( com.openexchange.hazelcast.interfaces )
+NEWNAMES=( com.openexchange.hazelcast.network.interfaces )
+DEFAULTS=( 127.0.0.1 )
+for I in $(seq 1 ${#OLDNAMES[@]}); do
+    OLDNAME=${OLDNAMES[$I-1]}
+    NEWNAME=${NEWNAMES[$I-1]}
+    VALUE=$(ox_read_property $OLDNAME $pfile)
+    if ox_exists_property $OLDNAME $pfile; then
+        ox_remove_property $OLDNAME $pfile
+    fi
+    if [ -z "$VALUE" ]; then
+        VALUE="${DEFAULTS[$I-1]}"
+    fi
+    if ! ox_exists_property $NEWNAME $pfile; then
+        ox_set_property $NEWNAME "$VALUE" $pfile
+    fi
+done
+NEWPROPS=( com.openexchange.hazelcast.group.password com.openexchange.hazelcast.memcache.enabled com.openexchange.hazelcast.rest.enabled com.openexchange.hazelcast.socket.bindAny )
+DEFAULTS=( 'wtV6$VQk8#+3ds!a' false false false )
+for I in $(seq 1 ${#NEWPROPS[@]}); do
+    NEWPROP=${NEWPROPS[$I-1]}
+    DEFAULT=${DEFAULTS[$I-1]}
+    if ! ox_exists_property $NEWPROP $pfile; then
+        ox_set_property $NEWPROP "$DEFAULT" $pfile
+    fi
+done
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT
 do
@@ -584,6 +613,8 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/requestwatcher.properties
 
 %changelog
+* Thu Aug 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-08-22
 * Mon Jul 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second build for patch  2013-07-18
 * Tue May 28 2013 Marcus Klein <marcus.klein@open-xchange.com>

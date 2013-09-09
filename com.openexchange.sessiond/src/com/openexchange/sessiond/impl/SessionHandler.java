@@ -639,15 +639,52 @@ public final class SessionHandler {
         if (null == sessionControl) {
             throw SessionExceptionCodes.PASSWORD_UPDATE_FAILED.create();
         }
-        // TODO: Check permission via security service
-        sessionControl.getSession().setPassword(newPassword);
-        final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-        if (sessionStorageService != null) {
+        /*
+         * Change password in current session
+         */
+        final SessionImpl currentSession = sessionControl.getSession();
+        currentSession.setPassword(newPassword);
+        final SessionStorageService sessionStorage = getServiceRegistry().getService(SessionStorageService.class);
+        if (null != sessionStorage) {
             final Task<Void> c = new AbstractTask<Void>() {
 
                 @Override
                 public Void call() throws Exception {
-                    sessionStorageService.changePassword(sessionid, newPassword);
+                    sessionStorage.changePassword(sessionid, newPassword);
+                    return null;
+                }
+            };
+            submitAndIgnoreRejection(c);
+        }
+        /*
+         * Invalidate all other user sessions known by local session containers
+         */
+        SessionControl[] userSessionControls = sessionData.getUserSessions(currentSession.getUserId(), currentSession.getContextId());
+        if (null != userSessionControls && 0 < userSessionControls.length) {
+            for (SessionControl userSessionControl : userSessionControls) {
+                String otherSessionID = userSessionControl.getSession().getSessionID();
+                if (null != otherSessionID && false == otherSessionID.equals(sessionid)) {
+                    clearSession(otherSessionID);
+                }
+            }
+        }
+        /*
+         * Invalidate all further user sessions in session storage if needed
+         */
+        if (null != sessionStorage) {
+            final Task<Void> c = new AbstractTask<Void>() {
+
+                @Override
+                public Void call() throws Exception {
+                    Session[] sessions = sessionStorage.getUserSessions(currentSession.getUserId(), currentSession.getContextId());
+                    if (null != sessions && 0 < sessions.length) {
+                        for (Session session : sessions) {
+                            String otherSessionID = session.getSessionID();
+                            if (null != otherSessionID && false == otherSessionID.equals(sessionid)) {
+                                sessionStorage.removeSession(otherSessionID);
+                            }
+                        }
+                    }
                     return null;
                 }
             };

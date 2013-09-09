@@ -9,3 +9,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: javax.xml.parsers,
  org.w3c.dom,
  org.xml.sax
+Bundle-Classpath: .
+

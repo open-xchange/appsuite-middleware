@@ -3,6 +3,12 @@
  - Fix for bug 28635: Sanitize HTML content from calendar printing
  - Fix for bug 28668: Avoid trailing "\n" after <br> tag on text2html conversion
 
+* 2013-08-16 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28260: Restrict socket binding to local loopback address only by default, disable Hazelcast's REST and Memcache client 
+                      request listener services by default 
+ - Fix for bug 28317: Invalidate all other user sessions after password change
+
 * 2013-05-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 26815: Don't interrupt appender task if not finished
