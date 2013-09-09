@@ -85,6 +85,11 @@ public abstract class PublicationAbstraction extends UserAbstraction {
         this.publicationUrl = setLongOpt(parser,OPT_PUBLICATION_URL,"The publication's URL", true, true, false);
     }
 
+    @Override
+    protected String getObjectName() {
+        return "publication";
+    }
+
     protected abstract void setFurtherOptions(final AdminParser parser);
 
 }

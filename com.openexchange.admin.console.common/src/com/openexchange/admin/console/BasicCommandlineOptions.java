@@ -136,6 +136,11 @@ public abstract class BasicCommandlineOptions {
 
     public static final int SYSEXIT_UNABLE_TO_PARSE = 114;
 
+    /**
+     * Used when a publication does not exists
+     */
+    public static final int SYSEXIT_NO_SUCH_PUBLICATION = 115;
+
     protected static final int DEFAULT_CONTEXT=1;
     protected static final char OPT_NAME_CONTEXT_SHORT='c';
     protected static final String OPT_NAME_CONTEXT_LONG="contextid";
@@ -270,9 +275,9 @@ public abstract class BasicCommandlineOptions {
         System.err.println(output);
     }
 
-//    protected final void printNotBoundResponse(final NotBoundException nbe){
-//        System.err.println("RMI module "+nbe.getMessage()+" not available on server");
-//    }
+    //    protected final void printNotBoundResponse(final NotBoundException nbe){
+    //        System.err.println("RMI module "+nbe.getMessage()+" not available on server");
+    //    }
 
     protected final void printError(final String msg, final AdminParser parser){
         String output = null;
@@ -363,11 +368,11 @@ public abstract class BasicCommandlineOptions {
     protected final CLIOption setLongOpt(final AdminParser admp, final String longopt, final String description, final boolean hasarg, final boolean required) {
 
         final CLIOption retval = admp.addOption(longopt, longopt, description, required,hasarg);
-//        //OptionBuilder.withLongOpt( longopt ).withDescription( description ).withValueSeparator( '=' ).create();
-//        if (hasarg) {
-//            retval.hasArg();
-//        }
-//        retval.setRequired(required);
+        //        //OptionBuilder.withLongOpt( longopt ).withDescription( description ).withValueSeparator( '=' ).create();
+        //        if (hasarg) {
+        //            retval.hasArg();
+        //        }
+        //        retval.setRequired(required);
         return retval;
     }
 

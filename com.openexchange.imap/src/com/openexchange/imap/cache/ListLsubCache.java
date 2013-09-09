@@ -64,7 +64,6 @@ import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.ThreadPools;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
@@ -683,7 +682,7 @@ public final class ListLsubCache {
             }
             throw e;
         } catch (final InterruptedException e) {
-            ThreadPools.unexpectedlyInterrupted(Thread.currentThread());
+            Thread.currentThread().interrupt();
             throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
         }
     }

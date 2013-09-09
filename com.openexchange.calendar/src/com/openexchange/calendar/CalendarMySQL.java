@@ -4538,9 +4538,11 @@ public class CalendarMySQL implements CalendarSqlImp {
                          * shall be written to storage. If storage's reminder
                          * date is greater than or equal to specified reminder,
                          * leave unchanged.
+                         * 
+                         * Update: I think this is inverted. Change it...
                          */
-                        if (rsql.loadReminder(oid, uid, Types.APPOINTMENT, con).getDate().getTime() < reminder_date
-                                .getTime()) {
+                        Date storageReminder = rsql.loadReminder(oid, uid, Types.APPOINTMENT, con).getDate();
+                        if (storageReminder.getTime() > reminder_date.getTime()) {
                             if (con != null) {
                                 rsql.updateReminder(ro, con);
                             } else {

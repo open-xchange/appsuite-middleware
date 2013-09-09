@@ -752,15 +752,18 @@ class UpdateData {
     }
 
     void updateReminder() throws OXException, OXException {
-        updateReminder(ctx, getUpdated(), user, isMove(), getRemoved(), getUpdatedFolder());
+        updateReminder(ctx, getUpdated(), user, isMove(), getRemoved(), getDestFolder(), getUpdatedParticipants(), getUpdatedFolder());
     }
 
-    static void updateReminder(final Context ctx, final Task updated, final User user, final boolean move, final Set<TaskParticipant> removed, final Set<Folder> folders) throws OXException {
+    static void updateReminder(Context ctx, Task updated, User user, boolean move, Set<TaskParticipant> removed, FolderObject destFolder, Set<TaskParticipant> participants, Set<Folder> folders) throws OXException {
         if (updated.containsAlarm()) {
             Reminder.updateAlarm(ctx, updated, user);
         }
         if (move) {
-            Reminder.fixAlarm(ctx, updated, removed, folders);
+            if (Tools.isFolderPrivate(destFolder)) {
+                Tools.fillStandardFolders(ctx.getContextId(), updated.getObjectID(), participants, folders, true);
+            }
+            Reminder.fixAlarm(ctx, updated, removed, participants, folders);
         }
     }
 

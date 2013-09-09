@@ -162,7 +162,11 @@ public final class SendTest extends AbstractMailTest {
         JSONObject jMail = new JSONObject(mailObject_25kb);
         JSONObject jAttach = jMail.getJSONArray("attachments").getJSONObject(0);
 
-        jAttach.put("content", "Pile of poo \uD83D\uDCA9");
+        char a = '\uD83D';
+        char b = '\uDCA9';
+        String s = "Pile of poo ";
+
+        jAttach.put("content", s + a + b);
 
         /*
          * Perform send request
@@ -177,10 +181,11 @@ public final class SendTest extends AbstractMailTest {
             final String content = getResponse.getAttachments().getJSONObject(0).getString("content");
             assertTrue("Content is empty", null != content && content.length() > 0);
 
+            System.out.println("Huhuhuhuhuhuhuhu1234 with the content that will be asserted: " + content);
             int pos = content.indexOf("Pile of poo ");
             assertTrue("Content is empty", pos >= 0);
 
-            pos += 12;
+            pos += s.length();
             assertEquals("Missing \\uD83D unicode", (int) '\uD83D', (int) content.charAt(pos++));
             assertEquals("Missing \\uDCA9 unicode", (int) '\uDCA9', (int) content.charAt(pos++));
         }

@@ -52,15 +52,12 @@
  */
 package com.openexchange.admin.contextrestore.storage.interfaces;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
-
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException;
 import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore.Parser.PoolIdSchemaAndVersionInfo;
 import com.openexchange.admin.contextrestore.tools.PropertyHandlerExtended;
@@ -133,7 +130,7 @@ public abstract class OXContextRestoreStorageInterface {
     }
 
 
-    public abstract String restorectx(final Context ctx, final PoolIdSchemaAndVersionInfo poolidandschema) throws SQLException, FileNotFoundException, IOException, OXContextRestoreException, StorageException;
+    public abstract String restorectx(final Context ctx, final PoolIdSchemaAndVersionInfo poolidandschema, String configdbname) throws SQLException, IOException, OXContextRestoreException, StorageException;
 
     public abstract void checkVersion(final PoolIdSchemaAndVersionInfo poolIdAndSchema) throws SQLException, OXContextRestoreException, StorageException;
 }

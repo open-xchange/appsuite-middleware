@@ -234,22 +234,10 @@ public final class MessageParser {
                 /*
                  * Uploaded files
                  */
-                final int numOfUploadFiles = uploadEvent.getNumberOfUploadFiles();
-                int attachmentCounter = 0;
-                int addedAttachments = 0;
-                while (addedAttachments < numOfUploadFiles) {
-                    /*
-                     * Get uploaded file by field name: file_0, file_1, ...
-                     */
-                    final UploadFile uf;
-                    {
-                        final List<UploadFile> list = uploadEvent.getUploadFilesByFieldName(getFieldName(attachmentCounter++));
-                        uf = null == list || list.isEmpty() ? null : list.get(0);
-                    }
+                for (final UploadFile uf : uploadEvent.getUploadFiles()) {
                     if (uf != null) {
                         final UploadFileMailPart mailPart = provider.getNewFilePart(uf);
                         attachmentHandler.addAttachment(mailPart);
-                        addedAttachments++;
                     }
                 }
             }
@@ -351,12 +339,6 @@ public final class MessageParser {
             dataArguments.put(entry.getKey(), entry.getValue().toString());
         }
         return dataArguments;
-    }
-
-    private static final String UPLOAD_FILE_ATTACHMENT_PREFIX = "file_";
-
-    private static String getFieldName(final int num) {
-        return new com.openexchange.java.StringAllocator(8).append(UPLOAD_FILE_ATTACHMENT_PREFIX).append(num).toString();
     }
 
     private static void parse(final ComposedMailMessage transportMail, final JSONObject jsonObj, final Session session, final int accountId, final TransportProvider provider, final IAttachmentHandler attachmentHandler, final Context ctx, final boolean prepare4Transport) throws OXException {

@@ -752,6 +752,12 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
                 return null;
             }
             final String refId = rs.getString(1);
+            if (null == refId) {
+                // Drop incomplete entry
+                dropFromTable(id, userId, contextId);
+                return null;
+            }
+            // Try to load to ensure existence
             final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
             try {
                 Streams.close(fileStorage.getFile(refId));

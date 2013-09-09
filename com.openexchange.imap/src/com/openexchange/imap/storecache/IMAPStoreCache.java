@@ -318,7 +318,7 @@ public final class IMAPStoreCache {
             return store;
         } catch (final InterruptedException e) {
             // Should not occur
-            ThreadPools.unexpectedlyInterrupted(Thread.currentThread());
+            Thread.currentThread().interrupt();
             throw MailExceptionCode.INTERRUPT_ERROR.create(e);
         } catch (final MessagingException e) {
             final Exception nested = e.getNextException();

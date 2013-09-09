@@ -50,24 +50,17 @@
 package com.openexchange.realtime.hazelcast.channel;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
-import com.openexchange.realtime.dispatch.DispatchExceptionCode;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.hazelcast.Services;
 import com.openexchange.realtime.hazelcast.Utils;
-import com.openexchange.realtime.hazelcast.impl.GlobalMessageDispatcherImpl;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.IDMap;
 
 /**
  * {@link StanzaDispatcher}
@@ -108,6 +101,11 @@ public class StanzaDispatcher implements Callable<Map<ID, OXException>>, Seriali
         stanza.trace("Received remove delivery. Dispatching locally");
         LocalMessageDispatcher dispatcher = Services.getService(LocalMessageDispatcher.class);
         Map<ID, OXException> exceptions = dispatcher.send(stanza, targets);
+        /*
+         * The Stanza was delivered to this node because the ResourceDirectory listed this node in the routing info. If the Resource isn't
+         * available anylonger we remove it from the ResourceDirectory and try to send the Stanza again. This will succeed if the Channel
+         * can conjure the Resource.
+         */
         if (Utils.shouldResend(exceptions, stanza)) {
             ResourceDirectory directory = Services.optService(ResourceDirectory.class);
             directory.remove(stanza.getTo());

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,51 @@
  *
  */
 
-package com.openexchange.dav.caldav.bugs;
+package com.openexchange.soap.cxf.interceptor;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.apache.cxf.interceptor.LoggingMessage;
 
 /**
- * {@link CalDAVBugSuite}
+ * {@link LoggingUtility} - Utility class for CXF logging.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CalDAVBugSuite {
+public final class LoggingUtility {
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(Bug21794Test.class);
-        suite.addTestSuite(Bug22094Test.class);
-        suite.addTestSuite(Bug22352Test.class);
-        suite.addTestSuite(Bug22338Test.class);
-        suite.addTestSuite(Bug22395Test.class);
-        suite.addTestSuite(Bug22451Test.class);
-        suite.addTestSuite(Bug22723Test.class);
-        suite.addTestSuite(Bug23067Test.class);
-        suite.addTestSuite(Bug23167Test.class);
-        suite.addTestSuite(Bug23181Test.class);
-        suite.addTestSuite(Bug22689Test.class);
-        suite.addTestSuite(Bug23610Test.class);
-        suite.addTestSuite(Bug23612Test.class);
-        suite.addTestSuite(Bug24682Test.class);
-        suite.addTestSuite(Bug25783Test.class);
-        suite.addTestSuite(Bug25672Test.class);
-        suite.addTestSuite(Bug26957Test.class);
-        suite.addTestSuite(Bug27224Test.class);
-        suite.addTestSuite(Bug27309Test.class);
-        suite.addTestSuite(Bug28490Test.class);
-        suite.addTestSuite(Bug28734Test.class);
-        return suite;
+    /**
+     * Initializes a new {@link LoggingUtility}.
+     */
+    private LoggingUtility() {
+        super();
     }
+
+    /** The regular expression to discover possible password elements */
+    private static final Pattern PATTERN_PASSWORD = Pattern.compile("(<[^<]*password>)[^<>]+(</[^<]*password>)");
+
+    /**
+     * Sanitizes possible user-sensitive data from given logging message.
+     *
+     * @param loggingMessage The logging message to sanitize
+     */
+    public static LoggingMessage sanitizeLoggingMessage(final LoggingMessage loggingMessage) {
+        if (null != loggingMessage) {
+            // Replace possible passwords in payload
+            final StringBuilder payload = loggingMessage.getPayload();
+            if (null != payload && payload.length() > 0) {
+                final StringBuffer sb = new StringBuffer(payload.length());
+                final Matcher m = PATTERN_PASSWORD.matcher(payload);
+                while (m.find()) {
+                    m.appendReplacement(sb, "$1XXXX$2");
+                }
+                m.appendTail(sb);
+                payload.setLength(0);
+                payload.append(sb);
+            }
+        }
+
+        return loggingMessage;
+    }
+
 }

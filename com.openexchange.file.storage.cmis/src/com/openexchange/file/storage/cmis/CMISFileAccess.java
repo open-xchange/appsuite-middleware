@@ -322,7 +322,9 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
                 // Reload & return document
                 return (Document) cmisSession.getObject(documentId);
             }
-            return parent.createDocument(properties, csi, VersioningState.NONE);
+            final Document createdDocument = parent.createDocument(properties, csi, VersioningState.NONE);
+            file.setId(createdDocument.getId());
+            return createdDocument;
         } catch (final CmisBaseException e) {
             throw handleCmisException(e);
         } catch (final RuntimeException e) {

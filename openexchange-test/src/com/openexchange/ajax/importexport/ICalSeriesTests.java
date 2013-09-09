@@ -118,7 +118,7 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
 		"BEGIN:VEVENT\n"+
 		"DTSTART;TZID=Europe/Rome:20100202T103000\n"+
 		"DTEND;TZID=Europe/Rome:20100202T120000\n"+
-		"RRULE:FREQ=DAILY;UNTIL=20100230T215959Z\n"+
+		"RRULE:FREQ=DAILY;UNTIL=20100228T215959Z\n"+
 		"DTSTAMP:20110105T174810Z\n"+
 		"SUMMARY:Exceptional meeting #3\n"+
 		"UID:"+uid+"\n"+
@@ -143,7 +143,7 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
 		"BEGIN:VEVENT\n"+
 		"DTSTART;TZID=Europe/Rome:20100202T110000\n"+
 		"DTEND;TZID=Europe/Rome:20100202T120000\n"+
-		"RRULE:FREQ=DAILY;UNTIL=20100230T215959Z\n"+
+		"RRULE:FREQ=DAILY;UNTIL=20100228T215959Z\n"+
 		"DTSTAMP:20110105T174810Z\n"+
 		"SUMMARY:Exceptional meeting #2\n"+
 		"UID:"+uid+"\n"+
