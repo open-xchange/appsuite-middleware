@@ -183,7 +183,7 @@ public final class SendTest extends AbstractMailTest {
 
             System.out.println("Huhuhuhuhuhuhuhu1234 with the content that will be asserted: " + content);
             int pos = content.indexOf("Pile of poo ");
-            assertTrue("Content is empty", pos >= 0);
+            assertTrue("Content not found: \"Pile of poo \" -- Content:\n" + content, pos >= 0);
 
             pos += s.length();
             assertEquals("Missing \\uD83D unicode", (int) '\uD83D', (int) content.charAt(pos++));
