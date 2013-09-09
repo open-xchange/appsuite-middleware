@@ -52,7 +52,6 @@ package com.openexchange.secret.recovery.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.apache.commons.logging.Log;
-import org.osgi.framework.Constants;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -69,6 +68,8 @@ import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.secret.recovery.impl.FastSecretInconsistencyDetector;
 import com.openexchange.session.Session;
+import com.openexchange.session.SetableSession;
+import com.openexchange.session.SetableSessionFactory;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
@@ -120,12 +121,12 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
             registerService(SecretMigrator.class, detector); // Needs Migration as well
 
             whiteboardEncryptedItemDetector.open();
-            
+
             final ServiceSet<SecretMigrator> secretMigrators = new ServiceSet<SecretMigrator>();
             track(SecretMigrator.class, secretMigrators);
-            
+
             openTrackers();
-            
+
             /*
              * Register appropriate event handler
              */
@@ -136,14 +137,22 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
                     @Override
                     public void handleEvent(final Event event) {
                         final String oldPassword = (String) event.getProperty("com.openexchange.passwordchange.oldPassword");
-                        // final String newPassword = (String) event.getProperty("com.openexchange.passwordchange.newPassword");
-                        final Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
-                        // Current secret
-                        final String secret = whiteboardSecretService.getSecret(session);
-                        // Try to migrate
+                        final String newPassword = (String) event.getProperty("com.openexchange.passwordchange.newPassword");
+                        final SetableSession setableSession = SetableSessionFactory.getFactory().setableSessionFor((Session) event.getProperty("com.openexchange.passwordchange.session"));
+
+                        // Old secret
+                        setableSession.setPassword(oldPassword);
+                        final String oldSecret = whiteboardSecretService.getSecret(setableSession);
+
+                        // New secret
+                        setableSession.setPassword(newPassword);
+                        final String newSecret = whiteboardSecretService.getSecret(setableSession);
+
+                        // Try to migrate with new password applied to session
                         try {
-                            for(SecretMigrator migrator: secretMigrators) {
-                                migrator.migrate(oldPassword, secret, ServerSessionAdapter.valueOf(session));
+                            final ServerSession serverSession = ServerSessionAdapter.valueOf(setableSession);
+                            for (final SecretMigrator migrator : secretMigrators) {
+                                migrator.migrate(oldSecret, newSecret, serverSession);
                             }
                         } catch (final Exception e) {
                             log.warn("Password change event could not be handled.", e);

@@ -282,6 +282,32 @@ public class Streams {
     }
 
     /**
+     * Counts the number of bytes readable from specified input stream.
+     * <p>
+     * The input stream will be closed orderly.
+     *
+     * @param in The input stream
+     * @return The number of bytes
+     * @throws IOException If an I/O error occurs
+     */
+    public static long countInputStream(final InputStream in) throws IOException {
+        if (null == in) {
+            return 0L;
+        }
+        try {
+            final int blen = 2048;
+            final byte[] buf = new byte[blen];
+            long count = 0;
+            for (int read; (read = in.read(buf, 0, blen)) > 0;) {
+                count += read;
+            }
+            return count;
+        } finally {
+            close(in);
+        }
+    }
+
+    /**
      * Safely closes specified {@link Closeable} instance.
      *
      * @param toClose The {@link Closeable} instance

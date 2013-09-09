@@ -57,6 +57,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -108,7 +109,18 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
         try {
             reader = new BufferedReader(new InputStreamReader(ical, Charsets.UTF_8));
 
-            net.fortuna.ical4j.model.Calendar calendar = parse(reader);
+            final net.fortuna.ical4j.model.Calendar calendar;
+            {
+                final List<Exception> exceptions = new LinkedList<Exception>();
+                calendar = parse(reader, exceptions);
+                if (null == calendar) {
+                    if (exceptions.isEmpty()) {
+                        throw new ConversionError(-1, ConversionWarning.Code.PARSE_EXCEPTION, "iCalendar object could not be parsed");
+                    }
+                    final Exception cause = exceptions.get(0);
+                    throw new ConversionError(-1, ConversionWarning.Code.PARSE_EXCEPTION, cause, cause.getMessage());
+                }
+            }
 
             boolean microsoft = looksLikeMicrosoft(calendar);
 

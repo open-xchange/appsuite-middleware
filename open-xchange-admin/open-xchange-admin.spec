@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 14
+%define        ox_release 17
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -158,6 +158,12 @@ fi
 %doc com.openexchange.admin/ChangeLog
 
 %changelog
+* Thu Sep 05 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-09-05
+* Mon Sep 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-09-26
+* Fri Aug 30 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-08-30
 * Thu Aug 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-08-22
 * Tue Aug 20 2013 Marcus Klein <marcus.klein@open-xchange.com>

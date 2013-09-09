@@ -1,3 +1,7 @@
+* 2013-09-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28673: Removed the warning on password change that rather acts as information message
+
 * 2013-09-03 - dennis.sieben@open-xchange.com
 
  - Fix for bug 28658: Removed special handling
@@ -9,6 +13,11 @@
 * 2013-09-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 28642: Apply sanitizing to text/xml MIME types, too
+
+* 2013-08-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28602: Don't close ThresholdFileHolder instance
+ - Fix for bug 27866: Handle possible null return value from iCal parse attempt
 
 * 2013-08-16 - tobias.friedrich@open-xchange.com
 
