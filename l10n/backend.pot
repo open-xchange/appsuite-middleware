@@ -10845,25 +10845,25 @@ msgid "Shared folder %1$s must not be updated in context %2$s"
 msgstr ""
 
 #. *
-#. * The attribute %1$s contains too much characters. Current length %3$s is more than allowed length of %2$s characters.
+#. * The value for attribute %1$s contains more than the allowed number of %2$d characters.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:427
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:428
 msgid ""
-"he attribute %1$s contains too many characters. Current length %3$d is more "
-"than allowed length of %2$d characters."
+"The value for attribute %1$s contains more than the allowed number of %2$d "
+"characters."
 msgstr ""
 
 #. *
 #. * Unable to map OCL permission value %1$s to a JSON permission value
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:431
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:432
 msgid "Unable to map OCL permission value %1$s to a JSON permission value"
 msgstr ""
 
 #. *
 #. * Folder existence cannot be checked due to insufficient folder information
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:435
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:436
 msgid ""
 "Folder existence cannot be checked due to insufficient folder information"
 msgstr ""
@@ -10871,28 +10871,28 @@ msgstr ""
 #. *
 #. * A runtime error occurred in context %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:439
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:440
 msgid "A runtime error occurred in context %1$s"
 msgstr ""
 
 #. *
 #. * This method is not applicable to an IMAP permission.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:443
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:444
 msgid "This method is not applicable to an IMAP permission."
 msgstr ""
 
 #. *
 #. * No subfolder creation underneath shared folder %1$s in context %2$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:447
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:448
 msgid "No subfolder creation below shared folder %1$s in context %2$s"
 msgstr ""
 
 #. *
 #. * User %1$s granted invalid permissions on shared folder %2$s in context %3$s. Only the owner of the parent shared folder %4$s can administrate the folder.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:451
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:452
 msgid ""
 "User %1$s granted invalid permissions on shared folder %2$s in context %3$s. "
 "Only the owner of the parent shared folder %4$s can administrate the folder."
@@ -10901,14 +10901,14 @@ msgstr ""
 #. *
 #. * Owner %1$s of default folder %2$s must keep the folder admin permission
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:455
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:456
 msgid "Owner %1$s of default folder %2$s must keep the folder admin permission"
 msgstr ""
 
 #. *
 #. * User %1$s is not allowed to share folder %2$s in context %3$s due to user configuration
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:459
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:460
 msgid ""
 "User %1$s is not allowed to share folder %2$s in context %3$s due to user "
 "configuration"
@@ -10918,7 +10918,7 @@ msgstr ""
 #. * The permissions for the user %1$s are limited. It is not possible to grant this user the wanted permissions for the folder %2$s
 #. * in context %3$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:464
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:465
 msgid ""
 "The permissions for the user %1$s are limited. It is not possible to grant "
 "this user the wanted permissions for the folder %2$s in context %3$s."
@@ -10928,7 +10928,7 @@ msgstr ""
 #. * Folder %1$s in context %2$s contains a hidden subfolder. User %3$s has no delete rights for this subfolder and consequently
 #. * cannot delete its parent folder.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:469
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:470
 msgid ""
 "Folder %1$s in context %2$s contains a hidden subfolder. User %3$s has no "
 "delete rights for this subfolder and consequently cannot delete its parent "
@@ -10938,7 +10938,7 @@ msgstr ""
 #. *
 #. * An infostore folder named %1$s already exists below folder %2$s (%3$s) in context %4$s. Please choose another display name.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:473
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:474
 msgid ""
 "An infostore folder named %1$s already exists below folder %2$s (%3$s) in "
 "context %4$s. Please choose another display name."
@@ -10947,7 +10947,7 @@ msgstr ""
 #. *
 #. * Folder contains invalid data: "%1$s"
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:477
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:478
 msgid "Folder contains invalid data: \"%1$s\""
 msgstr ""
 
@@ -10955,7 +10955,7 @@ msgstr ""
 #. * You already share a personal folder named "%1$s" with the same user. You can not share two folders with exactly the same name
 #. * with a user. Please rename the folder before sharing it with this user.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:482
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:483
 msgid ""
 "You already share a personal folder named \"%1$s\" with the same user. You "
 "can not share two folders with exactly the same name with a user. Please "
@@ -10965,14 +10965,14 @@ msgstr ""
 #. *
 #. * Folder module cannot be updated since folder is not empty
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:486
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:487
 msgid "Folder module cannot be updated since folder is not empty"
 msgstr ""
 
 #. *
 #. * Duplicate permission defined for user %1$s. Only one permission per user is allowed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:490
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:491
 msgid ""
 "Duplicate permission defined for user %1$s. Only one permission per user is "
 "allowed."
@@ -10981,7 +10981,7 @@ msgstr ""
 #. *
 #. * Duplicate permission defined for group %1$s. Only one permission per group is allowed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:494
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:495
 msgid ""
 "Duplicate permission defined for group %1$s. Only one permission per group "
 "is allowed."
@@ -10990,7 +10990,7 @@ msgstr ""
 #. *
 #. * Only the folder visibility permission is allowed to be changed for folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:498
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:499
 msgid ""
 "Only the folder visibility permission is allowed to be changed for folder "
 "%1$s in context %2$s."
@@ -10999,7 +10999,7 @@ msgstr ""
 #. *
 #. * Only individual user permissions, but no group permissions are allowed for folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:502
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:503
 msgid ""
 "Only individual user permissions, but no group permissions are allowed for "
 "folder %1$s in context %2$s."
@@ -11008,7 +11008,7 @@ msgstr ""
 #. *
 #. * No individual user permissions are allowed for folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:506
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:507
 msgid ""
 "No individual user permissions are allowed for folder %1$s in context %2$s."
 msgstr ""
@@ -11016,14 +11016,14 @@ msgstr ""
 #. *
 #. * Folder module must not be updated.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:510
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:511
 msgid "Folder module must not be updated."
 msgstr ""
 
 #. *
 #. * The module of a default folder must not be changed.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:514
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:515
 msgid "The module of a default folder must not be changed."
 msgstr ""
 
@@ -11033,21 +11033,21 @@ msgstr ""
 #. * No necessary rename access granted for update operation
 #. * </p>
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:521
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:522
 msgid "User %1$s must not rename folder %2$s in context %3$s"
 msgstr ""
 
 #. *
 #. * Failed to create folder. Please retry.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:525
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:526
 msgid "Failed to create folder. Please retry."
 msgstr ""
 
 #. *
 #. * Delete cannot be performed because of locked documents in folder %1$s in context %2$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:529
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:530
 msgid ""
 "Delete cannot be performed because of locked documents in folder %1$s in "
 "context %2$s."
@@ -11056,17 +11056,17 @@ msgstr ""
 #. *
 #. * Operation may only be performed for context administrator.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:533
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:534
 msgid "Operation may only be performed for context administrator."
 msgstr ""
 
 #. Folder %1$s must not be deleted in context %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:536
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:537
 msgid "Folder %1$s must not be deleted in context %2$s."
 msgstr ""
 
 #. Owner %1$s of folder %2$s has been restored to keep the folder admin permission
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:539
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:540
 msgid ""
 "Owner %1$s of folder %2$s has been restored to keep the folder admin "
 "permission"
