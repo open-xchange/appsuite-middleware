@@ -27,12 +27,14 @@ modules/mail/appendmailtext > io.ox/mail//appendMailTextOnReply
 modules/mail/deletemail > io.ox/mail//removeDeletedPermanently
 modules/mail/forwardmessage > io.ox/mail//forwardMessageAs
 modules/mail/allowhtmlimages > io.ox/mail//allowHtmlImages
-modules/mail/emoticons > io.ox/mail//displayEmomticons
+modules/mail/inlineattachments > io.ox/mail//allowHtmlMessages
+modules/mail/emoticons > io.ox/mail//displayEmoticons
 modules/mail/colorquoted > io.ox/mail//isColorQuoted
 mail/folder > io.ox/mail//folder
 mail/vcard > io.ox/mail//vcard
 ui/mail/replyTo > io.ox/mail//showReplyTo
 modules/mail/linewrap > io.ox/mail//lineWrapAfter
+modules/mail/vcard > io.ox/mail//appendVcard
 
 # CalDAV
 modules/caldav/active > io.ox/caldav//active
