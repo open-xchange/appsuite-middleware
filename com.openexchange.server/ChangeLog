@@ -1,3 +1,7 @@
+* 2013-09-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28734: Upgraded iCal4j library to version 1.0.4. 
+
 * 2013-09-06 - dennis.sieben@open-xchange.com
 
  - Fix for bug 28736: Now using File.createTempFile for temp files

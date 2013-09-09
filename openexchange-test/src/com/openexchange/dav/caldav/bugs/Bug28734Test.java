@@ -49,39 +49,47 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.TimeZone;
+import com.openexchange.dav.caldav.CalDAVTest;
+import com.openexchange.dav.caldav.ICalResource;
+import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link CalDAVBugSuite}
+ * {@link Bug28734Test}
+ *
+ * ical calendar shows WebUI created appointments in incorrect time zone (+1 hour)
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class CalDAVBugSuite {
+public class Bug28734Test extends CalDAVTest {
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(Bug21794Test.class);
-        suite.addTestSuite(Bug22094Test.class);
-        suite.addTestSuite(Bug22352Test.class);
-        suite.addTestSuite(Bug22338Test.class);
-        suite.addTestSuite(Bug22395Test.class);
-        suite.addTestSuite(Bug22451Test.class);
-        suite.addTestSuite(Bug22723Test.class);
-        suite.addTestSuite(Bug23067Test.class);
-        suite.addTestSuite(Bug23167Test.class);
-        suite.addTestSuite(Bug23181Test.class);
-        suite.addTestSuite(Bug22689Test.class);
-        suite.addTestSuite(Bug23610Test.class);
-        suite.addTestSuite(Bug23612Test.class);
-        suite.addTestSuite(Bug24682Test.class);
-        suite.addTestSuite(Bug25783Test.class);
-        suite.addTestSuite(Bug25672Test.class);
-        suite.addTestSuite(Bug26957Test.class);
-        suite.addTestSuite(Bug27224Test.class);
-        suite.addTestSuite(Bug27309Test.class);
-        suite.addTestSuite(Bug28490Test.class);
-        suite.addTestSuite(Bug28734Test.class);
-        return suite;
-    }
+	public Bug28734Test(String name) {
+		super(name);
+	}
+
+	public void testTimeZoneHongKong() throws Exception {
+		/*
+		 * create appointment in timezone on server
+		 */
+		String uid = randomUID();
+        Appointment appointment = new Appointment();
+        appointment.setUid(uid);
+        appointment.setTitle(getClass().getCanonicalName());
+        appointment.setIgnoreConflicts(true);
+        appointment.setStartDate(TimeTools.D("september on friday at 20:00", TimeZone.getTimeZone("Asia/Hong_Kong")));
+        appointment.setEndDate(TimeTools.D("september on friday at 21:00", TimeZone.getTimeZone("Asia/Hong_Kong")));
+        appointment.setTimezone("Asia/Hong_Kong");
+        super.create(appointment);
+        super.rememberForCleanUp(appointment);
+        /*
+         * verify appointment timezone on client
+         */
+        ICalResource iCalResource = super.get(uid, null);
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
+        assertTrue("DTSTART wrong", iCalResource.getVEvent().getPropertyValue("DTSTART").endsWith("T200000"));
+        assertTrue("DTEND wrong", iCalResource.getVEvent().getPropertyValue("DTEND").endsWith("T210000"));
+	}
+
 }
