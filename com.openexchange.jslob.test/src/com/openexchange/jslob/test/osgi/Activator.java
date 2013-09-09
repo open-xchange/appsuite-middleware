@@ -76,11 +76,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("test1", true);
-        jsonObject.put("test2", -1);
-        registerService(SharedJSlobService.class, new SimSharedJSlobService(jsonObject));
-        // Register event handler
         EventHandler eventHandler = new EventHandler() {
 
             @Override
@@ -92,6 +87,11 @@ public class Activator extends HousekeepingActivator {
         Dictionary<String, Object> props = new Hashtable<String, Object>(1);
         props.put(EventConstants.EVENT_TOPIC, new String[] { SharedJSlobService.EVENT_ADDED });
         registerService(EventHandler.class, eventHandler, props);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("test1", true);
+        jsonObject.put("test2", -1);
+        registerService(SharedJSlobService.class, new SimSharedJSlobService(jsonObject));
+        // Register event handler
     }
 
 }
