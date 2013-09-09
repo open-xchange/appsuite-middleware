@@ -1,3 +1,7 @@
+* 2013-09-09 - martin.schneider@open-xchange.com
+
+ - Fix for bug 28261: Command line tool 'createcontext' returns proper information if 'user' parameter is set inadequate.
+
 * 2013-09-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 28745: User proper charset encoding when generating user's vCard
