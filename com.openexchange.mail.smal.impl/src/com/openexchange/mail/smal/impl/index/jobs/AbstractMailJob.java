@@ -78,6 +78,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailUUID;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.service.indexing.IndexingJob;
 
 
@@ -123,7 +124,7 @@ public abstract class AbstractMailJob implements IndexingJob {
                  * Avoid memory leak in java mail implementation
                  */
                 if (messageStorage instanceof IMailMessageStorageExt) {
-                    LOG.debug("Cleaning mail cache of com.sun.mail.imap.IMAPFolder...");
+                    LOG.trace("Cleaning mail cache of com.sun.mail.imap.IMAPFolder...");
                     ((IMailMessageStorageExt) messageStorage).clearCache();
                 }
 
@@ -147,7 +148,10 @@ public abstract class AbstractMailJob implements IndexingJob {
                             parser.parseMailMessage(message, handler);
                             attachments.addAll(handler.getAttachments());
                         } catch (Throwable t) {
-                            LOG.warn("Could not parse mail attachments. Indexing attachments will be skipped for this mail.", t);
+                            ExceptionUtils.handleThrowable(t);
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Attachments will be skipped for mail " + message.getMailId() + ".\nCause: " + t.getMessage() + "\n" + info.toString());
+                            }
                         }
                     }
                 }
