@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
@@ -178,7 +179,7 @@ public final class SendTest extends AbstractMailTest {
         if (null != folderAndID) {
             final GetResponse getResponse = Executor.execute(getSession(), new GetRequest(folderAndID[0], folderAndID[1]));
 
-            final String content = getResponse.getAttachments().getJSONObject(0).getString("content");
+            final String content = getResponse.getAttachments().getJSONObject(0).getString("content").replaceAll(Pattern.quote("&nbsp;"), " ");
             assertTrue("Content is empty", null != content && content.length() > 0);
 
             System.out.println("Huhuhuhuhuhuhuhu1234 with the content that will be asserted: " + content);
