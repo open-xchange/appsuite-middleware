@@ -233,6 +233,20 @@ public class Strings {
     }
 
     /**
+     * Replaces whitespaces in given string with specified <code>replacement</code>.
+     *
+     * @param s The string replacement
+     * @param replacement The string replacement
+     * @return The replaced string
+     */
+    public static String replaceWhitespacesWith(final String s, final String replacement) {
+        if (null == s) {
+            return null;
+        }
+        return P_SPLIT_WHITESPACE.matcher(s).replaceAll(null == replacement ? "" : quoteReplacement(replacement));
+    }
+
+    /**
      * Returns a literal replacement <code>String</code> for the specified <code>String</code>. This method produces a <code>String</code>
      * that will work as a literal replacement <code>s</code> in the <code>appendReplacement</code> method of the {@link Matcher} class. The
      * <code>String</code> produced will match the sequence of characters in <code>s</code> treated as a literal sequence. Slashes ('\') and

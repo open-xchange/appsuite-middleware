@@ -109,6 +109,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
@@ -147,6 +148,7 @@ import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Versit;
@@ -1003,12 +1005,17 @@ public class MimeMessageFiller {
              * Append VCard
              */
             AppendVCard: if (mail.isAppendVCard()) {
-                final String fileName =
-                    MimeUtility.encodeText(
-                        new com.openexchange.java.StringAllocator(UserStorage.getStorageUser(session.getUserId(), ctx).getDisplayName().replaceAll("\\s+", "")).append(
-                            ".vcf").toString(),
-                        charset,
-                        "Q");
+                final String fileName;
+                {
+                    final String displayName;
+                    if (session instanceof ServerSession) {
+                        displayName = ((ServerSession) session).getUser().getDisplayName();
+                    } else {
+                        displayName = UserStorage.getStorageUser(session.getUserId(), ctx).getDisplayName();
+                    }
+                    final String saneDisplayName = Strings.replaceWhitespacesWith(displayName, "");
+                    fileName = MimeUtility.encodeText(new StringAllocator(saneDisplayName).append(".vcf").toString(), charset, "Q");
+                }
                 for (int i = 0; i < size; i++) {
                     final MailPart part = mail.getEnclosedMailPart(i);
                     if (fileName.equalsIgnoreCase(part.getFileName())) {
@@ -1032,7 +1039,7 @@ public class MimeMessageFiller {
                      */
                     final ContentType ct = new ContentType(MimeTypes.MIME_TEXT_VCARD);
                     ct.setCharsetParameter(charset);
-                    vcardPart.setDataHandler(new DataHandler(new MessageDataSource(userVCard, ct)));
+                    vcardPart.setDataHandler(new DataHandler(new MessageDataSource(userVCard.getBytes(Charsets.forName(charset)), ct.toString())));
                     if (fileName != null && !ct.containsNameParameter()) {
                         ct.setNameParameter(fileName);
                     }
@@ -1203,7 +1210,7 @@ public class MimeMessageFiller {
                 final VersitObject versitObj = converter.convertContact(contact, "3.0");
                 final ByteArrayOutputStream os = new UnsynchronizedByteArrayOutputStream();
                 final VersitDefinition def = Versit.getDefinition(MimeTypes.MIME_TEXT_VCARD);
-                final VersitDefinition.Writer w = def.getWriter(os, MailProperties.getInstance().getDefaultMimeCharset());
+                final VersitDefinition.Writer w = def.getWriter(os, charset);
                 def.write(w, versitObj);
                 w.flush();
                 os.flush();
