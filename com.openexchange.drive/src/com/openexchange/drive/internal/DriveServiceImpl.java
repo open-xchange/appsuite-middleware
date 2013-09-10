@@ -476,14 +476,39 @@ public class DriveServiceImpl implements DriveService {
             }
             break;
         case REMOVE:
-            if (false == DriveConstants.EMPTY_MD5.equals(action.getVersion().getChecksum())) {
+            if (DriveConstants.EMPTY_MD5.equals(action.getVersion().getChecksum())) {
                 /*
-                 * move all files to temp folder
+                 * just delete empty directory
                  */
-                FileStoragePermission permission = session.getStorage().getOwnPermission(action.getVersion().getPath());
-                if (FileStoragePermission.DELETE_ALL_OBJECTS <= permission.getDeletePermission()) {
+                folderID = session.getStorage().deleteFolder(action.getVersion().getPath());
+                session.getChecksumStore().removeDirectoryChecksum(new FolderID(folderID));
+            } else if (session.hasTempFolder()) {
+                /*
+                 * move to temp
+                 */
+                FileStoragePermission sourceFolderPermission = session.getStorage().getOwnPermission(action.getVersion().getPath());
+                FileStoragePermission targetFolderPermission = session.getStorage().getOwnPermission(DriveConstants.TEMP_PATH);
+                if (FileStoragePermission.CREATE_SUB_FOLDERS <= targetFolderPermission.getDeletePermission() &&
+                    FileStoragePermission.MAX_PERMISSION <= sourceFolderPermission.getFolderPermission()) {
                     /*
-                     * move all files to temp folder
+                     * try to move whole directory to temp folder
+                     */
+                    String targetPath = DriveConstants.TEMP_PATH + '/' + action.getVersion().getChecksum();
+                    FileStorageFolder targetFolder = session.getStorage().optFolder(targetPath, false);
+                    if (null == targetFolder) {
+                        String currentFolderID = session.getStorage().getFolderID(action.getVersion().getPath());
+                        String movedFolderID = session.getStorage().moveFolder(action.getVersion().getPath(), targetPath);
+                        /*
+                         * update stored checksums if needed
+                         */
+                        if (false == currentFolderID.equals(movedFolderID)) {
+                            session.getChecksumStore().updateFileChecksumFolders(new FolderID(currentFolderID), new FolderID(movedFolderID));
+                            session.getChecksumStore().updateDirectoryChecksumFolder(new FolderID(currentFolderID), new FolderID(movedFolderID));
+                        }
+                    }
+                } else {
+                    /*
+                     * no permissions to move whole directory, try and preserve at least each file separately
                      */
                     List<FileChecksum> checksumsToUpdate = new ArrayList<FileChecksum>();
                     List<FileChecksum> checksumsToRemove = new ArrayList<FileChecksum>();
@@ -528,13 +553,20 @@ public class DriveServiceImpl implements DriveService {
                         }
                         session.getStorage().getFileAccess().removeDocument(ids, sequenceNumber);
                     }
+                    /*
+                     * delete (empty) directory
+                     */
+                    folderID = session.getStorage().deleteFolder(action.getVersion().getPath());
+                    session.getChecksumStore().removeDirectoryChecksum(new FolderID(folderID));
                 }
+            } else {
+                /*
+                 * no temp folder available, hard-delete directory + contents
+                 */
+                folderID = session.getStorage().deleteFolder(action.getVersion().getPath());
+                session.getChecksumStore().removeDirectoryChecksum(new FolderID(folderID));
+                session.getChecksumStore().removeFileChecksumsInFolder(new FolderID(folderID));
             }
-            /*
-             * delete directory
-             */
-            folderID = session.getStorage().deleteFolder(action.getVersion().getPath());
-            session.getChecksumStore().removeDirectoryChecksum(new FolderID(folderID));
             break;
         case SYNC:
             if (Boolean.TRUE.equals(action.getParameters().get(DriveAction.PARAMETER_RESET))) {
@@ -637,8 +669,6 @@ public class DriveServiceImpl implements DriveService {
                     throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(sourceVersion.getName(), sourceVersion.getChecksum(), path);
                 }
             }
-            boolean moveFromTemp = null != sourceFile.getVersion() && sourceFile.isCurrentVersion() && session.hasTempFolder() &&
-                sourceFile.getFolderId().equals(session.getStorage().getFolderID(DriveConstants.TEMP_PATH));
             File targetFile = null;
             if (null != action.getVersion()) {
                 File file = session.getStorage().findFileByName(path, action.getVersion().getName());
@@ -659,9 +689,9 @@ public class DriveServiceImpl implements DriveService {
                 session.getChecksumStore().removeFileChecksum(
                     fileID, targetFile.getVersion(), targetFile.getSequenceNumber());
             }
-            if (moveFromTemp) {
+            if (sourceFile.isCurrentVersion() && isFromTemp(session, sourceFile)) {
                 /*
-                 * move file, update stored checksum
+                 * restore from temp folder possible, move file & update stored checksum
                  */
                 File movedFile = null != targetFile ? session.getStorage().moveFile(sourceFile, targetFile) :
                     session.getStorage().moveFile(sourceFile, action.getNewVersion().getName(), path);
@@ -735,6 +765,18 @@ public class DriveServiceImpl implements DriveService {
         default:
             throw new IllegalStateException("Can't perform action " + action + " on server");
         }
+    }
+
+    private static boolean isFromTemp(SyncSession session, File file) throws OXException {
+        if (session.hasTempFolder()) {
+            String tempFolderID = session.getStorage().getFolderID(DriveConstants.TEMP_PATH);
+            if (tempFolderID.equals(file.getFolderId())) {
+                return true;
+            }
+            FileStorageFolder folder = session.getStorage().getFolderAccess().getFolder(file.getFolderId());
+            return null != folder && tempFolderID.equals(folder.getParentId());
+        }
+        return false;
     }
 
     private static List<ServerFileVersion> getServerFiles(SyncSession session, String path) throws OXException {
