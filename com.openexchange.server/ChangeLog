@@ -1,3 +1,7 @@
+* 2013-09-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28741: Orderly close opened 'Base64OutputStream'
+ 
 * 2013-09-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 28673: Removed the warning on password change that rather acts as information message
