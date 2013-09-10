@@ -1,6 +1,7 @@
 * 2013-09-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 28786: Honor possibly absent service during runtime
+ - Fix for bug 28741: Orderly close opened 'Base64OutputStream'
  
 * 2013-09-10 - martin.schneider@open-xchange.com
  
