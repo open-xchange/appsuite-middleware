@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_CN.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: DATE\n"
-"PO-Revision-Date: 2013-08-23 21:06+1000\n"
+"PO-Revision-Date: 2013-09-09 19:09+1000\n"
 "Last-Translator: \n"
 "Language-Team: Simplified Chinese <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1813,6 +1813,14 @@ msgstr "无视文件名称 \"%1$s\""
 msgid "The path \"%1$s\" is conflicting"
 msgstr "冲突路径 \"%1$s\""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:82
+msgid "The file version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr "无效的文件版本 \"%1$s\" 和校验 \"%2$s\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:83
+msgid "The directory version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr "无效目录版本 \"%1$s\" 和 校验 \"%2$s\""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:63
 msgid "An error occurred for action: %1$s"
 msgstr "命令出现一个错误：%1$s"
@@ -3082,8 +3090,10 @@ msgid "The grizzly server could not be started"
 msgstr "服务器无法启动"
 
 #. * The following needed service is missing: \"%1$s\"
+#. The following needed service is missing: "%1$s"
+#. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
@@ -11607,6 +11617,13 @@ msgstr "操作只能由环境管理员执行。"
 msgid "Folder %1$s must not be deleted in context %2$s."
 msgstr "不能在环境 %2$s 中删除文件夹 %1$s。"
 
+#. Owner %1$s of folder %2$s has been restored to keep the folder admin permission
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:539
+msgid ""
+"Owner %1$s of folder %2$s has been restored to keep the folder admin "
+"permission"
+msgstr "拥有人 %1$s （文件夹 %2$s）已被恢复以保留文件夹管理权限"
+
 #. Unknown AJAX action: %s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:70
 msgid "Unknown AJAX action: %s."
@@ -12452,6 +12469,11 @@ msgstr "您要先创建一个 OAuth-account，以访问此服务。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:129
 msgid "An unexpected error occurred: %1$s."
 msgstr "出现一个意外错误：%1$s。"
+
+#. Please specify your full E-Mail address as login name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:132
+msgid "Please specify your full E-Mail address as login name."
+msgstr "请指定您的完整电子邮件地址作为登陆名称。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "Verify file system and templates."
