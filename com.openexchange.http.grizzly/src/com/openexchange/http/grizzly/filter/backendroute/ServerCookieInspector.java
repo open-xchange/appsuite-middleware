@@ -143,8 +143,8 @@ public class ServerCookieInspector extends AbstractCookieInspector {
      * @return true if either the request is over a secure connection or the server enforces https.
      */
     private boolean isSecure() {
-        final ConfigurationService configService = Services.getService(ConfigurationService.class);
-        final boolean forceHttps = configService.getBoolProperty("com.openexchange.forceHTTPS", true);
+        final ConfigurationService configService = Services.optService(ConfigurationService.class);
+        final boolean forceHttps = null == configService || configService.getBoolProperty("com.openexchange.forceHTTPS", true);
         if (forceHttps && !com.openexchange.tools.servlet.http.Cookies.isLocalLan(httpResponsePacket.getRequest().getRemoteHost())) {
             // Speak HTTPS with all non-local LAN endpoints
             return true;

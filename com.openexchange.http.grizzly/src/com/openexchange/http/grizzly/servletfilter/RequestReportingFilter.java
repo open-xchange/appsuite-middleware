@@ -96,7 +96,7 @@ public class RequestReportingFilter implements Filter {
      * @throws OXException If initialization fails
      */
     public RequestReportingFilter() throws OXException {
-        final ConfigurationService configService = Services.getService(ConfigurationService.class);
+        final ConfigurationService configService = Services.optService(ConfigurationService.class);
         if (configService == null) {
             throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ConfigurationService.class.getSimpleName());
         }
@@ -116,7 +116,7 @@ public class RequestReportingFilter implements Filter {
             if (isLongRunning(httpServletRequest)) { // don't track long running requests
                 chain.doFilter(request, response);
             } else {
-                final RequestWatcherService requestWatcherService = Services.getService(RequestWatcherService.class);
+                final RequestWatcherService requestWatcherService = Services.optService(RequestWatcherService.class);
                 // Request watcher is enabled but service is missing, bundle not started etc ..
                 if (requestWatcherService == null) {
                     LOG.warn("RequestWatcherService is not available. Unable to watch this request.");

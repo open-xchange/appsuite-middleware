@@ -1,3 +1,11 @@
+* 2013-09-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28786: Honor possibly absent service during runtime
+ 
+* 2013-09-10 - martin.schneider@open-xchange.com
+ 
+ - Fix for bug 28759, start parsing css with correct matched character
+
 * 2013-09-09 - martin.schneider@open-xchange.com
 
  - Fix for bug 28261: Command line tool 'createcontext' returns proper information if 'user' parameter is set inadequate.

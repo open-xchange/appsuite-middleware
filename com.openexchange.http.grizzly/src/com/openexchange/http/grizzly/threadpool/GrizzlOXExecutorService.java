@@ -78,7 +78,7 @@ public class GrizzlOXExecutorService extends GrizzlyExecutorService {
      */
     public GrizzlOXExecutorService(ThreadPoolConfig config) {
         super(config);
-        ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
+        ThreadPoolService threadPoolService = Services.optService(ThreadPoolService.class);
         if (threadPoolService == null) {
             throw new IllegalStateException(String.format(
                 GrizzlyExceptionMessage.NEEDED_SERVICE_MISSING_MSG,
