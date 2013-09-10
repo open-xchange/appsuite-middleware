@@ -8,6 +8,7 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.cache,
  com.openexchange.caching,
+ com.openexchange.config.cascade,
  com.openexchange.context,
  com.openexchange.crypto,
  com.openexchange.database,

@@ -51,6 +51,7 @@ package com.openexchange.snippet.rdb.osgi;
 
 import org.apache.commons.logging.Log;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
@@ -83,7 +84,7 @@ public class RdbSnippetActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             DatabaseService.class, GenericConfigurationStorageService.class, ContextService.class, CacheService.class, CryptoService.class,
-            IDGeneratorService.class };
+            IDGeneratorService.class, ConfigViewFactory.class };
     }
 
     @Override
