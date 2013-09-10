@@ -421,10 +421,11 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
      * Shared folder %1$s must not be updated in context %2$s
      */
     public final static String NO_SHARED_FOLDER_UPDATE_MSG = "Shared folder %1$s must not be updated in context %2$s";
+
     /**
-     * The attribute %1$s contains too much characters. Current length %3$s is more than allowed length of %2$s characters.
+     * The value for attribute %1$s contains more than the allowed number of %2$d characters. Current length: %3$d characters.
      */
-    public final static String TRUNCATED_MSG = "he attribute %1$s contains too many characters. Current length %3$d is more than allowed length of %2$d characters.";
+    public final static String TRUNCATED_MSG = "The value for attribute %1$s contains more than the allowed number of %2$d characters. Current length: %3$d characters.";
     /**
      * Unable to map OCL permission value %1$s to a JSON permission value
      */

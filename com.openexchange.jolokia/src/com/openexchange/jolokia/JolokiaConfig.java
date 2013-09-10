@@ -130,8 +130,21 @@ public class JolokiaConfig implements Initialization {
         this.jolokiaServletName = configService.getProperty("com.openexchange.jolokia.servlet.name", "/monitoring/jolokia");
         this.jolokiaStart = configService.getBoolProperty("com.openexchange.jolokia.start", false);
         this.user = configService.getProperty("com.openexchange.jolokia.user");
-        this.password = configService.getProperty("com.openexchange.jolokia.password", "secret");
+        this.password = configService.getProperty("com.openexchange.jolokia.password");
         this.restrictToLocalhost = configService.getBoolProperty("com.openexchange.jolokia.restrict.to.localhost", true);
+        
+        // only allow Jolokia to be started if user and password are set by admin
+        if (jolokiaStart){
+            if (!(null != user && user.length() != 0)) {
+                LOG.warn("No user set by com.openexchange.jolokia.user, Jolokia will not start");
+                jolokiaStart = false;
+            }
+            if (!(null != password && password.length() != 0)) {
+                LOG.warn("No password set by com.openexchange.jolokia.password, Jolokia will not start");
+                jolokiaStart = false;
+            }
+        }
+
 
         File xmlConfigFile = configService.getFileByName("jolokia-access.xml");
         if (null != xmlConfigFile) {

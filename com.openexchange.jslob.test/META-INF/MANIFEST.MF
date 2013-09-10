@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: com.openexchange.jslob.test
+Bundle-Name: Open-Xchange shared JSlob service test bundle
 Bundle-SymbolicName: com.openexchange.jslob.test
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 7.4.0
 Bundle-Activator: com.openexchange.jslob.test.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

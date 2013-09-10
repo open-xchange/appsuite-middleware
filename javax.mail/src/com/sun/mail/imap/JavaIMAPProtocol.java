@@ -106,6 +106,7 @@ public class JavaIMAPProtocol extends IMAPProtocol {
     /** The account identifier */
     private final int accountId;
 
+    /** The number of acquired permits */
     private final AtomicInteger permitCount;
 
     /**
@@ -162,7 +163,7 @@ public class JavaIMAPProtocol extends IMAPProtocol {
 
     }
 
-    private void acquirePermit(final String u, final String p, final int maxNumAuthenticated) throws ConnectQuotaExceededException, ProtocolException {
+    protected void acquirePermit(final String u, final String p, final int maxNumAuthenticated) throws ConnectQuotaExceededException, ProtocolException {
         final boolean debug = (logger.isLoggable(Level.FINE));
 
         Semaphore semaphore = this.semaphore;
@@ -218,7 +219,7 @@ public class JavaIMAPProtocol extends IMAPProtocol {
         }
     }
 
-    private void releasePermits() {
+    protected void releasePermits() {
         final Semaphore semaphore = this.semaphore;
         if (null != semaphore) {
             final int permits = permitCount.getAndSet(0);

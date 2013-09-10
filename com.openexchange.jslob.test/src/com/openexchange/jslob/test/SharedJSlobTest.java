@@ -49,10 +49,16 @@
 
 package com.openexchange.jslob.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
+import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobService;
+import com.openexchange.session.Session;
+import com.openexchange.session.SimSession;
 import com.openexchange.test.osgi.OSGiTest;
 
 /**
@@ -66,14 +72,15 @@ public class SharedJSlobTest implements OSGiTest {
 
     @Test
     public void testSharedJSlob() throws OXException, JSONException {
-//        assertNotNull("JSlob service was null", jslobService);
-//        JSlob jslob = jslobService.getShared("sharedjslob");
-//        assertNotNull("jslob was null", jslob);
-//        assertEquals("JSONObect's length was not 2", 2, jslob.getJsonObject().length());
-//        assertTrue("JSONObject has not key test1", jslob.getJsonObject().has("test1"));
-//        assertTrue("JSONObject has not key test2", jslob.getJsonObject().has("test2"));
-//        assertTrue("Key test1 was not true", jslob.getJsonObject().getBoolean("test1"));
-//        assertEquals("Key test2 was not -1", -1, jslob.getJsonObject().getInt("test2"));
+        Session session = new SimSession();
+        assertNotNull("JSlob service was null", jslobService);
+        JSlob jslob = jslobService.getShared("sharedjslob", session);
+        assertNotNull("jslob was null", jslob);
+        assertEquals("JSONObect's length was not 2", 2, jslob.getJsonObject().length());
+        assertTrue("JSONObject has not key test1", jslob.getJsonObject().has("test1"));
+        assertTrue("JSONObject has not key test2", jslob.getJsonObject().has("test2"));
+        assertTrue("Key test1 was not true", jslob.getJsonObject().getBoolean("test1"));
+        assertEquals("Key test2 was not -1", -1, jslob.getJsonObject().getInt("test2"));
     }
 
     public static void setJSlobService(JSlobService service) {

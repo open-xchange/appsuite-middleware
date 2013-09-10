@@ -106,6 +106,15 @@ public class IntermediateSyncResult<T extends DriveVersion> {
         return actionsForClient;
     }
 
+    /**
+     * Gets the total number of actions, both for server and client.
+     *
+     * @return The length
+     */
+    public int length() {
+        return (null == actionsForServer ? 0 : actionsForServer.size()) + (null == actionsForClient ? 0 : actionsForClient.size());
+    }
+
     @Override
     public String toString() {
         StringAllocator stringAllocator = new StringAllocator();

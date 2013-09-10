@@ -49,6 +49,7 @@
             <test name="com.openexchange.admin.rmi.ResourceTest" todir="${logDir}"/>
             <test name="com.openexchange.admin.rmi.UserTest" todir="${logDir}"/>
             <test name="com.openexchange.admin.rmi.GroupTest" todir="${logDir}"/>
+            <test name="com.openexchange.admin.user.copy.rmi.RoundtripTest" todir="${logDir}"/>
             <formatter type="xml"/>
             <sysproperty key="rmi_test_host" value="${rmiHost}"/>
             <sysproperty key="rmi_test_dbhost" value="${rmiDatabase}"/>

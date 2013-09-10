@@ -62,6 +62,8 @@ import com.openexchange.java.StringAllocator;
 public class Tracer {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(Tracer.class);
+    private static final int MAX_SIZE = 20000;
+
     private final StringAllocator traceLog;
 
     /**
@@ -86,10 +88,27 @@ public class Tracer {
                 LOG.trace(msg);
             }
             if (null != traceLog) {
-                traceLog
-                    .append(DriveConstants.LOG_DATE_FORMAT.get().format(new Date()))
-                    .append(" [").append(Thread.currentThread().getId()).append("] : ")
-                    .append(msg.trim()).append("\n\n");
+                int remainingCapacity = MAX_SIZE - traceLog.length();
+                if (0 < remainingCapacity) {
+                    traceLog.append(DriveConstants.LOG_DATE_FORMAT.get().format(new Date()))
+                        .append(" [").append(Thread.currentThread().getId()).append("] : ");
+                    if (msg.length() <= remainingCapacity) {
+                        traceLog.append(msg.trim()).append("\n\n");
+                    } else {
+                        traceLog.append(msg.substring(0, remainingCapacity)).append("\n... (truncated)");
+                    }
+                }
+//                if (traceLog.length() + msg.length() < MAX_SIZE) {
+//                    traceLog
+//                        .append(DriveConstants.LOG_DATE_FORMAT.get().format(new Date()))
+//                        .append(" [").append(Thread.currentThread().getId()).append("] : ")
+//                        .append(msg.trim()).append("\n\n");
+//                } else {
+//                    String end = traceLog.substring(traceLog.length() - 20, traceLog.length());
+//                    if (false == end.endsWith("\n... (truncated)")) {
+//                        traceLog.append("\n... (truncated)");
+//                    }
+//                }
             }
         }
     }

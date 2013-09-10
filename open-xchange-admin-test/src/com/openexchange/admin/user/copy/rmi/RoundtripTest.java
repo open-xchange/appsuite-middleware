@@ -51,6 +51,7 @@ package com.openexchange.admin.user.copy.rmi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -69,10 +70,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Test;
+
 import com.openexchange.admin.rmi.AbstractRMITest;
+import com.openexchange.admin.rmi.AbstractTest;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -170,6 +174,7 @@ public class RoundtripTest extends AbstractRMITest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        superAdminCredentials = AbstractTest.DummyMasterCredentials();
         ci = getContextInterface();
         Context[] contexts = ci.list("UserMove*", superAdminCredentials);
         for (Context ctx : contexts) {
@@ -406,6 +411,11 @@ public class RoundtripTest extends AbstractRMITest {
         ci.delete(dstCtx, superAdminCredentials);
         super.tearDown();
         System.gc();
+    }
+    
+    @Override
+    public String getRMIHostUrl(String classname) {
+    	return AbstractTest.getRMIHostUrl() + classname;
     }
 
     private OXUserCopyInterface getUserMoveClient() throws MalformedURLException, RemoteException, NotBoundException {

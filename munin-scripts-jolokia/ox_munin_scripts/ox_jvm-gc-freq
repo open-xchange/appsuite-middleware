@@ -51,16 +51,16 @@ my $jmx = new JMX::Jmx4Perl(url => $ENV{oxJolokiaUrl},
 user => $ENV{oxJolokiaUser},
 password => $ENV{oxJolokiaPassword});
 
-### test if a connection can be made
+### Test if a connection can be made
 my $request = new JMX::Jmx4Perl::Request({type => AGENT_VERSION});
 my $response = $jmx->request($request);
 if ($response->is_error()){
 	my $status = $response->status();
 	if ($status == 404) {
-		die "Link to servlet might be wrong";
+		die "Link to servlet might not be set correctly, this can be done by altering /etc/munin/plugin-conf.d/ox and setting the correct path to your jolokia servlet";
 	}
 	elsif ($status == 401) {
-		die "Credentials to login might be wrong";
+		die "Credentials to login might be not set correctly. The credentials are set inside /opt/open-xchange/etc/jolokia.properties on the OX, for munin, those need to be altered at /etc/munin/plugin-conf.d/ox";
 	}
 	else {
 		die "Something went wrong ",$status;

@@ -79,8 +79,13 @@ public abstract class Synchronizer<T extends DriveVersion> {
 
     public IntermediateSyncResult<T> sync() throws OXException {
         IntermediateSyncResult<T> result = new IntermediateSyncResult<T>();
+        int maxActions = getMaxActions();
         for (Entry<String, ThreeWayComparison<T>> entry : mapper) {
             process(result, entry.getValue());
+            if (result.length() > maxActions) {
+                session.trace("Interrupting processing since the maximum number of actions (" + maxActions + ") is exceeded.");
+                break;
+            }
         }
         return result;
     }
@@ -116,5 +121,14 @@ public abstract class Synchronizer<T extends DriveVersion> {
     protected abstract void processClientChange(IntermediateSyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException;
 
     protected abstract void processConflictingChange(IntermediateSyncResult<T> result, ThreeWayComparison<T> comparison) throws OXException;
+
+    /**
+     * Gets the maximum number of actions to be evaluated per synchronization request. Any further open actions will need to be handled in
+     * consecutive synchronizations. A smaller value will lead to faster responses for the client and less resource utilization on the
+     * backend, but increases the chance of rename- and move-optimizations not being detected.
+     *
+     * @return The maximum number of actions
+     */
+    protected abstract int getMaxActions();
 
 }

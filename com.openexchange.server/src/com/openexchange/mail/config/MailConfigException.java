@@ -86,7 +86,7 @@ public final class MailConfigException extends OXException {
      * Constructs a new exception from the given <code>Exception</code> instance.
      */
     public static OXException create(final Exception e) {
-        return MailExceptionCode.CONFIG_ERROR.create(e, new Object[0]);
+        return MailExceptionCode.CONFIG_ERROR.create(e, e.getMessage());
     }
 
 }

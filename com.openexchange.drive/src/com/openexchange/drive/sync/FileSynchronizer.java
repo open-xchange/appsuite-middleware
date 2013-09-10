@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
@@ -66,6 +67,7 @@ import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.comparison.ThreeWayComparison;
 import com.openexchange.drive.comparison.VersionMapper;
+import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.internal.UploadHelper;
 import com.openexchange.drive.storage.DriveConstants;
@@ -137,6 +139,16 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
 
         }
         return syncResult;
+    }
+
+    @Override
+    protected int getMaxActions() {
+        int defaultValue = 500;
+        ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
+        if (null != configService) {
+            return configService.getIntProperty("com.openexchange.drive.maxDirectoryActions", defaultValue);
+        }
+        return defaultValue;
     }
 
     @Override

@@ -118,10 +118,19 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
                         throw e;
                     }
                     // None available -- await
-                    availableQueue.awaitNotEmpty(45L, TimeUnit.SECONDS);
-                    // System.out.println("IMAPStoreContainer.getStore(): Retry obtaining IMAPStore instance.");
-                    if (DEBUG) {
-                        LOG.debug("IMAPStoreContainer.getStore(): Retry obtaining IMAPStore instance.");
+                    final IMAPStoreWrapper polled = availableQueue.poll(10, TimeUnit.SECONDS);
+                    if (null == polled) {
+                        // System.out.println("IMAPStoreContainer.getStore(): Retry obtaining IMAPStore instance.");
+                        if (DEBUG) {
+                            LOG.debug("IMAPStoreContainer.getStore(): Retry obtaining IMAPStore instance.");
+                        }
+                    } else {
+                        imapStore = polled.imapStore;
+                        // System.out.println("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance." + imapStore.toString() + "-" +
+                        // imapStore.hashCode());
+                        if (DEBUG) {
+                            LOG.debug("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance. " + imapStore.toString() + " -- " + imapStore.hashCode());
+                        }
                     }
                 }
             } else {

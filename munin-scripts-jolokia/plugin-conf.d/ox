@@ -1,5 +1,7 @@
 [ox_*]
 timeout 15
 env.oxJolokiaUrl http://localhost:8009/monitoring/jolokia
-env.oxJolokiaUser oxadmin
-env.oxJolokiaPassword secret
+### oxJolokiaUser must be the same as com.openexchange.jolokia.user inside jolokia.properties
+env.oxJolokiaUser 
+### oxJolokiaPassword must be the same as com.openexchange.jolokia.password inside jolokia.properties
+env.oxJolokiaPassword 
