@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.ja_JP\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-08-19 14:17+0900\n"
+"PO-Revision-Date: 2013-09-09 10:08+0900\n"
 "Last-Translator: \n"
 "Language-Team:  <ja@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -757,15 +757,15 @@ msgstr "仮承諾"
 #. Used if a participant changed it status to either 'Accepted', 'Denied', or 'Tentatively accepted'
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:148
 msgid "%1$s sets the status to %2$s for this appointment:"
-msgstr "%1$s がこのアポイントの状態を %2$s に設定しました: "
+msgstr "%1$s がこのアポイントのステータスを %2$s に設定しました: "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:150
 msgid "On behalf of %3$s, %1$s sets the status for this appointment to %2$s:"
-msgstr "%1$s は %3$s の代理でこのアポイントの状態を %2$s に設定しました:"
+msgstr "%1$s は %3$s の代理でこのアポイントのステータスを %2$s に設定しました:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:152
 msgid "On your behalf, %1$s sets your status for this appointment to %2$s:"
-msgstr "%1$s はあなたの代理で次のアポイントの状態を %2$s に設定しました:"
+msgstr "%1$s はあなたの代理で次のアポイントのステータスを %2$s に設定しました:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:154
 msgid "none"
@@ -1024,7 +1024,7 @@ msgstr "次のアポイントに対する新しい日時指定: %1$s"
 #. Used to indicate that a participant resetted his status to 'Waiting'; neither 'Accepted, 'Denied' nor 'Tentatively accepted'
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:286
 msgid "%1$s sets the status to 'none' for: %1$s"
-msgstr "%1$s が次の状態を「なし」に設定しました: %1$s"
+msgstr "%1$s が次のステータスを「なし」に設定しました: %1$s"
 
 #. Example: Subject: Doe, Jane accepted the invitation: My Appointment with Jane
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:289
@@ -1865,6 +1865,18 @@ msgstr "ファイル名 \"%1$s\" は無視されます。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:81
 msgid "The path \"%1$s\" is conflicting"
 msgstr "パス \"%1$s\" が競合しています。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:82
+msgid "The file version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr ""
+"ファイル バージョン \"%1$s\" は無効です。このファイル バージョンのチェックサ"
+"ムは \"%2$s\" です。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:83
+msgid "The directory version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr ""
+"ディレクトリ バージョン \"%1$s\" は無効です。このディレクトリ バージョンの"
+"チェックサムは \"%2$s\" です。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:63
 msgid "An error occurred for action: %1$s"
@@ -2863,7 +2875,7 @@ msgid ""
 "An error occurred inside the Open-Xchange server which prevented it from "
 "fulfilling the request."
 msgstr ""
-"Open-Xchange サーバにエラーが発生したため、リクエストを実行できませんでした。"
+"Open-Xchange サーバにエラーが発生したため、リクエストを処理できませんでした。"
 
 #. The default message displayed to user when a re-try is recommended
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:69
@@ -3188,8 +3200,10 @@ msgid "The grizzly server could not be started"
 msgstr "Grizzly サーバを起動できませんでした。"
 
 #. * The following needed service is missing: \"%1$s\"
+#. The following needed service is missing: "%1$s"
+#. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
@@ -4876,7 +4890,7 @@ msgstr "レスポンスが次のタイプではありません: %1$s"
 #. Unexpected status %1$s (%2$s)
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:78
 msgid "Unexpected status %1$s (%2$s)"
-msgstr "次の予期しない状態が発生しました: %1$s (%2$s)"
+msgstr "次の予期しないステータスです: %1$s (%2$s)"
 
 #. Invalid URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:81
@@ -5981,7 +5995,7 @@ msgstr ""
 #. Unable to convert task status "%1$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:70
 msgid "Unable to convert task status \"%1$s\"."
-msgstr "仕事の状態 \"%1$s\" を変換できません。"
+msgstr "仕事のステータス \"%1$s\" を変換できません。"
 
 #. Unable to convert task priority %1$d.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:73
@@ -8587,7 +8601,7 @@ msgstr "優先度: %1$s"
 #. Status: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:743
 msgid "Status: %1$s"
-msgstr "状態: %1$s"
+msgstr "ステータス: %1$s"
 
 #. Delete exceptions: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:746
@@ -10195,7 +10209,8 @@ msgid ""
 "be present to determine if a mail folder create or update shall be performed"
 msgstr ""
 "フォルダ属性が不十分です: メール フォルダの作成や更新が必要かどうかを決定する"
-"には、存在の状態を指定するか、フォルダの完全名を入力する必要があります。"
+"には、存在のステータスを指定するか、フォルダの完全名を入力する必要がありま"
+"す。"
 
 #. *
 #. * Root folder must not be modified or deleted
@@ -12213,6 +12228,15 @@ msgstr "コンテキストの管理者のみが操作を実行できます。"
 msgid "Folder %1$s must not be deleted in context %2$s."
 msgstr "コンテキスト %2$s では、フォルダ %1$s を削除できません。"
 
+#. Owner %1$s of folder %2$s has been restored to keep the folder admin permission
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:539
+msgid ""
+"Owner %1$s of folder %2$s has been restored to keep the folder admin "
+"permission"
+msgstr ""
+"フォルダの管理者権限を維持するため、フォルダ %2$s の所有者 %1$s が復元されま"
+"した。"
+
 #. Unknown AJAX action: %s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:70
 msgid "Unknown AJAX action: %s."
@@ -12329,7 +12353,7 @@ msgstr "リクエストのボディが見つかりません。"
 #. An HTTP error occurred. Status %1$s. Message %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:140
 msgid "An HTTP error occurred. Status %1$s. Message %2$s."
-msgstr "HTTP エラーが発生しました。状態 %1$s メッセージ %2$s"
+msgstr "HTTP エラーが発生しました。ステータス %1$s、メッセージ %2$s"
 
 #. Unsupported format: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:143
@@ -13096,6 +13120,11 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:129
 msgid "An unexpected error occurred: %1$s."
 msgstr "次の予期しないエラーが発生しました: %1$s"
+
+#. Please specify your full E-Mail address as login name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:132
+msgid "Please specify your full E-Mail address as login name."
+msgstr "ログイン名として完全なメール アドレスを入力してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "Verify file system and templates."
@@ -15492,14 +15521,14 @@ msgstr "ズールー"
 #~ "Conflict. The resource cannot be created until one or more parental "
 #~ "directories have been created: %1$s."
 #~ msgstr ""
-#~ "競合が発生しました。1 つ以上の親ディレクトリが生成されるまでリソースは生成"
+#~ "競合が発生しました。1 つ以上の親ディレクトリが生成されるまで設備は生成"
 #~ "されません: %1$s"
 
 #~ msgid "Such a resource already exists: %1$s."
-#~ msgstr "指定された次のリソースは既に存在します: %1$s"
+#~ msgstr "指定された次の設備は既に存在します: %1$s"
 
 #~ msgid "Resource limit exceeded."
-#~ msgstr "リソースの上限を超えました。"
+#~ msgstr "設備の上限を超えました。"
 
 #~ msgid "Name contains illegal characters or parent is read-only: %1$s."
 #~ msgstr "次の名前に無効な文字列が含まれているか、親が読み取り専用です: %1$s"
@@ -15513,8 +15542,8 @@ msgstr "ズールー"
 #~ "SmartDrive user \"%1$s\" is not authenticated for stateful access to "
 #~ "SmarTDrive server \"%2$s\"."
 #~ msgstr ""
-#~ "SmartDrive サーバ \"%2$s\" へのステートフル アクセスが SmartDrive ユーザ "
-#~ "\"%1$s\" に認証されていません。"
+#~ "SmartDrive ユーザ \"%1$s\" による SmartDrive サーバ \"%2$s\" への"
+#~ "ステートフル アクセスは認証されていません。"
 
 #~ msgid "This resource is not a file"
 #~ msgstr "このリソースはファイルではありません。"
@@ -15542,10 +15571,10 @@ msgstr "ズールー"
 #~ msgstr "次の整数値が大き過ぎます: %1$s"
 
 #~ msgid "Missing previous truncated message package(s)."
-#~ msgstr "以前に切り捨てられたメッセージ パッケージが見つかりません。"
+#~ msgstr "前回超過部分を切り捨てたメッセージ パッケージが見つかりません。"
 
 #~ msgid "Conflicting truncated message package(s)."
-#~ msgstr "切り捨てられたメッセージ パッケージが競合しています。"
+#~ msgstr "超過部分を切り捨てたメッセージ パッケージが競合しています。"
 
 #~ msgid "Missing or wrong magic bytes: %1$s"
 #~ msgstr "次のマジック バイトが見つからないか、誤っています: %1$s"
@@ -15570,11 +15599,11 @@ msgstr "ズールー"
 #~ "Unable to calculate given position. Seems to be a delete exception or "
 #~ "outside range"
 #~ msgstr ""
-#~ "指定した順番を処理できません。削除の例外に指定されているか、範囲外の可能性"
-#~ "があります。"
+#~ "指定した順番を処理できません。削除の例外に指定されているか、範囲外である"
+#~ "可能性があります。"
 
 #~ msgid "Cannot decrease number of attachments below zero."
-#~ msgstr "添付ファイルの数を 0 未満にすることはできません。"
+#~ msgstr "添付ファイルの数を 0 未満に変更できません。"
 
 #~ msgid "UNKNOWN EXCEPTION"
 #~ msgstr "不明な例外"
