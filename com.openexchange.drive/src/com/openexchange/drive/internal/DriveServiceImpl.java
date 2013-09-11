@@ -512,6 +512,13 @@ public class DriveServiceImpl implements DriveService {
                             session.getChecksumStore().updateFileChecksumFolders(new FolderID(currentFolderID), new FolderID(movedFolderID));
                             session.getChecksumStore().updateDirectoryChecksumFolder(new FolderID(currentFolderID), new FolderID(movedFolderID));
                         }
+                    } else {
+                        /*
+                         * identical folder already in trash, hard-delete the directory
+                         */
+                        FolderID deletedFolderID = new FolderID(session.getStorage().deleteFolder(action.getVersion().getPath()));
+                        session.getChecksumStore().removeDirectoryChecksum(deletedFolderID);
+                        session.getChecksumStore().removeFileChecksumsInFolder(deletedFolderID);
                     }
                 } else {
                     /*
