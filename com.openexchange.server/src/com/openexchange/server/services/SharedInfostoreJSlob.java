@@ -51,14 +51,18 @@ package com.openexchange.server.services;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.attach.AttachmentConfig;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.groupware.infostore.InfostoreConfig;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.shared.SharedJSlobService;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.session.Session;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -71,19 +75,16 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 public class SharedInfostoreJSlob implements SharedJSlobService {
 
     private final String serviceId;
-
+    
     private final DefaultJSlob jslob;
-
-    private final int maxUploadSize;
 
     /**
      * Initializes a new {@link SharedInfostoreJSlob}.
      */
-    public SharedInfostoreJSlob(int maxUploadSize) {
+    public SharedInfostoreJSlob() {
         super();
-        serviceId = "com.openexchange.jslob.config";
-        this.maxUploadSize = maxUploadSize;
-        jslob = new DefaultJSlob();
+        this.serviceId = "com.openexchange.jslob.config";
+        this.jslob = new DefaultJSlob();
         jslob.setId(new JSlobId(serviceId, "io.ox/core/properties", 0, 0));
     }
 
@@ -103,16 +104,30 @@ public class SharedInfostoreJSlob implements SharedJSlobService {
     @Override
     public JSlob getJSlob(Session session) throws OXException {
         try {
-            jslob.setId(new JSlobId(serviceId, "io.ox/core/properties", session.getUserId(), session.getContextId()));
-            JSONObject json = new JSONObject();
-            json.put("maxUploadSize", maxUploadSize);
             Context ctx = ContextStorage.getStorageContext(session);
             QuotaFileStorage fs = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
-            long quota = fs.getQuota();
-            long usage = fs.getUsage();
-            json.put("quota", quota);
-            json.put("usage", usage);
+            UserSettingMail us = new UserSettingMail(session.getUserId(), session.getContextId());
+
+            int maxBodySize = ServerConfig.getInt(ServerConfig.Property.MAX_BODY_SIZE);
+            long infostoreMaxUploadSize = InfostoreConfig.getMaxUploadSize();
+            long attachmentMaxUploadSize = AttachmentConfig.getMaxUploadSize();
+
+            long infostoreQuota = fs.getQuota();
+            long infostoreUsage = fs.getUsage();
+
+            long attachmentQuota = us.getUploadQuota();
+            long attachmentQuotaPerFile = us.getUploadQuotaPerFile();
+
+            JSONObject json = new JSONObject();
+            json.put("maxBodySize", maxBodySize);
+            json.put("infostoreMaxUploadSize", infostoreMaxUploadSize);
+            json.put("attachmentMaxUploadSize", attachmentMaxUploadSize);
+            json.put("infostoreQuota", infostoreQuota);
+            json.put("infostoreUsage", infostoreUsage);
+            json.put("attachmentQuota", attachmentQuota);
+            json.put("attachmentQuotaPerFile", attachmentQuotaPerFile);
             jslob.setJsonObject(json);
+            jslob.setId(new JSlobId(serviceId, "io.ox/core/properties", session.getUserId(), session.getContextId()));
             return jslob;
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
