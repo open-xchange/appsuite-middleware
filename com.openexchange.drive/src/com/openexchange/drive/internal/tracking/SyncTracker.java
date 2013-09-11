@@ -168,7 +168,12 @@ public class SyncTracker {
             /*
              * pass 'reset' actions as new sync result
              */
-            return new IntermediateSyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient);
+            IntermediateSyncResult<DirectoryVersion> newResult =
+                new IntermediateSyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient);
+            if (session.isTraceEnabled()) {
+                session.trace(newResult);
+            }
+            return newResult;
         } else {
             /*
              * all fine, pass through result
