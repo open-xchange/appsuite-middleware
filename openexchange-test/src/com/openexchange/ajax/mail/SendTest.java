@@ -182,7 +182,6 @@ public final class SendTest extends AbstractMailTest {
             final String content = getResponse.getAttachments().getJSONObject(0).getString("content").replaceAll(Pattern.quote("&nbsp;"), " ");
             assertTrue("Content is empty", null != content && content.length() > 0);
 
-            System.out.println("Huhuhuhuhuhuhuhu1234 with the content that will be asserted: " + content);
             int pos = content.indexOf("Pile of poo ");
             assertTrue("Content not found: \"Pile of poo \" -- Content:\n" + content, pos >= 0);
 
