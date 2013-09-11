@@ -40,10 +40,10 @@ opt/open-xchange/etc/participant.properties
 opt/open-xchange/etc/passwordchange.properties
 opt/open-xchange/etc/paths.perfMap
 opt/open-xchange/etc/permissions.properties
+opt/open-xchange/etc/preview.properties
 opt/open-xchange/etc/publications.properties
 opt/open-xchange/etc/push-udp.properties
 opt/open-xchange/etc/requestwatcher.properties
-opt/open-xchange/etc/preview.properties
 opt/open-xchange/etc/rmi.properties
 opt/open-xchange/etc/secret.properties
 opt/open-xchange/etc/secrets
