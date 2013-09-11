@@ -111,5 +111,9 @@ public class RealtimeExceptionMessages implements LocalizableStrings {
     /** The sent sequence is invalid.*/
     public static final String SEQUENCE_INVALID_MSG = "The sent sequence is invalid.";
     
+    /** The server has no state associated with this client. Please enrol first. */
+    public static final String STATE_MISSING_MSG = "The server has no state associated with this client. Please enrol first.";
+    
+    
 
 }

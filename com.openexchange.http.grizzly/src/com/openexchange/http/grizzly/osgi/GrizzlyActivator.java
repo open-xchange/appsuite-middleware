@@ -65,8 +65,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
-import com.openexchange.http.grizzly.service.atmosphere.AtmosphereService;
-import com.openexchange.http.grizzly.service.atmosphere.AtmosphereServiceImpl;
 import com.openexchange.http.grizzly.service.comet.CometContextService;
 import com.openexchange.http.grizzly.service.comet.impl.CometContextServiceImpl;
 import com.openexchange.http.grizzly.service.http.HttpServiceFactory;
@@ -161,18 +159,6 @@ public class GrizzlyActivator extends HousekeepingActivator {
                     LOG.info("Enabling WebSockets for Grizzly server.");
                 }
                 networkListener.registerAddOn(new WebSocketAddOn());
-//                WebSocketEngine.getEngine().register(new WebSocketApplication() {
-//
-//                    @Override
-//                    public boolean isApplicationRequest(HttpRequestPacket request) {
-//                        return "/echo".equals(request.getRequestURI());
-//                    }
-//
-//                    @Override
-//                    public void onMessage(WebSocket socket, String data) {
-//                        socket.send(data);
-//                    }
-//                });
             }
 
             if (grizzlyConfig.isCometEnabled()) {
@@ -182,20 +168,6 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 networkListener.registerAddOn(new CometAddOn());
                 registerService(CometContextService.class, new CometContextServiceImpl());
             }
-
-//            if (LOG.isInfoEnabled()) {
-//                LOG.info("Enabling GrizzlOXAddon for Grizzly server.");
-//            }
-//            networkListener.registerAddOn(new GrizzlOXAddOn());
-
-            /*
-             * AtmosphereServiceImpl that contains the framework to handle requests dispatched from the atmosphere servlet
-             */
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Registering Atmosphere service for Grizzly server.");
-            }
-            AtmosphereServiceImpl atmosphereServiceImpl = new AtmosphereServiceImpl(grizzly, context.getBundle());
-            registerService(AtmosphereService.class, atmosphereServiceImpl);
 
             if (LOG.isInfoEnabled()) {
                 LOG.info(String.format(

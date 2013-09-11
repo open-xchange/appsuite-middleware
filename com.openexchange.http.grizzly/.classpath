@@ -9,11 +9,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-portunif-2.2.22-SNAPSHOT.jar" sourcepath="source/grizzly-portunif-2.2.22-SNAPSHOT-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-rcm-2.2.22-SNAPSHOT.jar" sourcepath="source/grizzly-rcm-2.2.22-SNAPSHOT-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-websockets-2.2.22-SNAPSHOT.jar" sourcepath="source/grizzly-websockets-2.2.22-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/annotation-detector-3.0.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/atmosphere-compat-jbossweb-1.1.0-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/atmosphere-compat-tomcat-1.1.0-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/atmosphere-compat-tomcat7-1.1.0-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/atmosphere-runtime-1.1.0-SNAPSHOT.jar" sourcepath="lib/atmosphere-runtime-1.1.0-SNAPSHOT-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/gmbal-3.0.0-b023.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/management-api-3.0.0-b012.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
