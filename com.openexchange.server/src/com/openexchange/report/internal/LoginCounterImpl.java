@@ -124,7 +124,7 @@ public class LoginCounterImpl implements LoginCounterService {
             return Collections.singletonList(new Object[] { new Date(Long.parseLong(rs.getString(1))), client });
         } catch (final Exception e) {
             logger.error(e.getMessage(), e);
-            throw new OXException(-1, e.getMessage(), e, null);
+            throw new OXException(-1, e.getMessage(), e);
         } finally {
             closeSQLStuff(rs, stmt);
             if (null != con) {
@@ -138,11 +138,11 @@ public class LoginCounterImpl implements LoginCounterService {
         if (startDate == null) {
             throw new OXException(new IllegalArgumentException("Parameter 'startDate' must not be null!"));
         }
-        
+
         if (endDate == null) {
             throw new OXException(new IllegalArgumentException("Parameter 'endDate' must not be null!"));
         }
-        
+
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         Map<String, Integer> schemaMap = null;
         try {
@@ -188,7 +188,7 @@ public class LoginCounterImpl implements LoginCounterService {
                             } else {
                                 ++sum;
                             }
-                            
+
                             Integer value = results.get(client);
                             if (value == null) {
                                 results.put(client, 1);
@@ -251,9 +251,9 @@ public class LoginCounterImpl implements LoginCounterService {
         closeSQLStuff(result);
         closeSQLStuff(stmt);
     }
-    
+
     private static final class UserContextId {
-        
+
         private final int contextId;
         private final int userId;
         private final int hash;
