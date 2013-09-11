@@ -81,6 +81,7 @@ public class ChecksumEventListener implements EventHandler {
         "OpenXchange.HTTPClient.TestDrive",
         "ox-client.android.normal.hdpi",
         "OpenXchange.iosClient.OXDrive",
+        "OSX.OXDrive",
     });
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(ChecksumEventListener.class);

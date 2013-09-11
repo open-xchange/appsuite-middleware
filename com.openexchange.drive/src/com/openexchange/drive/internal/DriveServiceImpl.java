@@ -168,6 +168,12 @@ public class DriveServiceImpl implements DriveService {
                 throw e;
             }
             /*
+             * start cleaner run if applicable
+             */
+            if (syncResult.isEmpty()) {
+                TempCleaner.cleanUpIfNeeded(driveSession);
+            }
+            /*
              * return actions for client
              */
             if (driveSession.isTraceEnabled()) {

@@ -146,10 +146,10 @@ public final class CSSMatcher {
             GroupType.NON_CAPTURING);
 
         final String strCOLOR_SYSTEM = "ActiveBorder|ActiveCaption|AppWorkspace|Background|" +
-                "ButtonFace|ButtonHighlight|ButtonShadow|ButtonText|CaptionTextGrayText|" +
-                "Highlight|HighlightText|InactiveBorder|InactiveCaption|InactiveCaptionText|" +
-                "InfoBackground|InfoText|Menu|MenuText|Scrollbar|ThreeDDarkShadow|" +
-                "ThreeDFace|ThreeDHighlight|ThreeDLightShadow|ThreeDShadow|Window|WindowFrame|WindowText";
+            "ButtonFace|ButtonHighlight|ButtonShadow|ButtonText|CaptionTextGrayText|" +
+            "Highlight|HighlightText|InactiveBorder|InactiveCaption|InactiveCaptionText|" +
+            "InfoBackground|InfoText|Menu|MenuText|Scrollbar|ThreeDDarkShadow|" +
+            "ThreeDFace|ThreeDHighlight|ThreeDLightShadow|ThreeDShadow|Window|WindowFrame|WindowText";
 
         final String strCOLOR_RGB_HEX = "#?\\p{XDigit}{3,6}";
 
@@ -162,7 +162,7 @@ public final class CSSMatcher {
                 strPERCENTAGE,
                 strCSV_DELIM,
                 strPERCENTAGE)),
-            GroupType.NON_CAPTURING), "\\)");
+                GroupType.NON_CAPTURING), "\\)");
 
         final String strCOLOR = RegexUtility.group(RegexUtility.concat(
             strCOLOR_KEYWORD,
@@ -274,11 +274,11 @@ public final class CSSMatcher {
     }
 
     /** Matches a starting CSS block */
-    static final Pattern PATTERN_STYLE_STARTING_BLOCK = Pattern.compile("(?:#|\\.|@|[a-zA-Z])[^{/]*?\\{");
+    private static final Pattern PATTERN_STYLE_STARTING_BLOCK = Pattern.compile("(?:#|\\.|@|[a-zA-Z])[^{/*]*?\\{");
     /** Matches a complete CSS block, but not appropriate for possible nested blocks */
     private static final Pattern PATTERN_STYLE_BLOCK = Pattern.compile("((?:#|\\.|[a-zA-Z])[^{]*?\\{)([^}/]+)\\}");
     /** Matches a CR?LF plus indention */
-    static final Pattern CRLF = Pattern.compile("\r?\n( {2,})?");
+    private static final Pattern CRLF = Pattern.compile("\r?\n( {2,})?");
 
     /**
      * Iterates over CSS contained in specified string argument and checks each found element/block against given style map

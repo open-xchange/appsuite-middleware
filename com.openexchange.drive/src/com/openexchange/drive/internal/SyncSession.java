@@ -228,4 +228,10 @@ public class SyncSession {
         return hasTempFolder.booleanValue();
     }
 
+    @Override
+    public String toString() {
+        return session.getServerSession().getLoginName() + " [" + session.getServerSession().getContextId() + ':' +
+            session.getServerSession().getUserId() + "] # " + session.getRootFolderID();
+    }
+
 }

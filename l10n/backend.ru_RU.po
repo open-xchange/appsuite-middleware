@@ -41,7 +41,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-08-22 14:08+0000\n"
+"PO-Revision-Date: 2013-09-08 14:13+0000\n"
 "Last-Translator: \n"
 "Language-Team: Russian <>\n"
 "Language: \n"
@@ -86,7 +86,7 @@ msgstr "Ошибка аутентификации службы на сервер
 #. %1$s will be replaced with the detailed not translated message from the underlying implementation.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:83
 msgid "Problem while terminating service ticket: %1$s"
-msgstr "Не удалось отменить билет остановленной службы: %1$s"
+msgstr "Не удалось отменить билет: %1$s"
 
 #. Written to the log file if the session contains a Kerberos subject that does not contain any ticket that needs a renewal.
 #. %1$s is replaced with the subjects principal name.
@@ -1880,6 +1880,14 @@ msgstr "«%1$s» игнорируется."
 msgid "The path \"%1$s\" is conflicting"
 msgstr "Конфликт пути: «%1$s»"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:82
+msgid "The file version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr "Неверная версия файла «%1$s» с контрольной суммой «%2$s»"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:83
+msgid "The directory version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr "Неверная версия каталога «%1$s» с контрольной суммой «%2$s»"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:63
 msgid "An error occurred for action: %1$s"
 msgstr "Ошибка операции: %1$s"
@@ -3182,8 +3190,10 @@ msgid "The grizzly server could not be started"
 msgstr "Ошибка запуска сервера Grizzly"
 
 #. * The following needed service is missing: \"%1$s\"
+#. The following needed service is missing: "%1$s"
+#. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
@@ -12021,6 +12031,13 @@ msgstr "Эта операция доступна только администр
 msgid "Folder %1$s must not be deleted in context %2$s."
 msgstr "Папка %1$s не может быть удалена в контексте %2$s."
 
+#. Owner %1$s of folder %2$s has been restored to keep the folder admin permission
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:539
+msgid ""
+"Owner %1$s of folder %2$s has been restored to keep the folder admin "
+"permission"
+msgstr "Владелец %1$s папки %2$s теперь снова имеет права администратора"
+
 #. Unknown AJAX action: %s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:70
 msgid "Unknown AJAX action: %s."
@@ -12885,6 +12902,11 @@ msgstr "Для доступа к службе необходимо создат�
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:129
 msgid "An unexpected error occurred: %1$s."
 msgstr "Непредвиденная ошибка: %1$s."
+
+#. Please specify your full E-Mail address as login name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:132
+msgid "Please specify your full E-Mail address as login name."
+msgstr "В поле имени введите полный электронный дарес."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "Verify file system and templates."

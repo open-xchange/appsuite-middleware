@@ -35,6 +35,7 @@ mail/vcard > io.ox/mail//vcard
 ui/mail/replyTo > io.ox/mail//showReplyTo
 modules/mail/linewrap > io.ox/mail//lineWrapAfter
 modules/mail/vcard > io.ox/mail//appendVcard
+modules/mail/unifiedinboxidentifier > io.ox/mail//unifiedInboxIdentifier
 
 # CalDAV
 modules/caldav/active > io.ox/caldav//active

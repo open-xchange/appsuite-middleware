@@ -41,7 +41,7 @@ msgstr ""
 "Project-Id-Version: Open-Xchange 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: DATE\n"
-"PO-Revision-Date: 2013-08-22 00:46+0200\n"
+"PO-Revision-Date: 2013-09-06 14:48+0200\n"
 "Last-Translator: \n"
 "Language-Team: x\n"
 "Language: sk\n"
@@ -1885,6 +1885,14 @@ msgstr "Názov súboru „%1$s“ je ignorovaný"
 msgid "The path \"%1$s\" is conflicting"
 msgstr "Cesta „%1$s“ je v konflikte"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:82
+msgid "The file version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr "Verzia súboru „%1$s“ s kontrolným súčtom „%2$s“ je neplatná"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:83
+msgid "The directory version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr "Verzia adresára „%1$s“ s kontrolným súčtom „%2$s“ je neplatná"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:63
 msgid "An error occurred for action: %1$s"
 msgstr "Vyskytla sa chyba pri operácii: %1$s"
@@ -3192,8 +3200,8 @@ msgid ""
 "Cannot search a contact that is neither an internal user nor has an e-mail "
 "address."
 msgstr ""
-"Nemožno vyhľadať kontakt, ktorý nie je ani interný používateľ ani nemá "
-"e-mailovú adresu."
+"Nemožno vyhľadať kontakt, ktorý nie je ani interný používateľ ani nemá e-"
+"mailovú adresu."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:55
 msgid "The embedded Apache client threw an error: %1$s"
@@ -3221,8 +3229,10 @@ msgid "The grizzly server could not be started"
 msgstr "Server grizzly nebolo možné spustiť"
 
 #. * The following needed service is missing: \"%1$s\"
+#. The following needed service is missing: "%1$s"
+#. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
@@ -12194,6 +12204,15 @@ msgstr "Operáciu je možné vykonať iba pre správcu kontextu."
 msgid "Folder %1$s must not be deleted in context %2$s."
 msgstr "Priečinok %1$s nesmie byť zmazaný v kontexte %2$s"
 
+#. Owner %1$s of folder %2$s has been restored to keep the folder admin permission
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:539
+msgid ""
+"Owner %1$s of folder %2$s has been restored to keep the folder admin "
+"permission"
+msgstr ""
+"Vlastník %1$s priečinka %2$s bol obnovený, aby sa zachovalo oprávnenie "
+"správcu priečinka"
+
 #. Unknown AJAX action: %s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:70
 msgid "Unknown AJAX action: %s."
@@ -13072,6 +13091,11 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:129
 msgid "An unexpected error occurred: %1$s."
 msgstr "Vyskytla sa neočakávaná chyba: %1$s."
+
+#. Please specify your full E-Mail address as login name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:132
+msgid "Please specify your full E-Mail address as login name."
+msgstr "Prosím, zadajte svoju celú e-mailovú adresu ako prihlasovacie meno."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "Verify file system and templates."
