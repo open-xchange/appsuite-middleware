@@ -375,6 +375,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     @Override
     protected void closeInternal() {
         try {
+            final IMAPFolderStorage folderStorage = this.folderStorage;
             if (folderStorage != null) {
                 try {
                     folderStorage.releaseResources();
@@ -382,6 +383,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error("Error while closing IMAP folder storage,", e);
                 }
             }
+            final IMAPMessageStorage messageStorage = this.messageStorage;
             if (null != messageStorage) {
                 try {
                     messageStorage.releaseResources();
@@ -389,6 +391,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error("Error while closing IMAP message storage.", e);
                 }
             }
+            final AccessedIMAPStore imapStore = this.imapStore;
             if (imapStore != null) {
                 if (useIMAPStoreCache()) {
                     IMAPStoreCache.getInstance().returnIMAPStore(imapStore.dropAndGetImapStore(), accountId, server, port, login);
@@ -406,7 +409,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 if (null != ic) {
                     ic.dropImapStore();
                 }
-                imapStore = null;
+                this.imapStore = null;
             }
         } finally {
             reset();
