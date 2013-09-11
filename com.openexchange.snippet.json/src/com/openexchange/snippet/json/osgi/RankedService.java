@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,48 +49,79 @@
 
 package com.openexchange.snippet.json.osgi;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.snippet.SnippetService;
-import com.openexchange.snippet.json.SnippetActionFactory;
-import com.openexchange.snippet.json.converter.SnippetJSONResultConverter;
-
 /**
- * {@link SnippetJsonActivator} - Activator for the snippet's JSON interface.
+ * {@link RankedService} - A service plus its ranking.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SnippetJsonActivator extends AJAXModuleActivator {
+public final class RankedService<S> implements Comparable<RankedService<S>> {
 
     /**
-     * Initializes a new {@link SnippetJsonActivator}.
+     * The service.
      */
-    public SnippetJsonActivator() {
+    public final S service;
+
+    /**
+     * The service ranking.
+     */
+    public final int ranking;
+
+    /**
+     * Initializes a new {@link RankedService}.
+     *
+     * @param service
+     * @param ranking
+     */
+    public RankedService(final S service, final int ranking) {
         super();
+        this.service = service;
+        this.ranking = ranking;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SnippetService.class };
+    public int hashCode() {
+        return 31 + ((service == null) ? 0 : service.hashCode());
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(SnippetJsonActivator.class);
-
-        final SnippetServiceTracker customizer = new SnippetServiceTracker(context);
-        track(SnippetService.class, customizer);
-        openTrackers();
-
-        registerModule(new SnippetActionFactory(new ForwardingServiceLookup(this, customizer)), "snippet");
-        registerService(ResultConverter.class, new SnippetJSONResultConverter());
-        log.info("Bundle successfully started: com.openexchange.snippet.json");
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof RankedService)) {
+            return false;
+        }
+        final RankedService<?> other = (RankedService<?>) obj;
+        if (service == null) {
+            if (other.service != null) {
+                return false;
+            }
+        } else if (!service.equals(other.service)) {
+            return false;
+        }
+        return true;
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        com.openexchange.log.Log.loggerFor(SnippetJsonActivator.class).info("Bundle stopped: com.openexchange.snippet.json");
+    public int compareTo(final RankedService<S> o) {
+        // Highest ranking first
+        final int thisVal = this.ranking;
+        final int anotherVal = o.ranking;
+        return (thisVal < anotherVal ? 1 : (thisVal == anotherVal ? 0 : -1));
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(128);
+        builder.append("RankedService [");
+        if (service != null) {
+            builder.append("service=").append(service).append(", ");
+        }
+        builder.append("ranking=").append(ranking).append("]");
+        return builder.toString();
+    }
+
 }

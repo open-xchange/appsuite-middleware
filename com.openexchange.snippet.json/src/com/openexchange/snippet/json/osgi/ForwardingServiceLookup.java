@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,48 +49,44 @@
 
 package com.openexchange.snippet.json.osgi;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.snippet.SnippetService;
-import com.openexchange.snippet.json.SnippetActionFactory;
-import com.openexchange.snippet.json.converter.SnippetJSONResultConverter;
 
 /**
- * {@link SnippetJsonActivator} - Activator for the snippet's JSON interface.
+ * {@link ForwardingServiceLookup}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SnippetJsonActivator extends AJAXModuleActivator {
+public final class ForwardingServiceLookup implements ServiceLookup {
+
+    private final ServiceLookup services;
+    private final SnippetServiceTracker customizer;
 
     /**
-     * Initializes a new {@link SnippetJsonActivator}.
+     * Initializes a new {@link ForwardingServiceLookup}.
+     *
+     * @param services The service look-up
      */
-    public SnippetJsonActivator() {
+    public ForwardingServiceLookup(final ServiceLookup services, final SnippetServiceTracker customizer) {
         super();
+        this.services = services;
+        this.customizer = customizer;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SnippetService.class };
+    public <S> S getService(final Class<? extends S> clazz) {
+        if (SnippetService.class.equals(clazz)) {
+            return (S) customizer.getSnippetService();
+        }
+        return services.getService(clazz);
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(SnippetJsonActivator.class);
-
-        final SnippetServiceTracker customizer = new SnippetServiceTracker(context);
-        track(SnippetService.class, customizer);
-        openTrackers();
-
-        registerModule(new SnippetActionFactory(new ForwardingServiceLookup(this, customizer)), "snippet");
-        registerService(ResultConverter.class, new SnippetJSONResultConverter());
-        log.info("Bundle successfully started: com.openexchange.snippet.json");
+    public <S> S getOptionalService(final Class<? extends S> clazz) {
+        if (SnippetService.class.equals(clazz)) {
+            return (S) customizer.getSnippetService();
+        }
+        return services.getOptionalService(clazz);
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        com.openexchange.log.Log.loggerFor(SnippetJsonActivator.class).info("Bundle stopped: com.openexchange.snippet.json");
-    }
 }

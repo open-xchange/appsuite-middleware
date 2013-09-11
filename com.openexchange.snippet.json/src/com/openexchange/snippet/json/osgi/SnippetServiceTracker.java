@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,48 +49,73 @@
 
 package com.openexchange.snippet.json.osgi;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.snippet.SnippetService;
-import com.openexchange.snippet.json.SnippetActionFactory;
-import com.openexchange.snippet.json.converter.SnippetJSONResultConverter;
+
 
 /**
- * {@link SnippetJsonActivator} - Activator for the snippet's JSON interface.
+ * {@link SnippetServiceTracker} - The ranking-aware service tracker.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SnippetJsonActivator extends AJAXModuleActivator {
+public final class SnippetServiceTracker implements ServiceTrackerCustomizer<SnippetService, SnippetService> {
+
+    private final BundleContext context;
+    private final ConcurrentPriorityQueue<RankedService<SnippetService>> queue;
 
     /**
-     * Initializes a new {@link SnippetJsonActivator}.
+     * Initializes a new {@link SnippetServiceTracker}.
      */
-    public SnippetJsonActivator() {
+    public SnippetServiceTracker(final BundleContext context) {
         super();
+        this.context = context;
+        queue = new ConcurrentPriorityQueue<RankedService<SnippetService>>();
+    }
+
+    /**
+     * Gets currently available, highest ranked snippet service.
+     *
+     * @return The snippet service or <code>null</code> (if none available).
+     */
+    public SnippetService getSnippetService() {
+        final RankedService<SnippetService> rankedService = queue.peek();
+        return null == rankedService ? null : rankedService.service;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SnippetService.class };
+    public SnippetService addingService(final ServiceReference<SnippetService> reference) {
+        final SnippetService service = context.getService(reference);
+        queue.offer(new RankedService<SnippetService>(service, getRanking(reference)));
+        return service;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(SnippetJsonActivator.class);
-
-        final SnippetServiceTracker customizer = new SnippetServiceTracker(context);
-        track(SnippetService.class, customizer);
-        openTrackers();
-
-        registerModule(new SnippetActionFactory(new ForwardingServiceLookup(this, customizer)), "snippet");
-        registerService(ResultConverter.class, new SnippetJSONResultConverter());
-        log.info("Bundle successfully started: com.openexchange.snippet.json");
+    public void modifiedService(final ServiceReference<SnippetService> reference, final SnippetService service) {
+        // Ignore
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        com.openexchange.log.Log.loggerFor(SnippetJsonActivator.class).info("Bundle stopped: com.openexchange.snippet.json");
+    public void removedService(final ServiceReference<SnippetService> reference, final SnippetService service) {
+        queue.remove(new RankedService<SnippetService>(service, getRanking(reference)));
+        context.ungetService(reference);
     }
+
+    private int getRanking(final ServiceReference<SnippetService> reference) {
+        int ranking = 0;
+        {
+            final Object oRanking = reference.getProperty(Constants.SERVICE_RANKING);
+            if (null != oRanking) {
+                try {
+                    ranking = Integer.parseInt(oRanking.toString().trim());
+                } catch (final NumberFormatException e) {
+                    ranking = 0;
+                }
+            }
+        }
+        return ranking;
+    }
+
 }
