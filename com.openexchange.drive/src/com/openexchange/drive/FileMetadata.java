@@ -66,6 +66,13 @@ public interface FileMetadata extends FileVersion {
     String getDirectLink();
 
     /**
+     * Gets only the fragments part of the direct link, ready to use in combination with a token login redirect.
+     *
+     * @return The direct link fragments
+     */
+    String getDirectLinkFragments();
+
+    /**
      * Gets the date of the last modification.
      *
      * @return The last modified date

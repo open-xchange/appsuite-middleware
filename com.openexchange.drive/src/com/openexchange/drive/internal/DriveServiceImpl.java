@@ -356,6 +356,7 @@ public class DriveServiceImpl implements DriveService {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Got quota for root folder '" + session.getRootFolderID() + "': " + quota);
         }
+        final String manageLink = new DirectLinkGenerator(driveSession).getQuotaLink();
         return new DriveQuota() {
 
             @Override
@@ -365,7 +366,7 @@ public class DriveServiceImpl implements DriveService {
 
             @Override
             public String getManageLink() {
-                return new DirectLinkGenerator(driveSession).getQuotaLink();
+                return manageLink;
             }
         };
     }

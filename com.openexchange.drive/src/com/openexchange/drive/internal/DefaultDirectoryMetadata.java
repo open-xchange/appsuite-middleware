@@ -83,4 +83,9 @@ public class DefaultDirectoryMetadata implements DirectoryMetadata {
         return session.getLinkGenerator().getDirectoryLink(directoryVersion.getDirectoryChecksum().getFolderID().toUniqueID());
     }
 
+    @Override
+    public String getDirectLinkFragments() {
+        return session.getLinkGenerator().getDirectoryLinkFragments(directoryVersion.getDirectoryChecksum().getFolderID().toUniqueID());
+    }
+
 }

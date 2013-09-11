@@ -68,6 +68,7 @@ public class DirectLinkGenerator {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(DirectLinkGenerator.class);
 
     private final SyncSession session;
+    private final ConfigurationService configService;
     private String hostName;
 
     /**
@@ -76,6 +77,7 @@ public class DirectLinkGenerator {
     public DirectLinkGenerator(SyncSession session) {
         super();
         this.session = session;
+        this.configService = DriveServiceLookup.getService(ConfigurationService.class);
     }
 
     /**
@@ -84,14 +86,36 @@ public class DirectLinkGenerator {
      * @return The quota link
      */
     public String getQuotaLink() {
-        ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
-        String template = getDirectLinkQuota(configService);
-        return template
+        return getTemplate("com.openexchange.drive.directLinkQuota", "https://[hostname]")
             .replaceAll("\\[hostname\\]", getHostName())
-            .replaceAll("\\[uiwebpath\\]", getWebpath(configService))
+            .replaceAll("\\[uiwebpath\\]", getWebpath())
             .replaceAll("\\[contextid\\]", String.valueOf(session.getServerSession().getContextId()))
             .replaceAll("\\[userid\\]", String.valueOf(session.getServerSession().getUserId()))
             .replaceAll("\\[login\\]", String.valueOf(session.getServerSession().getLogin()))
+        ;
+    }
+
+    /**
+     * Gets the direct link fragments for the supplied file.
+     *
+     * @param file The file
+     * @return The direct link fragments
+     */
+    public String getFileLinkFragments(File file) {
+        return getFileLinkFragments(file.getFolderId(), file.getId());
+    }
+
+    /**
+     * Gets the direct link fragments for the file referenced by the supplied identifiers.
+     *
+     * @param folderID The file's parent folder ID
+     * @param objectID The file's object ID
+     * @return The direct link fragments
+     */
+    public String getFileLinkFragments(String folderID, String objectID) {
+        return getTemplate("com.openexchange.drive.directLinkFragmentsFile", "m=infostore&f=[folder]&i=[object]")
+            .replaceAll("\\[folder\\]", folderID)
+            .replaceAll("\\[object\\]", objectID)
         ;
     }
 
@@ -105,25 +129,49 @@ public class DirectLinkGenerator {
         return getFileLink(file.getFolderId(), file.getId());
     }
 
+    /**
+     * Gets a ready-to-use direct link for the file referenced by the supplied identifiers.
+     *
+     * @param folderID The file's parent folder ID
+     * @param objectID The file's object ID
+     * @return The direct link
+     */
     public String getFileLink(String folderID, String objectID) {
-        ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
-        String template = getDirectLinkFile(configService);
-        return template
+        return getTemplate("com.openexchange.drive.directLinkFile", "https://[hostname]/[uiwebpath]#[filefragments]")
             .replaceAll("\\[hostname\\]", getHostName())
-            .replaceAll("\\[uiwebpath\\]", getWebpath(configService))
-            .replaceAll("\\[folder\\]", folderID)
-            .replaceAll("\\[object\\]", objectID)
+            .replaceAll("\\[uiwebpath\\]", getWebpath())
+            .replaceAll("\\[filefragments\\]", getFileLinkFragments(folderID, objectID))
         ;
     }
 
-    public String getDirectoryLink(String folderID) {
-        ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
-        String template = getDirectLinkDirectory(configService);
-        return template
-            .replaceAll("\\[hostname\\]", getHostName())
-            .replaceAll("\\[uiwebpath\\]", getWebpath(configService))
+    /**
+     * Gets the direct link fragments for the directory referenced by the supplied identifier.
+     *
+     * @param folderID The folder ID
+     * @return The direct link fragments
+     */
+    public String getDirectoryLinkFragments(String folderID) {
+        return getTemplate("com.openexchange.drive.directLinkFragmentsDirectory", "m=infostore&f=[folder]")
             .replaceAll("\\[folder\\]", folderID)
         ;
+    }
+
+    /**
+     * Gets a ready-to-use direct link for the directory referenced by the supplied identifier.
+     *
+     * @param folderID The folder ID
+     * @return The direct link
+     */
+    public String getDirectoryLink(String folderID) {
+        return getTemplate("com.openexchange.drive.directLinkDirectory", "https://[hostname]/[uiwebpath]#[directoryfragments]")
+            .replaceAll("\\[hostname\\]", getHostName())
+            .replaceAll("\\[uiwebpath\\]", getWebpath())
+            .replaceAll("\\[directoryfragments\\]", getDirectoryLinkFragments(folderID))
+        ;
+    }
+
+    private String getTemplate(String propertyName, String defaultValue) {
+        return null != configService ? configService.getProperty(propertyName, defaultValue) : defaultValue;
     }
 
     private String getHostName() {
@@ -166,24 +214,8 @@ public class DirectLinkGenerator {
         return hostName;
     }
 
-    private static String getWebpath(ConfigurationService configService) {
-        String defaultValue = "/ox6/index.html";
-        return null != configService ? configService.getProperty("com.openexchange.UIWebPath", defaultValue) : defaultValue;
-    }
-
-    private static String getDirectLinkQuota(ConfigurationService configService) {
-        String defaultValue = "https://[hostname]";
-        return null != configService ? configService.getProperty("com.openexchange.drive.directLinkQuota", defaultValue) : defaultValue;
-    }
-
-    private static String getDirectLinkFile(ConfigurationService configService) {
-        String defaultValue = "https://[hostname]/[uiwebpath]#m=infostore&f=[folder]&i=[object]";
-        return null != configService ? configService.getProperty("com.openexchange.drive.directLinkFile", defaultValue) : defaultValue;
-    }
-
-    private static String getDirectLinkDirectory(ConfigurationService configService) {
-        String defaultValue = "https://[hostname]/[uiwebpath]#m=infostore&f=[folder]";
-        return null != configService ? configService.getProperty("com.openexchange.drive.directLinkDirectory", defaultValue) : defaultValue;
+    private String getWebpath() {
+        return getTemplate("com.openexchange.UIWebPath", "/ox6/index.html");
     }
 
 }

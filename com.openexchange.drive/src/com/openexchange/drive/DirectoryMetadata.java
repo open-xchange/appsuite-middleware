@@ -63,4 +63,11 @@ public interface DirectoryMetadata extends DirectoryVersion {
      */
     String getDirectLink();
 
+    /**
+     * Gets only the fragments part of the direct link, ready to use in combination with a token login redirect.
+     *
+     * @return The direct link fragments
+     */
+    String getDirectLinkFragments();
+
 }
