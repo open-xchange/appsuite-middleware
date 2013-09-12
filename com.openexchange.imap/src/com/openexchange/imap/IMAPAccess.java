@@ -394,15 +394,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             final AccessedIMAPStore imapStore = this.imapStore;
             if (imapStore != null) {
                 if (useIMAPStoreCache()) {
-                    IMAPStoreCache.getInstance().returnIMAPStore(imapStore.dropAndGetImapStore(), accountId, server, port, login);
-                } else {
-                    try {
-                        imapStore.close();
-                    } catch (final MessagingException e) {
-                        LOG.error("Error while closing IMAP store.", e);
-                    } catch (final RuntimeException e) {
-                        LOG.error("Error while closing IMAP store.", e);
+                    final IMAPStoreCache imapStoreCache = IMAPStoreCache.getInstance();
+                    if (null == imapStoreCache) {
+                        closeSafely(imapStore);
+                    } else {
+                        imapStoreCache.returnIMAPStore(imapStore.dropAndGetImapStore(), accountId, server, port, login);
                     }
+                } else {
+                    closeSafely(imapStore);
                 }
                 // Drop in associated IMAPConfig instance
                 final IMAPConfig ic = getIMAPConfig();
@@ -413,6 +412,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
         } finally {
             reset();
+        }
+    }
+
+    private void closeSafely(final AccessedIMAPStore imapStore) {
+        try {
+            imapStore.close();
+        } catch (final MessagingException e) {
+            LOG.error("Error while closing IMAP store.", e);
+        } catch (final RuntimeException e) {
+            LOG.error("Error while closing IMAP store.", e);
         }
     }
 
