@@ -104,12 +104,7 @@ public class RdbChecksumStore implements ChecksumStore {
 
     @Override
     public FileChecksum insertFileChecksum(FileID fileID, String version, long sequenceNumber, String checksum) throws OXException {
-        FileChecksum fileChecksum = new FileChecksum();
-        fileChecksum.setFileID(fileID);
-        fileChecksum.setVersion(version);
-        fileChecksum.setSequenceNumber(sequenceNumber);
-        fileChecksum.setChecksum(checksum);
-        return insertFileChecksum(fileChecksum);
+        return insertFileChecksum(new FileChecksum(fileID, version, sequenceNumber, checksum));
     }
 
     @Override

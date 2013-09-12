@@ -109,9 +109,9 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
     @Override
     protected void batchExecute(Action action, List<AbstractAction<FileVersion>> actions) throws OXException {
         switch (action) {
-//        case REMOVE:
-//            batchRemove(actions);
-//            break;
+        case REMOVE:
+            batchRemove(actions);
+            break;
         default:
             for (AbstractAction<FileVersion> driveAction : actions) {
                 execute(driveAction);

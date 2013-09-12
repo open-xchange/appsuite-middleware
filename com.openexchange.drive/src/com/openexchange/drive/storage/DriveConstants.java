@@ -110,6 +110,12 @@ public class DriveConstants {
     public static final int RETRY_BASEDELAY = 1000;
 
     /**
+     * The maximum file length of uploads to be stored directly at the target location - others are going to be written to a temporary
+     * upload file first.
+     */
+    public static final long OPTIMISTIC_UPLOAD_SIZE_THRESHOLD = 64 * 1024; // 64K
+
+    /**
      * Thread local {@link SimpleDateFormat} using "yyyy-MM-dd HH:mm:ss.SSS" as pattern.
      */
     public static final ThreadLocal<SimpleDateFormat> LOG_DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
