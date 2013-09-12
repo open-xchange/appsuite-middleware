@@ -875,7 +875,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     // properties.put("mail.imap.authTimeoutMillis", "90000");
                     properties.put("mail.imap.accountId", Integer.toString(accountId));
                 }
-                return borrowIMAPStore(imapSession, server, port, login, pw);
+                final IMAPStore borrowedIMAPStore = borrowIMAPStore(imapSession, server, port, login, pw);
+                if (null == borrowedIMAPStore) {
+                    throw IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, imapConfig, session, imapConfig.getServer(), imapConfig.getLogin());
+                }
+                return borrowedIMAPStore;
             }
             /*
              * Possible connect limitation

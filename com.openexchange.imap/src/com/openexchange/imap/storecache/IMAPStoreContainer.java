@@ -70,7 +70,7 @@ public interface IMAPStoreContainer {
      * Gets a connected IMAP store.
      *
      * @param imapSession The IMAP session
-     * @return The connected IMAP store
+     * @return The connected IMAP store or <code>null</code> if currently impossible to do so
      * @throws MessagingException If returning a connected IMAP store fails
      * @throws InterruptedException If thread is interrupted when possibly waiting for free resources
      */

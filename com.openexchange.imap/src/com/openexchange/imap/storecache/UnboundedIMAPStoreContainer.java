@@ -75,12 +75,14 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     protected final int port;
     protected final String login;
     protected final String pw;
+    private final int maxRetryCount;
 
     /**
      * Initializes a new {@link UnboundedIMAPStoreContainer}.
      */
     public UnboundedIMAPStoreContainer(final String server, final int port, final String login, final String pw) {
         super();
+        maxRetryCount = 10;
         availableQueue = new InheritedPriorityBlockingQueue();
         this.login = login;
         this.port = port;
@@ -99,8 +101,9 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
     @Override
     public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
+        int count = maxRetryCount;
         IMAPStore imapStore = null;
-        while (null == imapStore) {
+        while (null == imapStore && count-- > 0) {
             /*
              * Select a not-in-use element
              */

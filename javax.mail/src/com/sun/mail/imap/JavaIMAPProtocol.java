@@ -207,7 +207,7 @@ public class JavaIMAPProtocol extends IMAPProtocol {
                     semaphore.acquire();
                 }
                 // Permit obtained
-                permitCount.incrementAndGet();
+                /*final int acquired = */permitCount.incrementAndGet();
                 if (debug) {
                     final long dur = System.currentTimeMillis() - start;
                     logger.fine("JavaIMAPProtocol.authenticated: login permitted ("+dur+"msec) -- " + semaphore + " -- protocol's permit count " + permitCount.get());
