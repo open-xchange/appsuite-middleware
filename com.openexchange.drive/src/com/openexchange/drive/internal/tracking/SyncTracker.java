@@ -140,6 +140,7 @@ public class SyncTracker {
         insert(syncResult, null);
         RepeatedSequence<HistoryEntry> cycle = findCycle();
         if (null != cycle) {
+            clearHistory();
             trace(session, cycle);
             List<AbstractAction<DirectoryVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>();
             List<AbstractAction<DirectoryVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<DirectoryVersion>>();
@@ -242,6 +243,13 @@ public class SyncTracker {
         return null;
     }
 
+    /**
+     * Clears the result history
+     */
+    private void clearHistory() {
+        getResultHistory().clear();
+    }
+
     private static Collection<DirectoryVersion> getAffectedDirectoryVersions(SyncSession session, RepeatedSequence<HistoryEntry> cycle) {
         Map<String, DirectoryVersion> directoryVersions = new HashMap<String, DirectoryVersion>();
         List<HistoryEntry> sequence = cycle.getSequence();
@@ -287,15 +295,15 @@ public class SyncTracker {
         if (null != cycle && session.isTraceEnabled()) {
             List<HistoryEntry> sequence = cycle.getSequence();
             StringAllocator stringAllocator = new StringAllocator();
-            stringAllocator.append("A synchronization cycle was detected - The following ").append(sequence.size())
+            stringAllocator.append("A synchronization cycle was detected - the following ").append(sequence.size())
                 .append(" sync results were repeated ").append(cycle.getRepetitions()).append(" times:\n\n");
             for (int i = 0; i < sequence.size(); i++) {
                 HistoryEntry entry = sequence.get(i);
                 stringAllocator.append(" # ").append(i + 1).append(' ').append(null != entry.getPath() ? entry.getPath() : "")
-                    .append(" : [").append(entry.hashCode()).append(']');
+                    .append(" : [").append(entry.hashCode()).append("]\n");
                 IntermediateSyncResult<? extends DriveVersion> result = entry.getSyncResult();
                 if (null != result) {
-                    stringAllocator.append('\n').append(result);
+                    stringAllocator.append(result);
                 }
             }
             session.trace(stringAllocator.toString());
