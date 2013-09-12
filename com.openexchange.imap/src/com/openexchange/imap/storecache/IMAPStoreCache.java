@@ -299,7 +299,7 @@ public final class IMAPStoreCache {
      * @param port The port
      * @param login The login/user name
      * @param pw The password
-     * @return The connected IMAP store
+     * @return The connected IMAP store or <code>null</code> if currently impossible to do so
      * @throws MessagingException If connecting IMAP store fails
      * @throws OXException If a mail error occurs
      */

@@ -495,7 +495,7 @@ public abstract class SessionServlet extends AJAXServlet {
                     sb.append(" and is not covered by IP white-list or netmask.");
                     LOG.info(sb.toString());
                 }
-                throw SessionExceptionCodes.WRONG_CLIENT_IP.create();
+                throw SessionExceptionCodes.WRONG_CLIENT_IP.create(session.getLocalIp(), null == actual ? "<unknown>" : actual);
             }
             if (null != actual && (!doCheck || isWhitelistedClient(session, whitelist))) {
                 // change IP in session so the IMAP NOOP command contains the correct client IP address (Bug #21842)

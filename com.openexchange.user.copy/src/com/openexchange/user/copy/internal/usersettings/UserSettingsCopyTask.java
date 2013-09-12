@@ -87,7 +87,7 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
 
     private static final String INSERT_SQL = "INSERT INTO user_setting (cid, user_id, path_id, value) VALUES (?, ?, ?, ?)";
 
-    private static final String SELECT_SERVER_SQL = "SELECT contact_collect_folder, contact_collect_enabled, defaultStatusPrivate, defaultStatusPublic, contactCollectOnMailTransport, contactCollectOnMailAccess, folderTree FROM user_setting_server WHERE cid = ? AND user = ?";
+    private static final String SELECT_SERVER_SQL = "SELECT contact_collect_folder, contact_collect_enabled, defaultStatusPrivate, defaultStatusPublic, contactCollectOnMailTransport, contactCollectOnMailAccess, folderTree, uuid FROM user_setting_server WHERE cid = ? AND user = ?";
 
     private static final String INSERT_SERVER_SQL = "INSERT INTO user_setting_server (cid, user, contact_collect_folder, contact_collect_enabled, defaultStatusPrivate, defaultStatusPublic, contactCollectOnMailTransport, contactCollectOnMailAccess, folderTree, uuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 

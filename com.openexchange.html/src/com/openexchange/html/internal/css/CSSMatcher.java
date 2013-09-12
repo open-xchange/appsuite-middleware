@@ -609,43 +609,50 @@ public final class CSSMatcher {
             return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
         }
         final String css = CRLF.matcher(cssBuilder).replaceAll(" ");
-        final int cssLength = css.length();
-        final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(cssLength));
-        final Matcher m = PATTERN_STYLE_STARTING_BLOCK.matcher(css);
-        if (!m.find()) {
-            return false;
-        }
-        cssBuilder.setLength(0);
-        int lastPos = 0;
-        do {
-            // Check prefix part
-            cssElemsBuffer.append(css.substring(lastPos, m.start()));
-            modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
-            final String prefix = cssElemsBuffer.toString();
-            cssElemsBuffer.setLength(0);
-            // Check block part
-            {
-                int i = m.end();
-                for (char c; (c = css.charAt(i++)) != '}';) {
-                    cssElemsBuffer.append(c);
+        try {
+            final int cssLength = css.length();
+            final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(cssLength));
+            final Matcher m = PATTERN_STYLE_STARTING_BLOCK.matcher(css);
+            if (!m.find()) {
+                return false;
+            }
+            cssBuilder.setLength(0);
+            int lastPos = 0;
+            do {
+                // Check prefix part
+                cssElemsBuffer.append(css.substring(lastPos, m.start()));
+                modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
+                final String prefix = cssElemsBuffer.toString();
+                cssElemsBuffer.setLength(0);
+                // Check block part
+                {
+                    int i = m.end();
+                    for (char c; i < cssLength && (c = css.charAt(i++)) != '}';) {
+                        cssElemsBuffer.append(c);
+                    }
+                    lastPos = i + 1;
                 }
-                lastPos = i + 1;
+                modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
+                cssElemsBuffer.insert(0, m.group()).append('}').append('\n'); // Surround with block definition
+                // Add to main builder
+                cssBuilder.append(prefix);
+                cssBuilder.append(cssElemsBuffer);
+                cssElemsBuffer.setLength(0);
+            } while (lastPos < cssLength && m.find(lastPos));
+            if (lastPos < cssLength) {
+                cssElemsBuffer.append(css.substring(lastPos, cssLength));
             }
             modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
-            cssElemsBuffer.insert(0, m.group()).append('}').append('\n'); // Surround with block definition
-            // Add to main builder
-            cssBuilder.append(prefix);
-            cssBuilder.append(cssElemsBuffer);
+            final String tail = cssElemsBuffer.toString();
             cssElemsBuffer.setLength(0);
-        } while (lastPos < cssLength && m.find(lastPos));
-        if (lastPos < cssLength) {
-            cssElemsBuffer.append(css.substring(lastPos, cssLength));
+            cssBuilder.append(tail);
+            return modified;
+        } catch (final RuntimeException unchecked) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Unchecked exception while processing CSS content:" + System.getProperty("line.separator") + css, unchecked);
+            }
+            throw unchecked;
         }
-        modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
-        final String tail = cssElemsBuffer.toString();
-        cssElemsBuffer.setLength(0);
-        cssBuilder.append(tail);
-        return modified;
     }
 
     /**

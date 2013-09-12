@@ -668,6 +668,12 @@ if ! ox_exists_property com.openexchange.preview.cache.quotaAware $pfile; then
     ox_set_property com.openexchange.preview.cache.quotaAware false $pfile
 fi
 
+# SoftwareChange_Request-1610
+pfile=/opt/open-xchange/etc/templating.properties
+if ! ox_exists_property com.openexchange.templating.trusted $pfile; then
+    ox_set_property com.openexchange.templating.trusted server $pfile
+fi
+
 setConfigFilePermissions() {
     PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
     for FILE in $PROTECT

@@ -127,6 +127,9 @@ public enum DriveExceptionCodes implements OXExceptionCode {
     /** Push via long polling is not available */
     LONG_POLLING_NOT_AVAILABLE(DriveExceptionMessages.LONG_POLLING_NOT_AVAILABLE_MSG, Category.CATEGORY_ERROR, 22),
 
+    /** The server is too busy at the moment - please try again later */
+    SERVER_BUSY(DriveExceptionMessages.SERVER_BUSY_MSG, Category.CATEGORY_TRY_AGAIN, 23),
+
     ;
 
     private static final String PREFIX = "DRV";

@@ -75,6 +75,8 @@ public interface DirectoryChecksumStore {
 
     boolean removeDirectoryChecksum(FolderID folderID) throws OXException;
 
+    int removeDirectoryChecksums(List<FolderID> folderIDs) throws OXException;
+
 
     DirectoryChecksum getDirectoryChecksum(FolderID folderID) throws OXException;
 

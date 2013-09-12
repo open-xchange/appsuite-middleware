@@ -85,6 +85,22 @@ postFix() {
             ox_set_property $NEWPROP 1d $PFILE
         fi
     done
+
+    # SoftwareChange_Request-1613
+    pfile=/opt/open-xchange/etc/crawler.properties
+    if ! ox_exists_property com.openexchange.subscribe.xing $pfile; then
+        ox_set_property com.openexchange.subscribe.xing true $pfile
+    fi
+
+    #SoftwareChange_Request-1623
+    PFILE=/opt/open-xchange/etc/crawler.properties
+    NEWPROPS=( com.openexchange.subscribe.crawler.gmx.de com.openexchange.subscribe.crawler.yahoocom com.openexchange.subscribe.crawler.web.de )
+    for I in $(seq 1 ${#NEWPROPS[@]}); do
+        NEWPROP=${NEWPROPS[$I-1]}
+        if ! ox_exists_property $NEWPROP $PFILE; then
+            ox_set_property $NEWPROP true $PFILE
+        fi
+    done
 }
 
 setConfigFilePermissions() {

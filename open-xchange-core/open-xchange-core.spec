@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 8
+%define        ox_release 9
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -797,6 +797,12 @@ if ! ox_exists_property com.openexchange.preview.cache.quotaAware $pfile; then
     ox_set_property com.openexchange.preview.cache.quotaAware false $pfile
 fi
 
+# SoftwareChange_Request-1610
+pfile=/opt/open-xchange/etc/templating.properties
+if ! ox_exists_property com.openexchange.templating.trusted $pfile; then
+    ox_set_property com.openexchange.templating.trusted server $pfile
+fi
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT
 do
@@ -840,6 +846,8 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Thu Sep 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Ninth candidate for 7.4.0 release
 * Mon Sep 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Eighth candidate for 7.4.0 release
 * Wed Aug 28 2013 Marcus Klein <marcus.klein@open-xchange.com>

@@ -70,6 +70,22 @@ public class FileChecksum extends StoredChecksum {
     }
 
     /**
+     * Initializes a new {@link FileChecksum}.
+     *
+     * @param fileID The file ID
+     * @param version The version
+     * @param sequenceNumber The sequence number
+     * @param checksum The checksum
+     */
+    public FileChecksum(FileID fileID, String version, long sequenceNumber, String checksum) {
+        super();
+        this.fileID = fileID;
+        this.version = version;
+        this.sequenceNumber = sequenceNumber;
+        this.checksum = checksum;
+    }
+
+    /**
      * Gets the fileID
      *
      * @return The fileID

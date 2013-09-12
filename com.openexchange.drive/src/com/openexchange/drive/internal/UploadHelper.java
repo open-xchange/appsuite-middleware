@@ -103,8 +103,11 @@ public class UploadHelper {
 
     public File perform(final String path, final FileVersion originalVersion, final FileVersion newVersion, final InputStream uploadStream,
         final String contentType, final long offset, final long totalLength, final Date created, final Date modified) throws OXException {
+        /*
+         * Try to save directly if applicable (no upload resume, no replace, total length is known and smaller than threshold)
+         */
+        if (null == originalVersion && 0 >= offset && 0 < totalLength && DriveConstants.OPTIMISTIC_UPLOAD_SIZE_THRESHOLD >= totalLength) {
 
-        if (null == originalVersion && 0 >= offset && 0 < totalLength && 10000 > totalLength) {
             Entry<File, String> uploadEntry = session.getStorage().wrapInTransaction(new StorageOperation<Entry<File, String>>() {
 
                 @Override
@@ -129,7 +132,6 @@ public class UploadHelper {
             }
             return uploadFile;
         }
-
         /*
          * save data
          */
@@ -273,7 +275,9 @@ public class UploadHelper {
         Date now = new Date();
         file.setLastModified(null != modified && modified.before(now) ? modified : now);
         fields.add(Field.LAST_MODIFIED);
-
+        if (session.isTraceEnabled()) {
+            session.trace(session.getStorage().toString() + ">> " + path + '/' + newVersion.getName());
+        }
         String checksum = saveDocumentAndChecksum(file, uploadStream, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, fields, false);
         return new AbstractMap.SimpleEntry<File, String>(file, checksum);
     }
@@ -298,6 +302,9 @@ public class UploadHelper {
         uploadFile.setVersionComment(session.getStorage().getVersionComment());
         uploadFile.setFileMIMEType(contentType);
         uploadFile.setFileSize(totalLength - offset);
+        if (session.isTraceEnabled()) {
+            session.trace(session.getStorage().toString() + ">> " + path + '/' + newVersion.getName());
+        }
         if (0 == offset) {
             /*
              * write initial file data, setting the first version number
