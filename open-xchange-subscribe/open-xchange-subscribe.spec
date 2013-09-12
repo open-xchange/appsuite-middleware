@@ -109,6 +109,16 @@ if [ ${1:-0} -eq 2 ]; then
         ox_set_property com.openexchange.subscribe.xing true $pfile
     fi
 
+    #SoftwareChange_Request-1623
+    PFILE=/opt/open-xchange/etc/crawler.properties
+    NEWPROPS=( com.openexchange.subscribe.crawler.gmx.de com.openexchange.subscribe.crawler.yahoocom com.openexchange.subscribe.crawler.web.de )
+    for I in $(seq 1 ${#NEWPROPS[@]}); do
+        NEWPROP=${NEWPROPS[$I-1]}
+        if ! ox_exists_property $NEWPROP $PFILE; then
+            ox_set_property $NEWPROP true $PFILE
+        fi
+    done
+
     find /opt/open-xchange/etc/crawlers -name "*.yml" -print0 | while read -d $'\0' i; do
         ox_update_permissions "$i" open-xchange:root 644
     done
