@@ -62,8 +62,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-push-imapidle"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-push-mailnotify"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-push-malpoll"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-realtime-atmosphere"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-realtime-core"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-realtime-json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-recaptcha"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-report-client"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-sessionstorage-hazelcast"/>
