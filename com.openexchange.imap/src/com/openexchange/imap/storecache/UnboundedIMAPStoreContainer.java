@@ -118,7 +118,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
                         throw e;
                     }
                     // None available -- await
-                    final IMAPStoreWrapper polled = availableQueue.poll(10, TimeUnit.SECONDS);
+                    final IMAPStoreWrapper polled = availableQueue.poll(2, TimeUnit.SECONDS);
                     if (null == polled) {
                         // System.out.println("IMAPStoreContainer.getStore(): Retry obtaining IMAPStore instance.");
                         if (DEBUG) {
@@ -126,8 +126,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
                         }
                     } else {
                         imapStore = polled.imapStore;
-                        // System.out.println("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance." + imapStore.toString() + "-" +
-                        // imapStore.hashCode());
+                        // System.out.println("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance." + imapStore.toString() + "-" + imapStore.hashCode());
                         if (DEBUG) {
                             LOG.debug("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance. " + imapStore.toString() + " -- " + imapStore.hashCode());
                         }

@@ -2778,7 +2778,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         }
                     }
                 } finally {
-                    newFolder.close(false);
+                    closeSafe(newFolder);
                 }
             } catch (final ReadOnlyFolderException e) {
                 throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, e, newFullname);
@@ -2800,7 +2800,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     uids = IMAPCommandsCollection.seqNums2UID(toMove, (1 == messageCount ? new String[] { "1" } : ARGS_ALL), messageCount);
                 }
             } finally {
-                toMove.close(false);
+                closeSafe(toMove);
             }
             imapAccess.getMessageStorage().copyMessagesLong(moveFullname, newFullname, uids, true);
         }
