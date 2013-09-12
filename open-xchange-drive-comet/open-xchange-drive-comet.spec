@@ -8,7 +8,7 @@ BuildRequires:  open-xchange-drive
 BuildRequires:  open-xchange-grizzly
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 0
+%define         ox_release 1
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -47,5 +47,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Thu Sep 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Ninth candidate for 7.4.0 release
 * Thu Sep 05 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Initial release

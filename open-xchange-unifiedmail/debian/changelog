@@ -1,3 +1,9 @@
+open-xchange-unifiedmail (7.4.0-9) stable; urgency=low
+
+  * Ninth candidate for 7.4.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 12 Sep 2013 17:17:42 +0200
+
 open-xchange-unifiedmail (7.4.0-8) stable; urgency=low
 
   * Eighth candidate for 7.4.0 release
