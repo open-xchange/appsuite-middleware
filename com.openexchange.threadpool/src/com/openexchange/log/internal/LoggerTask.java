@@ -126,6 +126,7 @@ final class LoggerTask extends AbstractTask<Object> {
     private final AtomicBoolean keepgoing;
     private final String lineSeparator;
     private final int maxMessageLength;
+    private final boolean reporting;
 
     private final Map<Level, LogCallback> callbacks;
 
@@ -135,12 +136,13 @@ final class LoggerTask extends AbstractTask<Object> {
      * @param queue
      * @param maxMessageLength
      */
-    protected LoggerTask(final BlockingQueue<Loggable> queue, final int maxMessageLength) {
+    protected LoggerTask(final BlockingQueue<Loggable> queue, final int maxMessageLength, final boolean reporting) {
         super();
         lineSeparator = System.getProperty("line.separator");
         keepgoing = new AtomicBoolean(true);
         this.queue = queue;
         this.maxMessageLength = maxMessageLength;
+        this.reporting = reporting;
 
         final Map<Loggable.Level, LogCallback> callbacks = new EnumMap<Loggable.Level, LogCallback>(Loggable.Level.class);
         callbacks.put(Loggable.Level.DEBUG, new DebugCallback());
@@ -181,16 +183,15 @@ final class LoggerTask extends AbstractTask<Object> {
         while (keepgoing.get()) {
             try {
                 loggables.clear();
-                if (queue.isEmpty()) {
-                    /*
-                     * Blocking wait for at least 1 Loggable to arrive.
-                     */
+                // Blocking wait for at least 1 Loggable to arrive
+                {
                     final Loggable loggable = queue.take();
                     if (POISON == loggable) {
                         return null;
                     }
                     loggables.add(loggable);
                 }
+                // Drain more if available
                 queue.drainTo(loggables);
                 final boolean quit = loggables.remove(POISON);
                 for (final Loggable loggable : loggables) {
@@ -233,10 +234,16 @@ final class LoggerTask extends AbstractTask<Object> {
                 msg = CRLF.matcher(msg).replaceAll(lineSeparator + " ");
             }
         }
+        // The optional Throwable instance
+        final Throwable throwable = loggable.getThrowable();
+        // Reporting (if enabled)
+        if (reporting && null != throwable) {
+            report(throwable);
+        }
         // Check stack trace
         final StackTraceElement[] trace = loggable.getCallerTrace();
         if (null == trace) {
-            callback.log(msg, loggable.getThrowable(), loggable.getLog());
+            callback.log(msg, throwable, loggable.getLog());
             return;
         }
         // Stack trace available: <stack-trace> + <LF> + <message>
@@ -258,7 +265,7 @@ final class LoggerTask extends AbstractTask<Object> {
                         substring = "..." + delim + substring;
                     }
                     sb.delete(0, pos + delim.length());
-                    callback.log(substring + "...", sb.length() <= 0 ? loggable.getThrowable() : null, loggable.getLog());
+                    callback.log(substring + "...", sb.length() <= 0 ? throwable : null, loggable.getLog());
                 } else {
                     String substring = sb.substring(0, maxMessageLength);
                     if (first) {
@@ -267,15 +274,19 @@ final class LoggerTask extends AbstractTask<Object> {
                         substring = "..." + delim + substring;
                     }
                     sb.delete(0, maxMessageLength);
-                    callback.log(substring + "...", sb.length() <= 0 ? loggable.getThrowable() : null, loggable.getLog());
+                    callback.log(substring + "...", sb.length() <= 0 ? throwable : null, loggable.getLog());
                 }
             } while (sb.length() > maxMessageLength);
             if (sb.length() > 0) {
-                callback.log("..." + delim + sb.toString(), loggable.getThrowable(), loggable.getLog());
+                callback.log("..." + delim + sb.toString(), throwable, loggable.getLog());
             }
         } else {
-            callback.log(sb.toString(), loggable.getThrowable(), loggable.getLog());
+            callback.log(sb.toString(), throwable, loggable.getLog());
         }
+    }
+    
+    private void report(final Throwable throwable) {
+        // TODO: Invoke tracked handlers
     }
 
     private void appendLogLocation(final StackTraceElement[] trace, final StringBuilder sb) {

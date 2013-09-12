@@ -84,10 +84,10 @@ public final class LogServiceImpl implements LogService {
     /**
      * Initializes a new {@link LogServiceImpl}.
      */
-    public LogServiceImpl(final ThreadPoolService threadPool, final int queueCapacity, final int maxMessageLength) {
+    public LogServiceImpl(final ThreadPoolService threadPool, final int queueCapacity, final int maxMessageLength, final boolean reporting) {
         super();
         queue = new LinkedBlockingQueue<Loggable>(queueCapacity > 0 ? queueCapacity : DEFAULT_CAPACITY);
-        loggerTask = new LoggerTask(queue, maxMessageLength);
+        loggerTask = new LoggerTask(queue, maxMessageLength, reporting);
         future = threadPool.submit(loggerTask, AbortBehavior.getInstance());
     }
 
