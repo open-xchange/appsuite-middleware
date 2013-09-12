@@ -49,9 +49,7 @@
 
 package com.openexchange.apps.manifests.json;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.json.JSONArray;
@@ -64,7 +62,6 @@ import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -99,9 +96,7 @@ public class AllAction implements AJAXActionService {
 
                 for (int i = 0, size = manifests.length(); i < size; i++) {
                     JSONObject definition = manifests.getJSONObject(i);
-                    //if (hasCapability(capMap, definition)) {
-                        result.put(new JSONObject(definition));
-                    //}
+                    result.put(new JSONObject(definition));
                 }
 
             } else {
@@ -117,9 +112,7 @@ public class AllAction implements AJAXActionService {
 
                 for (int i = 0, size = manifests.length(); i < size; i++) {
                     JSONObject definition = manifests.getJSONObject(i);
-                    //if (hasCapability(capMap, definition)) {
-                        result.put(new JSONObject(definition));
-                    //}
+                    result.put(new JSONObject(definition));
                 }
             }
         } catch (JSONException x) {
@@ -127,67 +120,4 @@ public class AllAction implements AJAXActionService {
         }
         return result;
     }
-
-    private static boolean isSigninPlugin(JSONObject definition) throws JSONException {
-        if (!definition.has("namespace")) {
-            return false;
-        }
-
-        return definition.getString("namespace").equalsIgnoreCase("signin");
-    }
-
-    private static boolean hasCapability(Map<String, Capability> capMap, JSONObject definition) throws JSONException {
-
-        if (!definition.has("requires")) {
-            return true;
-        }
-        Object requires = definition.get("requires");
-        // This could be a string or an array
-        List<String> capDef = new ArrayList<String>();
-
-        if (JSONArray.class.isInstance(requires)) {
-            JSONArray arr = (JSONArray) requires;
-            for (int i = 0, size = arr.length(); i < size; i++) {
-                capDef.add(arr.getString(i));
-            }
-        } else {
-            capDef.add(requires.toString());
-        }
-
-        for (String c : capDef) {
-            String[] split = Strings.splitByWhitespaces(c);
-            String name = split[0];
-            boolean inverse = false;
-            if (name.charAt(0) == '!') {
-                inverse = true;
-                name = name.substring(1);
-            }
-            boolean needsBackend = false;
-            if (split.length > 1) {
-                final String word = split[1];
-                needsBackend = "withbackend".equalsIgnoreCase(word) || "withbackendsupport".equalsIgnoreCase(word) || "backend".equals(word) || "backendsupport".equals(word);
-            }
-
-            Capability capability = capMap.get(name);
-
-            if (inverse) {
-                if (capability != null) {
-                    return false;
-                }
-            } else {
-                if (capability == null) {
-                    return false;
-                }
-                if (needsBackend) {
-                    if (!capability.isSupportedByBackend()) {
-                        return false;
-                    }
-                }
-            }
-
-        }
-
-        return true;
-    }
-
 }
