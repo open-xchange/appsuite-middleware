@@ -185,6 +185,54 @@ public class SQL {
         "WHERE cid=? AND folder=REVERSE(?);";
 
     /**
+     * DELETE FROM fileChecksums
+     * WHERE cid=? AND REVERSE(folder) IN (...);"
+     * @throws OXException
+     */
+    public static final String DELETE_FILE_CHECKSUMS_IN_FOLDER_STMT(FolderID[] folderIDs) throws OXException {
+        if (null == folderIDs || 0 == folderIDs.length) {
+            throw new IllegalArgumentException("folderIDs");
+        }
+        StringAllocator allocator = new StringAllocator();
+        allocator.append("DELETE FROM fileChecksums ");
+        allocator.append("WHERE cid=? AND REVERSE(folder)");
+        if (1 == folderIDs.length) {
+            allocator.append("='").append(escapeFolder(folderIDs[0])).append("';");
+        } else {
+            allocator.append(" IN ('").append(escapeFolder(folderIDs[0]));
+            for (int i = 1; i < folderIDs.length; i++) {
+                allocator.append("','").append(escapeFolder(folderIDs[i]));
+            }
+            allocator.append("');");
+        }
+        return allocator.toString();
+    }
+
+    /**
+     * DELETE FROM directoryChecksums
+     * WHERE cid=? AND REVERSE(folder) IN (...);"
+     * @throws OXException
+     */
+    public static final String DELETE_DIRECTORY_CHECKSUMS_STMT(FolderID[] folderIDs) throws OXException {
+        if (null == folderIDs || 0 == folderIDs.length) {
+            throw new IllegalArgumentException("folderIDs");
+        }
+        StringAllocator allocator = new StringAllocator();
+        allocator.append("DELETE FROM directoryChecksums ");
+        allocator.append("WHERE cid=? AND REVERSE(folder)");
+        if (1 == folderIDs.length) {
+            allocator.append("='").append(escapeFolder(folderIDs[0])).append("';");
+        } else {
+            allocator.append(" IN ('").append(escapeFolder(folderIDs[0]));
+            for (int i = 1; i < folderIDs.length; i++) {
+                allocator.append("','").append(escapeFolder(folderIDs[i]));
+            }
+            allocator.append("');");
+        }
+        return allocator.toString();
+    }
+
+    /**
      * SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,checksum FROM directoryChecksums
      * WHERE cid=? AND REVERSE(folder) IN (...);"
      * @throws OXException

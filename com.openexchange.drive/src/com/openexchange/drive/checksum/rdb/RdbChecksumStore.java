@@ -58,7 +58,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -162,7 +161,7 @@ public class RdbChecksumStore implements ChecksumStore {
 
     @Override
     public FileChecksum updateFileChecksum(FileChecksum fileChecksum) throws OXException {
-        return updateFileChecksums(Arrays.asList(new FileChecksum[] { fileChecksum })).get(0);
+        return updateFileChecksums(Collections.singletonList(fileChecksum)).get(0);
     }
 
     @Override
@@ -197,7 +196,7 @@ public class RdbChecksumStore implements ChecksumStore {
 
     @Override
     public boolean removeFileChecksum(FileChecksum fileChecksum) throws OXException {
-        return 0 < removeFileChecksums(Arrays.asList(new FileChecksum[] { fileChecksum }));
+        return 0 < removeFileChecksums(Collections.singletonList(fileChecksum));
     }
 
     @Override
@@ -233,9 +232,14 @@ public class RdbChecksumStore implements ChecksumStore {
 
     @Override
     public int removeFileChecksumsInFolder(FolderID folderID) throws OXException {
+        return removeFileChecksumsInFolders(Collections.singletonList(folderID));
+    }
+
+    @Override
+    public int removeFileChecksumsInFolders(List<FolderID> folderIDs) throws OXException {
         Connection connection = databaseService.getWritable(contextID);
         try {
-            return deleteFileChecksumsInFolder(connection, contextID, folderID);
+            return deleteFileChecksumsInFolders(connection, contextID, folderIDs.toArray(new FolderID[folderIDs.size()]));
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -328,7 +332,7 @@ public class RdbChecksumStore implements ChecksumStore {
 
     @Override
     public DirectoryChecksum insertDirectoryChecksum(DirectoryChecksum directoryChecksum) throws OXException {
-        return insertDirectoryChecksums(Arrays.asList(new DirectoryChecksum[] { directoryChecksum })).get(0);
+        return insertDirectoryChecksums(Collections.singletonList(directoryChecksum)).get(0);
     }
 
     @Override
@@ -377,7 +381,7 @@ public class RdbChecksumStore implements ChecksumStore {
 
     @Override
     public DirectoryChecksum updateDirectoryChecksum(DirectoryChecksum directoryChecksum) throws OXException {
-        return updateDirectoryChecksums(Arrays.asList(new DirectoryChecksum[] { directoryChecksum })).get(0);
+        return updateDirectoryChecksums(Collections.singletonList(directoryChecksum)).get(0);
     }
 
     @Override
@@ -394,9 +398,14 @@ public class RdbChecksumStore implements ChecksumStore {
 
     @Override
     public boolean removeDirectoryChecksum(FolderID folderID) throws OXException {
+        return 0 < removeDirectoryChecksums(Collections.singletonList(folderID));
+    }
+
+    @Override
+    public int removeDirectoryChecksums(List<FolderID> folderIDs) throws OXException {
         Connection connection = databaseService.getWritable(contextID);
         try {
-            return 0 < deleteDirectoryChecksum(connection, contextID, folderID);
+            return deleteDirectoryChecksums(connection, contextID, folderIDs.toArray(new FolderID[folderIDs.size()]));
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -406,7 +415,7 @@ public class RdbChecksumStore implements ChecksumStore {
 
     @Override
     public DirectoryChecksum getDirectoryChecksum(FolderID folderID) throws OXException {
-        List<DirectoryChecksum> directoryChecksums = getDirectoryChecksums(Arrays.asList(new FolderID[] { folderID }));
+        List<DirectoryChecksum> directoryChecksums = getDirectoryChecksums(Collections.singletonList(folderID));
         return 1 == directoryChecksums.size() ? directoryChecksums.get(0) : null;
     }
 
@@ -504,12 +513,11 @@ public class RdbChecksumStore implements ChecksumStore {
         }
     }
 
-    private static int deleteFileChecksumsInFolder(Connection connection, int cid, FolderID folder) throws SQLException, OXException {
+    private static int deleteFileChecksumsInFolders(Connection connection, int cid, FolderID[] folderIDs) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SQL.DELETE_FILE_CHECKSUMS_IN_FOLDER_STMT);
+            stmt = connection.prepareStatement(SQL.DELETE_DIRECTORY_CHECKSUMS_STMT(folderIDs));
             stmt.setInt(1, cid);
-            stmt.setString(2, escapeFolder(folder));
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -689,12 +697,11 @@ public class RdbChecksumStore implements ChecksumStore {
         }
     }
 
-    private static int deleteDirectoryChecksum(Connection connection, int cid, FolderID folder) throws SQLException, OXException {
+    private static int deleteDirectoryChecksums(Connection connection, int cid, FolderID[] folderIDs) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SQL.DELETE_DIRECTORY_CHECKSUM_STMT);
+            stmt = connection.prepareStatement(SQL.DELETE_DIRECTORY_CHECKSUMS_STMT(folderIDs));
             stmt.setInt(1, cid);
-            stmt.setString(2, escapeFolder(folder));
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
