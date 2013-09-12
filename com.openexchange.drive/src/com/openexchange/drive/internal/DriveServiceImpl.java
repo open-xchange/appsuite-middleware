@@ -55,7 +55,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.drive.Action;
@@ -84,7 +83,8 @@ import com.openexchange.drive.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.internal.tracking.SyncTracker;
 import com.openexchange.drive.storage.DriveConstants;
-import com.openexchange.drive.storage.StorageOperation;
+import com.openexchange.drive.storage.execute.DirectoryActionExecutor;
+import com.openexchange.drive.storage.execute.FileActionExecutor;
 import com.openexchange.drive.sync.DefaultSyncResult;
 import com.openexchange.drive.sync.IntermediateSyncResult;
 import com.openexchange.drive.sync.RenameTools;
@@ -134,7 +134,7 @@ public class DriveServiceImpl implements DriveService {
              */
             final SyncSession driveSession = new SyncSession(session);
             IntermediateSyncResult<DirectoryVersion> syncResult = syncDirectories(
-                driveSession, originalVersions, clientVersions, getServerDirectories(driveSession));
+                driveSession, originalVersions, clientVersions, driveSession.getServerDirectories());
             /*
              * track & check sync result for cycles
              */
@@ -145,17 +145,8 @@ public class DriveServiceImpl implements DriveService {
                 /*
                  * execute actions on server
                  */
-                for (final DriveAction<DirectoryVersion> action : syncResult.getActionsForServer()) {
-
-                    driveSession.getStorage().wrapInTransaction(new StorageOperation<Void>() {
-
-                        @Override
-                        public Void call() throws OXException {
-                            execute(driveSession, action);
-                            return null;
-                        }
-                    });
-                }
+                DirectoryActionExecutor executor = new DirectoryActionExecutor(driveSession, true, retryCount < DriveConstants.MAX_RETRIES);
+                executor.execute(syncResult.getActionsForServer());
             } catch (OXException e) {
                 if (tryAgain(e) && retryCount <= DriveConstants.MAX_RETRIES) {
                     retryCount++;
@@ -196,7 +187,7 @@ public class DriveServiceImpl implements DriveService {
             final SyncSession driveSession = new SyncSession(session);
             driveSession.getStorage().createFolder(path);
             IntermediateSyncResult<FileVersion> syncResult = syncFiles(
-                driveSession, path, originalVersions, clientVersions, getServerFiles(driveSession, path));
+                driveSession, path, originalVersions, clientVersions, driveSession.getServerFiles(path));
             /*
              * track sync result
              */
@@ -207,17 +198,9 @@ public class DriveServiceImpl implements DriveService {
                 /*
                  * execute actions on server
                  */
-                for (final DriveAction<FileVersion> action : syncResult.getActionsForServer()) {
-
-                    driveSession.getStorage().wrapInTransaction(new StorageOperation<Void>() {
-
-                        @Override
-                        public Void call() throws OXException {
-                            execute(driveSession, path, action);
-                            return null;
-                        }
-                    });
-                }
+                FileActionExecutor executor = new FileActionExecutor(driveSession, true, false, path);
+//                FileActionExecutor executor = new FileActionExecutor(driveSession, true, retryCount < DriveConstants.MAX_RETRIES, path);
+                executor.execute(syncResult.getActionsForServer());
             } catch (OXException e) {
                 if (tryAgain(e) && retryCount <= DriveConstants.MAX_RETRIES) {
                     retryCount++;
@@ -278,7 +261,9 @@ public class DriveServiceImpl implements DriveService {
         SyncSession driveSession = new SyncSession(session);
         if (driveSession.isTraceEnabled()) {
             driveSession.trace("Handling upload: original version: " + originalVersion + ", new version: " + newVersion +
-                ", offset: " + offset + ", total length: " + totalLength + ", created: " + created + ", modified: " + modified);
+                ", offset: " + offset + ", total length: " + totalLength +
+                ", created: " + (null != created ? DriveConstants.LOG_DATE_FORMAT.get().format(created) : "") +
+                ", modified: " + (null != modified ? DriveConstants.LOG_DATE_FORMAT.get().format(modified) : ""));
         }
         IntermediateSyncResult<FileVersion> syncResult = new IntermediateSyncResult<FileVersion>();
         File createdFile = null;
@@ -356,6 +341,7 @@ public class DriveServiceImpl implements DriveService {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Got quota for root folder '" + session.getRootFolderID() + "': " + quota);
         }
+        final String manageLink = new DirectLinkGenerator(driveSession).getQuotaLink();
         return new DriveQuota() {
 
             @Override
@@ -365,7 +351,7 @@ public class DriveServiceImpl implements DriveService {
 
             @Override
             public String getManageLink() {
-                return new DirectLinkGenerator(driveSession).getQuotaLink();
+                return manageLink;
             }
         };
     }
@@ -375,7 +361,7 @@ public class DriveServiceImpl implements DriveService {
         SyncSession driveSession = new SyncSession(session);
         List<FileMetadata> fileMetadata = new ArrayList<FileMetadata>();
         if (null == fileVersions) {
-            List<ServerFileVersion> serverFiles = getServerFiles(driveSession, path);
+            List<ServerFileVersion> serverFiles = driveSession.getServerFiles(path);
             for (ServerFileVersion fileVersion : serverFiles) {
                 fileMetadata.add(new DefaultFileMetadata(driveSession, fileVersion));
             }
@@ -383,7 +369,7 @@ public class DriveServiceImpl implements DriveService {
             ServerFileVersion fileVersion = ServerFileVersion.valueOf(fileVersions.get(0), path, driveSession);
             fileMetadata.add(new DefaultFileMetadata(driveSession, fileVersion));
         } else {
-            List<ServerFileVersion> serverFiles = getServerFiles(driveSession, path);
+            List<ServerFileVersion> serverFiles = driveSession.getServerFiles(path);
             for (FileVersion requestedVersion : fileVersions) {
                 ServerFileVersion matchingVersion = null;
                 for (ServerFileVersion serverFileVersion : serverFiles) {
@@ -511,6 +497,13 @@ public class DriveServiceImpl implements DriveService {
                             session.getChecksumStore().updateFileChecksumFolders(new FolderID(currentFolderID), new FolderID(movedFolderID));
                             session.getChecksumStore().updateDirectoryChecksumFolder(new FolderID(currentFolderID), new FolderID(movedFolderID));
                         }
+                    } else {
+                        /*
+                         * identical folder already in trash, hard-delete the directory
+                         */
+                        FolderID deletedFolderID = new FolderID(session.getStorage().deleteFolder(action.getVersion().getPath()));
+                        session.getChecksumStore().removeDirectoryChecksum(deletedFolderID);
+                        session.getChecksumStore().removeFileChecksumsInFolder(deletedFolderID);
                     }
                 } else {
                     /*
@@ -519,7 +512,7 @@ public class DriveServiceImpl implements DriveService {
                     List<FileChecksum> checksumsToUpdate = new ArrayList<FileChecksum>();
                     List<FileChecksum> checksumsToRemove = new ArrayList<FileChecksum>();
                     List<File> filesToRemove = new ArrayList<File>();
-                    for (ServerFileVersion versionToRemove : getServerFiles(session, action.getVersion().getPath())) {
+                    for (ServerFileVersion versionToRemove : session.getServerFiles(action.getVersion().getPath())) {
                         FileChecksum fileChecksum = versionToRemove.getFileChecksum();
                         File removedFile = session.getStorage().moveFile(
                             versionToRemove.getFile(), versionToRemove.getChecksum(), DriveConstants.TEMP_PATH);
@@ -783,52 +776,6 @@ public class DriveServiceImpl implements DriveService {
             return null != folder && tempFolderID.equals(folder.getParentId());
         }
         return false;
-    }
-
-    private static List<ServerFileVersion> getServerFiles(SyncSession session, String path) throws OXException {
-        String folderID = session.getStorage().getFolderID(path);
-        List<File> files = session.getStorage().getFilesInFolder(folderID);
-        List<FileChecksum> checksums = ChecksumProvider.getChecksums(session, folderID, files);
-        List<ServerFileVersion> serverFiles = new ArrayList<ServerFileVersion>(files.size());
-        for (int i = 0; i < files.size(); i++) {
-            serverFiles.add(new ServerFileVersion(files.get(i), checksums.get(i)));
-        }
-        return serverFiles;
-    }
-
-    private static List<ServerDirectoryVersion> getServerDirectories(final SyncSession session) throws OXException {
-        return session.getStorage().wrapInTransaction(new StorageOperation<List<ServerDirectoryVersion>>() {
-
-            @Override
-            public List<ServerDirectoryVersion> call() throws OXException {
-                StringAllocator stringAllocator = session.isTraceEnabled() ? new StringAllocator("Server directories:\n") : null;
-                Map<String, FileStorageFolder> folders = session.getStorage().getFolders();
-                List<String> folderIDs = new ArrayList<String>(folders.size());
-                for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
-                    if (false == DriveConstants.PATH_VALIDATION_PATTERN.matcher(entry.getKey()).matches()) {
-                        session.trace("Skipping invalid server directory: " + entry.getKey());
-                    } else {
-                        folderIDs.add(entry.getValue().getId());
-                    }
-                }
-                List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(session, folderIDs);
-                List<ServerDirectoryVersion> serverDirectories = new ArrayList<ServerDirectoryVersion>(folderIDs.size());
-                for (int i = 0; i < folderIDs.size(); i++) {
-                    ServerDirectoryVersion directoryVersion = new ServerDirectoryVersion(
-                        session.getStorage().getPath(folderIDs.get(i)), checksums.get(i));
-                    serverDirectories.add(directoryVersion);
-                    if (session.isTraceEnabled()) {
-                        stringAllocator.append(" [").append(directoryVersion.getDirectoryChecksum().getFolderID()).append("] ")
-                            .append(directoryVersion.getPath()).append(" | ").append(directoryVersion.getChecksum())
-                            .append(" (").append(directoryVersion.getDirectoryChecksum().getSequenceNumber()).append(")\n");
-                    }
-                }
-                if (session.isTraceEnabled()) {
-                    session.trace(stringAllocator);
-                }
-                return serverDirectories;
-            }
-        });
     }
 
     private static boolean tryAgain(OXException e) {

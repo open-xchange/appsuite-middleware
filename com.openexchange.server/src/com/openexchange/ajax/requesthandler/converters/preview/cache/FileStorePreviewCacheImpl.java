@@ -226,7 +226,7 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
                 /*
                  * Update
                  */
-                stmt = con.prepareStatement("UPDATE preview SET refId = ?, size = ?, createdAt = ?, fileName = ?, fileType = ?, data = NULL WHERE cid = ? AND user = ? AND id = ?");
+                stmt = con.prepareStatement("UPDATE preview SET refId = ?, size = ?, createdAt = ?, fileName = ?, fileType = ? WHERE cid = ? AND user = ? AND id = ?");
                 stmt.setString(pos++, refId);
                 stmt.setLong(pos++, bytes.length);
                 stmt.setLong(pos++, now);
@@ -247,7 +247,7 @@ public final class FileStorePreviewCacheImpl implements PreviewCache, EventHandl
                 /*
                  * Insert
                  */
-                stmt = con.prepareStatement("INSERT INTO preview (cid, user, id, size, createdAt, refId, fileName, fileType, data) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL)");
+                stmt = con.prepareStatement("INSERT INTO preview (cid, user, id, size, createdAt, refId, fileName, fileType) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                 stmt.setLong(pos++, contextId);
                 stmt.setLong(pos++, userId);
                 stmt.setString(pos++, id);

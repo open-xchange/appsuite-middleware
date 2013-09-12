@@ -53,8 +53,8 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.Utils;
 import com.openexchange.realtime.events.RTEventManagerService;
+import com.openexchange.realtime.json.Utils;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.tools.session.ServerSession;
 

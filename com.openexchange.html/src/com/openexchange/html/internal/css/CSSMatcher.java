@@ -49,6 +49,8 @@
 
 package com.openexchange.html.internal.css;
 
+import static com.openexchange.java.Strings.isEmpty;
+import static com.openexchange.java.Strings.toLowerCase;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.util.Map;
@@ -63,7 +65,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.html.internal.MatcherReplacer;
 import com.openexchange.html.internal.RegexUtility;
 import com.openexchange.html.internal.RegexUtility.GroupType;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.StringBufferStringer;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
@@ -274,11 +275,13 @@ public final class CSSMatcher {
     }
 
     /** Matches a starting CSS block */
-    private static final Pattern PATTERN_STYLE_STARTING_BLOCK = Pattern.compile("(?:#|\\.|@|[a-zA-Z])[^{/*]*?\\{");
+    protected static final Pattern PATTERN_STYLE_STARTING_BLOCK = Pattern.compile("(?:#|\\.|@|[a-zA-Z])[^{/*]*?\\{");
+
     /** Matches a complete CSS block, but not appropriate for possible nested blocks */
     private static final Pattern PATTERN_STYLE_BLOCK = Pattern.compile("((?:#|\\.|[a-zA-Z])[^{]*?\\{)([^}/]+)\\}");
+
     /** Matches a CR?LF plus indention */
-    private static final Pattern CRLF = Pattern.compile("\r?\n( {2,})?");
+    protected static final Pattern CRLF = Pattern.compile("\r?\n( {2,})?");
 
     /**
      * Iterates over CSS contained in specified string argument and checks each found element/block against given style map
@@ -292,7 +295,16 @@ public final class CSSMatcher {
         return checkCSS(cssBuilder, styleMap, cssPrefix, false);
     }
 
-    private static boolean checkCSS(final Stringer cssBuilder, final Map<String, Set<String>> styleMap, final String cssPrefix, final boolean internallyInvoked) {
+    /**
+     * Checks the CSS provided by given <code>Stringer</code>.
+     *
+     * @param cssBuilder The CSS content
+     * @param styleMap The style map
+     * @param cssPrefix The CSS prefix
+     * @param internallyInvoked <code>true</code> if already internally invoked; otherwise <code>false</code>
+     * @return <code>true</code> if modified; otherwise <code>false</code>
+     */
+    protected static boolean checkCSS(final Stringer cssBuilder, final Map<String, Set<String>> styleMap, final String cssPrefix, final boolean internallyInvoked) {
         // Schedule separate task to monitor duration
         // User StringBuffer-based invocation to honor concurrency
         final Stringer cssBld = new StringBufferStringer(new StringBuffer(cssBuilder.toString()));
@@ -688,8 +700,8 @@ public final class CSSMatcher {
     private static final Pattern PATTERN_STYLE_LINE = Pattern.compile(
         "([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}&&[^;{}]]+);?",
         Pattern.CASE_INSENSITIVE);
-    private static final Pattern PATTERN_START_STYLE_LINE = Pattern.compile(
-        "([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}&&[^;{}]])");
+    //private static final Pattern PATTERN_START_STYLE_LINE = Pattern.compile(
+    //    "([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}&&[^;{}]])");
 
     /**
      * Corrects rgb functions; e.g.<br>
@@ -817,32 +829,10 @@ public final class CSSMatcher {
      * @return <code>true</code> if specified string argument contains at least one CSS element; otherwise <code>false</code>
      */
     public static boolean containsCSSElement(final String css) {
-        if (null == css || isEmpty(css)) {
+        if (null == css || Strings.isEmpty(css)) {
             return false;
         }
         return PATTERN_STYLE_LINE.matcher(css).find();
-    }
-
-    static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
-    private static String toLowerCase(final CharSequence chars) {
-        final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
 }

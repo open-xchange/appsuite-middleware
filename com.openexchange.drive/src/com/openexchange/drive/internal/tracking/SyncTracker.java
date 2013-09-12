@@ -168,7 +168,12 @@ public class SyncTracker {
             /*
              * pass 'reset' actions as new sync result
              */
-            return new IntermediateSyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient);
+            IntermediateSyncResult<DirectoryVersion> newResult =
+                new IntermediateSyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient);
+            if (session.isTraceEnabled()) {
+                session.trace(newResult);
+            }
+            return newResult;
         } else {
             /*
              * all fine, pass through result
@@ -282,13 +287,16 @@ public class SyncTracker {
         if (null != cycle && session.isTraceEnabled()) {
             List<HistoryEntry> sequence = cycle.getSequence();
             StringAllocator stringAllocator = new StringAllocator();
-            stringAllocator.append("A synchronization cycle was detected:\n\n");
-            stringAllocator.append("The following ").append(sequence.size()).append(" sync results were repeated ")
-                .append(cycle.getRepetitions()).append(" times:\n\n");
+            stringAllocator.append("A synchronization cycle was detected - The following ").append(sequence.size())
+                .append(" sync results were repeated ").append(cycle.getRepetitions()).append(" times:\n\n");
             for (int i = 0; i < sequence.size(); i++) {
                 HistoryEntry entry = sequence.get(i);
-                stringAllocator.append(" # ").append(i + 1).append(" [").append(entry.hashCode()).append("] ")
-                    .append(null != entry.getPath() ? entry.getPath() : "").append(" :\n").append(entry.getSyncResult());
+                stringAllocator.append(" # ").append(i + 1).append(' ').append(null != entry.getPath() ? entry.getPath() : "")
+                    .append(" : [").append(entry.hashCode()).append(']');
+                IntermediateSyncResult<? extends DriveVersion> result = entry.getSyncResult();
+                if (null != result) {
+                    stringAllocator.append('\n').append(result);
+                }
             }
             session.trace(stringAllocator.toString());
         }

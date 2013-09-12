@@ -76,6 +76,7 @@ public class JsonFileMetadata {
         jsonObject.put("name", metadata.getName());
         jsonObject.put("checksum", metadata.getChecksum());
         jsonObject.put("directLink", metadata.getDirectLink());
+        jsonObject.put("directLinkFragments", metadata.getDirectLinkFragments());
         jsonObject.put("modified", null != metadata.getModified() ?
             Long.valueOf(metadata.getModified().getTime()) : JSONObject.NULL);
         jsonObject.put("created", null != metadata.getCreated() ?

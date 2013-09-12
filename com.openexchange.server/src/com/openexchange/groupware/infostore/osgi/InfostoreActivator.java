@@ -184,7 +184,7 @@ public class InfostoreActivator implements BundleActivator {
             configTracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new ServiceTrackerCustomizer<ConfigurationService, ConfigurationService>() {
                 
                 /* 
-                 * Register MAX_UPLOAD_SIZE & infostore quota as SharedJSLob
+                 * Register quotas as SharedJSLob
                  */                
                 ServiceRegistration<SharedJSlobService> registration;
 
@@ -192,8 +192,7 @@ public class InfostoreActivator implements BundleActivator {
                 public ConfigurationService addingService(ServiceReference<ConfigurationService> arg0) {
                     
                     ConfigurationService configService = context.getService(arg0);
-                    int maxUploadSize = configService.getIntProperty("MAX_UPLOAD_SIZE", 10485760);
-                    SharedJSlobService infostoreJSlob = new SharedInfostoreJSlob(maxUploadSize);
+                    SharedJSlobService infostoreJSlob = new SharedInfostoreJSlob();
                     registration = context.registerService(SharedJSlobService.class, infostoreJSlob, null);
                     return configService;
                 }

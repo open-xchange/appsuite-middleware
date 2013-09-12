@@ -63,6 +63,9 @@ import com.openexchange.snippet.json.converter.SnippetJSONResultConverter;
  */
 public class SnippetJsonActivator extends AJAXModuleActivator {
 
+    /**
+     * Initializes a new {@link SnippetJsonActivator}.
+     */
     public SnippetJsonActivator() {
         super();
     }
@@ -75,7 +78,12 @@ public class SnippetJsonActivator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         final Log log = com.openexchange.log.Log.loggerFor(SnippetJsonActivator.class);
-        registerModule(new SnippetActionFactory(this), "snippet");
+
+        final SnippetServiceTracker customizer = new SnippetServiceTracker(context);
+        track(SnippetService.class, customizer);
+        openTrackers();
+
+        registerModule(new SnippetActionFactory(new ForwardingServiceLookup(this, customizer)), "snippet");
         registerService(ResultConverter.class, new SnippetJSONResultConverter());
         log.info("Bundle successfully started: com.openexchange.snippet.json");
     }

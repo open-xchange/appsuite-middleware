@@ -598,8 +598,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     finishDBTransaction();
                 }
 
-                document.setCreationDate(new Date(System.currentTimeMillis()));
-                document.setLastModified(document.getCreationDate());
+                Date now = new Date();
+                if (null == document.getLastModified()) {
+                    document.setLastModified(now);
+                }
+                if (null == document.getCreationDate()) {
+                    document.setCreationDate(now);
+                }
                 document.setCreatedBy(session.getUserId());
                 document.setModifiedBy(session.getUserId());
 

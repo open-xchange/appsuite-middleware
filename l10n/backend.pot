@@ -5384,91 +5384,6 @@ msgstr ""
 msgid "Quota exceeded. Please delete some items in order to create new ones."
 msgstr ""
 
-#. * The mandatory session information is missing.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:62
-msgid "The session information didn't match any ServerSession"
-msgstr ""
-
-#. * "Obligatory key \"%1$s\" is missing from the Stanza"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:64
-msgid "Obligatory key \"%1$s\" is missing from the Stanza"
-msgstr ""
-
-#. * Could not find a builder for the specified element: . \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:66
-msgid "Could not find a builder for the given element: . \"%1$s\""
-msgstr ""
-
-#. * Error while building Stanza: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:68
-msgid "Error while building Stanza: \"%1$s\""
-msgstr ""
-
-#. * Could not find a transformer for the PayloadElement: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:70
-msgid "Could not find a transformer for the PayloadElement: \"%1$s\""
-msgstr ""
-
-#. * Could not find an initializer for the specified stanza
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:72
-msgid "Could not find an initializer for the given stanza: . \"%1$s\""
-msgstr ""
-
-#. * Error while transforming a PayloadElement: \"%1$s. %2$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:74
-msgid "Error while transforming a PayloadElement: \"%1$s, %2$s\""
-msgstr ""
-
-#. * Error while converting a PayloadElement: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:76
-msgid "Error while converting PayloadElement data: \"%1$s\""
-msgstr ""
-
-#. * The following obligatory element is missing: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:78
-msgid "The following obligatory element is missing: \"%1$s\""
-msgstr ""
-
-#. * Malformed Presence Data
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:80
-msgid "Malformed Presence Data"
-msgstr ""
-
-#. * Malformed Message Data
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:82
-msgid "Malformed Message Data"
-msgstr ""
-
-#. * Malformed IQ Data
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:84
-msgid "Malformed IQ Data"
-msgstr ""
-
-#. * Malformed Presence Element: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:86
-msgid "Malformed Presence Element: \"%1$s\""
-msgstr ""
-
-#. * Malformed Message Element: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:88
-msgid "Malformed Message Element: \"%1$s\""
-msgstr ""
-
-#. * Malformed IQ Element: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:90
-msgid "Malformed IQ Element: \"%1$s\""
-msgstr ""
-
-#. * Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:92
-msgid "Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\""
-msgstr ""
-
-#. * Malformed POST Data"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:94
-msgid "Malformed POST Data"
-msgstr ""
-
 #. Could not find a handler for the specified stanza
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
 msgid "Could not find a handler for the given stanza: . \"%1$s\""
@@ -5507,6 +5422,91 @@ msgstr ""
 #. * Could not send directed Presence to resource: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.handle/src/com/openexchange/realtime/handle/HandleExceptionMessage.java:63
 msgid "Could not send directed Presence to resource: %1$s"
+msgstr ""
+
+#. * The mandatory session information is missing.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:62
+msgid "The session information didn't match any ServerSession"
+msgstr ""
+
+#. * "Obligatory key \"%1$s\" is missing from the Stanza"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:64
+msgid "Obligatory key \"%1$s\" is missing from the Stanza"
+msgstr ""
+
+#. * Could not find a builder for the specified element: . \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:66
+msgid "Could not find a builder for the given element: . \"%1$s\""
+msgstr ""
+
+#. * Error while building Stanza: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:68
+msgid "Error while building Stanza: \"%1$s\""
+msgstr ""
+
+#. * Could not find a transformer for the PayloadElement: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:70
+msgid "Could not find a transformer for the PayloadElement: \"%1$s\""
+msgstr ""
+
+#. * Could not find an initializer for the specified stanza
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:72
+msgid "Could not find an initializer for the given stanza: . \"%1$s\""
+msgstr ""
+
+#. * Error while transforming a PayloadElement: \"%1$s. %2$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:74
+msgid "Error while transforming a PayloadElement: \"%1$s, %2$s\""
+msgstr ""
+
+#. * Error while converting a PayloadElement: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:76
+msgid "Error while converting PayloadElement data: \"%1$s\""
+msgstr ""
+
+#. * The following obligatory element is missing: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:78
+msgid "The following obligatory element is missing: \"%1$s\""
+msgstr ""
+
+#. * Malformed Presence Data
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:80
+msgid "Malformed Presence Data"
+msgstr ""
+
+#. * Malformed Message Data
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:82
+msgid "Malformed Message Data"
+msgstr ""
+
+#. * Malformed IQ Data
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:84
+msgid "Malformed IQ Data"
+msgstr ""
+
+#. * Malformed Presence Element: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:86
+msgid "Malformed Presence Element: \"%1$s\""
+msgstr ""
+
+#. * Malformed Message Element: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:88
+msgid "Malformed Message Element: \"%1$s\""
+msgstr ""
+
+#. * Malformed IQ Element: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:90
+msgid "Malformed IQ Element: \"%1$s\""
+msgstr ""
+
+#. * Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:92
+msgid "Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\""
+msgstr ""
+
+#. * Malformed POST Data"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:94
+msgid "Malformed POST Data"
 msgstr ""
 
 #. * Invalid context ID. Couldn't find context for: %1$s
@@ -5557,6 +5557,12 @@ msgstr ""
 #. * The sent sequence is invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:112
 msgid "The sent sequence is invalid."
+msgstr ""
+
+#. * The server has no state associated with this client. Please enrol first.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:115
+msgid ""
+"The server has no state associated with this client. Please enrol first."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rmi/src/com/openexchange/rmi/exceptions/OXRMIExceptionMessage.java:62

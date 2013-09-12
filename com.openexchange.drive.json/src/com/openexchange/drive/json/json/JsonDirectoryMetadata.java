@@ -49,6 +49,8 @@
 
 package com.openexchange.drive.json.json;
 
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.drive.DirectoryMetadata;
@@ -61,11 +63,20 @@ import com.openexchange.drive.DirectoryMetadata;
  */
 public class JsonDirectoryMetadata {
 
+    public static JSONArray serialize(List<DirectoryMetadata> directoryMetadata) throws JSONException {
+        JSONArray jsonArray = new JSONArray(directoryMetadata.size());
+        for (DirectoryMetadata metadata : directoryMetadata) {
+            jsonArray.put(serialize(metadata));
+        }
+        return jsonArray;
+    }
+
     public static JSONObject serialize(DirectoryMetadata metadata) throws JSONException {
         JSONObject jsonObject = new JSONObject(3);
         jsonObject.put("path", metadata.getPath());
         jsonObject.put("checksum", metadata.getChecksum());
         jsonObject.put("directLink", metadata.getDirectLink());
+        jsonObject.put("directLinkFragments", metadata.getDirectLinkFragments());
         return jsonObject;
     }
 

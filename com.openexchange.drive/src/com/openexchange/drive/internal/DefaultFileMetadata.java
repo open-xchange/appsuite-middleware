@@ -85,6 +85,11 @@ public class DefaultFileMetadata implements FileMetadata {
     }
 
     @Override
+    public String getDirectLinkFragments() {
+        return session.getLinkGenerator().getFileLinkFragments(fileVersion.getFile());
+    }
+
+    @Override
     public Date getModified() {
         return fileVersion.getFile().getLastModified();
     }

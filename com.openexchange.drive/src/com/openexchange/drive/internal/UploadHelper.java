@@ -74,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
 import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
@@ -102,6 +103,33 @@ public class UploadHelper {
 
     public File perform(final String path, final FileVersion originalVersion, final FileVersion newVersion, final InputStream uploadStream,
         final String contentType, final long offset, final long totalLength, final Date created, final Date modified) throws OXException {
+
+        if (null == originalVersion && 0 >= offset && 0 < totalLength && 10000 > totalLength) {
+            Entry<File, String> uploadEntry = session.getStorage().wrapInTransaction(new StorageOperation<Entry<File, String>>() {
+
+                @Override
+                public Entry<File, String> call() throws OXException {
+                    return saveOptimistically(path, newVersion, uploadStream, contentType, created, modified);
+                }
+            });
+            /*
+             * validate checksum
+             */
+            String checksum = uploadEntry.getValue();
+            final File uploadFile = uploadEntry.getKey();
+            if (null == checksum) {
+                checksum = ChecksumProvider.getChecksum(session, uploadFile).getChecksum();
+            }
+            if (false == checksum.equals(newVersion.getChecksum())) {
+                /*
+                 * checksum mismatch, clean up & throw error
+                 */
+                session.getStorage().deleteFile(uploadFile);
+                throw DriveExceptionCodes.UPLOADED_FILE_CHECKSUM_ERROR.create(checksum, newVersion.getName(), newVersion.getChecksum());
+            }
+            return uploadFile;
+        }
+
         /*
          * save data
          */
@@ -223,6 +251,31 @@ public class UploadHelper {
              */
             return null;
         }
+    }
+
+    private Entry<File, String> saveOptimistically(String path, FileVersion newVersion, InputStream uploadStream, String contentType, Date created, Date modified) throws OXException {
+        File file = new DefaultFile();
+        List<Field> fields = new ArrayList<File.Field>();
+        file.setFolderId(session.getStorage().getFolderID(path, true));
+        fields.add(Field.FOLDER_ID);
+        file.setFileName(newVersion.getName());
+        fields.add(Field.FILENAME);
+        file.setVersionComment(session.getStorage().getVersionComment());
+        fields.add(Field.VERSION_COMMENT);
+        if (null != contentType) {
+            file.setFileMIMEType(contentType);
+            fields.add(Field.FILE_MIMETYPE);
+        }
+        if (null != created) {
+            file.setCreated(created);
+            fields.add(Field.CREATED);
+        }
+        Date now = new Date();
+        file.setLastModified(null != modified && modified.before(now) ? modified : now);
+        fields.add(Field.LAST_MODIFIED);
+
+        String checksum = saveDocumentAndChecksum(file, uploadStream, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, fields, false);
+        return new AbstractMap.SimpleEntry<File, String>(file, checksum);
     }
 
     private Entry<File, String> upload(String path, FileVersion newVersion, InputStream uploadStream, String contentType, long offset, long totalLength) throws OXException {
