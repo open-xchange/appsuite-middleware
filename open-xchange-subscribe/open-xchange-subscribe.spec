@@ -103,6 +103,12 @@ if [ ${1:-0} -eq 2 ]; then
         fi
     done
 
+    # SoftwareChange_Request-1613
+    pfile=/opt/open-xchange/etc/crawler.properties
+    if ! ox_exists_property com.openexchange.subscribe.xing $pfile; then
+        ox_set_property com.openexchange.subscribe.xing true $pfile
+    fi
+
     find /opt/open-xchange/etc/crawlers -name "*.yml" -print0 | while read -d $'\0' i; do
         ox_update_permissions "$i" open-xchange:root 644
     done
