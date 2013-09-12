@@ -261,7 +261,9 @@ public class DriveServiceImpl implements DriveService {
         SyncSession driveSession = new SyncSession(session);
         if (driveSession.isTraceEnabled()) {
             driveSession.trace("Handling upload: original version: " + originalVersion + ", new version: " + newVersion +
-                ", offset: " + offset + ", total length: " + totalLength + ", created: " + created + ", modified: " + modified);
+                ", offset: " + offset + ", total length: " + totalLength +
+                ", created: " + (null != created ? DriveConstants.LOG_DATE_FORMAT.get().format(created) : "") +
+                ", modified: " + (null != modified ? DriveConstants.LOG_DATE_FORMAT.get().format(modified) : ""));
         }
         IntermediateSyncResult<FileVersion> syncResult = new IntermediateSyncResult<FileVersion>();
         File createdFile = null;

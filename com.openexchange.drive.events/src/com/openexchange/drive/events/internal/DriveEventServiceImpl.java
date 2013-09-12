@@ -164,7 +164,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
          * check event
          */
         if (LOG.isTraceEnabled()) {
-            LOG.debug(FileStorageEventHelper.createDebugMessage("event", event));
+            LOG.trace(FileStorageEventHelper.createDebugMessage("event", event));
         }
         if (false == check(event)) {
             if (LOG.isDebugEnabled()) {
