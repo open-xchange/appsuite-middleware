@@ -64,6 +64,7 @@ import com.openexchange.apps.manifests.json.ManifestActionFactory;
 import com.openexchange.apps.manifests.json.values.UIVersion;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.groupware.userconfiguration.osgi.PermissionRelevantServiceAddedTracker;
 import com.openexchange.java.Streams;
@@ -92,7 +93,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[]{ConfigurationService.class, CapabilityService.class, SimpleConverter.class};
+        return new Class<?>[]{ConfigurationService.class, CapabilityService.class, SimpleConverter.class, ConfigViewFactory.class};
     }
 
     /**

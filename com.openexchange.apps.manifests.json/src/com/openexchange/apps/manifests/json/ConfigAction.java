@@ -72,6 +72,9 @@ import com.openexchange.apps.manifests.json.values.Manifests;
 import com.openexchange.apps.manifests.json.values.ServerVersion;
 import com.openexchange.apps.manifests.json.values.UIVersion;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -111,10 +114,25 @@ public class ConfigAction implements AJAXActionService {
             JSONObject serverconfig = getFromConfiguration(requestData, session);
 
             addComputedValues(serverconfig, requestData, session);
-
+            mixInConfigurationValues(serverconfig, session);
+            
             return new AJAXRequestResult(serverconfig, "json");
         } catch (JSONException x) {
             throw AjaxExceptionCodes.JSON_ERROR.create(x.toString());
+        }
+    }
+
+    private void mixInConfigurationValues(JSONObject serverconfig, ServerSession session) throws OXException, JSONException {
+        if (session.isAnonymous()) {
+            return;
+        }
+        
+        ConfigView view = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
+        for(Map.Entry<String,ComposedConfigProperty<String>> entry: view.all().entrySet()) {
+            if (entry.getKey().startsWith("com.openexchange.appsuite.server")) {
+                String name = entry.getKey().substring(32);
+                serverconfig.put(name, entry.getValue().get());
+            }
         }
     }
 
