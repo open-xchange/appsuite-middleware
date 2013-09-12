@@ -51,16 +51,28 @@ package com.openexchange.drive.internal;
 
 import static com.openexchange.drive.storage.DriveConstants.TEMP_PATH;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.checksum.ChecksumStore;
+import com.openexchange.drive.checksum.DirectoryChecksum;
+import com.openexchange.drive.checksum.FileChecksum;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
+import com.openexchange.drive.comparison.ServerDirectoryVersion;
+import com.openexchange.drive.comparison.ServerFileVersion;
+import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.drive.storage.DriveStorage;
+import com.openexchange.drive.storage.StorageOperation;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -226,6 +238,53 @@ public class SyncSession {
             }
         }
         return hasTempFolder.booleanValue();
+    }
+
+    public List<ServerFileVersion> getServerFiles(String path) throws OXException {
+        String folderID = getStorage().getFolderID(path);
+        List<File> files = getStorage().getFilesInFolder(folderID);
+        List<FileChecksum> checksums = ChecksumProvider.getChecksums(this, folderID, files);
+        List<ServerFileVersion> serverFiles = new ArrayList<ServerFileVersion>(files.size());
+        for (int i = 0; i < files.size(); i++) {
+            serverFiles.add(new ServerFileVersion(files.get(i), checksums.get(i)));
+        }
+        return serverFiles;
+    }
+
+    public List<ServerDirectoryVersion> getServerDirectories() throws OXException {
+        final SyncSession syncSession = this;
+        return getStorage().wrapInTransaction(new StorageOperation<List<ServerDirectoryVersion>>() {
+
+            @Override
+            public List<ServerDirectoryVersion> call() throws OXException {
+                StringAllocator stringAllocator = isTraceEnabled() ? new StringAllocator("Server directories:\n") : null;
+                Map<String, FileStorageFolder> folders = getStorage().getFolders();
+                List<String> folderIDs = new ArrayList<String>(folders.size());
+                for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
+                    if (false == DriveConstants.PATH_VALIDATION_PATTERN.matcher(entry.getKey()).matches()) {
+                        trace("Skipping invalid server directory: " + entry.getKey());
+                    } else {
+                        folderIDs.add(entry.getValue().getId());
+                    }
+                }
+                List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(syncSession, folderIDs);
+                List<ServerDirectoryVersion> serverDirectories = new ArrayList<ServerDirectoryVersion>(folderIDs.size());
+                for (int i = 0; i < folderIDs.size(); i++) {
+                    ServerDirectoryVersion directoryVersion = new ServerDirectoryVersion(
+                        getStorage().getPath(folderIDs.get(i)), checksums.get(i));
+                    serverDirectories.add(directoryVersion);
+                    if (isTraceEnabled()) {
+                        stringAllocator.append(" [").append(directoryVersion.getDirectoryChecksum().getFolderID()).append("] ")
+                            .append(directoryVersion.getPath()).append(" | ").append(directoryVersion.getChecksum())
+                            .append(" (").append(directoryVersion.getDirectoryChecksum().getSequenceNumber()).append(")\n");
+                    }
+                }
+                if (isTraceEnabled()) {
+                    trace(stringAllocator);
+                }
+                return serverDirectories;
+            }
+        });
     }
 
     @Override
