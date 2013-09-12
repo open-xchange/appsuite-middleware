@@ -62,6 +62,8 @@ import com.openexchange.log.Loggable;
 import com.openexchange.log.Loggable.Level;
 import com.openexchange.log.PropertiesAware;
 import com.openexchange.log.Props;
+import com.openexchange.log.ReportedThrowableHandler;
+import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.AbortBehavior;
 
@@ -84,10 +86,10 @@ public final class LogServiceImpl implements LogService {
     /**
      * Initializes a new {@link LogServiceImpl}.
      */
-    public LogServiceImpl(final ThreadPoolService threadPool, final int queueCapacity, final int maxMessageLength, final boolean reporting) {
+    public LogServiceImpl(final ThreadPoolService threadPool, final int queueCapacity, final int maxMessageLength, final NearRegistryServiceTracker<ReportedThrowableHandler> registry) {
         super();
         queue = new LinkedBlockingQueue<Loggable>(queueCapacity > 0 ? queueCapacity : DEFAULT_CAPACITY);
-        loggerTask = new LoggerTask(queue, maxMessageLength, reporting);
+        loggerTask = new LoggerTask(queue, maxMessageLength, registry);
         future = threadPool.submit(loggerTask, AbortBehavior.getInstance());
     }
 

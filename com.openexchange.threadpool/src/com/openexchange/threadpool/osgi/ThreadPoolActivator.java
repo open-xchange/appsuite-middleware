@@ -68,9 +68,11 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogPropertyName;
 import com.openexchange.log.LogPropertyName.LogLevel;
 import com.openexchange.log.LogService;
+import com.openexchange.log.ReportedThrowableHandler;
 import com.openexchange.log.internal.LogServiceImpl;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessionCount.SessionThreadCounterImpl;
@@ -122,12 +124,21 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             }
             // Log configuration       Fix for bug 24724: Pass stack trace as separate argument to log routine, rather than appending it into log message
 
+            final NearRegistryServiceTracker<ReportedThrowableHandler> reportedThrowableHandlerRegistry = new NearRegistryServiceTracker<ReportedThrowableHandler>(context, ReportedThrowableHandler.class);
+            rememberTracker(reportedThrowableHandlerRegistry);
             final int queueCapacity = confService.getIntProperty("com.openexchange.log.queueCapacity", -1);
             final boolean appendTraceToMessage = confService.getBoolProperty("com.openexchange.log.appendTraceToMessage", false);
             Log.setAppendTraceToMessage(appendTraceToMessage);
             final int maxMessageLength = confService.getIntProperty("com.openexchange.log.maxMessageLength", -1);
             final boolean reporting = confService.getBoolProperty("com.openexchange.log.reporting", false);
-            final LogServiceImpl logService = new LogServiceImpl(threadPool, queueCapacity, maxMessageLength, reporting);
+            final LogServiceImpl logService;
+            if (reporting) {
+                final NearRegistryServiceTracker<ReportedThrowableHandler> registry = new NearRegistryServiceTracker<ReportedThrowableHandler>(context, ReportedThrowableHandler.class);
+                rememberTracker(registry);
+                logService = new LogServiceImpl(threadPool, queueCapacity, maxMessageLength, registry);
+            } else {
+                logService = new LogServiceImpl(threadPool, queueCapacity, maxMessageLength, null);
+            }
             this.logService = logService;
             Log.set(logService);
             /*

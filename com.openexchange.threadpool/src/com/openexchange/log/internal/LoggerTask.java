@@ -62,6 +62,8 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Loggable;
 import com.openexchange.log.Loggable.Level;
+import com.openexchange.log.ReportedThrowable;
+import com.openexchange.log.ReportedThrowableHandler;
 import com.openexchange.log.internal.callback.DebugCallback;
 import com.openexchange.log.internal.callback.ErrorCallback;
 import com.openexchange.log.internal.callback.FatalCallback;
@@ -69,6 +71,7 @@ import com.openexchange.log.internal.callback.InfoCallback;
 import com.openexchange.log.internal.callback.LogCallback;
 import com.openexchange.log.internal.callback.TraceCallback;
 import com.openexchange.log.internal.callback.WarnCallback;
+import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadRenamer;
 
@@ -126,7 +129,7 @@ final class LoggerTask extends AbstractTask<Object> {
     private final AtomicBoolean keepgoing;
     private final String lineSeparator;
     private final int maxMessageLength;
-    private final boolean reporting;
+    private final NearRegistryServiceTracker<ReportedThrowableHandler> registry;
 
     private final Map<Level, LogCallback> callbacks;
 
@@ -136,13 +139,13 @@ final class LoggerTask extends AbstractTask<Object> {
      * @param queue
      * @param maxMessageLength
      */
-    protected LoggerTask(final BlockingQueue<Loggable> queue, final int maxMessageLength, final boolean reporting) {
+    protected LoggerTask(final BlockingQueue<Loggable> queue, final int maxMessageLength, final NearRegistryServiceTracker<ReportedThrowableHandler> registry) {
         super();
         lineSeparator = System.getProperty("line.separator");
         keepgoing = new AtomicBoolean(true);
         this.queue = queue;
         this.maxMessageLength = maxMessageLength;
-        this.reporting = reporting;
+        this.registry = registry;
 
         final Map<Loggable.Level, LogCallback> callbacks = new EnumMap<Loggable.Level, LogCallback>(Loggable.Level.class);
         callbacks.put(Loggable.Level.DEBUG, new DebugCallback());
@@ -237,7 +240,7 @@ final class LoggerTask extends AbstractTask<Object> {
         // The optional Throwable instance
         final Throwable throwable = loggable.getThrowable();
         // Reporting (if enabled)
-        if (reporting && null != throwable) {
+        if (null != throwable) {
             report(throwable);
         }
         // Check stack trace
@@ -286,7 +289,17 @@ final class LoggerTask extends AbstractTask<Object> {
     }
     
     private void report(final Throwable throwable) {
-        // TODO: Invoke tracked handlers
+        final NearRegistryServiceTracker<ReportedThrowableHandler> registry = this.registry;
+        if (null == registry) {
+            return;
+        }
+        final List<ReportedThrowableHandler> handlers = registry.getServiceList();
+        if (null != handlers) {
+            final ReportedThrowable reportedThrowable = new ReportedThrowable(throwable);
+            for (final ReportedThrowableHandler reportedThrowableHandler : handlers) {
+                reportedThrowableHandler.handleReportedThrowable(reportedThrowable);
+            }
+        }
     }
 
     private void appendLogLocation(final StackTraceElement[] trace, final StringBuilder sb) {
