@@ -65,6 +65,7 @@ import com.openexchange.drive.checksum.rdb.DriveCreateTableTask;
 import com.openexchange.drive.checksum.rdb.DriveDeleteListener;
 import com.openexchange.drive.internal.DriveServiceImpl;
 import com.openexchange.drive.internal.DriveServiceLookup;
+import com.openexchange.drive.internal.throttle.ThrottlingDriveService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -100,7 +101,7 @@ public class DriveActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
         DriveServiceLookup.set(this);
-        registerService(DriveService.class, new DriveServiceImpl());
+        registerService(DriveService.class, new ThrottlingDriveService(new DriveServiceImpl()));
         registerService(CreateTableService.class, new DriveCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveCreateTableTask()));
         registerService(DeleteListener.class, new DriveDeleteListener());

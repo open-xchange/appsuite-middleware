@@ -132,6 +132,8 @@ public class DownloadAction extends AbstractDriveAction {
         } else if (DriveExceptionCodes.INVALID_FILE_OFFSET.equals(e) || "FLS-018".equals(e.getErrorCode())
             || "FLS-019".equals(e.getErrorCode()) || "FLS-020".equals(e.getErrorCode())) {
             status = HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE;
+        } else if (DriveExceptionCodes.SERVER_BUSY.equals(e)) {
+            status = HttpServletResponse.SC_SERVICE_UNAVAILABLE;
         } else if (AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
             status = HttpServletResponse.SC_BAD_REQUEST;
         } else if (OXException.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
