@@ -224,6 +224,13 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                  * same directory version, let client update it's metadata
                  */
                 result.addActionForClient(new AcknowledgeDirectoryAction(comparison.getOriginalVersion(), comparison.getClientVersion(), comparison));
+                if (false == DriveConstants.EMPTY_MD5.equals(comparison.getClientVersion().getChecksum()) &&
+                    Change.NEW.equals(comparison.getClientChange()) && Change.NEW.equals(comparison.getServerChange())) {
+                    /*
+                     * first-time synchronization of identical, but non-empty directory, let client sync directory to acknowledge the contents
+                     */
+                    result.addActionForClient(new SyncDirectoryAction(comparison.getServerVersion(), comparison));
+                }
             } else {
                 if (comparison.getClientVersion().getPath().equalsIgnoreCase(comparison.getServerVersion().getPath()) &&
                     false == comparison.getClientVersion().getPath().equals(comparison.getServerVersion().getPath())) {
