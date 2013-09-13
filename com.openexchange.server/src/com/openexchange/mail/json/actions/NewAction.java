@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.json.actions;
 
-import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.MessagingException;
@@ -165,12 +164,7 @@ public final class NewAction extends AbstractMailAction {
              */
             final InternetAddress from;
             try {
-                String value = jMail.getString(MailJSONField.FROM.getKey());
-                final int endPos;
-                if (value.length() > 0 && '[' == value.charAt(0) && (endPos = value.indexOf(']', 1)) < value.length()) {
-                    value = new com.openexchange.java.StringAllocator(32).append("\"[").append(value.substring(1, endPos)).append("]\"").append(value.substring(endPos+1)).toString();
-                }
-                from = parseAddressList(value, true, true)[0];
+                from = MessageParser.parseAddressKey(MailJSONField.FROM.getKey(), jMail, true)[0];
             } catch (final AddressException e) {
                 throw MimeMailException.handleMessagingException(e);
             }
