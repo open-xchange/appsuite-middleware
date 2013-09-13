@@ -318,12 +318,12 @@ public class SieveHandler {
             bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), com.openexchange.java.Charsets.UTF_8));
             bos_sieve = new BufferedOutputStream(s_sieve.getOutputStream());
             /*
-             * Fire CAPABILITY command but only for cyrus and NEMESIS that is not sieve draft conform to sent CAPABILITY response again
+             * Fire CAPABILITY command but only for cyrus that is not sieve draft conform to sent CAPABILITY response again
              * directly as response for the STARTTLS command.
              */
             final String implementation = capa.getImplementation();
 
-            if (implementation.matches(config.getProperty(MailFilterProperties.Values.NON_RFC_COMPLIANT_TLS_REGEX.property)) || implementation.startsWith("NEMESIS")) {
+            if (implementation.matches(config.getProperty(MailFilterProperties.Values.NON_RFC_COMPLIANT_TLS_REGEX.property))) {
 	            measureStart();
 	            bos_sieve.write(commandBuilder.append("CAPABILITY").append(CRLF).toString().getBytes(com.openexchange.java.Charsets.UTF_8));
 	            bos_sieve.flush();

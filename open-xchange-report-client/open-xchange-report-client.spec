@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 14
+%define        ox_release 18
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -56,6 +56,16 @@ ox_update_permissions /opt/open-xchange/etc/reportclient.properties root:open-xc
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Wed Sep 11 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-09-12
+* Thu Sep 05 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-09-05
+* Mon Sep 02 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-09-26
+* Fri Aug 30 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-08-30
+* Thu Aug 22 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-08-22
 * Thu Aug 22 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-08-22
 * Tue Aug 20 2013 Carsten Hoeger <choeger@open-xchange.com>

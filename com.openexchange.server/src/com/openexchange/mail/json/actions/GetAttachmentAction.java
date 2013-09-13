@@ -49,18 +49,20 @@
 
 package com.openexchange.mail.json.actions;
 
+import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -79,13 +81,19 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.mail.parser.MailMessageParser;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -107,6 +115,63 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "filter", optional = true, description = "1 to apply HTML white-list filter rules if and only if requested attachment is of MIME type text/htm* AND parameter save is set to 0.") }, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this attachment, except the parameter save is set to 1.")
 @DispatcherNotes(allowPublicSession = true)
 public final class GetAttachmentAction extends AbstractMailAction implements ETagAwareAJAXActionService {
+
+    private static final class ReconnectingInputStreamClosure implements IFileHolder.InputStreamClosure {
+
+        private final ServerSession session;
+        private final String id;
+        private final String uid;
+        private final MailPart mailPart;
+        private final String folderPath;
+        private final boolean image;
+        private volatile ThresholdFileHolder tfh;
+
+        ReconnectingInputStreamClosure(MailPart mailPart, String folderPath, String uid, String id, boolean image, ServerSession session) {
+            super();
+            this.session = session;
+            this.id = id;
+            this.uid = uid;
+            this.mailPart = mailPart;
+            this.folderPath = folderPath;
+            this.image = image;
+        }
+
+        @Override
+        public InputStream newStream() throws OXException, IOException {
+            {
+                final ThresholdFileHolder tfh = this.tfh;
+                if (null != tfh) {
+                    return tfh.getStream();
+                }
+            }
+            try {
+                final PushbackInputStream in = new PushbackInputStream(mailPart.getInputStream());
+                final int check = in.read();
+                in.unread(check);
+                return in;
+            } catch (final com.sun.mail.util.FolderClosedIOException e) {
+                // Need to reconnect
+                final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderPath);
+                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> ma = null;
+                try {
+                    ma = MailAccess.getInstance(session, fa.getAccountId());
+                    ma.connect(false);
+                    final ThresholdFileHolder newTfh = new ThresholdFileHolder();
+                    if (image) {
+                        newTfh.write(ma.getMessageStorage().getImageAttachment(fa.getFullName(), uid, id).getInputStream());
+                    } else {
+                        newTfh.write(ma.getMessageStorage().getAttachment(fa.getFullName(), uid, id).getInputStream());
+                    }
+                    this.tfh = newTfh;
+                    return newTfh.getStream();
+                } finally {
+                    if (null != ma) {
+                        ma.close(true);
+                    }
+                }
+            }
+        }
+    }
 
     private static final long EXPIRES_MILLIS_YEAR = AJAXRequestResult.YEAR_IN_MILLIS * 50;
     private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
@@ -180,6 +245,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             if (sequenceId == null && imageContentId == null) {
                 throw MailExceptionCode.MISSING_PARAM.create(new com.openexchange.java.StringAllocator().append(PARAMETER_MAILATTCHMENT).append(" | ").append(PARAMETER_MAILCID).toString());
             }
+            long size = -1L; /* mail system does not provide exact size */
             final MailPart mailPart;
             final IFileHolder.InputStreamClosure isClosure;
             if (imageContentId == null) {
@@ -187,7 +253,10 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 if (mailPart == null) {
                     throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
                 }
-                if (filter && !saveToDisk && mailPart.getContentType().startsWith("text/htm")) {
+                if (isEmpty(mailPart.getFileName())) {
+                    mailPart.setFileName(MailMessageParser.generateFilename(sequenceId, mailPart.getContentType().getBaseType()));
+                }
+                if (filter && !saveToDisk && mailPart.getContentType().startsWithAny("text/htm", "text/xhtm", "text/xml")) {
                     /*
                      * Apply filter
                      */
@@ -200,6 +269,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                         bytes = sanitizeHtml(htmlContent, htmlService).getBytes(Charsets.forName(cs));
                         contentType.setCharsetParameter(cs);
                     }
+                    size = bytes.length;
                     isClosure = new IFileHolder.InputStreamClosure() {
 
                         @Override
@@ -208,26 +278,22 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                         }
                     };
                 } else {
-                    isClosure = new IFileHolder.InputStreamClosure() {
-
-                        @Override
-                        public InputStream newStream() throws OXException, IOException {
-                            return mailPart.getInputStream();
-                        }
-                    };
+                    final boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
+                    if (exactLength) {
+                        size = Streams.countInputStream(mailPart.getInputStream());
+                    }
+                    isClosure = new ReconnectingInputStreamClosure(mailPart, folderPath, uid, sequenceId, false, req.getSession());
                 }
             } else {
                 mailPart = mailInterface.getMessageImage(folderPath, uid, imageContentId);
                 if (mailPart == null) {
                     throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
                 }
-                isClosure = new IFileHolder.InputStreamClosure() {
-
-                    @Override
-                    public InputStream newStream() throws OXException, IOException {
-                        return mailPart.getInputStream();
-                    }
-                };
+                final boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length"));
+                if (exactLength) {
+                    size = Streams.countInputStream(mailPart.getInputStream());
+                }
+                isClosure = new ReconnectingInputStreamClosure(mailPart, folderPath, uid, imageContentId, true, req.getSession());
             }
             /*
              * Check for image data
@@ -239,11 +305,11 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
              */
             final FileHolder fileHolder;
             if (saveToDisk) {
-                fileHolder = new FileHolder(isClosure, -1 /* mail system does not provide exact size */, MIME_APPL_OCTET, mailPart.getFileName());
+                fileHolder = new FileHolder(isClosure, size, MIME_APPL_OCTET, mailPart.getFileName());
                 fileHolder.setDelivery("download");
                 req.getRequest().putParameter(PARAMETER_DELIVERY, "download");
             } else {
-                fileHolder = new FileHolder(isClosure, -1 /* mail system does not provide exact size */, mailPart.getContentType().toString(), mailPart.getFileName());
+                fileHolder = new FileHolder(isClosure, size, mailPart.getContentType().toString(), mailPart.getFileName());
             }
             final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             /*
@@ -287,6 +353,9 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
             final IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
             boolean performRollback = false;
+            JSONObject fileData = new JSONObject();
+            fileData.put("mailFolder", folderPath);
+            fileData.put("mailUID", uid);
             try {
                 if (!session.getUserConfiguration().hasInfostore()) {
                     throw MailExceptionCode.NO_MAIL_ACCESS.create();
@@ -329,6 +398,9 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 performRollback = true;
                 fileAccess.saveDocument(file, mailPart.getInputStream(), System.currentTimeMillis(), fields);
                 fileAccess.commit();
+                fileData.put("id", file.getId());
+                fileData.put("folder_id", file.getFolderId());
+                fileData.put("filename", file.getFileName());
             } catch (final Exception e) {
                 if (performRollback) {
                     fileAccess.rollback();
@@ -339,7 +411,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     fileAccess.finish();
                 }
             }
-            return new AJAXRequestResult(new JSONArray(0), "json");
+            return new AJAXRequestResult(fileData, "json");
         } catch (final OXException e) {
             throw e;
         } catch (final JSONException e) {

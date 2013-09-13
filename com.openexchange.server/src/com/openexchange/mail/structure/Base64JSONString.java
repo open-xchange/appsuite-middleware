@@ -50,6 +50,7 @@
 package com.openexchange.mail.structure;
 
 import java.io.BufferedReader;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -93,10 +94,14 @@ public final class Base64JSONString implements JSONString {
              */
             final ThresholdFileHolder tfh = new ThresholdFileHolder();
             this.tfh = tfh;
-            /*
+            /*-
              * Write encoded to threshold file holder
+             *
+             *
+             * Don't close 'tfh' as we're going to read from it later on
              */
-            out = new Base64OutputStream(new JSONStringOutputStream(tfh.asOutputStream()), true, -1, null);
+            final NonClosingOutputStream nonClosingOutputStream = new NonClosingOutputStream(tfh.asOutputStream());
+            out = new Base64OutputStream(new JSONStringOutputStream(nonClosingOutputStream), true, -1, null);
             final int buflen = 2048;
             final byte[] buf = new byte[buflen];
             for (int read; (read = in.read(buf, 0, buflen)) > 0;) {
@@ -137,6 +142,39 @@ public final class Base64JSONString implements JSONString {
             return "";
         } finally {
             Streams.close(reader);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return toJSONString();
+    }
+
+    private static final class NonClosingOutputStream extends FilterOutputStream {
+
+        /**
+         * Initializes a new {@link Base64JSONString.NonClosingOutputStream}.
+         */
+        public NonClosingOutputStream(final OutputStream out) {
+            super(out);
+        }
+
+        @Override
+        public void write(final byte b[]) throws IOException {
+            out.write(b, 0, b.length);
+        }
+
+        @Override
+        public void write(final byte b[], final int off, final int len) throws IOException {
+            out.write(b, off, len);
+        }
+
+        @Override
+        public void close() throws IOException {
+            try {
+                flush();
+            } catch (final IOException ignored) { /* ignore */ }
+            // Don't close
         }
     }
 

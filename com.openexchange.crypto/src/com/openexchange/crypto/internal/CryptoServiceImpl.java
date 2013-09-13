@@ -209,8 +209,7 @@ public class CryptoServiceImpl implements CryptoService {
      * @throws OXException
      */
     private String decrypt(final String encryptedData, final Key key) throws OXException {
-        String retval = null;
-        Cipher cipher = null;
+        Cipher cipher;
         final byte encrypted[];
         try {
             /*-
@@ -241,12 +240,10 @@ public class CryptoServiceImpl implements CryptoService {
 
         try {
             final byte[] outputBytes = cipher.doFinal(encrypted);
-            retval = new String(outputBytes, com.openexchange.java.Charsets.UTF_8);
+            return new String(outputBytes, com.openexchange.java.Charsets.UTF_8);
         } catch (final GeneralSecurityException e) {
             throw BadPassword.create(e);
         }
-
-        return retval;
     }
 
     /**

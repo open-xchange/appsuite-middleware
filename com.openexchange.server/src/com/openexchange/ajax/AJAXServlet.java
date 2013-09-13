@@ -812,7 +812,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n|\r|(?:%0[aA])?%0[dD]|%0[aA]");
-    private static final Pattern PATTERN_DSLASH = Pattern.compile("(?:/|%2[fF]){2}");
+    private static final Pattern PATTERN_DSLASH = Pattern.compile("(?://+)");
+    private static final Pattern PATTERN_DSLASH2 = Pattern.compile("(?:/|%2[fF]){2,}");
 
     /**
      * URL encodes given string.
@@ -825,16 +826,18 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             return s;
         }
         try {
-            final String ascii;
+            // Strip possible "\r?\n" and/or "%0A?%0D"
+            String retval = PATTERN_CRLF.matcher(s).replaceAll("");
             if (forAnchor) {
                 // Prepare for being used as anchor/link
-                ascii = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL_ANCHOR, s.getBytes(Charsets.ISO_8859_1)));
+                retval = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL_ANCHOR, retval.getBytes(Charsets.ISO_8859_1)));
             } else {
-                ascii = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL, s.getBytes(Charsets.ISO_8859_1)));
+                retval = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL, retval.getBytes(Charsets.ISO_8859_1)));
             }
-            // Strip possible "\r?\n" and/or "%0A?%0D"
-            String retval = PATTERN_CRLF.matcher(ascii).replaceAll("");
+            // Again -- Strip possible "\r?\n" and/or "%0A?%0D"
+            retval = PATTERN_CRLF.matcher(retval).replaceAll("");
             // Check for a relative URI
+            Pattern dupSlashes = PATTERN_DSLASH;
             if (forLocation) {
                 try {
                     final java.net.URI uri = new java.net.URI(retval);
@@ -844,13 +847,15 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 } catch (final URISyntaxException e) {
                     throw new IllegalArgumentException("Illegal Location value: " + s, e);
                 }
+                // Adapt pattern
+                dupSlashes = PATTERN_DSLASH2;
             }
             // Replace double slashes with single one
             {
-                Matcher matcher = PATTERN_DSLASH.matcher(retval);
+                Matcher matcher = dupSlashes.matcher(retval);
                 while (matcher.find()) {
                     retval = matcher.replaceAll("/");
-                    matcher = PATTERN_DSLASH.matcher(retval);
+                    matcher = dupSlashes.matcher(retval);
                 }
             }
             return retval;

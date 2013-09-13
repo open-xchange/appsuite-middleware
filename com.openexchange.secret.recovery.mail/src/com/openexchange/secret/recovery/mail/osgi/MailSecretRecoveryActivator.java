@@ -94,7 +94,7 @@ public class MailSecretRecoveryActivator extends HousekeepingActivator {
 
             @Override
             public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
-                mailAccountStorage.migratePasswords(session.getUserId(), session.getContextId(), oldSecret, newSecret);
+                mailAccountStorage.migratePasswords(oldSecret, newSecret, session);
             }
 
         });
@@ -108,7 +108,7 @@ public class MailSecretRecoveryActivator extends HousekeepingActivator {
             @Override
             public void removeUnrecoverableItems(String secret, ServerSession session) throws OXException {
                 mailAccountStorage.removeUnrecoverableItems(secret, session);
-                
+
             }
 
         });
