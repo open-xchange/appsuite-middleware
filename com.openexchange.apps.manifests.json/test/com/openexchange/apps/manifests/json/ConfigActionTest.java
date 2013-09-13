@@ -121,6 +121,11 @@ public class ConfigActionTest extends AbstractMockTest {
         this.configAction = new ConfigAction(serviceLookup, manifests, serverConfigServicesLookup) {
 
             @Override
+            protected void mixInConfigurationValues(JSONObject serverconfig, ServerSession session) throws OXException, JSONException {
+                return;
+            }
+
+            @Override
             protected void addComputedValues(JSONObject serverconfig, AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
                 return;
             }
