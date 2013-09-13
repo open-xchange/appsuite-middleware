@@ -803,15 +803,18 @@ if ! ox_exists_property com.openexchange.templating.trusted $pfile; then
     ox_set_property com.openexchange.templating.trusted server $pfile
 fi
 
-# SoftwareChange_Request-1620
+# SoftwareChange_Request-1620, 1631
 PFILE=/opt/open-xchange/etc/file-logging.properties
-NEWPROPS=( org.glassfish.grizzly.level com.openexchange.appsuite.level com.openexchange.ajax.requesthandler.DispatcherServlet.level )
-DEFAULTS=( WARNING FINE INFO )
-for I in $(seq 1 ${#NEWPROPS[@]}); do
-    if ! ox_exists_property ${NEWPROPS[$I-1]} $PFILE; then
-        ox_set_property ${NEWPROPS[$I-1]} "${DEFAULTS[$I-1]}" $PFILE
-    fi
-done
+if ! ox_exists_property org.glassfish.grizzly.level $PFILE; then
+    ox_set_property org.glassfish.grizzly.level WARNING $PFILE
+fi
+if ! grep com.openexchange.appsuite.level >/dev/null $pfile; then
+    echo -e "\n# Log access to UI files\n" >> $pfile
+    echo "# com.openexchange.appsuite.level=FINE" >> $pfile
+fi
+if ! ox_exists_property com.openexchange.ajax.requesthandler.DispatcherServlet.level $PFILE; then
+    ox_set_property com.openexchange.ajax.requesthandler.DispatcherServlet.level INFO $PFILE
+fi
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT
