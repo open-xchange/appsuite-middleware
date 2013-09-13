@@ -162,7 +162,7 @@ public class Bug13027Test extends AbstractAJAXSession {
             appointment.setTitle("Bug 13027 Test");
             appointment.setParentFolderID(folderId);
             appointment.setIgnoreConflicts(true);
-            final Calendar calendar = TimeTools.createCalendar(tz);
+            final Calendar calendar = TimeTools.createCalendar(TimeZone.getTimeZone("UTC"));
             calendar.set(Calendar.YEAR, 2009);
             calendar.set(Calendar.DAY_OF_MONTH, 1);
             calendar.set(Calendar.MONTH, Calendar.JANUARY);
