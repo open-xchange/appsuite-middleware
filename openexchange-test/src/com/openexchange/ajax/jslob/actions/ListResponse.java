@@ -79,7 +79,7 @@ public class ListResponse extends AbstractAJAXResponse {
      *
      * @return The jSlobs
      */
-    public List<JSlob> getjSlobs() {
+    public List<JSlob> getJSlobs() {
         return jSlobs;
     }
 

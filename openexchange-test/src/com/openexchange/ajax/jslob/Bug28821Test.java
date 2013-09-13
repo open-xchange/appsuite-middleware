@@ -67,7 +67,7 @@ import com.openexchange.jslob.JSlob;
  */
 public final class Bug28821Test extends AbstractJSloblTest {
 
-    private static final int NUM_THREADS = 3;
+    private static final int NUM_THREADS = 4;
 
     /**
      * Initializes a new {@link Bug28821Test}.
@@ -118,6 +118,12 @@ public final class Bug28821Test extends AbstractJSloblTest {
                 final Thread thread = new Thread(listAction);
                 thread.start();
             }
+            {
+                final ListAction listAction = new ListAction(startLatch, finishedLatch, client, "io.ox/core", "io.ox/core/updates");
+                actions[3] = listAction;
+                final Thread thread = new Thread(listAction);
+                thread.start();
+            }
 
             // Release threads
             startLatch.countDown();
@@ -164,14 +170,16 @@ public final class Bug28821Test extends AbstractJSloblTest {
                 ListRequest listRequest = new ListRequest(identifiers);
                 ListResponse listResponse = client.execute(listRequest);
 
-                List<JSlob> getjSlobs = listResponse.getjSlobs();
+                List<JSlob> jSlobs = listResponse.getJSlobs();
+
+                assertEquals("Number of JSlobs does not match.", identifiers.length, jSlobs.size());
 
                 int length = identifiers.length;
                 for (int i = 0; i < length; i++) {
                     final String id = identifiers[i];
                     boolean found = false;
 
-                    for (final Iterator<JSlob> iterator = getjSlobs.iterator(); !found && iterator.hasNext();) {
+                    for (final Iterator<JSlob> iterator = jSlobs.iterator(); !found && iterator.hasNext();) {
                         final JSlob jSlob = iterator.next();
                         found = id.equals(jSlob.getId().getId());
                     }
