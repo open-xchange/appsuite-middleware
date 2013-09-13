@@ -84,6 +84,7 @@ public class Bug9742Test extends AbstractAJAXSession {
 		appointmentObj.setTimezone("Europe/Berlin");
 
 		final Calendar calendarRange = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		calendarRange.add(Calendar.MILLISECOND, timeZone.getOffset(calendarRange.getTimeInMillis()));
 		calendarRange.set(Calendar.HOUR_OF_DAY, 0);
 		calendarRange.set(Calendar.MINUTE, 0);
 		calendarRange.set(Calendar.SECOND, 0);
