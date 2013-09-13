@@ -1287,10 +1287,25 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         if (LOG.isTraceEnabled()) {
             LOG.trace(new com.openexchange.java.StringAllocator("Called close() with writer").append(w.toString()));
         }
-        // return;
-        /*
-         * if (w == null) { return; } try { w.flush(); // System.out.println("INFOSTORE: Flushed!"); } catch (IOException e) { LOG.error(e);
-         * } try { w.close(); // System.out.println("INFOSTORE: Closed!"); } catch (IOException e) { LOG.error(e); }
+        /*-
+         *
+        if (w != null) {
+            try {
+                w.flush();
+                System.out.println("INFOSTORE: Flushed!");
+            } catch (IOException e) {
+                LOG.error(e);
+            }
+            try {
+                w.close();
+                System.out.println("INFOSTORE: Closed!");
+            } catch (IOException e) {
+                LOG.error(e);
+            }
+        } else {
+            return;
+        }
+         *
          */
     }
 
