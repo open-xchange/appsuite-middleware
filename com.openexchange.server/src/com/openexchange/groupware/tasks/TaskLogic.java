@@ -691,35 +691,6 @@ public final class TaskLogic {
     /**
      * Deletes an ACTIVE task object. This stores the task as a DELETED task object, deletes all reminders and sends the task delete event.
      *
-     * @param ctx Conetxt
-     * @param task fully loaded task object to delete.
-     * @param lastModified last modification timestamp for concurrent conflicts.
-     * @throws OXException if an exception occurs.
-     */
-    public static void deleteTask(final Context ctx, final Connection con, final int userId, final Task task, final Date lastModified) throws OXException {
-        final int taskId = task.getObjectID();
-        // Load the folders remembering all task source folders on move
-        // operations for clients.
-        final Set<Folder> movedSourceFolders = foldStor.selectFolder(ctx, con, taskId, DELETED);
-        // Delete them to be able to remove the dummy task for them.
-        foldStor.deleteFolder(ctx, con, taskId, movedSourceFolders, DELETED, true);
-        // Delete dummy task.
-        storage.delete(ctx, con, taskId, new Date(Long.MAX_VALUE), DELETED, false);
-        // Move task to delete to deleted tables.
-        task.setLastModified(new Date());
-        task.setModifiedBy(userId);
-        storage.insertTask(ctx, con, task, DELETED);
-        final Set<Folder> removed = deleteParticipants(ctx, con, task.getObjectID());
-        deleteFolder(ctx, con, task.getObjectID(), removed);
-        storage.delete(ctx, con, task.getObjectID(), lastModified, ACTIVE);
-        // Insert the folders remembering all task source folders on move
-        // operations.
-        foldStor.insertFolder(ctx, con, taskId, movedSourceFolders, DELETED);
-    }
-
-    /**
-     * Deletes an ACTIVE task object. This stores the task as a DELETED task object, deletes all reminders and sends the task delete event.
-     *
      * @param session Session.
      * @param task fully loaded task object to delete.
      * @param lastModified last modification timestamp for concurrent conflicts.
@@ -735,8 +706,9 @@ public final class TaskLogic {
                     DBUtils.startTransaction(con);
                     final Task t = clone(task);
                     deleteTask(ctx, con, userId, t, lastModified);
-                    informDelete(session, ctx, con, t);
+                    Reminder.deleteReminder(ctx, con, task);
                     con.commit();
+                    informDelete(session, t);
                 } catch (final SQLException e) {
                     rollback(con);
                     if (!condition.isFailedTransactionRollback(e)) {
@@ -806,13 +778,10 @@ public final class TaskLogic {
      * Informs other systems about a deleted task.
      *
      * @param session Session.
-     * @param ctx the context.
-     * @param con writable database connection.
      * @param task Task object.
      * @throws OXException if an exception occurs.
      */
-    static void informDelete(final Session session, final Context ctx, final Connection con, final Task task) throws OXException {
-        Reminder.deleteReminder(ctx, task);
+    static void informDelete(Session session, Task task) throws OXException {
         try {
             new EventClient(session).delete(task);
         } catch (final OXException e) {
@@ -843,6 +812,7 @@ public final class TaskLogic {
         parts.addAll(external);
         task.setParticipants(TaskLogic.createParticipants(parts));
         task.setUsers(TaskLogic.createUserParticipants(parts));
+
         // Now remove it.
         partStor.deleteInternal(ctx, con, taskId, internal, type, true);
         if (ACTIVE == type) {
@@ -852,8 +822,38 @@ public final class TaskLogic {
         partStor.deleteExternal(ctx, con, taskId, external, type, true);
         foldStor.deleteFolder(ctx, con, taskId, folders, type);
         storage.delete(ctx, con, taskId, task.getLastModified(), type);
+        Reminder.deleteReminder(ctx, con, task);
         if (ACTIVE == type) {
-            informDelete(session, ctx, con, task);
+            informDelete(session, task);
         }
+    }
+
+    /**
+     * Deletes an ACTIVE task object. This stores the task as a DELETED task object, deletes all reminders and sends the task delete event.
+     *
+     * @param ctx Context
+     * @param task fully loaded task object to delete.
+     * @param lastModified last modification timestamp for concurrent conflicts.
+     * @throws OXException if an exception occurs.
+     */
+    public static void deleteTask(final Context ctx, final Connection con, final int userId, final Task task, final Date lastModified) throws OXException {
+        final int taskId = task.getObjectID();
+        // Load the folders remembering all task source folders on move
+        // operations for clients.
+        final Set<Folder> movedSourceFolders = foldStor.selectFolder(ctx, con, taskId, DELETED);
+        // Delete them to be able to remove the dummy task for them.
+        foldStor.deleteFolder(ctx, con, taskId, movedSourceFolders, DELETED, true);
+        // Delete dummy task.
+        storage.delete(ctx, con, taskId, new Date(Long.MAX_VALUE), DELETED, false);
+        // Move task to delete to deleted tables.
+        task.setLastModified(new Date());
+        task.setModifiedBy(userId);
+        storage.insertTask(ctx, con, task, DELETED);
+        final Set<Folder> removed = deleteParticipants(ctx, con, task.getObjectID());
+        deleteFolder(ctx, con, task.getObjectID(), removed);
+        storage.delete(ctx, con, task.getObjectID(), lastModified, ACTIVE);
+        // Insert the folders remembering all task source folders on move
+        // operations.
+        foldStor.insertFolder(ctx, con, taskId, movedSourceFolders, DELETED);
     }
 }

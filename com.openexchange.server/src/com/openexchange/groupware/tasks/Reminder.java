@@ -235,10 +235,10 @@ final class Reminder {
         }
     }
 
-    static void deleteReminder(final Context ctx, final Task task) throws OXException {
+    static void deleteReminder(Context ctx, Connection con, Task task) throws OXException {
         final ReminderService reminder = new ReminderHandler(ctx);
         try {
-            reminder.deleteReminder(task.getObjectID(), Types.TASK);
+            reminder.deleteReminder(task.getObjectID(), Types.TASK, con);
         } catch (final OXException e) {
             if (!ReminderExceptionCode.NOT_FOUND.equals(e)) {
                 throw e;

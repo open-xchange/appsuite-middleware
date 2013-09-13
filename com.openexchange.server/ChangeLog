@@ -1,3 +1,7 @@
+* 2013-09-13 - marcus.klein@open-xchange.com
+
+ - Fix for bug 28089: Use the same database connection to delete the reminder of the task.
+
 * 2013-09-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 28828: Consider string length when iterating over its characters
