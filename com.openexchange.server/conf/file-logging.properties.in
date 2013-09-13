@@ -44,8 +44,8 @@ com.openexchange.documentconverter.impl.Manager.level=WARNING
 # Reduce log level for htmlunit.jar
 com.gargoylesoftware.htmlunit.level=WARNING
 
-# Log access to UI files
-com.openexchange.appsuite.level=FINE
+## Log access to UI files
+# com.openexchange.appsuite.level=FINE
 
 # A switch to control which exceptions are logged to the log file
 # Set this to ALL to log all exceptions
