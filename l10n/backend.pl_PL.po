@@ -46,7 +46,7 @@ msgstr ""
 "Project-Id-Version: errors.pl_PL\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-08-23 05:29-0700\n"
+"PO-Revision-Date: 2013-09-11 04:52-0700\n"
 "Last-Translator: jolanta <kontekst@kontekst.biz>\n"
 "Language-Team: Polish <>\n"
 "Language: pl\n"
@@ -1915,6 +1915,14 @@ msgstr "Nazwa pliku \"%1$s\" została zignorowana"
 msgid "The path \"%1$s\" is conflicting"
 msgstr "Ścieżka \"%1$s\" powoduje konflikt"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:82
+msgid "The file version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr "Wersja pliku \"%1$s\" z sumą kontrolną \"%2$s\" jest nieprawidłowa"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:83
+msgid "The directory version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr "Wersja katalogu \"%1$s\" z sumą kontrolną \"%2$s\" jest nieprawidłowa"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:63
 msgid "An error occurred for action: %1$s"
 msgstr "Wystąpił błąd dla czynności: %1$s"
@@ -3232,8 +3240,8 @@ msgid ""
 "Cannot search a contact that is neither an internal user nor has an e-mail "
 "address."
 msgstr ""
-"Nie można wyszukać kontaktu, który nie jest użytkownikiem wewnętrznym ani nie "
-"ma adresu e-mail."
+"Nie można wyszukać kontaktu, który nie jest użytkownikiem wewnętrznym ani "
+"nie ma adresu e-mail."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:55
 msgid "The embedded Apache client threw an error: %1$s"
@@ -3261,8 +3269,10 @@ msgid "The grizzly server could not be started"
 msgstr "Nie można uruchomić serwera grizzly"
 
 #. * The following needed service is missing: \"%1$s\"
+#. The following needed service is missing: "%1$s"
+#. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
@@ -12362,6 +12372,15 @@ msgstr "Operację można wykonać jedynie dla administratora tego kontekstu."
 msgid "Folder %1$s must not be deleted in context %2$s."
 msgstr "Nie wolno usunąć folderu %1$s w kontekście %2$s."
 
+#. Owner %1$s of folder %2$s has been restored to keep the folder admin permission
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:539
+msgid ""
+"Owner %1$s of folder %2$s has been restored to keep the folder admin "
+"permission"
+msgstr ""
+"Przywrócono właściciela %1$s folderu %2$s w celu zachowania uprawnień "
+"administracyjnych do folderu"
+
 #. Unknown AJAX action: %s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:70
 msgid "Unknown AJAX action: %s."
@@ -13251,6 +13270,11 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:129
 msgid "An unexpected error occurred: %1$s."
 msgstr "Wystąpił nieoczekiwany błąd: %1$s."
+
+#. Please specify your full E-Mail address as login name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:132
+msgid "Please specify your full E-Mail address as login name."
+msgstr "Jako nazwę logowania podaj cały adres e-mail."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "Verify file system and templates."

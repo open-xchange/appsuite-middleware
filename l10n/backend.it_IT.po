@@ -45,7 +45,7 @@ msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-08-18 18:06+0200\n"
+"PO-Revision-Date: 2013-09-07 23:14+0200\n"
 "Last-Translator: Vincenzo Reale <vincenzo@bureau-cornavin.com>\n"
 "Language-Team: Italian <it@bureau-cornavin.com>\n"
 "Language: it\n"
@@ -1928,6 +1928,17 @@ msgstr "Il nome del file \"%1$s\" è ignorato"
 msgid "The path \"%1$s\" is conflicting"
 msgstr "Il percorso \"%1$s\" è in conflitto"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:82
+msgid "The file version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr ""
+"La versione del file \"%1$s\" con il codice di controllo \"%2$s\" non è valida"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:83
+msgid "The directory version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr ""
+"La versione della cartella \"%1$s\" con il codice di controllo \"%2$s\" non è "
+"valida"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:63
 msgid "An error occurred for action: %1$s"
 msgstr "Si è verificato un errore per l'azione: %1$s"
@@ -2859,9 +2870,9 @@ msgid ""
 "Value of User-Agent header must not be used as value for the client "
 "parameter. Please use a string identifying the client software."
 msgstr ""
-"Il valore dell'intestazione User-Agent non deve essere utilizzato come valore "
-"del parametro del client. "
-"Utilizza una stringa che identifica il software del client."
+"Il valore dell'intestazione User-Agent non deve essere utilizzato come "
+"valore del parametro del client. Utilizza una stringa che identifica il "
+"software del client."
 
 #. *
 #. * A put into the cache failed.
@@ -3247,8 +3258,8 @@ msgid ""
 "Cannot search a contact that is neither an internal user nor has an e-mail "
 "address."
 msgstr ""
-"Impossibile cercare un contatto che non sia un utente interno o che non abbia "
-"un indirizzo di posta elettronica."
+"Impossibile cercare un contatto che non sia un utente interno o che non "
+"abbia un indirizzo di posta elettronica."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:55
 msgid "The embedded Apache client threw an error: %1$s"
@@ -3276,8 +3287,10 @@ msgid "The grizzly server could not be started"
 msgstr "Il server grizzly non può essere avviato"
 
 #. * The following needed service is missing: \"%1$s\"
+#. The following needed service is missing: "%1$s"
+#. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
@@ -12430,6 +12443,15 @@ msgstr ""
 msgid "Folder %1$s must not be deleted in context %2$s."
 msgstr "La cartella %1$s non può essere eliminata nel contesto %2$s."
 
+#. Owner %1$s of folder %2$s has been restored to keep the folder admin permission
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:539
+msgid ""
+"Owner %1$s of folder %2$s has been restored to keep the folder admin "
+"permission"
+msgstr ""
+"Il proprietario %1$s della cartella %2$s è stato ripristinato per mantenere i "
+"permessi di amministrazione sulla cartella"
+
 #. Unknown AJAX action: %s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:70
 msgid "Unknown AJAX action: %s."
@@ -13327,6 +13349,11 @@ msgstr "Devi creare un account OAuth prima di accedere al servizio."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:129
 msgid "An unexpected error occurred: %1$s."
 msgstr "Si è verificato un errore imprevisto: %1$s."
+
+#. Please specify your full E-Mail address as login name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:132
+msgid "Please specify your full E-Mail address as login name."
+msgstr "Specifica l'indirizzo completo di posta elettronica come nome utente."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "Verify file system and templates."
