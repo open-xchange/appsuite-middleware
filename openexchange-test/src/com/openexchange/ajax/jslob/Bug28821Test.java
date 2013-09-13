@@ -113,7 +113,7 @@ public final class Bug28821Test extends AbstractJSloblTest {
                 thread.start();
             }
             {
-                final ListAction listAction = new ListAction(startLatch, finishedLatch, client, "io.ox/files", "io.ox/core/updates");
+                final ListAction listAction = new ListAction(startLatch, finishedLatch, client, "io.ox/files");
                 actions[2] = listAction;
                 final Thread thread = new Thread(listAction);
                 thread.start();
