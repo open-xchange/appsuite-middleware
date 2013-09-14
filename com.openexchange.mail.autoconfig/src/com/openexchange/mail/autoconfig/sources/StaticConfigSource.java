@@ -64,6 +64,12 @@ public abstract class StaticConfigSource implements ConfigSource {
 
     public static interface DomainFilter {
 
+        /**
+         * Checks if specified domain is supported.
+         *
+         * @param emailDomain The domain
+         * @return <code>true</code> if accepted; otherwise <code>false</code>
+         */
         public boolean accept(String emailDomain);
     }
 
@@ -80,7 +86,7 @@ public abstract class StaticConfigSource implements ConfigSource {
     }
 
     @Override
-    public final Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException {
+    public final Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context) throws OXException {
         if (null != filter && filter.accept(emailDomain)) {
             return getStaticAutoconfig(emailLocalPart, emailDomain, password, user, context);
         }
