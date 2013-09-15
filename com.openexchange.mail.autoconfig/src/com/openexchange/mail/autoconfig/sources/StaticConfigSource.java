@@ -62,12 +62,18 @@ import com.openexchange.mail.autoconfig.Autoconfig;
  */
 public abstract class StaticConfigSource implements ConfigSource {
 
+    /**
+     * Checks if a given domain is supported.
+     *
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     * @since 7.4.0
+     */
     public static interface DomainFilter {
 
         /**
-         * Checks if specified domain is supported.
+         * Checks if specified domain is supported; e.g. <code>"yahoo.com"</code>.
          *
-         * @param emailDomain The domain
+         * @param emailDomain The domain to check
          * @return <code>true</code> if accepted; otherwise <code>false</code>
          */
         public boolean accept(String emailDomain);
