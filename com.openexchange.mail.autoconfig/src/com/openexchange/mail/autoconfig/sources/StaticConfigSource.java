@@ -85,9 +85,15 @@ public abstract class StaticConfigSource implements ConfigSource {
 
     /**
      * Initializes a new {@link StaticConfigSource}.
+     *
+     * @param filter The domain filter
+     * @throws NullPointerException If <code>filter</code> is <code>null</code>
      */
     protected StaticConfigSource(final DomainFilter filter) {
         super();
+        if (null == filter) {
+            throw new NullPointerException("filter rmust not be null.");
+        }
         this.filter = filter;
     }
 
