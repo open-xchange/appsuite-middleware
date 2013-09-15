@@ -389,6 +389,8 @@ public final class MimeForward {
             new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(originalMsg, handler);
             for (final MailPart mailPart : handler.getNonInlineParts()) {
                 mailPart.getContentDisposition().setDisposition(Part.ATTACHMENT);
+                mailPart.getFileName(); // Enforce to set file name possibly extracted from Content-Type header
+                mailPart.getContentType().removeNameParameter(); // Remove name parameter
                 compositeMail.addAdditionalParts(mailPart);
             }
             forwardMail = compositeMail;

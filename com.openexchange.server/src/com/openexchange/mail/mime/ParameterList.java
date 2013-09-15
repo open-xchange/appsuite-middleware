@@ -406,6 +406,13 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     }
 
     /**
+     * Clears all parameters contained in this parameter list.
+     */
+    public void clearParameters() {
+        parameters.clear();
+    }
+
+    /**
      * Appends the RFC2045 style (ASCII-only) string representation of this parameter list including empty parameters.
      *
      * @param sb The string builder to append to
