@@ -752,21 +752,21 @@ public class FileResponseRenderer implements ResponseRenderer {
          * transform
          */
         try {
-            final InputStream transformed = transformations.getInputStream(file.getContentType());
+            InputStream transformed;
+            try {
+                transformed = transformations.getInputStream(file.getContentType());
+            } catch (final IOException ioe) {
+                if ("Unsupported Image Type".equals(ioe.getMessage())) {
+                    return handleFailure(file, stream, markSupported);
+                }
+                // Rethrow...
+                throw ioe;
+            }
             if (null == transformed) {
                 if (DEBUG) {
                     LOG.debug("Got no resulting input stream from transformation, trying to recover original input");
                 }
-                if (markSupported) {
-                    try {
-                        stream.reset();
-                        return file;
-                    } catch (final Exception e) {
-                        LOG.warn("Error resetting input stream", e);
-                    }
-                }
-                LOG.warn("Unable to transform image from " + file.getName());
-                return file.repetitive() ? file : null;
+                return handleFailure(file, stream, markSupported);
             }
             return new FileHolder(transformed, -1, file.getContentType(), file.getName());
         } catch (final RuntimeException e) {
@@ -782,6 +782,19 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             return file.repetitive() ? file : null;
         }
+    }
+
+    private IFileHolder handleFailure(final IFileHolder file, final InputStream stream, final boolean markSupported) {
+        if (markSupported) {
+            try {
+                stream.reset();
+                return file;
+            } catch (final Exception e) {
+                LOG.warn("Error resetting input stream", e);
+            }
+        }
+        LOG.warn("Unable to transform image from " + file.getName());
+        return file.repetitive() ? file : null;
     }
 
     /**

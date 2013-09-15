@@ -2,6 +2,7 @@
 
  - Fix for bug 27882: Remove the "name" parameter an attachment's "Content-Type" header
  - Fix for bug 27959: Lowered log level to "DEBUG" in case an already removed session is supposed to be refreshed/touched
+ - Fix for bug 28082: Recover from "Unsupported Image Type" javax.imageio.IIOException
 
 * 2013-09-13 - thorben.betten@open-xchange.com
 
