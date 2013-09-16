@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
+<<<<<<< HEAD:open-xchange-munin-scripts-jolokia/open-xchange-munin-scripts-jolokia.psf
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,munin-scripts-jolokia"/>
+=======
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,hotfix-1621,com.openexchange.realtime.atmosphere"/>
+>>>>>>> hotfix-1621:open-xchange-realtime-atmosphere/open-xchange-realtime-atmosphere.psf
 </provider>
 </psf>

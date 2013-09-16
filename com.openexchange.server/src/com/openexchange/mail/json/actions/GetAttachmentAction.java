@@ -146,7 +146,8 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             try {
                 // Try to read first byte and push back immediately
                 final PushbackInputStream in = new PushbackInputStream(mailPart.getInputStream());
-                in.unread(in.read());
+                final int check = in.read();
+                in.unread(check);
                 return in;
             } catch (final com.sun.mail.util.FolderClosedIOException e) {
                 // Need to reconnect
@@ -352,6 +353,9 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
             final IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
             boolean performRollback = false;
+            JSONObject fileData = new JSONObject();
+            fileData.put("mailFolder", folderPath);
+            fileData.put("mailUID", uid);
             try {
                 if (!session.getUserPermissionBits().hasInfostore()) {
                     throw MailExceptionCode.NO_MAIL_ACCESS.create();

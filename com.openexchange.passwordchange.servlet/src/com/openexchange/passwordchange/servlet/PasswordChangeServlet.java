@@ -217,7 +217,7 @@ public final class PasswordChangeServlet extends SessionServlet {
         /*
          * Close response and flush print writer
          */
-        response.setData(PasswordChangeServletExceptionCode.PW_CHANGE_SUCCEEDED.create().getDisplayMessage(localeFrom(session)));
+        response.setData(JSONObject.NULL);
         // response.addWarning(PasswordChangeServletExceptionCode.PW_CHANGE_SUCCEEDED.create());
         response.setTimestamp(null);
         ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
