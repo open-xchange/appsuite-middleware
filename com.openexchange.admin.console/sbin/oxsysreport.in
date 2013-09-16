@@ -83,15 +83,11 @@ LOGARC_LONG=log-archive
 KEEP_TMP=false
 KEEP_TMP_LONG=keep-tmp-files
 KEEP_TMP_VALUES="true false"
-EXCLUDES="--exclude groupware/osgi --exclude admindaemon/osgi --exclude apache2/ssl --exclude httpd/logs"
 
-FILES_DIRS="
-/opt/open-xchange/etc
-/var/log/open-xchange
-/etc/*apache*
-"
+# NOTE: Do not add arbitrary directories here!
+ARCHIVE_DIRS="/opt/open-xchange/etc /var/log/open-xchange"
 
-PROCS='showruntimestats -a;showruntimestats -A -a;route -n;ps faux;df;mount;netstat -putane;free;report -d;listbundles;listservices'
+PROCS='showruntimestats -a;showruntimestats -A -a;route -n;ps faux;top -bHn 1;dmesg;df;mount;netstat -putane;free;report -d;listbundles;listservices;uname -a'
 
 MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
 LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:'
@@ -211,30 +207,44 @@ DIST=$?
 
 if [ $(( $DIST & $DEBIAN )) -eq $DEBIAN ]; then
      echo Debian system detected
-     FILES_DIRS="$FILES_DIRS /etc/debian_version"
+     ARCHIVE_DIRS="$ARCHIVE_DIRS /etc/debian_version"
      PROCS=${PROCS}';dpkg -l'
-     test -f /etc/mysql/my.cnf && FILES_DIRS="$FILES_DIRS /etc/mysql/my.cnf"
+     test -f /etc/mysql/my.cnf && ARCHIVE_DIRS="$ARCHIVE_DIRS /etc/mysql/my.cnf"
 elif [ $(( $DIST & $UCS )) -eq $UCS ]; then
      echo "Univention system detected"
-     FILES_DIRS="$FILES_DIRS /var/log/univention*"
+     ARCHIVE_DIRS="$ARCHIVE_DIRS /var/log/univention*"
      PROCS=${PROCS}';dpkg -l;ucr dump'
-     test -f /etc/mysql/my.cnf && FILES_DIRS="$FILES_DIRS /etc/mysql/my.cnf"
+     test -f /etc/mysql/my.cnf && ARCHIVE_DIRS="$ARCHIVE_DIRS /etc/mysql/my.cnf"
 elif [ $(( $DIST & $SUSE )) -eq $SUSE ]; then
      echo SuSE system detected
-     FILES_DIRS="$FILES_DIRS /etc/SuSE-release"
+     ARCHIVE_DIRS="$ARCHIVE_DIRS /etc/SuSE-release"
      PROCS=${PROCS}';rpm -qa --last'
-     test -f /etc/my.cnf && FILES_DIRS="$FILES_DIRS /etc/my.cnf"
+     test -f /etc/my.cnf && ARCHIVE_DIRS="$ARCHIVE_DIRS /etc/my.cnf"
 elif [ $(( $DIST & $REDHAT )) -eq $REDHAT ]; then
      echo Redhat system detected
-     FILES_DIRS="$FILES_DIRS /etc/redhat-release /etc/httpd"
+     ARCHIVE_DIRS="$ARCHIVE_DIRS /etc/redhat-release"
      PROCS=${PROCS}';rpm -qa --last'
-     test -f /etc/my.cnf && FILES_DIRS="$FILES_DIRS /etc/my.cnf"
+     test -f /etc/my.cnf && ARCHIVE_DIRS="$ARCHIVE_DIRS /etc/my.cnf"
 else
      echo Distribution not detected
 fi
 
 collect_files() {
-   $TAR cvhfj /$TMP/$LOGDIR/ox_files_and_logs.tar.bz2 ${EXCLUDES} ${FILES_DIRS} > /dev/null 2>&1
+   $TAR cvf /$TMP/$LOGDIR/ox_files_and_logs.tar --ignore-failed-read ${ARCHIVE_DIRS} > /dev/null 2>&1
+   OIFS=$IFS
+   IFS=$'\n'
+   # be very selective on what to add to the archive (Bug#28830)
+   for dir in /etc/httpd /etc/apache*; do
+       test -d $dir || continue
+       for file in $(find $dir -type f \
+                               -regex '^.*\.conf$' -o \
+			       -regex '^.*-\(enabled\|availabled\)\/.*$'); do
+           ALLFILES="$ALLFILES $file"
+       done
+   done
+   IFS=$OIFS
+   $TAR rvf /$TMP/$LOGDIR/ox_files_and_logs.tar --ignore-failed-read $ALLFILES > /dev/null 2>&1
+   bzip2 -9 /$TMP/$LOGDIR/ox_files_and_logs.tar
 }
 
 
@@ -242,9 +252,9 @@ collect_output(){
    cd /$TMP
    IFS=";"
    for i in $PROCS; do
-   unset IFS
-   $i > "/$TMP/$LOGDIR/commands/$i" 2>&1
-   IFS=";"
+       unset IFS
+       $i > "/$TMP/$LOGDIR/commands/$i" 2>&1
+       IFS=";"
    done
    unset IFS
    cd - > /dev/null 2>&1
@@ -254,6 +264,8 @@ clean_up(){
    test "$KEEP_TMP" = "true" || rm -rf $TMP/$LOGDIR
 }
 
+trap "rm -f $LOGARC; clean_up; exit 1" SIGINT SIGSEGV SIGQUIT SIGTERM
+
 echo creating logdir $TMP/$LOGDIR
 mkdir -p $TMP/$LOGDIR/commands/
 echo collecting files into $TMP/$LOGDIR/ox_files_and_logs.tar.bz2 
@@ -261,5 +273,5 @@ collect_files
 echo collecting system data into $TMP/$LOGDIR
 collect_output
 echo creating archive $LOGARC
-$TAR cvfz $LOGARC $TMP/$LOGDIR > /dev/null 2>&1
+$TAR cvfz $LOGARC -C $TMP $LOGDIR > /dev/null 2>&1
 clean_up

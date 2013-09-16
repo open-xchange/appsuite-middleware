@@ -1,3 +1,7 @@
+* 2013-09-16 - choeger@open-xchange.com
+
+ - Fix for bug 28830: oxsysreport is collecting unneeded protected data
+
 * 2013-06-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 26164: Accept other boolean identifiers like "true","1","yes","y", and "on"
