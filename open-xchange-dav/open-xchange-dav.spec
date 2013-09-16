@@ -83,8 +83,14 @@ fi
 %changelog
 * Thu Sep 12 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Ninth candidate for 7.4.0 release
+* Thu Sep 05 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2013-09-05
 * Mon Sep 02 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Eighth candidate for 7.4.0 release
+* Mon Sep 02 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2013-09-26
+* Fri Aug 30 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2013-08-30
 * Wed Aug 28 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2013-09-03
 * Tue Aug 27 2013 Steffen Templin <marcus.klein@open-xchange.com>

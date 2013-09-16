@@ -113,7 +113,7 @@ public final class Base64JSONString implements JSONString {
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            Streams.close(in, out);
+            Streams.close(in);
         }
     }
 

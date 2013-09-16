@@ -141,15 +141,13 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     public void invalidateMailAccounts(final int user, final int cid) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
+            final DatabaseService db = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+            final Connection con = db.getWritable(cid);
             final int[] ids;
-            {
-                final DatabaseService db = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-                final Connection con = db.getWritable(cid);
-                try {
-                    ids = delegate.getUserMailAccountIDs(user, cid, con);
-                } finally {
-                    db.backWritableAfterReading(cid, con);
-                }
+            try {
+                ids = delegate.getUserMailAccountIDs(user, cid, con);
+            } finally {
+                db.backWritableAfterReading(cid, con);
             }
 
             for (final int id : ids) {
