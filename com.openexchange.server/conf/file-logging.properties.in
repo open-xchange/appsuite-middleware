@@ -25,15 +25,12 @@ org.apache.level=WARNING
 com.sun.level=INFO
 javax.management.level=INFO
 javax.jmdns.level=WARNING
-com.hazelcast.level=SEVERE
-org.glassfish.grizzly.level=SEVERE
+com.hazelcast.level=WARNING
+org.glassfish.grizzly.level=WARNING
 
 # Set to FINE to log SOAP requests for debugging purpose
 org.apache.cxf.level=WARNING
 com.openexchange.soap.cxf.logger.level=WARNING
-
-# Reduce log level for htmlunit.jar
-com.gargoylesoftware.htmlunit.level=WARNING
 
 # Set org.jaudiotagger to WARNING
 org.jaudiotagger.level=WARNING
@@ -45,7 +42,7 @@ com.openexchange.documentconverter.impl.Manager.level=WARNING
 com.gargoylesoftware.htmlunit.level=WARNING
 
 # Log access to UI files
-com.openexchange.appsuite.level=FINE
+# com.openexchange.appsuite.level=FINE
 
 # A switch to control which exceptions are logged to the log file
 # Set this to ALL to log all exceptions

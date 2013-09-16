@@ -51,7 +51,6 @@ package com.openexchange.mail.json.parser;
 
 import static com.openexchange.mail.mime.filler.MimeMessageFiller.isCustomOrReplyHeader;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
-import static com.openexchange.mail.mime.utils.MimeMessageUtility.quotePersonal;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.shouldRetry;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -955,7 +954,7 @@ public final class MessageParser {
                 if (length == 0) {
                     return EMPTY_ADDRS;
                 }
-                value = parseAdressArray(jsonArr, length);
+                return parseAdressArray(jsonArr, length);
             } catch (final JSONException e) {
                 LOG.error(e.getMessage(), e);
                 /*
@@ -964,7 +963,7 @@ public final class MessageParser {
                 value = jo.getString(key);
             }
         }
-        return parseAddressList(value, true, true);
+        return parseAddressList(value, true, failOnError);
     }
 
     /**
@@ -977,38 +976,32 @@ public final class MessageParser {
      * @param jsonArray The JSON array
      * @return Parsed address list combined in a {@link String} object
      * @throws JSONException If a JSON error occurs
+     * @throws AddressException If constructing an address fails
      */
-    private static String parseAdressArray(final JSONArray jsonArray, final int length) throws JSONException {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(length << 6);
-        {
-            /*
-             * Add first address
-             */
-            final JSONArray persAndAddr = jsonArray.getJSONArray(0);
-            final String personal = persAndAddr.getString(0);
-            final boolean hasPersonal = (personal != null && !"null".equals(personal));
-            if (hasPersonal) {
-                sb.append(quotePersonal(personal)).append(" <");
-            }
-            sb.append(persAndAddr.getString(1));
-            if (hasPersonal) {
-                sb.append('>');
-            }
-        }
-        for (int i = 1; i < length; i++) {
-            sb.append(", ");
+    private static InternetAddress[] parseAdressArray(final JSONArray jsonArray, final int length) throws JSONException, AddressException {
+        final List<InternetAddress> addresses = new ArrayList<InternetAddress>(length);
+        for (int i = 0; i < length; i++) {
             final JSONArray persAndAddr = jsonArray.getJSONArray(i);
-            final String personal = persAndAddr.getString(0);
-            final boolean hasPersonal = (personal != null && !"null".equals(personal));
-            if (hasPersonal) {
-                sb.append(quotePersonal(personal)).append(" <");
-            }
-            sb.append(persAndAddr.getString(1));
-            if (hasPersonal) {
-                sb.append('>');
+            final int pLen = persAndAddr.length();
+            if (pLen != 0) {
+                if (1 == pLen) {
+                    addresses.add(new QuotedInternetAddress(persAndAddr.getString(0)));
+                } else {
+                    final String personal = persAndAddr.getString(0);
+                    final boolean hasPersonal = (personal != null && !"null".equals(personal));
+                    if (hasPersonal) {
+                        try {
+                            addresses.add(new QuotedInternetAddress(persAndAddr.getString(1), personal, "UTF-8"));
+                        } catch (final UnsupportedEncodingException x) {
+                            // Cannot occur
+                        }
+                    } else {
+                        addresses.add(new QuotedInternetAddress(persAndAddr.getString(1)));
+                    }
+                }
             }
         }
-        return sb.toString();
+        return addresses.toArray(new InternetAddress[0]);
     }
 
     private static InternetAddress getEmailAddress(final String addrStr) {

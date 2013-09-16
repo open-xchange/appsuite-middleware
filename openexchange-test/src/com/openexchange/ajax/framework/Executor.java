@@ -74,7 +74,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.cookie.Cookie;
-import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.mime.FormBodyPart;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
@@ -173,7 +173,7 @@ public class Executor extends Assert {
             break;
         case PUT:
             final HttpPut httpPut = new HttpPut(urlString + getURLParameter(session, request, false));
-            final InputStreamEntity entity = new InputStreamEntity(createBody(request.getBody()), -1);
+            final ByteArrayEntity entity = new ByteArrayEntity(createBodyBytes(request.getBody()));
             entity.setContentType("text/javascript; charset=UTF-8");
             httpPut.setEntity(entity);
             httpRequest = httpPut;
@@ -445,6 +445,10 @@ public class Executor extends Assert {
 
     private static InputStream createBody(final Object body) throws UnsupportedCharsetException {
         return new ByteArrayInputStream(body.toString().getBytes(Charsets.UTF_8));
+    }
+
+    private static byte[] createBodyBytes(final Object body) throws UnsupportedCharsetException {
+        return body.toString().getBytes(Charsets.UTF_8);
     }
 
     private static int getSleep() {

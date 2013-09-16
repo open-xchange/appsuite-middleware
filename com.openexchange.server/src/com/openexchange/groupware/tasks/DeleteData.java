@@ -128,6 +128,7 @@ public final class DeleteData {
             // Try to block simultaneous deleting of tasks by generating a new identifier.
             IDGenerator.getId(ctx, Types.TASK, con);
             TaskLogic.deleteTask(ctx, con, user.getId(), TaskLogic.clone(getOrigTask()), lastModified);
+            deleteReminder(con);
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
@@ -145,7 +146,7 @@ public final class DeleteData {
         new EventClient(session).delete(getOrigTask());
     }
 
-    public void deleteReminder() throws OXException {
-        Reminder.deleteReminder(ctx, task);
+    private void deleteReminder(Connection con) throws OXException {
+        Reminder.deleteReminder(ctx, con, task);
     }
 }

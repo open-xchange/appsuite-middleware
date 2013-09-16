@@ -47,88 +47,40 @@
  *
  */
 
-package com.openexchange.tools.encoding;
+package com.openexchange.ajax.jslob.actions;
 
-import org.apache.commons.logging.Log;
+import java.util.List;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.jslob.JSlob;
 
 /**
- * QuotedPrintable
+ * {@link ListResponse}
  *
- * @author <a href="mailto:martin.kauss@open-xchange.com">Martin Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+public class ListResponse extends AbstractAJAXResponse {
 
-public final class QuotedPrintable {
+    private final List<JSlob> jSlobs;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(QuotedPrintable.class);
-
-    private QuotedPrintable() {
-        super();
+    /**
+     * Initializes a new {@link ListResponse}.
+     *
+     * @param response The response
+     * @param jSlobs The JSLob list
+     */
+    public ListResponse(final Response response, final List<JSlob> jSlobs) {
+        super(response);
+        this.jSlobs = jSlobs;
     }
 
-    public static String encode(final String s) {
-
-        final StringBuilder sb = new StringBuilder();
-
-        int i = 0;
-        String x = "";
-
-        try {
-            final byte b[] = s.getBytes();
-
-            for (int a = 0; a < b.length; a++) {
-                final int unsignedInt = (0xff & b[a]);
-                if ((unsignedInt >= 32) && (unsignedInt <= 127) && (unsignedInt != 61)) {
-                    sb.append((char) b[a]);
-                } else {
-                    i = b[a];
-                    if (i < 0) {
-                        i = i + 256;
-                    }
-
-                    x = Integer.toString(i, 16).toUpperCase();
-
-                    if (x.length() == 1) {
-                        x = '0' + x;
-                    }
-
-                    sb.append('=').append(x);
-                }
-            }
-        } catch (final Exception exc) {
-            LOG.error(new StringBuilder("encode error: ").append(exc).toString(), exc);
-        }
-
-        return sb.toString();
+    /**
+     * Gets the jSlobs
+     *
+     * @return The jSlobs
+     */
+    public List<JSlob> getJSlobs() {
+        return jSlobs;
     }
 
-    public static String decode(final String s) {
-        final StringBuilder sb = new StringBuilder();
-
-        int i = 0;
-
-        String x = "";
-
-        try {
-            final byte b[] = s.getBytes();
-
-            for (int a = 0; a < b.length; a++) {
-                if (b[a] == 61) {
-                    if ((a + 2) < b.length) {
-                        x = ((char) b[a + 1] + "" + (char) b[a + 2]);
-
-                        i = Integer.parseInt(x, 16);
-
-                        sb.append((char) i);
-                        a = a + 2;
-                    }
-                } else {
-                    sb.append((char) b[a]);
-                }
-            }
-        } catch (final Exception exc) {
-            LOG.error(exc.getMessage(), exc);
-        }
-
-        return sb.toString();
-    }
 }

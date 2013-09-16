@@ -197,6 +197,7 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setOccurrence(5);
         assertFalse("test if no until is set", cdao.containsUntil());
         long test_until = cdao.getEndDate().getTime() + (new CalendarCollection().MILLI_DAY * 4);
+        test_until += TimeZone.getTimeZone(TIMEZONE).getOffset(test_until);
         test_until = new CalendarCollection().normalizeLong(test_until);
 
         cdao.setTitle("testBasicRecurringWithOccurrence");

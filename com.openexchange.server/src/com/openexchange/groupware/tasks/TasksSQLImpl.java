@@ -237,7 +237,6 @@ public class TasksSQLImpl implements TasksSQLInterface {
         try {
             delete.prepare();
             delete.doDelete();
-            delete.deleteReminder();
             delete.sentEvent(session);
         } catch (final OXException e) {
             throw e;

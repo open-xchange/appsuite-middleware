@@ -803,6 +803,19 @@ if ! ox_exists_property com.openexchange.templating.trusted $pfile; then
     ox_set_property com.openexchange.templating.trusted server $pfile
 fi
 
+# SoftwareChange_Request-1620, 1631
+PFILE=/opt/open-xchange/etc/file-logging.properties
+if ! ox_exists_property org.glassfish.grizzly.level $PFILE; then
+    ox_set_property org.glassfish.grizzly.level WARNING $PFILE
+fi
+if ! grep com.openexchange.appsuite.level >/dev/null $pfile; then
+    echo -e "\n# Log access to UI files\n" >> $pfile
+    echo "# com.openexchange.appsuite.level=FINE" >> $pfile
+fi
+if ! ox_exists_property com.openexchange.ajax.requesthandler.DispatcherServlet.level $PFILE; then
+    ox_set_property com.openexchange.ajax.requesthandler.DispatcherServlet.level INFO $PFILE
+fi
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT
 do

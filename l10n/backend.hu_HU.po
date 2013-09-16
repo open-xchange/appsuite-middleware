@@ -45,7 +45,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2013-08-22 11:58+0200\n"
+"PO-Revision-Date: 2013-09-12 01:33+0200\n"
 "Last-Translator: Gabor Kelemen <kelemeng at gnome dot hu>\n"
 "Language-Team: Hungarian <kde-l10n-hu@kde.org>\n"
 "Language: hu\n"
@@ -1894,6 +1894,14 @@ msgstr "A(z) „%1$s” fájlnév figyelmen kívül hagyva"
 msgid "The path \"%1$s\" is conflicting"
 msgstr "A(z) „%1$s” útvonal ütközik"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:82
+msgid "The file version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr "A(z) „%2$s” ellenőrző-összegű „%1$s” fájlverzió érvénytelen"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:83
+msgid "The directory version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr "A(z) „%2$s” ellenőrző-összegű „%1$s” könyvtárverzió érvénytelen"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:63
 msgid "An error occurred for action: %1$s"
 msgstr "Hiba történt a művelet végrehajtásakor: %1$s"
@@ -3222,8 +3230,10 @@ msgid "The grizzly server could not be started"
 msgstr "A grizzly kiszolgáló nem indul el"
 
 #. * The following needed service is missing: \"%1$s\"
+#. The following needed service is missing: "%1$s"
+#. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
@@ -12261,6 +12271,15 @@ msgstr ""
 msgid "Folder %1$s must not be deleted in context %2$s."
 msgstr "A(z) %1$s mappa nem törölhető a(z) %2$s kontextusban."
 
+#. Owner %1$s of folder %2$s has been restored to keep the folder admin permission
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:539
+msgid ""
+"Owner %1$s of folder %2$s has been restored to keep the folder admin "
+"permission"
+msgstr ""
+"A(z) %2$s mappa %1$s tulajdonosa visszaállítva a mappaadmin jogosultság "
+"megtartására"
+
 #. Unknown AJAX action: %s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:70
 msgid "Unknown AJAX action: %s."
@@ -13140,6 +13159,11 @@ msgstr "A szolgáltatás eléréséhez létre kell hoznia egy OAuth fiókot."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:129
 msgid "An unexpected error occurred: %1$s."
 msgstr "Váratlan hiba történt: %1$s."
+
+#. Please specify your full E-Mail address as login name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:132
+msgid "Please specify your full E-Mail address as login name."
+msgstr "Adja meg teljes e-mail címét bejelentkezési névként."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "Verify file system and templates."

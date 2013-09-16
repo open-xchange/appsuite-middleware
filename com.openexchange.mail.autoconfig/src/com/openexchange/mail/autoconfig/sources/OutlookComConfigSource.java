@@ -47,88 +47,52 @@
  *
  */
 
-package com.openexchange.tools.encoding;
+package com.openexchange.mail.autoconfig.sources;
 
-import org.apache.commons.logging.Log;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.autoconfig.Autoconfig;
 
 /**
- * QuotedPrintable
+ * {@link OutlookComConfigSource} - The static config source for <code>outlook.com</code>.
+ * <p>
+ * See <a href="http://windows.microsoft.com/en-US/windows/outlook/send-receive-from-app">http://windows.microsoft.com/en-US/windows/outlook/send-receive-from-app<a>
  *
- * @author <a href="mailto:martin.kauss@open-xchange.com">Martin Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.0
  */
+public class OutlookComConfigSource extends StaticConfigSource {
 
-public final class QuotedPrintable {
+    /**
+     * Initializes a new {@link OutlookComConfigSource}.
+     */
+    public OutlookComConfigSource() {
+        super(new DomainFilter() {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(QuotedPrintable.class);
-
-    private QuotedPrintable() {
-        super();
-    }
-
-    public static String encode(final String s) {
-
-        final StringBuilder sb = new StringBuilder();
-
-        int i = 0;
-        String x = "";
-
-        try {
-            final byte b[] = s.getBytes();
-
-            for (int a = 0; a < b.length; a++) {
-                final int unsignedInt = (0xff & b[a]);
-                if ((unsignedInt >= 32) && (unsignedInt <= 127) && (unsignedInt != 61)) {
-                    sb.append((char) b[a]);
-                } else {
-                    i = b[a];
-                    if (i < 0) {
-                        i = i + 256;
-                    }
-
-                    x = Integer.toString(i, 16).toUpperCase();
-
-                    if (x.length() == 1) {
-                        x = '0' + x;
-                    }
-
-                    sb.append('=').append(x);
-                }
+            @Override
+            public boolean accept(final String emailDomain) {
+                return null != emailDomain && "outlook.com".equals(Strings.toLowerCase(emailDomain.trim()));
             }
-        } catch (final Exception exc) {
-            LOG.error(new StringBuilder("encode error: ").append(exc).toString(), exc);
-        }
-
-        return sb.toString();
+        });
     }
 
-    public static String decode(final String s) {
-        final StringBuilder sb = new StringBuilder();
-
-        int i = 0;
-
-        String x = "";
-
-        try {
-            final byte b[] = s.getBytes();
-
-            for (int a = 0; a < b.length; a++) {
-                if (b[a] == 61) {
-                    if ((a + 2) < b.length) {
-                        x = ((char) b[a + 1] + "" + (char) b[a + 2]);
-
-                        i = Integer.parseInt(x, 16);
-
-                        sb.append((char) i);
-                        a = a + 2;
-                    }
-                } else {
-                    sb.append((char) b[a]);
-                }
-            }
-        } catch (final Exception exc) {
-            LOG.error(exc.getMessage(), exc);
-        }
-
-        return sb.toString();
+    @Override
+    protected Autoconfig getStaticAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context) throws OXException {
+        final Autoconfig autoconfig = new Autoconfig();
+        // IMAP
+        autoconfig.setMailPort(993);
+        autoconfig.setMailProtocol("imap");
+        autoconfig.setMailSecure(true);
+        autoconfig.setMailServer("imap-mail.outlook.com");
+        // Transport
+        autoconfig.setTransportPort(25);
+        autoconfig.setTransportProtocol("smtp");
+        autoconfig.setTransportSecure(false);
+        autoconfig.setTransportServer("smtp-mail.outlook.com");
+        autoconfig.setUsername(emailLocalPart + '@' + emailDomain);
+        return autoconfig;
     }
+
 }

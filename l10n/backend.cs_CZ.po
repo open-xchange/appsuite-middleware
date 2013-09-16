@@ -10,7 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.cs_CZ.po\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2013-08-26 17:49+0100\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2013-09-10 11:09+0100\n"
 "Last-Translator: Vlastimil Ott <vlastimil@e-ott.info>\n"
 "Language-Team: Czech <>\n"
 "Language: cs\n"
@@ -21,7 +22,6 @@ msgstr ""
 "X-Generator: Poedit 1.5.4\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Lokalize 1.4\n"
-"POT-Creation-Date: \n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #. %1$s will be replaced with a detailed exception message.
@@ -1853,6 +1853,14 @@ msgstr "Jméno souboru  \"%1$s\" je ignorováno"
 msgid "The path \"%1$s\" is conflicting"
 msgstr "Cesta \"%1$s\" je v konfliktu"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:82
+msgid "The file version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr "Soubor verze \"%1$s\" s kontrolním součtem \"%2$s\" je neplatný"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:83
+msgid "The directory version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr "Adresář verze \"%1$s\" s kontrolním součtem \"%2$s\" je neplatný"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:63
 msgid "An error occurred for action: %1$s"
 msgstr "Došlo k chybě při činnosti %1$s"
@@ -3173,8 +3181,10 @@ msgid "The grizzly server could not be started"
 msgstr "Nepodařilo se spustit server grizzly."
 
 #. * The following needed service is missing: \"%1$s\"
+#. The following needed service is missing: "%1$s"
+#. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
@@ -12078,6 +12088,15 @@ msgstr "Operaci lze provést pouze pro administrátora kontextu."
 msgid "Folder %1$s must not be deleted in context %2$s."
 msgstr "Složka %1$s nesmí být v kontextu %2$s smazána."
 
+#. Owner %1$s of folder %2$s has been restored to keep the folder admin permission
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:539
+msgid ""
+"Owner %1$s of folder %2$s has been restored to keep the folder admin "
+"permission"
+msgstr ""
+"Vlastník %1$s složky %2$s byl obnoven, aby bylo u složky zachováno povolení "
+"administrátora"
+
 #. Unknown AJAX action: %s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:70
 msgid "Unknown AJAX action: %s."
@@ -12957,6 +12976,13 @@ msgstr "Pro přístup k této službě si musíte nejprve vytvořit účet OAuth
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:129
 msgid "An unexpected error occurred: %1$s."
 msgstr "Došlo k neočekávané chybě: %1$s."
+
+#. Please specify your full E-Mail address as login name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:132
+msgid "Please specify your full E-Mail address as login name."
+msgstr ""
+"Zadejte prosím svou celou e-mailovou adresu, bude použita jako přihlašovací "
+"jméno."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "Verify file system and templates."

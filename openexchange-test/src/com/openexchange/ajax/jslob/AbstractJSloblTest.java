@@ -47,88 +47,44 @@
  *
  */
 
-package com.openexchange.tools.encoding;
+package com.openexchange.ajax.jslob;
 
-import org.apache.commons.logging.Log;
+import java.io.IOException;
+import org.json.JSONException;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.exception.OXException;
 
 /**
- * QuotedPrintable
+ * {@link AbstractJSloblTest}
  *
- * @author <a href="mailto:martin.kauss@open-xchange.com">Martin Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+public abstract class AbstractJSloblTest extends AbstractAJAXSession {
 
-public final class QuotedPrintable {
-
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(QuotedPrintable.class);
-
-    private QuotedPrintable() {
-        super();
+    /**
+     * Default constructor.
+     *
+     * @param name name of the test.
+     */
+    protected AbstractJSloblTest(final String name) {
+        super(name);
     }
 
-    public static String encode(final String s) {
-
-        final StringBuilder sb = new StringBuilder();
-
-        int i = 0;
-        String x = "";
-
-        try {
-            final byte b[] = s.getBytes();
-
-            for (int a = 0; a < b.length; a++) {
-                final int unsignedInt = (0xff & b[a]);
-                if ((unsignedInt >= 32) && (unsignedInt <= 127) && (unsignedInt != 61)) {
-                    sb.append((char) b[a]);
-                } else {
-                    i = b[a];
-                    if (i < 0) {
-                        i = i + 256;
-                    }
-
-                    x = Integer.toString(i, 16).toUpperCase();
-
-                    if (x.length() == 1) {
-                        x = '0' + x;
-                    }
-
-                    sb.append('=').append(x);
-                }
-            }
-        } catch (final Exception exc) {
-            LOG.error(new StringBuilder("encode error: ").append(exc).toString(), exc);
-        }
-
-        return sb.toString();
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
     }
 
-    public static String decode(final String s) {
-        final StringBuilder sb = new StringBuilder();
-
-        int i = 0;
-
-        String x = "";
-
-        try {
-            final byte b[] = s.getBytes();
-
-            for (int a = 0; a < b.length; a++) {
-                if (b[a] == 61) {
-                    if ((a + 2) < b.length) {
-                        x = ((char) b[a + 1] + "" + (char) b[a + 2]);
-
-                        i = Integer.parseInt(x, 16);
-
-                        sb.append((char) i);
-                        a = a + 2;
-                    }
-                } else {
-                    sb.append((char) b[a]);
-                }
-            }
-        } catch (final Exception exc) {
-            LOG.error(exc.getMessage(), exc);
-        }
-
-        return sb.toString();
+    /**
+     * @return User's default send address
+     */
+    protected String getSendAddress() throws OXException, IOException, JSONException {
+        return getSendAddress(getClient());
     }
+
+    protected static String getSendAddress(final AJAXClient client) throws OXException, IOException, JSONException {
+        return client.getValues().getSendAddress();
+    }
+
 }

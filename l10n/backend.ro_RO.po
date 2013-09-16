@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-08-19 22:29+0000\n"
+"PO-Revision-Date: 2013-09-11 18:34+0100\n"
 "Last-Translator: Daiana Heinrich <xdaiana@yahoo.com>\n"
 "Language-Team: Romanian <kde-i18n-doc@kde.org>\n"
 "Language: ro\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2;\n"
-"X-Generator: Lokalize 1.4\n"
+"X-Generator: Poedit 1.5.7\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #. %1$s will be replaced with a detailed exception message.
@@ -1881,6 +1881,16 @@ msgstr "Numele de fișier \"%1$s\" este ignorat"
 msgid "The path \"%1$s\" is conflicting"
 msgstr "Calea \"%1$s\" este conflictuală"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:82
+msgid "The file version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr ""
+"Versiunea de fișier \"%1$s\" cu suma de control \"%2$s\" este incorectă"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:83
+msgid "The directory version \"%1$s\" with checksum \"%2$s\" is invalid"
+msgstr ""
+"Versiunea de director \"%1$s\" cu suma de control \"%2$s\" este incorectă"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:63
 msgid "An error occurred for action: %1$s"
 msgstr "A apărut o eroare pentru acțiunea: %1$s"
@@ -3200,8 +3210,7 @@ msgid ""
 "address."
 msgstr ""
 "Nu se poate căuta un contact care nu este nici utilizator intern și nu are "
-"nici "
-"adresă de e-mail."
+"nici adresă de e-mail."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:55
 msgid "The embedded Apache client threw an error: %1$s"
@@ -3229,8 +3238,10 @@ msgid "The grizzly server could not be started"
 msgstr "Serverul grizzly nu a putut fi pornit"
 
 #. * The following needed service is missing: \"%1$s\"
+#. The following needed service is missing: "%1$s"
+#. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
 msgid "The following needed service is missing: \"%1$s\""
@@ -12302,6 +12313,15 @@ msgstr "Operația se poate efectua numai pentru administratorul de context."
 msgid "Folder %1$s must not be deleted in context %2$s."
 msgstr "Dosarul %1$s nu poate fi șters în contextul %2$s."
 
+#. Owner %1$s of folder %2$s has been restored to keep the folder admin permission
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:539
+msgid ""
+"Owner %1$s of folder %2$s has been restored to keep the folder admin "
+"permission"
+msgstr ""
+"Proprietarul %1$s al dosarului %2$s a fost restabilit pentru a păstra "
+"drepturile de administrare asupra acestui dosar"
+
 #. Unknown AJAX action: %s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:70
 msgid "Unknown AJAX action: %s."
@@ -13190,6 +13210,11 @@ msgstr "Trebuie să creați un cont OAuth pentru a accesa acest serviciu."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:129
 msgid "An unexpected error occurred: %1$s."
 msgstr "A apărut o eroare neașteptată: %1$s."
+
+#. Please specify your full E-Mail address as login name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:132
+msgid "Please specify your full E-Mail address as login name."
+msgstr "Precizați adresa de E-Mail completă ca nume de autentificare."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "Verify file system and templates."
