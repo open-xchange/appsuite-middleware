@@ -91,26 +91,23 @@ public final class DatabasePasswordChange extends PasswordChangeService {
             encodedPassword = getEncodedPassword(user.getPasswordMech(), event.getNewPassword());
         }
         // Update database
-        final Connection writeCon;
+        final Connection writeCon = Database.get(ctx, true);
+        boolean rollback = false;
         try {
-            writeCon = Database.get(ctx, true);
             writeCon.setAutoCommit(false);
-        } catch (final OXException e) {
-            throw e;
-        } catch (final SQLException e) {
-            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        }
-        try {
+            rollback = true;
             update(writeCon, encodedPassword, event.getSession().getUserId(), ctx.getContextId());
             deleteAttr(writeCon, event.getSession().getUserId(), ctx.getContextId());
             writeCon.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            rollback(writeCon);
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
-            rollback(writeCon);
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                rollback(writeCon);
+            }
             autocommit(writeCon);
             Database.back(ctx, true, writeCon);
         }
