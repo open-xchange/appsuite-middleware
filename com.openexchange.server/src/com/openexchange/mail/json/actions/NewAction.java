@@ -118,6 +118,8 @@ public final class NewAction extends AbstractMailAction {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
+    private static final String FROM = MailJSONField.FROM.getKey();
+
     /**
      * Initializes a new {@link NewAction}.
      * @param services
@@ -164,7 +166,8 @@ public final class NewAction extends AbstractMailAction {
              */
             final InternetAddress from;
             try {
-                from = MessageParser.parseAddressKey(MailJSONField.FROM.getKey(), jMail, true)[0];
+                final InternetAddress[] fromAddresses = MessageParser.parseAddressKey(FROM, jMail, true);
+                from = null == fromAddresses || 0 == fromAddresses.length ? null : fromAddresses[0];
             } catch (final AddressException e) {
                 throw MimeMailException.handleMessagingException(e);
             }

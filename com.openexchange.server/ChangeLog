@@ -1,6 +1,7 @@
 * 2013-09-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 28857: Orderly signal Snippet identifiers
+ - Fix for bug 28875: Avoid possible 'ArrayIndexOutOfBoundsException' when parsing "From" address
 
 * 2013-09-15 - thorben.betten@open-xchange.com
 
