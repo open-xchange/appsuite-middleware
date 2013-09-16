@@ -1,3 +1,7 @@
+* 2013-09-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 28857: Orderly signal Snippet identifiers
+
 * 2013-09-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 27882: Remove the "name" parameter from an attachment's "Content-Type" header
