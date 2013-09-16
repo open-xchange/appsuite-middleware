@@ -4869,13 +4869,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
 msgid ""
 "This message could not be moved to trash folder, possibly because your "
-"mailbox is nearly full."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
-msgid ""
-"In that case, please try to empty your deleted items first, or delete "
-"smaller messages first."
+"mailbox is nearly full. In that case, please try to empty your deleted items "
+"first, or delete smaller messages first."
 msgstr ""
 
 #. *
@@ -5052,11 +5047,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s)."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
-msgid "Error message from server: %5$s"
+"context=%4$s). Error message from server: %5$s"
 msgstr ""
 
 #. *
@@ -5066,11 +5057,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s). Try again in %5$s seconds."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
-msgid "Error message from server: %6$s"
+"context=%4$s). Try again in %5$s seconds. Error message from server: %6$s"
 msgstr ""
 
 #. *
@@ -9172,13 +9159,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:272
 msgid ""
 "This message could not be moved to trash folder as your mailbox is nearly "
-"full."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:272
-msgid ""
-"Please try to empty your deleted items first, or delete smaller messages "
-"first."
+"full. Please try to empty your deleted items first, or delete smaller "
+"messages first."
 msgstr ""
 
 #. *
@@ -9626,12 +9608,7 @@ msgstr ""
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:106
-msgid "Folder \"%1$s\" has been closed."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:106
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:112
-msgid "Probably your request took too long."
+msgid "Folder \"%1$s\" has been closed. Probably your request took too long."
 msgstr ""
 
 #. *
@@ -9641,7 +9618,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:112
 msgid ""
 "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
-"%4$s, context=%5$s) ."
+"%4$s, context=%5$s). Probably your request took too long."
 msgstr ""
 
 #. *
@@ -9970,21 +9947,15 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:351
 msgid ""
-"That mailbox is already in use by another process. Please try again later."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:351
-msgid "Error message: %1$s"
+"That mailbox is already in use by another process. Please try again later. "
+"Error message: %1$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:353
 msgid ""
 "That mailbox is already in use by another process on %1$s mail server for "
-"login %2$s (user=%3$s, context=%4$s). Please try again later."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:353
-msgid "Error message: %5$s"
+"login %2$s (user=%3$s, context=%4$s). Please try again later. Error message: "
+"%5$s"
 msgstr ""
 
 #. Unexpected error: %1$s.
