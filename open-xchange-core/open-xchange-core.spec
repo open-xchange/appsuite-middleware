@@ -816,6 +816,12 @@ if ! ox_exists_property com.openexchange.ajax.requesthandler.DispatcherServlet.l
     ox_set_property com.openexchange.ajax.requesthandler.DispatcherServlet.level INFO $PFILE
 fi
 
+# SoftwareChange_Request-1635
+PFILE=/opt/open-xchange/etc/permissions.properties
+if ! ox_exists_property com.openexchange.capability.filestore $PFILE; then
+    ox_set_property com.openexchange.capability.filestore true $PFILE
+fi
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 for FILE in $PROTECT
 do
