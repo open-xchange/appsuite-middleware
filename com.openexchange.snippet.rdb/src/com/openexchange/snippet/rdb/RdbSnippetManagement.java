@@ -473,8 +473,12 @@ public final class RdbSnippetManagement implements SnippetManagement {
         try {
             con.setAutoCommit(false); // BEGIN;
             rollback = true;
-            // Obtain identifier
-            final int id = getIdGeneratorService().getId("com.openexchange.snippet.rdb", contextId);
+            /*-
+             * Obtain identifier
+             * 
+             * Yes, please use "com.openexchange.snippet.mime" since both implementations use shared table 'snippet'.
+             */
+            final int id = getIdGeneratorService().getId("com.openexchange.snippet.mime", contextId);
             // Store attachments
             if (supportsAttachments) {
                 final List<Attachment> attachments = snippet.getAttachments();
