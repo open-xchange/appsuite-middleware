@@ -66,6 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.Snippet;
@@ -112,8 +113,8 @@ public final class GetAttachmentAction extends SnippetAction implements ETagAwar
      *
      * @param services The service look-up
      */
-    public GetAttachmentAction(final ServiceLookup services, final Map<String, SnippetAction> actions) {
-        super(services, actions);
+    public GetAttachmentAction(final ServiceLookup services, final ServiceListing<SnippetService> snippetServices, final Map<String, SnippetAction> actions) {
+        super(services, snippetServices, actions);
     }
 
     @Override
@@ -147,7 +148,7 @@ public final class GetAttachmentAction extends SnippetAction implements ETagAwar
             }
         }
         // Get service
-        final SnippetService snippetService = getSnippetService();
+        final SnippetService snippetService = getSnippetService(snippetRequest.getSession());
         final Snippet snippet = snippetService.getManagement(snippetRequest.getSession()).getSnippet(id);
         final List<Attachment> attachments = snippet.getAttachments();
         if (null == attachments) {

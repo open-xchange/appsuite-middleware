@@ -47,60 +47,23 @@
  *
  */
 
-package com.openexchange.snippet.json.action;
+package com.openexchange.osgi;
 
 import java.util.List;
-import java.util.Map;
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.ServiceListing;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.snippet.Snippet;
-import com.openexchange.snippet.SnippetService;
-import com.openexchange.snippet.json.SnippetRequest;
+
 
 /**
- * {@link AllAction}
+ * {@link ServiceListing} - Provides access to a service listing.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(
-    name = "all"
-    , description = "Gets all snippets associated with the current user and context."
-    , method = RequestMethod.GET
-    , parameters = {
-        @Parameter(name = "type", description = "Optional comma-separated identifiers for snippet types", optional=true)
-    }
-)
-public final class AllAction extends SnippetAction {
+public interface ServiceListing<S> {
 
     /**
-     * Initializes a new {@link AllAction}.
+     * Gets the service list
+     *
+     * @return The service list
      */
-    public AllAction(final ServiceLookup services, final ServiceListing<SnippetService> snippetServices, final Map<String, SnippetAction> actions) {
-        super(services, snippetServices, actions);
-    }
-
-    @Override
-    protected AJAXRequestResult perform(final SnippetRequest snippetRequest) throws OXException, JSONException {
-        final String[] types;
-        {
-            final String tmp = snippetRequest.getParameter("type", String.class);
-            types = isEmpty(tmp) ? new String[0] : SPLIT_CSV.split(tmp);
-        }
-        final SnippetService snippetService = getSnippetService(snippetRequest.getSession());
-
-        final List<Snippet> snippets = snippetService.getManagement(snippetRequest.getSession()).getSnippets(types);
-        return new AJAXRequestResult(snippets, "snippet");
-    }
-
-    @Override
-    public String getAction() {
-        return "all";
-    }
+    public List<S> getServiceList();
 
 }

@@ -49,6 +49,8 @@
 
 package com.openexchange.snippet.mime;
 
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.snippet.SnippetManagement;
@@ -73,5 +75,12 @@ public final class MimeSnippetService implements SnippetService {
     public SnippetManagement getManagement(final Session session) throws OXException {
         return new MimeSnippetManagement(session);
     }
+
+    @Override
+    public List<String> neededCapabilities() {
+        return Collections.singletonList("filestore");
+    }
+
+
 
 }

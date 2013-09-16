@@ -57,7 +57,9 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.json.action.Method;
 import com.openexchange.snippet.json.action.SnippetAction;
 
@@ -79,18 +81,18 @@ public class SnippetActionFactory implements AJAXActionServiceFactory {
      *
      * @param services The service look-up
      */
-    public SnippetActionFactory(final ServiceLookup services) {
+    public SnippetActionFactory(final ServiceLookup services, final ServiceListing<SnippetService> snippetServices) {
         super();
         actions = new ConcurrentHashMap<String, SnippetAction>(10);
-        addJSlobAction(new com.openexchange.snippet.json.action.AllAction(services, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.GetAction(services, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.ListAction(services, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.DeleteAction(services, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.NewAction(services, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.AttachAction(services, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.DetachAction(services, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.UpdateAction(services, actions));
-        addJSlobAction(new com.openexchange.snippet.json.action.GetAttachmentAction(services, actions));
+        addJSlobAction(new com.openexchange.snippet.json.action.AllAction(services, snippetServices, actions));
+        addJSlobAction(new com.openexchange.snippet.json.action.GetAction(services, snippetServices, actions));
+        addJSlobAction(new com.openexchange.snippet.json.action.ListAction(services, snippetServices, actions));
+        addJSlobAction(new com.openexchange.snippet.json.action.DeleteAction(services, snippetServices, actions));
+        addJSlobAction(new com.openexchange.snippet.json.action.NewAction(services, snippetServices, actions));
+        addJSlobAction(new com.openexchange.snippet.json.action.AttachAction(services, snippetServices, actions));
+        addJSlobAction(new com.openexchange.snippet.json.action.DetachAction(services, snippetServices, actions));
+        addJSlobAction(new com.openexchange.snippet.json.action.UpdateAction(services, snippetServices, actions));
+        addJSlobAction(new com.openexchange.snippet.json.action.GetAttachmentAction(services, snippetServices, actions));
     }
 
     private void addJSlobAction(final SnippetAction snippetAction) {

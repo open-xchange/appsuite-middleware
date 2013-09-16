@@ -49,6 +49,7 @@
 
 package com.openexchange.snippet.rdb;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.snippet.SnippetManagement;
@@ -72,6 +73,11 @@ public final class RdbSnippetService implements SnippetService {
     @Override
     public SnippetManagement getManagement(final Session session) throws OXException {
         return new RdbSnippetManagement(session);
+    }
+
+    @Override
+    public List<String> neededCapabilities() {
+        return null;
     }
 
 }

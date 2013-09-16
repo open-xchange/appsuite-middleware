@@ -52,12 +52,17 @@ package com.openexchange.snippet.json.action;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ServiceListing;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.json.SnippetRequest;
@@ -87,6 +92,11 @@ public abstract class SnippetAction implements AJAXActionService {
     protected final ServiceLookup services;
 
     /**
+     * The service listing.
+     */
+    protected final ServiceListing<SnippetService> snippetServices;
+
+    /**
      * Registered actions.
      */
     protected final Map<String, SnippetAction> actions;
@@ -96,9 +106,10 @@ public abstract class SnippetAction implements AJAXActionService {
      *
      * @param services The service look-up
      */
-    protected SnippetAction(final ServiceLookup services, final Map<String, SnippetAction> actions) {
+    protected SnippetAction(final ServiceLookup services, final ServiceListing<SnippetService> snippetServices, final Map<String, SnippetAction> actions) {
         super();
         this.services = services;
+        this.snippetServices = snippetServices;
         this.actions = actions;
     }
 
@@ -137,10 +148,28 @@ public abstract class SnippetAction implements AJAXActionService {
     /**
      * Gets the snippet service.
      *
+     * @param serverSession The server session
      * @return The snippet service
+     * @throws OXException If appropriate Snippet service cannot be returned
      */
-    protected SnippetService getSnippetService() {
-        return services.getService(SnippetService.class);
+    protected SnippetService getSnippetService(final ServerSession serverSession) throws OXException {
+        final CapabilityService capabilityService = services.getOptionalService(CapabilityService.class);
+        for (final SnippetService snippetService : snippetServices.getServiceList()) {
+            final List<String> neededCapabilities = snippetService.neededCapabilities();
+            if (null == capabilityService || (null == neededCapabilities || neededCapabilities.isEmpty())) {
+                // Either no capabilities signaled or service is absent (thus not able to check)
+                return snippetService;
+            }
+            final Set<Capability> capabilities = capabilityService.getCapabilities(serverSession);
+            boolean contained = true;
+            for (int i = neededCapabilities.size(); contained && i-- > 0;) {
+                contained = capabilities.contains(new Capability(neededCapabilities.get(i)));
+            }
+            if (contained) {
+                return snippetService;
+            }
+        }
+        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SnippetService.class.getSimpleName());
     }
 
     /**

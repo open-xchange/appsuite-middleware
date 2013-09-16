@@ -47,60 +47,78 @@
  *
  */
 
-package com.openexchange.snippet.json.action;
-
-import java.util.List;
-import java.util.Map;
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.ServiceListing;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.snippet.Snippet;
-import com.openexchange.snippet.SnippetService;
-import com.openexchange.snippet.json.SnippetRequest;
+package com.openexchange.osgi.util;
 
 /**
- * {@link AllAction}
+ * {@link RankedService} - A service plus its ranking.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(
-    name = "all"
-    , description = "Gets all snippets associated with the current user and context."
-    , method = RequestMethod.GET
-    , parameters = {
-        @Parameter(name = "type", description = "Optional comma-separated identifiers for snippet types", optional=true)
-    }
-)
-public final class AllAction extends SnippetAction {
+public final class RankedService<S> implements Comparable<RankedService<S>> {
 
     /**
-     * Initializes a new {@link AllAction}.
+     * The service.
      */
-    public AllAction(final ServiceLookup services, final ServiceListing<SnippetService> snippetServices, final Map<String, SnippetAction> actions) {
-        super(services, snippetServices, actions);
+    public final S service;
+
+    /**
+     * The service ranking.
+     */
+    public final int ranking;
+
+    /**
+     * Initializes a new {@link RankedService}.
+     *
+     * @param service
+     * @param ranking
+     */
+    public RankedService(final S service, final int ranking) {
+        super();
+        this.service = service;
+        this.ranking = ranking;
     }
 
     @Override
-    protected AJAXRequestResult perform(final SnippetRequest snippetRequest) throws OXException, JSONException {
-        final String[] types;
-        {
-            final String tmp = snippetRequest.getParameter("type", String.class);
-            types = isEmpty(tmp) ? new String[0] : SPLIT_CSV.split(tmp);
+    public int hashCode() {
+        return 31 + ((service == null) ? 0 : service.hashCode());
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
         }
-        final SnippetService snippetService = getSnippetService(snippetRequest.getSession());
-
-        final List<Snippet> snippets = snippetService.getManagement(snippetRequest.getSession()).getSnippets(types);
-        return new AJAXRequestResult(snippets, "snippet");
+        if (!(obj instanceof RankedService)) {
+            return false;
+        }
+        final RankedService<?> other = (RankedService<?>) obj;
+        if (service == null) {
+            if (other.service != null) {
+                return false;
+            }
+        } else if (!service.equals(other.service)) {
+            return false;
+        }
+        return true;
     }
 
     @Override
-    public String getAction() {
-        return "all";
+    public int compareTo(final RankedService<S> o) {
+        // Highest ranking first
+        final int thisVal = this.ranking;
+        final int anotherVal = o.ranking;
+        return (thisVal < anotherVal ? 1 : (thisVal == anotherVal ? 0 : -1));
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(128);
+        builder.append("RankedService [");
+        if (service != null) {
+            builder.append("service=").append(service).append(", ");
+        }
+        builder.append("ranking=").append(ranking).append("]");
+        return builder.toString();
     }
 
 }

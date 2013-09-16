@@ -49,44 +49,57 @@
 
 package com.openexchange.osgi;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.java.ConcurrentList;
+import com.openexchange.java.SortableConcurrentList;
+import com.openexchange.osgi.util.RankedService;
 
 /**
- * {@link NearRegistryServiceTracker} - A near-registry service tracker.
- * <p>
- * Occurrences of specified service type are collected and available via {@link #getServiceList()}.<br>
- * This is intended to replace {@link #getServices()} since it requires to obtain tracker's mutex on each invocation.
+ * {@link RankingAwareNearRegistryServiceTracker} - A {@link NearRegistryServiceTracker} that sorts tracked services by their ranking
+ * (highest ranking first).
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class NearRegistryServiceTracker<S> extends ServiceTracker<S, S> implements ServiceListing<S> {
+public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S, S> implements ServiceListing<S> {
 
-    private final List<S> services;
+    private final SortableConcurrentList<RankedService<S>> services;
 
     /**
-     * Initializes a new {@link NearRegistryServiceTracker}.
+     * Initializes a new {@link RankingAwareNearRegistryServiceTracker}.
      *
      * @param context The bundle context
-     * @param clazz The service class
+     * @param clazz The service's class
      */
-    public NearRegistryServiceTracker(final BundleContext context, final Class<S> clazz) {
+    public RankingAwareNearRegistryServiceTracker(final BundleContext context, final Class<S> clazz) {
         super(context, clazz, null);
-        services = new ConcurrentList<S>();
+        services = new SortableConcurrentList<RankedService<S>>();
     }
 
+    /**
+     * Gets the rank-wise sorted service list
+     *
+     * @return The rank-wise sorted service list
+     */
     @Override
     public List<S> getServiceList() {
-        return services;
+        final List<S> ret = new ArrayList<S>(services.size());
+        for (final RankedService<S> rs : services) {
+            ret.add(rs.service);
+        }
+        return ret;
     }
 
     @Override
     public S addingService(final ServiceReference<S> reference) {
         final S service = context.getService(reference);
-        if (services.add(service)) {
+        final int ranking = getRanking(reference);
+        final RankedService<S> rankedService = new RankedService<S>(service, ranking);
+        if (services.add(rankedService)) {
+            services.sort();
             return service;
         }
         context.ungetService(reference);
@@ -95,8 +108,24 @@ public final class NearRegistryServiceTracker<S> extends ServiceTracker<S, S> im
 
     @Override
     public void removedService(final ServiceReference<S> reference, final S service) {
-        services.remove(service);
+        services.remove(new RankedService<S>(service, getRanking(reference)));
+        services.sort();
         context.ungetService(reference);
+    }
+
+    private static <S> int getRanking(final ServiceReference<S> reference) {
+        int ranking = 0;
+        {
+            final Object oRanking = reference.getProperty(Constants.SERVICE_RANKING);
+            if (null != oRanking) {
+                try {
+                    ranking = Integer.parseInt(oRanking.toString().trim());
+                } catch (final NumberFormatException e) {
+                    ranking = 0;
+                }
+            }
+        }
+        return ranking;
     }
 
 }

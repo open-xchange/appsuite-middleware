@@ -70,6 +70,7 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
@@ -112,14 +113,14 @@ public final class AttachAction extends SnippetAction {
     /**
      * Initializes a new {@link AttachAction}.
      */
-    public AttachAction(final ServiceLookup services, final Map<String, SnippetAction> actions) {
-        super(services, actions);
+    public AttachAction(final ServiceLookup services, final ServiceListing<SnippetService> snippetServices, final Map<String, SnippetAction> actions) {
+        super(services, snippetServices, actions);
     }
 
     @Override
     protected AJAXRequestResult perform(final SnippetRequest snippetRequest) throws OXException, JSONException {
         final String id = snippetRequest.checkParameter("id");
-        final SnippetService snippetService = getSnippetService();
+        final SnippetService snippetService = getSnippetService(snippetRequest.getSession());
 
         final DefaultSnippet snippet = new DefaultSnippet().setId(id);
         final AJAXRequestData requestData = snippetRequest.getRequestData();

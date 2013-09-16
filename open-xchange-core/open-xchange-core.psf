@@ -105,6 +105,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,com.openexchange.sessionstorage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,com.openexchange.snippet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,com.openexchange.snippet.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,com.openexchange.snippet.mime"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,com.openexchange.snippet.rdb"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,com.openexchange.sql"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.0,com.openexchange.subscribe"/>
