@@ -89,6 +89,8 @@ Sixth candidate for 7.4.0 release
 Build for patch 2013-08-22
 * Thu Aug 22 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2013-08-22
+* Thu Aug 22 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2013-08-22
 * Tue Aug 20 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2013-08-19
 * Mon Aug 19 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>

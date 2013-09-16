@@ -64,6 +64,12 @@ open-xchange-admin (7.4.0-0) UNRELEASED; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Apr 2013 10:28:52 +0200
 
+open-xchange-admin (7.2.2-18) stable; urgency=low
+
+  * Build for patch 2013-09-12
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 11 Sep 2013 15:10:59 +0200
+
 open-xchange-admin (7.2.2-17) stable; urgency=low
 
   * Build for patch 2013-09-05
