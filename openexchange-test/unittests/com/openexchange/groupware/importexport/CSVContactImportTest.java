@@ -144,6 +144,8 @@ public class CSVContactImportTest extends AbstractContactTest {
     }
 
     @Test public void importEmpty() throws NumberFormatException, Exception{
+        final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
+        final int numberOfContactsBefore = contactSql.getNumberOfContacts(folderId);
         final List<ImportResult> results = importStuff(IMPORT_EMPTY);
         assertTrue("One result?" , 1 == results.size());
         final ImportResult res = results.get(0);
@@ -151,8 +153,8 @@ public class CSVContactImportTest extends AbstractContactTest {
         assertEquals("Should contain error for not importing because fields are missing", 808, res.getException().getCode());
 
         //no import, please
-        final ContactSQLInterface contactSql = new RdbContactSQLImpl(sessObj);
-        assertEquals("Should not have imported a contact", 0 ,  contactSql.getNumberOfContacts(folderId));
+        final int numberOfContactsAfter = contactSql.getNumberOfContacts(folderId);
+        assertEquals("Should not have imported a contact", numberOfContactsBefore, numberOfContactsAfter);
     }
 
 
