@@ -114,7 +114,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
         if (json.has("to")) {
             String defaultContext = null;
             if (session != null) {
-                defaultContext = session.getContext().getName();
+                defaultContext = session.getContext().getContextId() + "";
             }
             stanza.setTo(new ID(json.optString("to"), defaultContext));
         }
