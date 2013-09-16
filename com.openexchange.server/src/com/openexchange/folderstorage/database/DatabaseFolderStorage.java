@@ -1348,7 +1348,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     }
                 }
                 final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
-                final List<String[]> subfolderIds = SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userConfiguration, ctx, altNames, con);
+                final List<String[]> subfolderIds = SystemInfostoreFolder.getSystemInfostoreFolderSubfolders(user, userConfiguration, ctx, altNames, storageParameters.getSession(), con);
                 final int size = subfolderIds.size();
                 final List<SortableId> list = new ArrayList<SortableId>(size);
                 for (int i = 0; i < size; i++) {
