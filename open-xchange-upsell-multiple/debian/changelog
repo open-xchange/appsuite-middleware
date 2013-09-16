@@ -280,6 +280,12 @@ open-xchange-upsell-multiple (7.2.0-0) UNRELEASED; urgency=low
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 15 Mar 2013 13:33:59 +0100
 
+open-xchange-upsell-multiple (7.0.2-14) stable; urgency=low
+
+  * Build for patch 2013-09-12
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 11 Sep 2013 15:06:21 +0200
+
 open-xchange-upsell-multiple (7.0.2-13) stable; urgency=low
 
   * Build for patch 2013-08-22

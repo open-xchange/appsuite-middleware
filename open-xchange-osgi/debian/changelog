@@ -280,6 +280,12 @@ open-xchange-osgi (7.2.0-0) UNRELEASED; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 15 Mar 2013 13:32:09 +0100
 
+open-xchange-osgi (7.0.2-14) stable; urgency=low
+
+  * Build for patch 2013-09-12
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 11 Sep 2013 15:04:05 +0200
+
 open-xchange-osgi (7.0.2-13) stable; urgency=low
 
   * Build for patch 2013-08-22
