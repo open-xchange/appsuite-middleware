@@ -51,7 +51,6 @@ package com.openexchange.drive.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
-import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
@@ -93,10 +92,10 @@ public class DownloadHelper {
      */
     public IFileHolder perform(final String path, final FileVersion fileVersion, final long offset, final long length) throws OXException {
 
-        return session.getStorage().wrapInTransaction(new StorageOperation<FileHolder>() {
+        return session.getStorage().wrapInTransaction(new StorageOperation<IFileHolder>() {
 
             @Override
-            public FileHolder call() throws OXException {
+            public IFileHolder call() throws OXException {
                 /*
                  * get the file's input stream
                  */
@@ -111,10 +110,7 @@ public class DownloadHelper {
                 if (null == inputStream) {
                     throw DriveExceptionCodes.FILE_NOT_FOUND.create(fileVersion.getName(), path);
                 }
-                String contentType = null != file.getFileMIMEType() ? file.getFileMIMEType() : "application/octet-stream";
-                FileHolder fileHolder = new FileHolder(inputStream, -1, contentType, fileVersion.getName());
-                fileHolder.setDelivery("download");
-                return fileHolder;
+                return new DriveFileHolder(session, inputStream, fileVersion.getName(), file.getFileMIMEType());
             }
         });
     }
