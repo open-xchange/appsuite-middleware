@@ -64,6 +64,12 @@ open-xchange-meta (7.4.0-0) UNRELEASED; urgency=low
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 15 Apr 2013 10:29:48 +0200
 
+open-xchange-meta (7.2.2-17) stable; urgency=low
+
+  * Build for patch 2013-09-12
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 11 Sep 2013 15:12:17 +0200
+
 open-xchange-meta (7.2.2-16) stable; urgency=low
 
   * Build for patch 2013-09-05
