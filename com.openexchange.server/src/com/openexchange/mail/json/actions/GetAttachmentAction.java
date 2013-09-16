@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.json.actions;
 
-import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
