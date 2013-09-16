@@ -1,3 +1,9 @@
+open-xchange-xerces-ibm (7.2.2-17) stable; urgency=low
+
+  * Build for patch 2013-09-12
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 11 Sep 2013 15:10:52 +0200
+
 open-xchange-xerces-ibm (7.2.2-16) stable; urgency=low
 
   * Build for patch 2013-09-05

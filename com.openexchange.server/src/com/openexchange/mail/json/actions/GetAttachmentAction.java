@@ -92,6 +92,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.ServiceLookup;
@@ -253,9 +254,9 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
                 }
                 if (isEmpty(mailPart.getFileName())) {
-                    mailPart.setFileName(generateFilename(sequenceId, mailPart.getContentType().getBaseType()));
+                    mailPart.setFileName(MailMessageParser.generateFilename(sequenceId, mailPart.getContentType().getBaseType()));
                 }
-                if (filter && !saveToDisk && mailPart.getContentType().startsWith("text/htm")) {
+                if (filter && !saveToDisk && mailPart.getContentType().startsWithAny("text/htm", "text/xhtm", "text/xml")) {
                     /*
                      * Apply filter
                      */
