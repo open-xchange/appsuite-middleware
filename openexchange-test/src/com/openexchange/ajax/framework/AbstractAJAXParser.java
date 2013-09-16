@@ -90,6 +90,7 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends
             final OXException exception = response.getException();
             if (null != exception) {
                 final StringBuilder sb = new StringBuilder(exception.getMessage());
+                sb.insert(0, "Request failed with error -- ");
                 final StackTraceElement[] trace = exception.getStackTrace();
                 if (null != trace) {
                     final String lineSeparator = System.getProperty("line.separator");
