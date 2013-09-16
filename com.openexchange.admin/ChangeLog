@@ -1,3 +1,7 @@
+* 2013-09-16 - choeger@open-xchange.com
+
+ - Fix for bug 28830: oxsysreport is collecting unneeded protected data
+
 * 2013-08-08 - choeger@open-xchange.com
 
  - Fix for bug 28157: generatempasswd returns "0" even if it fails
