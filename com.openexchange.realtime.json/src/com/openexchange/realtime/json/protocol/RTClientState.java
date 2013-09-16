@@ -102,7 +102,7 @@ public interface RTClientState {
     /**
      * Checks whether this state should be considered timed out relative to the given timestamp
      * @param timestamp - The timestamp to check the timeout status for
-     * @return true if the timestamp is more than two minutes ahead of the lastSeen timestamp, false otherwise
+     * @return true if the timestamp is more than thirty minutes ahead of the lastSeen timestamp, false otherwise
      */
     public abstract boolean isTimedOut(long timestamp);
 
