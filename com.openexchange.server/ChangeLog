@@ -6,6 +6,7 @@
  - Fix for bug 27394: Signal no accepted range for inexact resources (Accept-Ranges: none) and signal proper HTTP error code if range requested although not supported respectively
  - Fix for bug 28770: Once again -- Removed &nbsp; entities from html2text converted plain text
  - Fix for bug 26312: Try read before returning a part's input stream to detect possible I/O related errors
+ - Fix for bug 28827: Support HTTP error code 429 (too many requests) and added appropriate handling for HTTP error codes w/o a pre-configured status message
 
 * 2013-09-16 - thorben.betten@open-xchange.com
 

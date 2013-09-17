@@ -180,6 +180,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         STATUS_MSGS.put(415, "Unsupported Media Type");
         STATUS_MSGS.put(416, "Requested Range Not Satisfiable");
         STATUS_MSGS.put(417, "Expectation Failed");
+        STATUS_MSGS.put(429, "Too Many Requests");
         STATUS_MSGS.put(500, "Internal Server Error");
         STATUS_MSGS.put(501, "Not Implemented");
         STATUS_MSGS.put(502, "Bad Gateway");
@@ -980,9 +981,10 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
             desc = String.format(desc, request.getServletPath());
         }
         String errorMsgStr = ERROR_PAGE_TEMPL;
-        errorMsgStr = errorMsgStr.replaceAll("#STATUS_CODE#", String.valueOf(this.status)).replaceAll(
-            "#STATUS_MSG#",
-            com.openexchange.java.Strings.quoteReplacement(this.statusMsg)).replaceFirst("#STATUS_DESC#", com.openexchange.java.Strings.quoteReplacement(desc));
+        errorMsgStr = errorMsgStr.replaceAll("#STATUS_CODE#", Integer.toString(status));
+        final String thisStatusMsg = this.statusMsg;
+        errorMsgStr = errorMsgStr.replaceAll("#STATUS_MSG#", null == thisStatusMsg ? Integer.toString(status) : com.openexchange.java.Strings.quoteReplacement(thisStatusMsg));
+        errorMsgStr = errorMsgStr.replaceFirst("#STATUS_DESC#", com.openexchange.java.Strings.quoteReplacement(desc));
         synchronized (HEADER_DATE_FORMAT) {
             errorMsgStr = errorMsgStr.replaceFirst("#DATE#", HEADER_DATE_FORMAT.format(new Date(System.currentTimeMillis())));
         }
@@ -1006,16 +1008,17 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
      * @return The default error page
      */
     public byte[] getErrorMessage() {
-        String desc = STATUS_DESC.containsKey(this.status) ? STATUS_DESC.get(this.status) : ERR_DESC_NOT_AVAILABLE;
+        final int status = this.status;
+        String desc = STATUS_DESC.containsKey(status) ? STATUS_DESC.get(status) : ERR_DESC_NOT_AVAILABLE;
         if (HttpServletResponse.SC_NOT_FOUND == status) {
             final HttpServletRequestImpl request = ajpProcessor.getRequest();
             desc = String.format(desc, request.getServletPath());
         }
         String errorMsgStr = ERROR_PAGE_TEMPL;
-        errorMsgStr =
-            errorMsgStr.replaceAll("#STATUS_CODE#", Integer.toString(this.status)).replaceAll("#STATUS_MSG#", this.statusMsg).replaceFirst(
-                "#STATUS_DESC#",
-                desc);
+        errorMsgStr = errorMsgStr.replaceAll("#STATUS_CODE#", Integer.toString(status));
+        final String statusMsg = this.statusMsg;
+        errorMsgStr = errorMsgStr.replaceAll("#STATUS_MSG#", null == statusMsg ? Integer.toString(status) : com.openexchange.java.Strings.quoteReplacement(statusMsg));
+        errorMsgStr = errorMsgStr.replaceFirst("#STATUS_DESC#", com.openexchange.java.Strings.quoteReplacement(desc));
         synchronized (HEADER_DATE_FORMAT) {
             errorMsgStr = errorMsgStr.replaceFirst("#DATE#", HEADER_DATE_FORMAT.format(new Date(System.currentTimeMillis())));
         }
