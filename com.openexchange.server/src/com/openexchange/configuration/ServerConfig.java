@@ -56,6 +56,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -417,7 +418,7 @@ public final class ServerConfig {
         default:
             try {
                 final String prop = getProperty(property.getPropertyName());
-                if (prop == null) {
+                if (Strings.isEmpty(prop)) {
                     throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property.getPropertyName());
                 }
                 value = Integer.parseInt(prop.trim());
