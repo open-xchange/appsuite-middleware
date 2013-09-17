@@ -407,7 +407,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             }
         }
         final UserParticipant userParticipant = new UserParticipant((onBehalfOf != null ? onBehalfOf : actor).getIdentifier());
-        userParticipant.setConfirm(confirmStatus.getId());
+        userParticipant.setConfirm(null == confirmStatus ? ConfirmStatus.NONE.getId() : confirmStatus.getId());
         reply.setParticipants(Arrays.asList((Participant) userParticipant));
         reply.setUsers(Arrays.asList(userParticipant));
         if (reply.containsRecurrenceDatePosition() || reply.containsRecurrenceDatePosition()) {
