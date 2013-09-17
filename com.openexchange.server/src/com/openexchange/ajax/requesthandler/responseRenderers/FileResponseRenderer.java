@@ -367,6 +367,8 @@ public class FileResponseRenderer implements ResponseRenderer {
                 if (length > 0) {
                     resp.setHeader("Accept-Ranges", "bytes");
                     resp.setHeader("Content-Length", Long.toString(length));
+                } else {
+                    resp.setHeader("Accept-Ranges", "none");
                 }
                 /*-
                  * Determine preferred Content-Type
@@ -455,8 +457,8 @@ public class FileResponseRenderer implements ResponseRenderer {
              */
             try {
                 final ServletOutputStream outputStream = resp.getOutputStream();
-                final String sRange;
-                if (length > 0 && null != (sRange = req.getHeader("Range"))) {
+                final String sRange = req.getHeader("Range");
+                if ((length > 0) && (null != sRange)) {
                     // Taken from http://balusc.blogspot.co.uk/2009/02/fileservlet-supporting-resume-and.html
                     // Range header should match format "bytes=n-n,n-n,n-n...". If not, then return 416.
                     if (!PATTERN_BYTE_RANGES.matcher(sRange).matches()) {
@@ -553,6 +555,14 @@ public class FileResponseRenderer implements ResponseRenderer {
                         outputStream.println(new StringAllocator("--").append(boundary).append("--").toString());
                     }
                 } else {
+                    // Check if "Range" header was sent by client although we do not know exact size/length
+                    if (length <= 0 && null != sRange) {
+                        // Client requested a range, but cannot be satisfied
+                        setHeaderSafe("Content-Range", "bytes */" + documentData.available(), resp); // Required in 416.
+                        resp.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+                        return;
+                    }
+                    // Check for "off"/"len" parameters
                     final int off = AJAXRequestDataTools.parseIntParameter(req.getParameter("off"), -1);
                     final int amount = AJAXRequestDataTools.parseIntParameter(req.getParameter("len"), -1);
                     if (off >= 0 && amount > 0) {
