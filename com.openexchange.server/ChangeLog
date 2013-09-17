@@ -1,3 +1,7 @@
+* 2013-09-17 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 28835: Duplicate invitation mail.
+
 * 2013-09-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 28885: Null guard for possibly absent confirm status

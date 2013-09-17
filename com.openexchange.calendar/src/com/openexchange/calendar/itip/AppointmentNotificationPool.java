@@ -59,7 +59,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
@@ -76,6 +75,7 @@ import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
+import com.openexchange.groupware.notify.State;
 import com.openexchange.session.Session;
 import com.openexchange.timer.TimerService;
 
@@ -419,7 +419,7 @@ public class AppointmentNotificationPool implements
                 }
 
 				NotificationMail mail = generator.generateUpdateMailFor(participant);
-				if (mail != null) {
+				if (mail != null && mail.getStateType() != State.Type.NEW) {
 					notificationMailer.sendMail(mail, session);
 				}
 			}
@@ -439,7 +439,7 @@ public class AppointmentNotificationPool implements
                     }
 
                     NotificationMail mail = generator.generateUpdateMailFor(participant);
-                    if (mail != null) {
+                    if (mail != null && mail.getStateType() != State.Type.NEW) {
                         notificationMailer.sendMail(mail, session);
                     }
                 }
@@ -507,7 +507,7 @@ public class AppointmentNotificationPool implements
 						continue;
 					}
 					NotificationMail mail = generator.generateUpdateMailFor(participant);
-					if (mail != null) {
+					if (mail != null && mail.getStateType() != State.Type.NEW) {
 						notificationMailer.sendMail(mail, session);
 					}
 				}
@@ -612,7 +612,7 @@ public class AppointmentNotificationPool implements
 					continue;
 				}
 				NotificationMail mail = generator.generateUpdateMailFor(participant);
-				if (mail != null) {
+				if (mail != null && mail.getStateType() != State.Type.NEW) {
 					notificationMailer.sendMail(mail, session);
 				}
 			}
@@ -632,7 +632,7 @@ public class AppointmentNotificationPool implements
 					continue;
 				}
 				NotificationMail mail = generator.generateUpdateMailFor(participant);
-				if (mail != null) {
+				if (mail != null && mail.getStateType() != State.Type.NEW) {
 					notificationMailer.sendMail(mail, session);
 				}
 			}
